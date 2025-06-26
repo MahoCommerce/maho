@@ -38,11 +38,25 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         } catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         }
-        $this->_initAction()->loadLayout('overlay_popup');
+
+        $this->_initAction()
+            ->_title($this->__('CMS'))
+            ->_title($this->__('Media Library'));
+
+        if ($this->getRequest()->isAjax()) {
+            $canInsertImage = true;
+            $this->loadLayout('overlay_popup');
+        } else {
+            $canInsertImage = false;
+            $this->loadLayout();
+        }
+
         $block = $this->getLayout()->getBlock('wysiwyg_images.js');
         if ($block) {
-            $block->setStoreId($storeId);
+            $block->setStoreId($storeId)
+                ->setCanInsertImage($canInsertImage);
         }
+
         $this->renderLayout();
     }
 
@@ -147,12 +161,13 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
 
         $filename = $this->getRequest()->getParam('filename');
         $filename = $helper->idDecode($filename);
-        $asIs = $this->getRequest()->getParam('as_is');
+
+        $alt = $this->getRequest()->getParam('alt');
 
         Mage::helper('catalog')->setStoreId($storeId);
         $helper->setStoreId($storeId);
 
-        $image = $helper->getImageHtmlDeclaration($filename, $asIs);
+        $image = $helper->getImageHtmlDeclaration($filename, $alt);
         $this->getResponse()->setBody($image);
     }
 
@@ -161,19 +176,34 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
      */
     public function thumbnailAction()
     {
-        $file = $this->getRequest()->getParam('file');
-        $file = Mage::helper('cms/wysiwyg_images')->idDecode($file);
-        $thumb = $this->getStorage()->resizeOnTheFly($file);
-        if ($thumb !== false) {
-            $image = Maho::getImageManager()->read($thumb);
-            $imageInfo = @getimagesize($thumb);
-        } else {
-            $image = Maho::getImageManager()->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
-            $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+        try {
+            $file = $this->getRequest()->getParam('file');
+            $file = Mage::helper('cms/wysiwyg_images')->idDecode($file);
+
+            $thumb = $this->getStorage()->resizeOnTheFly($file);
+            if ($thumb === false) {
+                Mage::throwException('Thumbnail image could not be generated');
+            }
+
+            $image = Maho::getImageManager()->read($thumb)->encode();
+
+            $this->getResponse()
+                ->setHttpResponseCode(200)
+                ->setHeader('Content-type', $image->mediaType(), true);
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()
+                ->setHttpResponseCode(500);
         }
 
-        $this->getResponse()->setHeader('Content-type', $imageInfo['mime']);
-        $this->getResponse()->setBody($image->encode());
+        $this->getResponse()->clearBody();
+        $this->getResponse()->sendHeaders();
+
+        if (isset($image)) {
+            print $image;
+        }
+        exit(0);
     }
 
     /**

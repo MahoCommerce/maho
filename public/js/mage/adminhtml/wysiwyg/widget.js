@@ -22,7 +22,7 @@ const widgetTools = {
         targetEl.append(...fragment.children);
     },
 
-    async openDialog(widgetUrl) {
+    async openDialog(widgetUrl, opts) {
         if (document.getElementById(this.dialogWindowId)) {
             return;
         }
@@ -35,10 +35,9 @@ const widgetTools = {
                 className: 'magento',
                 windowClassName: 'popup-window',
                 width: 950,
-                onClose: this.closeDialog.bind(this)
+                ...opts,
             });
         } catch (error) {
-            console.error(error);
             alert(error.message);
         }
     },
@@ -46,15 +45,10 @@ const widgetTools = {
     closeDialog(window) {
         window ??= this.dialogWindow;
         window?.close();
-        
-        // Clear any editing state when dialog is closed
-        if (typeof tiptapEditors !== 'undefined') {
-            tiptapEditors.forEach(editor => {
-                if (editor.editingWidgetId) {
-                    editor.editingWidgetId = null;
-                }
-            });
-        }
+    },
+
+    initOptionValues(obj) {
+        window.wWidget?.initOptionValues(obj);
     },
 };
 
@@ -76,29 +70,6 @@ WysiwygWidget.Widget = class {
         this.widgetTargetId = widgetTargetId;
 
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
-        
-        // Check for initial widget values (for editing existing widgets)
-        if (window.widgetFormInitialValues) {
-            const initialValues = window.widgetFormInitialValues;
-            
-            // Set the widget type if available
-            if (initialValues.type && this.widgetEl) {
-                this.widgetEl.value = initialValues.type;
-                
-                // Store all values in optionValues map
-                Object.entries(initialValues).forEach(([key, value]) => {
-                    if (key !== 'type') {
-                        this.optionValues.set(key, value);
-                    }
-                });
-                
-                // Load options for the selected widget type
-                this.loadOptions();
-            }
-            
-            // Clear the global variable
-            delete window.widgetFormInitialValues;
-        }
     }
 
     getOptionsContainerId() {
@@ -147,6 +118,26 @@ WysiwygWidget.Widget = class {
             }
         });
         containerEl.classList.add('no-display');
+    }
+
+    initOptionValues(obj) {
+        if (typeof obj !== 'object' || obj === null) {
+            return;
+        }
+        // Assign widget options values when existing widget selected in WYSIWYG
+        for (const [key, value] of Object.entries(obj)) {
+            if (key === 'type') {
+                this.widgetEl.value = value;
+            } else if (key === 'as_json') {
+                this.formEl.elements.as_json.value = value;
+            } else {
+                this.optionValues.set(key, value);
+            }
+        }
+        // Load options for the selected widget type
+        if (obj.type) {
+            this.loadOptions();
+        }
     }
 
     async loadOptions() {
@@ -202,63 +193,35 @@ WysiwygWidget.Widget = class {
 
     async insertWidget() {
         const widgetOptionsForm = new varienForm(this.formEl);
-        if (widgetOptionsForm.validator && widgetOptionsForm.validator.validate() || !widgetOptionsForm.validator) {
-            try {
-                const formData = new FormData();
-                
-                // Check if we need raw widget directive (for textarea) or processed HTML (for WYSIWYG)
-                let needsRawDirective = true;
-                if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
-                    const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
-                    if (tiptapEditor && tiptapEditor.editor) {
-                        // Tiptap is active, we need processed HTML
-                        needsRawDirective = false;
-                    }
-                }
-                
-                // Add form elements
-                for (const el of this.formEl.elements) {
-                    if (!el.classList.contains('skip-submit')) {
-                        formData.append(el.name, el.value);
-                    }
-                }
-                
-                // Add as_is parameter if we need raw directive
-                if (needsRawDirective) {
-                    formData.append('as_is', '1');
-                }
+        if (widgetOptionsForm.validator && !widgetOptionsForm.validator.validate()) {
+            return;
+        }
+        try {
+            const formData = new FormData();
 
-                const html = await mahoFetch(this.formEl.action, {
-                    method: 'POST',
-                    body: formData,
-                })
-
-                Windows.close('widget_window');
-
-                // Insert widget content using Tiptap or fallback to textarea
-                if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
-                    const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
-                    if (tiptapEditor && tiptapEditor.editor) {
-                        // Tiptap is active, use its insert method
-                        tiptapEditor.insertContent(html);
-                    } else {
-                        // Tiptap is toggled off, insert into textarea directly
-                        const textareaElm = document.getElementById(this.widgetTargetId);
-                        if (textareaElm) {
-                            updateElementAtCursor(textareaElm, html);
-                        }
-                    }
-                } else {
-                    // No Tiptap at all, insert into textarea directly
-                    const textareaElm = document.getElementById(this.widgetTargetId);
-                    if (textareaElm) {
-                        updateElementAtCursor(textareaElm, html);
-                    }
+            // Add form elements
+            for (const el of this.formEl.elements) {
+                if (!el.classList.contains('skip-submit')) {
+                    formData.append(el.name, el.value);
                 }
-            } catch(error) {
-                console.error(error);
-                alert(error.message);
             }
+
+            // Returns {{widget type="cms/some_type" ...params}}
+            const directive = await mahoFetch(this.formEl.action, {
+                method: 'POST',
+                body: formData,
+            })
+
+            // Close the dialog, and send directive as dialog.returnValue
+            Dialog.close(directive);
+
+            const textareaElm = document.getElementById(this.widgetTargetId);
+            if (textareaElm?.checkVisibility()) {
+                updateElementAtCursor(textareaElm, directive);
+            }
+        } catch(error) {
+            console.error(error);
+            alert(error.message);
         }
     }
 };

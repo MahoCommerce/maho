@@ -110,7 +110,6 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
             $fieldset->addField('template_styles', 'textarea', [
                 'name'          => 'styles',
                 'label'         => Mage::helper('newsletter')->__('Template Styles'),
-                'container_id'  => 'field_template_styles',
                 'value'         => $model->getTemplateStyles(),
             ]);
         }

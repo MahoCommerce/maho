@@ -23,23 +23,34 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
      */
     public function directiveAction()
     {
-        $directive = $this->getRequest()->getParam('___directive');
-        $directive = Mage::helper('core')->urlDecode($directive);
-        $url = Mage::getModel('cms/adminhtml_template_filter')->filter($directive);
         try {
+            $directive = $this->getRequest()->getParam('___directive');
+            $directive = Mage::helper('core')->urlDecode($directive);
+            $path = Mage::getModel('cms/adminhtml_template_filter')->filter($directive);
+
             $allowedStreamWrappers = Mage::helper('cms')->getAllowedStreamWrappers();
-            if (!Mage::getModel('core/file_validator_streamWrapper', $allowedStreamWrappers)->validate($url)) {
+            if (!Mage::getModel('core/file_validator_streamWrapper', $allowedStreamWrappers)->validate($path)) {
                 Mage::throwException(Mage::helper('core')->__('Invalid stream.'));
             }
 
-            $image = Maho::getImageManager()->read($url);
-            $imageInfo = @getimagesize($url);
+            $image = Maho::getImageManager()->read($path)->encode();
+
+            $this->getResponse()
+                ->setHttpResponseCode(200)
+                ->setHeader('Content-type', $image->mediaType(), true);
+
         } catch (Exception $e) {
-            $image = Maho::getImageManager()->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
-            $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+            Mage::logException($e);
+            $this->getResponse()
+                ->setHttpResponseCode(500);
         }
 
-        $this->getResponse()->setHeader('Content-type', $imageInfo['mime']);
-        $this->getResponse()->setBody($image->encode());
+        $this->getResponse()->clearBody();
+        $this->getResponse()->sendHeaders();
+
+        if (isset($image)) {
+            print $image;
+        }
+        exit(0);
     }
 }

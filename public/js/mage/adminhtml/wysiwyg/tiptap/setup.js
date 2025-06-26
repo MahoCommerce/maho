@@ -6,29 +6,10 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@2.14.0';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.14.0';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.14.0';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.14.0';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.14.0';
-import Underline from 'https://esm.sh/@tiptap/extension-underline@2.14.0';
-import Table from 'https://esm.sh/@tiptap/extension-table@2.14.0';
-import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.14.0';
-import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.14.0';
-import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.14.0';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.14.0';
-
-const TiptapModules = {
-    Editor, Node, Mark, mergeAttributes, StarterKit,
-    Link, Image, TextAlign, Underline,
-    Table, TableRow, TableCell, TableHeader, BubbleMenu
-};
+import TiptapModules from './extensions.js';
+import { html_beautify } from 'https://esm.sh/js-beautify@1.15.4/js/lib/beautify-html.js';
 
 class tiptapWysiwygSetup {
-
-    mediaBrowserCallback = null;
-    mediaBrowserMetal = null;
-    mediaBrowserValue = null;
 
     constructor() {
         this.initialize(...arguments);
@@ -36,624 +17,184 @@ class tiptapWysiwygSetup {
 
     initialize(htmlId, config) {
         this.id = htmlId;
-        this.selector = `#${htmlId}`;
         this.config = config;
         this.editor = null;
+        this.wrapper = null;
+        this.textarea = document.getElementById(this.id);
+        this.storeId = config.store_id ?? 0;
 
-        if (typeof tiptapEditors === 'undefined') {
-            window.tiptapEditors = new Map();
-        }
-        tiptapEditors.set(this.id, this);
+        window.tiptapEditors ??= new Map();
+        window.tiptapEditors.set(this.id, this);
 
-        this.bindEventListeners();
+        this.setup();
+
+        console.log(config)
         if (!config.hidden) {
-            this.setup();
+            this.toggle();
         }
     }
 
     bindEventListeners() {
         this.getToggleButton()?.addEventListener('click', this.toggle.bind(this));
 
-        this.onFormValidation = this.onFormValidation.bind(this);
-        varienGlobalEvents.attachEventHandler('formSubmit', this.onFormValidation);
+        this.syncHandler = () => {
+            if (this.isTiptapActive()) {
+                this.syncWysiwygToPlain();
+            }
+        }
+        this.syncHandlerDebounced = debounce(this.syncHandler, 200);
 
-        varienGlobalEvents.clearEventHandlers('open_browser_callback');
-        varienGlobalEvents.attachEventHandler('open_browser_callback', this.openFileBrowser.bind(this));
+        varienGlobalEvents?.attachEventHandler('formValidate', this.syncHandler.bind(this));
+        varienGlobalEvents?.attachEventHandler('formSubmit', this.syncHandler.bind(this));
+
+        const formEl = this.textarea.closest('form');
+        formEl?.addEventListener('formdata', this.syncHandler.bind(this));
+        formEl?.addEventListener('submit', this.syncHandler.bind(this));
     }
 
     unbindEventListeners() {
-        varienGlobalEvents.removeEventHandler('formSubmit', this.onFormValidation);
+        varienGlobalEvents?.removeEventHandler('formValidate', this.syncHandler.bind(this));
+        varienGlobalEvents?.removeEventHandler('formSubmit', this.syncHandler.bind(this));
+
+        const formEl = this.textarea.closest('form');
+        formEl?.removeEventListener('formdata', this.syncHandler.bind(this));
+        formEl?.removeEventListener('submit', this.syncHandler.bind(this));
     }
 
-    destroy() {
-        this.unbindEventListeners();
-        if (this.editor) {
-            // Save content before destroying
-            this.updateTextArea();
+    convertFromPlain(content) {
+        // Find all directives, then search backwards for an angle bracket followed by a letter
+        // If found, we are in an attribute. Then:
+        //
+        // Escape directives contained in attributes since this is not valid HTML. For example:
+        // <a href="mailto:{{config path="trans_email/ident_sales/email"}}"> into
+        // <a href="mailto:{{config path=&quot;trans_email/ident_sales/email&quot;}}">
+        //
+        // Convert all other directives into MahoWidget nodes since tiptap cannot recognize text nodes. For example:
+        // {{widget type="cms/some_type"}} into
+        // <span data-type="widget" data-directive="{{widget type=&quot;cms/some_type&quot;}}"></span>
 
-            // Destroy the Tiptap instance
-            this.editor.destroy();
-            this.editor = null;
-        }
+        console.log("FROM PLAIN")
+        console.log(content)
 
-        // Remove the wrapper which contains everything
-        const wrapper = document.getElementById(`${this.id}_wrapper`);
-        if (wrapper) {
-            wrapper.remove();
-        }
-    }
+        content = content.replace(/{{(.*?)}}/gi, (match, directive, offset, string) => {
+            const escapedDirective = escapeHtml('{{' + directive.trim() + '}}', true);
 
-    createToolbar() {
-        const toolbar = document.createElement('div');
-        toolbar.className = 'tiptap-toolbar';
-        toolbar.id = `${this.id}_toolbar`;
-
-        // Heading dropdown
-        const headingGroup = document.createElement('div');
-        headingGroup.className = 'toolbar-group';
-
-        const headingSelect = document.createElement('select');
-        headingSelect.innerHTML = `
-            <option value="">Paragraph</option>
-            <option value="1">Heading 1</option>
-            <option value="2">Heading 2</option>
-            <option value="3">Heading 3</option>
-            <option value="4">Heading 4</option>
-            <option value="5">Heading 5</option>
-        `;
-        headingSelect.addEventListener('change', (e) => {
-            const level = e.target.value;
-            if (level) {
-                this.editor.chain().focus().toggleHeading({ level: parseInt(level) }).run();
-            } else {
-                this.editor.chain().focus().setParagraph().run();
-            }
-        });
-        headingGroup.appendChild(headingSelect);
-        toolbar.appendChild(headingGroup);
-
-        // Separator
-        toolbar.appendChild(this.createSeparator());
-
-        // Text formatting buttons
-        const formatGroup = document.createElement('div');
-        formatGroup.className = 'toolbar-group';
-
-        const boldBtn = this.createToolbarButton('Bold', this.getIcon('bold'), () => {
-            this.editor.chain().focus().toggleBold().run();
-        }, 'bold');
-        formatGroup.appendChild(boldBtn);
-
-        const italicBtn = this.createToolbarButton('Italic', this.getIcon('italic'), () => {
-            this.editor.chain().focus().toggleItalic().run();
-        }, 'italic');
-        formatGroup.appendChild(italicBtn);
-
-        const underlineBtn = this.createToolbarButton('Underline', this.getIcon('underline'), () => {
-            this.editor.chain().focus().toggleUnderline().run();
-        }, 'underline');
-        formatGroup.appendChild(underlineBtn);
-
-        const strikeBtn = this.createToolbarButton('Strike', this.getIcon('strike'), () => {
-            this.editor.chain().focus().toggleStrike().run();
-        }, 'strike');
-        formatGroup.appendChild(strikeBtn);
-
-        const blockquoteBtn = this.createToolbarButton('Blockquote', this.getIcon('blockquote'), () => {
-            this.editor.chain().focus().toggleBlockquote().run();
-        }, 'blockquote');
-        formatGroup.appendChild(blockquoteBtn);
-
-        toolbar.appendChild(formatGroup);
-
-        // Separator
-        toolbar.appendChild(this.createSeparator());
-
-        // List buttons
-        const listGroup = document.createElement('div');
-        listGroup.className = 'toolbar-group';
-
-        const bulletListBtn = this.createToolbarButton('Bullet List', this.getIcon('bullet-list'), () => {
-            this.editor.chain().focus().toggleBulletList().run();
-        }, 'bulletList');
-        listGroup.appendChild(bulletListBtn);
-
-        const orderedListBtn = this.createToolbarButton('Ordered List', this.getIcon('ordered-list'), () => {
-            this.editor.chain().focus().toggleOrderedList().run();
-        }, 'orderedList');
-        listGroup.appendChild(orderedListBtn);
-
-        toolbar.appendChild(listGroup);
-
-        // Separator
-        toolbar.appendChild(this.createSeparator());
-
-        // Alignment buttons
-        const alignGroup = document.createElement('div');
-        alignGroup.className = 'toolbar-group';
-
-        const alignLeftBtn = this.createToolbarButton('Align Left', this.getIcon('align-left'), () => {
-            this.editor.chain().focus().setTextAlign('left').run();
-        });
-        alignGroup.appendChild(alignLeftBtn);
-
-        const alignCenterBtn = this.createToolbarButton('Align Center', this.getIcon('align-center'), () => {
-            this.editor.chain().focus().setTextAlign('center').run();
-        });
-        alignGroup.appendChild(alignCenterBtn);
-
-        const alignRightBtn = this.createToolbarButton('Align Right', this.getIcon('align-right'), () => {
-            this.editor.chain().focus().setTextAlign('right').run();
-        });
-        alignGroup.appendChild(alignRightBtn);
-
-        toolbar.appendChild(alignGroup);
-
-        // Separator
-        toolbar.appendChild(this.createSeparator());
-
-        // Insert buttons
-        const insertGroup = document.createElement('div');
-        insertGroup.className = 'toolbar-group';
-
-        const linkBtn = this.createToolbarButton('Link', this.getIcon('link'), () => {
-            this.linkHandler();
-        });
-        insertGroup.appendChild(linkBtn);
-
-        const imageBtn = this.createToolbarButton('Image', this.getIcon('image'), () => {
-            this.imageHandler();
-        });
-        insertGroup.appendChild(imageBtn);
-
-        // Simple Insert Table button
-        const insertTableBtn = this.createToolbarButton('Insert Table', this.getIcon('table'), () => {
-            this.editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-        });
-        insertGroup.appendChild(insertTableBtn);
-
-        const widgetBtn = this.createToolbarButton('Insert Widget', this.getIcon('widget'), () => {
-            this.widgetHandler();
-        });
-        insertGroup.appendChild(widgetBtn);
-
-        const variableBtn = this.createToolbarButton('Insert Variable', this.getIcon('variable'), () => {
-            this.variableHandler();
-        });
-        insertGroup.appendChild(variableBtn);
-
-        toolbar.appendChild(insertGroup);
-
-        return toolbar;
-    }
-
-    createSeparator() {
-        const separator = document.createElement('div');
-        separator.className = 'toolbar-separator';
-        return separator;
-    }
-
-    createTableBubbleMenu() {
-        const bubbleMenu = document.createElement('div');
-        bubbleMenu.className = 'table-bubble-menu';
-        bubbleMenu.id = `${this.id}_table_bubble_menu`;
-
-        const tableCommands = [
-            { label: 'Add Column Before', command: 'addColumnBefore', icon: this.getIcon('column-insert-left') },
-            { label: 'Add Column After', command: 'addColumnAfter', icon: this.getIcon('column-insert-right') },
-            { label: 'Delete Column', command: 'deleteColumn', icon: this.getIcon('column-remove') },
-            { separator: true },
-            { label: 'Add Row Before', command: 'addRowBefore', icon: this.getIcon('row-insert-top') },
-            { label: 'Add Row After', command: 'addRowAfter', icon: this.getIcon('row-insert-bottom') },
-            { label: 'Delete Row', command: 'deleteRow', icon: this.getIcon('row-remove') },
-            { separator: true },
-            { label: 'Merge Cells', command: 'mergeCells', icon: this.getIcon('arrows-join') },
-            { label: 'Split Cell', command: 'splitCell', icon: this.getIcon('arrows-split') },
-            { separator: true },
-            { label: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: this.getIcon('table-column') },
-            { label: 'Toggle Header Row', command: 'toggleHeaderRow', icon: this.getIcon('table-row') },
-            { separator: true },
-            { label: 'Delete Table', command: 'deleteTable', icon: this.getIcon('trash') }
-        ];
-
-        tableCommands.forEach(item => {
-            if (item.separator) {
-                const separator = document.createElement('div');
-                separator.className = 'table-bubble-separator';
-                bubbleMenu.appendChild(separator);
-            } else {
-                const menuItem = document.createElement('button');
-                menuItem.type = 'button';
-                menuItem.innerHTML = item.icon;
-                menuItem.title = item.label;
-                menuItem.className = 'table-menu-item';
-                menuItem.onmouseover = () => {
-                    menuItem.style.backgroundColor = '#f1f5f9';
-                    menuItem.style.color = '#1e293b';
-                };
-                menuItem.onmouseout = () => {
-                    menuItem.style.backgroundColor = 'transparent';
-                    menuItem.style.color = '#4b5563';
-                };
-                menuItem.onclick = () => {
-                    if (this.editor) {
-                        this.editor.chain().focus()[item.command]().run();
-                    }
-                };
-                bubbleMenu.appendChild(menuItem);
-            }
-        });
-
-        return bubbleMenu;
-    }
-
-    createToolbarButton(title, innerHTML, onClick, commandName) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.title = title;
-        button.innerHTML = innerHTML;
-        button.addEventListener('click', onClick);
-
-        if (commandName) {
-            button.dataset.command = commandName;
-        }
-
-        return button;
-    }
-
-    updateToolbarState() {
-        if (!this.editor) return;
-
-        // Update heading dropdown
-        const headingSelect = document.querySelector(`#${this.id}_toolbar select`);
-        if (headingSelect) {
-            if (this.editor.isActive('heading', { level: 1 })) headingSelect.value = '1';
-            else if (this.editor.isActive('heading', { level: 2 })) headingSelect.value = '2';
-            else if (this.editor.isActive('heading', { level: 3 })) headingSelect.value = '3';
-            else if (this.editor.isActive('heading', { level: 4 })) headingSelect.value = '4';
-            else if (this.editor.isActive('heading', { level: 5 })) headingSelect.value = '5';
-            else headingSelect.value = '';
-        }
-
-        // Update button states
-        const toolbar = document.getElementById(`${this.id}_toolbar`);
-        if (toolbar) {
-            toolbar.querySelectorAll('button[data-command]').forEach(button => {
-                const command = button.dataset.command;
-                if (this.editor.isActive(command)) {
-                    button.classList.add('is-active');
-                } else {
-                    button.classList.remove('is-active');
+            let inAttribute = false;
+            while (offset-- > 0) {
+                const char = string[offset];
+                if (char === '<' && string[offset + 1].match(/[a-z]/i)) {
+                    inAttribute = true;
+                    break;
                 }
-            });
+                if (['\n', '\r', '<', '>'].includes(char)) {
+                    break;
+                }
+            }
+            if (inAttribute) {
+                return escapedDirective;
+            }
+            return `<span data-type="maho-widget" data-directive="${escapedDirective}"></span>`;
+        });
+
+        console.log(content)
+
+        return content;
+    }
+
+    convertToPlain(content) {
+        console.log("TO PLAIN")
+        console.log(content)
+
+        //
+        content = html_beautify(content, { indent_size: 4 });
+
+        console.log(content)
+
+        // Extract directives from MahoWidget nodes
+        content = content.replace(/<span data-type="maho-widget" data-directive="(.*?)"><\/span>/gi, (match, directive) => {
+            return directive;
+        });
+
+        // Unescape all directives both in attributes and as text nodes
+        content = content.replace(/{{(.*?)}}/gi, (match, directive) => {
+            return unescapeHtml('{{' + directive.trim() + '}}');
+        });
+
+        console.log(content)
+        return content;
+    }
+
+    syncPlainToWysiwyg() {
+        if (!this.textarea || !this.editor) {
+            return;
+        }
+        this.editor.commands.setContent(this.convertFromPlain(this.textarea.value));
+    }
+
+    syncWysiwygToPlain() {
+        if (!this.textarea || !this.editor) {
+            return;
+        }
+        this.textarea.value = this.convertToPlain(this.editor.getHTML());
+        this.textarea.dispatchEvent(new Event('change', { bubbles: false, cancelable: true }));
+    }
+
+    isTiptapActive() {
+        return this.wrapper?.checkVisibility() ?? false;
+    }
+
+    toggle() {
+        const enabled = !this.isTiptapActive();
+        if (enabled) {
+            this.syncPlainToWysiwyg();
+        } else {
+            this.syncWysiwygToPlain();
+        }
+        toggleVis(this.textarea, !enabled);
+        toggleVis(this.wrapper, enabled);
+        for (const button of this.getPluginButtons()) {
+            toggleVis(button, !enabled);
+        }
+        return enabled;
+    }
+
+    turnOn() {
+        if (!this.isTiptapActive()) {
+            this.toggle();
+        }
+    }
+
+    turnOff() {
+        if (this.isTiptapActive()) {
+            this.toggle();
         }
     }
 
     setup() {
-        // Create wrapper container for Tiptap editor
-        const textarea = this.getTextArea();
-        const wrapper = document.createElement('div');
-        wrapper.id = `${this.id}_wrapper`;
-        wrapper.className = 'tiptap-wrapper';
+        // Create wrapper for Tiptap editor
+        this.wrapper = document.createElement('div');
+        this.wrapper.id = `${this.id}_wrapper`;
+        this.wrapper.className = 'tiptap-wrapper no-display';
 
-        // Create and add toolbar
-        const toolbar = this.createToolbar();
-        wrapper.appendChild(toolbar);
+        // Create main toolbar
+        const toolbar = this.createMainToolbar();
+        this.wrapper.appendChild(toolbar);
+
+        // Create table bubble menu
+        const tableBubbleMenu = this.createTableBubbleMenu();
+        this.wrapper.appendChild(tableBubbleMenu);
 
         // Create container for Tiptap editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
-        wrapper.appendChild(container);
+        this.wrapper.appendChild(container);
 
         // Insert wrapper after textarea
-        textarea.style.display = 'none';
-        textarea.parentNode.insertBefore(wrapper, textarea.nextSibling);
-
-        // Get initial content
-        let initialContent = this.getTextArea().value;
-
-        // Convert media directives in img src to directive URLs
-        initialContent = initialContent.replace(/<img([^>]*)>/gi, (match, attributes) => {
-            // Check if this img tag has a media directive in the src
-            const srcMatch = attributes.match(/\bsrc="(\{\{media\s+url="([^"]+)"\}\})"/i);
-            if (srcMatch) {
-                const fullDirective = srcMatch[1];
-                const url = srcMatch[2];
-                const directive = `{{media url="${url}"}}`;
-                const encodedDirective = Base64.mageEncode(directive);
-                const directiveUrl = this.makeDirectiveUrl(encodedDirective);
-
-                // Replace only the src attribute value, preserving all other attributes
-                const updatedAttributes = attributes.replace(/\bsrc="[^"]+"/i, `src="${directiveUrl}"`);
-                return `<img${updatedAttributes}>`;
-            }
-            return match;
-        });
-
-        // Process content for widgets
-        initialContent = this.encodeContent(initialContent);
-
-        // Define custom image extension with additional attributes and resize support
-        const CustomImage = TiptapModules.Image.extend({
-            addAttributes() {
-                return {
-                    src: { default: null },
-                    alt: { default: null },
-                    title: { default: null },
-                    width: { default: null },
-                    height: { default: null },
-                    id: { default: null },
-                    class: { default: null },
-                    'data-original': { default: null },
-                    'data-width': { default: null },
-                    'data-height': { default: null },
-                    'style-data': { default: null }
-                };
-            },
-
-            addCommands() {
-                return {
-                    ...this.parent?.(),
-                    updateImageAttributes: (attributes) => ({ tr, state }) => {
-                        const { selection } = state
-                        const { from } = selection
-                        const node = state.doc.nodeAt(from)
-
-                        if (node && node.type.name === 'image') {
-                            tr.setNodeMarkup(from, undefined, {
-                                ...node.attrs,
-                                ...attributes
-                            })
-                            return true
-                        }
-                        return false
-                    }
-                }
-            },
-
-            addNodeView() {
-                return ({ node, updateAttributes, editor }) => {
-                    const container = document.createElement('div');
-                    container.style.position = 'relative';
-                    container.style.display = 'inline-block';
-                    container.className = 'image-container';
-
-                    const img = document.createElement('img');
-                    Object.entries(node.attrs).forEach(([key, value]) => {
-                        if (value !== null) {
-                            img.setAttribute(key, value);
-                        }
-                    });
-
-                    // Store update function reference
-                    const updateImageAttributes = (attrs) => {
-                        // First try the built-in updateAttributes if available
-                        if (updateAttributes && typeof updateAttributes === 'function') {
-                            updateAttributes(attrs);
-                            return;
-                        }
-
-                        // Fallback to command system
-                        try {
-                            const pos = editor.view.posAtDOM(img, 0);
-                            if (pos >= 0) {
-                                editor.chain().focus().command(({ tr, state }) => {
-                                    const nodeAt = state.doc.nodeAt(pos);
-                                    if (nodeAt && nodeAt.type.name === 'image') {
-                                        tr.setNodeMarkup(pos, undefined, {
-                                            ...nodeAt.attrs,
-                                            ...attrs
-                                        });
-                                        return true;
-                                    }
-                                    return false;
-                                }).run();
-                            }
-                        } catch (e) {
-                            console.warn('Failed to update image attributes:', e);
-                        }
-                    };
-
-                    // Create resize handles
-                    const createResizeHandle = (position) => {
-                        const handle = document.createElement('div');
-                        handle.className = `resize-handle resize-handle-${position}`;
-                        handle.style.cssText = `
-                            position: absolute;
-                            width: 10px;
-                            height: 10px;
-                            background: #3b82f6;
-                            border: 1px solid white;
-                            cursor: ${position}-resize;
-                            display: none;
-                        `;
-
-                        // Position handles
-                        switch(position) {
-                            case 'nw': handle.style.top = '-5px'; handle.style.left = '-5px'; break;
-                            case 'ne': handle.style.top = '-5px'; handle.style.right = '-5px'; break;
-                            case 'sw': handle.style.bottom = '-5px'; handle.style.left = '-5px'; break;
-                            case 'se': handle.style.bottom = '-5px'; handle.style.right = '-5px'; break;
-                        }
-
-                        return handle;
-                    };
-
-                    const handles = ['nw', 'ne', 'sw', 'se'].map(createResizeHandle);
-
-                    container.appendChild(img);
-                    handles.forEach(handle => container.appendChild(handle));
-
-                    // Show/hide handles on hover (only for non-widget images)
-                    container.addEventListener('mouseenter', () => {
-                        if (!node.attrs.class || !node.attrs.class.includes('maho-widget-placeholder')) {
-                            handles.forEach(h => h.style.display = 'block');
-                        }
-                    });
-                    container.addEventListener('mouseleave', () => {
-                        handles.forEach(h => h.style.display = 'none');
-                    });
-
-                    // Add double-click handler
-                    img.addEventListener('dblclick', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        // Check if this is a widget placeholder
-                        if (node.attrs.class && node.attrs.class.includes('maho-widget-placeholder')) {
-                            // This is a widget placeholder - open widget editor
-                            if (node.attrs.id && editor.storage.wysiwygSetup) {
-                                editor.storage.wysiwygSetup.openWidgetForEdit(node.attrs.id);
-                            }
-                        } else {
-                            // Regular image - edit alt text
-                            const currentAlt = node.attrs.alt || '';
-                            const newAlt = window.prompt('Alternative text:', currentAlt);
-
-                            if (newAlt !== null) {
-                                updateImageAttributes({ alt: newAlt });
-                            }
-                        }
-                    });
-
-                    // Handle resizing (only for non-widget images)
-                    handles.forEach(handle => {
-                        handle.addEventListener('mousedown', (e) => {
-                            e.preventDefault();
-
-                            // Don't allow resizing for widget placeholders
-                            if (node.attrs.class && node.attrs.class.includes('maho-widget-placeholder')) {
-                                return;
-                            }
-
-                            const startX = e.clientX;
-                            const startY = e.clientY;
-                            const startWidth = img.offsetWidth;
-                            const startHeight = img.offsetHeight;
-                            const aspectRatio = startWidth / startHeight;
-
-                            const handleMouseMove = (e) => {
-                                const deltaX = e.clientX - startX;
-                                const deltaY = e.clientY - startY;
-
-                                let newWidth = startWidth + deltaX;
-                                let newHeight = startHeight + deltaY;
-
-                                // Maintain aspect ratio
-                                if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                                    newHeight = newWidth / aspectRatio;
-                                } else {
-                                    newWidth = newHeight * aspectRatio;
-                                }
-
-                                // Minimum size
-                                newWidth = Math.max(50, newWidth);
-                                newHeight = Math.max(50, newHeight);
-
-                                img.style.width = newWidth + 'px';
-                                img.style.height = newHeight + 'px';
-                            };
-
-                            const handleMouseUp = () => {
-                                document.removeEventListener('mousemove', handleMouseMove);
-                                document.removeEventListener('mouseup', handleMouseUp);
-
-                                // Update node attributes
-                                updateImageAttributes({
-                                    width: Math.round(img.offsetWidth),
-                                    height: Math.round(img.offsetHeight)
-                                });
-                            };
-
-                            document.addEventListener('mousemove', handleMouseMove);
-                            document.addEventListener('mouseup', handleMouseUp);
-                        });
-                    });
-
-                    return {
-                        dom: container,
-                        contentDOM: null,
-                        update: (updatedNode) => {
-                            if (updatedNode.type.name !== 'image') return false;
-
-                            Object.entries(updatedNode.attrs).forEach(([key, value]) => {
-                                if (value !== null && key !== 'width' && key !== 'height') {
-                                    img.setAttribute(key, value);
-                                }
-                            });
-
-                            if (updatedNode.attrs.width) {
-                                img.style.width = updatedNode.attrs.width + 'px';
-                            }
-                            if (updatedNode.attrs.height) {
-                                img.style.height = updatedNode.attrs.height + 'px';
-                            }
-
-                            return true;
-                        }
-                    };
-                };
-            }
-        });
-
-        // Store reference to this instance for use in Widget extension
-        const setupInstance = this;
-
-        // Define custom Widget node for widget placeholders
-        const Widget = TiptapModules.Node.create({
-            name: 'widget',
-
-            group: 'inline',
-            inline: true,
-            atom: true,
-
-            addAttributes() {
-                return {
-                    id: { default: null },
-                    src: { default: null },
-                    title: { default: null },
-                    class: { default: 'maho-widget-placeholder' }
-                };
-            },
-
-            parseHTML() {
-                return [{
-                    tag: 'img.maho-widget-placeholder',
-                }];
-            },
-
-            renderHTML({ HTMLAttributes }) {
-                return ['img', TiptapModules.mergeAttributes(HTMLAttributes)];
-            },
-
-            addNodeView() {
-                return ({ node }) => {
-                    const dom = document.createElement('img');
-                    dom.setAttribute('id', node.attrs.id);
-                    dom.setAttribute('src', node.attrs.src);
-                    dom.setAttribute('title', node.attrs.title || 'Double-click to edit');
-                    dom.setAttribute('class', node.attrs.class);
-
-                    // Add double-click handler
-                    dom.addEventListener('dblclick', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (node.attrs.id && setupInstance) {
-                            setupInstance.openWidgetForEdit(node.attrs.id);
-                        }
-                    });
-
-                    return { dom };
-                };
-            }
-        });
+        this.textarea.after(this.wrapper);
 
         // Initialize Tiptap
-        // Create table bubble menu
-        const tableBubbleMenu = this.createTableBubbleMenu();
-        wrapper.appendChild(tableBubbleMenu);
-
         this.editor = new TiptapModules.Editor({
+            wysiwygSetup: this,
             element: container,
             extensions: [
                 TiptapModules.StarterKit.configure({
@@ -661,8 +202,23 @@ class tiptapWysiwygSetup {
                         levels: [1, 2, 3, 4, 5]
                     }
                 }),
-                CustomImage,
-                Widget,
+                TiptapModules.MahoImage.configure({
+                    title: this.translate('Insert Image...'),
+                    directivesUrl: this.config.directives_url,
+                    browserUrl: setRouteParams(this.config.files_browser_window_url, {
+                        target_element_id: this.id,
+                        store: this.storeId,
+                        filetype: 'image',
+                    }),
+                }),
+                TiptapModules.MahoWidget.configure({
+                    widgetUrl: setRouteParams(this.config.widget_window_url, {
+                        widget_target_id: this.id,
+                    }),
+                    variableUrl: setRouteParams(this.config.variable_window_url, {
+                        variable_target_id: this.id,
+                    }),
+                }),
                 TiptapModules.Link.configure({
                     openOnClick: false,
                     HTMLAttributes: {
@@ -694,25 +250,37 @@ class tiptapWysiwygSetup {
                     },
                 }),
             ],
-            content: initialContent,
-            onCreate: ({ editor }) => {
-                // Store reference to this setup instance for custom nodes
-                editor.storage.wysiwygSetup = this;
+            onTransaction: ({ editor }) => {
+                if (editor.isInitialized) {
+                    this.syncHandlerDebounced();
+                    this.updateToolbarState();
+                }
             },
-            onUpdate: ({ editor }) => {
-                this.updateTextArea();
-                this.onChangeContent();
-            },
-            onSelectionUpdate: ({ editor }) => {
-                this.updateToolbarState();
-            }
         });
 
         // Update toolbar state initially
         this.updateToolbarState();
 
+        this.bindEventListeners();
+
         // Fire initialization event
-        varienGlobalEvents.fireEvent('wysiwygEditorInitialized', this.editor);
+        varienGlobalEvents?.fireEvent('wysiwygEditorInitialized', this.editor);
+    }
+
+    destroy() {
+        if (this.editor) {
+            // Save content before destroying
+            this.syncWysiwygToPlain();
+
+            // Destroy the Tiptap instance
+            this.editor.destroy();
+            this.editor = null;
+        }
+
+        // Remove the wrapper which contains everything
+        document.getElementById(`${this.id}_wrapper`)?.remove();
+
+        this.unbindEventListeners();
     }
 
     linkHandler() {
@@ -731,113 +299,156 @@ class tiptapWysiwygSetup {
         this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     }
 
-    imageHandler() {
-        if (this.config.files_browser_window_url) {
-            // Store the current selection/cursor position before opening dialog
-            const { from } = this.editor.state.selection;
-
-            varienGlobalEvents.fireEvent("open_browser_callback", {
-                callback: (url) => {
-                    // Insert the image at the stored position
-                    this.editor.chain().focus().insertContentAt(from, {
-                        type: 'image',
-                        attrs: { src: url }
-                    }).run();
-                },
-                value: '',
-                meta: { filetype: 'image' }
-            });
+    headingHandler(event) {
+        const level = parseInt(event.target.value);
+        if (level) {
+            this.editor.chain().focus().toggleHeading({ level }).run();
+        } else {
+            this.editor.chain().focus().setParagraph().run();
         }
     }
 
+    createMainToolbar() {
+        const toolbar = this.createToolbar([
+            { type: 'select', options: [['','Paragraph'], [1,'Heading 1'], [2,'Heading 2'], [3,'Heading 3'], [4,'Heading 4'], [5,'Heading 5']], onChange: this.headingHandler.bind(this) },
+            { type: 'separator'},
+            { type: 'button', title: 'Bold', icon: 'bold', command: 'toggleMark', args: ['bold'] },
+            { type: 'button', title: 'Italic', icon: 'italic', command: 'toggleMark', args: ['italic'] },
+            { type: 'button', title: 'Underline', icon: 'underline', command: 'toggleMark', args: ['underline'] },
+            { type: 'button', title: 'Strike', icon: 'strike', command: 'toggleMark', args: ['strike'] },
+            { type: 'button', title: 'Block Quote', icon: 'blockquote', command: 'toggleBlockquote' },
+            { type: 'separator'},
+            { type: 'button', title: 'Bullet List', icon: 'bullet-list', command: 'toggleBulletList' },
+            { type: 'button', title: 'Ordered List', icon: 'ordered-list', command: 'toggleOrderedList' },
+            { type: 'separator'},
+            { type: 'button', title: 'Align Left', icon: 'align-left', command: 'setTextAlign', args: ['left'] },
+            { type: 'button', title: 'Align Center', icon: 'align-center', command: 'setTextAlign', args: ['center'] },
+            { type: 'button', title: 'Align Right', icon: 'align-right', command: 'setTextAlign', args: ['right'] },
+            { type: 'separator'},
+            { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
+            { type: 'button', title: 'Insert Table', icon: 'table', command: 'insertTable', args: [{rows:3, cols:3, withHeaderRow:true}] },
+            { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
+            { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
+            { type: 'button', title: 'Insert Variable', icon: 'variable', command: 'insertMahoVariable', enabled: this.config.add_variables},
+        ]);
 
-    widgetHandler() {
-        if (this.config.widget_window_url) {
-            // Clear any editing state when inserting a new widget
-            this.editingWidgetId = null;
-            delete window.widgetFormInitialValues;
-
-            const url = this.config.widget_window_url + 'widget_target_id/' + this.id + '/';
-            widgetTools.openDialog(url);
-        }
+        toolbar.id = `${this.id}_toolbar`;
+        toolbar.className = 'tiptap-toolbar';
+        return toolbar;
     }
 
+    createTableBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'button', title: 'Add Column Before', command: 'addColumnBefore', icon: 'column-insert-left' },
+            { type: 'button', title: 'Add Column After', command: 'addColumnAfter', icon: 'column-insert-right' },
+            { type: 'button', title: 'Delete Column', command: 'deleteColumn', icon: 'column-remove' },
+            { type: 'separator'},
+            { type: 'button', title: 'Add Row Before', command: 'addRowBefore', icon: 'row-insert-top' },
+            { type: 'button', title: 'Add Row After', command: 'addRowAfter', icon: 'row-insert-bottom' },
+            { type: 'button', title: 'Delete Row', command: 'deleteRow', icon: 'row-remove' },
+            { type: 'separator'},
+            { type: 'button', title: 'Merge Cells', command: 'mergeCells', icon: 'arrows-join' },
+            { type: 'button', title: 'Split Cell', command: 'splitCell', icon: 'arrows-split' },
+            { type: 'separator'},
+            { type: 'button', title: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: 'table-column' },
+            { type: 'button', title: 'Toggle Header Row', command: 'toggleHeaderRow', icon: 'table-row' },
+            { type: 'separator'},
+            { type: 'button', title: 'Delete Table', command: 'deleteTable', icon: 'trash' },
+        ]);
 
-    openWidgetForEdit(widgetId) {
-        if (!this.config.widget_window_url || !widgetId) {
+        bubbleMenu.id = `${this.id}_table_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        return bubbleMenu;
+    }
+
+    createToolbar(items) {
+        const toolbar = document.createElement('div');
+        const addGroup = () => {
+            const group = document.createElement('div');
+            group.className = 'toolbar-group';
+            return toolbar.appendChild(group);
+        }
+        let group = addGroup();
+        for (const item of items) {
+            if (!(item.enabled ?? true)) {
+                continue;
+            }
+            if (item.type === 'separator') {
+                const separator = document.createElement('div');
+                separator.className = 'toolbar-separator';
+                toolbar.append(separator);
+                group = addGroup();
+            }
+            else if (item.type === 'select') {
+                const select = document.createElement('select');
+                for (const option of item.options) {
+                    const [ value, label ] = option;
+                    select.add(new Option(this.translate(label), value));
+                }
+                if (typeof item.onChange === 'function') {
+                    select.addEventListener('change', item.onChange);
+                }
+                group.append(select);
+            }
+            else if (item.type === 'button') {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.title = this.translate(item.title ?? '');
+                button.innerHTML = this.getIcon(item.icon);
+
+                if (typeof item.onClick === 'function') {
+                    button.addEventListener('click', item.onClick);
+                }
+                else if (item.command) {
+                    item.args = Array.isArray(item.args) ? item.args : [];
+                    button.addEventListener('click', () => {
+                        this.editor.chain().focus()[item.command](...item.args).run();
+                    });
+                    button.dataset.command = item.command;
+                    button.dataset.args = JSON.stringify(item.args);
+                }
+                group.append(button);
+            }
+            else if (item instanceof HTMLElement) {
+                group.append(item);
+            }
+        }
+        return toolbar;
+    }
+
+    updateToolbarState() {
+        if (!this.editor) {
             return;
         }
 
-        // Decode the widget content from the ID
-        const widgetCode = Base64.idDecode(widgetId);
+        // Update heading dropdown
+        const level = this.editor.getAttributes('heading').level ?? '';
+        document.querySelector(`#${this.id}_toolbar select`).value = level;
 
-        // Parse the widget code to extract parameters
-        const widgetParams = this.parseWidgetCode(widgetCode);
-
-        if (widgetParams && widgetParams.type) {
-            // Store the widget element for later replacement
-            this.editingWidgetId = widgetId;
-
-            // Store widget parameters globally for the widget form to access
-            window.widgetFormInitialValues = widgetParams;
-
-            // Open the widget dialog
-            const url = this.config.widget_window_url + 'widget_target_id/' + this.id + '/';
-            widgetTools.openDialog(url);
-        }
-    }
-
-    parseWidgetCode(widgetCode) {
-        // Extract widget parameters from the widget directive
-        const match = widgetCode.match(/\{\{widget\s+(.+?)\}\}/);
-        if (!match) return null;
-
-        const params = {};
-        const paramString = match[1];
-
-        // Parse key="value" pairs
-        const regex = /(\w+)="([^"]*)"/g;
-        let paramMatch;
-
-        while ((paramMatch = regex.exec(paramString)) !== null) {
-            params[paramMatch[1]] = paramMatch[2];
-        }
-
-        return params;
-    }
-
-    variableHandler() {
-        if (this.config.variable_window_url) {
-            // Store cursor position before opening dialog
-            this.lastSelection = this.editor.state.selection;
-            const url = this.config.variable_window_url + 'variable_target_id/' + this.id + '/';
-            OpenmagevariablePlugin.loadChooser(url, this.id);
-        }
-    }
-
-    openFileBrowser(o) {
-        var typeTitle;
-        var storeId = this.config.store_id !== null ? this.config.store_id : 0;
-        var wUrl = this.config.files_browser_window_url +
-            'target_element_id/' + this.id + '/' +
-            'store/' + storeId + '/';
-
-        this.mediaBrowserCallback = o.callback;
-        this.mediaBrowserMeta = o.meta;
-        this.mediaBrowserValue = o.value;
-
-        if (typeof (o.meta.filetype) != 'undefined' && o.meta.filetype == "image") {
-            typeTitle = 'image' == o.meta.filetype ? this.translate('Insert Image...') : this.translate('Insert Media...');
-            wUrl = wUrl + "type/" + o.meta.filetype + "/";
-        } else {
-            typeTitle = this.translate('Insert File...');
-        }
-
-        MediabrowserUtility.openDialog(wUrl, false, false, typeTitle, {
-            onBeforeShow: function (win) {
-                win.element.setStyle({ zIndex: 300200 });
+        // Update button states
+        for (const button of document.querySelectorAll(`#${this.id}_toolbar button[data-command]`)) {
+            const command = button.dataset.command;
+            const args = JSON.parse(button.dataset.args);
+            let isActive = false;
+            switch (command) {
+            case 'toggleMark':
+                isActive = this.editor.isActive(args[0]);
+                break;
+            case 'setTextAlign':
+                isActive = this.editor.isActive({ textAlign: args[0] });
+                break;
+            case 'toggleBlockquote':
+                isActive = this.editor.isActive('blockquote');
+                break;
+            case 'toggleBulletList':
+                isActive = this.editor.isActive('bulletList');
+                break;
+            case 'toggleOrderedList':
+                isActive = this.editor.isActive('orderedList');
+                break;
             }
-        });
+            button.classList.toggle('is-active', isActive);
+        }
     }
 
     translate(string) {
@@ -852,284 +463,21 @@ class tiptapWysiwygSetup {
         return document.querySelectorAll(`#buttons${this.id} > button.plugin`);
     }
 
-    getContainer() {
-        return document.getElementById(`${this.id}_editor`);
-    }
-
     getTextArea() {
-        return document.getElementById(this.id);
-    }
-
-    turnOn() {
-        this.setup();
-        this.getPluginButtons().forEach((el) => el.classList.add('no-display'));
-    }
-
-    turnOff() {
-        this.destroy();
-        this.getTextArea().style.display = '';
-        this.getPluginButtons().forEach((el) => el.classList.remove('no-display'));
-    }
-
-    toggle() {
-        if (this.editor === null) {
-            this.turnOn();
-            return true;
-        } else {
-            this.turnOff();
-            return false;
-        }
-    }
-
-    onFormValidation() {
-        if (this.editor) {
-            this.updateTextArea();
-        }
-    }
-
-    onChangeContent() {
-        if (this.config.tab_id) {
-            const tab = document.querySelector(`a[id$=${this.config.tab_id}]`);
-            if (tab && tab.classList.contains('tab-item-link')) {
-                tab.classList.add('changed');
-            }
-        }
+        return this.textarea;
     }
 
     updateTextArea() {
-        if (this.editor) {
-            const textarea = this.getTextArea();
-            if (textarea) {
-                const content = this.decodeContent(this.editor.getHTML());
-                textarea.value = content;
-                this.triggerChange(textarea);
-            }
+        this.syncWysiwygToPlain();
+    }
+
+    getIcon(name) {
+        const iconPath = tiptapWysiwygSetup.iconRegistry[name];
+        if (!iconPath) {
+            console.warn(`Icon "${name}" not found in registry`);
+            return '';
         }
-    }
-
-    triggerChange(element) {
-        element.dispatchEvent(new Event('change', { bubbles: false, cancelable: true }));
-        return element;
-    }
-
-    encodeContent(content) {
-        if (!content) return '';
-        // Encode both directives and widgets
-        return this.encodeWidgets(this.encodeDirectives(content));
-    }
-
-    decodeContent(content) {
-        if (!content) return '';
-        return this.decodeDirectives(this.decodeWidgets(content));
-    }
-
-    makeDirectiveUrl(directive) {
-        return this.config.directives_url.replace('directive', 'directive/___directive/' + directive);
-    }
-
-    encodeDirectives(content) {
-        return content.replace(/<([a-z0-9\-\_]+.+?)([a-z0-9\-\_]+=".*?\{\{.+?\}\}.*?".+?)>/gi, (match, p1, p2) => {
-            const attributesString = p2.replace(/([a-z0-9\-\_]+)="(.*?)(\{\{.+?\}\})(.*?)"/gi, (m, attr, before, directive, after) => {
-                return attr + '="' + before + this.makeDirectiveUrl(Base64.mageEncode(directive)) + after + '"';
-            });
-            return '<' + p1 + attributesString + '>';
-        });
-    }
-
-    encodeWidgets(content) {
-        return content.replace(/\{\{widget(.*?)\}\}/gi, (match, attributes) => {
-            const attrs = this.parseAttributesString(attributes);
-            if (attrs.type) {
-                let placeholderFilename = attrs.type.replace(/\//g, "__") + ".svg";
-                if (!this.widgetPlaceholderExist(placeholderFilename)) {
-                    placeholderFilename = 'default.svg';
-                }
-
-                const id = Base64.idEncode(match);
-                const src = this.config.widget_images_url + placeholderFilename;
-                return `<img id="${id}" src="${src}" title="Double-click to edit" class="maho-widget-placeholder">`;
-            }
-            return match;
-        });
-    }
-
-    decodeDirectives(content) {
-        // First decode directive URLs in img src attributes
-        content = content.replace(/<img([^>]*)>/gi, (match, attributes) => {
-            // Parse the complete attributes string to handle the src attribute properly
-            const srcMatch = attributes.match(/\bsrc="([^"]+)"/i);
-            if (!srcMatch) return match;
-
-            const src = srcMatch[1];
-            const urlPattern = this.config.directives_url
-                .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
-                .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
-
-            // Check if the src contains a directive URL
-            if (src.match(new RegExp(urlPattern))) {
-                const decodedSrc = src.replace(new RegExp(urlPattern, 'g'), (m, directive) => {
-                    return Base64.mageDecode(directive);
-                });
-                // Replace only the src attribute value, preserving all other attributes
-                const updatedAttributes = attributes.replace(/\bsrc="[^"]+"/i, `src="${decodedSrc}"`);
-                return `<img${updatedAttributes}>`;
-            }
-            return match;
-        });
-
-        // Then decode directive URLs in other contexts (but NOT media directives)
-        return content.replace(/<([a-z0-9\-\_]+[^>]*?)>/gi, (match) => {
-            // Skip img tags as we already handled them
-            if (match.toLowerCase().startsWith('<img')) {
-                return match;
-            }
-
-            const urlPattern = this.config.directives_url
-                .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
-                .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
-            const reg = new RegExp(urlPattern, 'g');
-
-            return match.replace(reg, (m, directive) => {
-                const decoded = Base64.mageDecode(directive);
-                // Only decode if it's NOT a media directive
-                if (!decoded.includes('{{media url=')) {
-                    return decoded;
-                }
-                return m; // Keep the directive URL if it's a media directive
-            });
-        });
-    }
-
-    decodeWidgets(content) {
-        return content.replace(/<img([^>]+id=\"[^>]+)>/gi, (match, attributes) => {
-            const attrs = this.parseAttributesString(attributes);
-            if (attrs.id) {
-                const widgetCode = Base64.idDecode(attrs.id);
-                if (widgetCode.indexOf('{{widget') !== -1) {
-                    return widgetCode;
-                }
-            }
-            return match;
-        });
-    }
-
-    parseAttributesString(attributes) {
-        // Create a temporary element with unique ID
-        const tempElement = document.createElement('div');
-        tempElement.innerHTML = `<div ${attributes}></div>`;
-
-        // Add to DOM temporarily (some browsers need this for full parsing)
-        document.body.appendChild(tempElement);
-
-        const element = tempElement.firstChild;
-        const result = {};
-
-        // Extract all attributes
-        for (const attr of element.attributes) {
-            result[attr.name] = attr.value;
-        }
-
-        // Clean up - remove the temporary element
-        document.body.removeChild(tempElement);
-        return result;
-    }
-
-    widgetPlaceholderExist(filename) {
-        return this.config.widget_placeholders && this.config.widget_placeholders.indexOf(filename) !== -1;
-    }
-
-    getMediaBrowserCallback() {
-        return this.mediaBrowserCallback;
-    }
-
-    // Method to insert content at cursor position (for widgets/variables)
-    insertContent(content) {
-        if (this.editor) {
-            // Check if we're replacing an existing widget
-            if (this.editingWidgetId) {
-                // Find all widget nodes
-                let targetPos = null;
-                this.editor.state.doc.descendants((node, pos) => {
-                    if (node.type.name === 'widget' && node.attrs.id === this.editingWidgetId) {
-                        targetPos = pos;
-                        return false; // Stop searching
-                    }
-                });
-
-                if (targetPos !== null) {
-                    // Process the new content to get widget attributes
-                    const processedContent = this.encodeContent(content);
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = processedContent;
-                    const newWidget = tempDiv.querySelector('img.maho-widget-placeholder');
-
-                    if (newWidget) {
-                        // Replace the existing widget with new widget node
-                        this.editor.chain()
-                            .focus()
-                            .setNodeSelection(targetPos)
-                            .deleteSelection()
-                            .insertContent({
-                                type: 'widget',
-                                attrs: {
-                                    id: newWidget.getAttribute('id'),
-                                    src: newWidget.getAttribute('src'),
-                                    title: newWidget.getAttribute('title'),
-                                    class: newWidget.getAttribute('class')
-                                }
-                            })
-                            .run();
-                    }
-
-                    // Clear the editing widget ID
-                    this.editingWidgetId = null;
-                    return;
-                }
-            }
-
-            // Normal insertion at cursor position
-            if (content.includes('{{widget') && content.includes('}}')) {
-                // This is a widget, process it first
-                const processedContent = this.encodeContent(content);
-
-                // Parse the widget directly from the processedContent to avoid HTML parsing issues
-                const widgetMatch = processedContent.match(/<img\s+([^>]+)>/);
-                if (widgetMatch) {
-                    const attrs = {};
-
-                    // Parse attributes more carefully
-                    const attrString = widgetMatch[1];
-
-                    // Split by spaces but not spaces inside quotes
-                    const attrPairs = attrString.match(/\w+="[^"]*"/g) || [];
-
-                    attrPairs.forEach(pair => {
-                        const [key, ...valueParts] = pair.split('=');
-                        const value = valueParts.join('=').replace(/^"|"$/g, '');
-                        attrs[key] = value;
-                    });
-
-                    if (attrs.id && attrs.src) {
-                        // Insert as widget node
-                        this.editor.chain().focus().insertContent({
-                            type: 'widget',
-                            attrs: {
-                                id: attrs.id,
-                                src: attrs.src,
-                                title: attrs.title || 'Double-click to edit',
-                                class: attrs.class || 'maho-widget-placeholder'
-                            }
-                        }).run();
-                    }
-                }
-            } else if (content.includes('<') && content.includes('>')) {
-                // Insert HTML content
-                this.editor.chain().focus().insertContent(content).run();
-            } else {
-                // Insert plain text (including variables)
-                this.editor.chain().focus().insertContent(content).run();
-            }
-        }
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>`;
     }
 
     static iconRegistry = {
@@ -1153,7 +501,8 @@ class tiptapWysiwygSetup {
         'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
         'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
         'table': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M3 10h18"/><path d="M10 3v18"/>',
-        'widget': '<path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>',
+        //'widget': '<path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>',
+        'widget': '<path d="M18 16v.01"/><path d="M6 16v.01"/><path d="M12 5v.01"/><path d="M12 12v.01"/><path d="M12 1a4 4 0 0 1 2.001 7.464l.001 .072a3.998 3.998 0 0 1 1.987 3.758l.22 .128a3.978 3.978 0 0 1 1.591 -.417l.2 -.005a4 4 0 1 1 -3.994 3.77l-.28 -.16c-.522 .25 -1.108 .39 -1.726 .39c-.619 0 -1.205 -.14 -1.728 -.391l-.279 .16l.007 .231a4 4 0 1 1 -2.212 -3.579l.222 -.129a3.998 3.998 0 0 1 1.988 -3.756l.002 -.071a4 4 0 0 1 -1.995 -3.265l-.005 -.2a4 4 0 0 1 4 -4z"/>',
         'variable': '<path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/>',
 
         // Table operation icons
@@ -1169,15 +518,6 @@ class tiptapWysiwygSetup {
         'table-column': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M10 10h11"/><path d="M10 3v18"/><path d="M9 3l-6 6"/><path d="M10 7l-7 7"/><path d="M10 12l-7 7"/><path d="M10 17l-4 4"/>',
         'trash': '<path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>'
     };
-
-    getIcon(name) {
-        const iconPath = tiptapWysiwygSetup.iconRegistry[name];
-        if (!iconPath) {
-            console.warn(`Icon "${name}" not found in registry`);
-            return '';
-        }
-        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>`;
-    }
 }
 
 window.tiptapWysiwygSetup = tiptapWysiwygSetup;

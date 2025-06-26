@@ -55,6 +55,14 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree extends Mage_Adminhtml_Block_
     }
 
     /**
+     * Return file to select in current path
+     */
+    public function getTreeCurrentFile(): string
+    {
+        return $this->getRequest()->getParam('filename', '');
+    }
+
+    /**
      * Return tree node full path based on current path
      *
      * @return string
@@ -62,8 +70,15 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree extends Mage_Adminhtml_Block_
     public function getTreeCurrentPath()
     {
         $treePath = '/root';
-        if ($path = Mage::registry('storage')->getSession()->getCurrentPath()) {
-            $helper = Mage::helper('cms/wysiwyg_images');
+        $helper = Mage::helper('cms/wysiwyg_images');
+
+        if ($path = $this->getRequest()->getParam('path')) {
+            $path = $helper->convertIdToPath($path);
+        } else {
+            $path = Mage::registry('storage')->getSession()->getCurrentPath();
+        }
+
+        if ($path) {
             $path = str_replace($helper->getStorageRoot(), '', $path);
             $relative = '';
             foreach (explode(DS, $path) as $dirName) {

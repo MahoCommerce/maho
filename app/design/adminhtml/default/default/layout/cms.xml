@@ -65,7 +65,7 @@
             <block name="wysiwyg_images.tree" type="adminhtml/cms_wysiwyg_images_tree" template="cms/browser/tree.phtml" />
         </reference>
         <reference name="content">
-            <block name="wysiwyg_images.content"  type="adminhtml/cms_wysiwyg_images_content" template="cms/browser/content.phtml">
+            <block name="wysiwyg_images.content" type="adminhtml/cms_wysiwyg_images_content" template="cms/browser/content.phtml">
                 <block name="wysiwyg_images.uploader" type="adminhtml/cms_wysiwyg_images_content_uploader" template="media/uploader.phtml">
                     <block name="additional_scripts" type="core/template" template="cms/browser/content/uploader.phtml"/>
                 </block>

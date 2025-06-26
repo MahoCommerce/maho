@@ -82,18 +82,6 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit extends Mage_Adminhtml_Blo
         );
 
         $this->setChild(
-            'toggle_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
-                ->setData(
-                    [
-                        'label'   => Mage::helper('adminhtml')->__('Toggle Editor'),
-                        'onclick' => 'templateControl.toggleEditor();',
-                        'id'      => 'toggle_button',
-                    ],
-                ),
-        );
-
-        $this->setChild(
             'preview_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData(

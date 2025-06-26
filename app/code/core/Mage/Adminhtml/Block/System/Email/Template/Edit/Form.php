@@ -18,13 +18,13 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
     #[\Override]
     protected function _prepareLayout()
     {
+        parent::_prepareLayout();
         /** @var Mage_Page_Block_Html_Head $head */
         $head = $this->getLayout()->getBlock('head');
-        if ($head) {
-            $head->addItem('js', 'maho-dialog.js')
-                ->addItem('js', 'mage/adminhtml/variables.js');
+        if ($head && Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
+            $this->getLayout()->getBlock('head')->setCanLoadWysiwyg(true);
         }
-        return parent::_prepareLayout();
+        return $this;
     }
 
     /**
@@ -91,30 +91,24 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
             'name' => 'template_variables',
         ]);
 
-        $insertVariableButton = $this->getLayout()
-            ->createBlock('adminhtml/widget_button', '', [
-                'type' => 'button',
-                'label' => Mage::helper('adminhtml')->__('Insert Variable...'),
-                'onclick' => 'templateControl.openVariableChooser();return false;',
-            ]);
+        $widgetFilters = ['is_email_compatible' => 1];
+        $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')
+            ->getConfig(['widget_filters' => $widgetFilters]);
 
-        $fieldset->addField('insert_variable', 'note', [
-            'text' => $insertVariableButton->toHtml(),
-        ]);
-
-        $fieldset->addField('template_text', 'textarea', [
-            'name' => 'template_text',
-            'label' => Mage::helper('adminhtml')->__('Template Content'),
-            'title' => Mage::helper('adminhtml')->__('Template Content'),
-            'required' => true,
-            'style' => 'height:24em;',
+        $fieldset->addField('template_text', 'editor', [
+            'name'      => 'template_text',
+            'label'     => Mage::helper('adminhtml')->__('Template Content'),
+            'title'     => Mage::helper('adminhtml')->__('Template Content'),
+            'state'     => 'html', // TODO?
+            'required'  => true,
+            'style'     => 'height:24em;',
+            'config'    => $wysiwygConfig,
         ]);
 
         if (!$this->getEmailTemplate()->isPlain()) {
             $fieldset->addField('template_styles', 'textarea', [
                 'name' => 'template_styles',
                 'label' => Mage::helper('adminhtml')->__('Template Styles'),
-                'container_id' => 'field_template_styles',
             ]);
         }
 

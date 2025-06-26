@@ -13,6 +13,9 @@
 <layout>
     <adminhtml_newsletter_template_edit>
         <update handle="editor"/>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/system/email-template.js</name></action>
+        </reference>
         <reference name="content">
             <block type="adminhtml/newsletter_template_edit" name="template_edit" template="newsletter/template/edit.phtml" />
         </reference>
@@ -20,6 +23,9 @@
 
     <adminhtml_newsletter_queue_edit>
         <update handle="editor"/>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/system/email-template.js</name></action>
+        </reference>
         <reference name="content">
             <block type="adminhtml/newsletter_queue_edit" name="queue_edit" template="newsletter/queue/edit.phtml" />
         </reference>

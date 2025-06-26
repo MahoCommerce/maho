@@ -165,24 +165,19 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
      * Prepare Image insertion declaration for Wysiwyg or textarea(as_is mode)
      *
      * @param string $filename Filename transferred via Ajax
-     * @param bool $renderAsTag Leave image HTML as is or transform it to controller directive
+     * @param string $alt Alt text for the image
      * @return string
      */
-    public function getImageHtmlDeclaration($filename, $renderAsTag = false)
+    public function getImageHtmlDeclaration($filename, $alt = '')
     {
         $fileurl = $this->getCurrentUrl() . $filename;
         $mediaPath = str_replace(Mage::getBaseUrl('media'), '', $fileurl);
         $directive = sprintf('{{media url="%s"}}', $mediaPath);
-        if ($renderAsTag) {
-            $html = sprintf('<img src="%s" alt="" />', $this->isUsingStaticUrlsAllowed() ? $fileurl : $directive);
-        } else {
-            if ($this->isUsingStaticUrlsAllowed()) {
-                $html = $fileurl; // $mediaPath;
-            } else {
-                $directive = Mage::helper('core')->urlEncode($directive);
-                $html = Mage::helper('adminhtml')->getUrl('*/cms_wysiwyg/directive', ['___directive' => $directive]);
-            }
-        }
+        $html = sprintf(
+            '<img src="%s" alt="%s" />',
+            $this->isUsingStaticUrlsAllowed() ? $fileurl : $directive,
+            $this->escapeHtml(is_string($alt) ? $alt : ''),
+        );
         return $html;
     }
 

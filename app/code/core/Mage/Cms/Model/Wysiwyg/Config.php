@@ -37,12 +37,6 @@ class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
     public const IMAGE_DIRECTORY = 'wysiwyg';
 
     /**
-     * Path to skin image placeholder file
-     */
-    public const WYSIWYG_SKIN_IMAGE_PLACEHOLDER_FILE = 'images/wysiwyg/placeholder-image.svg';
-
-
-    /**
      * Return Wysiwyg config as Varien_Object
      *
      * Config options description:
@@ -53,7 +47,6 @@ class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
      * no_display:              Hide Editor container or not (related to use_container)
      * translator:              Helper to translate phrases in lib
      * files_browser_*:         Files Browser (media, images) settings
-     * encode_directives:       Encode template directives with JS or not
      *
      * @param array $data constructor params to override default config values
      * @return Varien_Object
@@ -70,7 +63,6 @@ class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
             'add_widgets'                   => Mage::getSingleton('admin/session')->isAllowed('cms/widget_instance'),
             'no_display'                    => false,
             'translator'                    => Mage::helper('cms'),
-            'encode_directives'             => true,
             'directives_url'                => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/directive'),
             'width'                         => '100%',
             'plugins'                       => [],
@@ -95,26 +87,6 @@ class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
         Mage::dispatchEvent('cms_wysiwyg_config_prepare', ['config' => $config]);
 
         return $config;
-    }
-
-    /**
-     * Return the URL for skin image placeholder
-     *
-     * @return string
-     */
-    public function getSkinImagePlaceholderUrl()
-    {
-        return Mage::getDesign()->getSkinUrl(self::WYSIWYG_SKIN_IMAGE_PLACEHOLDER_FILE);
-    }
-
-    /**
-     * Return the path to the skin image placeholder
-     *
-     * @return string
-     */
-    public function getSkinImagePlaceholderPath()
-    {
-        return Mage::getDesign()->getFilename(self::WYSIWYG_SKIN_IMAGE_PLACEHOLDER_FILE, ['_type' => 'skin']);
     }
 
     /**

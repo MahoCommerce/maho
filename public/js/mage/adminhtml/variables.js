@@ -9,152 +9,133 @@
  */
 
 const Variables = {
-    textareaElementId: null,
-    variablesContent: null,
     dialogWindow: null,
     dialogWindowId: 'variables-chooser',
-    insertFunction: 'Variables.insertVariable',
+
+    textareaElementId: null,
+    insertFunction: this.insertVariable,
+    variablesData: new Map(),
 
     init(textareaElementId, insertFunction) {
         if (document.getElementById(textareaElementId)) {
             this.textareaElementId = textareaElementId;
         }
-        if (insertFunction) {
+        if (typeof insertFunction === 'function') {
             this.insertFunction = insertFunction;
         }
+        this.insertFunction ??= this.insertVariable;
     },
 
     resetData() {
-        this.variablesContent = null;
         this.dialogWindow = null;
+        this.variablesData = new Map();
     },
 
-    openVariableChooser(variables) {
-        if (this.variablesContent === null && Array.isArray(variables)) {
-            this.variablesContent = '<ul>';
-            for (const group of variables) {
-                if (!group.label || !Array.isArray(group.value)) {
-                    continue;
-                }
-                this.variablesContent += `<li><strong>${group.label}</strong></li>`;
-                for (const variable of group.value) {
-                    if (!variable.value || !variable.label) {
-                        continue;
-                    }
-                    const row = this.prepareVariableRow(variable.value, variable.label);
-                    this.variablesContent += `<li style="padding-left: 20px;">${row}</li>`;
-                }
-            }
-            this.variablesContent += '</ul>';
-        }
-        if (this.variablesContent) {
-            this.openDialogWindow(this.variablesContent);
-        }
-    },
-
-    openDialogWindow(variablesContent) {
+    async openDialog(url, opts = {}) {
         if (document.getElementById(this.dialogWindowId)) {
             return;
         }
-        this.dialogWindow = Dialog.info(variablesContent, {
+
+        const variables = await this.fetchVariables(url);
+        if (!Array.isArray(variables)) {
+            return;
+        }
+
+        const textareaElementId = url.match(/variable_target_id\/(\w+)/)?.[1] ?? opts.target_id;
+        if (textareaElementId) {
+            this.init(textareaElementId);
+        }
+
+        opts.onOk = wrapFunction(
+            opts.onOk ?? function(){},
+            (next, dialog) => {
+                this.insertFunction(dialog);
+                next(dialog);
+            },
+        );
+
+        const html = this.buildHtml(variables);
+        this.dialogWindow = Dialog.info(html, {
             id: this.dialogWindowId,
             title: 'Insert Variable...',
             className: 'magento',
             windowClassName: 'popup-window',
             width: 700,
-            onClose: this.closeDialogWindow.bind(this)
+            ok: true,
+            okLabel: 'Insert',
+            ...opts,
         });
     },
 
-    closeDialogWindow(window) {
+    closeDialog(window) {
         window ??= this.dialogWindow;
         window?.close();
     },
 
-    prepareVariableRow(value, label) {
-        value = escapeHtml(value, true).replace(/\\/g, '\\\\');
-        return `<a href="#" onclick="${this.insertFunction}('${value}');return false;">${label}</a>`;
-    },
-
-    insertVariable(value) {
-        this.closeDialogWindow();
-        
-        // Check if we have a Tiptap editor
-        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.textareaElementId)) {
-            const tiptapEditor = tiptapEditors.get(this.textareaElementId);
-            if (tiptapEditor && tiptapEditor.editor) {
-                tiptapEditor.insertContent(value);
-                return;
-            }
+    async fetchVariables(url) {
+        if (this.variablesData.has(url)) {
+            return this.variablesData.get(url);
         }
-        
-        const textareaElm = document.getElementById(this.textareaElementId);
-        if (textareaElm) {
-            updateElementAtCursor(textareaElm, value);
-        }
-    }
-};
-
-const OpenmagevariablePlugin = {
-    editor: null,
-    variables: null,
-    textareaId: null,
-
-    setEditor(editor) {
-        this.editor = editor;
-    },
-
-    async loadChooser(url, textareaId) {
-        this.textareaId = textareaId;
         try {
-            if (this.variables === null) {
-                this.variables = await mahoFetch(url);
+            const result = await mahoFetch(url);
+            if (Array.isArray(result)) {
+                this.variablesData.set(url, result);
+                return result;
             }
-            Variables.init(null, 'OpenmagevariablePlugin.insertVariable');
-            this.openChooser(this.variables);
         } catch (error) {
-            console.error(error);
             alert(error.message);
         }
+        return false;
     },
 
-    openChooser(variables) {
-        Variables.openVariableChooser(variables);
+    buildHtml(variables) {
+        let html = '';
+        for (const group of variables) {
+            if (!group.label || !Array.isArray(group.value)) {
+                continue;
+            }
+            html += `<h3>${group.label}</h3>`;
+            html += '<ul>';
+            for (const variable of group.value) {
+                if (!variable.value || !variable.label) {
+                    continue;
+                }
+                const label = escapeHtml(variable.label);
+                const value = escapeHtml(variable.value, true);
+                html += `<li><label><input type="radio" name="variable" value="${value}"> ${label}</label></li>`;
+            }
+            html += '</ul>';
+        }
+        return html;
     },
 
-    insertVariable(value) {
-        if (this.textareaId) {
-            Variables.closeDialogWindow();
-            
-            // Check if we have a Tiptap editor
-            if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.textareaId)) {
-                const tiptapEditor = tiptapEditors.get(this.textareaId);
-                if (tiptapEditor && tiptapEditor.editor) {
-                    tiptapEditor.insertContent(value);
-                    return;
-                }
+    openVariableChooser(variables, opts) {
+        const fakeUrl = generateRandomString(6);
+        this.variablesData.set(fakeUrl, variables);
+        this.openDialog(fakeUrl, opts);
+    },
+
+    initSelected(value) {
+        if (!value) {
+            return;
+        }
+        for (const inputEl of this.dialogWindow?.querySelectorAll('input[name=variable]')) {
+            if (inputEl.value === value) {
+                inputEl.checked = true;
             }
-            
-            // Fallback to textarea
-            const textareaElm = document.getElementById(this.textareaId);
-            if (textareaElm) {
-                updateElementAtCursor(textareaElm, value);
-            }
-        } else {
-            Variables.closeDialogWindow();
-            
-            // Check if we're using Tiptap
-            if (typeof tiptapEditors !== 'undefined' && this.editor && this.editor.container) {
-                // Find the Tiptap instance by container
-                const editorId = this.editor.container.previousElementSibling?.id;
-                if (editorId && tiptapEditors.has(editorId)) {
-                    const tiptapEditor = tiptapEditors.get(editorId);
-                    if (tiptapEditor) {
-                        tiptapEditor.insertContent(value);
-                        return;
-                    }
-                }
-            }
+        }
+    },
+
+    insertVariable(dialog) {
+        const directive = this.dialogWindow?.querySelector('input[name=variable]:checked')?.value;
+
+        if (dialog instanceof HTMLDialogElement) {
+            dialog.returnValue = directive;
+        }
+
+        const textareaElm = document.getElementById(this.textareaElementId);
+        if (textareaElm?.checkVisibility()) {
+            updateElementAtCursor(textareaElm, directive);
         }
     },
 };

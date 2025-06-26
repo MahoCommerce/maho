@@ -21,35 +21,26 @@ class Mage_Core_Model_Variable_Config
     public function getWysiwygPluginSettings($config)
     {
         $variableConfig = [];
-        // Add variable URL for Tiptap
+
+        // Add variable URL for WYSIWYG editor
         $variableConfig['variable_window_url'] = $this->getVariablesWysiwygActionUrl();
 
-        // Keep legacy plugin config for backward compatibility
-        $onclickParts = [
-            'search' => ['html_id'],
-            'subject' => 'OpenmagevariablePlugin.loadChooser(\'' . $this->getVariablesWysiwygActionUrl() . '\', \'{{html_id}}\');',
-        ];
-        $variableWysiwygPlugin = [['name' => 'openmagevariable',
-            'src' => $this->getWysiwygJsPluginSrc(),
+        // Add plugin for plain text editor
+        $pluginConfig = [
+            'name' => 'variables',
             'options' => [
                 'title' => Mage::helper('adminhtml')->__('Insert Variable...'),
-                'url' => $this->getVariablesWysiwygActionUrl(),
-                'onclick' => $onclickParts,
+                'onclick' => [
+                    'search' => ['html_id'],
+                    'subject' => "Variables.openDialog('{$this->getVariablesWysiwygActionUrl()}', { target_id: '{{html_id}}' });",
+                ],
                 'class'   => 'add-variable plugin',
-            ]]];
-        $configPlugins = $config->getData('plugins');
-        $variableConfig['plugins'] = array_merge($configPlugins, $variableWysiwygPlugin);
-        return $variableConfig;
-    }
+            ],
+        ];
 
-    /**
-     * Return url to wysiwyg plugin
-     *
-     * @return string
-     */
-    public function getWysiwygJsPluginSrc()
-    {
-        return Mage::getBaseUrl('js') . 'mage/adminhtml/variables.js';
+        $variableConfig['plugins'] = array_merge($config->getData('plugins'), [$pluginConfig]);
+
+        return $variableConfig;
     }
 
     /**

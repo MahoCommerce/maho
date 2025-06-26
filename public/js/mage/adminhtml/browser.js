@@ -53,15 +53,13 @@ class Mediabrowser {
     tree = null;
     currentNode = null;
     storeId = null;
+    canInsertImage = null;
 
     constructor() {
         this.initialize(...arguments);
     }
 
     initialize(setup) {
-        this.newFolderPrompt = setup.newFolderPrompt;
-        this.deleteFolderConfirmationMessage = setup.deleteFolderConfirmationMessage;
-        this.deleteFileConfirmationMessage = setup.deleteFileConfirmationMessage;
         this.targetElementId = setup.targetElementId;
         this.contentsUrl = setup.contentsUrl;
         this.onInsertUrl = setup.onInsertUrl;
@@ -69,6 +67,16 @@ class Mediabrowser {
         this.deleteFolderUrl = setup.deleteFolderUrl;
         this.deleteFilesUrl = setup.deleteFilesUrl;
         this.headerText = setup.headerText;
+        this.canInsertImage = setup.canInsertImage;
+    }
+
+    static {
+        document.addEventListener('uploader:filesAdded', (event) => {
+            MediabrowserInstance.deselectFiles();
+        });
+        document.addEventListener('uploader:success', (event) => {
+            MediabrowserInstance.handleUploadComplete(event.detail.files);
+        });
     }
 
     setTree(tree) {
@@ -100,7 +108,7 @@ class Mediabrowser {
         this.updateHeader(this.currentNode);
         this.drawBreadcrumbs(this.currentNode);
 
-        this.updateContent();
+        return this.updateContent();
     }
 
     async updateContent() {
@@ -113,13 +121,21 @@ class Mediabrowser {
             });
 
             const contentsEl = document.getElementById('contents');
-            if (contentsEl) {
-                updateElementHtmlAndExecuteScripts(contentsEl, html);
-                contentsEl.querySelectorAll('div.filecnt').forEach((el) => {
-                    el.addEventListener('click', this.selectFile.bind(this));
-                    el.addEventListener('dblclick', this.insert.bind(this));
-                });
+            if (!contentsEl) {
+                return;
             }
+            updateElementHtmlAndExecuteScripts(contentsEl, html);
+
+            contentsEl.querySelectorAll('div.filecnt').forEach((el) => {
+                el.addEventListener('click', this.selectFile.bind(this));
+                if (this.canInsertImage) {
+                    el.addEventListener('dblclick', this.insert.bind(this));
+                }
+            });
+
+            document.getElementById('contents-uploader')?.prepend(
+                document.getElementById('contents-alt-text'),
+            );
         } catch(error) {
             alert(error.message);
         }
@@ -133,24 +149,37 @@ class Mediabrowser {
         const div = event.target.closest('div.filecnt');
         const selected = !div.classList.contains('selected');
 
-        document.querySelectorAll('div.filecnt.selected').forEach((el) => el.classList.remove('selected'));
+        this.deselectFiles();
         div.classList.toggle('selected', selected);
 
         if (selected) {
             this.showFileButtons();
-        } else {
-            this.hideFileButtons();
         }
+    }
+
+    selectFileById(fileId) {
+        document.getElementById(fileId)?.click();
+    }
+
+    deselectFiles() {
+        document.querySelectorAll('div.filecnt.selected').forEach((el) => {
+            el.classList.remove('selected')
+        });
+        this.hideFileButtons();
     }
 
     showFileButtons() {
         this.showElement('button_delete_files');
-        this.showElement('button_insert_files');
+        if (this.canInsertImage) {
+            this.showElement('button_insert_files');
+            this.showElement('contents-alt-text');
+        }
     }
 
     hideFileButtons() {
         this.hideElement('button_delete_files');
         this.hideElement('button_insert_files');
+        this.hideElement('contents-alt-text');
     }
 
     handleUploadComplete(files) {
@@ -169,40 +198,27 @@ class Mediabrowser {
             return false;
         }
 
-        const targetEl = this.getTargetElement();
-        if (!targetEl) {
-            alert('Target element not found for content update');
-            MediabrowserUtility.closeDialog();
-            return;
-        }
-
         try {
             const params = new URLSearchParams({
                 filename: div.id,
                 node: this.currentNode.id,
-                store: this.storeId
+                store: this.storeId,
+                alt: document.querySelector('input[name=alt]')?.value,
             });
 
-            if (targetEl.tagName && targetEl.tagName === 'TEXTAREA') {
-                params.set('as_is', 1);
-            }
-
-            const text = await mahoFetch(this.onInsertUrl, {
+            const html = await mahoFetch(this.onInsertUrl, {
                 method: 'POST',
                 body: params,
-            })
+            });
 
-            if (this.getMediaBrowserCallback()) {
-                window.blur();
-            }
-            MediabrowserUtility.closeDialog();
+            // Close the dialog, and send html as dialog.returnValue
+            Dialog.close(html);
 
+            const targetEl = document.getElementById(this.targetElementId);
             if (targetEl.tagName === 'INPUT') {
-                targetEl.value = text;
+                targetEl.value = html;
             } else if (targetEl.tagName === 'TEXTAREA') {
-                updateElementAtCursor(targetEl, text);
-            } else {
-                targetEl(text);
+                updateElementAtCursor(targetEl, html);
             }
 
         } catch (error) {
@@ -210,40 +226,8 @@ class Mediabrowser {
         }
     }
 
-    /**
-     * Find document target element in next order:
-     *  in acive file browser opener:
-     *  - input field with ID: "src" in opener window
-     *  - input field with ID: "href" in opener window
-     *  in document:
-     *  - element with target ID
-     *
-     * return HTMLelement | null
-     */
-    getTargetElement() {
-        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.targetElementId)) {
-            const tiptapEditor = tiptapEditors.get(this.targetElementId);
-            // Only return callback if Tiptap is active (has editor)
-            if (tiptapEditor && tiptapEditor.editor) {
-                return this.getMediaBrowserCallback();
-            }
-        }
-        // Fallback to textarea element
-        return document.getElementById(this.targetElementId);
-    }
-
-    /**
-     * return object|null
-     */
-    getMediaBrowserCallback() {
-        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.targetElementId)) {
-            return tiptapEditors.get(this.targetElementId).getMediaBrowserCallback();
-        }
-        return null;
-    }
-
     async newFolder() {
-        const folderName = prompt(this.newFolderPrompt);
+        const folderName = prompt(Translator.translate('New Folder Name:'));
         if (!folderName) {
             return false;
         }
@@ -272,7 +256,8 @@ class Mediabrowser {
     }
 
     async deleteFolder() {
-        if (!confirm(this.deleteFolderConfirmationMessage)) {
+        const message = Translator.translate('Are you sure you want to delete current folder?');
+        if (!confirm(message)) {
             return false;
         }
         try {
@@ -288,7 +273,8 @@ class Mediabrowser {
     }
 
     async deleteFiles() {
-        if (!confirm(this.deleteFileConfirmationMessage)) {
+        const message = Translator.translate('Are you sure you want to delete the selected file?');
+        if (!confirm(message)) {
             return false;
         }
 

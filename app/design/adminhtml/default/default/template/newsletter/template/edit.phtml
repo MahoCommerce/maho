@@ -12,22 +12,22 @@
 /** @var Mage_Adminhtml_Block_Newsletter_Template_Edit $this */
 ?>
 <div class="content-header">
-   <h3><?= $this->getHeaderText() ?></h3>
-   <p class="content-buttons form-buttons">
-                <?= $this->getBackButtonHtml() ?>
-                <?= $this->getResetButtonHtml() ?>
-                <?php if(!$this->isTextType()): ?>
-                <?= $this->getToPlainButtonHtml() ?>
-                <?= $this->getToHtmlButtonHtml() ?>
-                <?php endif ?>
-                <?= $this->getPreviewButtonHtml() ?>
-                <?php if($this->getEditMode()): ?>
-                <?= $this->getDeleteButtonHtml() ?>
-                <?php endif ?>
-                <?php if($this->getEditMode()): ?>
-                <?= $this->getSaveAsButtonHtml() ?>
-                <?php endif ?>
-                <?= $this->getSaveButtonHtml() ?>
+    <h3><?= $this->getHeaderText() ?></h3>
+    <p class="content-buttons form-buttons">
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getResetButtonHtml() ?>
+        <?php if (!$this->isTextType()): ?>
+        <?= $this->getToPlainButtonHtml() ?>
+        <?= $this->getToHtmlButtonHtml() ?>
+        <?php endif ?>
+        <?= $this->getPreviewButtonHtml() ?>
+        <?php if ($this->getEditMode()): ?>
+        <?= $this->getDeleteButtonHtml() ?>
+        <?php endif ?>
+        <?php if ($this->getEditMode()): ?>
+        <?= $this->getSaveAsButtonHtml() ?>
+        <?php endif ?>
+        <?= $this->getSaveButtonHtml() ?>
     </p>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="newsletter_template_edit_form">
@@ -48,185 +48,24 @@
     </div>
 </form>
 <script>
-const templateForm = new varienForm('newsletter_template_edit_form');
-const templatePreviewForm = new varienForm('newsletter_template_preview_form');
-
-const templateControl = {
-    unconvertedText: '',
-    typeChange: false,
-    templateName: false,
-    id: 'text',
-
-    init() {
-        const convertButtonBack = document.getElementById('convert_button_back');
-        if (convertButtonBack) {
-            convertButtonBack.style.display = 'none';
-        }
+const templateControl = new EmailTemplateEditForm({
+    templateName: "<?= $this->getJsTemplateName() ?>",
+    forms: {
+        edit: new varienForm('newsletter_template_edit_form'),
+        preview: new varienForm('newsletter_template_preview_form'),
     },
-
-    stripTags() {
-        if (!window.confirm("<?= $this->jsQuoteEscape(Mage::helper('newsletter')->__('Are you sure that you want to strip all tags?')) ?>")) {
-            return false;
-        }
-
-        if (this.isEditor()) {
-            const editor = this.getEditor();
-            if (editor) {
-                editor.turnOff();
-                const toggleButton = editor.getToggleButton();
-                if (toggleButton) {
-                    toggleButton.style.display = 'none';
-                }
-            }
-        }
-
-        const textElement = document.getElementById(this.id);
-        this.unconvertedText = textElement.value;
-
-        document.getElementById('convert_button').style.display = 'none';
-        document.getElementById('convert_button_back').style.display = '';
-
-        // Strip HTML tags and scripts
-        textElement.value = stripTags(textElement.value);
-
-        const fieldStyles = document.getElementById('field_template_styles');
-        if (fieldStyles) {
-            fieldStyles.style.display = 'none';
-        }
-
-        this.typeChange = true;
-        return false;
+    urls: {
+        delete: '<?= $this->getDeleteUrl() ?>',
     },
-
-    unStripTags() {
-        document.getElementById('convert_button').style.display = '';
-        document.getElementById('convert_button_back').style.display = 'none';
-        document.getElementById(this.id).value = this.unconvertedText;
-
-        if (this.isEditor()) {
-            const editor = this.getEditor();
-            if (editor) {
-                editor.turnOn();
-                const toggleButton = editor.getToggleButton();
-                if (toggleButton) {
-                    toggleButton.style.display = '';
-                }
-            }
-        }
-
-        this.typeChange = false;
-
-        const fieldStyles = document.getElementById('field_template_styles');
-        if (fieldStyles) {
-            fieldStyles.style.display = '';
-        }
-
-        return false;
+    elements: {
+        templateId: 'id',
+        templateName: 'code',
+        templateText: 'text',
+        templateStyles: 'template_styles',
+        previewId: 'preview_id',
+        previewType: 'preview_type',
+        previewText: 'preview_text',
+        previewStyles: 'preview_styles',
     },
-
-    save() {
-        if (this.typeChange) {
-            document.getElementById('change_flag_element').value = '1';
-        }
-
-        if (this.isEditor()) {
-            const editor = this.getEditor();
-            if (editor && editor.editor) {
-                editor.updateTextArea();
-            }
-        }
-
-        templateForm.submit();
-        return false;
-    },
-
-    saveAs() {
-        if (this.typeChange) {
-            document.getElementById('change_flag_element').value = '1';
-        }
-
-        const codeElement = document.getElementById('code');
-        const codeValue = codeElement.value.trim();
-
-        if (!codeValue || codeValue === this.templateName) {
-            const value = prompt(
-                '<?= $this->jsQuoteEscape(Mage::helper('newsletter')->__('Please enter new template name')) ?>',
-                this.templateName + '<?= $this->jsQuoteEscape(Mage::helper('newsletter')->__(' Copy')) ?>'
-            );
-
-            if (!value) {
-                if (value !== null) {
-                    codeElement.value = '';
-                    templateForm.submit();
-                }
-                return false;
-            } else {
-                codeElement.value = value;
-            }
-        }
-
-        document.getElementById('save_as_flag').value = '1';
-
-        if (this.isEditor()) {
-            const editor = this.getEditor();
-            if (editor && editor.editor) {
-                editor.updateTextArea();
-            }
-        }
-
-        templateForm.submit();
-        return false;
-    },
-
-    preview() {
-        const previewTypeElement = document.getElementById('preview_type');
-        if (this.typeChange) {
-            previewTypeElement.value = 1;
-        } else {
-            previewTypeElement.value = 2;
-        }
-
-        const textElement = document.getElementById(this.id);
-        const previewTextElement = document.getElementById('preview_text');
-
-        if (this.isEditor()) {
-            const editor = this.getEditor();
-            if (editor && editor.editor) {
-                editor.updateTextArea();
-            }
-        }
-
-        previewTextElement.value = textElement.value;
-
-        const templateStyles = document.getElementById('template_styles');
-        if (templateStyles) {
-            document.getElementById('preview_styles').value = templateStyles.value;
-        }
-
-        const idElement = document.getElementById('id');
-        if (idElement) {
-            document.getElementById('preview_id').value = idElement.value;
-        }
-
-        templatePreviewForm.submit();
-        return false;
-    },
-
-    deleteTemplate() {
-        if (window.confirm("<?= $this->jsQuoteEscape(Mage::helper('newsletter')->__('Are you sure that you want to delete this template?')) ?>")) {
-            window.location.href = '<?= $this->getDeleteUrl() ?>';
-        }
-    },
-
-    isEditor() {
-        return window.tiptapEditors?.has?.(this.id);
-    },
-
-    getEditor() {
-        return window.tiptapEditors?.get(this.id);
-    }
-};
-
-templateControl.init();
-templateControl.templateName = "<?= $this->getJsTemplateName() ?>";
+});
 </script>

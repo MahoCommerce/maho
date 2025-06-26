@@ -8,14 +8,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * Wysiwyg Images content template
- *
- * @see Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content
- * @var Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content $this 
- */
+
+/** @var Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content $this */
 ?>
 <?= $this->getChildHtml('wysiwyg_images.js') ?>
 
@@ -30,6 +24,9 @@
     </table>
 </div>
 
+<div id="contents-alt-text" class="no-display">
+    <label><?= $this->__('Alt text:') ?> <input name="alt" value="<?= $this->escapeHtml($this->getAltText()) ?>" class="input-text validate-text validate-length max-length-125"></label>
+</div>
 <div id="contents-uploader"><?= $this->getChildHtml('wysiwyg_images.uploader') ?></div>
 <div id="contents"></div>
 <div id="contents-newfolder" class="no-display"><?= $this->getChildHtml('wysiwyg_images.newfolder') ?></div>

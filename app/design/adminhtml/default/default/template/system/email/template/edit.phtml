@@ -14,17 +14,17 @@
 <div class="content-header">
     <h3><?= $this->getHeaderText() ?></h3>
     <p class="content-buttons form-buttons">
-                <?= $this->getBackButtonHtml() ?>
-                <?= $this->getResetButtonHtml() ?>
-                <?php if($this->getEditMode()): ?>
-                <?= $this->getDeleteButtonHtml() ?>
-                <?php endif ?>
-                <?php if(!$this->isTextType()): ?>
-                <?= $this->getToPlainButtonHtml() ?>
-                <?= $this->getToHtmlButtonHtml() ?>
-                <?php endif ?>
-                <?= $this->getPreviewButtonHtml() ?>
-                <?= $this->getSaveButtonHtml() ?>
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getResetButtonHtml() ?>
+        <?php if ($this->getEditMode()): ?>
+        <?= $this->getDeleteButtonHtml() ?>
+        <?php endif ?>
+        <?php if (!$this->isTextType()): ?>
+        <?= $this->getToPlainButtonHtml() ?>
+        <?= $this->getToHtmlButtonHtml() ?>
+        <?php endif ?>
+        <?= $this->getPreviewButtonHtml() ?>
+        <?= $this->getSaveButtonHtml() ?>
     </p>
 </div>
 <?php if (!$this->getEditMode()): ?>
@@ -104,227 +104,25 @@
     </div>
 </form>
 <script>
-const templateForm = new varienForm('email_template_edit_form');
-const templatePreviewForm = new varienForm('email_template_preview_form');
-
-const templateControl = {
-    unconvertedText: '',
-    typeChange: false,
-    variables: null,
-
-    init() {
-        const convertButtonBack = document.getElementById('convert_button_back');
-        if (convertButtonBack) {
-            convertButtonBack.style.display = 'none';
-        }
-        this.renderPaths(<?= $this->getUsedDefaultForPaths() ?>, 'used_default_for');
-        this.renderPaths(<?= $this->getUsedCurrentlyForPaths() ?>, 'used_currently_for');
+const templateControl = new EmailTemplateEditForm({
+    forms: {
+        edit: new varienForm('email_template_edit_form'),
+        preview: new varienForm('email_template_preview_form'),
+        load: new varienForm('email_template_load_form'),
     },
-
-    stripTags() {
-        if (!window.confirm("<?= $this->jsQuoteEscape($this->__('Are you sure that you want to strip tags?')) ?>")) {
-            return false;
-        }
-
-        const templateText = document.getElementById('template_text');
-        this.unconvertedText = templateText.value;
-
-        document.getElementById('convert_button').style.display = 'none';
-
-        // Strip scripts, styles and HTML tags
-        let cleanedValue = templateText.value
-            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = cleanedValue;
-        templateText.value = (tempDiv.textContent || tempDiv.innerText || '').trim();
-
-        document.getElementById('convert_button_back').style.display = '';
-
-        const fieldStyles = document.getElementById('field_template_styles');
-        if (fieldStyles) {
-            fieldStyles.style.display = 'none';
-        }
-
-        this.typeChange = true;
-        return false;
+    urls: {
+        delete: '<?= $this->getDeleteUrl() ?>',
     },
-
-    unStripTags() {
-        document.getElementById('convert_button').style.display = '';
-        document.getElementById('convert_button_back').style.display = 'none';
-        document.getElementById('template_text').value = this.unconvertedText;
-
-        const fieldStyles = document.getElementById('field_template_styles');
-        if (fieldStyles) {
-            fieldStyles.style.display = '';
-        }
-
-        this.typeChange = false;
-        return false;
+    elements: {
+        templateText: 'template_text',
+        templateStyles: 'template_styles',
+        previewType: 'preview_type',
+        previewText: 'preview_text',
+        previewStyles: 'preview_styles',
     },
-
-    save() {
-        if (this.typeChange) {
-            document.getElementById('change_flag_element').value = '1';
-        }
-
-        // Check if we have a Tiptap editor
-        const editor = window.tiptapEditors?.get('template_text');
-        if (editor?.editor) {
-            editor.updateTextArea();
-        }
-
-        templateForm.submit();
-        return false;
+    paths: {
+        used_default_for: <?= $this->getUsedDefaultForPaths() ?>,
+        used_currently_for: <?= $this->getUsedCurrentlyForPaths() ?>,
     },
-
-    preview() {
-        const previewType = document.getElementById('preview_type');
-        if (this.typeChange) {
-            previewType.value = 1;
-        } else {
-            previewType.value = 2;
-        }
-
-        const previewText = document.getElementById('preview_text');
-        const templateText = document.getElementById('template_text');
-
-        // Check if we have a Tiptap editor
-        const editor = window.tiptapEditors?.get('template_text');
-        if (editor?.editor) {
-            editor.updateTextArea();
-        }
-
-        previewText.value = templateText.value;
-
-        const templateStyles = document.getElementById('template_styles');
-        if (templateStyles) {
-            document.getElementById('preview_styles').value = templateStyles.value;
-        }
-
-        templatePreviewForm.submit();
-        return false;
-    },
-
-    deleteTemplate() {
-        if (window.confirm("<?= $this->jsQuoteEscape($this->__('Are you sure that you want to delete this template?')) ?>")) {
-            window.location.href = '<?= $this->getDeleteUrl() ?>';
-        }
-    },
-
-    async load() {
-        const form = new varienForm('email_template_load_form');
-
-        if (!form.validator.validate()) {
-            return;
-        }
-
-        this.variables = null;
-
-        const formElement = document.getElementById('email_template_load_form');
-        const formData = new FormData(formElement);
-
-        try {
-            const result = await mahoFetch(formElement.action, {
-                method: 'POST',
-                body: formData,
-            });
-
-            for (const [key, value] of Object.entries(result)) {
-                const element = document.getElementById(key);
-                if (element) {
-                    element.value = typeof value === 'string' ? value.trim() : value;
-                }
-
-                if (key === 'template_type') {
-                    const convertButton = document.getElementById('convert_button');
-                    const convertButtonBack = document.getElementById('convert_button_back');
-
-                    if (value == 1) {
-                        this.typeChange = true;
-                        convertButton.style.display = 'none';
-                        convertButtonBack.style.display = 'none';
-                    } else {
-                        this.typeChange = false;
-                        convertButtonBack.style.display = 'none';
-                        convertButton.style.display = '';
-                    }
-                }
-
-                if (key === 'orig_template_used_default_for') {
-                    const usedDefaultFor = document.getElementById('used_default_for');
-                    if (value.length) {
-                        usedDefaultFor.style.display = '';
-                        this.renderPaths(value, 'used_default_for');
-                    } else {
-                        usedDefaultFor.style.display = 'none';
-                    }
-                }
-            }
-        } catch (error) {
-            alert(`Failed to load template: ${error.message}`);
-        }
-    },
-
-    renderPaths(paths, fieldId) {
-        const field = document.getElementById(fieldId);
-        if (field) {
-            const tdElement = field.querySelector('td');
-            if (tdElement && tdElement.nextElementSibling) {
-                tdElement.nextElementSibling.innerHTML = this.parsePath(paths, '<span class="path-delimiter">&nbsp;-&gt;&nbsp;</span>', '<br />');
-            }
-        }
-    },
-
-    parsePath(value, pathDelimiter, lineDelimiter) {
-        if (Array.isArray(value)) {
-            const result = [];
-            for (let i = 0, len = value.length; i < len; i++) {
-                result.push(this.parsePath(value[i], pathDelimiter, pathDelimiter));
-            }
-            return result.join(lineDelimiter);
-        }
-
-        if (typeof value !== 'string' && value.title) {
-            value = (value.url ? '<a href="' + value.url + '">' + value.title + '</a>' : value.title) +
-                    (value.scope ? '&nbsp;&nbsp;<span class="path-scope-label">(' + value.scope + ')</span>' : '');
-        }
-
-        return value;
-    },
-
-    openVariableChooser() {
-        Variables.init('template_text');
-        if (this.variables == null) {
-            Variables.resetData();
-            const variablesElement = document.getElementById('variables');
-            if (variablesElement?.value) {
-                try {
-                    this.variables = JSON.parse(variablesElement.value);
-                } catch (e) {
-                    console.error('Failed to parse variables:', e);
-                }
-            }
-
-            const templateVariablesElement = document.getElementById('template_variables');
-            if (this.variables && templateVariablesElement?.value) {
-                try {
-                    const templateVariables = JSON.parse(templateVariablesElement.value);
-                    if (templateVariables) {
-                        this.variables.push(templateVariables);
-                    }
-                } catch (e) {
-                    console.error('Failed to parse template variables:', e);
-                }
-            }
-        }
-        if (this.variables) {
-            Variables.openVariableChooser(this.variables);
-        }
-    }
-};
-
-templateControl.init();
+});
 </script>

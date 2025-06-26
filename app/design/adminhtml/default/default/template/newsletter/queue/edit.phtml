@@ -46,49 +46,18 @@
     </div>
 </form>
 <script>
-const queueForm = new varienForm('queue_edit_form');
-const newsletterPreviewForm = new varienForm('newsletter_queue_preview_form');
-
-const queueControl = {
-    id: 'text',
-    
-    save() {
-        document.getElementById('_resume_flag').value = '';
-        queueForm.submit();
+const queueControl = new EmailTemplateEditForm({
+    forms: {
+        edit: new varienForm('newsletter_template_edit_form'),
+        preview: new varienForm('newsletter_template_preview_form'),
     },
-    
-    preview() {
-        const textElement = document.getElementById(this.id);
-        const previewTextElement = document.getElementById('preview_text');
-
-        if (this.isEditor()) {
-            const editor = window.tiptapEditors?.get(this.id);
-            editor?.editor?.updateTextArea();
-        }
-
-        previewTextElement.value = textElement.value;
-
-        const stylesElement = document.getElementById('styles');
-        if (stylesElement) {
-            document.getElementById('preview_styles').value = stylesElement.value;
-        }
-
-        const idElement = document.getElementById('id');
-        if (idElement) {
-            document.getElementById('preview_id').value = idElement.value;
-        }
-
-        newsletterPreviewForm.submit();
-        return false;
+    elements: {
+        templateId: 'id',
+        templateText: 'text',
+        templateStyles: 'template_styles',
+        previewId: 'preview_id',
+        previewText: 'preview_text',
+        previewStyles: 'preview_styles',
     },
-    
-    isEditor() {
-        return window.tiptapEditors?.has?.(this.id);
-    },
-    
-    resume() {
-        document.getElementById('_resume_flag').value = '1';
-        queueForm.submit();
-    }
-};
+});
 </script>

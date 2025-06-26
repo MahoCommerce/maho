@@ -152,10 +152,13 @@ function unescapeHtml(str) {
 /**
  * Alternative to PrototypeJS's string.stripTags() method
  */
-function stripTags(str) {
-    const div = document.createElement('div');
-    div.innerHTML = str;
-    return div.textContent;
+function stripTags(str, removeScriptAndStyleContent = false) {
+    const doc = new DOMParser().parseFromString(str, 'text/html');
+    if (removeScriptAndStyleContent) {
+        doc.querySelectorAll('script').forEach(script => script.remove());
+        doc.querySelectorAll('style').forEach(style => style.remove());
+    }
+    return doc.body.textContent;
 }
 
 /**

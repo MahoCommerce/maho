@@ -71,9 +71,6 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
         $setupObject = new Varien_Object();
 
         $setupObject->setData([
-            'newFolderPrompt'                 => $this->helper('cms')->__('New Folder Name:'),
-            'deleteFolderConfirmationMessage' => $this->helper('cms')->__('Are you sure you want to delete current folder?'),
-            'deleteFileConfirmationMessage'   => $this->helper('cms')->__('Are you sure you want to delete the selected file?'),
             'targetElementId' => $this->getTargetElementId(),
             'contentsUrl'     => $this->getContentsUrl(),
             'onInsertUrl'     => $this->getOnInsertUrl(),
@@ -81,6 +78,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
             'deleteFolderUrl' => $this->getDeletefolderUrl(),
             'deleteFilesUrl'  => $this->getDeleteFilesUrl(),
             'headerText'      => $this->getHeaderText(),
+            'canInsertImage'  => $this->getCanInsertImage(),
         ]);
 
         return Mage::helper('core')->jsonEncode($setupObject);
@@ -132,5 +130,13 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     public function getTargetElementId()
     {
         return $this->getRequest()->getParam('target_element_id');
+    }
+
+    /**
+     * Current alt text value passed from client
+     */
+    public function getAltText(): string
+    {
+        return Mage::helper('cms')->urlDecode($this->getRequest()->getParam('alt'));
     }
 }

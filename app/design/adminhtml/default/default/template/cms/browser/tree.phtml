@@ -60,6 +60,8 @@
     });
 
     tree.expandPath('<?= $this->getTreeCurrentPath() ?>').then((node) => {
-        MediabrowserInstance.selectFolder(node);
+        MediabrowserInstance.selectFolder(node).then(() => {
+            MediabrowserInstance.selectFileById('<?= $this->getTreeCurrentFile() ?>');
+        });
     });
 </script>

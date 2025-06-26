@@ -9,6 +9,14 @@
  */
 
 const catalogWysiwygEditor = {
+    elementId: null,
+
+    getEditorInstance() {
+        if (this.elementId) {
+            return window[`wysiwyg${this.elementId}_editor`];
+        }
+    },
+
     async open(editorUrl, elementId) {
         if (!editorUrl || !elementId) {
             return;
@@ -28,81 +36,50 @@ const catalogWysiwygEditor = {
     },
 
     openDialogWindow(content, elementId) {
+        this.elementId = elementId;
+
         Dialog.confirm(content, {
             id: 'catalog-wysiwyg-editor',
             title: 'WYSIWYG Editor',
             className: 'magento',
             windowClassName: 'popup-window',
+            ok: true,
             okLabel: 'Submit',
-            ok: this.okDialogWindow.bind(this),
+            onOk: this.okDialogWindow.bind(this),
             onClose: this.closeDialogWindow.bind(this),
-            firedElementId: elementId,
         });
 
-        // Get the content from the original textarea
-        const originalContent = document.getElementById(elementId).value;
-        
-        // Set initial content in the textarea that will be used by Tiptap
-        const editorTextarea = document.getElementById(`${elementId}_editor`);
-        if (editorTextarea) {
-            editorTextarea.value = originalContent;
+        // Sync value from original textarea to wysiwyg textarea
+        const originalTextarea = document.getElementById(this.elementId);
+        const wysiwygTextarea = document.getElementById(`${this.elementId}_editor`);
+        if (originalTextarea && wysiwygTextarea) {
+            wysiwygTextarea.value = originalTextarea.value;
         }
-        
-        // Wait for Tiptap editor to be initialized and then set content
-        const checkAndSetContent = () => {
-            if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(`${elementId}_editor`)) {
-                const tiptapEditor = tiptapEditors.get(`${elementId}_editor`);
-                if (tiptapEditor && tiptapEditor.editor) {
-                    // Tiptap is initialized, set the content
-                    tiptapEditor.editor.commands.setContent(originalContent);
-                } else {
-                    // Tiptap not yet initialized, check again
-                    setTimeout(checkAndSetContent, 50);
-                }
-            } else {
-                // No Tiptap, check again
-                setTimeout(checkAndSetContent, 50);
-            }
-        };
-        
-        // Start checking after a small delay to allow DOM to update
-        setTimeout(checkAndSetContent, 50);
+
+        // Wait for wysiwyg to be initialized and then set content
+        mahoOnReady(() => {
+            this.getEditorInstance()?.syncPlainToWysiwyg();
+        });
     },
 
     okDialogWindow(dialogWindow) {
-        const elementId = dialogWindow.options.firedElementId;
-        if (!elementId) {
+        if (!this.elementId) {
             return;
         }
 
-        const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-        wysiwygObj.turnOff();
-
-        let content = document.getElementById(`${elementId}_editor`)?.value;
-        
-        // Check if we have a Tiptap editor
-        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(wysiwygObj.id)) {
-            const tiptapEditor = tiptapEditors.get(wysiwygObj.id);
-            if (tiptapEditor && tiptapEditor.editor) {
-                content = tiptapEditor.editor.getHTML();
-            }
-        }
-
-        if (content) {
-            document.getElementById(elementId).value = content;
+        // Sync value from wysiwyg textarea to original textarea
+        const originalTextarea = document.getElementById(this.elementId);
+        const wysiwygTextarea = document.getElementById(`${this.elementId}_editor`);
+        if (originalTextarea && wysiwygTextarea) {
+            originalTextarea.value = wysiwygTextarea.value;
         }
     },
 
     closeDialogWindow(dialogWindow) {
-        const elementId = dialogWindow.options.firedElementId;
-        if (!elementId) {
+        if (!this.elementId) {
             return;
         }
 
-        // destroy the instance of editor
-        const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-        if (wysiwygObj && typeof wysiwygObj.destroy === 'function') {
-            wysiwygObj.destroy();
-        }
+        this.getEditorInstance()?.destroy();
     }
 };

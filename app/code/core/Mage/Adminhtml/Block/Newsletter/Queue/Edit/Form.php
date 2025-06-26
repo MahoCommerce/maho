@@ -128,7 +128,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
                 'state'     => 'html',
                 'required'  => true,
                 'value'     => $queue->getTemplate()->getTemplateText(),
-                'style'     => 'height: 600px;',
+                'style'     => 'height:24em;',
                 'config'    => $wysiwygConfig,
             ]);
 

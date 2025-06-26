@@ -111,13 +111,13 @@
         document.body.appendChild(dialog);
 
         async function closeDialog(action) {
-            if (action === 'ok' && typeof options.ok === 'function') {
-                const result = await options.ok(dialog);
+            if (action === 'ok' && typeof options.onOk === 'function') {
+                const result = await options.onOk(dialog);
                 if (result === false) {
                     return;
                 }
-            } else if (action === 'cancel' && typeof options.cancel === 'function') {
-                options.cancel(dialog);
+            } else if (action === 'cancel' && typeof options.onCancel === 'function') {
+                options.onCancel(dialog);
             }
 
             dialog.remove();
@@ -136,7 +136,9 @@
 
         dialog.querySelector('.dialog-header button').addEventListener('click', () => closeDialog('cancel'));
         dialog.addEventListener('close', () => {
-            if (!dialog.returnValue) {
+            if (dialog.returnValue) {
+                closeDialog('ok');
+            } else {
                 closeDialog('cancel');
             }
         });
@@ -150,6 +152,13 @@
 
         dialog.showModal();
         dialog.querySelector('.dialog-content')?.focus();
+
+
+        if (typeof options.onOpen === 'function') {
+            queueMicrotask(() => {
+                options.onOpen(dialog);
+            });
+        }
 
         return dialog;
     }
@@ -170,8 +179,8 @@
         const dialog = [...document.querySelectorAll('dialog[open]')].pop();
         dialog?.querySelector('.dialog-content')?.focus();
     };
-    Windows.close = Dialog.close = function() {
+    Windows.close = Dialog.close = function(returnValue) {
         const dialog = [...document.querySelectorAll('dialog[open]')].pop();
-        dialog?.close();
+        dialog?.close(returnValue);
     };
 })();

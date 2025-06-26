@@ -1471,6 +1471,7 @@ ul.super-product-attributes { padding-left:15px; }
 dialog .uploader .file-row { margin:16px 0; width:auto; }
 dialog #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
 dialog #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
+dialog #contents-alt-text { float: left; }
 dialog #contents { margin-left:-3px; overflow:auto; display: flex; flex-wrap: wrap; }
 dialog #contents .filecnt { border:1px solid #ccc; cursor:pointer; padding:3px; margin:0 0 15px 4px; overflow:hidden; width:100px; }
 dialog #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
@@ -1490,12 +1491,13 @@ dialog #contents .nm img { vertical-align:bottom; }
 #widget-chooser .main-col { padding-right:4px; }
 
 /* CMS Variables Popup */
-#variables-chooser .magento_message { padding:10px 18px; }
+#variables-chooser .dialog-content { font-size: 14px; }
+#variables-chooser .dialog-content li + li { margin-top: 4px; }
+#variables-chooser .dialog-content ul + h3 { margin-top: 16px; }
 
 /* Product description WYSIWYG editor */
 #catalog-wysiwyg-editor .buttons-set { margin-top:10px; }
 #catalog-wysiwyg-editor .magento_content { height:auto !important; overflow:hidden; }
-#catalog-wysiwyg-editor .textarea { width:930px !important; }
 #catalog-wysiwyg-editor .magento_message { padding:0 7px; }
 #catalog-wysiwyg-editor .magento_buttons { padding-left:7px; padding-right:7px; }
 

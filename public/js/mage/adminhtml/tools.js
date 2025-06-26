@@ -846,3 +846,17 @@ function wrapFunction(originalFn, wrapperFn) {
         return wrapperFn(originalFn, ...arguments);
     };
 }
+
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait`
+ * milliseconds have elapsed since the last time the function was invoked.
+ */
+function debounce(func, delay) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
