@@ -43,6 +43,7 @@ class Varien_Data_Form_Element_Editor extends Varien_Data_Form_Element_Textarea
     {
         $this->addClass('textarea');
         if ($this->isEnabled()) {
+            $this->addClass('no-display');
             $jsSetupObject = 'wysiwyg' . $this->getHtmlId();
             $configObject = Zend_Json::encode($this->getConfig());
 
