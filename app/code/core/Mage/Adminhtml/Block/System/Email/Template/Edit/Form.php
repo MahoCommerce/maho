@@ -22,7 +22,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
         /** @var Mage_Page_Block_Html_Head $head */
         $head = $this->getLayout()->getBlock('head');
         if ($head && Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
-            $this->getLayout()->getBlock('head')->setCanLoadWysiwyg(false);
+            $head->setCanLoadWysiwyg(false);
         }
         return $this;
     }

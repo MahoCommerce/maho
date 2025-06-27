@@ -28,8 +28,10 @@ class EmailTemplateEditForm {
             this.elements[key] = document.getElementById(id);
         }
 
-        for (const [ fieldId, paths ] of Object.entries(config.paths) ?? []) {
-            this.renderPaths(paths, fieldId);
+        if (typeof config.paths === 'object' && config.paths !== null) {
+            for (const [ fieldId, paths ] of Object.entries(config.paths)) {
+                this.renderPaths(paths, fieldId);
+            }
         }
 
         this.toggleEditMode('html');
@@ -58,7 +60,11 @@ class EmailTemplateEditForm {
             if (mode === 'plainonly') {
                 this.getEditorInstance()?.turnOff();
                 toggleVis(this.elements.editorToggle, false);
-            } else {
+            } else if (mode === 'plain') {
+                this.getEditorInstance()?.turnOff();
+                toggleVis(this.elements.editorToggle, true);
+            } else if (mode === 'html') {
+                this.getEditorInstance()?.turnOn();
                 toggleVis(this.elements.editorToggle, true);
             }
         }
@@ -74,19 +80,21 @@ class EmailTemplateEditForm {
             return false;
         }
 
-        // Store current value for returning to HTML version, then strip tags
-        this.unconvertedText = this.elements.templateText.value;
-        this.elements.templateText.value = stripTags(templateText.value, true);
-
+        // Turn off editor ensuring contents are synced to textarea
         this.toggleEditMode('plain');
         this.typeChange = true;
+
+        // Store current value for returning to HTML version, then strip tags
+        this.unconvertedText = this.elements.templateText.value;
+        this.elements.templateText.value = stripTags(this.elements.templateText.value, true);
 
         return false;
     }
 
     unStripTags() {
-        // Restore HTML version
+        // Restore HTML version and sync back to editor
         this.elements.templateText.value = this.unconvertedText;
+        this.getEditorInstance()?.syncPlainToWysiwyg();
 
         this.toggleEditMode('html');
         this.typeChange = false;
