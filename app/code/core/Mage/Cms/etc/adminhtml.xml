@@ -27,7 +27,7 @@
                 </block>
                 <media_library translate="title" module="cms">
                     <title>Media Library</title>
-                    <action>adminhtml/cms_wysiwyg_images/medialibrary</action>
+                    <action>adminhtml/cms_wysiwyg_images</action>
                     <sort_order>20</sort_order>
                 </media_library>
             </children>

@@ -1468,15 +1468,16 @@ ul.super-product-attributes { padding-left:15px; }
 .options-box .option-header td { padding:5px 2px; }
 .options-box .option-header .tree { margin:5px 0 0; }
 
-dialog .uploader .file-row { margin:16px 0; width:auto; }
-dialog #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
-dialog #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
-dialog #contents-alt-text { float: left; }
-dialog #contents { margin-left:-3px; overflow:auto; display: flex; flex-wrap: wrap; }
-dialog #contents .filecnt { border:1px solid #ccc; cursor:pointer; padding:3px; margin:0 0 15px 4px; overflow:hidden; width:100px; }
-dialog #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
-dialog #contents .nm { text-align:center; }
-dialog #contents .nm img { vertical-align:bottom; }
+.media-library-content .uploader .file-row { margin:16px 0; width:auto; }
+.media-library-content #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
+.media-library-content #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
+.media-library-content #contents-alt-text { float: left; }
+.media-library-content #contents { margin-left:-3px; overflow:auto; display: flex; flex-wrap: wrap; }
+.media-library-content #contents .filecnt { border:1px solid #ccc; cursor:pointer; padding:3px; margin:0 0 15px 4px; overflow:hidden; width:100px; }
+.media-library-content #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
+.media-library-content #contents .nm { text-align:center; }
+.media-library-content #contents .nm img { vertical-align:bottom; }
+.media-library-content { border: 1px solid #ccc; background: #fff; padding: 10px; }
 
 /* Widget Insert */
 #widget_window .magento_content { height:auto !important; min-height:450px; }
