@@ -943,7 +943,9 @@ XML;
         $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
-        return match ($emailTransport) {
+        $region = Mage::getStoreConfig('system/smtp/region');
+
+        $dsn = match ($emailTransport) {
             'smtp' => "$emailTransport://$user:$pass@$host:$port",
             'ses+smtp' => "$emailTransport://$user:$pass@default",
             'ses+https' => "$emailTransport://$user:$pass@default",
@@ -982,5 +984,11 @@ XML;
             'sendmail' => "$emailTransport://default",
             default => '',
         };
+
+        if ($region) {
+            $dsn .= "?region=$region";
+        }
+
+        return $dsn;
     }
 }
