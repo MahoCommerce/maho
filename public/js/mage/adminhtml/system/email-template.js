@@ -14,11 +14,6 @@ class EmailTemplateEditForm {
     typeChange = false;
     unconvertedText = '';
 
-    /**
-     * @param {Object} config
-     * @param {string} config.productEditUrl - URL to link to product edit page
-     * @param {string} config.ratingItemsUrl - URL to POST rating changes
-     */
     constructor(config) {
         this.templateName = config.templateName;
         this.forms = config.forms;
