@@ -1133,7 +1133,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
         bool $showTime = false,
-        bool $useTimezone = true
+        bool $useTimezone = true,
     ): string {
         /** @var Mage_Core_Helper_Data $helper */
         $helper = $this->helper('core');

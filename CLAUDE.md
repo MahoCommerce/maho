@@ -35,20 +35,6 @@ vendor/bin/phpstan analyze    # Run static analysis
 ./maho index:reindex:all  # Reindex all indexes
 ```
 
-### Admin & Customer Management
-```bash
-./maho admin:user:list                          # List admin users
-./maho admin:user:create                        # Create admin user
-./maho admin:user:changepassword <username>     # Change admin password
-./maho customer:list                            # List customers
-./maho customer:create                          # Create customer
-```
-
-### Installation
-```bash
-./maho install            # Install Maho (non interactive)
-```
-
 ## Architecture Overview
 
 ### MVC Pattern
@@ -151,3 +137,8 @@ While there's no dedicated test suite, ensure code quality through:
 - PHP-CS-Fixer for code standards
 - Manual testing of features
 - GitHub Actions CI for automated checks
+
+## Git Commit Rules
+- **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
+- **NEVER** mention Claude, AI, or assistant in commit messages
+- Keep commits professional and focused only on code changes

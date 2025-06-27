@@ -68,7 +68,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
     protected function _getQuoteItemByProduct(
         Mage_Sales_Model_Quote $quote,
         Mage_Catalog_Model_Product $product,
-        Varien_Object $requestInfo
+        Varien_Object $requestInfo,
     ) {
         $cartCandidates = $product->getTypeInstance(true)
                         ->prepareForCartAdvanced(

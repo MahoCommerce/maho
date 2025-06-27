@@ -324,7 +324,7 @@ class Mage_Catalog_Model_Product_Api_V2 extends Mage_Catalog_Model_Product_Api
         $fromDate = null,
         $toDate = null,
         $store = null,
-        $identifierType = null
+        $identifierType = null,
     ) {
         $obj = new stdClass();
         $obj->special_price = $specialPrice;

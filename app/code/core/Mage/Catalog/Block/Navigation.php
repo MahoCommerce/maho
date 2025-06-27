@@ -223,7 +223,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
         $isOutermost = false,
         $outermostItemClass = '',
         $childrenWrapClass = '',
-        $noEventAttributes = false
+        $noEventAttributes = false,
     ) {
         if (!$category->getIsActive()) {
             return '';

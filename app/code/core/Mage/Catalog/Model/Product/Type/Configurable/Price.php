@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -114,5 +114,78 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
             }
         }
         return false;
+    }
+
+    /**
+     * Apply tier price for configurable product based on total quantity in cart
+     */
+    #[\Override]
+    protected function _applyTierPrice($product, $qty, $finalPrice)
+    {
+        if (is_null($qty)) {
+            return $finalPrice;
+        }
+
+        // Calculate total quantity of this configurable product across cart
+        $totalQty = $this->getConfigurableProductTotalQty($product, $qty);
+
+        // Use the total quantity to determine tier pricing
+        $tierPrice = $product->getTierPrice($totalQty);
+        if (is_numeric($tierPrice)) {
+            $finalPrice = min($finalPrice, $tierPrice);
+        }
+
+        return $finalPrice;
+    }
+
+    /**
+     * Get total quantity of configurable product in cart
+     */
+    protected function getConfigurableProductTotalQty(Mage_Catalog_Model_Product $product, float $qty): float
+    {
+        // If we're not in cart context, return the given quantity
+        if (!$product->hasCustomOptions()) {
+            return $qty;
+        }
+
+        $totalQty = 0;
+        $configurableProductId = $product->getId();
+        $currentItemId = $product->getCustomOption('item_id') ? $product->getCustomOption('item_id')->getValue() : null;
+
+        foreach ($this->getAllVisibleItems() as $item) {
+            // Check if this is the same configurable product
+            if ($item->getProduct()->getId() == $configurableProductId) {
+                // If this is the current item being calculated, use the provided qty
+                if ($currentItemId && $item->getId() == $currentItemId) {
+                    $totalQty += $qty;
+                } else {
+                    $totalQty += $item->getQty();
+                }
+            }
+        }
+
+        // If no items found (shouldn't happen), return the provided qty
+        return $totalQty ?: $qty;
+    }
+
+    /**
+     * Get all visible items from cart
+     */
+    protected function getAllVisibleItems(): array
+    {
+        // Admin order create
+        if (Mage::app()->getStore()->isAdmin()) {
+            $adminQuote = Mage::getSingleton('adminhtml/session_quote');
+            if ($adminQuote && $adminQuote->getQuote()) {
+                return $adminQuote->getQuote()->getAllVisibleItems();
+            }
+        }
+
+        // Frontend checkout/cart
+        if (Mage::getSingleton('checkout/session')->hasQuote()) {
+            return Mage::getSingleton('checkout/session')->getQuote()->getAllVisibleItems();
+        }
+
+        return [];
     }
 }

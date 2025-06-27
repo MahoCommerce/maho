@@ -819,7 +819,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     public function changeParent(
         Mage_Catalog_Model_Category $category,
         Mage_Catalog_Model_Category $newParent,
-        $afterCategoryId = null
+        $afterCategoryId = null,
     ) {
         $childrenCount  = (int) $this->getChildrenCount($category->getId()) + 1;
         $table          = $this->getEntityTable();
