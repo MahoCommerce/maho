@@ -67,8 +67,6 @@ const MahoWidget = Node.create({
         return {
             directiveObj: {
                 parseHTML: (element) => {
-                    console.log(element.getAttribute('data-directive'))
-                    console.log(JSON.stringify(parseDirective(element.getAttribute('data-directive'))))
                     return parseDirective(element.getAttribute('data-directive'));
                 },
                 rendered: false,

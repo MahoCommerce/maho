@@ -28,7 +28,6 @@ class tiptapWysiwygSetup {
 
         this.setup();
 
-        console.log(config)
         if (!config.hidden) {
             this.toggle();
         }
@@ -73,9 +72,6 @@ class tiptapWysiwygSetup {
         // {{widget type="cms/some_type"}} into
         // <span data-type="widget" data-directive="{{widget type=&quot;cms/some_type&quot;}}"></span>
 
-        console.log("FROM PLAIN")
-        console.log(content)
-
         content = content.replace(/{{(.*?)}}/gi, (match, directive, offset, string) => {
             const escapedDirective = escapeHtml('{{' + directive.trim() + '}}', true);
 
@@ -96,19 +92,12 @@ class tiptapWysiwygSetup {
             return `<span data-type="maho-widget" data-directive="${escapedDirective}"></span>`;
         });
 
-        console.log(content)
-
         return content;
     }
 
     convertToPlain(content) {
-        console.log("TO PLAIN")
-        console.log(content)
-
-        //
+        // TipTap generates minified HTML, so when switching to the plain editor beautify it
         content = html_beautify(content, { indent_size: 4 });
-
-        console.log(content)
 
         // Extract directives from MahoWidget nodes
         content = content.replace(/<span data-type="maho-widget" data-directive="(.*?)"><\/span>/gi, (match, directive) => {
@@ -120,7 +109,6 @@ class tiptapWysiwygSetup {
             return unescapeHtml('{{' + directive.trim() + '}}');
         });
 
-        console.log(content)
         return content;
     }
 
