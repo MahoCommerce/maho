@@ -1139,16 +1139,16 @@
         },
         {
             "name": "shardj/zf1-future",
-            "version": "1.24.3",
+            "version": "1.24.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Shardj/zf1-future.git",
-                "reference": "2c5f8bc5333aebb45b200e1f76afd6f951c3cd0f"
+                "reference": "3582cce4bcf2c820191be56cf17fdef0addf0771"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Shardj/zf1-future/zipball/2c5f8bc5333aebb45b200e1f76afd6f951c3cd0f",
-                "reference": "2c5f8bc5333aebb45b200e1f76afd6f951c3cd0f",
+                "url": "https://api.github.com/repos/Shardj/zf1-future/zipball/3582cce4bcf2c820191be56cf17fdef0addf0771",
+                "reference": "3582cce4bcf2c820191be56cf17fdef0addf0771",
                 "shasum": ""
             },
             "require": {
@@ -1198,9 +1198,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Shardj/zf1-future/issues",
-                "source": "https://github.com/Shardj/zf1-future/tree/release-1.24.3"
+                "source": "https://github.com/Shardj/zf1-future/tree/release-1.24.4"
             },
-            "time": "2025-04-11T16:49:34+00:00"
+            "time": "2025-06-26T19:09:46+00:00"
         },
         {
             "name": "spomky-labs/otphp",
