@@ -191,6 +191,7 @@ class tiptapWysiwygSetup {
                     }
                 }),
                 TiptapModules.MahoImage.configure({
+                    inline: true,
                     title: this.translate('Insert Image...'),
                     directivesUrl: this.config.directives_url,
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
