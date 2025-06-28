@@ -136,7 +136,7 @@ function setRouteParams(url, params = {}) {
         url.pathname += '/';
     }
     for (const [ key, val ] of Object.entries(params)) {
-        const regex = new RegExp(String.raw`\/${key}\/\w+\/`);
+        const regex = new RegExp(String.raw`\/${key}\/(.*?)\/`);
         if (val === null || val === false) {
             url.pathname = url.pathname.replace(regex, '/');
         } else if (url.pathname.match(regex)) {

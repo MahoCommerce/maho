@@ -114,7 +114,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
         }
 
         foreach ($params as $key => $val) {
-            $regex = "/\/{$key}\/\w+\//";
+            $regex = "/\/{$key}\/(.*?)\//";
             if ($val === null || $val === false) {
                 $parts['path'] = preg_replace($regex, '/', $parts['path']);
             } elseif (preg_match($regex, $parts['path'])) {
