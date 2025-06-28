@@ -289,7 +289,7 @@ const MahoImage = Image.extend({
                 const params = {}
                 if (node?.attrs.directiveObj.params.url) {
                     const parts = node.attrs.directiveObj.params.url.split('/');
-                    params.path = Base64.idEncode(parts.slice(1, -1).join('/'));
+                    params.node = Base64.idEncode(parts.slice(1, -1).join('/'));
                     params.filename = Base64.idEncode(parts.pop());
                 }
                 if (node?.attrs.alt) {

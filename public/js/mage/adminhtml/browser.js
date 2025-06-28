@@ -19,7 +19,9 @@ const MediabrowserUtility = {
             return;
         }
         try {
-            url = setRouteParams(url, { node: this.lastSelectedNode });
+            if (!url.match(/\/node\/(.*?)\//)) {
+                url = setRouteParams(url, { node: this.lastSelectedNode });
+            }
             const result = await mahoFetch(url);
 
             this.dialogWindow = Dialog.info(result, {
