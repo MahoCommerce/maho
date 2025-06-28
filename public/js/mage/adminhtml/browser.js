@@ -12,12 +12,14 @@ const MediabrowserUtility = {
 
     dialogWindow: null,
     dialogWindowId: 'browser_window',
+    lastSelectedNode: null,
 
     async openDialog(url, width, height, title, options) {
         if (document.getElementById(this.dialogWindowId)) {
             return;
         }
         try {
+            url = setRouteParams(url, { node: this.lastSelectedNode });
             const result = await mahoFetch(url);
 
             this.dialogWindow = Dialog.info(result, {
@@ -101,6 +103,8 @@ class Mediabrowser {
         this.updateUrl(this.currentNode);
         this.updateHeader(this.currentNode);
         this.drawBreadcrumbs(this.currentNode);
+
+        MediabrowserUtility.lastSelectedNode = node.id;
 
         return this.updateContent();
     }
