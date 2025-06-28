@@ -69,6 +69,11 @@ class Mediabrowser {
         document.addEventListener('uploader:filesAdded', (event) => {
             MediabrowserInstance.deselectFiles();
         });
+        document.addEventListener('uploader:beforeUpload', (event) => {
+            event.detail.instance.uploaderConfig.target = setRouteParams(event.detail.instance.uploaderConfig.target, {
+                node: MediabrowserInstance.currentNode.id,
+            });
+        });
         document.addEventListener('uploader:success', (event) => {
             MediabrowserInstance.handleUploadComplete(event.detail.files);
         });
