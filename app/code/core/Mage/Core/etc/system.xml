@@ -657,6 +657,24 @@
                         </exception_file>
                     </fields>
                 </log>
+                <js translate="label">
+                    <label>JavaScript Settings</label>
+                    <sort_order>50</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <load_on_intent translate="label comment">
+                            <label>Load JavaScript on Intent</label>
+                            <comment><![CDATA[<strong style="color:red">Highly Experimental Feature!</strong> When enabled, all JavaScript files will be deferred and loaded only on user interaction (click, scroll, hover, etc.), significantly improving initial page load performance. This feature is designed for pure vanilla JavaScript and will probably not work with scripts based on PrototypeJS or jQuery. It's not intended to cover up poorly written JavaScript but to optimize well-written vanilla JS. This feature should be thoroughly tested before using in production.]]></comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </load_on_intent>
+                    </fields>
+                </js>
             </groups>
         </dev>
         <general translate="label" module="core">
@@ -908,6 +926,15 @@
                                 <set_return_path>2</set_return_path>
                             </depends>
                         </return_path_email>
+                        <region translate="label comment">
+                            <label>Region</label>
+                            <comment>Optional region for providers that support it (e.g. us-east-1 for AWS)</comment>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled separator=",">ses+smtp,ses+https,ses+api,azure+api,scaleway+smtp,scaleway+api,mailgun+smtp,mailgun+https,mailgun+api</enabled></depends>
+                        </region>
                     </fields>
                 </smtp>
                 <media_storage_configuration translate="label" module="core">
