@@ -58,7 +58,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
-    public function popupAction()
+    public function popupAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
 
