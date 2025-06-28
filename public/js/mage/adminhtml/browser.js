@@ -43,17 +43,9 @@ const MediabrowserUtility = {
 
 class Mediabrowser {
 
-    targetElementId = null;
-    contentsUrl = null;
-    onInsertUrl = null;
-    newFolderUrl = null;
-    deleteFolderUrl = null;
-    deleteFilesUrl = null;
-    headerText = null;
     tree = null;
     currentNode = null;
     storeId = null;
-    canInsertImage = null;
 
     constructor() {
         this.initialize(...arguments);
@@ -61,6 +53,7 @@ class Mediabrowser {
 
     initialize(setup) {
         this.targetElementId = setup.targetElementId;
+        this.indexUrl = setup.indexUrl;
         this.contentsUrl = setup.contentsUrl;
         this.onInsertUrl = setup.onInsertUrl;
         this.newFolderUrl = setup.newFolderUrl;
@@ -105,6 +98,7 @@ class Mediabrowser {
             this.showElement('button_delete_folder');
         }
 
+        this.updateUrl(this.currentNode);
         this.updateHeader(this.currentNode);
         this.drawBreadcrumbs(this.currentNode);
 
@@ -126,12 +120,12 @@ class Mediabrowser {
             }
             updateElementHtmlAndExecuteScripts(contentsEl, html);
 
-            contentsEl.querySelectorAll('div.filecnt').forEach((el) => {
+            for (const el of contentsEl.querySelectorAll('div.filecnt')) {
                 el.addEventListener('click', this.selectFile.bind(this));
                 if (this.canInsertImage) {
                     el.addEventListener('dblclick', this.insert.bind(this));
                 }
-            });
+            }
 
             document.getElementById('contents-uploader')?.prepend(
                 document.getElementById('contents-alt-text'),
@@ -162,9 +156,9 @@ class Mediabrowser {
     }
 
     deselectFiles() {
-        document.querySelectorAll('div.filecnt.selected').forEach((el) => {
+        for (const el of document.querySelectorAll('div.filecnt.selected')) {
             el.classList.remove('selected')
-        });
+        }
         this.hideFileButtons();
     }
 
@@ -183,9 +177,9 @@ class Mediabrowser {
     }
 
     handleUploadComplete(files) {
-        document.querySelectorAll('div[class*="file-row complete"]').forEach((el) => {
+        for (const el of document.querySelectorAll('div[class*="file-row complete"]')) {
             document.getElementById(el.id)?.remove();
-        });
+        }
         this.updateContent();
     }
 
@@ -314,17 +308,42 @@ class Mediabrowser {
             document.getElementById('content_header')?.after(breadcrumbsEl);
         }
 
+        breadcrumbsEl.innerHTML = '';
+
         if (node.id === 'root') {
-            breadcrumbsEl.innerHTML = '';
             return;
         }
 
-        const crumbs = node.getPath().split('/').map((id) => {
-            const currNode = this.tree.getNodeById(id);
-            return `<li><a href="#" onclick="MediabrowserInstance.selectFolderById('${currNode.id}');">${currNode.text}</a></li>`;
-        });
+        const crumbs = node.getPath().split('/');
+        for (let i = 0; i < crumbs.length; i++) {
+            const currNode = this.tree.getNodeById(crumbs[i]);
+            const crumbEl = breadcrumbsEl.appendChild(document.createElement('li'));
 
-        breadcrumbsEl.innerHTML = crumbs.join(' <span>/</span> ');
+            if (i < crumbs.length - 1) {
+                const linkEl = crumbEl.appendChild(document.createElement('a'));
+                linkEl.href = '#';
+                linkEl.textContent = currNode.text;
+                linkEl.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.selectFolder(currNode);
+                });
+
+                const spanEl = breadcrumbsEl.appendChild(document.createElement('span'));
+                spanEl.textContent = ' / ';
+
+            } else {
+                const spanEl = crumbEl.appendChild(document.createElement('span'));
+                spanEl.textContent = currNode.text;
+            }
+        }
+    }
+
+    updateUrl(node) {
+        // Don't update URL in modal view
+        if (document.getElementById('contents')?.closest('dialog')) {
+            return;
+        }
+        history.replaceState(null, '', setRouteParams(this.indexUrl, { node: node.id }));
     }
 
     updateHeader(node) {

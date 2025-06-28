@@ -72,6 +72,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
 
         $setupObject->setData([
             'targetElementId' => $this->getTargetElementId(),
+            'indexUrl'        => $this->getMediaLibraryUrl(),
             'contentsUrl'     => $this->getContentsUrl(),
             'onInsertUrl'     => $this->getOnInsertUrl(),
             'newFolderUrl'    => $this->getNewfolderUrl(),
@@ -82,6 +83,16 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
         ]);
 
         return Mage::helper('core')->jsonEncode($setupObject);
+    }
+
+    /**
+     * Main Media Library URL
+     *
+     * @return string
+     */
+    public function getMediaLibraryUrl()
+    {
+        return $this->getUrl('*/*/index');
     }
 
     /**
