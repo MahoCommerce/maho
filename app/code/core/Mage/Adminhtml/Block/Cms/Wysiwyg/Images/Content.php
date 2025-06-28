@@ -149,6 +149,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
      */
     public function getAltText(): string
     {
-        return Mage::helper('cms')->urlDecode($this->getRequest()->getParam('alt'));
+        $alt = $this->getRequest()->getParam('alt');
+        return $alt ? Mage::helper('cms')->urlDecode($alt) : '';
     }
 }
