@@ -31,6 +31,10 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
 
     public function indexAction()
     {
+        if ($this->getRequest()->isAjax()) {
+            return $this->_forward('popup');
+        }
+
         $storeId = (int) $this->getRequest()->getParam('store');
 
         try {
@@ -43,19 +47,34 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             ->_title($this->__('CMS'))
             ->_title($this->__('Media Library'));
 
-        if ($this->getRequest()->isAjax()) {
-            $canInsertImage = true;
-            $this->loadLayout('overlay_popup');
-            $this->getLayout()->getBlock('root')->unsetChild('footer');
-        } else {
-            $canInsertImage = false;
-            $this->loadLayout();
-        }
+        $this->loadLayout();
 
         $block = $this->getLayout()->getBlock('wysiwyg_images.js');
         if ($block) {
             $block->setStoreId($storeId)
-                ->setCanInsertImage($canInsertImage);
+                ->setCanInsertImage(false);
+        }
+
+        $this->renderLayout();
+    }
+
+    public function popupAction()
+    {
+        $storeId = (int) $this->getRequest()->getParam('store');
+
+        try {
+            Mage::helper('cms/wysiwyg_images')->getCurrentPath();
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        }
+
+        $this->_initAction();
+        $this->loadLayout('overlay_popup');
+
+        $block = $this->getLayout()->getBlock('wysiwyg_images.js');
+        if ($block) {
+            $block->setStoreId($storeId)
+                ->setCanInsertImage(true);
         }
 
         $this->renderLayout();
@@ -65,9 +84,9 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     {
         try {
             $this->_initAction();
-            $this->getResponse()->setBodyJson(
-                $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree')->getTreeJson(),
-            );
+            $path = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
+            $block = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree');
+            $this->getResponse()->setBodyJson($block->getTreeJson($path));
         } catch (Exception $e) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
@@ -76,7 +95,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     public function contentsAction()
     {
         try {
-            $this->_initAction()->_saveSessionCurrentPath();
+            $this->_initAction();
             $this->loadLayout('empty');
             $this->renderLayout();
         } catch (Exception $e) {
@@ -89,7 +108,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         try {
             $this->_initAction();
             $name = $this->getRequest()->getPost('name');
-            $path = $this->getStorage()->getSession()->getCurrentPath();
+            $path = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
             $result = $this->getStorage()->createDirectory($name, $path);
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
@@ -100,7 +119,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     public function deleteFolderAction()
     {
         try {
-            $path = $this->getStorage()->getSession()->getCurrentPath();
+            $path = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
             $this->getStorage()->deleteDirectory($path);
             $this->getResponse()->setBodyJson([]);
         } catch (Exception $e) {
@@ -121,7 +140,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
 
             /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
             $helper = Mage::helper('cms/wysiwyg_images');
-            $path = $this->getStorage()->getSession()->getCurrentPath();
+            $path = $helper->getCurrentPath();
             foreach ($files as $file) {
                 $file = $helper->idDecode($file);
                 $filePath = realpath($path . DS . $file);
@@ -144,7 +163,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     {
         try {
             $this->_initAction();
-            $targetPath = $this->getStorage()->getSession()->getCurrentPath();
+            $targetPath = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
             $result = $this->getStorage()->uploadFile($targetPath, $this->getRequest()->getParam('type'));
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
@@ -225,14 +244,10 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
      * Save current path in session
      *
      * @return $this
+     * @deprecated since 25.7.0 current path is no longer stored in session
      */
     protected function _saveSessionCurrentPath()
     {
-        if ($this->getRequest()->isPost()) {
-            $this->getStorage()
-                ->getSession()
-                ->setCurrentPath(Mage::helper('cms/wysiwyg_images')->getCurrentPath());
-        }
         return $this;
     }
 }

@@ -77,6 +77,11 @@
         </reference>
     </adminhtml_cms_wysiwyg_images_index>
 
+    <adminhtml_cms_wysiwyg_images_popup>
+        <update handle="adminhtml_cms_wysiwyg_images_index" />
+        <remove name="footer" />
+    </adminhtml_cms_wysiwyg_images_popup>
+
     <adminhtml_cms_wysiwyg_images_contents>
         <block name="wysiwyg_images.files" type="adminhtml/cms_wysiwyg_images_content_files" template="cms/browser/content/files.phtml" output="toHtml" />
     </adminhtml_cms_wysiwyg_images_contents>

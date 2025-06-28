@@ -17,11 +17,11 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree extends Mage_Adminhtml_Block_
      *
      * @return string
      */
-    public function getTreeJson()
+    public function getTreeJson(string $path = null)
     {
         $helper = Mage::helper('cms/wysiwyg_images');
-        $storageRoot = $helper->getStorageRoot();
-        $collection = Mage::registry('storage')->getDirsCollection($helper->getCurrentPath());
+        $path ??= $helper->getStorageRoot();
+        $collection = Mage::registry('storage')->getDirsCollection($path);
         $jsonArray = [];
         foreach ($collection as $item) {
             $jsonArray[] = [
@@ -71,13 +71,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree extends Mage_Adminhtml_Block_
     {
         $treePath = '/root';
         $helper = Mage::helper('cms/wysiwyg_images');
-
-        if ($path = $this->getRequest()->getParam('path')) {
-            $path = $helper->convertIdToPath($path);
-        } else {
-            $path = Mage::registry('storage')->getSession()->getCurrentPath();
-        }
-
+        $path = $helper->getCurrentPath();
         if ($path) {
             $path = str_replace($helper->getStorageRoot(), '', $path);
             $relative = '';

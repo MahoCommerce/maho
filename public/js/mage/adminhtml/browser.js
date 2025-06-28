@@ -88,8 +88,8 @@ class Mediabrowser {
         return this.tree;
     }
 
-    selectFolder(node) {
-        if (this.currentNode === node) {
+    async selectFolder(node, forceRefresh = false) {
+        if (this.currentNode === node && !forceRefresh) {
             return;
         }
 
@@ -235,6 +235,7 @@ class Mediabrowser {
             const result = await mahoFetch(this.newFolderUrl, {
                 method: 'POST',
                 body: new URLSearchParams({
+                    node: this.currentNode.id,
                     name: folderName,
                 }),
             });
@@ -261,7 +262,12 @@ class Mediabrowser {
             return false;
         }
         try {
-            await mahoFetch(this.deleteFolderUrl, { method: 'POST' });
+            await mahoFetch(this.deleteFolderUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    node: this.currentNode.id,
+                }),
+            });
 
             const parent = this.currentNode.parentNode;
             parent.removeChild(this.currentNode);
@@ -287,6 +293,7 @@ class Mediabrowser {
             await mahoFetch(this.deleteFilesUrl, {
                 method: 'POST',
                 body: new URLSearchParams({
+                    node: this.currentNode.id,
                     files: JSON.stringify(ids),
                 }),
             });
