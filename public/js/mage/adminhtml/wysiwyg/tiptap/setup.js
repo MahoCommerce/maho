@@ -208,6 +208,9 @@ class tiptapWysiwygSetup {
                         variable_target_id: this.id,
                     }),
                 }),
+                TiptapModules.MahoSlideshow.configure({
+                    directivesUrl: this.config.directives_url,
+                }),
                 TiptapModules.Link.configure({
                     openOnClick: false,
                     HTMLAttributes: {

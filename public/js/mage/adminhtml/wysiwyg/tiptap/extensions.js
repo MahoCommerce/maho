@@ -56,6 +56,15 @@ const renderDirective = (directiveObj) => {
     return directiveStr
 };
 
+const renderDirectiveImageUrl = (src, directiveObj, directivesUrl) => {
+    if (directiveObj?.type) {
+        return setRouteParams(directivesUrl, {
+            ___directive: Base64.mageEncode(renderDirective(directiveObj)),
+        });
+    }
+    return src;
+};
+
 /**
  * Maho Widget Node View Extension
  *
@@ -208,10 +217,8 @@ export const MahoImage = Image.extend({
             container.appendChild(img);
 
             for (const [key, value] of Object.entries(HTMLAttributes)) {
-                if (key === 'src' && node.attrs.directiveObj.type) {
-                    img.src = setRouteParams(this.options.directivesUrl, {
-                        ___directive: Base64.mageEncode(renderDirective(node.attrs.directiveObj)),
-                    });
+                if (key === 'src') {
+                    img.src = renderDirectiveImageUrl(value, node.attrs.directiveObj, this.options.directivesUrl);
                 } else if (value !== null) {
                     img.setAttribute(key, value);
                 }
@@ -325,5 +332,111 @@ export const MahoImage = Image.extend({
                 });
             },
         }
+    },
+});
+
+
+/**
+ * Parse a `<div class="slideshow">` node into an array of slides `[{ src, alt, href }, ...]`
+ */
+const parseSlides = (div) => {
+    // Parse each <li> child and add to our array if it's a valid slide, i.e. contains an image
+    const slides = [];
+    for (const li of div.querySelectorAll(':scope > ul > li')) {
+        const img = li.querySelector('img');
+        const link = li.querySelector('a');
+        if (img) {
+            slides.push({
+                src: img.getAttribute('src') ?? '',
+                alt: img.getAttribute('alt') ?? '',
+                href: link?.getAttribute('href'),
+                directiveObj: parseDirective(img.getAttribute('src')),
+            });
+        }
+    }
+    return slides;
+};
+
+/**
+ * Render array of slides into a TipTap node object
+ */
+const renderSlides = (slides) => {
+    return slides.map((slide) => {
+        const { src, alt, href } = slide;
+        const content = href
+              ? ['a', { href }, ['img', { src, alt }]]
+              : ['img', { src, alt }];
+
+        return ['li', {}, content];
+    });
+}
+
+/**
+ * Maho Slideshow Node View Extension
+ *
+ * This extension adds basic support for slideshow divs, but does not yet provide any editing capabilities
+ */
+export const MahoSlideshow = Node.create({
+    name: 'mahoSlideshow',
+    group: 'block',
+    atom: true,
+    draggable: true,
+
+    addAttributes() {
+        return {
+            slides: {
+                default: [],
+                rendered: false,
+            },
+        };
+    },
+
+    parseHTML() {
+        return [{
+            tag: 'div.slideshow',
+            getAttrs: (div) => {
+                const slides = parseSlides(div);
+                return { slides };
+            },
+        }];
+    },
+
+    renderHTML({ node }) {
+        const slides = renderSlides(node.attrs.slides);
+        return ['div', { class: 'slideshow' }, ['ul', {}, ...slides]];
+    },
+
+    addNodeView() {
+        return ({ node, editor }) => {
+            const slides = node.attrs.slides;
+
+            const dom = document.createElement('div');
+            dom.dataset.type = 'maho-slideshow';
+            dom.contentEditable = 'false';
+
+            // Create slide container and show the first slide if it exists
+            const slideshow = dom.appendChild(document.createElement('div'));
+            slideshow.className = 'slideshow';
+
+            if (slides.length) {
+                const img = slideshow.appendChild(document.createElement('img'));
+                img.src = renderDirectiveImageUrl(slides[0].src, slides[0].directiveObj, this.options.directivesUrl);
+                img.alt = slides[0].alt ?? '';
+            }
+
+            // Create dots and show at least one dot even if there are no slides
+            const dots = dom.appendChild(document.createElement('div'));
+            dots.className = 'slideshow-dots';
+
+            for (let i = 0; i < Math.max(slides.length, 1); i++) {
+                const dot = dots.appendChild(document.createElement('span'));
+                dot.classList.add('dot');
+                if (i === 0) {
+                    dot.classList.add('active');
+                }
+            }
+
+            return { dom };
+        };
     },
 });
