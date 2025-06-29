@@ -20,10 +20,13 @@
  * - `fileRemoved` { file: File } - File was removed from the queue by pressing the delete button or after file upload
  * - `fileSuccess` { file: File, response: Object } - File was successfully uploaded, included response from server
  * - `fileError` { file: File, error: Error, message: string } - File upload encountered an error
+ * - `beforeUpload` { files: File[] } - Files are about to be uploaded
  * - `success` { files: File[] } - Files were successfully uploaded
  * - `complete` { filesSuccess: File[], filesError: File[] } - Upload process is complete
  *
- * All events also include a `containerId` property referencing the container element passed during construction.
+ * All events also include:
+ * - `instance` referencing the uploader instance that dispatched the event.
+ * - `containerId` referencing the container element passed during construction.
  *
  * Binding to events:
  *
@@ -316,6 +319,7 @@ class Uploader extends EventTarget {
      * Upload all files in queue one at a time
      */
     async upload() {
+        this._fireEvent('beforeUpload', { files: this.files });
         this.onUploadStart();
 
         const detail = { filesSuccess: [], filesError: [] };
@@ -474,6 +478,7 @@ class Uploader extends EventTarget {
      * @private
      */
     _fireEvent(type, detail = {}) {
+        detail.instance = this;
         detail.containerId = this.elementsIds.container;
         const results = [
             this.dispatchEvent(new CustomEvent(type, { detail }, { cancelable: true })),

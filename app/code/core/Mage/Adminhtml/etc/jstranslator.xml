@@ -71,6 +71,18 @@
         </clear-giftmessage>
     </script>
 
+    <script path="mage/adminhtml/browser.js" area="adminhtml" module="cms">
+        <new-folder-prompt translate="message">
+            <message>New Folder Name:</message>
+        </new-folder-prompt>
+        <delete-folder-message translate="message">
+            <message>Are you sure you want to delete current folder?</message>
+        </delete-folder-message>
+        <delete-file-message translate="message">
+            <message>Are you sure you want to delete the selected file?</message>
+        </delete-file-message>
+    </script>
+
     <script path="mage/adminhtml/sales/packaging.js" area="adminhtml" module="sales">
         <invalid-url translate="message" module="core">
             <message>Invalid URL</message>

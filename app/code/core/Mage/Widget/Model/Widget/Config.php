@@ -6,6 +6,7 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,54 +21,8 @@ class Mage_Widget_Model_Widget_Config extends Varien_Object
     public function getPluginSettings($config)
     {
         return [
-            'widget_plugin_src'   => Mage::getBaseUrl('js') . 'mage/adminhtml/wysiwyg/tinymce/plugins/openmagewidget.js',
-            'widget_images_url'   => $this->getPlaceholderImagesBaseUrl(),
-            'widget_placeholders' => $this->getAvailablePlaceholderFilenames(),
-            'widget_window_url'   => $this->getWidgetWindowUrl($config),
+            'widget_window_url' => $this->getWidgetWindowUrl($config),
         ];
-    }
-
-    /**
-     * Return Widget placeholders images URL
-     *
-     * @return string
-     */
-    public function getPlaceholderImagesBaseUrl()
-    {
-        return Mage::getDesign()->getSkinUrl('images/widget/');
-    }
-
-    /**
-     * Return Widget placeholders images dir
-     *
-     * @return string
-     */
-    public function getPlaceholderImagesBaseDir()
-    {
-        return Mage::getDesign()->getSkinBaseDir() . DS . 'images' . DS . 'widget';
-    }
-
-    /**
-     * Return list of existing widget image placeholders
-     *
-     * @return array
-     */
-    public function getAvailablePlaceholderFilenames()
-    {
-        $result = [];
-        $targetDir = $this->getPlaceholderImagesBaseDir();
-        if (is_dir($targetDir) && is_readable($targetDir)) {
-            $collection = new Varien_Data_Collection_Filesystem();
-            $collection->addTargetDir($targetDir)
-                ->setCollectDirs(false)
-                ->setCollectFiles(true)
-                ->setCollectRecursively(false);
-            foreach ($collection as $file) {
-                $result[] = $file->getBasename();
-            }
-        }
-
-        return $result;
     }
 
     /**

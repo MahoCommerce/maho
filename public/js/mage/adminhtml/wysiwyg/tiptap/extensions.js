@@ -1,0 +1,442 @@
+/**
+ * Maho
+ *
+ * @package     Mage_Adminhtml
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@2.23.0';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.23.0';
+import Link from 'https://esm.sh/@tiptap/extension-link@2.23.0';
+import Image from 'https://esm.sh/@tiptap/extension-image@2.23.0';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.23.0';
+import Underline from 'https://esm.sh/@tiptap/extension-underline@2.23.0';
+import Table from 'https://esm.sh/@tiptap/extension-table@2.23.0';
+import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.23.0';
+import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.23.0';
+import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.23.0';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.23.0';
+
+export {
+    Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,
+    Table, TableRow, TableCell, TableHeader, BubbleMenu,
+};
+
+
+const parseDirective = (directiveStr) => {
+    const directiveObj = {
+        type: null,
+        params: {},
+    }
+    directiveStr = (directiveStr ?? '').trim();
+    if (directiveStr.startsWith('{{') && directiveStr.endsWith('}}')) {
+        const [ type, attrStr ] = directiveStr.slice(2, -2).trim().split(' ', 2);
+        directiveObj.type = type;
+        for (const match of (attrStr ?? '').matchAll(/([\w\-]+)="(.*?)"/g)) {
+            directiveObj.params[match[1]] = match[2];
+        }
+    }
+    return directiveObj;
+};
+
+const renderDirective = (directiveObj) => {
+    if (!directiveObj?.type) {
+        return '';
+    }
+    let directiveStr = '{{' + directiveObj.type;
+    for (const [name, value] of Object.entries(directiveObj.params)) {
+        if (value) {
+            directiveStr += ` ${name}="${value}"`;
+        } else {
+            directiveStr += ` ${name}`;
+        }
+    }
+    directiveStr += '}}';
+    return directiveStr
+};
+
+const renderDirectiveImageUrl = (src, directiveObj, directivesUrl) => {
+    if (directiveObj?.type) {
+        return setRouteParams(directivesUrl, {
+            ___directive: Base64.mageEncode(renderDirective(directiveObj)),
+        });
+    }
+    return src;
+};
+
+/**
+ * Maho Widget Node View Extension
+ *
+ * This extension adds widget and variable support
+ */
+export const MahoWidget = Node.create({
+    name: 'mahoWidget',
+    group: 'inline',
+    inline: true,
+    draggable: true,
+    atom: true,
+
+    addAttributes() {
+        return {
+            directiveObj: {
+                parseHTML: (element) => {
+                    return parseDirective(element.getAttribute('data-directive'));
+                },
+                rendered: false,
+            },
+        }
+    },
+
+    parseHTML() {
+        return [{
+            tag: 'span[data-type=maho-widget]',
+        }];
+    },
+
+    renderHTML({ node }) {
+        const directiveStr = renderDirective(node.attrs.directiveObj);
+        return ['span', { 'data-type': 'maho-widget', 'data-directive': directiveStr }];
+    },
+
+    addNodeView() {
+        return ({ node, editor }) => {
+            const dom = document.createElement('span');
+            dom.dataset.type = 'maho-widget';
+            dom.contentEditable = 'false';
+
+            let icon, label, dblclick;
+
+            if (node.attrs.directiveObj.type === 'var') {
+                icon = 'variable';
+            }
+            else if (node.attrs.directiveObj.type === 'config') {
+                icon = 'variable';
+                label = node.attrs.directiveObj.params.path;
+                dblclick = () => editor.commands.insertMahoVariable(node);
+            }
+            else if (node.attrs.directiveObj.type === 'customvar') {
+                icon = 'variable';
+                label = node.attrs.directiveObj.params.code;
+                dblclick = () => editor.commands.insertMahoVariable(node);
+            }
+            else if (node.attrs.directiveObj.type === 'widget') {
+                icon = 'widget';
+                label = node.attrs.directiveObj.params.type;
+                dblclick = () => editor.commands.insertMahoWidget(node);
+            }
+
+            dom.innerHTML = editor.options.wysiwygSetup.getIcon(icon ?? 'widget')
+                + escapeHtml(label ?? renderDirective(node.attrs.directiveObj));
+
+            if (dblclick) {
+                dom.title = editor.options.wysiwygSetup.translate('Double-click to edit');
+                dom.addEventListener('dblclick', dblclick);
+            }
+
+            return { dom };
+        };
+    },
+
+    addCommands() {
+        return {
+            insertMahoWidget: (node) => ({ editor, state }) => {
+                const { from, to } = state.selection;
+
+                widgetTools.openDialog(this.options.widgetUrl, {
+                    onOpen: () => {
+                        widgetTools.initOptionValues(node?.attrs.directiveObj.params);
+                    },
+                    onOk: (dialog) => {
+                        const directiveObj = parseDirective(dialog.returnValue);
+                        editor.commands.insertContentAt({ from, to }, {
+                            type: this.name,
+                            attrs: { directiveObj },
+                        });
+                    },
+                });
+            },
+            insertMahoVariable: (node) => ({ editor, state }) => {
+                const { from, to } = state.selection;
+
+                Variables.openDialog(this.options.variableUrl, {
+                    onOpen: () => {
+                        Variables.initSelected(renderDirective(node?.attrs.directiveObj));
+                    },
+                    onOk: (dialog) => {
+                        const directiveObj = parseDirective(dialog.returnValue);
+                        editor.commands.insertContentAt({ from, to }, {
+                            type: this.name,
+                            attrs: { directiveObj },
+                        });
+                    },
+                });
+            },
+        }
+    },
+});
+
+/**
+ * Maho Image Node View Extension
+ *
+ * This extension adds media browser and resize support
+ */
+export const MahoImage = Image.extend({
+    name: 'mahoImage',
+
+    addAttributes() {
+        return {
+            ...this.parent?.(),
+            width: {
+                default: null,
+            },
+            height: {
+                default: null,
+            },
+            directiveObj: {
+                parseHTML: (element) => {
+                    return parseDirective(element.getAttribute('src'));
+                },
+                rendered: false,
+            },
+        }
+    },
+
+    renderHTML({ node, HTMLAttributes }) {
+        const src = renderDirective(node.attrs.directiveObj) || HTMLAttributes.src;
+        return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { src })];
+    },
+
+    addNodeView() {
+        return ({ node, editor, HTMLAttributes, getPos }) => {
+            const container = document.createElement('div');
+            container.className = 'image-container';
+            container.title = editor.options.wysiwygSetup.translate('Double-click to edit');
+
+            const img = document.createElement('img');
+            container.appendChild(img);
+
+            for (const [key, value] of Object.entries(HTMLAttributes)) {
+                if (key === 'src') {
+                    img.src = renderDirectiveImageUrl(value, node.attrs.directiveObj, this.options.directivesUrl);
+                } else if (value !== null) {
+                    img.setAttribute(key, value);
+                }
+            }
+
+            img.addEventListener('error', () => {
+                img.src = 'data:image/svg+xml,' + editor.options.wysiwygSetup.getIcon('image');
+                img.classList.add('placeholder');
+            }, { once: true });
+
+            img.addEventListener('dblclick', () => {
+                editor.commands.insertMahoImage(node);
+            });
+
+            // Create resize handles
+            for (const position of ['nw', 'ne', 'sw', 'se']) {
+                const handle = document.createElement('div');
+                handle.className = `resize-handle resize-handle-${position}`;
+                container.appendChild(handle);
+
+                handle.addEventListener('mousedown', (event) => {
+                    // Select the image when resizing
+                    editor.commands.setNodeSelection(getPos());
+                    event.preventDefault();
+
+                    const startX = event.clientX;
+                    const startY = event.clientY;
+                    const startWidth = img.offsetWidth;
+                    const startHeight = img.offsetHeight;
+                    const aspectRatio = startWidth / startHeight;
+
+                    const handleMouseMove = (event) => {
+                        const deltaX = event.clientX - startX;
+                        const deltaY = event.clientY - startY;
+
+                        let newWidth = startWidth + deltaX;
+                        let newHeight = startHeight + deltaY;
+
+                        // Maintain aspect ratio
+                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                            newHeight = newWidth / aspectRatio;
+                        } else {
+                            newWidth = newHeight * aspectRatio;
+                        }
+
+                        // Minimum size
+                        newWidth = Math.max(50, newWidth);
+                        newHeight = Math.max(50, newHeight);
+
+                        img.width = Math.round(newWidth);
+                        img.height = Math.round(newHeight);
+                    };
+
+                    const handleMouseUp = () => {
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+
+                        editor.commands.updateAttributes(this.name, {
+                            width: img.width,
+                            height: img.height,
+                        });
+                    };
+
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+            }
+
+            return {
+                dom: container,
+            };
+        };
+    },
+
+    addCommands() {
+        return {
+            insertMahoImage: (node) => ({ editor, state }) => {
+                const { from, to } = state.selection;
+
+                const params = {}
+                if (node?.attrs.directiveObj.params.url) {
+                    const parts = node.attrs.directiveObj.params.url.split('/');
+                    params.node = Base64.idEncode(parts.slice(1, -1).join('/'));
+                    params.filename = Base64.idEncode(parts.pop());
+                }
+                if (node?.attrs.alt) {
+                    params.alt = Base64.mageEncode(node.attrs.alt);
+                }
+
+                const url = setRouteParams(this.options.browserUrl, params);
+                MediabrowserUtility.openDialog(url, null, null, this.options.title, {
+                    onOk: (dialog) => {
+                        //  Parse out the directive and alt text
+                        let match;
+
+                        match = dialog.returnValue.match(/src="({{.*?}})"/);
+                        const directiveObj = parseDirective(match?.[1]);
+
+                        match = dialog.returnValue.match(/alt="(.*?)"/);
+                        const alt = match?.[1];
+
+                        // Keep some attributes of old image
+                        const title = node?.attrs.title;
+                        const width = node?.attrs.width;
+
+                        editor.commands.insertContentAt({ from, to }, {
+                            type: this.name,
+                            attrs: { directiveObj, alt, title, width },
+                        });
+                    },
+                });
+            },
+        }
+    },
+});
+
+
+/**
+ * Parse a `<div class="slideshow">` node into an array of slides `[{ src, alt, href }, ...]`
+ */
+const parseSlides = (div) => {
+    // Parse each <li> child and add to our array if it's a valid slide, i.e. contains an image
+    const slides = [];
+    for (const li of div.querySelectorAll(':scope > ul > li')) {
+        const img = li.querySelector('img');
+        const link = li.querySelector('a');
+        if (img) {
+            slides.push({
+                src: img.getAttribute('src') ?? '',
+                alt: img.getAttribute('alt') ?? '',
+                href: link?.getAttribute('href'),
+                directiveObj: parseDirective(img.getAttribute('src')),
+            });
+        }
+    }
+    return slides;
+};
+
+/**
+ * Render array of slides into a TipTap node object
+ */
+const renderSlides = (slides) => {
+    return slides.map((slide) => {
+        const { src, alt, href } = slide;
+        const content = href
+              ? ['a', { href }, ['img', { src, alt }]]
+              : ['img', { src, alt }];
+
+        return ['li', {}, content];
+    });
+}
+
+/**
+ * Maho Slideshow Node View Extension
+ *
+ * This extension adds basic support for slideshow divs, but does not yet provide any editing capabilities
+ */
+export const MahoSlideshow = Node.create({
+    name: 'mahoSlideshow',
+    group: 'block',
+    atom: true,
+    draggable: true,
+
+    addAttributes() {
+        return {
+            slides: {
+                default: [],
+                rendered: false,
+            },
+        };
+    },
+
+    parseHTML() {
+        return [{
+            tag: 'div.slideshow',
+            getAttrs: (div) => {
+                const slides = parseSlides(div);
+                return { slides };
+            },
+        }];
+    },
+
+    renderHTML({ node }) {
+        const slides = renderSlides(node.attrs.slides);
+        return ['div', { class: 'slideshow' }, ['ul', {}, ...slides]];
+    },
+
+    addNodeView() {
+        return ({ node, editor }) => {
+            const slides = node.attrs.slides;
+
+            const dom = document.createElement('div');
+            dom.dataset.type = 'maho-slideshow';
+            dom.contentEditable = 'false';
+
+            // Create slide container and show the first slide if it exists
+            const slideshow = dom.appendChild(document.createElement('div'));
+            slideshow.className = 'slideshow';
+
+            if (slides.length) {
+                const img = slideshow.appendChild(document.createElement('img'));
+                img.src = renderDirectiveImageUrl(slides[0].src, slides[0].directiveObj, this.options.directivesUrl);
+                img.alt = slides[0].alt ?? '';
+            }
+
+            // Create dots and show at least one dot even if there are no slides
+            const dots = dom.appendChild(document.createElement('div'));
+            dots.className = 'slideshow-dots';
+
+            for (let i = 0; i < Math.max(slides.length, 1); i++) {
+                const dot = dots.appendChild(document.createElement('span'));
+                dot.classList.add('dot');
+                if (i === 0) {
+                    dot.classList.add('active');
+                }
+            }
+
+            return { dom };
+        };
+    },
+});

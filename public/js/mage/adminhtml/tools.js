@@ -805,7 +805,7 @@ function setRouteParams(url, params = {}) {
         url.pathname += '/';
     }
     for (const [ key, val ] of Object.entries(params)) {
-        const regex = new RegExp(String.raw`\/${key}\/\w+\/`);
+        const regex = new RegExp(String.raw`\/${key}\/(.*?)\/`);
         if (val === null || val === false) {
             url.pathname = url.pathname.replace(regex, '/');
         } else if (url.pathname.match(regex)) {
@@ -844,5 +844,19 @@ function wrapFunction(originalFn, wrapperFn) {
     }
     return function() {
         return wrapperFn(originalFn, ...arguments);
+    };
+}
+
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait`
+ * milliseconds have elapsed since the last time the function was invoked.
+ */
+function debounce(func, delay) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
     };
 }

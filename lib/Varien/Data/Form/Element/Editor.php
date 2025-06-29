@@ -43,6 +43,9 @@ class Varien_Data_Form_Element_Editor extends Varien_Data_Form_Element_Textarea
     {
         $this->addClass('textarea');
         if ($this->isEnabled()) {
+            if (!$this->isHidden()) {
+                $this->addClass('no-display');
+            }
             $jsSetupObject = 'wysiwyg' . $this->getHtmlId();
             $configObject = Zend_Json::encode($this->getConfig());
 
@@ -50,7 +53,9 @@ class Varien_Data_Form_Element_Editor extends Varien_Data_Form_Element_Textarea
                 {$this->_getButtonsHtml()}
                 <textarea id="{$this->getHtmlId()}" name="{$this->getName()}" {$this->serialize($this->getHtmlAttributes())}>{$this->getEscapedValue()}</textarea>
                 <script>
-                    window.$jsSetupObject = new tinyMceWysiwygSetup('{$this->getHtmlId()}', $configObject);
+                    mahoOnReady(() => {
+                        window.$jsSetupObject = new tiptapWysiwygSetup('{$this->getHtmlId()}', $configObject);
+                    });
                 </script>
             HTML;
 
