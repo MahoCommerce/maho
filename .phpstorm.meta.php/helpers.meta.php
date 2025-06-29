@@ -6,6 +6,7 @@ namespace PHPSTORM_META {
         'admin/data' => \Mage_Admin_Helper_Data::class,
         'admin/rules_fallback' => \Mage_Admin_Helper_Rules_Fallback::class,
         'admin/variable' => \Mage_Admin_Helper_Variable::class,
+        'adminactivitylog/data' => \Maho_AdminActivityLog_Helper_Data::class,
         'adminhtml/addresses' => \Mage_Adminhtml_Helper_Addresses::class,
         'adminhtml/catalog' => \Mage_Adminhtml_Helper_Catalog::class,
         'adminhtml/catalog_product_composite' => \Mage_Adminhtml_Helper_Catalog_Product_Composite::class,
