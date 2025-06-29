@@ -6,7 +6,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import TiptapModules from './extensions.js';
+import * as TiptapModules from './extensions.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@1.15.4/js/lib/beautify-html.js';
 
 class tiptapWysiwygSetup {

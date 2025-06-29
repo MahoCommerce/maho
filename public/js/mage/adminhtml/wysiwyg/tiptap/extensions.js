@@ -18,6 +18,11 @@ import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.23.0';
 import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.23.0';
 import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.23.0';
 
+export {
+    Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,
+    Table, TableRow, TableCell, TableHeader, BubbleMenu,
+};
+
 
 const parseDirective = (directiveStr) => {
     const directiveObj = {
@@ -56,7 +61,7 @@ const renderDirective = (directiveObj) => {
  *
  * This extension adds widget and variable support
  */
-const MahoWidget = Node.create({
+export const MahoWidget = Node.create({
     name: 'mahoWidget',
     group: 'inline',
     inline: true,
@@ -167,7 +172,7 @@ const MahoWidget = Node.create({
  *
  * This extension adds media browser and resize support
  */
-const MahoImage = Image.extend({
+export const MahoImage = Image.extend({
     name: 'mahoImage',
 
     addAttributes() {
@@ -322,9 +327,3 @@ const MahoImage = Image.extend({
         }
     },
 });
-
-export default {
-    Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,
-    Table, TableRow, TableCell, TableHeader, BubbleMenu,
-    MahoWidget, MahoImage,
-};
