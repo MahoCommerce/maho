@@ -519,7 +519,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      */
     public function loadBreadcrumbsArray($path, $addCollectionData = true, $withRootNode = false)
     {
-        $pathIds = explode('/', $path);
+        $pathIds = explode('/', $path ?? '');
         if (!$withRootNode) {
             array_shift($pathIds);
         }
