@@ -63,7 +63,8 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
         // Process body to defer JavaScript loading
         $body = $this->getBody();
         if ($this->shouldDeferJavaScript($body)) {
-            $processedBody = $this->_deferJavaScriptLoading($body);
+            $deferMode = $this->getJavaScriptDeferMode();
+            $processedBody = $this->deferJavaScriptLoading($body, $deferMode);
             $this->setBody($processedBody);
         }
 
@@ -117,13 +118,18 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
         return $this;
     }
 
+    protected function getJavaScriptDeferMode(): int
+    {
+        return (int) Mage::getStoreConfig('dev/js/defer_mode');
+    }
+
     /**
      * Check if JavaScript deferral should be applied
      */
     protected function shouldDeferJavaScript(string $body): bool
     {
         // Check if feature is enabled
-        if (!Mage::getStoreConfigFlag('dev/js/load_on_intent')) {
+        if ($this->getJavaScriptDeferMode() == Mage_Core_Model_Source_Js_Defer::MODE_DISABLED) {
             return false;
         }
 
@@ -165,50 +171,68 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
     }
 
     /**
-     * Defer JavaScript loading until user interaction
+     * Defer JavaScript loading based on selected mode
      */
-    protected function _deferJavaScriptLoading(string $html): string
+    protected function deferJavaScriptLoading(string $html, int $mode): string
     {
         $scriptIndex = 0;
+        $scripts = [];
 
-        // More precise regex that handles edge cases better
+        // Extract all scripts and transform based on mode
         $html = preg_replace_callback(
             '/<script(?:\s+[^>]*?)?>(?:(?!<\/script>).)*?<\/script>/is',
-            function ($matches) use (&$scriptIndex) {
-                // Skip if contains our loader or already has data attributes
-                if (str_contains($matches[0], 'mahoLazyJs') || preg_match('/\sdata-(?!maho-script)\w+=/i', $matches[0])) {
-                    return $matches[0];
+            function ($matches) use (&$scriptIndex, $mode, &$scripts) {
+                // For load on intent mode, transform scripts
+                if ($mode == Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
+                    // Skip if contains our loader or already has data attributes
+                    if (str_contains($matches[0], 'mahoLazyJs') || preg_match('/\sdata-(?!maho-script)\w+=/i', $matches[0])) {
+                        $scripts[] = $matches[0];
+                        return '';
+                    }
+
+                    // Extract and process attributes
+                    if (preg_match('/<script(\s+[^>]*?)?>(.*?)<\/script>/is', $matches[0], $parts)) {
+                        $attrs = $parts[1];
+                        $content = $parts[2];
+
+                        // Remove existing type attribute more efficiently
+                        $attrs = preg_replace('/\stype\s*=\s*["\']?[^"\'>\s]+["\']?/i', '', $attrs);
+
+                        $scripts[] = '<script type="text/plain" data-maho-script="' . $scriptIndex++ . '"' . $attrs . '>' . $content . '</script>';
+                    } else {
+                        $scripts[] = $matches[0];
+                    }
+                } else {
+                    // For defer only mode, keep script as-is
+                    $scripts[] = $matches[0];
                 }
 
-                // Extract and process attributes
-                if (preg_match('/<script(\s+[^>]*?)?>(.*?)<\/script>/is', $matches[0], $parts)) {
-                    $attrs = $parts[1];
-                    $content = $parts[2];
-
-                    // Remove existing type attribute more efficiently
-                    $attrs = preg_replace('/\stype\s*=\s*["\']?[^"\'>\s]+["\']?/i', '', $attrs);
-
-                    return '<script type="text/plain" data-maho-script="' . $scriptIndex++ . '"' . $attrs . '>' . $content . '</script>';
-                }
-
-                return $matches[0];
+                // Remove script from original position
+                return '';
             },
             $html,
         );
 
-        // Inject loader before </body> or at end
-        $loader = $this->_getJavaScriptLoader();
+        // Prepare scripts for bottom insertion
+        $scriptsHtml = '';
+        if (!empty($scripts)) {
+            $scriptsHtml = implode("\n", $scripts);
+
+            // Add loader for load on intent mode
+            if ($mode == Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
+                $scriptsHtml .= "\n" . $this->getJavaScriptLoader();
+            }
+        }
+
+        // Inject scripts before </body> or at end
         $bodyPos = stripos($html, '</body>');
 
         return $bodyPos !== false
-            ? substr($html, 0, $bodyPos) . $loader . substr($html, $bodyPos)
-            : $html . $loader;
+            ? substr($html, 0, $bodyPos) . "\n" . $scriptsHtml . "\n" . substr($html, $bodyPos)
+            : $html . "\n" . $scriptsHtml;
     }
 
-    /**
-     * Get the JavaScript loader code
-     */
-    protected function _getJavaScriptLoader(): string
+    protected function getJavaScriptLoader(): string
     {
         $baseJsUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_JS);
         return '<script src="' . $baseJsUrl . 'maho-load-on-intent.js"></script>';
