@@ -6,17 +6,17 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@2.14.0';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.14.0';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.14.0';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.14.0';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.14.0';
-import Underline from 'https://esm.sh/@tiptap/extension-underline@2.14.0';
-import Table from 'https://esm.sh/@tiptap/extension-table@2.14.0';
-import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.14.0';
-import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.14.0';
-import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.14.0';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.14.0';
+import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@2.23.0';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.23.0';
+import Link from 'https://esm.sh/@tiptap/extension-link@2.23.0';
+import Image from 'https://esm.sh/@tiptap/extension-image@2.23.0';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.23.0';
+import Underline from 'https://esm.sh/@tiptap/extension-underline@2.23.0';
+import Table from 'https://esm.sh/@tiptap/extension-table@2.23.0';
+import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.23.0';
+import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.23.0';
+import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.23.0';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.23.0';
 
 
 const parseDirective = (directiveStr) => {
