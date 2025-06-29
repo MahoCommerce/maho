@@ -10,9 +10,9 @@
 
 class Mage_Core_Model_Source_Js_Defer
 {
-    const MODE_DISABLED = 0;
-    const MODE_DEFER_ONLY = 1;
-    const MODE_LOAD_ON_INTENT = 2;
+    public const MODE_DISABLED = 0;
+    public const MODE_DEFER_ONLY = 1;
+    public const MODE_LOAD_ON_INTENT = 2;
 
     public function toOptionArray(): array
     {
