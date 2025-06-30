@@ -308,6 +308,9 @@
                 <file>system.log</file>
                 <exception_file>exception.log</exception_file>
             </log>
+            <js>
+                <defer_mode>0</defer_mode>
+            </js>
         </dev>
         <system>
             <rate_limit>
@@ -536,6 +539,10 @@
                 <schedule><cron_expr>0 0 * * *</cron_expr></schedule>
                 <run><model>core/email_queue::cleanQueue</model></run>
             </core_email_queue_clean_up>
+            <core_session_clean>
+                <schedule><cron_expr>30 3 * * *</cron_expr></schedule>
+                <run><model>core/session::cleanExpiredSessions</model></run>
+            </core_session_clean>
         </jobs>
     </crontab>
 </config>

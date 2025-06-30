@@ -228,7 +228,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
         $precision,
         $options = [],
         $includeContainer = true,
-        $addBrackets = false
+        $addBrackets = false,
     ) {
         if (!isset($options['precision'])) {
             $options['precision'] = $precision;

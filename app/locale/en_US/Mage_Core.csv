@@ -443,3 +443,8 @@
 "The store view #%d is disabled.","The store view #%d is disabled."
 "Loading Indicator Timeout","Loading Indicator Timeout"
 "Number of milliseconds to delay showing the loading indicator. The default value is ""200"". An empty value disables the delay.","Number of milliseconds to delay showing the loading indicator. The default value is ""200"". An empty value disables the delay."
+"JavaScript Settings","JavaScript Settings"
+"JavaScript Deferral Mode","JavaScript Deferral Mode"
+"Defer Only","Defer Only"
+"Load on Intent","Load on Intent"
+"<strong>Disabled:</strong> No deferral (default behavior)<br/><strong>Defer Only:</strong> Moves all script tags to the end of the page, improving initial render performance<br/><strong>Load on Intent:</strong> <strong style="color:red">Highly Experimental!</strong> Defers all scripts until user interaction (click, scroll, hover, etc.) - designed for pure vanilla JavaScript and may not work with PrototypeJS or jQuery","<strong>Disabled:</strong> No deferral (default behavior)<br/><strong>Defer Only:</strong> Moves all script tags to the end of the page, improving initial render performance<br/><strong>Load on Intent:</strong> <strong style="color:red">Highly Experimental!</strong> Defers all scripts until user interaction (click, scroll, hover, etc.) - designed for pure vanilla JavaScript and may not work with PrototypeJS or jQuery"

@@ -41,7 +41,7 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
         $lastTransactionId,
         $card,
         $amount = false,
-        $exception = false
+        $exception = false,
     ) {
         return $this->getExtendedTransactionMessage(
             $payment,
@@ -72,7 +72,7 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
         $card,
         $amount = false,
         $exception = false,
-        $additionalMessage = false
+        $additionalMessage = false,
     ) {
         $operation = $this->_getOperation($requestType);
 

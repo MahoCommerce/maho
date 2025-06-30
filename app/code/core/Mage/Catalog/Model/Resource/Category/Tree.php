@@ -114,7 +114,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
         $sorted = false,
         $exclude = [],
         $toLoad = true,
-        $onlyActive = false
+        $onlyActive = false,
     ) {
         if (is_null($collection)) {
             $collection = $this->getCollection($sorted);

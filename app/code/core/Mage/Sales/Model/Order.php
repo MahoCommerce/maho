@@ -1099,7 +1099,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         $status = false,
         $comment = '',
         $isCustomerNotified = null,
-        $shouldProtectState = false
+        $shouldProtectState = false,
     ) {
         // attempt to set the specified state
         if ($shouldProtectState) {

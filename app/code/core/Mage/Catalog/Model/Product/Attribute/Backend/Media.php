@@ -287,7 +287,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         $file,
         $mediaAttribute = null,
         $move = false,
-        $exclude = true
+        $exclude = true,
     ) {
         if (str_contains($file, chr(0))
             || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $file)
@@ -390,7 +390,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         $fileAndAttributesArray,
         $filePath = '',
         $move = false,
-        $exclude = true
+        $exclude = true,
     ) {
         $alreadyAddedFiles = [];
         $alreadyAddedFilesNames = [];
