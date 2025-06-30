@@ -51,11 +51,14 @@ class Maho_AdminActivityLog_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->isEnabled() && Mage::getStoreConfigFlag('admin/adminactivitylog/log_failed_login');
     }
 
+    public function getDaysToKeepLogs(): int
+    {
+        return Mage::getStoreConfigAsInt('admin/adminactivitylog/days_to_keep');
+    }
+
     public function cleanOldLogs(): void
     {
-        if ($this->isEnabled()) {
-            Mage::getResourceModel('adminactivitylog/activity')->cleanOldLogs();
-            Mage::getResourceModel('adminactivitylog/login')->cleanOldLogs();
-        }
+        Mage::getResourceModel('adminactivitylog/activity')->cleanOldLogs();
+        Mage::getResourceModel('adminactivitylog/login')->cleanOldLogs();
     }
 }
