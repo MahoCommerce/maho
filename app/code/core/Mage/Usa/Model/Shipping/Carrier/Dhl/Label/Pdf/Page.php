@@ -148,16 +148,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
         $this->_pdf->setFont($font, '', $fontSize);
     }
 
-    /**
-     * Convert Y coordinate from bottom-left to top-left origin
-     *
-     * @param float $y
-     * @return float
-     */
-    protected function _convertY($y)
-    {
-        return $this->_pdf->getPageHeight() - $y;
-    }
 
     /**
      * Draw a line of text at the specified position.
@@ -188,7 +178,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
                 break;
         }
 
-        $this->_pdf->Text($left, $this->_convertY($y), $text);
+        $this->_pdf->Text($left, $y, $text);
         return $this;
     }
 
@@ -212,7 +202,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
                 continue;
             }
             $this->drawText($line, $x, $y, 'UTF-8', $align);
-            $y -= ceil($this->getFontSize());
+            $y += ceil($this->getFontSize());
         }
         return $y;
     }
@@ -231,7 +221,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
     {
         $width = $x2 - $x1;
         $height = abs($y2 - $y1);
-        $y = $this->_convertY(max($y1, $y2));
+        $y = min($y1, $y2);
         $this->_pdf->Rect($x1, $y, $width, $height, $style);
         return $this;
     }
@@ -247,7 +237,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
      */
     public function drawLine($x1, $y1, $x2, $y2)
     {
-        $this->_pdf->Line($x1, $this->_convertY($y1), $x2, $this->_convertY($y2));
+        $this->_pdf->Line($x1, $y1, $x2, $y2);
         return $this;
     }
 
@@ -265,7 +255,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
     {
         $width = $x2 - $x1;
         $height = $y2 - $y1;
-        $this->_pdf->Image($imagePath, $x1, $this->_convertY($y2), $width, $height);
+        $this->_pdf->Image($imagePath, $x1, $y1, $width, $height);
         return $this;
     }
 

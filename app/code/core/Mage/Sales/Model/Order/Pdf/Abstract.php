@@ -57,16 +57,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     abstract public function getPdf();
 
-    /**
-     * Convert Y coordinate from bottom-left origin to TCPDF (top-left origin)
-     *
-     * @param float $y
-     * @return float
-     */
-    protected function _convertY($y)
-    {
-        return $this->_pdf->getPageHeight() - $y;
-    }
 
     /**
      * Draw text at specified coordinates
@@ -78,7 +68,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _drawText($text, $x, $y)
     {
-        $this->_pdf->Text($x, $this->_convertY($y), $text);
+        $this->_pdf->Text($x, $y, $text);
     }
 
     /**
@@ -95,8 +85,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     {
         $width = $x2 - $x1;
         $height = abs($y2 - $y1);
-        $y = $this->_convertY(max($y1, $y2));
-        $this->_pdf->Rect($x1, $y, $width, $height, $style);
+        $this->_pdf->Rect($x1, $y1, $width, $height, $style);
     }
 
     /**
@@ -110,7 +99,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _drawLine($x1, $y1, $x2, $y2)
     {
-        $this->_pdf->Line($x1, $this->_convertY($y1), $x2, $this->_convertY($y2));
+        $this->_pdf->Line($x1, $y1, $x2, $y2);
     }
 
     /**
@@ -182,14 +171,13 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function insertLogo($store = null)
     {
-        $this->y = $this->y ?: 815;
+        $this->y = $this->y ?: 30; // Start from top of page
         $image = Mage::getStoreConfig('sales/identity/logo', $store);
         if ($image) {
             $imagePath = Mage::getBaseDir('media') . '/sales/store/logo/' . $image;
             if (is_file($imagePath)) {
                 $imageSize = getimagesize($imagePath);
                 if ($imageSize !== false) {
-                    $top = 30; // Top position from top of page (TCPDF uses top-left origin)
                     $widthLimit = 270; // Half of the page width
                     $heightLimit = 270; // Assuming the image is not a "skyscraper"
                     $originalWidth = $imageSize[0];
@@ -212,11 +200,10 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                     }
 
                     $x = 25;
-                    $this->_pdf->Image($imagePath, $x, $top, $width, $height);
+                    $this->_pdf->Image($imagePath, $x, $this->y, $width, $height);
 
-                    // Update y position (convert to bottom-left coordinate system)
-                    $pageHeight = $this->_pdf->getPageHeight();
-                    $this->y = $pageHeight - ($top + $height + 10);
+                    // Update y position (move down for next elements)
+                    $this->y += $height + 10;
                 }
             }
         }
@@ -233,9 +220,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         $this->_setFontRegular(10);
         $this->_pdf->setLineWidth(0);
 
-        $this->y = $this->y ?: 815;
-        $pageHeight = $this->_pdf->getPageHeight();
-        $top = $pageHeight - 815; // Convert to TCPDF coordinate system
+        $this->y = $this->y ?: 30; // Start from top of page
 
         $addressLines = explode("\n", Mage::getStoreConfig('sales/identity/address', $store));
         foreach ($addressLines as $value) {
@@ -244,14 +229,11 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 foreach (Mage::helper('core/string')->str_split($value, 45, true, true) as $str) {
                     $text = trim(strip_tags($str));
                     $x = $this->getAlignRight($text, 130, 440, 'helvetica', 10);
-                    $this->_pdf->Text($x, $top, $text);
-                    $top += 10; // Move down in TCPDF coordinate system
+                    $this->_pdf->Text($x, $this->y, $text);
+                    $this->y += 10; // Move down
                 }
             }
         }
-
-        // Update y position in bottom-left coordinate system
-        $this->y = $pageHeight - $top;
     }
 
     /**
@@ -313,23 +295,25 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             $order = $shipment->getOrder();
         }
 
-        $this->y = $this->y ?: 815;
+        $this->y = $this->y ?: 200; // Start after logo/address area
         $top = $this->y;
 
         $this->_pdf->setFillColor(115, 115, 115);
         $this->_pdf->setDrawColor(115, 115, 115);
-        $this->_drawRectangle(25, $top, 570, $top - 55, 'DF');
+        $this->_drawRectangle(25, $top, 570, $top + 55, 'DF');
         $this->_pdf->setFillColor(255, 255, 255);
-        $this->setDocHeaderCoordinates([25, $top, 570, $top - 55]);
+        $this->setDocHeaderCoordinates([25, $top, 570, $top + 55]);
         $this->_setFontRegular(10);
 
         if ($putOrderId) {
+            $top += 30;
             $this->_drawText(
                 Mage::helper('sales')->__('Order # ') . $order->getRealOrderId(),
                 35,
-                ($top -= 30),
+                $top,
             );
         }
+        $top += 15;
         $this->_drawText(
             Mage::helper('sales')->__('Order Date: ') . Mage::helper('core')->formatDate(
                 $order->getCreatedAtStoreDate(),
@@ -337,15 +321,15 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 false,
             ),
             35,
-            ($top -= 15),
+            $top,
         );
 
-        $top -= 10;
+        $top += 10;
         $this->_pdf->setFillColor(237, 235, 235);
         $this->_pdf->setDrawColor(128, 128, 128);
         $this->_pdf->setLineWidth(0.5);
-        $this->_drawRectangle(25, $top, 275, ($top - 25), 'DF');
-        $this->_drawRectangle(275, $top, 570, ($top - 25), 'DF');
+        $this->_drawRectangle(25, $top, 275, $top + 25, 'DF');
+        $this->_drawRectangle(275, $top, 570, $top + 25, 'DF');
 
         /* Calculate blocks info */
 
@@ -374,12 +358,13 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
         $this->_pdf->setFillColor(0, 0, 0);
         $this->_setFontBold(12);
-        $this->_drawText(Mage::helper('sales')->__('Sold to:'), 35, ($top - 15));
+        $top += 15;
+        $this->_drawText(Mage::helper('sales')->__('Sold to:'), 35, $top);
 
         if (!$order->getIsVirtual()) {
-            $this->_drawText(Mage::helper('sales')->__('Ship to:'), 285, ($top - 15));
+            $this->_drawText(Mage::helper('sales')->__('Ship to:'), 285, $top);
         } else {
-            $this->_drawText(Mage::helper('sales')->__('Payment Method:'), 285, ($top - 15));
+            $this->_drawText(Mage::helper('sales')->__('Payment Method:'), 285, $top);
         }
 
         $addressesHeight = $this->_calcAddressHeight($billingAddress);
@@ -388,10 +373,10 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         }
 
         $this->_pdf->setFillColor(255, 255, 255);
-        $this->_drawRectangle(25, ($top - 25), 570, $top - 33 - $addressesHeight, 'DF');
+        $this->_drawRectangle(25, $top + 25, 570, $top + 33 + $addressesHeight, 'DF');
         $this->_pdf->setFillColor(0, 0, 0);
         $this->_setFontRegular(10);
-        $this->y = $top - 40;
+        $this->y = $top + 40;
         $addressesStartY = $this->y;
 
         foreach ($billingAddress as $value) {
@@ -402,7 +387,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 }
                 foreach ($text as $part) {
                     $this->_drawText(strip_tags(ltrim($part)), 35, $this->y);
-                    $this->y -= 15;
+                    $this->y += 15;
                 }
             }
         }
@@ -420,34 +405,34 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                         }
                         foreach ($text as $part) {
                             $this->_drawText(strip_tags(ltrim($part)), 285, $this->y);
-                            $this->y -= 15;
+                            $this->y += 15;
                         }
                     }
                 }
             }
 
-            $addressesEndY = min($addressesEndY, $this->y);
+            $addressesEndY = max($addressesEndY, $this->y);
             $this->y = $addressesEndY;
 
             $this->_pdf->setFillColor(237, 235, 235);
             $this->_pdf->setLineWidth(0.5);
-            $this->_drawRectangle(25, $this->y, 275, $this->y - 25, 'DF');
-            $this->_drawRectangle(275, $this->y, 570, $this->y - 25, 'DF');
+            $this->_drawRectangle(25, $this->y, 275, $this->y + 25, 'DF');
+            $this->_drawRectangle(275, $this->y, 570, $this->y + 25, 'DF');
 
-            $this->y -= 15;
+            $this->y += 15;
             $this->_setFontBold(12);
             $this->_pdf->setFillColor(0, 0, 0);
             $this->_drawText(Mage::helper('sales')->__('Payment Method'), 35, $this->y);
             $this->_drawText(Mage::helper('sales')->__('Shipping Method:'), 285, $this->y);
 
-            $this->y -= 10;
+            $this->y += 10;
             $this->_pdf->setFillColor(255, 255, 255);
 
             $this->_setFontRegular(10);
             $this->_pdf->setFillColor(0, 0, 0);
 
             $paymentLeft = 35;
-            $yPayments   = $this->y - 15;
+            $yPayments   = $this->y + 15;
         } else {
             $yPayments   = $addressesStartY;
             $paymentLeft = 285;
@@ -459,35 +444,35 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 $value = preg_replace('/<br[^>]*>/i', "\n", $value);
                 foreach (Mage::helper('core/string')->str_split($value, 45, true, true) as $str) {
                     $this->_drawText(strip_tags(trim($str)), $paymentLeft, $yPayments);
-                    $yPayments -= 15;
+                    $yPayments += 15;
                 }
             }
         }
 
         if ($order->getIsVirtual()) {
             // replacement of Shipments-Payments rectangle block
-            $yPayments = min($addressesEndY, $yPayments);
-            $this->_drawLine(25, ($top - 25), 25, $yPayments);
-            $this->_drawLine(570, ($top - 25), 570, $yPayments);
+            $yPayments = max($addressesEndY, $yPayments);
+            $this->_drawLine(25, $top + 25, 25, $yPayments);
+            $this->_drawLine(570, $top + 25, 570, $yPayments);
             $this->_drawLine(25, $yPayments, 570, $yPayments);
 
-            $this->y = $yPayments - 15;
+            $this->y = $yPayments + 15;
         } else {
             $topMargin    = 15;
             $methodStartY = $this->y;
-            $this->y     -= 15;
+            $this->y     += 15;
 
             foreach (Mage::helper('core/string')->str_split($shippingMethod, 45, true, true) as $str) {
                 $this->_drawText(strip_tags(trim($str)), 285, $this->y);
-                $this->y -= 15;
+                $this->y += 15;
             }
 
             $yShipments = $this->y;
             $totalShippingChargesText = '(' . Mage::helper('sales')->__('Total Shipping Charges') . ' '
                 . $order->formatPriceTxt($order->getShippingAmount()) . ')';
 
-            $this->_drawText($totalShippingChargesText, 285, $yShipments - $topMargin);
-            $yShipments -= $topMargin + 10;
+            $this->_drawText($totalShippingChargesText, 285, $yShipments + $topMargin);
+            $yShipments += $topMargin + 10;
 
             $tracks = [];
             if ($shipment) {
@@ -497,15 +482,15 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             if (count($tracks)) {
                 $this->_pdf->setFillColor(237, 235, 235);
                 $this->_pdf->setLineWidth(0.5);
-                $this->_drawRectangle(285, $yShipments, 510, $yShipments - 10, 'DF');
-                $this->_drawLine(400, $yShipments, 400, $yShipments - 10);
+                $this->_drawRectangle(285, $yShipments, 510, $yShipments + 10, 'DF');
+                $this->_drawLine(400, $yShipments, 400, $yShipments + 10);
 
                 $this->_setFontRegular(9);
                 $this->_pdf->setFillColor(0, 0, 0);
-                $this->_drawText(Mage::helper('sales')->__('Title'), 290, $yShipments - 7);
-                $this->_drawText(Mage::helper('sales')->__('Number'), 410, $yShipments - 7);
+                $this->_drawText(Mage::helper('sales')->__('Title'), 290, $yShipments + 7);
+                $this->_drawText(Mage::helper('sales')->__('Number'), 410, $yShipments + 7);
 
-                $yShipments -= 20;
+                $yShipments += 20;
                 $this->_setFontRegular(8);
                 foreach ($tracks as $track) {
                     $carrierCode = $track->getCarrierCode();
@@ -523,13 +508,13 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                     //$page->drawText($truncatedCarrierTitle, 285, $yShipments , 'UTF-8');
                     $this->_drawText($truncatedTitle, 292, $yShipments);
                     $this->_drawText($track->getNumber() ?? '', 410, $yShipments);
-                    $yShipments -= $topMargin - 5;
+                    $yShipments += $topMargin - 5;
                 }
             } else {
-                $yShipments -= $topMargin - 5;
+                $yShipments += $topMargin - 5;
             }
 
-            $currentY = min($yPayments, $yShipments);
+            $currentY = max($yPayments, $yShipments);
 
             // replacement of Shipments-Payments rectangle block
             $this->_drawLine(25, $methodStartY, 25, $currentY); //left
@@ -537,7 +522,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             $this->_drawLine(570, $currentY, 570, $methodStartY); //right
 
             $this->y = $currentY;
-            $this->y -= 15;
+            $this->y += 15;
         }
     }
 
@@ -551,7 +536,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         $this->_pdf->setFillColor(255, 255, 255);
         $this->_setFontRegular(10);
         $docHeader = $this->getDocHeaderCoordinates();
-        $this->_drawText($text, 35, $docHeader[1] - 15);
+        $this->_drawText($text, 35, $docHeader[1] + 15);
     }
 
     /**
@@ -641,7 +626,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             }
         }
 
-        $this->y -= 20;
+        $this->y += 20;
         $this->drawLineBlocks([$lineBlock]);
     }
 
@@ -877,7 +862,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     {
         $pageFormat = !empty($settings['page_size']) ? $settings['page_size'] : 'A4';
         $this->_getPdf()->AddPage('P', $pageFormat);
-        $this->y = 800;
+        $this->y = 30; // Start from top of page (TCPDF coordinates)
     }
 
     /**
@@ -932,7 +917,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 $itemsProp['shift'] = $shift;
             }
 
-            if ($this->y - $itemsProp['shift'] < 15) {
+            if ($this->y + $itemsProp['shift'] > 750) { // Adjust for page height
                 $this->newPage($pageSettings);
             }
 
@@ -960,7 +945,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                     $lineSpacing = !empty($column['height']) ? $column['height'] : $height;
                     $top = 0;
                     foreach ($column['text'] as $part) {
-                        if ($this->y - $lineSpacing < 15) {
+                        if ($this->y + $lineSpacing > 750) { // Adjust for page height
                             $this->newPage($pageSettings);
                         }
 
@@ -981,13 +966,13 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                                 }
                                 break;
                         }
-                        $this->_drawText($part, $feed, $this->y - $top);
+                        $this->_drawText($part, $feed, $this->y + $top);
                         $top += $lineSpacing;
                     }
 
                     $maxHeight = $top > $maxHeight ? $top : $maxHeight;
                 }
-                $this->y -= $maxHeight;
+                $this->y += $maxHeight;
             }
         }
     }
