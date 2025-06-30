@@ -15,15 +15,15 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
     /**
      * Draw table header for product items
      */
-    protected function _drawHeader(Zend_Pdf_Page $page)
+    protected function _drawHeader()
     {
-        $this->_setFontRegular($page, 10);
-        $page->setFillColor(new Zend_Pdf_Color_Rgb(0.93, 0.92, 0.92));
-        $page->setLineColor(new Zend_Pdf_Color_GrayScale(0.5));
-        $page->setLineWidth(0.5);
-        $page->drawRectangle(25, $this->y, 570, $this->y - 30);
+        $this->_setFontRegular(10);
+        $this->_pdf->SetFillColor(237, 235, 235);
+        $this->_pdf->SetDrawColor(128, 128, 128);
+        $this->_pdf->SetLineWidth(0.5);
+        $this->_drawRectangle(25, $this->y, 570, $this->y - 30, 'DF');
         $this->y -= 10;
-        $page->setFillColor(new Zend_Pdf_Color_Rgb(0, 0, 0));
+        $this->_pdf->SetFillColor(0, 0, 0);
 
         //columns headers
         $lines[0][] = [
@@ -76,8 +76,8 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
             'height' => 10,
         ];
 
-        $this->drawLineBlocks($page, [$lineBlock], ['table_header' => true]);
-        $page->setFillColor(new Zend_Pdf_Color_GrayScale(0));
+        $this->drawLineBlocks([$lineBlock], ['table_header' => true]);
+        $this->_pdf->SetFillColor(0, 0, 0);
         $this->y -= 20;
     }
 
@@ -85,7 +85,7 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
      * Return PDF document
      *
      * @param  Mage_Sales_Model_Order_Creditmemo[] $creditmemos
-     * @return Zend_Pdf
+     * @return string
      */
     #[\Override]
     public function getPdf($creditmemos = [])
@@ -93,66 +93,66 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
         $this->_beforeGetPdf();
         $this->_initRenderer('creditmemo');
 
-        $pdf = new Zend_Pdf();
+        $pdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8');
+        $pdf->SetAutoPageBreak(false);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->SetMargins(0, 0, 0);
+
         $this->_setPdf($pdf);
-        $style = new Zend_Pdf_Style();
-        $this->_setFontBold($style, 10);
+        $this->_setFontBold(10);
 
         foreach ($creditmemos as $creditmemo) {
             if ($creditmemo->getStoreId()) {
                 Mage::app()->getLocale()->emulate($creditmemo->getStoreId());
                 Mage::app()->setCurrentStore($creditmemo->getStoreId());
             }
-            $page  = $this->newPage();
+            $this->newPage();
             $order = $creditmemo->getOrder();
             /* Add image */
-            $this->insertLogo($page, $creditmemo->getStore());
+            $this->insertLogo($creditmemo->getStore());
             /* Add address */
-            $this->insertAddress($page, $creditmemo->getStore());
+            $this->insertAddress($creditmemo->getStore());
             /* Add head */
             $this->insertOrder(
-                $page,
                 $order,
                 Mage::getStoreConfigFlag(self::XML_PATH_SALES_PDF_CREDITMEMO_PUT_ORDER_ID, $order->getStoreId()),
             );
             /* Add document text and number */
             $this->insertDocumentNumber(
-                $page,
                 Mage::helper('sales')->__('Credit Memo # ') . $creditmemo->getIncrementId(),
             );
             /* Add table head */
-            $this->_drawHeader($page);
+            $this->_drawHeader();
             /* Add body */
             foreach ($creditmemo->getAllItems() as $item) {
                 if ($item->getOrderItem()->getParentItem()) {
                     continue;
                 }
                 /* Draw item */
-                $this->_drawItem($item, $page, $order);
-                $page = end($pdf->pages);
+                $this->_drawItem($item, $order);
             }
             /* Add totals */
-            $this->insertTotals($page, $creditmemo);
+            $this->insertTotals($creditmemo);
         }
         $this->_afterGetPdf();
         if (isset($creditmemo) && $creditmemo->getStoreId()) {
             Mage::app()->getLocale()->revert();
         }
-        return $pdf;
+        return $pdf->Output('', 'S');
     }
 
     /**
      * Create new page and assign to PDF object
      *
-     * @return Zend_Pdf_Page
+     * @return void
      */
     #[\Override]
     public function newPage(array $settings = [])
     {
-        $page = parent::newPage($settings);
+        parent::newPage($settings);
         if (!empty($settings['table_header'])) {
-            $this->_drawHeader($page);
+            $this->_drawHeader();
         }
-        return $page;
     }
 }

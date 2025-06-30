@@ -47,11 +47,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf
      */
     public function render()
     {
-        $pdf = new Zend_Pdf();
+        // TODO: This DHL functionality is deprecated - complete TCPDF migration if needed
+        $pdf = new TCPDF('L', 'pt', 'A4', true, 'UTF-8');
+        $pdf->SetAutoPageBreak(false);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->SetMargins(0, 0, 0);
 
         $pdfBuilder = new Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder();
 
-        $template = new Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page(Zend_Pdf_Page::SIZE_A4_LANDSCAPE);
+        // Create template page with TCPDF integration
+        $template = new Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page($pdf);
         $pdfBuilder->setPage($template)
             ->addProductName((string) $this->_info->ProductShortName)
             ->addProductContentCode((string) $this->_info->ProductContentCode)
@@ -81,7 +87,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf
         $packages = array_values($this->_request->getPackages());
         $i = 0;
         foreach ($this->_info->Pieces->Piece as $piece) {
-            $page = new Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page($template);
+            // Add a new page for each piece
+            $pdf->AddPage();
+
+            // Create a new page instance for each piece
+            $page = new Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page($pdf);
             $pdfBuilder->setPage($page)
                 ->addPieceNumber((int) $piece->PieceNumber, (int) $this->_info->Piece)
                 ->addContentInfo($packages[$i])
@@ -90,9 +100,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf
                     (string) $piece->LicensePlate,
                     (string) $piece->LicensePlateBarCode,
                 );
-            $pdf->pages[] = $page;
             $i++;
         }
-        return $pdf->render();
+        return $pdf->Output('', 'S');
     }
 }

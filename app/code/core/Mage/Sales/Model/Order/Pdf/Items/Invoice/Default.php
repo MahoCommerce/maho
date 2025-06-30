@@ -21,7 +21,6 @@ class Mage_Sales_Model_Order_Pdf_Items_Invoice_Default extends Mage_Sales_Model_
         $order  = $this->getOrder();
         $item   = $this->getItem();
         $pdf    = $this->getPdf();
-        $page   = $this->getPage();
         $lines  = [];
 
         // draw Product name
@@ -119,7 +118,6 @@ class Mage_Sales_Model_Order_Pdf_Items_Invoice_Default extends Mage_Sales_Model_
             'height' => 20,
         ];
 
-        $page = $pdf->drawLineBlocks($page, [$lineBlock], ['table_header' => true]);
-        $this->setPage($page);
+        $pdf->drawLineBlocks([$lineBlock], ['table_header' => true]);
     }
 }

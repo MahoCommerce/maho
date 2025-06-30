@@ -6,17 +6,14 @@
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * DHL International (API v1.4) Label Creation
+ * DHL International (API v1.4) Label Creation - TCPDF Implementation
  *
  * @deprecated now the process of creating the label is on DHL side
- *
- * @property Zend_Pdf_Resource_Font $_fontBold
- * @property Zend_Pdf_Resource_Font $_fontNormal
  */
 class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
 {
@@ -33,33 +30,38 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     /**
      * Pdf Page Instance
      *
-     * @var Zend_Pdf_Page
+     * @var Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
      */
     protected $_page;
 
     /**
-     * @var Zend_Pdf_Resource_Font
+     * Normal font family name
+     *
+     * @var string
      */
-    protected $_fontNormal;
+    protected $_fontNormal = 'helvetica';
 
     /**
-     * @var  Zend_Pdf_Resource_Font
+     * Bold font family name
+     *
+     * @var string
      */
-    protected $_fontBold;
+    protected $_fontBold = 'helvetica';
 
     /**
-     * Create font instances
+     * Create font instances - TCPDF doesn't need font resource creation
      */
     public function __construct()
     {
-        $this->_fontNormal = Zend_Pdf_Font::fontWithName(Zend_Pdf_Font::FONT_HELVETICA);
-        $this->_fontBold = Zend_Pdf_Font::fontWithName(Zend_Pdf_Font::FONT_HELVETICA_BOLD);
+        // TCPDF uses font names directly, no need to create font resources
+        $this->_fontNormal = 'helvetica';
+        $this->_fontBold = 'helvetica';
     }
 
     /**
      * Get Page
      *
-     * @return Zend_Pdf_Page
+     * @return Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
      */
     public function getPage()
     {
@@ -71,7 +73,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
      *
      * @return $this
      */
-    public function setPage(Zend_Pdf_Page $page)
+    public function setPage(Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page $page)
     {
         $this->_page = $page;
         return $this;
@@ -109,8 +111,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
         $x = $this->_x(0);
         $y = $this->_y(0);
 
-        $image = new Zend_Pdf_Resource_Image_Jpeg(Mage::getBaseDir('media') . DS . 'dhl' . DS . 'logo.jpg');
-        $this->_page->drawImage($image, $x + 191, $this->_y(27), $x + 287, $this->_y(1));
+        // Draw DHL logo if exists
+        $logoPath = Mage::getBaseDir('media') . DS . 'dhl' . DS . 'logo.jpg';
+        if (file_exists($logoPath)) {
+            $this->_page->drawImage($logoPath, $x + 191, $this->_y(27), $x + 287, $this->_y(1));
+        }
 
         /* Vertical borders */
         $this->_page->drawLine($x, $y, $x, $this->_y(568));
@@ -118,7 +123,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
         $this->_page->drawLine($x + 139.5, $y, $x + 139.5, $this->_y(28));
         $this->_page->drawLine($x + 190.5, $y, $x + 190.5, $this->_y(28));
 
-        /* Horisontal borders */
+        /* Horizontal borders */
         $this->_page->drawLine($x, $y, $x + 288, $y);
         $this->_page->drawLine($x, $this->_y(28), $x + 288, $this->_y(28));
         $this->_page->drawLine($x, $this->_y(80.5), $x + 288, $this->_y(80.5));
@@ -196,9 +201,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
                 $this->_y(0),
                 $this->_x(190),
                 $this->_y(28),
-                Zend_Pdf_Page::SHAPE_DRAW_FILL,
+                'DF',
             );
-            $this->_page->setFillColor(new Zend_Pdf_Color_Html('#ffffff'));
+            $this->_page->setFillColor([1, 1, 1]); // White color
             $font = $this->_fontBold;
         } else {
             $font = $this->_fontNormal;
@@ -422,7 +427,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
             $this->_y(195),
             $this->_x(218),
             $this->_y(217),
-            Zend_Pdf_Page::SHAPE_DRAW_FILL,
+            'DF',
         );
         $this->_page->restoreGS();
         return $this;
@@ -561,12 +566,20 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
         if (!strlen($number) || !strlen($barCode)) {
             throw new InvalidArgumentException(Mage::helper('usa')->__('Waybill barcode information is missing'));
         }
-        $image = new Zend_Pdf_Resource_Image_Png('data://image/png;base64,' . $barCode);
-        $this->_page->drawImage($image, $this->_x(0), $this->_y(296), $this->_x(232), $this->_y(375));
+
+        // Create temporary image from base64 barcode
+        $imageData = base64_decode($barCode);
+        $tmpFileName = sys_get_temp_dir() . DS . 'dhl_waybill_' . uniqid() . '.png';
+        file_put_contents($tmpFileName, $imageData);
+
+        $this->_page->drawImage($tmpFileName, $this->_x(0), $this->_y(296), $this->_x(232), $this->_y(375));
 
         $this->_page->setFont($this->_fontNormal, 9);
         $number = substr($number, 0, 2) . ' ' . substr($number, 2, 4) . ' ' . substr($number, 6, 4);
         $this->_page->drawText('WAYBILL ' . $number, $this->_x(13.5), $this->_y(382));
+
+        // Clean up temporary file
+        unlink($tmpFileName);
 
         $this->_page->restoreGS();
         return $this;
@@ -589,12 +602,19 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
             throw new InvalidArgumentException(Mage::helper('usa')->__('Routing barcode is missing'));
         }
 
-        $image = new Zend_Pdf_Resource_Image_Png('data://image/png;base64,' . $barCode);
-        $this->_page->drawImage($image, $this->_x(0), $this->_y(386), $this->_x(232), $this->_y(465));
+        // Create temporary image from base64 barcode
+        $imageData = base64_decode($barCode);
+        $tmpFileName = sys_get_temp_dir() . DS . 'dhl_routing_' . uniqid() . '.png';
+        file_put_contents($tmpFileName, $imageData);
+
+        $this->_page->drawImage($tmpFileName, $this->_x(0), $this->_y(386), $this->_x(232), $this->_y(465));
 
         $this->_page->setFont($this->_fontNormal, 9);
         $routingText = '(' . $id . ')' . $routingCode;
         $this->_page->drawText($routingText, $this->_x(12), $this->_y(472));
+
+        // Clean up temporary file
+        unlink($tmpFileName);
 
         $this->_page->restoreGS();
         return $this;
@@ -617,8 +637,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
             throw new InvalidArgumentException(Mage::helper('usa')->__('Piece Id barcode is missing'));
         }
 
-        $image = new Zend_Pdf_Resource_Image_Png('data://image/png;base64,' . $barCode);
-        $this->_page->drawImage($image, $this->_x(29), $this->_y(476), $this->_x(261), $this->_y(555));
+        // Create temporary image from base64 barcode
+        $imageData = base64_decode($barCode);
+        $tmpFileName = sys_get_temp_dir() . DS . 'dhl_piece_' . uniqid() . '.png';
+        file_put_contents($tmpFileName, $imageData);
+
+        $this->_page->drawImage($tmpFileName, $this->_x(29), $this->_y(476), $this->_x(261), $this->_y(555));
 
         $this->_page->setFont($this->_fontNormal, 9);
         $routingText = '(' . $dataIdentifier . ')' . $licensePlate;
@@ -629,6 +653,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
             'UTF-8',
             Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page::ALIGN_CENTER,
         );
+
+        // Clean up temporary file
+        unlink($tmpFileName);
 
         $this->_page->restoreGS();
         return $this;

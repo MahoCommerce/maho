@@ -41,13 +41,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     protected $_pdf;
 
     /**
-     * Pdf current page
-     *
-     * @var Zend_Pdf_Page|null
-     */
-    protected $_pdfPage;
-
-    /**
      * Set order model
      *
      * @return $this
@@ -88,17 +81,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     public function setPdf(Mage_Sales_Model_Order_Pdf_Abstract $pdf)
     {
         $this->_pdf = $pdf;
-        return $this;
-    }
-
-    /**
-     * Set current page
-     *
-     * @return $this
-     */
-    public function setPage(Zend_Pdf_Page $page)
-    {
-        $this->_pdfPage = $page;
         return $this;
     }
 
@@ -158,19 +140,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
         return $this->_pdf;
     }
 
-    /**
-     * Retrieve Pdf page object
-     *
-     * @throws Mage_Core_Exception
-     * @return Zend_Pdf_Page
-     */
-    public function getPage()
-    {
-        if (is_null($this->_pdfPage)) {
-            Mage::throwException(Mage::helper('sales')->__('PDF page object is not specified.'));
-        }
-        return $this->_pdfPage;
-    }
 
     /**
      * Draw item line
@@ -288,39 +257,36 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
      * Set font as regular
      *
      * @param  int $size
-     * @return Zend_Pdf_Resource_Font
+     * @return string
      */
     protected function _setFontRegular($size = 7)
     {
-        $font = Zend_Pdf_Font::fontWithName(Zend_Pdf_Font::FONT_HELVETICA);
-        $this->getPage()->setFont($font, $size);
-        return $font;
+        $this->getPdf()->_setFontRegular($size);
+        return 'helvetica';
     }
 
     /**
      * Set font as bold
      *
      * @param  int $size
-     * @return Zend_Pdf_Resource_Font
+     * @return string
      */
     protected function _setFontBold($size = 7)
     {
-        $font = Zend_Pdf_Font::fontWithName(Zend_Pdf_Font::FONT_HELVETICA_BOLD);
-        $this->getPage()->setFont($font, $size);
-        return $font;
+        $this->getPdf()->_setFontBold($size);
+        return 'helvetica';
     }
 
     /**
      * Set font as italic
      *
      * @param  int $size
-     * @return Zend_Pdf_Resource_Font
+     * @return string
      */
     protected function _setFontItalic($size = 7)
     {
-        $font = Zend_Pdf_Font::fontWithName(Zend_Pdf_Font::FONT_HELVETICA_OBLIQUE);
-        $this->getPage()->setFont($font, $size);
-        return $font;
+        $this->getPdf()->_setFontItalic($size);
+        return 'helvetica';
     }
 
     /**
