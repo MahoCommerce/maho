@@ -16,4 +16,15 @@ class Maho_AdminActivityLog_Model_Resource_Activity extends Mage_Core_Model_Reso
     {
         $this->_init('adminactivitylog/activity', 'activity_id');
     }
+
+    public function cleanOldLogs(): void
+    {
+        $daysToKeep = (int) Mage::getStoreConfig('admin/adminactivitylog/days_to_keep');
+        if ($daysToKeep > 0) {
+            $date = Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s', strtotime("-{$daysToKeep} days"));
+            Mage::getResourceModel('adminactivitylog/activity_collection')
+                ->addFieldToFilter('created_at', ['lt' => $date])
+                ->walk('delete');
+        }
+    }
 }

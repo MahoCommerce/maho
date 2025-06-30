@@ -19,8 +19,8 @@ class Maho_AdminActivityLog_Helper_Data extends Mage_Core_Helper_Abstract
     public function cleanOldLogs(): void
     {
         if ($this->isEnabled()) {
-            Mage::getModel('adminactivitylog/activity')->cleanOldLogs();
-            Mage::getModel('adminactivitylog/login')->cleanOldLogs();
+            Mage::getResourceModel('adminactivitylog/activity')->cleanOldLogs();
+            Mage::getResourceModel('adminactivitylog/login')->cleanOldLogs();
         }
     }
 }
