@@ -33,12 +33,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             'label' => Mage::helper('adminactivitylog')->__('Username'),
             'value' => $activity->getUsername(),
         ]);
-
-        $fieldset->addField('fullname', 'label', [
-            'label' => Mage::helper('adminactivitylog')->__('Full Name'),
-            'value' => $activity->getFullname(),
-        ]);
-
         $fieldset->addField('action_type', 'label', [
             'label' => Mage::helper('adminactivitylog')->__('Action Type'),
             'value' => ucfirst(str_replace('_', ' ', $activity->getActionType())),
