@@ -16,6 +16,10 @@ class Maho_AdminActivityLog_Model_Observer
     public function logAdminLogin(Varien_Event_Observer $observer): void
     {
         try {
+            if (!Mage::helper('adminactivitylog')->shouldLogAuth()) {
+                return;
+            }
+
             $user = $observer->getEvent()->getUser();
             if ($user && $user->getId()) {
                 Mage::getModel('adminactivitylog/login')->logLogin($user);
@@ -28,6 +32,10 @@ class Maho_AdminActivityLog_Model_Observer
     public function logAdminLogout(Varien_Event_Observer $observer): void
     {
         try {
+            if (!Mage::helper('adminactivitylog')->shouldLogAuth()) {
+                return;
+            }
+
             $user = Mage::getSingleton('admin/session')->getUser();
             if ($user && $user->getId()) {
                 Mage::getModel('adminactivitylog/login')->logLogout($user);
@@ -40,6 +48,10 @@ class Maho_AdminActivityLog_Model_Observer
     public function logAdminLoginFailed(Varien_Event_Observer $observer): void
     {
         try {
+            if (!Mage::helper('adminactivitylog')->shouldLogFailedAuth()) {
+                return;
+            }
+
             $username = $observer->getEvent()->getUserName();
             $exception = $observer->getEvent()->getException();
             $reason = $exception ? $exception->getMessage() : 'Unknown error';
@@ -55,7 +67,7 @@ class Maho_AdminActivityLog_Model_Observer
     public function logAdminActivityBefore(Varien_Event_Observer $observer): void
     {
         try {
-            if (!$this->_shouldLogActivity() || !$this->_isAdminArea()) {
+            if (!Mage::helper('adminactivitylog')->shouldLogActivity()) {
                 return;
             }
 
@@ -74,11 +86,7 @@ class Maho_AdminActivityLog_Model_Observer
     public function logAdminActivityAfter(Varien_Event_Observer $observer): void
     {
         try {
-            if (!$this->_shouldLogActivity() || !$this->_isAdminArea()) {
-                return;
-            }
-
-            if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_save_actions')) {
+            if (!Mage::helper('adminactivitylog')->shouldLogSaveActions()) {
                 return;
             }
 
@@ -172,11 +180,7 @@ class Maho_AdminActivityLog_Model_Observer
     public function logAdminDelete(Varien_Event_Observer $observer): void
     {
         try {
-            if (!$this->_shouldLogActivity() || !$this->_isAdminArea()) {
-                return;
-            }
-
-            if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_delete_actions')) {
+            if (!Mage::helper('adminactivitylog')->shouldLogDeleteActions()) {
                 return;
             }
 
@@ -205,7 +209,7 @@ class Maho_AdminActivityLog_Model_Observer
     public function logPageVisit(Varien_Event_Observer $observer): void
     {
         try {
-            if (!$this->_shouldLogActivity() || !Mage::getStoreConfigFlag('admin/adminactivitylog/log_page_visit')) {
+            if (!Mage::helper('adminactivitylog')->shouldLogPageVisit()) {
                 return;
             }
 
@@ -234,17 +238,6 @@ class Maho_AdminActivityLog_Model_Observer
         } catch (Exception $e) {
             Mage::logException($e);
         }
-    }
-
-    protected function _shouldLogActivity(): bool
-    {
-        return Mage::getStoreConfigFlag('admin/adminactivitylog/enabled')
-            && Mage::getSingleton('admin/session')->isLoggedIn();
-    }
-
-    protected function _isAdminArea(): bool
-    {
-        return Mage::app()->getStore()->isAdmin();
     }
 
     protected function _getCurrentModule(): string
@@ -294,15 +287,7 @@ class Maho_AdminActivityLog_Model_Observer
 
     public function logMassAction(Varien_Event_Observer $observer): void
     {
-        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/enabled')) {
-            return;
-        }
-
-        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_mass_actions')) {
-            return;
-        }
-
-        if (!Mage::getSingleton('admin/session')->isLoggedIn()) {
+        if (!Mage::helper('adminactivitylog')->shouldLogMassActions()) {
             return;
         }
 

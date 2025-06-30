@@ -41,6 +41,19 @@
                 </setup>
             </adminactivitylog_setup>
         </resources>
+    </global>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Maho_AdminActivityLog before="Mage_Adminhtml">Maho_AdminActivityLog_Adminhtml</Maho_AdminActivityLog>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    <adminhtml>
         <events>
             <admin_user_authenticate_after>
                 <observers>
@@ -107,19 +120,6 @@
                 </observers>
             </controller_action_postdispatch_adminhtml>
         </events>
-    </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Maho_AdminActivityLog before="Mage_Adminhtml">Maho_AdminActivityLog_Adminhtml</Maho_AdminActivityLog>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
-    <adminhtml>
         <layout>
             <updates>
                 <adminactivitylog>

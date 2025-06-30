@@ -19,7 +19,7 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
 
     public function logActivity(array $data): self
     {
-        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/enabled')) {
+        if (!Mage::helper('adminactivitylog')->shouldLogActivity()) {
             return $this;
         }
 

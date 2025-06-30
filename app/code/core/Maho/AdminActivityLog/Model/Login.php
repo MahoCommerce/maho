@@ -23,7 +23,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 
     public function logLogin(Mage_Admin_Model_User $user): self
     {
-        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_login_activity')) {
+        if (!Mage::helper('adminactivitylog')->shouldLogAuth()) {
             return $this;
         }
 
@@ -41,7 +41,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 
     public function logLogout(Mage_Admin_Model_User $user): self
     {
-        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_login_activity')) {
+        if (!Mage::helper('adminactivitylog')->shouldLogAuth()) {
             return $this;
         }
 
@@ -59,7 +59,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 
     public function logFailedLogin(#[\SensitiveParameter] string $username, string $reason = ''): self
     {
-        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_failed_login')) {
+        if (!Mage::helper('adminactivitylog')->shouldLogFailedAuth()) {
             return $this;
         }
 
