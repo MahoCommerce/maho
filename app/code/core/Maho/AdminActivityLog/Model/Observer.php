@@ -13,6 +13,15 @@ class Maho_AdminActivityLog_Model_Observer
 {
     protected array $_oldData = [];
 
+    /**
+     * Fields to ignore (system fields, timestamps, and form fields)
+     */
+    protected array $ignoreFields = [
+        'updated_at', 'created_at', 'entity_id', 'has_options', 'required_options',
+        'form_key', 'key', 'uenc', 'form_token', 'session_id', '_store', '_redirect',
+        'isAjax', 'ajax', 'callback', 'controller', 'action', 'module', 'update_time',
+    ];
+
     public function logAdminLogin(Varien_Event_Observer $observer): void
     {
         try {
@@ -77,7 +86,17 @@ class Maho_AdminActivityLog_Model_Observer
             }
 
             $objectHash = spl_object_hash($object);
-            $this->_oldData[$objectHash] = $object->getOrigData();
+
+            if ($object instanceof Mage_Core_Model_Config_Data) {
+                $this->_oldData[$objectHash] = [
+                    'path' => $object->getPath(),
+                    'website_code' => $object->getWebsiteCode(),
+                    'store_code' => $object->getStoreCode(),
+                    'value' => $object->getOldValue(),
+                ];
+            } else {
+                $this->_oldData[$objectHash] = $object->getOrigData();
+            }
         } catch (Exception $e) {
             Mage::logException($e);
         }
@@ -105,72 +124,61 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
+            // Don't log config data if not changed
+            if ($object instanceof Mage_Core_Model_Config_Data && !$object->isValueChanged()) {
+                return;
+            }
+
             $objectHash = spl_object_hash($object);
+
             $oldData = $this->_oldData[$objectHash] ?? [];
-            $isNew = empty($oldData);
+            $newData = $object->getData();
 
-            $entityType = $this->_getEntityType($object);
-            $entityName = $this->_getEntityName($object);
-
-            $changedData = [];
             $oldChangedData = [];
             $newChangedData = [];
 
-            // Fields to ignore (system fields, timestamps, and form fields)
-            $ignoreFields = [
-                'updated_at', 'created_at', 'entity_id', 'has_options', 'required_options',
-                'form_key', 'key', 'uenc', 'form_token', 'session_id', '_store', '_redirect',
-                'isAjax', 'ajax', 'callback', 'controller', 'action', 'module', 'update_time',
-            ];
+            $isNew = empty($oldData);
 
-            if (!$isNew) {
-                // Get the original data keys to ensure we only track DB fields
-                $originalDataKeys = array_keys($oldData);
-
-                foreach ($object->getData() as $key => $value) {
-                    // Skip ignored fields
-                    if (in_array($key, $ignoreFields)) {
-                        continue;
-                    }
-
-                    // Skip fields that weren't in the original data (likely not DB fields)
-                    if (!in_array($key, $originalDataKeys) && !isset($oldData[$key])) {
-                        continue;
-                    }
-
-                    $oldValue = $oldData[$key] ?? null;
+            if ($isNew) {
+                $oldChangedData = $oldData;
+                $newChangedData = $newData;
+            } else {
+                foreach ($oldData as $key => $oldValue) {
+                    $newValue = $newData[$key] ?? null;
 
                     // Only log if there's a meaningful change
-                    if ($oldValue != $value) {
-                        // Skip changes where both old and new are null/empty
-                        if (($oldValue === null || $oldValue === '') && ($value === null || $value === '')) {
+                    if (!$object instanceof Mage_Core_Model_Config_Data) {
+                        if ($oldValue == $newValue) {
                             continue;
                         }
-
-                        $changedData[$key] = [
-                            'old' => $oldValue,
-                            'new' => $value,
-                        ];
-                        $oldChangedData[$key] = $oldValue;
-                        $newChangedData[$key] = $value;
+                        if (($oldValue === null || $oldValue === '') && ($newValue === null || $newValue === '')) {
+                            continue;
+                        }
                     }
+
+                    $oldChangedData[$key] = $oldValue;
+                    $newChangedData[$key] = $newValue;
                 }
             }
+
+            $oldChangedData = $this->filterFields($oldChangedData);
+            $newChangedData = $this->filterFields($newChangedData);
 
             $data = [
                 'action_type' => $isNew ? 'create' : 'update',
                 'module' => $this->_getCurrentModule(),
                 'controller' => $this->_getCurrentController(),
                 'action' => $this->_getCurrentAction(),
-                'entity_type' => $entityType,
+                'entity_type' => $this->_getEntityType($object),
                 'entity_id' => $object->getId(),
-                'entity_name' => $entityName,
-                'old_data' => $isNew ? [] : $oldChangedData,
-                'new_data' => $isNew ? $object->getData() : $newChangedData,
+                'entity_name' => $this->_getEntityName($object),
+                'old_data' => $oldChangedData,
+                'new_data' => $newChangedData,
             ];
 
-            Mage::getModel('adminactivitylog/activity')->logActivity($data);
-
+            if (count(array_keys($newChangedData)) > 0) {
+                Mage::getModel('adminactivitylog/activity')->logActivity($data);
+            }
             unset($this->_oldData[$objectHash]);
         } catch (Exception $e) {
             Mage::logException($e);
@@ -189,6 +197,9 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
+            $objectHash = spl_object_hash($object);
+            $oldData = $this->_oldData[$objectHash] ?? $object->getData();
+
             $data = [
                 'action_type' => 'delete',
                 'module' => $this->_getCurrentModule(),
@@ -197,7 +208,7 @@ class Maho_AdminActivityLog_Model_Observer
                 'entity_type' => $this->_getEntityType($object),
                 'entity_id' => $object->getId(),
                 'entity_name' => $this->_getEntityName($object),
-                'old_data' => $object->getData(),
+                'old_data' => $this->filterFields($oldData),
             ];
 
             Mage::getModel('adminactivitylog/activity')->logActivity($data);
@@ -255,6 +266,11 @@ class Maho_AdminActivityLog_Model_Observer
         return (string) Mage::app()->getRequest()->getActionName();
     }
 
+    protected function filterFields(array $data): array
+    {
+        return array_diff_key($data, array_flip($this->ignoreFields));
+    }
+
     protected function _getEntityType(Mage_Core_Model_Abstract $object): string
     {
         $class = $object::class;
@@ -274,7 +290,7 @@ class Maho_AdminActivityLog_Model_Observer
 
     protected function _getEntityName(Mage_Core_Model_Abstract $object): string
     {
-        $nameFields = ['name', 'title', 'sku', 'increment_id', 'username', 'email', 'identifier'];
+        $nameFields = ['name', 'title', 'sku', 'increment_id', 'username', 'email', 'identifier', 'path'];
 
         foreach ($nameFields as $field) {
             if ($object->hasData($field) && $object->getData($field)) {

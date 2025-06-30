@@ -97,12 +97,20 @@
             </model_save_after>
             <model_delete_before>
                 <observers>
-                    <adminactivitylog_delete>
+                    <adminactivitylog_delete_before>
                         <class>adminactivitylog/observer</class>
-                        <method>logAdminDelete</method>
-                    </adminactivitylog_delete>
+                        <method>logAdminActivityBefore</method>
+                    </adminactivitylog_delete_before>
                 </observers>
             </model_delete_before>
+            <model_delete_after>
+                <observers>
+                    <adminactivitylog_delete_after>
+                        <class>adminactivitylog/observer</class>
+                        <method>logAdminDelete</method>
+                    </adminactivitylog_delete_after>
+                </observers>
+            </model_delete_after>
             <controller_action_predispatch_adminhtml>
                 <observers>
                     <adminactivitylog_page_visit>
