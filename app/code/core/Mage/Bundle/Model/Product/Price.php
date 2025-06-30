@@ -521,7 +521,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $selectionProduct,
         $bundleQty,
         $selectionQty = null,
-        $multiplyQty = true
+        $multiplyQty = true,
     ) {
         return $this->getSelectionFinalTotalPrice(
             $bundleProduct,
@@ -551,7 +551,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $bundleQty,
         $selectionQty,
         $multiplyQty = true,
-        $takeTierPrice = true
+        $takeTierPrice = true,
     ) {
         if (is_null($selectionQty)) {
             $selectionQty = $selectionProduct->getSelectionQty();
@@ -801,7 +801,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $rulePrice = false,
         $wId = null,
         $gId = null,
-        $productId = null
+        $productId = null,
     ) {
         $resource = Mage::getResourceSingleton('bundle/bundle');
         $selectionResource = Mage::getResourceSingleton('bundle/selection');
@@ -958,7 +958,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $specialPrice,
         $specialPriceFrom,
         $specialPriceTo,
-        $store = null
+        $store = null,
     ) {
         if (!is_null($specialPrice) && $specialPrice != false) {
             if (Mage::app()->getLocale()->isStoreDateInInterval($store, $specialPriceFrom, $specialPriceTo)) {

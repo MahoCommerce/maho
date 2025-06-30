@@ -191,7 +191,7 @@ class Mage_Api2_Model_Server
     protected function _dispatch(
         Mage_Api2_Model_Request $request,
         Mage_Api2_Model_Response $response,
-        Mage_Api2_Model_Auth_User_Abstract $apiUser
+        Mage_Api2_Model_Auth_User_Abstract $apiUser,
     ) {
         /** @var Mage_Api2_Model_Dispatcher $dispatcher */
         $dispatcher = Mage::getModel('api2/dispatcher');
@@ -219,7 +219,7 @@ class Mage_Api2_Model_Server
     protected function _renderException(
         Exception $exception,
         Mage_Api2_Model_Renderer_Interface $renderer,
-        Mage_Api2_Model_Response $response
+        Mage_Api2_Model_Response $response,
     ) {
         if ($exception instanceof Mage_Api2_Exception && $exception->getCode()) {
             $httpCode = $exception->getCode();

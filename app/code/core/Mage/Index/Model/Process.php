@@ -349,7 +349,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
      */
     protected function _processEventsCollection(
         Mage_Index_Model_Resource_Event_Collection $eventsCollection,
-        $skipUnmatched = true
+        $skipUnmatched = true,
     ) {
         // We can't reload the collection because of transaction
         while ($event = $eventsCollection->fetchItem()) {

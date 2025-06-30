@@ -71,7 +71,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
         $liParams = null,
         $aParams = null,
         $beforeText = '',
-        $afterText = ''
+        $afterText = '',
     ) {
         if (is_null($label) || $label === false) {
             return $this;

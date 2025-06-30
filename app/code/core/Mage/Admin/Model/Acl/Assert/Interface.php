@@ -24,6 +24,6 @@ interface Mage_Admin_Model_Acl_Assert_Interface
         Mage_Admin_Model_Acl $acl,
         ?Mage_Admin_Model_Acl_Role $role = null,
         ?Mage_Admin_Model_Acl_Resource $resource = null,
-        $privilege = null
+        $privilege = null,
     );
 }

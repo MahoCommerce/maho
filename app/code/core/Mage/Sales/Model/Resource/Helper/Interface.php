@@ -24,6 +24,6 @@ interface Mage_Sales_Model_Resource_Helper_Interface
         $aggregation,
         $aggregationAliases,
         $mainTable,
-        $aggregationTable
+        $aggregationTable,
     );
 }

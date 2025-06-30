@@ -330,7 +330,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      */
     public function changeResetPasswordLinkCustomerId(
         Mage_Customer_Model_Customer $customer,
-        $newResetPasswordLinkCustomerId
+        $newResetPasswordLinkCustomerId,
     ) {
         if (is_string($newResetPasswordLinkCustomerId) && !empty($newResetPasswordLinkCustomerId)) {
             $customer->setRpCustomerId($newResetPasswordLinkCustomerId);

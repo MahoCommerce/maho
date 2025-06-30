@@ -159,7 +159,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
         bool $showTime = false,
-        bool $useTimezone = true
+        bool $useTimezone = true,
     ): string {
         if (!in_array($format, $this->_allowedFormats, true)) {
             return $date;
@@ -943,7 +943,9 @@ XML;
         $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
-        return match ($emailTransport) {
+        $region = Mage::getStoreConfig('system/smtp/region');
+
+        $dsn = match ($emailTransport) {
             'smtp' => "$emailTransport://$user:$pass@$host:$port",
             'ses+smtp' => "$emailTransport://$user:$pass@default",
             'ses+https' => "$emailTransport://$user:$pass@default",
@@ -980,7 +982,13 @@ XML;
             'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
             'sweego+api' => "$emailTransport://$pass@default",
             'sendmail' => "$emailTransport://default",
-            default => ''
+            default => '',
         };
+
+        if ($region) {
+            $dsn .= "?region=$region";
+        }
+
+        return $dsn;
     }
 }

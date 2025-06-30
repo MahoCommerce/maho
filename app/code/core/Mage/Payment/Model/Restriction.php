@@ -27,7 +27,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
     public function validatePaymentMethod(
         string $paymentMethodCode,
         ?Mage_Sales_Model_Quote $quote = null,
-        ?Mage_Customer_Model_Customer $customer = null
+        ?Mage_Customer_Model_Customer $customer = null,
     ): bool {
         $restrictions = $this->getCollection()
             ->addFieldToFilter('status', self::STATUS_ENABLED);
@@ -72,7 +72,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
     protected function _checkBasicRestrictions(
         Mage_Payment_Model_Restriction $restriction,
         ?Mage_Sales_Model_Quote $quote = null,
-        ?Mage_Customer_Model_Customer $customer = null
+        ?Mage_Customer_Model_Customer $customer = null,
     ): bool {
         // Date restriction (from_date, to_date)
         if ($restriction->getFromDate() || $restriction->getToDate()) {
@@ -119,7 +119,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
     protected function _matchesRestriction(
         Mage_Payment_Model_Restriction $restriction,
         ?Mage_Sales_Model_Quote $quote = null,
-        ?Mage_Customer_Model_Customer $customer = null
+        ?Mage_Customer_Model_Customer $customer = null,
     ): bool {
         return $this->_checkBasicRestrictions($restriction, $quote, $customer);
     }
