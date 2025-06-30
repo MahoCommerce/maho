@@ -352,7 +352,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
         $this->_page->setFont($this->_fontNormal, 9);
         $this->_page->drawText('To:', $this->_x(5), $this->_y(92));
         $this->_page->drawText($consignee->CompanyName, $this->_x(20), $this->_y(90));
-        $y = $this->_page->drawLines($consignee->AddressLine, $this->_x(19), $this->_y(100), 50);
+        $addressLines = is_array($consignee->AddressLine) ? $consignee->AddressLine : ($consignee->AddressLine ? [$consignee->AddressLine] : []);
+        $y = $this->_page->drawLines($addressLines, $this->_x(19), $this->_y(100), 50);
 
         $this->_page->setFont($this->_fontBold, 11);
         $cityInfo = implode(' ', array_filter([$consignee->PostalCode, $consignee->City,

@@ -104,7 +104,6 @@ class Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Default extends Mage_Sales_Mod
             'height' => 20,
         ];
 
-        $page = $pdf->drawLineBlocks($page, [$lineBlock], ['table_header' => true]);
-        $this->setPage($page);
+        $pdf->drawLineBlocks([$lineBlock], ['table_header' => true]);
     }
 }

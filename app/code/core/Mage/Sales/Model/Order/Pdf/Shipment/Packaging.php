@@ -253,7 +253,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
                     $itemCollsX[++$i] + $txtIndent,
                     $this->y,
                 );
-                $this->_drawText($item->getQty() * 1, $itemCollsX[++$i] + $txtIndent, $this->y);
+                $this->_drawText((string)($item->getQty() * 1), $itemCollsX[++$i] + $txtIndent, $this->y);
             }
             $this->y = $this->y - 30;
         }

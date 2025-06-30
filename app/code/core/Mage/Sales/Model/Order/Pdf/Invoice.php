@@ -142,7 +142,7 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
     public function newPage(array $settings = [])
     {
         /* Add new table head */
-        $this->_getPdf()->addPage('P', 'A4');
+        $this->_getPdf()->AddPage('P', 'A4');
         $this->y = 800;
         if (!empty($settings['table_header'])) {
             $this->_drawHeader();

@@ -78,7 +78,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _drawText($text, $x, $y)
     {
-        $this->_pdf->text($x, $this->_convertY($y), $text);
+        $this->_pdf->Text($x, $this->_convertY($y), $text);
     }
 
     /**
@@ -134,7 +134,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
         // Set the font for measurement
         $this->_pdf->setFont($font, '', $fontSize);
-        $width = $this->_pdf->getStringWidth($string);
+        $width = $this->_pdf->GetStringWidth($string);
 
         // Restore previous font settings
         $this->_pdf->setFont($currentFont, $currentFontStyle, $currentFontSize);
@@ -244,7 +244,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 foreach (Mage::helper('core/string')->str_split($value, 45, true, true) as $str) {
                     $text = trim(strip_tags($str));
                     $x = $this->getAlignRight($text, 130, 440, 'helvetica', 10);
-                    $this->_pdf->text($x, $top, $text);
+                    $this->_pdf->Text($x, $top, $text);
                     $top += 10; // Move down in TCPDF coordinate system
                 }
             }
@@ -300,7 +300,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Insert order to pdf page
      *
-     * @param Mage_Sales_Model_Order $obj
+     * @param Mage_Sales_Model_Order|Mage_Sales_Model_Order_Shipment $obj
      * @param bool $putOrderId
      */
     protected function insertOrder($obj, $putOrderId = true)
@@ -812,7 +812,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      * @param  int $size
      * @return string
      */
-    protected function _setFontRegular($size = 7)
+    public function _setFontRegular($size = 7)
     {
         $this->_pdf->setFont('helvetica', '', $size);
         return 'helvetica';
@@ -824,7 +824,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      * @param  int $size
      * @return string
      */
-    protected function _setFontBold($size = 7)
+    public function _setFontBold($size = 7)
     {
         $this->_pdf->setFont('helvetica', 'B', $size);
         return 'helvetica';
@@ -836,7 +836,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      * @param  int $size
      * @return string
      */
-    protected function _setFontItalic($size = 7)
+    public function _setFontItalic($size = 7)
     {
         $this->_pdf->setFont('helvetica', 'I', $size);
         return 'helvetica';
@@ -876,7 +876,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     public function newPage(array $settings = [])
     {
         $pageFormat = !empty($settings['page_size']) ? $settings['page_size'] : 'A4';
-        $this->_getPdf()->addPage('P', $pageFormat);
+        $this->_getPdf()->AddPage('P', $pageFormat);
         $this->y = 800;
     }
 

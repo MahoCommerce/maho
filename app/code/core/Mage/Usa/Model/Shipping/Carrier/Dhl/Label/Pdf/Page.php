@@ -63,10 +63,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
      * DHL International Label Creation Class constructor
      *
      * @param TCPDF|string $param1 TCPDF instance or page size
-     * @param mixed $param2
-     * @param mixed $param3
      */
-    public function __construct($param1, $param2 = null, $param3 = null)
+    public function __construct($param1)
     {
         if ($param1 instanceof TCPDF) {
             $this->_pdf = $param1;
@@ -108,7 +106,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
 
         // Set the font for measurement
         $this->_pdf->setFont($font, '', $fontSize);
-        $width = $this->_pdf->getStringWidth($text);
+        $width = $this->_pdf->GetStringWidth($text);
 
         // Restore previous settings
         $this->_pdf->setFont($currentFont, $currentFontStyle, $currentFontSize);
@@ -190,7 +188,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
                 break;
         }
 
-        $this->_pdf->text($left, $this->_convertY($y), $text);
+        $this->_pdf->Text($left, $this->_convertY($y), $text);
         return $this;
     }
 
@@ -334,7 +332,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
     public function restoreGS()
     {
         // Restore font settings if they were saved
-        if (isset($this->_savedFontFamily, $this->_savedFontSize)) {
+        if ($this->_savedFontFamily !== null && $this->_savedFontSize !== null) {
             $this->setFont($this->_savedFontFamily, $this->_savedFontSize);
         }
         return $this;
