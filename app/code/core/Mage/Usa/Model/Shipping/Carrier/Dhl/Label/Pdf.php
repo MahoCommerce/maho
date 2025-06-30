@@ -49,10 +49,10 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf
     {
         // TODO: This DHL functionality is deprecated - complete TCPDF migration if needed
         $pdf = new TCPDF('L', 'pt', 'A4', true, 'UTF-8');
-        $pdf->SetAutoPageBreak(false);
+        $pdf->setAutoPageBreak(false);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
-        $pdf->SetMargins(0, 0, 0);
+        $pdf->setMargins(0, 0, 0);
 
         $pdfBuilder = new Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder();
 

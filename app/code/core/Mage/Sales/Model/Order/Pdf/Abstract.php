@@ -78,7 +78,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _drawText($text, $x, $y)
     {
-        $this->_pdf->Text($x, $this->_convertY($y), $text);
+        $this->_pdf->text($x, $this->_convertY($y), $text);
     }
 
     /**
@@ -133,11 +133,11 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         $currentFontSize = $this->_pdf->getFontSizePt();
 
         // Set the font for measurement
-        $this->_pdf->SetFont($font, '', $fontSize);
-        $width = $this->_pdf->GetStringWidth($string);
+        $this->_pdf->setFont($font, '', $fontSize);
+        $width = $this->_pdf->getStringWidth($string);
 
         // Restore previous font settings
-        $this->_pdf->SetFont($currentFont, $currentFontStyle, $currentFontSize);
+        $this->_pdf->setFont($currentFont, $currentFontStyle, $currentFontSize);
 
         return $width;
     }
@@ -229,9 +229,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function insertAddress($store = null)
     {
-        $this->_pdf->SetFillColor(0, 0, 0);
+        $this->_pdf->setFillColor(0, 0, 0);
         $this->_setFontRegular(10);
-        $this->_pdf->SetLineWidth(0);
+        $this->_pdf->setLineWidth(0);
 
         $this->y = $this->y ?: 815;
         $pageHeight = $this->_pdf->getPageHeight();
@@ -244,7 +244,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 foreach (Mage::helper('core/string')->str_split($value, 45, true, true) as $str) {
                     $text = trim(strip_tags($str));
                     $x = $this->getAlignRight($text, 130, 440, 'helvetica', 10);
-                    $this->_pdf->Text($x, $top, $text);
+                    $this->_pdf->text($x, $top, $text);
                     $top += 10; // Move down in TCPDF coordinate system
                 }
             }
@@ -316,10 +316,10 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         $this->y = $this->y ?: 815;
         $top = $this->y;
 
-        $this->_pdf->SetFillColor(115, 115, 115);
-        $this->_pdf->SetDrawColor(115, 115, 115);
+        $this->_pdf->setFillColor(115, 115, 115);
+        $this->_pdf->setDrawColor(115, 115, 115);
         $this->_drawRectangle(25, $top, 570, $top - 55, 'DF');
-        $this->_pdf->SetFillColor(255, 255, 255);
+        $this->_pdf->setFillColor(255, 255, 255);
         $this->setDocHeaderCoordinates([25, $top, 570, $top - 55]);
         $this->_setFontRegular(10);
 
@@ -341,9 +341,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         );
 
         $top -= 10;
-        $this->_pdf->SetFillColor(237, 235, 235);
-        $this->_pdf->SetDrawColor(128, 128, 128);
-        $this->_pdf->SetLineWidth(0.5);
+        $this->_pdf->setFillColor(237, 235, 235);
+        $this->_pdf->setDrawColor(128, 128, 128);
+        $this->_pdf->setLineWidth(0.5);
         $this->_drawRectangle(25, $top, 275, ($top - 25), 'DF');
         $this->_drawRectangle(275, $top, 570, ($top - 25), 'DF');
 
@@ -372,7 +372,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             $shippingMethod  = $order->getShippingDescription();
         }
 
-        $this->_pdf->SetFillColor(0, 0, 0);
+        $this->_pdf->setFillColor(0, 0, 0);
         $this->_setFontBold(12);
         $this->_drawText(Mage::helper('sales')->__('Sold to:'), 35, ($top - 15));
 
@@ -387,9 +387,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             $addressesHeight = max($addressesHeight, $this->_calcAddressHeight($shippingAddress));
         }
 
-        $this->_pdf->SetFillColor(255, 255, 255);
+        $this->_pdf->setFillColor(255, 255, 255);
         $this->_drawRectangle(25, ($top - 25), 570, $top - 33 - $addressesHeight, 'DF');
-        $this->_pdf->SetFillColor(0, 0, 0);
+        $this->_pdf->setFillColor(0, 0, 0);
         $this->_setFontRegular(10);
         $this->y = $top - 40;
         $addressesStartY = $this->y;
@@ -429,22 +429,22 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             $addressesEndY = min($addressesEndY, $this->y);
             $this->y = $addressesEndY;
 
-            $this->_pdf->SetFillColor(237, 235, 235);
-            $this->_pdf->SetLineWidth(0.5);
+            $this->_pdf->setFillColor(237, 235, 235);
+            $this->_pdf->setLineWidth(0.5);
             $this->_drawRectangle(25, $this->y, 275, $this->y - 25, 'DF');
             $this->_drawRectangle(275, $this->y, 570, $this->y - 25, 'DF');
 
             $this->y -= 15;
             $this->_setFontBold(12);
-            $this->_pdf->SetFillColor(0, 0, 0);
+            $this->_pdf->setFillColor(0, 0, 0);
             $this->_drawText(Mage::helper('sales')->__('Payment Method'), 35, $this->y);
             $this->_drawText(Mage::helper('sales')->__('Shipping Method:'), 285, $this->y);
 
             $this->y -= 10;
-            $this->_pdf->SetFillColor(255, 255, 255);
+            $this->_pdf->setFillColor(255, 255, 255);
 
             $this->_setFontRegular(10);
-            $this->_pdf->SetFillColor(0, 0, 0);
+            $this->_pdf->setFillColor(0, 0, 0);
 
             $paymentLeft = 35;
             $yPayments   = $this->y - 15;
@@ -495,13 +495,13 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                 $tracks = $shipment->getAllTracks();
             }
             if (count($tracks)) {
-                $this->_pdf->SetFillColor(237, 235, 235);
-                $this->_pdf->SetLineWidth(0.5);
+                $this->_pdf->setFillColor(237, 235, 235);
+                $this->_pdf->setLineWidth(0.5);
                 $this->_drawRectangle(285, $yShipments, 510, $yShipments - 10, 'DF');
                 $this->_drawLine(400, $yShipments, 400, $yShipments - 10);
 
                 $this->_setFontRegular(9);
-                $this->_pdf->SetFillColor(0, 0, 0);
+                $this->_pdf->setFillColor(0, 0, 0);
                 $this->_drawText(Mage::helper('sales')->__('Title'), 290, $yShipments - 7);
                 $this->_drawText(Mage::helper('sales')->__('Number'), 410, $yShipments - 7);
 
@@ -548,7 +548,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     public function insertDocumentNumber($text)
     {
-        $this->_pdf->SetFillColor(255, 255, 255);
+        $this->_pdf->setFillColor(255, 255, 255);
         $this->_setFontRegular(10);
         $docHeader = $this->getDocHeaderCoordinates();
         $this->_drawText($text, 35, $docHeader[1] - 15);
@@ -814,7 +814,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _setFontRegular($size = 7)
     {
-        $this->_pdf->SetFont('helvetica', '', $size);
+        $this->_pdf->setFont('helvetica', '', $size);
         return 'helvetica';
     }
 
@@ -826,7 +826,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _setFontBold($size = 7)
     {
-        $this->_pdf->SetFont('helvetica', 'B', $size);
+        $this->_pdf->setFont('helvetica', 'B', $size);
         return 'helvetica';
     }
 
@@ -838,7 +838,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _setFontItalic($size = 7)
     {
-        $this->_pdf->SetFont('helvetica', 'I', $size);
+        $this->_pdf->setFont('helvetica', 'I', $size);
         return 'helvetica';
     }
 
@@ -876,7 +876,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     public function newPage(array $settings = [])
     {
         $pageFormat = !empty($settings['page_size']) ? $settings['page_size'] : 'A4';
-        $this->_getPdf()->AddPage('P', $pageFormat);
+        $this->_getPdf()->addPage('P', $pageFormat);
         $this->y = 800;
     }
 
@@ -943,7 +943,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
                     if (!empty($column['font_file'])) {
                         // Custom font handling - for now, fall back to helvetica
                         $font = 'helvetica';
-                        $this->_pdf->SetFont($font, '', $fontSize);
+                        $this->_pdf->setFont($font, '', $fontSize);
                     } else {
                         $fontStyle = empty($column['font']) ? 'regular' : $column['font'];
                         $font = match ($fontStyle) {

@@ -527,10 +527,10 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                     $pdfContent = $labelContent;
                 } else {
                     $pdf = new TCPDF('P', 'pt', 'LETTER', true, 'UTF-8');
-                    $pdf->SetAutoPageBreak(false);
+                    $pdf->setAutoPageBreak(false);
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
-                    $pdf->SetMargins(0, 0, 0);
+                    $pdf->setMargins(0, 0, 0);
                     $pdf->AddPage();
 
                     if ($this->_addImageToPdf($pdf, $labelContent)) {
@@ -641,10 +641,10 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     protected function _combineLabelsPdf(array $labelsContent)
     {
         $outputPdf = new TCPDF('P', 'pt', 'LETTER', true, 'UTF-8');
-        $outputPdf->SetAutoPageBreak(false);
+        $outputPdf->setAutoPageBreak(false);
         $outputPdf->setPrintHeader(false);
         $outputPdf->setPrintFooter(false);
-        $outputPdf->SetMargins(0, 0, 0);
+        $outputPdf->setMargins(0, 0, 0);
 
         foreach ($labelsContent as $content) {
             if (stripos($content, '%PDF-') !== false) {

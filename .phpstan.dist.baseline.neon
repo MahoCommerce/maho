@@ -8965,12 +8965,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
 
 		-
-			message: '#^Parameter \#1 \$creditmemos of method Mage_Sales_Model_Order_Pdf_Creditmemo\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Creditmemo\>, Mage_Sales_Model_Resource_Order_Creditmemo_Collection given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
-
-		-
 			message: '#^Parameter \#1 \$invoices of method Mage_Sales_Model_Order_Pdf_Invoice\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Invoice\>, Mage_Sales_Model_Resource_Order_Invoice_Collection given\.$#'
 			identifier: argument.type
 			count: 4
@@ -26716,20 +26710,8 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Pdf/Creditmemo.php
 
 		-
-			message: '#^Parameter \#1 \$object of method Mage_Sales_Model_Order_Pdf_Abstract\:\:_setFontBold\(\) expects Zend_Pdf_Page, Zend_Pdf_Style given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Creditmemo.php
-
-		-
 			message: '#^Method Mage_Sales_Model_Order_Pdf_Invoice\:\:_drawHeader\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Invoice.php
-
-		-
-			message: '#^Parameter \#1 \$object of method Mage_Sales_Model_Order_Pdf_Abstract\:\:_setFontBold\(\) expects Zend_Pdf_Page, Zend_Pdf_Style given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Pdf/Invoice.php
 
@@ -26792,24 +26774,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment.php
-
-		-
-			message: '#^Parameter \#1 \$object of method Mage_Sales_Model_Order_Pdf_Abstract\:\:_setFontBold\(\) expects Zend_Pdf_Page, Zend_Pdf_Style given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment.php
-
-		-
-			message: '#^Parameter \#2 \$obj of method Mage_Sales_Model_Order_Pdf_Abstract\:\:insertOrder\(\) expects Mage_Sales_Model_Order, Mage_Sales_Model_Order_Shipment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment.php
-
-		-
-			message: '#^Parameter \#1 \$text of method Zend_Pdf_Canvas_Abstract\:\:drawText\(\) expects string, \(float\|int\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment/Packaging.php
 
 		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Order_Shipment_Comment\:\:setIsCustomerNotified\(\) expects int, bool given\.$#'
@@ -29176,33 +29140,9 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page\:\:drawText\(\) has parameter \$align with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/Page.php
-
-		-
-			message: '#^Call to an undefined method Zend_Pdf_Page\:\:drawLines\(\)\.$#'
-			identifier: method.notFound
-			count: 5
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
-			message: '#^Call to an undefined method Zend_Pdf_Page\:\:getTextWidth\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder\:\:addReferenceData\(\) has parameter \$data with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
-			message: '#^Method Zend_Pdf_Canvas_Abstract\:\:drawText\(\) invoked with 5 parameters, 3\-4 required\.$#'
-			identifier: arguments.count
-			count: 3
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
 
 		-

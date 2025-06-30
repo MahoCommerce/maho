@@ -19,12 +19,12 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
     {
         /* Add table head */
         $this->_setFontRegular(10);
-        $this->_pdf->SetFillColor(237, 235, 235);
-        $this->_pdf->SetDrawColor(128, 128, 128);
-        $this->_pdf->SetLineWidth(0.5);
+        $this->_pdf->setFillColor(237, 235, 235);
+        $this->_pdf->setDrawColor(128, 128, 128);
+        $this->_pdf->setLineWidth(0.5);
         $this->_drawRectangle(25, $this->y, 570, $this->y - 15, 'DF');
         $this->y -= 10;
-        $this->_pdf->SetFillColor(0, 0, 0);
+        $this->_pdf->setFillColor(0, 0, 0);
 
         //columns headers
         $lines[0][] = [
@@ -49,7 +49,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
         ];
 
         $this->drawLineBlocks([$lineBlock], ['table_header' => true]);
-        $this->_pdf->SetFillColor(0, 0, 0);
+        $this->_pdf->setFillColor(0, 0, 0);
         $this->y -= 20;
     }
 
@@ -66,10 +66,10 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
         $this->_initRenderer('shipment');
 
         $pdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8');
-        $pdf->SetAutoPageBreak(false);
+        $pdf->setAutoPageBreak(false);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
-        $pdf->SetMargins(0, 0, 0);
+        $pdf->setMargins(0, 0, 0);
 
         $this->_setPdf($pdf);
         $this->_setFontBold(10);
@@ -121,7 +121,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
     public function newPage(array $settings = [])
     {
         /* Add new table head */
-        $this->_getPdf()->AddPage('P', 'A4');
+        $this->_getPdf()->addPage('P', 'A4');
         $this->y = 800;
         if (!empty($settings['table_header'])) {
             $this->_drawHeader();

@@ -25,10 +25,10 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
         $this->_initRenderer('shipment');
 
         $pdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8');
-        $pdf->SetAutoPageBreak(false);
+        $pdf->setAutoPageBreak(false);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
-        $pdf->SetMargins(0, 0, 0);
+        $pdf->setMargins(0, 0, 0);
 
         $this->_setPdf($pdf);
         $this->newPage();
@@ -43,7 +43,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
 
         $this->y = 740;
         $this->_drawPackageBlock();
-        $this->_pdf->SetFillColor(0, 0, 0);
+        $this->_pdf->setFillColor(0, 0, 0);
         $this->_afterGetPdf();
 
         if ($shipment->getStoreId()) {
@@ -59,13 +59,13 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
      */
     protected function _drawHeaderBlock()
     {
-        $this->_pdf->SetFillColor(128, 128, 128);
-        $this->_pdf->SetDrawColor(128, 128, 128);
-        $this->_pdf->SetLineWidth(0.5);
+        $this->_pdf->setFillColor(128, 128, 128);
+        $this->_pdf->setDrawColor(128, 128, 128);
+        $this->_pdf->setLineWidth(0.5);
         $this->_drawRectangle(25, 790, 570, 755, 'DF');
-        $this->_pdf->SetFillColor(255, 255, 255);
+        $this->_pdf->setFillColor(255, 255, 255);
         $this->_drawText(Mage::helper('sales')->__('Packages'), 35, 770);
-        $this->_pdf->SetFillColor(237, 235, 235);
+        $this->_pdf->setFillColor(237, 235, 235);
 
         return $this;
     }
@@ -86,15 +86,15 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
 
         $packageNum = 1;
         foreach ($packages as $packageId => $package) {
-            $this->_pdf->SetFillColor(237, 235, 235);
+            $this->_pdf->setFillColor(237, 235, 235);
             $this->_drawRectangle(25, $this->y + 15, 190, $this->y - 35, 'DF');
             $this->_drawRectangle(190, $this->y + 15, 350, $this->y - 35, 'DF');
             $this->_drawRectangle(350, $this->y + 15, 570, $this->y - 35, 'DF');
 
-            $this->_pdf->SetFillColor(255, 255, 255);
+            $this->_pdf->setFillColor(255, 255, 255);
             $this->_drawRectangle(520, $this->y + 15, 570, $this->y - 5, 'DF');
 
-            $this->_pdf->SetFillColor(0, 0, 0);
+            $this->_pdf->setFillColor(0, 0, 0);
             $packageText = Mage::helper('sales')->__('Package') . ' ' . $packageNum;
             $this->_drawText($packageText, 525, $this->y);
             $packageNum++;
@@ -178,11 +178,11 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
             }
 
             $this->y = $this->y - 5;
-            $this->_pdf->SetFillColor(255, 255, 255);
+            $this->_pdf->setFillColor(255, 255, 255);
             $this->_drawRectangle(25, $this->y, 570, $this->y - 30 - (count($package->getItems()) * 12), 'DF');
 
             $this->y = $this->y - 10;
-            $this->_pdf->SetFillColor(0, 0, 0);
+            $this->_pdf->setFillColor(0, 0, 0);
             $this->_drawText(Mage::helper('sales')->__('Items in the Package'), 30, $this->y);
 
             $txtIndent = 5;
@@ -197,7 +197,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
             }
 
             $i = 0;
-            $this->_pdf->SetFillColor(237, 235, 235);
+            $this->_pdf->setFillColor(237, 235, 235);
             $this->_drawRectangle($itemCollsX[$i], $this->y - 5, $itemCollsX[++$i], $this->y - 15, 'DF');
             $this->_drawRectangle($itemCollsX[$i], $this->y - 5, $itemCollsX[++$i], $this->y - 15, 'DF');
             $this->_drawRectangle($itemCollsX[$i], $this->y - 5, $itemCollsX[++$i], $this->y - 15, 'DF');
@@ -207,7 +207,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
             $this->y = $this->y - 12;
             $i = 0;
 
-            $this->_pdf->SetFillColor(0, 0, 0);
+            $this->_pdf->setFillColor(0, 0, 0);
             $this->_drawText(Mage::helper('sales')->__('Product'), $itemCollsX[$i] + $txtIndent, $this->y);
             $this->_drawText(Mage::helper('sales')->__('Weight'), $itemCollsX[++$i] + $txtIndent, $this->y);
             if ($packaging->displayCustomsValue()) {
@@ -229,7 +229,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
                 $item = new Varien_Object($item);
                 $i = 0;
 
-                $this->_pdf->SetFillColor(255, 255, 255);
+                $this->_pdf->setFillColor(255, 255, 255);
                 $this->_drawRectangle($itemCollsX[$i], $this->y - 3, $itemCollsX[++$i], $this->y - 15, 'DF');
                 $this->_drawRectangle($itemCollsX[$i], $this->y - 3, $itemCollsX[++$i], $this->y - 15, 'DF');
                 $this->_drawRectangle($itemCollsX[$i], $this->y - 3, $itemCollsX[++$i], $this->y - 15, 'DF');
@@ -238,7 +238,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
 
                 $this->y = $this->y - 12;
                 $i = 0;
-                $this->_pdf->SetFillColor(0, 0, 0);
+                $this->_pdf->setFillColor(0, 0, 0);
                 $this->_drawText($item->getName(), $itemCollsX[$i] + $txtIndent, $this->y);
                 $this->_drawText($item->getWeight(), $itemCollsX[++$i] + $txtIndent, $this->y);
                 if ($packaging->displayCustomsValue()) {

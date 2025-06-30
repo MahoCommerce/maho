@@ -74,10 +74,10 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
             // Create new TCPDF instance with specified page size
             $pageSize = is_string($param1) ? $param1 : 'A4';
             $this->_pdf = new TCPDF('L', 'pt', $pageSize, true, 'UTF-8');
-            $this->_pdf->SetAutoPageBreak(false);
+            $this->_pdf->setAutoPageBreak(false);
             $this->_pdf->setPrintHeader(false);
             $this->_pdf->setPrintFooter(false);
-            $this->_pdf->SetMargins(0, 0, 0);
+            $this->_pdf->setMargins(0, 0, 0);
         }
     }
 
@@ -107,11 +107,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
         $currentFontSize = $this->_pdf->getFontSizePt();
 
         // Set the font for measurement
-        $this->_pdf->SetFont($font, '', $fontSize);
-        $width = $this->_pdf->GetStringWidth($text);
+        $this->_pdf->setFont($font, '', $fontSize);
+        $width = $this->_pdf->getStringWidth($text);
 
         // Restore previous settings
-        $this->_pdf->SetFont($currentFont, $currentFontStyle, $currentFontSize);
+        $this->_pdf->setFont($currentFont, $currentFontStyle, $currentFontSize);
 
         return $width;
     }
@@ -147,7 +147,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
     {
         $this->_fontFamily = $font;
         $this->_fontSize = $fontSize;
-        $this->_pdf->SetFont($font, '', $fontSize);
+        $this->_pdf->setFont($font, '', $fontSize);
     }
 
     /**
@@ -190,7 +190,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
                 break;
         }
 
-        $this->_pdf->Text($left, $this->_convertY($y), $text);
+        $this->_pdf->text($left, $this->_convertY($y), $text);
         return $this;
     }
 
@@ -284,17 +284,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
             $r = $color[0] <= 1 ? $color[0] * 255 : $color[0];
             $g = $color[1] <= 1 ? $color[1] * 255 : $color[1];
             $b = $color[2] <= 1 ? $color[2] * 255 : $color[2];
-            $this->_pdf->SetFillColor($r, $g, $b);
+            $this->_pdf->setFillColor($r, $g, $b);
         } elseif (is_object($color) && method_exists($color, 'getRed')) {
             // Handle legacy Zend_Pdf_Color objects (deprecated but maintained for compatibility)
-            $this->_pdf->SetFillColor($color->getRed() * 255, $color->getGreen() * 255, $color->getBlue() * 255);
+            $this->_pdf->setFillColor($color->getRed() * 255, $color->getGreen() * 255, $color->getBlue() * 255);
         } elseif (is_string($color) && strpos($color, '#') === 0) {
             // Handle hex color strings
             $hex = ltrim($color, '#');
             $r = hexdec(substr($hex, 0, 2));
             $g = hexdec(substr($hex, 2, 2));
             $b = hexdec(substr($hex, 4, 2));
-            $this->_pdf->SetFillColor($r, $g, $b);
+            $this->_pdf->setFillColor($r, $g, $b);
         }
         return $this;
     }
@@ -307,7 +307,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
      */
     public function setLineWidth($width)
     {
-        $this->_pdf->SetLineWidth($width);
+        $this->_pdf->setLineWidth($width);
         return $this;
     }
 
