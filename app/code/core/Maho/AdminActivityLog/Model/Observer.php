@@ -315,10 +315,6 @@ class Maho_AdminActivityLog_Model_Observer
         $controllerName = $request->getControllerName();
         $moduleName = $request->getModuleName();
 
-        // Debug log what we're seeing
-        Mage::log("Mass Action Debug - Action: {$actionName}, Controller: {$controllerName}, Module: {$moduleName}", null, 'adminactivitylog_debug.log');
-        Mage::log('Parameters: ' . print_r($allParams, true), null, 'adminactivitylog_debug.log');
-
         // Check if this is a mass action request - improved detection
         $isMassAction = false;
 
@@ -393,11 +389,8 @@ class Maho_AdminActivityLog_Model_Observer
         }
 
         if (empty($selectedIds)) {
-            Mage::log('No selected IDs found for mass action. All params: ' . print_r($allParams, true), null, 'adminactivitylog_debug.log');
             return;
         }
-
-        Mage::log('Found selected IDs: ' . print_r($selectedIds, true), null, 'adminactivitylog_debug.log');
 
         $user = Mage::getSingleton('admin/session')->getUser();
         $entityCount = count($selectedIds);
@@ -460,7 +453,6 @@ class Maho_AdminActivityLog_Model_Observer
         ];
 
         Mage::getModel('adminactivitylog/activity')->setData($data)->save();
-        Mage::log('Mass action logged successfully', null, 'adminactivitylog_debug.log');
     }
 
     protected function _getMassActionEntityType(Mage_Core_Controller_Varien_Action $controllerAction): string
