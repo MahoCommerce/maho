@@ -113,7 +113,7 @@ class Mage_Sales_Model_Order_Creditmemo_Api extends Mage_Sales_Model_Api_Resourc
         $comment = null,
         $notifyCustomer = false,
         $includeComment = false,
-        $refundToStoreCreditAmount = null
+        $refundToStoreCreditAmount = null,
     ) {
         /** @var Mage_Sales_Model_Order $order */
         $order = Mage::getModel('sales/order')->load($orderIncrementId, 'increment_id');

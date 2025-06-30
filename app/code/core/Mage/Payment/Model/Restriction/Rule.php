@@ -85,7 +85,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
     public function validatePaymentMethod(
         string $paymentMethodCode,
         ?Mage_Sales_Model_Quote $quote = null,
-        ?Mage_Customer_Model_Customer $customer = null
+        ?Mage_Customer_Model_Customer $customer = null,
     ): bool {
         $restrictions = $this->getCollection()
             ->addFieldToFilter('status', self::STATUS_ENABLED);

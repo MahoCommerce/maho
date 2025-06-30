@@ -130,10 +130,11 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getImageInfo(): array
     {
         if ($this->imageInfo === null) {
-            $this->imageInfo = @getimagesize($this->_baseFile);
-            if ($this->imageInfo === false) {
+            $info = @getimagesize($this->_baseFile);
+            if ($info === false) {
                 throw new RuntimeException('Failed to read image at ' . $this->_baseFile);
             }
+            $this->imageInfo = $info;
         }
         return $this->imageInfo;
     }

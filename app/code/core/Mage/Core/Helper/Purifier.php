@@ -18,7 +18,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * Purifier Constructor Call
      */
     public function __construct(
-        ?HTMLPurifier $purifier = null
+        ?HTMLPurifier $purifier = null,
     ) {
         $config = HTMLPurifier_Config::createDefault();
         $config->set(self::CACHE_DEFINITION, null);

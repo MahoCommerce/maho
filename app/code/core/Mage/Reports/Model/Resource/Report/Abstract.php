@@ -107,7 +107,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $from = null,
         $to = null,
         $subSelect = null,
-        $doNotUseTruncate = false
+        $doNotUseTruncate = false,
     ) {
         if ($from === null && $to === null && !$doNotUseTruncate) {
             $this->_truncateTable($table);
@@ -150,7 +150,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $from = null,
         $to = null,
         $additionalWhere = [],
-        $alias = 'date_range_table'
+        $alias = 'date_range_table',
     ) {
         $adapter = $this->_getReadAdapter();
         $select  = $adapter->select()
@@ -256,7 +256,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $to = null,
         $additionalWhere = [],
         $alias = 'date_range_table',
-        $relatedAlias = 'related_date_range_table'
+        $relatedAlias = 'related_date_range_table',
     ) {
         $adapter = $this->_getReadAdapter();
         $joinConditionSql = [];

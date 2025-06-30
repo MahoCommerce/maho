@@ -35,7 +35,7 @@ class Mage_Admin_Model_Redirectpolicy
     public function getRedirectUrl(
         Mage_Admin_Model_User $user,
         ?Zend_Controller_Request_Http $request = null,
-        $alternativeUrl = null
+        $alternativeUrl = null,
     ) {
         if (empty($request)) {
             return null;
