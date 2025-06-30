@@ -194,7 +194,6 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
             }
         }
 
-        $page = $pdf->drawLineBlocks($page, $drawItems, ['table_header' => true]);
-        $this->setPage($page);
+        $pdf->drawLineBlocks($drawItems, ['table_header' => true]);
     }
 }

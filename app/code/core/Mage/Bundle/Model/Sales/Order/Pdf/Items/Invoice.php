@@ -179,8 +179,6 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
             }
         }
 
-        $page = $pdf->drawLineBlocks($page, $drawItems, ['table_header' => true]);
-
-        $this->setPage($page);
+        $pdf->drawLineBlocks($drawItems, ['table_header' => true]);
     }
 }

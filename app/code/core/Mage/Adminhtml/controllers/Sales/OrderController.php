@@ -552,21 +552,21 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($invoices->getSize()) {
-                    $pdfData[] = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices);
+                    $pdfData[] = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices->getItems());
                 }
 
                 $shipments = Mage::getResourceModel('sales/order_shipment_collection')
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($shipments->getSize()) {
-                    $pdfData[] = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
+                    $pdfData[] = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments->getItems());
                 }
 
                 $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($creditmemos->getSize()) {
-                    $pdfData[] = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($creditmemos);
+                    $pdfData[] = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($creditmemos->getItems());
                 }
             }
 

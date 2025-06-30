@@ -8965,18 +8965,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
 
 		-
-			message: '#^Parameter \#1 \$invoices of method Mage_Sales_Model_Order_Pdf_Invoice\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Invoice\>, Mage_Sales_Model_Resource_Order_Invoice_Collection given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
-
-		-
-			message: '#^Parameter \#1 \$shipments of method Mage_Sales_Model_Order_Pdf_Shipment\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Shipment\>, Mage_Sales_Model_Resource_Order_Shipment_Collection given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
-
-		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Order\:\:setEmailSent\(\) expects int, false given\.$#'
 			identifier: argument.type
 			count: 1

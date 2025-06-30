@@ -152,7 +152,6 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Shipment extends Mage_Bundle_Model
             }
         }
 
-        $page = $pdf->drawLineBlocks($page, $drawItems, ['table_header' => true]);
-        $this->setPage($page);
+        $pdf->drawLineBlocks($drawItems, ['table_header' => true]);
     }
 }
