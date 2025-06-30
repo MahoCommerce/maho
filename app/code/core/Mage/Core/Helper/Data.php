@@ -947,6 +947,9 @@ XML;
 
         $dsn = match ($emailTransport) {
             'smtp' => "$emailTransport://$user:$pass@$host:$port",
+            'ses+smtp' => "$emailTransport://$user:$pass@default",
+            'ses+https' => "$emailTransport://$user:$pass@default",
+            'ses+api' => "$emailTransport://$user:$pass@default",
             'azure+api' => "$emailTransport://$user:$pass@default",
             'brevo+smtp' => "$emailTransport://$user:$pass@default",
             'brevo+api' => "$emailTransport://$pass@default",
