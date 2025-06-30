@@ -526,7 +526,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 if (stripos($labelContent, '%PDF-') !== false) {
                     $pdfContent = $labelContent;
                 } else {
-                    $pdf = new TCPDF('P', 'pt', 'LETTER', true, 'UTF-8');
+                    $pdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8');
                     $pdf->setAutoPageBreak(false);
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
@@ -640,7 +640,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      */
     protected function _combineLabelsPdf(array $labelsContent)
     {
-        $outputPdf = new TCPDF('P', 'pt', 'LETTER', true, 'UTF-8');
+        $outputPdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8');
         $outputPdf->setAutoPageBreak(false);
         $outputPdf->setPrintHeader(false);
         $outputPdf->setPrintFooter(false);
