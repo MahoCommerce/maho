@@ -99,16 +99,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
             $urlData['scheme'] = $_SERVER['REQUEST_SCHEME'] ?? 'https';
         }
 
-        $baseUrl = (fn(array $parts) =>
-            $parts['scheme'] . '://' .
-            ($parts['user'] ?? '') .
-            (isset($parts['pass']) ? ':' . $parts['pass'] : '') .
-            ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '') .
-            ($parts['host'] ?? '') .
-            (isset($parts['port']) ? ':' . $parts['port'] : '') .
-            ($parts['path'] ?? '') .
-            (isset($parts['query']) ? '?' . $parts['query'] : '') .
-            (isset($parts['fragment']) ? '#' . $parts['fragment'] : ''))($urlData);
+        $baseUrl = Mage::helper('core/url')->buildUrl($urlData);
         $baseSecureUrl = str_replace('http://', 'https://', $baseUrl);
         $connectDefault = Mage::getConfig()
                 ->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE);
