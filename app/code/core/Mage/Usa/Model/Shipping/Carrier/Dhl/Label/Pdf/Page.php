@@ -286,7 +286,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
         } elseif (is_object($color) && method_exists($color, 'getRed')) {
             // Handle legacy Zend_Pdf_Color objects (deprecated but maintained for compatibility)
             $this->_pdf->setFillColor($color->getRed() * 255, $color->getGreen() * 255, $color->getBlue() * 255);
-        } elseif (is_string($color) && strpos($color, '#') === 0) {
+        } elseif (is_string($color) && str_starts_with($color, '#')) {
             // Handle hex color strings
             $hex = ltrim($color, '#');
             $r = hexdec(substr($hex, 0, 2));
