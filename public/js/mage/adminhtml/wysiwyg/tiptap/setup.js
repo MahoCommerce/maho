@@ -22,6 +22,7 @@ class tiptapWysiwygSetup {
         this.wrapper = null;
         this.textarea = document.getElementById(this.id);
         this.storeId = config.store_id ?? 0;
+        this.invalidContent = null;
 
         window.tiptapEditors ??= new Map();
         window.tiptapEditors.set(this.id, this);
@@ -29,12 +30,24 @@ class tiptapWysiwygSetup {
         this.setup();
 
         if (!config.hidden) {
-            this.toggle();
+            if (this.invalidContent === null) {
+                this.turnOn();
+            } else {
+                toggleVis(this.textarea, true);
+            }
         }
     }
 
     bindEventListeners() {
-        this.getToggleButton()?.addEventListener('click', this.toggle.bind(this));
+        this.getToggleButton()?.addEventListener('click', () => {
+            if (this.invalidContent !== null) {
+                if (!confirm(this.translate('Some content is not supported. Clean and continue?'))) {
+                    return;
+                }
+                this.invalidContent = null;
+            }
+            this.toggle();
+        });
 
         this.syncHandler = () => {
             if (this.isTiptapActive()) {
@@ -184,6 +197,8 @@ class tiptapWysiwygSetup {
         this.editor = new TiptapModules.Editor({
             wysiwygSetup: this,
             element: container,
+            enableContentCheck: true,
+            content: this.convertFromPlain(this.textarea.value),
             extensions: [
                 TiptapModules.StarterKit.configure({
                     heading: {
@@ -248,7 +263,13 @@ class tiptapWysiwygSetup {
                     this.updateToolbarState();
                 }
             },
+            onContentError: ({ editor, error }) => {
+                this.invalidContent = error.cause.message;
+            },
         });
+
+        // Turn off content check after initial content
+        this.editor.options.enableContentCheck = false;
 
         // Update toolbar state initially
         this.updateToolbarState();
