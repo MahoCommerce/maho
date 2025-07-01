@@ -33,11 +33,15 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         $data['user_agent'] = Mage::helper('core/http')->getHttpUserAgent();
         $data['request_url'] = Mage::helper('core/url')->getCurrentUrl();
 
+        $encryption = Mage::getModel('core/encryption');
+
         if (isset($data['old_data']) && is_array($data['old_data'])) {
-            $data['old_data'] = json_encode($data['old_data']);
+            $jsonData = json_encode($data['old_data']);
+            $data['old_data'] = $encryption->encrypt($jsonData);
         }
         if (isset($data['new_data']) && is_array($data['new_data'])) {
-            $data['new_data'] = json_encode($data['new_data']);
+            $jsonData = json_encode($data['new_data']);
+            $data['new_data'] = $encryption->encrypt($jsonData);
         }
 
         $this->setData($data);

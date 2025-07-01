@@ -456,11 +456,11 @@ class Maho_AdminActivityLog_Model_Observer
             'username' => $user->getUsername(),
             'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
             'request_url' => Mage::helper('core/url')->getCurrentUrl(),
-            'old_data' => json_encode($oldDataToStore),
-            'new_data' => json_encode($newDataToStore),
+            'old_data' => $oldDataToStore,
+            'new_data' => $newDataToStore,
         ];
 
-        Mage::getModel('adminactivitylog/activity')->setData($data)->save();
+        Mage::getModel('adminactivitylog/activity')->logActivity($data);
     }
 
     protected function _getMassActionEntityType(Mage_Core_Controller_Varien_Action $controllerAction): string
@@ -517,5 +517,46 @@ class Maho_AdminActivityLog_Model_Observer
     public function cleanOldLogs(): void
     {
         Mage::helper('adminactivitylog')->cleanOldLogs();
+    }
+
+    public function encryptionKeyRegenerated(Varien_Event_Observer $observer): void
+    {
+        /** @var \Symfony\Component\Console\Output\OutputInterface $output */
+        $output = $observer->getEvent()->getOutput();
+        $encryptCallback = $observer->getEvent()->getEncryptCallback();
+        $decryptCallback = $observer->getEvent()->getDecryptCallback();
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        $output->write('Re-encrypting data on maho_adminactivitylog_activity table... ');
+        $table = Mage::getSingleton('core/resource')->getTableName('adminactivitylog/activity');
+
+        // Re-encrypt old_data
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('old_data IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['old_data' => $encryptCallback($decryptCallback($encryptedDataRow['old_data']))],
+                ['activity_id = ?' => $encryptedDataRow['activity_id']],
+            );
+        }
+
+        // Re-encrypt new_data
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('new_data IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['new_data' => $encryptCallback($decryptCallback($encryptedDataRow['new_data']))],
+                ['activity_id = ?' => $encryptedDataRow['activity_id']],
+            );
+        }
+
+        $output->writeln('OK');
     }
 }

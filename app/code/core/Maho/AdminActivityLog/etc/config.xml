@@ -41,6 +41,16 @@
                 </setup>
             </adminactivitylog_setup>
         </resources>
+        <events>
+            <encryption_key_regenerated>
+                <observers>
+                    <adminactivitylog_recrypt_data>
+                        <class>adminactivitylog/observer</class>
+                        <method>encryptionKeyRegenerated</method>
+                    </adminactivitylog_recrypt_data>
+                </observers>
+            </encryption_key_regenerated>
+        </events>
     </global>
     <admin>
         <routers>

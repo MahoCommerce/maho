@@ -66,8 +66,19 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         if ($activity->getOldData() || $activity->getNewData()) {
             $changesFieldset = $form->addFieldset('activity_changes', ['legend' => Mage::helper('adminactivitylog')->__('Data Changes')]);
 
-            $oldData = $activity->getOldData() ? json_decode($activity->getOldData(), true) : [];
-            $newData = $activity->getNewData() ? json_decode($activity->getNewData(), true) : [];
+            $encryption = Mage::getModel('core/encryption');
+
+            $oldData = [];
+            if ($activity->getOldData()) {
+                $decryptedOldData = $encryption->decrypt($activity->getOldData());
+                $oldData = $decryptedOldData ? json_decode($decryptedOldData, true) : [];
+            }
+
+            $newData = [];
+            if ($activity->getNewData()) {
+                $decryptedNewData = $encryption->decrypt($activity->getNewData());
+                $newData = $decryptedNewData ? json_decode($decryptedNewData, true) : [];
+            }
 
             // For updates, the data already contains only changed fields
             // For creates, show all new data
