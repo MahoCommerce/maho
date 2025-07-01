@@ -12334,12 +12334,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Image.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} and false will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
 			message: '#^Cannot call method isIndexable\(\) on Mage_Eav_Model_Entity_Attribute_Abstract\|false\.$#'
 			identifier: method.nonObject
 			count: 1
