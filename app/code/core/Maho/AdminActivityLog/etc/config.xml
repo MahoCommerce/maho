@@ -15,10 +15,10 @@
                 <class>Maho_AdminActivityLog_Model_Resource</class>
                 <entities>
                     <activity>
-                        <table>maho_adminactivitylog_activity</table>
+                        <table>adminactivitylog_activity</table>
                     </activity>
                     <login>
-                        <table>maho_adminactivitylog_login</table>
+                        <table>adminactivitylog_login</table>
                     </login>
                 </entities>
             </adminactivitylog_resource>

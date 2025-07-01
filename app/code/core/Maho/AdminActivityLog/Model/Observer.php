@@ -553,7 +553,7 @@ class Maho_AdminActivityLog_Model_Observer
         $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
-        $output->write('Re-encrypting data on maho_adminactivitylog_activity table... ');
+        $output->write('Re-encrypting data on adminactivitylog_activity table... ');
         $table = Mage::getSingleton('core/resource')->getTableName('adminactivitylog/activity');
 
         // Re-encrypt old_data
