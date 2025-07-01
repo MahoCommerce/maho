@@ -611,12 +611,11 @@
     border-radius: 4px;
     margin: 8px 0;
     padding: 8px;
-    background-color: rgba(59, 130, 246, 0.05);
+    background: none !important;
 }
 
 .ProseMirror div[data-div-info]:hover {
     border-color: #1d4ed8;
-    background-color: rgba(59, 130, 246, 0.1);
 }
 
 .ProseMirror div[data-div-info]::before {
@@ -636,7 +635,6 @@
 
 .ProseMirror div[data-div-info].ProseMirror-selectednode {
     border-color: #1d4ed8;
-    background-color: rgba(59, 130, 246, 0.15);
 }
 
 .ProseMirror div[data-div-info].ProseMirror-selectednode::before {
