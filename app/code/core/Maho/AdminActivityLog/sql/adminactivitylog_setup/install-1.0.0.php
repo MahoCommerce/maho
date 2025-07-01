@@ -21,6 +21,9 @@ $activityTable = $installer->getConnection()
         'nullable'  => false,
         'primary'   => true,
     ], 'Activity ID')
+    ->addColumn('action_group_id', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+        'nullable'  => true,
+    ], 'Action Group ID for grouping related activities')
     ->addColumn('user_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
@@ -72,6 +75,10 @@ $activityTable = $installer->getConnection()
     ->addIndex(
         $installer->getIdxName('adminactivitylog/activity', ['user_id']),
         ['user_id'],
+    )
+    ->addIndex(
+        $installer->getIdxName('adminactivitylog/activity', ['action_group_id']),
+        ['action_group_id'],
     )
     ->addIndex(
         $installer->getIdxName('adminactivitylog/activity', ['action_type']),

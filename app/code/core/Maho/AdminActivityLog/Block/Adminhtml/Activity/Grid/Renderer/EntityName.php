@@ -20,6 +20,12 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_EntityName ex
             return '';
         }
 
+        // For grouped entities, show count if more than one
+        $activityCount = $row->getData('activity_count');
+        if ($activityCount > 1) {
+            $entityName .= sprintf("\n(%d activities)", $activityCount);
+        }
+
         // Convert newlines to <br> tags for HTML display
         return nl2br($this->escapeHtml($entityName));
     }

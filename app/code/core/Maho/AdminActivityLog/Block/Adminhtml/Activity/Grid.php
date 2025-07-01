@@ -25,6 +25,16 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('adminactivitylog/activity_collection');
+
+        // Group by action_group_id to show only one entry per group
+        // Using MIN(activity_id) to get the first activity in each group
+        $collection->getSelect()
+            ->group('IFNULL(main_table.action_group_id, main_table.activity_id)')
+            ->columns([
+                'activity_count' => new Zend_Db_Expr('COUNT(*)'),
+                'grouped_entity_names' => new Zend_Db_Expr('GROUP_CONCAT(DISTINCT main_table.entity_name ORDER BY main_table.activity_id SEPARATOR "\n")'),
+            ]);
+
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -78,8 +88,18 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
         $this->addColumn('entity_name', [
             'header'    => Mage::helper('adminactivitylog')->__('Entity'),
             'align'     => 'left',
-            'index'     => 'entity_name',
+            'index'     => 'grouped_entity_names',
+            'filter_index' => 'main_table.entity_name',
             'renderer'  => 'adminactivitylog/adminhtml_activity_grid_renderer_entityName',
+        ]);
+
+        $this->addColumn('activity_count', [
+            'header'    => Mage::helper('adminactivitylog')->__('Activities'),
+            'align'     => 'center',
+            'width'     => '80px',
+            'index'     => 'activity_count',
+            'type'      => 'number',
+            'filter'    => false,
         ]);
 
         $this->addColumn('ip_address', [

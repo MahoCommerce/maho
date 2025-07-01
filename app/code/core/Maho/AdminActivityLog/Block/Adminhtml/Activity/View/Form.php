@@ -15,6 +15,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
     protected function _prepareForm()
     {
         $activity = Mage::registry('current_activity');
+        $groupActivities = $activity->getGroupActivities();
 
         $form = new Varien_Data_Form([
             'id' => 'edit_form',
@@ -33,25 +34,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             'label' => Mage::helper('adminactivitylog')->__('Username'),
             'value' => $activity->getUsername(),
         ]);
-        $fieldset->addField('action_type', 'label', [
-            'label' => Mage::helper('adminactivitylog')->__('Action Type'),
-            'value' => ucfirst(str_replace('_', ' ', $activity->getActionType())),
-        ]);
-
-        $fieldset->addField('entity_type', 'label', [
-            'label' => Mage::helper('adminactivitylog')->__('Entity Type'),
-            'value' => $activity->getEntityType(),
-        ]);
-
-        $fieldset->addField('entity_id', 'label', [
-            'label' => Mage::helper('adminactivitylog')->__('Entity ID'),
-            'value' => $activity->getEntityId(),
-        ]);
-
-        $fieldset->addField('entity_name', 'note', [
-            'label' => Mage::helper('adminactivitylog')->__('Entity Name'),
-            'text' => nl2br($this->escapeHtml($activity->getEntityName())),
-        ]);
 
         $fieldset->addField('ip_address', 'label', [
             'label' => Mage::helper('adminactivitylog')->__('IP Address'),
@@ -63,62 +45,93 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             'value' => $activity->getRequestUrl(),
         ]);
 
-        if ($activity->getOldData() || $activity->getNewData()) {
-            $changesFieldset = $form->addFieldset('activity_changes', ['legend' => Mage::helper('adminactivitylog')->__('Data Changes')]);
+        // If this is part of a group, show group summary
+        if ($groupActivities->count() > 1) {
+            $fieldset->addField('group_summary', 'note', [
+                'label' => Mage::helper('adminactivitylog')->__('Action Group'),
+                'text' => '<strong>' . $groupActivities->count() . ' activities in this action</strong>',
+            ]);
+        }
 
-            $encryption = Mage::getModel('core/encryption');
+        // Show all activities in the group
+        $activityIndex = 0;
+        foreach ($groupActivities as $groupActivity) {
+            $activityIndex++;
 
-            $oldData = [];
-            if ($activity->getOldData()) {
-                $decryptedOldData = $encryption->decrypt($activity->getOldData());
-                $oldData = $decryptedOldData ? json_decode($decryptedOldData, true) : [];
-            }
+            $activityFieldset = $form->addFieldset('activity_' . $groupActivity->getId(), [
+                'legend' => Mage::helper('adminactivitylog')->__(
+                    'Activity #%d: %s %s',
+                    $activityIndex,
+                    ucfirst(str_replace('_', ' ', $groupActivity->getActionType())),
+                    $groupActivity->getEntityType(),
+                ),
+            ]);
 
-            $newData = [];
-            if ($activity->getNewData()) {
-                $decryptedNewData = $encryption->decrypt($activity->getNewData());
-                $newData = $decryptedNewData ? json_decode($decryptedNewData, true) : [];
-            }
+            $activityFieldset->addField('activity_' . $groupActivity->getId() . '_entity', 'note', [
+                'label' => Mage::helper('adminactivitylog')->__('Entity'),
+                'text' => '<strong>' . $this->escapeHtml($groupActivity->getEntityName()) . '</strong>' .
+                         ($groupActivity->getEntityId() ? ' (ID: ' . $groupActivity->getEntityId() . ')' : ''),
+            ]);
 
-            // For updates, the data already contains only changed fields
-            // For creates, show all new data
-            if ($activity->getActionType() === 'create') {
-                $changedFields = [];
-                foreach ($newData as $key => $newValue) {
-                    $changedFields[$key] = [
-                        'old' => 'N/A',
-                        'new' => $newValue,
-                    ];
+            if ($groupActivity->getOldData() || $groupActivity->getNewData()) {
+                $encryption = Mage::getModel('core/encryption');
+
+                $oldData = [];
+                if ($groupActivity->getOldData()) {
+                    $decryptedOldData = $encryption->decrypt($groupActivity->getOldData());
+                    $oldData = $decryptedOldData ? json_decode($decryptedOldData, true) : [];
                 }
-            } else {
-                // For updates, combine old and new data to show changes
-                $changedFields = [];
-                $allChangedFields = array_unique(array_merge(array_keys($oldData), array_keys($newData)));
 
-                foreach ($allChangedFields as $key) {
-                    $changedFields[$key] = [
-                        'old' => $oldData[$key] ?? 'N/A',
-                        'new' => $newData[$key] ?? 'N/A',
-                    ];
+                $newData = [];
+                if ($groupActivity->getNewData()) {
+                    $decryptedNewData = $encryption->decrypt($groupActivity->getNewData());
+                    $newData = $decryptedNewData ? json_decode($decryptedNewData, true) : [];
                 }
-            }
 
-            if (!empty($changedFields)) {
-                foreach ($changedFields as $field => $values) {
-                    $oldValue = is_array($values['old']) ? json_encode($values['old']) : (string) $values['old'];
-                    $newValue = is_array($values['new']) ? json_encode($values['new']) : (string) $values['new'];
-
-                    // Skip fields where both values are N/A or empty
-                    if (($oldValue === 'N/A' || $oldValue === '') && ($newValue === 'N/A' || $newValue === '')) {
-                        continue;
+                // For updates, the data already contains only changed fields
+                // For creates, show all new data
+                if ($groupActivity->getActionType() === 'create') {
+                    $changedFields = [];
+                    foreach ($newData as $key => $newValue) {
+                        $changedFields[$key] = [
+                            'old' => 'N/A',
+                            'new' => $newValue,
+                        ];
                     }
+                } else {
+                    // For updates, combine old and new data to show changes
+                    $changedFields = [];
+                    $allChangedFields = array_unique(array_merge(array_keys($oldData), array_keys($newData)));
 
-                    // Generate diff HTML
-                    $diffHtml = $this->generateDiffHtml($oldValue, $newValue);
+                    foreach ($allChangedFields as $key) {
+                        $changedFields[$key] = [
+                            'old' => $oldData[$key] ?? 'N/A',
+                            'new' => $newData[$key] ?? 'N/A',
+                        ];
+                    }
+                }
 
-                    $changesFieldset->addField('change_' . $field, 'note', [
-                        'label' => $this->escapeHtml($field),
-                        'text' => $diffHtml,
+                if (!empty($changedFields)) {
+                    $changesHtml = '<div style="margin-top: 10px;">';
+                    foreach ($changedFields as $field => $values) {
+                        $oldValue = is_array($values['old']) ? json_encode($values['old']) : (string) $values['old'];
+                        $newValue = is_array($values['new']) ? json_encode($values['new']) : (string) $values['new'];
+
+                        // Skip fields where both values are N/A or empty
+                        if (($oldValue === 'N/A' || $oldValue === '') && ($newValue === 'N/A' || $newValue === '')) {
+                            continue;
+                        }
+
+                        $changesHtml .= '<div style="margin-bottom: 15px;">';
+                        $changesHtml .= '<strong>' . $this->escapeHtml($field) . ':</strong>';
+                        $changesHtml .= $this->generateDiffHtml($oldValue, $newValue);
+                        $changesHtml .= '</div>';
+                    }
+                    $changesHtml .= '</div>';
+
+                    $activityFieldset->addField('activity_' . $groupActivity->getId() . '_changes', 'note', [
+                        'label' => Mage::helper('adminactivitylog')->__('Changes'),
+                        'text' => $changesHtml,
                     ]);
                 }
             }

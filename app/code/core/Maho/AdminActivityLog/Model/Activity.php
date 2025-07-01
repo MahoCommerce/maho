@@ -33,6 +33,11 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         $data['user_agent'] = Mage::helper('core/http')->getHttpUserAgent();
         $data['request_url'] = Mage::helper('core/url')->getCurrentUrl();
 
+        // Preserve action_group_id if provided
+        if (isset($data['action_group_id'])) {
+            $this->setActionGroupId($data['action_group_id']);
+        }
+
         $encryption = Mage::getModel('core/encryption');
 
         if (isset($data['old_data']) && is_array($data['old_data'])) {
@@ -48,5 +53,23 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         $this->save();
 
         return $this;
+    }
+
+    /**
+     * Get all activities in the same action group
+     */
+    public function getGroupActivities(): Maho_AdminActivityLog_Model_Resource_Activity_Collection
+    {
+        $collection = Mage::getResourceModel('adminactivitylog/activity_collection');
+
+        if ($this->getActionGroupId()) {
+            $collection->addFieldToFilter('action_group_id', $this->getActionGroupId());
+            $collection->setOrder('created_at', 'ASC');
+        } else {
+            // If no group ID, return collection with just this activity
+            $collection->addFieldToFilter('activity_id', $this->getId());
+        }
+
+        return $collection;
     }
 }

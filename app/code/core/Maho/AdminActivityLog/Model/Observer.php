@@ -12,6 +12,7 @@
 class Maho_AdminActivityLog_Model_Observer
 {
     protected array $_oldData = [];
+    protected ?string $_currentActionGroupId = null;
 
     /**
      * Fields to ignore (system fields, timestamps, and form fields)
@@ -21,6 +22,27 @@ class Maho_AdminActivityLog_Model_Observer
         'form_key', 'key', 'uenc', 'form_token', 'session_id', '_store', '_redirect',
         'isAjax', 'ajax', 'callback', 'controller', 'action', 'module', 'update_time',
     ];
+
+    /**
+     * Get or generate action group ID for the current request
+     */
+    protected function _getActionGroupId(): string
+    {
+        if ($this->_currentActionGroupId === null) {
+            // Generate a unique ID based on:
+            // - Current timestamp (to group actions in the same request)
+            // - Admin session ID (to separate different users)
+            // - Request URL (to separate different actions)
+            $sessionId = Mage::getSingleton('admin/session')->getSessionId();
+            $requestUrl = Mage::helper('core/url')->getCurrentUrl();
+            $timestamp = microtime(true);
+
+            // Create a hash of these components
+            $this->_currentActionGroupId = hash('sha256', $sessionId . '|' . $requestUrl . '|' . $timestamp);
+        }
+
+        return $this->_currentActionGroupId;
+    }
 
     public function logAdminLogin(Varien_Event_Observer $observer): void
     {
@@ -168,6 +190,7 @@ class Maho_AdminActivityLog_Model_Observer
 
             $data = [
                 'action_type' => $isNew ? 'create' : 'update',
+                'action_group_id' => $this->_getActionGroupId(),
                 'module' => $this->_getCurrentModule(),
                 'controller' => $this->_getCurrentController(),
                 'action' => $this->_getCurrentAction(),
@@ -206,6 +229,7 @@ class Maho_AdminActivityLog_Model_Observer
 
             $data = [
                 'action_type' => 'delete',
+                'action_group_id' => $this->_getActionGroupId(),
                 'module' => $this->_getCurrentModule(),
                 'controller' => $this->_getCurrentController(),
                 'action' => $this->_getCurrentAction(),
@@ -450,6 +474,7 @@ class Maho_AdminActivityLog_Model_Observer
 
         $data = [
             'action_type' => 'mass_update',
+            'action_group_id' => $this->_getActionGroupId(),
             'entity_type' => $entityType,
             'entity_id' => null, // For mass actions, no single entity ID makes sense
             'entity_name' => $entityName,
