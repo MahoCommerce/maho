@@ -161,7 +161,7 @@ class Maho_AdminActivityLog_Model_Observer
                 }
             }
 
-            $dbFields = Mage::helper('adminactivitylog')->getObjectFields($object);
+            $dbFields = Mage::helper('adminactivitylog')->getDbFields($object);
 
             $oldChangedData = $this->filterFields($oldChangedData, $dbFields);
             $newChangedData = $this->filterFields($newChangedData, $dbFields);
@@ -202,7 +202,7 @@ class Maho_AdminActivityLog_Model_Observer
             $objectHash = spl_object_hash($object);
             $oldData = $this->_oldData[$objectHash] ?? $object->getData();
 
-            $dbFields = Mage::helper('adminactivitylog')->getObjectFields($object);
+            $dbFields = Mage::helper('adminactivitylog')->getDbFields($object);
 
             $data = [
                 'action_type' => 'delete',

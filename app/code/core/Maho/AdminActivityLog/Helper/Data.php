@@ -56,7 +56,7 @@ class Maho_AdminActivityLog_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfigAsInt('admin/adminactivitylog/days_to_keep');
     }
 
-    public function getObjectFields(mixed $object): ?array
+    public function getDbFields(mixed $object): ?array
     {
         try {
             $resource = $object->getResource();
