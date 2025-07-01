@@ -73,20 +73,10 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                          ($groupActivity->getEntityId() ? ' (ID: ' . $groupActivity->getEntityId() . ')' : ''),
             ]);
 
-            if ($groupActivity->getOldData() || $groupActivity->getNewData()) {
-                $encryption = Mage::getModel('core/encryption');
+            $oldData = $groupActivity->getOldData();
+            $newData = $groupActivity->getNewData();
 
-                $oldData = [];
-                if ($groupActivity->getOldData()) {
-                    $decryptedOldData = $encryption->decrypt($groupActivity->getOldData());
-                    $oldData = $decryptedOldData ? json_decode($decryptedOldData, true) : [];
-                }
-
-                $newData = [];
-                if ($groupActivity->getNewData()) {
-                    $decryptedNewData = $encryption->decrypt($groupActivity->getNewData());
-                    $newData = $decryptedNewData ? json_decode($decryptedNewData, true) : [];
-                }
+            if (!empty($oldData) || !empty($newData)) {
 
                 // For updates, the data already contains only changed fields
                 // For creates, show all new data

@@ -55,6 +55,30 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    public function getOldData(): array
+    {
+        $data = $this->getData('old_data');
+        if ($data) {
+            $decrypted = Mage::getModel('core/encryption')->decrypt($data);
+            if ($decrypted && json_validate($decrypted)) {
+                return json_decode($decrypted, true);
+            }
+        }
+        return [];
+    }
+
+    public function getNewData(): array
+    {
+        $data = $this->getData('new_data');
+        if ($data) {
+            $decrypted = Mage::getModel('core/encryption')->decrypt($data);
+            if ($decrypted && json_validate($decrypted)) {
+                return json_decode($decrypted, true);
+            }
+        }
+        return [];
+    }
+
     /**
      * Get all activities in the same action group
      */
