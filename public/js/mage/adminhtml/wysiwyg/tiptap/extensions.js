@@ -454,31 +454,27 @@ export const MahoDiv = Node.create({
 
     addAttributes() {
         return {
-            class: {
-                default: null,
-                parseHTML: element => element.getAttribute('class'),
-                renderHTML: attributes => attributes.class ? { class: attributes.class } : {},
-            },
             id: {
-                default: null,
-                parseHTML: element => element.getAttribute('id'),
-                renderHTML: attributes => attributes.id ? { id: attributes.id } : {},
+                parseHTML: (element) => element.id,
+                renderHTML: (attributes) => attributes.id ? { id: attributes.id } : {},
+            },
+            classList: {
+                parseHTML: (element) => element.classList,
+                renderHTML: (attributes) => attributes.classList ? { class: attributes.classList } : {},
             },
         };
     },
 
     parseHTML() {
-        return [
-            {
-                tag: 'div',
-                getAttrs: element => {
-                    // Only capture divs that have class or id attributes
-                    const className = element.getAttribute('class');
-                    const idAttr = element.getAttribute('id');
-                    return (className || idAttr) ? {} : false;
-                },
+        return [{
+            tag: 'div',
+            getAttrs: (element) => {
+                // Only capture divs that have an id or class attribute
+                if (!element.id && element.classList.length === 0) {
+                    return false;
+                }
             },
-        ];
+        }];
     },
 
     renderHTML({ HTMLAttributes }) {
@@ -490,20 +486,17 @@ export const MahoDiv = Node.create({
             const div = document.createElement('div');
 
             // Apply original attributes
-            Object.entries(HTMLAttributes).forEach(([key, value]) => {
-                if (value !== null && value !== undefined) {
-                    div.setAttribute(key, value);
-                }
-            });
+            for (const [key, value] of Object.entries(HTMLAttributes)) {
+                div.setAttribute(key, value);
+            }
 
             // Create label for visual identification
             let label = 'div';
-            if (node.attrs.id) label += `#${node.attrs.id}`;
-            if (node.attrs.class) {
-                const classes = node.attrs.class.split(' ').filter(c => c.trim());
-                if (classes.length) {
-                    label += `.${classes.join('.')}`;
-                }
+            if (node.attrs.id) {
+                label += `#${node.attrs.id}`;
+            }
+            for (const className of node.attrs.classList.values()) {
+                label += `.${className}`;
             }
 
             // Add visual styling attributes
