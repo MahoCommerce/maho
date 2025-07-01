@@ -440,3 +440,80 @@ export const MahoSlideshow = Node.create({
         };
     },
 });
+
+/**
+ * MahoDiv Node Extension
+ *
+ * Preserves div elements with visual highlighting showing class/id info
+ */
+export const MahoDiv = Node.create({
+    name: 'mahoDiv',
+    group: 'block',
+    content: 'block*',
+    defining: true,
+
+    addAttributes() {
+        return {
+            class: {
+                default: null,
+                parseHTML: element => element.getAttribute('class'),
+                renderHTML: attributes => attributes.class ? { class: attributes.class } : {},
+            },
+            id: {
+                default: null,
+                parseHTML: element => element.getAttribute('id'),
+                renderHTML: attributes => attributes.id ? { id: attributes.id } : {},
+            },
+        };
+    },
+
+    parseHTML() {
+        return [
+            {
+                tag: 'div',
+                getAttrs: element => {
+                    // Only capture divs that have class or id attributes
+                    const className = element.getAttribute('class');
+                    const idAttr = element.getAttribute('id');
+                    return (className || idAttr) ? {} : false;
+                },
+            },
+        ];
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        return ['div', HTMLAttributes, 0];
+    },
+
+    addNodeView() {
+        return ({ node, HTMLAttributes }) => {
+            const div = document.createElement('div');
+
+            // Apply original attributes
+            Object.entries(HTMLAttributes).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    div.setAttribute(key, value);
+                }
+            });
+
+            // Create label for visual identification
+            let label = 'div';
+            if (node.attrs.id) label += `#${node.attrs.id}`;
+            if (node.attrs.class) {
+                const classes = node.attrs.class.split(' ').filter(c => c.trim());
+                if (classes.length) {
+                    label += `.${classes.join('.')}`;
+                }
+            }
+
+            // Add visual styling attributes
+            div.setAttribute('data-div-info', label);
+            div.contentEditable = 'true';
+
+            return {
+                dom: div,
+                contentDOM: div,
+            };
+        };
+    },
+});

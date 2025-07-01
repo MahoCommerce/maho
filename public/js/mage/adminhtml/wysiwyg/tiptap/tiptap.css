@@ -603,3 +603,42 @@
     height: 24px !important;
     border-left: 1px solid #e2e8f0;
 }
+
+/* MahoDiv */
+.ProseMirror div[data-div-info] {
+    position: relative;
+    border: 2px dashed #3b82f6;
+    border-radius: 4px;
+    margin: 8px 0;
+    padding: 8px;
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.ProseMirror div[data-div-info]:hover {
+    border-color: #1d4ed8;
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.ProseMirror div[data-div-info]::before {
+    content: attr(data-div-info);
+    position: absolute;
+    top: -10px;
+    left: 8px;
+    background: #3b82f6;
+    color: white;
+    padding: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: monospace;
+    line-height: 1;
+    z-index: 1;
+}
+
+.ProseMirror div[data-div-info].ProseMirror-selectednode {
+    border-color: #1d4ed8;
+    background-color: rgba(59, 130, 246, 0.15);
+}
+
+.ProseMirror div[data-div-info].ProseMirror-selectednode::before {
+    background: #1d4ed8;
+}

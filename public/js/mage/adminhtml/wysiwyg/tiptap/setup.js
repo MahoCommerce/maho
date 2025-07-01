@@ -205,6 +205,7 @@ class tiptapWysiwygSetup {
                         levels: [1, 2, 3, 4, 5]
                     }
                 }),
+                TiptapModules.MahoDiv,
                 TiptapModules.MahoImage.configure({
                     inline: true,
                     title: this.translate('Insert Image...'),
