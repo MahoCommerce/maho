@@ -161,8 +161,10 @@ class Maho_AdminActivityLog_Model_Observer
                 }
             }
 
-            $oldChangedData = $this->filterFields($oldChangedData);
-            $newChangedData = $this->filterFields($newChangedData);
+            $dbFields = Mage::helper('adminactivitylog')->getObjectFields($object);
+
+            $oldChangedData = $this->filterFields($oldChangedData, $dbFields);
+            $newChangedData = $this->filterFields($newChangedData, $dbFields);
 
             $data = [
                 'action_type' => $isNew ? 'create' : 'update',
@@ -200,6 +202,8 @@ class Maho_AdminActivityLog_Model_Observer
             $objectHash = spl_object_hash($object);
             $oldData = $this->_oldData[$objectHash] ?? $object->getData();
 
+            $dbFields = Mage::helper('adminactivitylog')->getObjectFields($object);
+
             $data = [
                 'action_type' => 'delete',
                 'module' => $this->_getCurrentModule(),
@@ -208,7 +212,7 @@ class Maho_AdminActivityLog_Model_Observer
                 'entity_type' => $this->_getEntityType($object),
                 'entity_id' => $object->getId(),
                 'entity_name' => $this->_getEntityName($object),
-                'old_data' => $this->filterFields($oldData),
+                'old_data' => $this->filterFields($oldData, $dbFields),
             ];
 
             Mage::getModel('adminactivitylog/activity')->logActivity($data);
@@ -266,8 +270,11 @@ class Maho_AdminActivityLog_Model_Observer
         return (string) Mage::app()->getRequest()->getActionName();
     }
 
-    protected function filterFields(array $data): array
+    protected function filterFields(array $data, ?array $dbFields): array
     {
+        if ($dbFields !== null) {
+            $data = array_intersect_key($data, array_flip($dbFields));
+        }
         return array_diff_key($data, array_flip($this->ignoreFields));
     }
 
