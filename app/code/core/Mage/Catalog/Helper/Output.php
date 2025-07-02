@@ -115,7 +115,6 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
                 $attributeHtml = $this->escapeHtml($attributeHtml);
             }
             if ($attribute->getFrontendInput() == 'textarea') {
-                Mage::log($attributeHtml);
                 // Only add <br> if we don't already have HTML
                 if ($attributeHtml === strip_tags($attributeHtml)) {
                     $attributeHtml = nl2br($attributeHtml);
