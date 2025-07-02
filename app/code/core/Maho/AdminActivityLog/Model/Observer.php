@@ -189,19 +189,11 @@ class Maho_AdminActivityLog_Model_Observer
             $oldChangedData = $this->filterFields($oldChangedData, $dbFields);
             $newChangedData = $this->filterFields($newChangedData, $dbFields);
 
-            $groupId = $this->_getActionGroupId();
-            $entityType = $this->_getEntityType($object);
-            $entityName = $this->_getEntityName($object);
-
             $data = [
                 'action_type' => $isNew ? 'create' : 'update',
-                'action_group_id' => $groupId,
-                'module' => $this->_getCurrentModule(),
-                'controller' => $this->_getCurrentController(),
-                'action' => $this->_getCurrentAction(),
-                'entity_type' => $entityType,
+                'action_group_id' => $this->_getActionGroupId(),
+                'entity_type' => $this->_getModelAlias($object),
                 'entity_id' => $object->getId(),
-                'entity_name' => $entityName,
                 'request_url' => $this->_getRelativeAdminUrl(),
                 'old_data' => $oldChangedData,
                 'new_data' => $newChangedData,
@@ -236,12 +228,8 @@ class Maho_AdminActivityLog_Model_Observer
             $data = [
                 'action_type' => 'delete',
                 'action_group_id' => $this->_getActionGroupId(),
-                'module' => $this->_getCurrentModule(),
-                'controller' => $this->_getCurrentController(),
-                'action' => $this->_getCurrentAction(),
-                'entity_type' => $this->_getEntityType($object),
+                'entity_type' => $this->_getModelAlias($object),
                 'entity_id' => $object->getId(),
-                'entity_name' => $this->_getEntityName($object),
                 'request_url' => $this->_getRelativeAdminUrl(),
                 'old_data' => $this->filterFields($oldData, $dbFields),
             ];
@@ -275,9 +263,6 @@ class Maho_AdminActivityLog_Model_Observer
 
             $data = [
                 'action_type' => 'page_visit',
-                'module' => $this->_getCurrentModule(),
-                'controller' => $this->_getCurrentController(),
-                'action' => $this->_getCurrentAction(),
                 'request_url' => $this->_getRelativeAdminUrl(),
             ];
 
@@ -287,20 +272,6 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    protected function _getCurrentModule(): string
-    {
-        return (string) Mage::app()->getRequest()->getModuleName();
-    }
-
-    protected function _getCurrentController(): string
-    {
-        return (string) Mage::app()->getRequest()->getControllerName();
-    }
-
-    protected function _getCurrentAction(): string
-    {
-        return (string) Mage::app()->getRequest()->getActionName();
-    }
 
     protected function _getRelativeAdminUrl(): string
     {
@@ -312,23 +283,34 @@ class Maho_AdminActivityLog_Model_Observer
         if ($pos !== false) {
             // Extract everything after the admin front name and slash
             $relativePath = substr($currentUrl, $pos + strlen("/{$adminFrontName}/"));
-            
+
             // Remove query parameters and fragments
             $relativePath = strtok($relativePath, '?');
             $relativePath = strtok($relativePath, '#');
-            
+
             // Split by slash and keep only the first parameter (if any)
             $parts = explode('/', $relativePath);
             if (count($parts) > 3) {
                 // Keep module/controller/action + first parameter (id/value)
                 $relativePath = implode('/', array_slice($parts, 0, 4));
             }
-            
+
             return $relativePath;
         }
 
         // Fallback if admin front name not found
         return '';
+    }
+
+    protected function _getModelAlias(Mage_Core_Model_Abstract $object): string
+    {
+        $resourceName = $object->getResourceName();
+        if ($resourceName) {
+            return $resourceName;
+        }
+
+        // Fallback to class name if resource name is not available
+        return get_class($object);
     }
 
     protected function filterFields(array $data, ?array $dbFields): array
@@ -337,46 +319,6 @@ class Maho_AdminActivityLog_Model_Observer
             $data = array_intersect_key($data, array_flip($dbFields));
         }
         return array_diff_key($data, array_flip($this->ignoreFields));
-    }
-
-    protected function _getEntityType(Mage_Core_Model_Abstract $object): string
-    {
-        $class = $object::class;
-        $map = [
-            // Main entities (high priority)
-            'Mage_Catalog_Model_Product' => 'product',
-            'Mage_Catalog_Model_Category' => 'category',
-            'Mage_Customer_Model_Customer' => 'customer',
-            'Mage_Sales_Model_Order' => 'order',
-            'Mage_Cms_Model_Page' => 'cms_page',
-            'Mage_Cms_Model_Block' => 'cms_block',
-            'Mage_Admin_Model_User' => 'admin_user',
-            'Mage_Admin_Model_Role' => 'admin_role',
-
-            // Supporting entities (low priority)
-            'Mage_Catalog_Model_Product_Attribute' => 'catalog_product_attribute',
-            'Mage_Catalog_Model_Product_Type_Configurable_Attribute' => 'catalog_product_type_configurable_attribute',
-            'Mage_Eav_Model_Entity_Attribute_Option' => 'eav_attribute_option',
-            'Mage_Catalog_Model_Product_Link' => 'catalog_product_link',
-            'Mage_Catalog_Model_Product_Website' => 'catalog_product_website',
-            'Mage_Catalog_Model_Category_Product' => 'catalog_product_category',
-            'Mage_CatalogInventory_Model_Stock_Item' => 'catalog_product_stock_item',
-        ];
-
-        return $map[$class] ?? strtolower(str_replace('_Model_', '_', $class));
-    }
-
-    protected function _getEntityName(Mage_Core_Model_Abstract $object): string
-    {
-        $nameFields = ['name', 'title', 'sku', 'increment_id', 'username', 'email', 'identifier', 'path'];
-
-        foreach ($nameFields as $field) {
-            if ($object->hasData($field) && $object->getData($field)) {
-                return (string) $object->getData($field);
-            }
-        }
-
-        return 'ID: ' . $object->getId();
     }
 
     public function logMassAction(Varien_Event_Observer $observer): void
@@ -474,16 +416,8 @@ class Maho_AdminActivityLog_Model_Observer
         $user = Mage::getSingleton('admin/session')->getUser();
         $entityCount = count($selectedIds);
 
-        // Determine entity type from controller
-        $entityType = $this->_getMassActionEntityType($controllerAction);
-
-        // Create a clean, readable entity name
-        $actionDescription = $this->_getReadableActionName($actionName, $controllerName);
-        $entityName = "{$actionDescription} ({$entityCount} items)";
-
-        // Get clean attribute data for mass attribute updates and product names
+        // Get clean attribute data for mass attribute updates
         $attributeData = [];
-        $productNames = [];
 
         if ($actionName === 'save' && $controllerName === 'catalog_product_action_attribute') {
             $postData = $request->getPost();
@@ -494,37 +428,19 @@ class Maho_AdminActivityLog_Model_Observer
                     }
                 }
             }
-
-            // Get product names for the selected IDs
-            $productCollection = Mage::getModel('catalog/product')->getCollection()
-                ->addFieldToFilter('entity_id', ['in' => array_slice($selectedIds, 0, 10)])
-                ->addAttributeToSelect('name');
-
-            foreach ($productCollection as $product) {
-                $productNames[] = $product->getName() . ' (ID: ' . $product->getId() . ')';
-            }
         }
 
-        // Only store attribute changes in old_data/new_data, not action/controller info
+        // Store only attribute changes and selected IDs
         $oldDataToStore = [];
-        $newDataToStore = $attributeData;
-
-        // Create a meaningful entity name with product list
-        if (!empty($productNames)) {
-            $productList = implode("\n", $productNames);
-            if (count($productNames) < $entityCount) {
-                $remaining = $entityCount - count($productNames);
-                $productList .= "\n(and {$remaining} more)";
-            }
-            $entityName = $productList;
-        }
+        $newDataToStore = [
+            'affected_count' => $entityCount,
+            'selected_ids' => array_slice($selectedIds, 0, 10), // Store first 10 IDs
+            'attributes' => $attributeData,
+        ];
 
         $data = [
             'action_type' => 'mass_update',
             'action_group_id' => $this->_getActionGroupId(),
-            'entity_type' => $entityType,
-            'entity_id' => null, // For mass actions, no single entity ID makes sense
-            'entity_name' => $entityName,
             'username' => $user->getUsername(),
             'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
             'request_url' => $this->_getRelativeAdminUrl(),
@@ -533,57 +449,6 @@ class Maho_AdminActivityLog_Model_Observer
         ];
 
         Mage::getModel('adminactivitylog/activity')->logActivity($data);
-    }
-
-    protected function _getMassActionEntityType(Mage_Core_Controller_Varien_Action $controllerAction): string
-    {
-        $controllerName = $controllerAction->getRequest()->getControllerName();
-        $moduleName = $controllerAction->getRequest()->getModuleName();
-
-        // Clean up controller name and remove common suffixes
-        $cleanController = str_replace(['_action_attribute', '_action'], '', $controllerName);
-
-        // For admin module, just use the controller name without the module prefix
-        if ($moduleName === 'admin' || $moduleName === 'adminhtml') {
-            return $cleanController;
-        }
-
-        // For other modules, include module name if different from controller
-        if ($cleanController !== $moduleName && !empty($cleanController)) {
-            return $moduleName . '/' . $cleanController;
-        }
-
-        return $cleanController;
-    }
-
-    protected function _getReadableActionName(string $actionName, string $controllerName): string
-    {
-        // Handle specific controller/action combinations
-        if ($controllerName === 'catalog_product_action_attribute') {
-            return match ($actionName) {
-                'edit' => 'Mass Edit Product Attributes',
-                'save' => 'Mass Update Product Attributes',
-                'validate' => 'Mass Validate Product Attributes',
-                default => 'Mass Product Attribute Action',
-            };
-        }
-
-        // Generic action name cleanup
-        $readableNames = [
-            'massDelete' => 'Mass Delete',
-            'massStatus' => 'Mass Status Change',
-            'massUpdateAttributes' => 'Mass Update Attributes',
-            'massRefresh' => 'Mass Refresh',
-            'massReindex' => 'Mass Reindex',
-            'massDisable' => 'Mass Disable',
-            'massEnable' => 'Mass Enable',
-            'save' => 'Save',
-            'edit' => 'Edit',
-            'validate' => 'Validate',
-        ];
-
-        // Fallback: capitalize and clean up action name
-        return $readableNames[$actionName] ?? ucfirst(str_replace('_', ' ', $actionName));
     }
 
     public function cleanOldLogs(): void

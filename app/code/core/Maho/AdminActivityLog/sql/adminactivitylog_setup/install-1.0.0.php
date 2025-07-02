@@ -34,25 +34,13 @@ $activityTable = $installer->getConnection()
     ->addColumn('action_type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 50, [
         'nullable'  => false,
     ], 'Action Type (create, update, delete, mass_update, page_visit)')
-    ->addColumn('module', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
-        'nullable'  => true,
-    ], 'Module Name')
-    ->addColumn('controller', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
-        'nullable'  => true,
-    ], 'Controller Name')
-    ->addColumn('action', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
-        'nullable'  => true,
-    ], 'Action Name')
     ->addColumn('entity_type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
         'nullable'  => true,
-    ], 'Entity Type')
+    ], 'Entity Type (Model Class Name)')
     ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
     ], 'Entity ID')
-    ->addColumn('entity_name', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
-        'nullable'  => true,
-    ], 'Entity Name/Title')
     ->addColumn('old_data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Old Data (JSON)')
@@ -85,8 +73,12 @@ $activityTable = $installer->getConnection()
         ['action_type'],
     )
     ->addIndex(
-        $installer->getIdxName('adminactivitylog/activity', ['entity_type', 'entity_id']),
-        ['entity_type', 'entity_id'],
+        $installer->getIdxName('adminactivitylog/activity', ['entity_type']),
+        ['entity_type'],
+    )
+    ->addIndex(
+        $installer->getIdxName('adminactivitylog/activity', ['entity_id']),
+        ['entity_id'],
     )
     ->addIndex(
         $installer->getIdxName('adminactivitylog/activity', ['created_at']),
