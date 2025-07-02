@@ -30,12 +30,13 @@ class Maho_AdminActivityLog_Model_Observer
     {
         if ($this->_currentActionGroupId === null) {
             // Generate a unique ID based on:
-            // - Current timestamp (to group actions in the same request)
+            // - Request start time (consistent during entire request)
             // - Admin session ID (to separate different users)
             // - Request URL (to separate different actions)
             $sessionId = Mage::getSingleton('admin/session')->getSessionId();
             $requestUrl = Mage::helper('core/url')->getCurrentUrl();
-            $timestamp = microtime(true);
+            // Use request start time instead of current microtime for consistency
+            $timestamp = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
 
             // Create a hash of these components
             $this->_currentActionGroupId = hash('sha256', $sessionId . '|' . $requestUrl . '|' . $timestamp);
@@ -188,15 +189,20 @@ class Maho_AdminActivityLog_Model_Observer
             $oldChangedData = $this->filterFields($oldChangedData, $dbFields);
             $newChangedData = $this->filterFields($newChangedData, $dbFields);
 
+            $groupId = $this->_getActionGroupId();
+            $entityType = $this->_getEntityType($object);
+            $entityName = $this->_getEntityName($object);
+
             $data = [
                 'action_type' => $isNew ? 'create' : 'update',
-                'action_group_id' => $this->_getActionGroupId(),
+                'action_group_id' => $groupId,
                 'module' => $this->_getCurrentModule(),
                 'controller' => $this->_getCurrentController(),
                 'action' => $this->_getCurrentAction(),
-                'entity_type' => $this->_getEntityType($object),
+                'entity_type' => $entityType,
                 'entity_id' => $object->getId(),
-                'entity_name' => $this->_getEntityName($object),
+                'entity_name' => $entityName,
+                'request_url' => $this->_getRelativeAdminUrl(),
                 'old_data' => $oldChangedData,
                 'new_data' => $newChangedData,
             ];
@@ -236,6 +242,7 @@ class Maho_AdminActivityLog_Model_Observer
                 'entity_type' => $this->_getEntityType($object),
                 'entity_id' => $object->getId(),
                 'entity_name' => $this->_getEntityName($object),
+                'request_url' => $this->_getRelativeAdminUrl(),
                 'old_data' => $this->filterFields($oldData, $dbFields),
             ];
 
@@ -271,6 +278,7 @@ class Maho_AdminActivityLog_Model_Observer
                 'module' => $this->_getCurrentModule(),
                 'controller' => $this->_getCurrentController(),
                 'action' => $this->_getCurrentAction(),
+                'request_url' => $this->_getRelativeAdminUrl(),
             ];
 
             Mage::getModel('adminactivitylog/activity')->logActivity($data);
@@ -294,6 +302,35 @@ class Maho_AdminActivityLog_Model_Observer
         return (string) Mage::app()->getRequest()->getActionName();
     }
 
+    protected function _getRelativeAdminUrl(): string
+    {
+        $currentUrl = Mage::helper('core/url')->getCurrentUrl();
+        $adminFrontName = (string) Mage::getConfig()->getNode('admin/routers/adminhtml/args/frontName');
+
+        // Find the position of the admin front name in the URL
+        $pos = strpos($currentUrl, "/{$adminFrontName}/");
+        if ($pos !== false) {
+            // Extract everything after the admin front name and slash
+            $relativePath = substr($currentUrl, $pos + strlen("/{$adminFrontName}/"));
+            
+            // Remove query parameters and fragments
+            $relativePath = strtok($relativePath, '?');
+            $relativePath = strtok($relativePath, '#');
+            
+            // Split by slash and keep only the first parameter (if any)
+            $parts = explode('/', $relativePath);
+            if (count($parts) > 3) {
+                // Keep module/controller/action + first parameter (id/value)
+                $relativePath = implode('/', array_slice($parts, 0, 4));
+            }
+            
+            return $relativePath;
+        }
+
+        // Fallback if admin front name not found
+        return '';
+    }
+
     protected function filterFields(array $data, ?array $dbFields): array
     {
         if ($dbFields !== null) {
@@ -306,6 +343,7 @@ class Maho_AdminActivityLog_Model_Observer
     {
         $class = $object::class;
         $map = [
+            // Main entities (high priority)
             'Mage_Catalog_Model_Product' => 'product',
             'Mage_Catalog_Model_Category' => 'category',
             'Mage_Customer_Model_Customer' => 'customer',
@@ -314,6 +352,15 @@ class Maho_AdminActivityLog_Model_Observer
             'Mage_Cms_Model_Block' => 'cms_block',
             'Mage_Admin_Model_User' => 'admin_user',
             'Mage_Admin_Model_Role' => 'admin_role',
+
+            // Supporting entities (low priority)
+            'Mage_Catalog_Model_Product_Attribute' => 'catalog_product_attribute',
+            'Mage_Catalog_Model_Product_Type_Configurable_Attribute' => 'catalog_product_type_configurable_attribute',
+            'Mage_Eav_Model_Entity_Attribute_Option' => 'eav_attribute_option',
+            'Mage_Catalog_Model_Product_Link' => 'catalog_product_link',
+            'Mage_Catalog_Model_Product_Website' => 'catalog_product_website',
+            'Mage_Catalog_Model_Category_Product' => 'catalog_product_category',
+            'Mage_CatalogInventory_Model_Stock_Item' => 'catalog_product_stock_item',
         ];
 
         return $map[$class] ?? strtolower(str_replace('_Model_', '_', $class));
@@ -480,7 +527,7 @@ class Maho_AdminActivityLog_Model_Observer
             'entity_name' => $entityName,
             'username' => $user->getUsername(),
             'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
-            'request_url' => Mage::helper('core/url')->getCurrentUrl(),
+            'request_url' => $this->_getRelativeAdminUrl(),
             'old_data' => $oldDataToStore,
             'new_data' => $newDataToStore,
         ];
@@ -584,4 +631,5 @@ class Maho_AdminActivityLog_Model_Observer
 
         $output->writeln('OK');
     }
+
 }

@@ -27,12 +27,10 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
         $collection = Mage::getResourceModel('adminactivitylog/activity_collection');
 
         // Group by action_group_id to show only one entry per group
-        // Using MIN(activity_id) to get the first activity in each group
         $collection->getSelect()
             ->group('IFNULL(main_table.action_group_id, main_table.activity_id)')
             ->columns([
                 'activity_count' => new Zend_Db_Expr('COUNT(*)'),
-                'grouped_entity_names' => new Zend_Db_Expr('GROUP_CONCAT(DISTINCT main_table.entity_name ORDER BY main_table.activity_id SEPARATOR "\n")'),
             ]);
 
         $this->setCollection($collection);
@@ -64,33 +62,10 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
             'index'     => 'username',
         ]);
 
-        $this->addColumn('action_type', [
-            'header'    => Mage::helper('adminactivitylog')->__('Action'),
+        $this->addColumn('request_url', [
+            'header'    => Mage::helper('adminactivitylog')->__('URL'),
             'align'     => 'left',
-            'width'     => '100px',
-            'index'     => 'action_type',
-            'type'      => 'options',
-            'options'   => [
-                'create' => $this->__('Create'),
-                'update' => $this->__('Update'),
-                'delete' => $this->__('Delete'),
-                'mass_update' => $this->__('Mass Update'),
-                'page_visit' => $this->__('Page Visit'),
-            ],
-        ]);
-
-        $this->addColumn('entity_type', [
-            'header'    => Mage::helper('adminactivitylog')->__('Entity Type'),
-            'align'     => 'left',
-            'index'     => 'entity_type',
-        ]);
-
-        $this->addColumn('entity_name', [
-            'header'    => Mage::helper('adminactivitylog')->__('Entity'),
-            'align'     => 'left',
-            'index'     => 'grouped_entity_names',
-            'filter_index' => 'main_table.entity_name',
-            'renderer'  => 'adminactivitylog/adminhtml_activity_grid_renderer_entityName',
+            'index'     => 'request_url',
         ]);
 
         $this->addColumn('activity_count', [
@@ -107,13 +82,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
             'align'     => 'left',
             'width'     => '120px',
             'index'     => 'ip_address',
-        ]);
-
-        $this->addColumn('request_url', [
-            'header'    => Mage::helper('adminactivitylog')->__('URL'),
-            'align'     => 'left',
-            'index'     => 'request_url',
-            'renderer'  => 'adminactivitylog/adminhtml_activity_grid_renderer_url',
         ]);
 
         $this->addExportType('*/*/exportCsv', Mage::helper('adminactivitylog')->__('CSV'));
