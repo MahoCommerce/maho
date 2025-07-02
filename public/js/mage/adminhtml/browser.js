@@ -220,10 +220,12 @@ class Mediabrowser {
             Dialog.close(html);
 
             const targetEl = document.getElementById(this.targetElementId);
-            if (targetEl.tagName === 'INPUT') {
-                targetEl.value = html;
-            } else if (targetEl.tagName === 'TEXTAREA') {
-                updateElementAtCursor(targetEl, html);
+            if (targetEl) {
+                if (targetEl.tagName === 'INPUT') {
+                    targetEl.value = html;
+                } else if (targetEl.tagName === 'TEXTAREA') {
+                    updateElementAtCursor(targetEl, html);
+                }
             }
 
         } catch (error) {

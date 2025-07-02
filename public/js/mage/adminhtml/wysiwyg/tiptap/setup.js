@@ -226,7 +226,6 @@ class tiptapWysiwygSetup {
                 TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
-                        target_element_id: this.id,
                         store: this.storeId,
                         filetype: 'image',
                     }),
