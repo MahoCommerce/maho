@@ -116,24 +116,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
             'renderer'  => 'adminactivitylog/adminhtml_activity_grid_renderer_url',
         ]);
 
-        $this->addColumn('action', [
-            'header'    => Mage::helper('adminactivitylog')->__('Action'),
-            'width'     => '100',
-            'type'      => 'action',
-            'getter'    => 'getId',
-            'actions'   => [
-                [
-                    'caption'   => Mage::helper('adminactivitylog')->__('View'),
-                    'url'       => ['base' => '*/*/view'],
-                    'field'     => 'id',
-                ],
-            ],
-            'filter'    => false,
-            'sortable'  => false,
-            'index'     => 'activity_id',
-            'is_system' => true,
-        ]);
-
         $this->addExportType('*/*/exportCsv', Mage::helper('adminactivitylog')->__('CSV'));
         $this->addExportType('*/*/exportXml', Mage::helper('adminactivitylog')->__('Excel XML'));
 
