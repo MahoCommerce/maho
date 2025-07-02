@@ -439,7 +439,6 @@ export const MahoSlideshow = Node.create({
 
             // Double-click to edit
             dom.addEventListener('dblclick', () => {
-                editor.commands.setNodeSelection(getPos());
                 editor.commands.insertMahoSlideshow(node);
             });
 
@@ -452,6 +451,7 @@ export const MahoSlideshow = Node.create({
             insertMahoSlideshow: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
                 let slides = Array.from(node?.attrs?.slides ?? []);
+                let sortableInstance;
 
                 // Create slideshow editor dialog content
                 const dialogContent = `
@@ -463,6 +463,21 @@ export const MahoSlideshow = Node.create({
                             <button type="button" class="add-slide-btn">Add Image</button>
                         </div>
                     </div>
+                `;
+                const slideTemplate = `
+                    <div class="slide-handle">
+                        ${editor.options.wysiwygSetup.getIcon('hamburger')}
+                    </div>
+                    <div class="slide-preview">
+                        <img src="" alt="">
+                    </div>
+                    <div class="slide-controls">
+                        <input type="text" class="slide-alt" placeholder="Alt text">
+                        <input type="url" class="slide-href" placeholder="Link URL (optional)">
+                    </div>
+                    <button type="button" class="remove-slide" title="Remove slide">
+                        ${editor.options.wysiwygSetup.getIcon('trash')}
+                    </button>
                 `;
 
                 Dialog.info(dialogContent, {
@@ -477,66 +492,47 @@ export const MahoSlideshow = Node.create({
                     onOpen: (dialog) => {
                         const container = dialog.querySelector('.slideshow-editor');
                         const slidesList = container.querySelector('.slides-list');
-                        const addBtn = container.querySelector('.add-slide-btn');
 
                         // Render existing slides
                         const renderSlides = () => {
                             slidesList.innerHTML = '';
-                            slides.forEach((slide, index) => {
-                                const li = document.createElement('li');
+                            for (const [index, slide] of Object.entries(slides)) {
+                                const li = slidesList.appendChild(document.createElement('li'));
                                 li.className = 'slide-item';
                                 li.dataset.index = index;
-                                li.innerHTML = `
-                                    <div class="slide-handle">☰</div>
-                                    <div class="slide-preview">
-                                        <img src="${renderDirectiveImageUrl(slide.src, slide.directiveObj, this.options.directivesUrl)}" alt="">
-                                    </div>
-                                    <div class="slide-controls">
-                                        <input type="text" class="slide-alt" placeholder="Alt text" value="${escapeHtml(slide.alt || '')}">
-                                        <input type="text" class="slide-href" placeholder="Link URL (optional)" value="${escapeHtml(slide.href || '')}">
-                                    </div>
-                                    <button type="button" class="remove-slide" data-index="${index}" title="Remove slide">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>
-                                        </svg>
-                                    </button>
-                                `;
-                                slidesList.appendChild(li);
-                            });
+                                li.innerHTML = slideTemplate;
+                                li.querySelector('.slide-alt').value = slide.alt ?? '';
+                                li.querySelector('.slide-href').value = slide.href ?? '';
+                                li.querySelector('.slide-preview img').src =
+                                    renderDirectiveImageUrl(slide.src, slide.directiveObj, this.options.directivesUrl);
 
-                            // Attach event listeners
-                            slidesList.querySelectorAll('.slide-alt').forEach((input, index) => {
-                                input.addEventListener('change', () => {
-                                    slides[index].alt = input.value;
+                                // Attach event listeners
+                                li.querySelector('.slide-alt').addEventListener('change', (event) => {
+                                    slides[index].alt = event.target.value
                                 });
-                            });
-
-                            slidesList.querySelectorAll('.slide-href').forEach((input, index) => {
-                                input.addEventListener('change', () => {
-                                    slides[index].href = input.value;
+                                li.querySelector('.slide-href').addEventListener('change', (event) => {
+                                    slides[index].href = event.target.value
                                 });
-                            });
-
-                            slidesList.querySelectorAll('.remove-slide').forEach(btn => {
-                                btn.addEventListener('click', () => {
-                                    const index = parseInt(btn.dataset.index);
+                                li.querySelector('.remove-slide').addEventListener('click', () => {
                                     slides.splice(index, 1);
                                     renderSlides();
                                 });
-                            });
+                            }
+                        };
 
-                            // Initialize SortableJS for drag and drop
-                            new Sortable(slidesList, {
+                        // Initialize SortableJS for drag and drop
+                        const bindSortable = () => {
+                            sortableInstance = new Sortable(slidesList, {
                                 animation: 150,
                                 handle: '.slide-handle',
                                 ghostClass: 'dragging',
                                 onEnd: () => {
                                     // Reorder slides array based on new DOM order
                                     const newSlides = [];
-                                    [...slidesList.querySelectorAll('.slide-item')].forEach(item => {
+                                    for (const item of slidesList.querySelectorAll('.slide-item')) {
                                         const oldIndex = parseInt(item.dataset.index);
                                         newSlides.push(slides[oldIndex]);
-                                    });
+                                    }
                                     slides = newSlides;
                                     renderSlides();
                                 }
@@ -544,7 +540,7 @@ export const MahoSlideshow = Node.create({
                         };
 
                         // Add slide button handler
-                        addBtn.addEventListener('click', () => {
+                        container.querySelector('.add-slide-btn').addEventListener('click', () => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
                                 onOk: (dialog) => {
                                     //  Parse out the directive and alt text
@@ -569,10 +565,20 @@ export const MahoSlideshow = Node.create({
 
                         // Initial render
                         renderSlides();
+                        bindSortable();
                     },
                     onOk: (dialog) => {
                         if (slides.length === 0) {
-                            alert('Please add at least one image to the slideshow');
+                            alert(editor.options.wysiwygSetup.translate('Please add at least one image to the slideshow'));
+                            return false;
+                        }
+
+                        // Check validity of link URLs
+                        let isValid = true;
+                        for (const input of dialog.querySelectorAll('.slide-href')) {
+                            isValid &&= input.checkValidity();
+                        }
+                        if (!isValid) {
                             return false;
                         }
 
@@ -581,7 +587,10 @@ export const MahoSlideshow = Node.create({
                             attrs: { slides },
                         });
                         return true;
-                    }
+                    },
+                    onClose: () => {
+                        sortableInstance?.destroy();
+                    },
                 });
             }
         };

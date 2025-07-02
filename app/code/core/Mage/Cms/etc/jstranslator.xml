@@ -13,6 +13,9 @@
         <invalid-content translate="message">
             <message>Some content is not supported. Clean and continue?</message>
         </invalid-content>
+        <invalid-slide-length translate="message">
+            <message>Please add at least one image to the slideshow</message>
+        </invalid-slide-length>
         <insert-image translate="message">
             <message>Insert Image...</message>
         </insert-image>

@@ -669,7 +669,6 @@
     border-radius: 4px;
     margin-bottom: 10px;
     background: #fafafa;
-    cursor: move;
 }
 
 .slideshow-editor .slide-item.dragging {
@@ -681,6 +680,12 @@
     font-size: 18px;
     cursor: grab;
     user-select: none;
+    align-self: stretch;
+}
+
+.slideshow-editor .slide-handle svg {
+    width: 24px;
+    height: 100%;
 }
 
 .slideshow-editor .slide-handle:active {
@@ -713,6 +718,10 @@
     border: 1px solid #ccc;
     border-radius: 3px;
     box-sizing: border-box;
+}
+
+.slideshow-editor .slide-controls input:invalid {
+    border-color: #dc3545;
 }
 
 .slideshow-editor .remove-slide {
