@@ -70,6 +70,9 @@
             padding: 15px 20px;
             border-top: 1px solid #e0e0e0;
         }
+        .dialog-buttons:empty {
+            display: none;
+        }
     `;
     document.head.appendChild(style);
 
@@ -86,14 +89,24 @@
                 <button title="Close">&times;</button>
             </div>
             <div class="dialog-content" tabindex="-1"></div>
+            <div class="dialog-buttons"></div>
         `;
-        if (options.ok || options.cancel) {
-            dialog.innerHTML += `
-            <div class="dialog-buttons">
-                ${options.cancel ? `<button id="${dialog.id}-cancel" class="cancel">Cancel</button>` : ''}
-                ${options.ok ? `<button id="${dialog.id}-ok" class="ok">${options.okLabel || "OK"}</button>` : ''}
-            </div>
-        `;
+
+        const buttons = Array.from(options.extraButtons ?? []);
+        if (options.cancel) {
+            buttons.push({ id: `${dialog.id}-cancel`, class: 'cancel', label: 'Cancel' });
+        }
+        if (options.ok) {
+            buttons.push({ id: `${dialog.id}-ok`, class: 'ok', label: options.okLabel ?? 'OK' });
+        }
+        for (const button of buttons) {
+            const { label, ...attrs } = button;
+            const buttonEl = dialog.querySelector('.dialog-buttons').appendChild(document.createElement('button'));
+            buttonEl.type = 'button';
+            buttonEl.textContent = label;
+            for (const [key, val] of Object.entries(attrs)) {
+                buttonEl.setAttribute(key, val);
+            }
         }
 
         if (options.content) {

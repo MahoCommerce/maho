@@ -456,12 +456,7 @@ export const MahoSlideshow = Node.create({
                 // Create slideshow editor dialog content
                 const dialogContent = `
                     <div class="slideshow-editor">
-                        <div class="slideshow-preview">
-                            <ul class="slides-list"></ul>
-                        </div>
-                        <div class="slideshow-actions">
-                            <button type="button" class="add-slide-btn">Add Image</button>
-                        </div>
+                        <ul class="slides-list"></ul>
                     </div>
                 `;
                 const slideTemplate = `
@@ -489,6 +484,7 @@ export const MahoSlideshow = Node.create({
                     ok: true,
                     cancel: true,
                     okLabel: 'Insert Slideshow',
+                    extraButtons: [{ label: 'Add Image', class: 'add-slide-btn' }],
                     onOpen: (dialog) => {
                         const container = dialog.querySelector('.slideshow-editor');
                         const slidesList = container.querySelector('.slides-list');
@@ -540,7 +536,7 @@ export const MahoSlideshow = Node.create({
                         };
 
                         // Add slide button handler
-                        container.querySelector('.add-slide-btn').addEventListener('click', () => {
+                        dialog.querySelector('.add-slide-btn').addEventListener('click', () => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
                                 onOk: (dialog) => {
                                     //  Parse out the directive and alt text

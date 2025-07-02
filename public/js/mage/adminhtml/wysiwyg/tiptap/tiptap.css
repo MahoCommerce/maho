@@ -648,11 +648,6 @@
     height: 100%;
 }
 
-.slideshow-editor .slideshow-preview {
-    flex: 1;
-    overflow-y: auto;
-}
-
 .slideshow-editor .slides-list {
     list-style: none;
     padding: 0;
@@ -747,18 +742,9 @@
     height: 20px;
 }
 
-.slideshow-editor .slideshow-actions {
-    display: flex;
-    justify-content: end;
-}
-
 .slideshow-editor .add-slide-btn {
-    padding: 0 13px;
     background: #3b82f6;
     color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
 }
 
 .slideshow-editor .add-slide-btn:hover {
