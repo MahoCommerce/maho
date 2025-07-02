@@ -318,7 +318,7 @@ export const MahoImage = Image.extend({
                         const directiveObj = parseDirective(match?.[1]);
 
                         match = dialog.returnValue.match(/alt="(.*?)"/);
-                        const alt = match?.[1];
+                        const alt = unescapeHtml(match?.[1]);
 
                         // Keep some attributes of old image
                         const title = node?.attrs.title;
@@ -421,7 +421,7 @@ export const MahoSlideshow = Node.create({
 
             if (slides.length) {
                 const img = slideshow.appendChild(document.createElement('img'));
-                img.src = renderDirectiveImageUrl(slides[0].src, slides[0].directiveObj, this.options.directivesUrl) || slides[0].src;
+                img.src = renderDirectiveImageUrl(slides[0].src, slides[0].directiveObj, this.options.directivesUrl);
                 img.alt = slides[0].alt ?? '';
             }
 
@@ -511,7 +511,7 @@ export const MahoSlideshow = Node.create({
                                 li.innerHTML = `
                                     <div class="slide-handle">☰</div>
                                     <div class="slide-preview">
-                                        <img src="${renderDirectiveImageUrl(slide.src, slide.directiveObj, this.options.directivesUrl) || slide.src}" alt="">
+                                        <img src="${renderDirectiveImageUrl(slide.src, slide.directiveObj, this.options.directivesUrl)}" alt="">
                                     </div>
                                     <div class="slide-controls">
                                         <input type="text" class="slide-alt" placeholder="Alt text" value="${escapeHtml(slide.alt || '')}">
@@ -573,41 +573,22 @@ export const MahoSlideshow = Node.create({
                         // Add slide button handler
                         addBtn.addEventListener('click', () => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
-                                onOpen: function() {},
-                                onOk: function(dialog) {
-                                    if (dialog.returnValue) {
-                                        // Parse src by finding the pattern between src=" and " alt
-                                        let src = '';
-                                        let alt = '';
+                                onOk: (dialog) => {
+                                    //  Parse out the directive and alt text
+                                    let match;
 
-                                        // Find src value - everything between src=" and the next " that's followed by a space or >
-                                        const srcStartIndex = dialog.returnValue.indexOf('src="') + 5;
-                                        const srcEndIndex = dialog.returnValue.indexOf('" alt', srcStartIndex);
+                                    match = dialog.returnValue.match(/src="({{.*?}})"/);
+                                    const src = match?.[1];
+                                    const directiveObj = parseDirective(src);
 
-                                        if (srcStartIndex > 4 && srcEndIndex > srcStartIndex) {
-                                            src = dialog.returnValue.substring(srcStartIndex, srcEndIndex);
-                                        }
+                                    match = dialog.returnValue.match(/alt="(.*?)"/);
+                                    const alt = unescapeHtml(match?.[1]);
 
-                                        // Find alt value
-                                        const altMatch = dialog.returnValue.match(/alt="([^"]*)"/);
-                                        if (altMatch) {
-                                            // Decode HTML entities
-                                            const tempDiv = document.createElement('div');
-                                            tempDiv.innerHTML = altMatch[1];
-                                            alt = tempDiv.textContent || '';
-                                        }
-
-                                        if (src) {
-                                            slides.push({
-                                                src: src,
-                                                alt: alt,
-                                                href: '',
-                                                directiveObj: parseDirective(src)
-                                            });
-                                            renderSlides();
-                                        } else {
-                                            console.error('Could not parse image from:', dialog.returnValue);
-                                        }
+                                    if (src) {
+                                        slides.push({ directiveObj, src, alt });
+                                        renderSlides();
+                                    } else {
+                                        console.error('Could not parse image from:', dialog.returnValue);
                                     }
                                 }
                             });

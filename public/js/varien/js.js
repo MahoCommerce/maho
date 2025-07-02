@@ -192,6 +192,7 @@ function escapeHtml(str, escapeQuotes = false) {
  * Alternative to PrototypeJS's string.unescapeHTML() method
  */
 function unescapeHtml(str) {
+    if (!str) return '';
     const doc = new DOMParser().parseFromString(str, 'text/html');
     return doc.documentElement.textContent;
 }
