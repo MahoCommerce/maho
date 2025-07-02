@@ -226,6 +226,11 @@ class tiptapWysiwygSetup {
                 }),
                 TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
+                    browserUrl: setRouteParams(this.config.files_browser_window_url, {
+                        target_element_id: this.id,
+                        store: this.storeId,
+                        filetype: 'image',
+                    }),
                 }),
                 TiptapModules.Link.configure({
                     openOnClick: false,
@@ -342,6 +347,7 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
             { type: 'button', title: 'Insert Table', icon: 'table', command: 'insertTable', args: [{rows:3, cols:3, withHeaderRow:true}] },
             { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
+            { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images },
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
             { type: 'button', title: 'Insert Variable', icon: 'variable', command: 'insertMahoVariable', enabled: this.config.add_variables},
         ]);
@@ -518,6 +524,7 @@ class tiptapWysiwygSetup {
         //'widget': '<path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>',
         'widget': '<path d="M18 16v.01"/><path d="M6 16v.01"/><path d="M12 5v.01"/><path d="M12 12v.01"/><path d="M12 1a4 4 0 0 1 2.001 7.464l.001 .072a3.998 3.998 0 0 1 1.987 3.758l.22 .128a3.978 3.978 0 0 1 1.591 -.417l.2 -.005a4 4 0 1 1 -3.994 3.77l-.28 -.16c-.522 .25 -1.108 .39 -1.726 .39c-.619 0 -1.205 -.14 -1.728 -.391l-.279 .16l.007 .231a4 4 0 1 1 -2.212 -3.579l.222 -.129a3.998 3.998 0 0 1 1.988 -3.756l.002 -.071a4 4 0 0 1 -1.995 -3.265l-.005 -.2a4 4 0 0 1 4 -4z"/>',
         'variable': '<path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/>',
+        'slideshow': '<path d="M15 6l.01 0"/><path d="M3 3m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z"/><path d="M3 13l4 -4a3 5 0 0 1 3 0l4 4"/><path d="M13 12l2 -2a3 5 0 0 1 3 0l3 3"/><path d="M8 21l.01 0"/><path d="M12 21l.01 0"/><path d="M16 21l.01 0"/>',
 
         // Table operation icons
         'column-insert-left': '<path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M5 12l4 0"/><path d="M7 10l0 4"/>',

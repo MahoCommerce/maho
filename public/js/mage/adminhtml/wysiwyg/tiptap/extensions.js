@@ -407,12 +407,13 @@ export const MahoSlideshow = Node.create({
     },
 
     addNodeView() {
-        return ({ node, editor }) => {
+        return ({ node, editor, getPos }) => {
             const slides = node.attrs.slides;
 
             const dom = document.createElement('div');
             dom.dataset.type = 'maho-slideshow';
             dom.contentEditable = 'false';
+            dom.title = editor.options.wysiwygSetup.translate('Double-click to edit');
 
             // Create slide container and show the first slide if it exists
             const slideshow = dom.appendChild(document.createElement('div'));
@@ -420,7 +421,7 @@ export const MahoSlideshow = Node.create({
 
             if (slides.length) {
                 const img = slideshow.appendChild(document.createElement('img'));
-                img.src = renderDirectiveImageUrl(slides[0].src, slides[0].directiveObj, this.options.directivesUrl);
+                img.src = renderDirectiveImageUrl(slides[0].src, slides[0].directiveObj, this.options.directivesUrl) || slides[0].src;
                 img.alt = slides[0].alt ?? '';
             }
 
@@ -436,7 +437,203 @@ export const MahoSlideshow = Node.create({
                 }
             }
 
+            // Double-click to edit
+            dom.addEventListener('dblclick', () => {
+                editor.commands.setNodeSelection(getPos());
+                editor.commands.insertMahoSlideshow(node);
+            });
+
             return { dom };
+        };
+    },
+
+    addCommands() {
+        return {
+            insertMahoSlideshow: (node) => ({ editor, state }) => {
+                const { from, to } = state.selection;
+                const existingSlides = node?.attrs?.slides || [];
+
+                // Create slideshow editor dialog content
+                const dialogContent = `
+                    <div class="slideshow-editor">
+                        <div class="slideshow-preview">
+                            <ul class="slides-list"></ul>
+                        </div>
+                        <div class="slideshow-actions">
+                            <button type="button" class="add-slide-btn">Add Image</button>
+                        </div>
+                    </div>
+                `;
+
+                Dialog.info(dialogContent, {
+                    id: 'slideshow-editor-dialog',
+                    title: 'Insert/Edit Slideshow',
+                    className: 'magento slideshow-editor',
+                    width: 900,
+                    height: 600,
+                    ok: true,
+                    cancel: true,
+                    okLabel: 'Insert Slideshow',
+                    onOpen: (dialog) => {
+                        const container = dialog.querySelector('.slideshow-editor');
+                        const slidesList = container.querySelector('.slides-list');
+                        const addBtn = container.querySelector('.add-slide-btn');
+
+                        // Store slides data
+                        let slides = [...existingSlides];
+                        
+                        // Load SortableJS if not already loaded
+                        const loadSortable = () => {
+                            return new Promise((resolve) => {
+                                if (typeof Sortable !== 'undefined') {
+                                    resolve();
+                                    return;
+                                }
+                                
+                                const script = document.createElement('script');
+                                script.src = SKIN_URL + '../../../../js/sortable.min.js'; // Navigate from skin dir to js dir
+                                script.onload = resolve;
+                                script.onerror = () => {
+                                    console.warn('Failed to load SortableJS');
+                                    resolve(); // Continue without sortable
+                                };
+                                document.head.appendChild(script);
+                            });
+                        };
+
+                        // Render existing slides
+                        const renderSlides = () => {
+                            slidesList.innerHTML = '';
+                            slides.forEach((slide, index) => {
+                                const li = document.createElement('li');
+                                li.className = 'slide-item';
+                                li.dataset.index = index;
+                                li.innerHTML = `
+                                    <div class="slide-handle">☰</div>
+                                    <div class="slide-preview">
+                                        <img src="${renderDirectiveImageUrl(slide.src, slide.directiveObj, this.options.directivesUrl) || slide.src}" alt="">
+                                    </div>
+                                    <div class="slide-controls">
+                                        <input type="text" class="slide-alt" placeholder="Alt text" value="${escapeHtml(slide.alt || '')}">
+                                        <input type="text" class="slide-href" placeholder="Link URL (optional)" value="${escapeHtml(slide.href || '')}">
+                                    </div>
+                                    <button type="button" class="remove-slide" data-index="${index}" title="Remove slide">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>
+                                        </svg>
+                                    </button>
+                                `;
+                                slidesList.appendChild(li);
+                            });
+
+                            // Attach event listeners
+                            slidesList.querySelectorAll('.slide-alt').forEach((input, index) => {
+                                input.addEventListener('change', () => {
+                                    slides[index].alt = input.value;
+                                });
+                            });
+
+                            slidesList.querySelectorAll('.slide-href').forEach((input, index) => {
+                                input.addEventListener('change', () => {
+                                    slides[index].href = input.value;
+                                });
+                            });
+
+                            slidesList.querySelectorAll('.remove-slide').forEach(btn => {
+                                btn.addEventListener('click', () => {
+                                    const index = parseInt(btn.dataset.index);
+                                    slides.splice(index, 1);
+                                    renderSlides();
+                                });
+                            });
+
+                            // Initialize SortableJS for drag and drop
+                            loadSortable().then(() => {
+                                if (typeof Sortable !== 'undefined') {
+                                    new Sortable(slidesList, {
+                                        animation: 150,
+                                        handle: '.slide-handle',
+                                        ghostClass: 'dragging',
+                                        onEnd: function(evt) {
+                                            // Reorder slides array based on new DOM order
+                                            const newSlides = [];
+                                            [...slidesList.querySelectorAll('.slide-item')].forEach(item => {
+                                                const oldIndex = parseInt(item.dataset.index);
+                                                newSlides.push(slides[oldIndex]);
+                                            });
+                                            slides = newSlides;
+                                            dialog.slidesData = slides;
+                                            renderSlides();
+                                        }
+                                    });
+                                }
+                            });
+                        };
+
+                        // Add slide button handler
+                        addBtn.addEventListener('click', () => {
+                            MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
+                                onOpen: function() {},
+                                onOk: function(dialog) {
+                                    if (dialog.returnValue) {
+                                        // Parse src by finding the pattern between src=" and " alt
+                                        let src = '';
+                                        let alt = '';
+
+                                        // Find src value - everything between src=" and the next " that's followed by a space or >
+                                        const srcStartIndex = dialog.returnValue.indexOf('src="') + 5;
+                                        const srcEndIndex = dialog.returnValue.indexOf('" alt', srcStartIndex);
+
+                                        if (srcStartIndex > 4 && srcEndIndex > srcStartIndex) {
+                                            src = dialog.returnValue.substring(srcStartIndex, srcEndIndex);
+                                        }
+
+                                        // Find alt value
+                                        const altMatch = dialog.returnValue.match(/alt="([^"]*)"/);
+                                        if (altMatch) {
+                                            // Decode HTML entities
+                                            const tempDiv = document.createElement('div');
+                                            tempDiv.innerHTML = altMatch[1];
+                                            alt = tempDiv.textContent || '';
+                                        }
+
+                                        if (src) {
+                                            slides.push({
+                                                src: src,
+                                                alt: alt,
+                                                href: '',
+                                                directiveObj: parseDirective(src)
+                                            });
+                                            renderSlides();
+                                        } else {
+                                            console.error('Could not parse image from:', dialog.returnValue);
+                                        }
+                                    }
+                                }
+                            });
+                        });
+
+                        // Store slides data on dialog for onOk handler
+                        dialog.slidesData = slides;
+
+                        // Initial render
+                        renderSlides();
+                    },
+                    onOk: (dialog) => {
+                        const slides = dialog.slidesData || [];
+                        if (slides.length === 0) {
+                            alert('Please add at least one image to the slideshow');
+                            return false;
+                        }
+
+                        editor.commands.insertContentAt({ from, to }, {
+                            type: this.name,
+                            attrs: { slides },
+                        });
+                        return true;
+                    }
+                });
+            }
         };
     },
 });
