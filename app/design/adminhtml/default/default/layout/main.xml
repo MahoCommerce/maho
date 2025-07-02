@@ -132,6 +132,7 @@ Layout for editor element
             <action method="addJs"><script>mage/adminhtml/browser.js</script></action>
             <action method="addJs"><script>maho-dialog.js</script></action>
             <action method="addJs"><script>maho-tree.js</script></action>
+            <action method="addJs"><script>sortable.min.js</script></action>
         </reference>
     </editor>
 

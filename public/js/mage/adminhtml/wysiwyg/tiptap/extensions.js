@@ -479,25 +479,6 @@ export const MahoSlideshow = Node.create({
                         const slidesList = container.querySelector('.slides-list');
                         const addBtn = container.querySelector('.add-slide-btn');
 
-                        // Load SortableJS if not already loaded
-                        const loadSortable = () => {
-                            return new Promise((resolve) => {
-                                if (typeof Sortable !== 'undefined') {
-                                    resolve();
-                                    return;
-                                }
-
-                                const script = document.createElement('script');
-                                script.src = SKIN_URL + '../../../../js/sortable.min.js'; // Navigate from skin dir to js dir
-                                script.onload = resolve;
-                                script.onerror = () => {
-                                    console.warn('Failed to load SortableJS');
-                                    resolve(); // Continue without sortable
-                                };
-                                document.head.appendChild(script);
-                            });
-                        };
-
                         // Render existing slides
                         const renderSlides = () => {
                             slidesList.innerHTML = '';
@@ -545,24 +526,19 @@ export const MahoSlideshow = Node.create({
                             });
 
                             // Initialize SortableJS for drag and drop
-                            loadSortable().then(() => {
-                                if (typeof Sortable !== 'undefined') {
-                                    new Sortable(slidesList, {
-                                        animation: 150,
-                                        handle: '.slide-handle',
-                                        ghostClass: 'dragging',
-                                        onEnd: function(evt) {
-                                            // Reorder slides array based on new DOM order
-                                            const newSlides = [];
-                                            [...slidesList.querySelectorAll('.slide-item')].forEach(item => {
-                                                const oldIndex = parseInt(item.dataset.index);
-                                                newSlides.push(slides[oldIndex]);
-                                            });
-                                            slides = newSlides;
-                                            dialog.slidesData = slides;
-                                            renderSlides();
-                                        }
+                            new Sortable(slidesList, {
+                                animation: 150,
+                                handle: '.slide-handle',
+                                ghostClass: 'dragging',
+                                onEnd: () => {
+                                    // Reorder slides array based on new DOM order
+                                    const newSlides = [];
+                                    [...slidesList.querySelectorAll('.slide-item')].forEach(item => {
+                                        const oldIndex = parseInt(item.dataset.index);
+                                        newSlides.push(slides[oldIndex]);
                                     });
+                                    slides = newSlides;
+                                    renderSlides();
                                 }
                             });
                         };
