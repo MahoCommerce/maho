@@ -374,7 +374,7 @@ const renderSlides = (slides) => {
 /**
  * Maho Slideshow Node View Extension
  *
- * This extension adds basic support for slideshow divs, but does not yet provide any editing capabilities
+ * This extension adds support for slideshow divs with full editing capabilities
  */
 export const MahoSlideshow = Node.create({
     name: 'mahoSlideshow',
