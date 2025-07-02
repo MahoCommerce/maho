@@ -310,7 +310,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
 
         // Fallback to class name if resource name is not available
-        return get_class($object);
+        return $object::class;
     }
 
     protected function filterFields(array $data, ?array $dbFields): array

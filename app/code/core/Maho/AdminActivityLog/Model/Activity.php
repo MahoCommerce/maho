@@ -29,9 +29,9 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
             $data['username'] = $adminUser->getUsername();
         }
 
-        $data['ip_address'] = $data['ip_address'] ?? Mage::helper('core/http')->getRemoteAddr();
+        $data['ip_address'] ??= Mage::helper('core/http')->getRemoteAddr();
         $data['user_agent'] = Mage::helper('core/http')->getHttpUserAgent();
-        $data['request_url'] = $data['request_url'] ?? Mage::helper('core/url')->getCurrentUrl();
+        $data['request_url'] ??= Mage::helper('core/url')->getCurrentUrl();
 
         // Preserve action_group_id if provided
         if (isset($data['action_group_id'])) {
