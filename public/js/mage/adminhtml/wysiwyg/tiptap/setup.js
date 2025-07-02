@@ -205,7 +205,6 @@ class tiptapWysiwygSetup {
                         levels: [1, 2, 3, 4, 5]
                     }
                 }),
-                TiptapModules.MahoDiv,
                 TiptapModules.MahoImage.configure({
                     inline: true,
                     title: this.translate('Insert Image...'),
@@ -262,6 +261,7 @@ class tiptapWysiwygSetup {
                         offset: [0, 8],
                     },
                 }),
+                TiptapModules.MahoDiv,
             ],
             onTransaction: ({ editor }) => {
                 if (editor.isInitialized) {
