@@ -451,7 +451,7 @@ export const MahoSlideshow = Node.create({
         return {
             insertMahoSlideshow: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
-                const existingSlides = node?.attrs?.slides || [];
+                let slides = Array.from(node?.attrs?.slides ?? []);
 
                 // Create slideshow editor dialog content
                 const dialogContent = `
@@ -478,9 +478,6 @@ export const MahoSlideshow = Node.create({
                         const container = dialog.querySelector('.slideshow-editor');
                         const slidesList = container.querySelector('.slides-list');
                         const addBtn = container.querySelector('.add-slide-btn');
-
-                        // Store slides data
-                        let slides = [...existingSlides];
 
                         // Load SortableJS if not already loaded
                         const loadSortable = () => {
@@ -594,14 +591,10 @@ export const MahoSlideshow = Node.create({
                             });
                         });
 
-                        // Store slides data on dialog for onOk handler
-                        dialog.slidesData = slides;
-
                         // Initial render
                         renderSlides();
                     },
                     onOk: (dialog) => {
-                        const slides = dialog.slidesData || [];
                         if (slides.length === 0) {
                             alert('Please add at least one image to the slideshow');
                             return false;
