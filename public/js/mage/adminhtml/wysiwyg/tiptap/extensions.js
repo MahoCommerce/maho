@@ -31,7 +31,7 @@ const parseDirective = (directiveStr) => {
     }
     directiveStr = (directiveStr ?? '').trim();
     if (directiveStr.startsWith('{{') && directiveStr.endsWith('}}')) {
-        const [ type, attrStr ] = directiveStr.slice(2, -2).trim().split(' ', 2);
+        const [ type, attrStr ] = directiveStr.slice(2, -2).trim().split(/\s(.*)/);
         directiveObj.type = type;
         for (const match of (attrStr ?? '').matchAll(/([\w\-]+)="(.*?)"/g)) {
             directiveObj.params[match[1]] = match[2];
