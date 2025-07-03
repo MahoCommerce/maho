@@ -91,7 +91,8 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         $paymentBlock = Mage::helper('payment')->getInfoBlock($payment)
             ->setIsSecureMode(true);
 
-        return $paymentBlock->toPdf();
+        // Use HTML output instead of PDF output since we're generating HTML
+        return $paymentBlock->toHtml();
     }
 
     public function getLogoUrl()
