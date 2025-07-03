@@ -39,7 +39,7 @@
         "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
-        "dompdf/dompdf": "^3.0",
+        "dompdf/dompdf": "^3.1",
         "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^3.11",
         "lbuchs/webauthn": "^2.2",
