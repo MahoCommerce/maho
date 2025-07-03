@@ -1,0 +1,261 @@
+<?php
+/**
+ * DHL Shipping Label Template
+ * @var Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf $this
+ */
+$info = $this->getLabelInfo();
+$request = $this->getShipmentRequest();
+$packages = array_values($request->getPackages());
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>DHL Shipping Label</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 5mm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 8pt;
+            margin: 0;
+            padding: 0;
+            color: #000;
+        }
+        
+        .dhl-label {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #000;
+            box-sizing: border-box;
+            page-break-after: always;
+        }
+        
+        .dhl-label:last-child {
+            page-break-after: auto;
+        }
+        
+        .dhl-header {
+            background-color: #FFCC00;
+            padding: 5pt;
+            border-bottom: 2px solid #000;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+        
+        .dhl-content {
+            padding: 10pt;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10pt;
+            height: calc(100% - 40pt);
+        }
+        
+        .sender-section, .receiver-section {
+            border: 1px solid #ccc;
+            padding: 8pt;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 5pt;
+            color: #D40511;
+        }
+        
+        .address-block {
+            margin-bottom: 8pt;
+        }
+        
+        .service-info {
+            grid-column: span 2;
+            border: 1px solid #ccc;
+            padding: 8pt;
+            margin-top: 10pt;
+        }
+        
+        .barcode-section {
+            text-align: center;
+            margin: 10pt 0;
+            padding: 10pt;
+            border: 1px solid #000;
+        }
+        
+        .barcode-image {
+            font-family: 'Libre Barcode 128', monospace;
+            font-size: 24pt;
+            letter-spacing: 0;
+        }
+        
+        .barcode-text {
+            font-size: 8pt;
+            margin-top: 2pt;
+        }
+        
+        .weight-info, .date-info {
+            display: inline-block;
+            margin-right: 20pt;
+        }
+        
+        .piece-info {
+            position: absolute;
+            top: 10pt;
+            right: 10pt;
+            background: #fff;
+            border: 1px solid #000;
+            padding: 5pt;
+            font-weight: bold;
+        }
+        
+        .service-codes {
+            display: flex;
+            gap: 10pt;
+            margin-top: 10pt;
+        }
+        
+        .service-code {
+            border: 1px solid #ccc;
+            padding: 3pt 6pt;
+            font-size: 7pt;
+        }
+    </style>
+</head>
+<body>
+    <?php $pieceIndex = 0; ?>
+    <?php foreach ($info->Pieces->Piece as $piece): ?>
+        <div class="dhl-label">
+            <div class="piece-info">
+                Piece <?= (int)$piece->PieceNumber ?> of <?= (int)$info->Piece ?>
+            </div>
+            
+            <div class="dhl-header">
+                DHL <?= $this->escapeHtml($info->ProductShortName) ?>
+                <span style="float: right;">Content Code: <?= $this->escapeHtml($info->ProductContentCode) ?></span>
+            </div>
+            
+            <div class="dhl-content">
+                <!-- Sender Information -->
+                <div class="sender-section">
+                    <div class="section-title">FROM / SENDER</div>
+                    <div class="address-block">
+                        <?php if (isset($info->Shipper->CompanyName)): ?>
+                            <strong><?= $this->escapeHtml($info->Shipper->CompanyName) ?></strong><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Shipper->PersonName)): ?>
+                            <?= $this->escapeHtml($info->Shipper->PersonName) ?><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Shipper->AddressLine)): ?>
+                            <?= $this->escapeHtml($info->Shipper->AddressLine) ?><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Shipper->City)): ?>
+                            <?= $this->escapeHtml($info->Shipper->City) ?>
+                        <?php endif; ?>
+                        <?php if (isset($info->Shipper->PostalCode)): ?>
+                            <?= $this->escapeHtml($info->Shipper->PostalCode) ?><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Shipper->CountryCode)): ?>
+                            <strong><?= $this->escapeHtml($info->Shipper->CountryCode) ?></strong>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="service-info">
+                        <strong>Origin Service Area:</strong> <?= $this->escapeHtml($info->OriginServiceArea->ServiceAreaCode) ?>
+                    </div>
+                </div>
+                
+                <!-- Receiver Information -->
+                <div class="receiver-section">
+                    <div class="section-title">TO / RECEIVER</div>
+                    <div class="address-block">
+                        <?php if (isset($info->Consignee->CompanyName)): ?>
+                            <strong><?= $this->escapeHtml($info->Consignee->CompanyName) ?></strong><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Consignee->PersonName)): ?>
+                            <?= $this->escapeHtml($info->Consignee->PersonName) ?><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Consignee->AddressLine)): ?>
+                            <?= $this->escapeHtml($info->Consignee->AddressLine) ?><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Consignee->City)): ?>
+                            <?= $this->escapeHtml($info->Consignee->City) ?>
+                        <?php endif; ?>
+                        <?php if (isset($info->Consignee->PostalCode)): ?>
+                            <?= $this->escapeHtml($info->Consignee->PostalCode) ?><br>
+                        <?php endif; ?>
+                        <?php if (isset($info->Consignee->CountryCode)): ?>
+                            <strong><?= $this->escapeHtml($info->Consignee->CountryCode) ?></strong>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="service-info">
+                        <strong>Destination:</strong> 
+                        <?= $this->escapeHtml($info->Consignee->CountryCode) ?> - 
+                        <?= $this->escapeHtml($info->DestinationServiceArea->ServiceAreaCode) ?> - 
+                        <?= $this->escapeHtml($info->DestinationServiceArea->FacilityCode) ?>
+                    </div>
+                </div>
+                
+                <!-- Service Information -->
+                <div class="service-info">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div class="weight-info">
+                            <strong>Weight:</strong> <?= $this->escapeHtml($info->ChargeableWeight) ?> <?= $this->escapeHtml($info->WeightUnit) ?>
+                        </div>
+                        <div class="date-info">
+                            <strong>Shipment Date:</strong> <?= $this->formatDate($info->ShipmentDate) ?>
+                        </div>
+                    </div>
+                    
+                    <?php if (isset($packages[$pieceIndex])): ?>
+                        <div style="margin-top: 8pt;">
+                            <strong>Package Contents:</strong>
+                            <?php $package = $packages[$pieceIndex]; ?>
+                            <?php if (isset($package['name'])): ?>
+                                <?= $this->escapeHtml($package['name']) ?>
+                            <?php endif; ?>
+                            <?php if (isset($package['customs_value'])): ?>
+                                (Value: <?= $this->escapeHtml($package['customs_value']) ?>)
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Waybill Barcode -->
+                <?php if (isset($info->Barcodes->AWBBarCode)): ?>
+                    <div class="barcode-section" style="grid-column: span 2;">
+                        <div class="section-title">Waybill Number</div>
+                        <div class="barcode-image"><?= $this->escapeHtml($info->Barcodes->AWBBarCode) ?></div>
+                        <div class="barcode-text"><?= $this->escapeHtml($info->AirwayBillNumber) ?></div>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Routing Barcode -->
+                <?php if (isset($info->Barcodes->DHLRoutingBarCode)): ?>
+                    <div class="barcode-section" style="grid-column: span 2;">
+                        <div class="section-title">Routing Code</div>
+                        <div class="barcode-image"><?= $this->escapeHtml($info->Barcodes->DHLRoutingBarCode) ?></div>
+                        <div class="barcode-text">
+                            <?= $this->escapeHtml($info->DHLRoutingCode) ?> - <?= $this->escapeHtml($info->DHLRoutingDataId) ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Piece ID Barcode -->
+                <?php if (isset($piece->LicensePlateBarCode)): ?>
+                    <div class="barcode-section" style="grid-column: span 2;">
+                        <div class="section-title">Piece ID</div>
+                        <div class="barcode-image"><?= $this->escapeHtml($piece->LicensePlateBarCode) ?></div>
+                        <div class="barcode-text">
+                            <?= $this->escapeHtml($piece->DataIdentifier) ?> - <?= $this->escapeHtml($piece->LicensePlate) ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php $pieceIndex++; ?>
+    <?php endforeach; ?>
+</body>
+</html>

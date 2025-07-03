@@ -266,6 +266,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->getItem()) {

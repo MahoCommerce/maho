@@ -113,22 +113,29 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         if (!$this->_dompdf) {
             $this->_dompdfOptions = new Options();
 
-            // Configure dompdf options from config
-            $config = Mage::getStoreConfig('sales_pdf/dompdf');
+            // Configure dompdf options from config with improved defaults
+            $config = Mage::getStoreConfig('sales_pdf/dompdf') ?: [];
 
+            // Performance optimizations
             $this->_dompdfOptions->set('enable_font_subsetting', $config['enable_font_subsetting'] ?? true);
-            $this->_dompdfOptions->set('enable_remote', $config['enable_remote'] ?? false);
+            $this->_dompdfOptions->set('enable_remote', $config['enable_remote'] ?? false); // Security: disabled by default
             $this->_dompdfOptions->set('enable_css_float', $config['enable_css_float'] ?? true);
             $this->_dompdfOptions->set('enable_html5_parser', $config['enable_html5_parser'] ?? true);
+
+            // Debug options (disabled in production)
             $this->_dompdfOptions->set('debug_png', $config['debug_png'] ?? false);
             $this->_dompdfOptions->set('debug_keep_temp', $config['debug_keep_temp'] ?? false);
+
+            // PDF quality settings
             $this->_dompdfOptions->set('pdf_backend', $config['pdf_backend'] ?? 'CPDF');
-            $this->_dompdfOptions->set('default_media_type', $config['default_media_type'] ?? 'screen');
+            $this->_dompdfOptions->set('default_media_type', $config['default_media_type'] ?? 'print'); // Changed to 'print' for better PDF output
             $this->_dompdfOptions->set('default_paper_size', $config['default_paper_size'] ?? 'a4');
-            $this->_dompdfOptions->set('default_paper_orientation', 'portrait');
+            $this->_dompdfOptions->set('default_paper_orientation', $config['default_paper_orientation'] ?? 'portrait');
             $this->_dompdfOptions->set('default_font', $config['default_font'] ?? 'DejaVu Sans');
-            $this->_dompdfOptions->set('dpi', $config['dpi'] ?? 96);
-            $this->_dompdfOptions->set('font_height_ratio', $config['font_height_ratio'] ?? 1.1);
+            $this->_dompdfOptions->set('dpi', (int) ($config['dpi'] ?? 96));
+            $this->_dompdfOptions->set('font_height_ratio', (float) ($config['font_height_ratio'] ?? 1.1));
+
+            // Security settings
             $this->_dompdfOptions->set('is_php_enabled', $config['is_php_enabled'] ?? false);
             $this->_dompdfOptions->set('is_javascript_enabled', $config['is_javascript_enabled'] ?? false);
             $this->_dompdfOptions->set('is_html5_parser_enabled', $config['is_html5_parser_enabled'] ?? true);
@@ -146,6 +153,17 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     }
 
     /**
+     * Generate PDF from HTML (public wrapper for external use)
+     *
+     * @param string $html
+     * @return string
+     */
+    public function generatePdfFromHtml($html)
+    {
+        return $this->_generatePdfFromHtml($html);
+    }
+
+    /**
      * Generate PDF from HTML
      *
      * @param string $html
@@ -153,12 +171,31 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _generatePdfFromHtml($html)
     {
-        $this->_initDompdf();
-        $this->_dompdf->loadHtml($html);
-        $this->_dompdf->setPaper($this->_dompdfOptions->get('default_paper_size'), 'portrait');
-        $this->_dompdf->render();
+        try {
+            $this->_initDompdf();
 
-        return $this->_dompdf->output();
+            if (empty($html)) {
+                throw new Exception('Empty HTML content provided for PDF generation');
+            }
+
+            $this->_dompdf->loadHtml($html);
+            $this->_dompdf->setPaper($this->_dompdfOptions->get('default_paper_size'), 'portrait');
+            $this->_dompdf->render();
+
+            $output = $this->_dompdf->output();
+
+            if (empty($output)) {
+                throw new Exception('PDF generation failed - empty output');
+            }
+
+            return $output;
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Error generating PDF: %s', $e->getMessage()),
+            );
+        }
     }
 
     /**
@@ -169,45 +206,55 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     protected function _renderDocumentsHtml($documents)
     {
+        if (empty($documents)) {
+            return '';
+        }
+
         $html = '';
 
         // Set adminhtml design area for template/block loading
         $originalArea = Mage::getDesign()->getArea();
         Mage::getDesign()->setArea('adminhtml');
 
-        foreach ($documents as $document) {
-            if ($document->getStoreId()) {
-                Mage::app()->getLocale()->emulate($document->getStoreId());
-                Mage::app()->setCurrentStore($document->getStoreId());
-            }
+        try {
+            foreach ($documents as $document) {
+                if ($document->getStoreId()) {
+                    Mage::app()->getLocale()->emulate($document->getStoreId());
+                    Mage::app()->setCurrentStore($document->getStoreId());
+                }
 
-            // Create block directly instead of using layout
-            $blockClass = $this->_getBlockClass();
-            $block = new $blockClass();
+                // Create block directly instead of using layout
+                $blockClass = $this->_getBlockClass();
+                $block = new $blockClass();
 
-            if ($block) {
                 $block->setDocument($document);
                 $block->setOrder($document->getOrder());
                 $blockHtml = $block->toHtml();
-                Mage::log('Block HTML length: ' . strlen($blockHtml), null, 'pdf_debug.log');
-                $html .= $blockHtml;
-            } else {
-                Mage::log('Failed to create block: ' . $blockClass, null, 'pdf_debug.log');
-            }
 
-            if ($document->getStoreId()) {
-                Mage::app()->getLocale()->revert();
+                if (!empty($blockHtml)) {
+                    $html .= $blockHtml;
+                }
+
+                // Clear block reference for memory management
+                unset($block);
+
+                if ($document->getStoreId()) {
+                    Mage::app()->getLocale()->revert();
+                }
+
+                // Memory management for large document sets
+                if (function_exists('gc_collect_cycles')) {
+                    gc_collect_cycles();
+                }
+            }
+        } finally {
+            // Restore original area even if exceptions occur
+            if ($originalArea !== 'adminhtml') {
+                Mage::getDesign()->setArea($originalArea);
             }
         }
 
-        // Restore original area
-        if ($originalArea !== 'adminhtml') {
-            Mage::getDesign()->setArea($originalArea);
-        }
-
-        $wrappedHtml = $this->_wrapHtmlDocument($html);
-        Mage::log('Final HTML length: ' . strlen($wrappedHtml) . ' characters', null, 'pdf_debug.log');
-        return $wrappedHtml;
+        return $this->_wrapHtmlDocument($html);
     }
 
     /**
@@ -507,9 +554,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Set font as regular
      *
-     * @param  Zend_Pdf_Page $object
+     * @param  mixed $object
      * @param  int $size
-     * @return Zend_Pdf_Resource_Font
+     * @return null
      * @deprecated No longer needed with HTML/CSS approach
      */
     protected function _setFontRegular($object, $size = 7)
@@ -520,9 +567,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Set font as bold
      *
-     * @param  Zend_Pdf_Page $object
+     * @param  mixed $object
      * @param  int $size
-     * @return Zend_Pdf_Resource_Font
+     * @return null
      * @deprecated No longer needed with HTML/CSS approach
      */
     protected function _setFontBold($object, $size = 7)
@@ -533,9 +580,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Set font as italic
      *
-     * @param  Zend_Pdf_Page $object
+     * @param  mixed $object
      * @param  int $size
-     * @return Zend_Pdf_Resource_Font
+     * @return null
      * @deprecated No longer needed with HTML/CSS approach
      */
     protected function _setFontItalic($object, $size = 7)
@@ -546,7 +593,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Set PDF object
      *
-     * @param  Zend_Pdf $pdf
+     * @param  mixed $pdf
      * @return Mage_Sales_Model_Order_Pdf_Abstract
      * @deprecated No longer needed
      */
@@ -558,7 +605,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Retrieve PDF object
      *
-     * @return Zend_Pdf
+     * @return null
      * @deprecated No longer used
      */
     protected function _getPdf()
@@ -569,8 +616,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Create new page and assign to PDF object
      *
-     * @param  array $settings
-     * @return Zend_Pdf_Page
+     * @return null
      * @deprecated No longer needed with HTML/CSS approach
      */
     public function newPage(array $settings = [])
@@ -581,9 +627,10 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Draw lines
      *
-     * @param  Zend_Pdf_Page $page
+     * @param  mixed $page
      * @param  array $draw
      * @param  array $pageSettings
+     * @return Mage_Sales_Model_Order_Pdf_Abstract
      * @deprecated No longer needed with HTML/CSS approach
      */
     public function drawLineBlocks($page, $draw, $pageSettings = [])

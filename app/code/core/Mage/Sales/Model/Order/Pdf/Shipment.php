@@ -37,6 +37,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
      *
      * @return string
      */
+    #[\Override]
     protected function _getBlockClass()
     {
         return 'Mage_Sales_Block_Order_Pdf_Shipment';

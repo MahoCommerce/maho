@@ -5,130 +5,91 @@
  *
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * DHL International (API v1.4) Label Creation
+ * DHL International (API v1.4) PDF Page
  *
- * @deprecated now the process of creating the label is on DHL side
+ * @deprecated No longer extends PDF page classes - now uses HTML/CSS template approach
+ * This class is kept for backward compatibility but methods are now stubs
  */
-class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page extends Zend_Pdf_Page
+class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
 {
     /**
-     * Text align constants
+     * Page dimensions (deprecated)
+     *
+     * @var array
+     * @deprecated No longer used with HTML/CSS approach
      */
-    public const ALIGN_RIGHT = 'right';
-    public const ALIGN_LEFT = 'left';
-    public const ALIGN_CENTER = 'center';
+    protected $_dimensions;
 
     /**
-     * Dhl International Label Creation Class Pdf Page constructor
-     * Create/Make a copy of pdf page
+     * Constructor - no longer creates PDF page objects
      *
-     * @param Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page|string $param1
-     * @param mixed $param2
-     * @param mixed $param3
+     * @param mixed $template Template or page size (deprecated)
+     * @deprecated No longer extends PDF page classes
      */
-    public function __construct($param1, $param2 = null, $param3 = null)
+    public function __construct($template = null)
     {
-        if ($param1 instanceof Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
-            && $param2 === null && $param3 === null
-        ) {
-            $this->_contents = $param1->getContents();
-        }
-        parent::__construct($param1, $param2, $param3);
+        // Legacy constructor - no longer creates PDF page objects
+        $this->_dimensions = ['width' => 842, 'height' => 595]; // A4 landscape
     }
 
     /**
-     * Get PDF Page contents
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getContents()
-    {
-        return $this->_contents;
-    }
-
-    /**
-     * Calculate the width of given text in points taking into account current font and font-size
+     * Get text width (deprecated)
      *
      * @param string $text
-     * @param float $fontSize
-     * @return float
+     * @param mixed $font
+     * @param int $fontSize
+     * @return int
+     * @deprecated No longer used with HTML/CSS approach
      */
-    public function getTextWidth($text, Zend_Pdf_Resource_Font $font, $fontSize)
+    public function getTextWidth($text, $font, $fontSize)
     {
-        $drawingText = iconv('', 'UTF-16BE', $text);
-        $characters = [];
-        for ($i = 0; $i < strlen($drawingText); $i++) {
-            $characters[] = (ord($drawingText[$i++]) << 8) | ord($drawingText[$i]);
-        }
-        $glyphs = $font->glyphNumbersForCharacters($characters);
-        $widths = $font->widthsForGlyphs($glyphs);
-        return (array_sum($widths) / $font->getUnitsPerEm()) * $fontSize;
+        // Return approximate width for compatibility
+        return strlen($text) * ($fontSize * 0.6);
     }
 
     /**
-     * Draw a line of text at the specified position.
+     * Compatibility method for drawing operations
      *
-     * @param string $text
-     * @param float $x
-     * @param float $y
-     * @param string $charEncoding (optional) Character encoding of source text.
-     *   Defaults to current locale.
-     * @param $align
-     * @throws Zend_Pdf_Exception
-     * @return Zend_Pdf_Canvas_Interface
+     * @param string $method
+     * @param array $args
+     * @return $this
+     * @deprecated All drawing methods are deprecated with HTML/CSS approach
      */
-    #[\Override]
-    public function drawText($text, $x, $y, $charEncoding = 'UTF-8', $align = self::ALIGN_LEFT)
+    public function __call($method, $args)
     {
-        $left = null;
-        switch ($align) {
-            case self::ALIGN_LEFT:
-                $left = $x;
-                break;
-
-            case self::ALIGN_CENTER:
-                $textWidth = $this->getTextWidth($text, $this->getFont(), $this->getFontSize());
-                $left = $x - ($textWidth / 2);
-                break;
-
-            case self::ALIGN_RIGHT:
-                $textWidth = $this->getTextWidth($text, $this->getFont(), $this->getFontSize());
-                $left = $x - $textWidth;
-                break;
-        }
-        return parent::drawText($text, $left, $y, $charEncoding);
+        // Return $this for any drawing method calls to maintain compatibility
+        // Methods like drawText, drawRectangle, setFillColor, etc. are now no-ops
+        return $this;
     }
 
     /**
-     * Draw a text paragraph taking into account the maximum number of symbols in a row.
-     * If line is longer - spit it.
+     * Legacy property access for compatibility
      *
-     * @param array $lines
-     * @param int $x
-     * @param int $y
-     * @param int $maxWidth - number of symbols
-     * @param string $align
-     * @throws Zend_Pdf_Exception
-     * @return float
+     * @param string $name
+     * @return mixed
+     * @deprecated No longer used with HTML/CSS approach
      */
-    public function drawLines($lines, $x, $y, $maxWidth, $align = self::ALIGN_LEFT)
+    public function __get($name)
     {
-        foreach ($lines as $line) {
-            if (strlen($line) > $maxWidth) {
-                $subLines = Mage::helper('core/string')->str_split($line, $maxWidth, true, true);
-                $y = $this->drawLines(array_filter($subLines), $x, $y, $maxWidth, $align);
-                continue;
-            }
-            $this->drawText($line, $x, $y, 'UTF-8', $align);
-            $y -= ceil($this->getFontSize());
-        }
-        return $y;
+        // Return null for any property access
+        return null;
+    }
+
+    /**
+     * Legacy property setting for compatibility
+     *
+     * @param string $name
+     * @param mixed $value
+     * @deprecated No longer used with HTML/CSS approach
+     */
+    public function __set($name, $value)
+    {
+        // No-op for property setting
     }
 }

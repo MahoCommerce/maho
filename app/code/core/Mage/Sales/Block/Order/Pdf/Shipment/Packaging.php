@@ -8,7 +8,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
+class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Template
 {
     protected $_shipment;
     protected $_order;
@@ -16,7 +16,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
     public function __construct()
     {
         parent::__construct();
-        $this->setTemplate('sales/order/pdf/shipment/default.phtml');
+        $this->setTemplate('sales/order/pdf/shipment/packaging.phtml');
     }
 
     public function setDocument($shipment)
@@ -57,10 +57,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
 
     public function getOrderNumber()
     {
-        if ($this->_order && Mage::getStoreConfigFlag(Mage_Sales_Model_Order_Pdf_Abstract::XML_PATH_SALES_PDF_SHIPMENT_PUT_ORDER_ID, $this->_order->getStoreId())) {
-            return $this->_order->getRealOrderId();
-        }
-        return '';
+        return $this->_order ? $this->_order->getRealOrderId() : '';
     }
 
     public function getOrderDate()
@@ -133,60 +130,62 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return Mage::getStoreConfig('sales/identity/address', $this->getStore());
     }
 
-    public function getItems()
+    public function getPackages()
     {
-        $items = [];
+        $packages = [];
         if ($this->_shipment) {
-            foreach ($this->_shipment->getAllItems() as $item) {
-                if ($item->getOrderItem()->getParentItem()) {
-                    continue;
-                }
-                $items[] = $item;
+            $packaging = Mage::getBlockSingleton('adminhtml/sales_order_shipment_packaging');
+            if ($packaging) {
+                $packages = $packaging->getPackages();
             }
         }
-        return $items;
+        return $packages;
     }
 
-    public function getItemHtml($item)
+    public function getPackageHtml($package)
     {
-        $orderItem = $item->getOrderItem();
-        $type = $orderItem->getProductType();
+        $packageObj = new Varien_Object($package);
+        $html = '<div class="package-details">';
 
-        $renderer = $this->_getItemRenderer($type);
-        if (!$renderer) {
-            $renderer = $this->_getItemRenderer('default');
+        // Package type
+        if ($packageObj->getPackageType()) {
+            $html .= '<div class="package-type">' . $this->escapeHtml($packageObj->getPackageType()) . '</div>';
         }
 
-        $renderer->setItem($item);
-        $renderer->setOrder($this->getOrder());
-        $renderer->setSource($this->getShipment());
-
-        return $renderer->toHtml();
-    }
-
-    protected function _getItemRenderer($type)
-    {
-        $rendererModel = Mage::getStoreConfig('sales_pdf/shipment/' . $type) ?: 'sales/order_pdf_items_shipment_default';
-        if (!isset($this->_renderers[$type])) {
-            $this->_renderers[$type] = new Mage_Sales_Model_Order_Pdf_Items_Shipment_Default();
+        // Package weight
+        if ($packageObj->getWeight()) {
+            $html .= '<div class="package-weight">' . $this->__('Weight: %s', $packageObj->getWeight()) . '</div>';
         }
-        return $this->_renderers[$type];
-    }
 
-    protected $_renderers = [];
+        // Package dimensions
+        if ($packageObj->getLength() || $packageObj->getWidth() || $packageObj->getHeight()) {
+            $dimensions = [];
+            if ($packageObj->getLength()) {
+                $dimensions[] = $packageObj->getLength();
+            }
+            if ($packageObj->getWidth()) {
+                $dimensions[] = $packageObj->getWidth();
+            }
+            if ($packageObj->getHeight()) {
+                $dimensions[] = $packageObj->getHeight();
+            }
 
-    public function getTracking()
-    {
-        $tracks = [];
-        if ($this->_shipment) {
-            foreach ($this->_shipment->getAllTracks() as $track) {
-                $tracks[] = [
-                    'title' => $track->getTitle(),
-                    'number' => $track->getNumber(),
-                ];
+            if (!empty($dimensions)) {
+                $html .= '<div class="package-dimensions">' . $this->__('Dimensions: %s', implode(' x ', $dimensions)) . '</div>';
             }
         }
-        return $tracks;
+
+        // Package value
+        if ($packageObj->getValue()) {
+            $html .= '<div class="package-value">' . $this->__('Value: %s', $this->formatPrice($packageObj->getValue())) . '</div>';
+        }
+
+        $html .= '</div>';
+        return $html;
     }
 
+    public function formatPrice($price)
+    {
+        return $this->_order ? $this->_order->formatPriceTxt($price) : Mage::helper('core')->currency($price);
+    }
 }

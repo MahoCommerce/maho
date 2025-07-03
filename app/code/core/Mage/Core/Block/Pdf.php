@@ -13,8 +13,8 @@ use Dompdf\Options;
 
 class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
 {
-    protected $_dompdf;
-    protected $_options;
+    protected ?Dompdf $_dompdf = null;
+    protected ?Options $_options = null;
 
     public function __construct()
     {
@@ -90,6 +90,7 @@ class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
         return Mage::app()->getStore();
     }
 
+    #[\Override]
     protected function _toHtml(): string
     {
         // Include PDF CSS
