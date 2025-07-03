@@ -98,7 +98,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
             $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($invoices);
 
             return $this->_prepareDownloadResponse('creditmemo' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') .
-                '.pdf', $pdf->render(), 'application/pdf');
+                '.pdf', $pdf, 'application/pdf');
         }
         $this->_redirect('*/*/');
     }
@@ -110,7 +110,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
             if ($creditmemo = Mage::getModel('sales/order_creditmemo')->load($creditmemoId)) {
                 $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf([$creditmemo]);
                 $this->_prepareDownloadResponse('creditmemo' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') .
-                    '.pdf', $pdf->render(), 'application/pdf');
+                    '.pdf', $pdf, 'application/pdf');
             }
         } else {
             $this->_forward('noRoute');

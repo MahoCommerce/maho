@@ -1,0 +1,36 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ *
+ * @var $this Mage_Sales_Model_Order_Pdf_Items_Shipment_Default
+ */
+
+$item = $this->getItem();
+?>
+
+<td class="col-qty">
+    <?php echo $this->getItemQty() * 1 ?>
+</td>
+
+<td class="col-products">
+    <div class="item-name"><?php echo $this->escapeHtml($this->getItemName()) ?></div>
+
+    <?php if ($options = $this->getItemOptions()): ?>
+    <div class="item-options">
+        <?php foreach ($options as $option): ?>
+        <div class="option">
+            <span class="option-label"><?php echo $this->escapeHtml($option['label']) ?>:</span>
+            <span class="option-value"><?php echo $this->escapeHtml($option['value']) ?></span>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+</td>
+
+<td class="col-sku text-right">
+    <?php echo $this->escapeHtml($this->getSku()) ?>
+</td>

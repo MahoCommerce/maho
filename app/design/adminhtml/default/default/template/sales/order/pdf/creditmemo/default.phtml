@@ -1,0 +1,112 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ *
+ * @var $this Mage_Sales_Block_Order_Pdf_Creditmemo
+ */
+
+$creditmemo = $this->getCreditmemo();
+$order = $this->getOrder();
+?>
+
+<div class="pdf-page">
+    <!-- Logo -->
+    <?php if ($logoUrl = $this->getLogoUrl()): ?>
+    <div class="pdf-logo">
+        <img src="<?php echo $logoUrl ?>" alt="<?php echo $this->escapeHtml($this->getStore()->getName()) ?>" style="max-height: 50pt;" />
+    </div>
+    <?php endif; ?>
+
+    <!-- Store Address -->
+    <?php if ($storeAddress = $this->getStoreAddress()): ?>
+    <div class="pdf-store-address">
+        <?php echo nl2br($this->escapeHtml($storeAddress)) ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Document Header -->
+    <div class="pdf-document-header">
+        <h1><?php echo $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
+        <?php if ($orderNumber = $this->getOrderNumber()): ?>
+        <p><?php echo $this->__('Order # %s', $orderNumber) ?></p>
+        <?php endif; ?>
+        <?php if ($invoiceNumber = $this->getInvoiceNumber()): ?>
+        <p><?php echo $this->__('Invoice # %s', $invoiceNumber) ?></p>
+        <?php endif; ?>
+        <p><?php echo $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?></p>
+        <?php if ($orderDate = $this->getOrderDate()): ?>
+        <p><?php echo $this->__('Order Date: %s', $orderDate) ?></p>
+        <?php endif; ?>
+    </div>
+
+    <!-- Addresses -->
+    <div class="pdf-addresses">
+        <div class="pdf-address-billing">
+            <h3><?php echo $this->__('Sold to:') ?></h3>
+            <?php if ($billing = $this->getBillingAddress()): ?>
+            <address>
+                <?php echo $billing->format('html') ?>
+            </address>
+            <?php endif; ?>
+        </div>
+
+        <?php if (!$order->getIsVirtual()): ?>
+        <div class="pdf-address-shipping">
+            <h3><?php echo $this->__('Ship to:') ?></h3>
+            <?php if ($shipping = $this->getShippingAddress()): ?>
+            <address>
+                <?php echo $shipping->format('html') ?>
+            </address>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Payment Method -->
+    <?php if ($paymentInfo = $this->getPaymentInfo()): ?>
+    <div class="pdf-payment-info">
+        <h3><?php echo $this->__('Payment Method') ?></h3>
+        <div><?php echo $paymentInfo ?></div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Items Table -->
+    <div class="pdf-items">
+        <table class="pdf-items-table">
+            <thead>
+                <tr class="pdf-table-header">
+                    <th class="col-products"><?php echo $this->__('Products') ?></th>
+                    <th class="col-sku"><?php echo $this->__('SKU') ?></th>
+                    <th class="col-price"><?php echo $this->__('Total (ex)') ?></th>
+                    <th class="col-discount"><?php echo $this->__('Discount') ?></th>
+                    <th class="col-qty"><?php echo $this->__('Qty') ?></th>
+                    <th class="col-tax"><?php echo $this->__('Tax') ?></th>
+                    <th class="col-subtotal"><?php echo $this->__('Total (inc)') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($this->getItems() as $item): ?>
+                <tr class="pdf-item-row">
+                    <?php echo $this->getItemHtml($item) ?>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="pdf-totals">
+        <table>
+            <?php foreach ($this->getTotals() as $total): ?>
+            <tr<?php if (isset($total['strong']) && $total['strong']): ?> class="pdf-grand-total"<?php endif; ?>>
+                <td><?php echo $this->escapeHtml($total['label']) ?></td>
+                <td class="text-right"><?php echo $total['value'] ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+</div>
