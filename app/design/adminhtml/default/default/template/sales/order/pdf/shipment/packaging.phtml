@@ -1,7 +1,14 @@
 <?php
+
 /**
- * @var Mage_Sales_Block_Order_Pdf_Shipment_Packaging $this
+ * Maho
+ *
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+/** @var Mage_Sales_Block_Order_Pdf_Shipment_Packaging $this */
 $order = $this->getOrder();
 $shipment = $this->getShipment();
 $packages = $this->getPackages();
@@ -12,7 +19,7 @@ $packages = $this->getPackages();
         <?php if ($this->getLogoUrl()): ?>
             <img src="<?= $this->getLogoUrl() ?>" alt="Logo" class="pdf-logo" />
         <?php endif; ?>
-        
+
         <div class="document-info">
             <h1><?= $this->__('Packing Slip') ?></h1>
             <div class="document-numbers">
@@ -59,7 +66,7 @@ $packages = $this->getPackages();
     <!-- Packages -->
     <div class="packages-section">
         <h2><?= $this->__('Packages') ?></h2>
-        
+
         <?php if (!empty($packages)): ?>
             <div class="packages-grid">
                 <?php $packageNum = 1; ?>
@@ -68,17 +75,17 @@ $packages = $this->getPackages();
                         <div class="package-header">
                             <h3><?= $this->__('Package') ?> <?= $packageNum ?></h3>
                         </div>
-                        
+
                         <div class="package-content">
                             <?= $this->getPackageHtml($package) ?>
                         </div>
-                        
+
                         <?php if (isset($package['items']) && is_array($package['items'])): ?>
                             <div class="package-items">
                                 <h4><?= $this->__('Package Contents:') ?></h4>
                                 <ul>
                                     <?php foreach ($package['items'] as $item): ?>
-                                        <li><?= $this->escapeHtml($item['name'] ?? 'Unknown Item') ?> 
+                                        <li><?= $this->escapeHtml($item['name'] ?? 'Unknown Item') ?>
                                             <?php if (isset($item['qty'])): ?>
                                                 (<?= $this->__('Qty: %s', $item['qty']) ?>)
                                             <?php endif; ?>
@@ -97,7 +104,7 @@ $packages = $this->getPackages();
             </div>
         <?php endif; ?>
     </div>
-    
+
     <!-- Footer -->
     <div class="pdf-footer">
         <p><?= $this->__('Thank you for your business!') ?></p>
