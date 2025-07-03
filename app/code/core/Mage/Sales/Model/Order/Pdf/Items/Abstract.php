@@ -135,7 +135,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
         if ($item && method_exists($item, 'getOrderItem')) {
             return $item->getOrderItem();
         }
-        return $item;
+        // If item doesn't have getOrderItem method, it's likely already an order item
+        // or we need to return null to maintain type safety
+        return ($item instanceof Mage_Sales_Model_Order_Item) ? $item : null;
     }
 
     /**

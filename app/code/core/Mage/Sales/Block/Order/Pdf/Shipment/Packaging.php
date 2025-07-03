@@ -10,8 +10,8 @@
 
 class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Template
 {
-    protected $_shipment;
-    protected $_order;
+    protected ?Mage_Sales_Model_Order_Shipment $_shipment = null;
+    protected ?Mage_Sales_Model_Order $_order = null;
 
     public function __construct()
     {
@@ -19,35 +19,35 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Temp
         $this->setTemplate('sales/order/pdf/shipment/packaging.phtml');
     }
 
-    public function setDocument($shipment)
+    public function setDocument(Mage_Sales_Model_Order_Shipment $shipment): self
     {
         $this->_shipment = $shipment;
         $this->_order = $shipment->getOrder();
         return $this;
     }
 
-    public function setOrder($order)
+    public function setOrder(Mage_Sales_Model_Order $order): self
     {
         $this->_order = $order;
         return $this;
     }
 
-    public function getShipment()
+    public function getShipment(): ?Mage_Sales_Model_Order_Shipment
     {
         return $this->_shipment;
     }
 
-    public function getOrder()
+    public function getOrder(): ?Mage_Sales_Model_Order
     {
         return $this->_order;
     }
 
-    public function getShipmentNumber()
+    public function getShipmentNumber(): string
     {
         return $this->_shipment ? $this->_shipment->getIncrementId() : '';
     }
 
-    public function getShipmentDate()
+    public function getShipmentDate(): string
     {
         if ($this->_shipment) {
             return Mage::helper('core')->formatDate($this->_shipment->getCreatedAt(), 'medium', false);
@@ -55,12 +55,12 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Temp
         return '';
     }
 
-    public function getOrderNumber()
+    public function getOrderNumber(): string
     {
         return $this->_order ? $this->_order->getRealOrderId() : '';
     }
 
-    public function getOrderDate()
+    public function getOrderDate(): string
     {
         if ($this->_order) {
             return Mage::helper('core')->formatDate($this->_order->getCreatedAtStoreDate(), 'medium', false);
@@ -68,22 +68,22 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Temp
         return '';
     }
 
-    public function getBillingAddress()
+    public function getBillingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->_order ? $this->_order->getBillingAddress() : null;
     }
 
-    public function getShippingAddress()
+    public function getShippingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->_order ? $this->_order->getShippingAddress() : null;
     }
 
-    public function getShippingMethod()
+    public function getShippingMethod(): string
     {
         return $this->_order ? $this->_order->getShippingDescription() : '';
     }
 
-    public function getLogoUrl()
+    public function getLogoUrl(): ?string
     {
         $logoFile = Mage::getStoreConfig('sales/identity/logo', $this->getStore());
         if ($logoFile) {
@@ -120,17 +120,17 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Temp
         return null;
     }
 
-    public function getStore()
+    public function getStore(): Mage_Core_Model_Store
     {
         return $this->_order ? $this->_order->getStore() : Mage::app()->getStore();
     }
 
-    public function getStoreAddress()
+    public function getStoreAddress(): string
     {
         return Mage::getStoreConfig('sales/identity/address', $this->getStore());
     }
 
-    public function getPackages()
+    public function getPackages(): array
     {
         $packages = [];
         if ($this->_shipment) {
@@ -142,7 +142,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Temp
         return $packages;
     }
 
-    public function getPackageHtml($package)
+    public function getPackageHtml(array $package): string
     {
         $packageObj = new Varien_Object($package);
         $html = '<div class="package-details">';
@@ -184,7 +184,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Temp
         return $html;
     }
 
-    public function formatPrice($price)
+    public function formatPrice(float $price): string
     {
         return $this->_order ? $this->_order->formatPriceTxt($price) : Mage::helper('core')->currency($price);
     }

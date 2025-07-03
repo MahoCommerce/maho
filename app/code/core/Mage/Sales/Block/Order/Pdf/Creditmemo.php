@@ -10,8 +10,8 @@
 
 class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
 {
-    protected $_creditmemo;
-    protected $_order;
+    protected ?Mage_Sales_Model_Order_Creditmemo $_creditmemo = null;
+    protected ?Mage_Sales_Model_Order $_order = null;
 
     public function __construct()
     {
@@ -19,35 +19,35 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         $this->setTemplate('sales/order/pdf/creditmemo/default.phtml');
     }
 
-    public function setDocument($creditmemo)
+    public function setDocument(Mage_Sales_Model_Order_Creditmemo $creditmemo): self
     {
         $this->_creditmemo = $creditmemo;
         $this->_order = $creditmemo->getOrder();
         return $this;
     }
 
-    public function setOrder($order)
+    public function setOrder(Mage_Sales_Model_Order $order): self
     {
         $this->_order = $order;
         return $this;
     }
 
-    public function getCreditmemo()
+    public function getCreditmemo(): ?Mage_Sales_Model_Order_Creditmemo
     {
         return $this->_creditmemo;
     }
 
-    public function getOrder()
+    public function getOrder(): ?Mage_Sales_Model_Order
     {
         return $this->_order;
     }
 
-    public function getCreditmemoNumber()
+    public function getCreditmemoNumber(): string
     {
         return $this->_creditmemo ? $this->_creditmemo->getIncrementId() : '';
     }
 
-    public function getCreditmemoDate()
+    public function getCreditmemoDate(): string
     {
         if ($this->_creditmemo) {
             return Mage::helper('core')->formatDate($this->_creditmemo->getCreatedAt(), 'medium', false);
@@ -55,7 +55,7 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return '';
     }
 
-    public function getOrderNumber()
+    public function getOrderNumber(): string
     {
         if ($this->_order && Mage::getStoreConfigFlag(Mage_Sales_Model_Order_Pdf_Abstract::XML_PATH_SALES_PDF_CREDITMEMO_PUT_ORDER_ID, $this->_order->getStoreId())) {
             return $this->_order->getRealOrderId();
@@ -63,7 +63,7 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return '';
     }
 
-    public function getOrderDate()
+    public function getOrderDate(): string
     {
         if ($this->_order) {
             return Mage::helper('core')->formatDate($this->_order->getCreatedAtStoreDate(), 'medium', false);
@@ -71,17 +71,17 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return '';
     }
 
-    public function getBillingAddress()
+    public function getBillingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->_order ? $this->_order->getBillingAddress() : null;
     }
 
-    public function getShippingAddress()
+    public function getShippingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->_order ? $this->_order->getShippingAddress() : null;
     }
 
-    public function getPaymentInfo()
+    public function getPaymentInfo(): string
     {
         if (!$this->_order || !$this->_order->getPayment()) {
             return '';
@@ -95,7 +95,7 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return $paymentBlock->toHtml();
     }
 
-    public function getLogoUrl()
+    public function getLogoUrl(): ?string
     {
         $logoFile = Mage::getStoreConfig('sales/identity/logo', $this->getStore());
         if ($logoFile) {
@@ -132,17 +132,17 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return null;
     }
 
-    public function getStore()
+    public function getStore(): Mage_Core_Model_Store
     {
         return $this->_order ? $this->_order->getStore() : Mage::app()->getStore();
     }
 
-    public function getStoreAddress()
+    public function getStoreAddress(): string
     {
         return Mage::getStoreConfig('sales/identity/address', $this->getStore());
     }
 
-    public function getItems()
+    public function getItems(): array
     {
         $items = [];
         if ($this->_creditmemo) {
@@ -156,7 +156,7 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return $items;
     }
 
-    public function getItemHtml($item)
+    public function getItemHtml(Mage_Sales_Model_Order_Creditmemo_Item $item): string
     {
         $orderItem = $item->getOrderItem();
         $type = $orderItem->getProductType();
@@ -173,7 +173,7 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return $renderer->toHtml();
     }
 
-    protected function _getItemRenderer($type)
+    protected function _getItemRenderer(string $type): ?Mage_Sales_Model_Order_Pdf_Items_Abstract
     {
         $rendererModel = Mage::getStoreConfig('sales_pdf/creditmemo/' . $type) ?: 'sales/order_pdf_items_creditmemo_default';
         if (!isset($this->_renderers[$type])) {
@@ -182,9 +182,9 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return $this->_renderers[$type];
     }
 
-    protected $_renderers = [];
+    protected array $_renderers = [];
 
-    public function getTotals()
+    public function getTotals(): array
     {
         if (!$this->_creditmemo) {
             return [];
@@ -248,7 +248,7 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Core_Block_Template
         return $totals;
     }
 
-    public function formatPrice($price)
+    public function formatPrice(float $price): string
     {
         return $this->_order->formatPriceTxt($price);
     }

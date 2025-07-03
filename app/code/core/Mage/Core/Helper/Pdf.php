@@ -31,12 +31,6 @@ class Mage_Core_Helper_Pdf extends Mage_Core_Helper_Abstract
         return Mage::app()->getLocale()->date($date, null, $store->getLocaleCode())->toString($format);
     }
 
-    #[\Override]
-    public function escapeHtml(string $text): string
-    {
-        return htmlspecialchars($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-    }
-
     public function getLogoUrl(?Mage_Core_Model_Store $store = null): ?string
     {
         if (!$store) {

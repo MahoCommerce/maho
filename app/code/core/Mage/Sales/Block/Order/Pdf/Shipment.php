@@ -10,8 +10,8 @@
 
 class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
 {
-    protected $_shipment;
-    protected $_order;
+    protected ?Mage_Sales_Model_Order_Shipment $_shipment = null;
+    protected ?Mage_Sales_Model_Order $_order = null;
 
     public function __construct()
     {
@@ -19,35 +19,35 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         $this->setTemplate('sales/order/pdf/shipment/default.phtml');
     }
 
-    public function setDocument($shipment)
+    public function setDocument(Mage_Sales_Model_Order_Shipment $shipment): self
     {
         $this->_shipment = $shipment;
         $this->_order = $shipment->getOrder();
         return $this;
     }
 
-    public function setOrder($order)
+    public function setOrder(Mage_Sales_Model_Order $order): self
     {
         $this->_order = $order;
         return $this;
     }
 
-    public function getShipment()
+    public function getShipment(): ?Mage_Sales_Model_Order_Shipment
     {
         return $this->_shipment;
     }
 
-    public function getOrder()
+    public function getOrder(): ?Mage_Sales_Model_Order
     {
         return $this->_order;
     }
 
-    public function getShipmentNumber()
+    public function getShipmentNumber(): string
     {
         return $this->_shipment ? $this->_shipment->getIncrementId() : '';
     }
 
-    public function getShipmentDate()
+    public function getShipmentDate(): string
     {
         if ($this->_shipment) {
             return Mage::helper('core')->formatDate($this->_shipment->getCreatedAt(), 'medium', false);
@@ -55,7 +55,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return '';
     }
 
-    public function getOrderNumber()
+    public function getOrderNumber(): string
     {
         if ($this->_order && Mage::getStoreConfigFlag(Mage_Sales_Model_Order_Pdf_Abstract::XML_PATH_SALES_PDF_SHIPMENT_PUT_ORDER_ID, $this->_order->getStoreId())) {
             return $this->_order->getRealOrderId();
@@ -63,7 +63,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return '';
     }
 
-    public function getOrderDate()
+    public function getOrderDate(): string
     {
         if ($this->_order) {
             return Mage::helper('core')->formatDate($this->_order->getCreatedAtStoreDate(), 'medium', false);
@@ -71,22 +71,22 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return '';
     }
 
-    public function getBillingAddress()
+    public function getBillingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->_order ? $this->_order->getBillingAddress() : null;
     }
 
-    public function getShippingAddress()
+    public function getShippingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->_order ? $this->_order->getShippingAddress() : null;
     }
 
-    public function getShippingMethod()
+    public function getShippingMethod(): string
     {
         return $this->_order ? $this->_order->getShippingDescription() : '';
     }
 
-    public function getLogoUrl()
+    public function getLogoUrl(): ?string
     {
         $logoFile = Mage::getStoreConfig('sales/identity/logo', $this->getStore());
         if ($logoFile) {
@@ -123,17 +123,17 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return null;
     }
 
-    public function getStore()
+    public function getStore(): Mage_Core_Model_Store
     {
         return $this->_order ? $this->_order->getStore() : Mage::app()->getStore();
     }
 
-    public function getStoreAddress()
+    public function getStoreAddress(): string
     {
         return Mage::getStoreConfig('sales/identity/address', $this->getStore());
     }
 
-    public function getItems()
+    public function getItems(): array
     {
         $items = [];
         if ($this->_shipment) {
@@ -147,7 +147,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return $items;
     }
 
-    public function getItemHtml($item)
+    public function getItemHtml(Mage_Sales_Model_Order_Shipment_Item $item): string
     {
         $orderItem = $item->getOrderItem();
         $type = $orderItem->getProductType();
@@ -164,7 +164,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return $renderer->toHtml();
     }
 
-    protected function _getItemRenderer($type)
+    protected function _getItemRenderer(string $type): ?Mage_Sales_Model_Order_Pdf_Items_Abstract
     {
         $rendererModel = Mage::getStoreConfig('sales_pdf/shipment/' . $type) ?: 'sales/order_pdf_items_shipment_default';
         if (!isset($this->_renderers[$type])) {
@@ -173,9 +173,9 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
         return $this->_renderers[$type];
     }
 
-    protected $_renderers = [];
+    protected array $_renderers = [];
 
-    public function getTracking()
+    public function getTracking(): array
     {
         $tracks = [];
         if ($this->_shipment) {
