@@ -94,7 +94,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
         $fileName,
         $content,
         $contentType = 'application/octet-stream',
-        $contentLength = null
+        $contentLength = null,
     ) {
         $session = Mage::getSingleton('admin/session');
         if ($session->isFirstPageAfterLogin()) {

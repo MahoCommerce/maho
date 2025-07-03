@@ -64,7 +64,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $finalPrice = true,
         $tierPrice = true,
         $products = null,
-        $store = null
+        $store = null,
     ) {
         $suffix = '';
         $priceSuffix = '';
@@ -374,7 +374,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $store,
         $forcedId = null,
         $table = 'catalogindex/eav',
-        $storeIsWebsite = false
+        $storeIsWebsite = false,
     ) {
         $storeField = 'store_id';
         $websiteId = null;

@@ -35,7 +35,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
         $status,
         $qty = 0,
         $stockId = 1,
-        $websiteId = null
+        $websiteId = null,
     ) {
         $websites = array_keys($object->getWebsites($websiteId));
         $adapter = $this->_getWriteAdapter();

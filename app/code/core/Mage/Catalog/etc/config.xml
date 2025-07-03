@@ -798,8 +798,8 @@
                 <max_dimension>5000</max_dimension>
             </product_image>
             <seo>
-                <product_url_suffix>.html</product_url_suffix>
-                <category_url_suffix>.html</category_url_suffix>
+                <product_url_suffix></product_url_suffix>
+                <category_url_suffix></category_url_suffix>
                 <product_use_categories>1</product_use_categories>
                 <save_rewrites_history>1</save_rewrites_history>
                 <title_separator>-</title_separator>

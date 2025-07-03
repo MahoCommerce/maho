@@ -264,7 +264,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
         $qty = 0,
         $status = self::STATUS_IN_STOCK,
         $stockId = 1,
-        $websiteId = null
+        $websiteId = null,
     ) {
         if ($status == self::STATUS_OUT_OF_STOCK) {
             $this->saveProductStatus($productId, $status, $qty, $stockId, $websiteId);

@@ -10177,18 +10177,6 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Session.php
 
 		-
-			message: '#^Return type \(bool\) of method Mage_Api_Model_Session\:\:clear\(\) should be compatible with return type \(\$this\(Mage_Core_Model_Session_Abstract_Varien\)\) of method Mage_Core_Model_Session_Abstract_Varien\:\:clear\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Session.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_Api_Model_Session\:\:revalidateCookie\(\) should be compatible with return type \(\$this\(Mage_Core_Model_Session_Abstract_Varien\)\) of method Mage_Core_Model_Session_Abstract_Varien\:\:revalidateCookie\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Session.php
-
-		-
 			message: '#^Invalid array key type array\.$#'
 			identifier: offsetAccess.invalidOffset
 			count: 1
@@ -12402,12 +12390,6 @@ parameters:
 		-
 			message: '#^Property Mage_Catalog_Model_Product_Image\:\:\$_watermarkWidth has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} and false will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Image.php
 
@@ -16855,18 +16837,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Resource.php
 
 		-
-			message: '#^Method Mage_Core_Model_Resource_Session\:\:setStaticSaveHandler\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Session.php
-
-		-
-			message: '#^Parameter \#6 \$gc of function session_set_save_handler expects callable\(string\)\: bool, array\{\$this\(Mage_Core_Model_Resource_Session\), ''gc''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Session.php
-
-		-
 			message: '#^Method Mage_Core_Model_Resource_Setup\:\:applyAllDataUpdates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -16955,36 +16925,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Session.php
-
-		-
-			message: '#^Parameter \#1 \$host of method Mage_Core_Model_Session_Abstract\:\:addHost\(\) expects string, true given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Core/Model/Session/Abstract.php
-
-		-
-			message: '#^Call to Mage\:\:getSingleton\(''cm_redissession/session''\) resulted in invalid type Mage_Cm_Redissession_Model_Session\.$#'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
-
-		-
-			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Varien\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
-
-		-
-			message: '#^Access to an undefined property Zend_Session_Namespace\:\:\$data\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Zend.php
-
-		-
-			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Zend\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Zend.php
 
 		-
 			message: '#^Method Mage_Core_Model_Store\:\:_getSession\(\) should return Mage_Core_Model_Session but returns Mage_Core_Model_Session_Abstract\.$#'

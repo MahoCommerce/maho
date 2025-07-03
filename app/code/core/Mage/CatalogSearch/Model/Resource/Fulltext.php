@@ -218,7 +218,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         array $staticFields,
         $productIds = null,
         $lastProductId = 0,
-        $limit = 100
+        $limit = 100,
     ) {
         $websiteId      = Mage::app()->getStore($storeId)->getWebsiteId();
         $writeAdapter   = $this->_getWriteAdapter();

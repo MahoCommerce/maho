@@ -193,7 +193,6 @@ namespace PHPSTORM_META {
         'core_resource/layout' => \Mage_Core_Model_Resource_Layout::class,
         'core_resource/mage_core_model_resource' => \Mage_Core_Model_Resource::class,
         'core_resource/resource' => \Mage_Core_Model_Resource_Resource::class,
-        'core_resource/session' => \Mage_Core_Model_Resource_Session::class,
         'core_resource/setup' => \Mage_Core_Model_Resource_Setup::class,
         'core_resource/setup_query_modifier' => \Mage_Core_Model_Resource_Setup_Query_Modifier::class,
         'core_resource/store' => \Mage_Core_Model_Resource_Store::class,

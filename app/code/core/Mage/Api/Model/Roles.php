@@ -107,7 +107,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
         $level = 0,
         $represent2Darray = null,
         $rawNodes = false,
-        $module = 'adminhtml'
+        $module = 'adminhtml',
     ) {
         static $result;
 

@@ -155,7 +155,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
     public function getConfigurableImagesFallbackArray(
         Mage_Catalog_Model_Product $product,
         array $imageTypes,
-        $keepFrame = false
+        $keepFrame = false,
     ) {
         if (!$product->hasConfigurableImagesFallbackArray()) {
             $mapping = $product->getChildAttributeLabelMapping() ?? [];

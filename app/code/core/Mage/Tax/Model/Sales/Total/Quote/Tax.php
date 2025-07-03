@@ -271,7 +271,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         Mage_Sales_Model_Quote_Address $address,
         $rate,
         $appliedRates,
-        $taxId = null
+        $taxId = null,
     ) {
         $inclTax = $address->getIsShippingInclTax();
         $shipping = $address->getShippingTaxable();
@@ -444,7 +444,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $item,
         $taxRateRequest,
         &$itemTaxGroups,
-        $catalogPriceInclTax
+        $catalogPriceInclTax,
     ) {
         $taxRateRequest->setProductClassId($item->getProduct()->getTaxClassId());
         $rate = $this->_calculator->getRate($taxRateRequest);
@@ -521,7 +521,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $rate,
         &$taxGroups = null,
         $taxId = null,
-        $recalculateRowTotalInclTax = false
+        $recalculateRowTotalInclTax = false,
     ) {
         $qty = $item->getTotalQty();
         $inclTax = $item->getIsPriceInclTax();
@@ -792,7 +792,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $rate,
         &$taxGroups = null,
         $taxId = null,
-        $recalculateRowTotalInclTax = false
+        $recalculateRowTotalInclTax = false,
     ) {
         $inclTax = $item->getIsPriceInclTax();
         $subtotal = $taxSubtotal = $item->getTaxableAmount();
@@ -1019,7 +1019,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $taxRateRequest,
         &$taxGroups,
         &$itemTaxGroups,
-        $catalogPriceInclTax
+        $catalogPriceInclTax,
     ) {
         $taxRateRequest->setProductClassId($item->getProduct()->getTaxClassId());
         $rate = $this->_calculator->getRate($taxRateRequest);
@@ -1080,7 +1080,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $rate,
         &$taxGroups,
         $taxId = null,
-        $recalculateRowTotalInclTax = false
+        $recalculateRowTotalInclTax = false,
     ) {
         $inclTax = $item->getIsPriceInclTax();
         $rateKey = ($taxId == null) ? (string) $rate : $taxId;
@@ -1509,7 +1509,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
         $applied,
         $amount,
         $baseAmount,
-        $rate
+        $rate,
     ) {
         $previouslyAppliedTaxes = $address->getAppliedTaxes();
         $process = count($previouslyAppliedTaxes);
