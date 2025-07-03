@@ -19,23 +19,14 @@
 class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
 {
     /**
-     * Page dimensions (deprecated)
-     *
-     * @var array
-     * @deprecated No longer used with HTML/CSS approach
-     */
-    protected $_dimensions;
-
-    /**
      * Constructor - no longer creates PDF page objects
      *
-     * @param mixed $template Template or page size (deprecated)
+     * @param mixed $template Template or page size (deprecated, ignored for backward compatibility)
      * @deprecated No longer extends PDF page classes
      */
     public function __construct($template = null)
     {
-        // Legacy constructor - no longer creates PDF page objects
-        $this->_dimensions = ['width' => 842, 'height' => 595]; // A4 landscape
+        // Legacy constructor - $template parameter is ignored for backward compatibility
     }
 
     /**
@@ -50,11 +41,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
     public function getTextWidth($text, $font, $fontSize)
     {
         // Return approximate width for compatibility
-        return strlen($text) * ($fontSize * 0.6);
+        return (int) (strlen($text) * ($fontSize * 0.6));
     }
 
     /**
-     * Compatibility method for drawing operations
+     * Compatibility method for drawing operations and property access
      *
      * @param string $method
      * @param array $args
@@ -64,7 +55,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
     public function __call($method, $args)
     {
         // Return $this for any drawing method calls to maintain compatibility
-        // Methods like drawText, drawRectangle, setFillColor, etc. are now no-ops
         return $this;
     }
 
@@ -72,12 +62,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page
      * Legacy property access for compatibility
      *
      * @param string $name
-     * @return mixed
+     * @return null
      * @deprecated No longer used with HTML/CSS approach
      */
     public function __get($name)
     {
-        // Return null for any property access
         return null;
     }
 

@@ -14,27 +14,10 @@
  * DHL International (API v1.4) Page Builder
  *
  * @deprecated No longer used with HTML/CSS template approach
- * This class is kept for backward compatibility but methods are now stubs
+ * This class is kept for backward compatibility but all methods are now no-ops
  */
 class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
 {
-    /**
-     * PDF Page reference (deprecated)
-     *
-     * @var mixed
-     * @deprecated No longer used with HTML/CSS approach
-     */
-    protected $_page;
-
-    /**
-     * Font references (deprecated)
-     *
-     * @var mixed
-     * @deprecated No longer used with HTML/CSS approach
-     */
-    protected $_fontNormal;
-    protected $_fontBold;
-
     /**
      * Create font instances (deprecated)
      *
@@ -43,19 +26,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     public function __construct()
     {
         // Legacy constructor - no longer creates fonts
-        $this->_fontNormal = null;
-        $this->_fontBold = null;
     }
 
     /**
      * Get Page (deprecated)
      *
-     * @return mixed
+     * @return null
      * @deprecated No longer used with HTML/CSS approach
      */
     public function getPage()
     {
-        return $this->_page;
+        return null;
     }
 
     /**
@@ -67,134 +48,18 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
      */
     public function setPage($page)
     {
-        $this->_page = $page;
         return $this;
     }
 
     /**
-     * All drawing methods are now deprecated and return $this for compatibility
+     * Legacy method stubs for any drawing operations
+     * All drawing methods now return $this for fluent interface compatibility
+     *
+     * @return $this
      */
-
-    /** @deprecated */
-    public function addProductName($name)
+    public function __call(string $method, array $args): self
     {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addProductContentCode($code)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addUnitId($id)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addReferenceData($data)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addSenderInfo($sender)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addOriginInfo($origin)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addReceiveInfo($receiver)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addDestinationFacilityCode($country, $area, $facility)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addServiceFeaturesCodes()
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addDeliveryDateCode()
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addShipmentInformation($shipment)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addDateInfo($date)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addWeightInfo($weight, $unit)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addWaybillBarcode($number, $barcode)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addRoutingBarcode($code, $dataId, $barcode)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addBorder()
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addPieceNumber($pieceNum, $totalPieces)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addContentInfo($content)
-    {
-        return $this;
-    }
-
-    /** @deprecated */
-    public function addPieceIdBarcode($dataId, $license, $barcode)
-    {
-        return $this;
-    }
-
-    /**
-     * Legacy method stubs for any other drawing operations
-     */
-    public function __call($method, $args)
-    {
-        // Return $this for any unknown method calls to maintain fluent interface
+        // Return $this for any method calls to maintain fluent interface
         return $this;
     }
 }

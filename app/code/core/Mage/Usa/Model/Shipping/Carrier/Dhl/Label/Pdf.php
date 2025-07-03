@@ -28,11 +28,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf extends Mage_Core_Block_Temp
     protected $_info;
 
     /**
-     * Shipment Request
+     * Shipment Request (DHL specific)
      *
      * @var Mage_Shipping_Model_Shipment_Request
      */
-    protected $_request;
+    protected $_shipmentRequest;
 
     /**
      * Dhl International Label Creation Class constructor
@@ -45,7 +45,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf extends Mage_Core_Block_Temp
             $this->_info = $arguments['info'];
         }
         if (isset($arguments['request'])) {
-            $this->_request = $arguments['request'];
+            $this->_shipmentRequest = $arguments['request'];
         }
 
         $this->setTemplate('usa/dhl/label.phtml');
@@ -94,19 +94,24 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf extends Mage_Core_Block_Temp
      */
     public function getShipmentRequest()
     {
-        return $this->_request;
+        return $this->_shipmentRequest;
     }
 
     /**
-     * Format date for display
+     * Format date for display (DHL specific implementation)
      *
-     * @param string $date
+     * @param string|null $date
+     * @param string $format
+     * @param bool $showTime
      * @return string
      */
     #[\Override]
-    public function formatDate($date)
+    public function formatDate($date = null, $format = 'medium', $showTime = false)
     {
-        return Mage::helper('core')->formatDate($date, 'medium', false);
+        if ($date === null) {
+            return '';
+        }
+        return Mage::helper('core')->formatDate($date, $format, $showTime);
     }
 
     /**

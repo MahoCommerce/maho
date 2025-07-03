@@ -472,7 +472,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             }
         }
         $outputPdf = $this->_combineLabelsPdf($labelsContent);
-        $shipment->setShippingLabel($outputPdf->render());
+        $shipment->setShippingLabel($outputPdf);
         $carrierCode = $carrier->getCarrierCode();
         $carrierTitle = Mage::getStoreConfig('carriers/' . $carrierCode . '/title', $shipment->getStoreId());
         if ($trackingNumbers) {
@@ -610,7 +610,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
 
         if (!empty($labelsContent)) {
             $outputPdf = $this->_combineLabelsPdf($labelsContent);
-            $this->_prepareDownloadResponse('ShippingLabels.pdf', $outputPdf->render(), 'application/pdf');
+            $this->_prepareDownloadResponse('ShippingLabels.pdf', $outputPdf, 'application/pdf');
             return;
         }
 
