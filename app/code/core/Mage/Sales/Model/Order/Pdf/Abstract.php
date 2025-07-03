@@ -41,24 +41,18 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Layout instance
-     *
-     * @var Mage_Core_Model_Layout
      */
-    protected $_layout;
+    protected ?Mage_Core_Model_Layout $_layout = null;
 
     /**
      * dompdf instance
-     *
-     * @var Dompdf
      */
-    protected $_dompdf;
+    protected ?Dompdf $_dompdf = null;
 
     /**
      * dompdf options
-     *
-     * @var Options
      */
-    protected $_dompdfOptions;
+    protected ?Options $_dompdfOptions = null;
 
     /**
      * Retrieve PDF
@@ -83,10 +77,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Initialize layout
-     *
-     * @return Mage_Core_Model_Layout
      */
-    protected function _getLayout()
+    protected function _getLayout(): Mage_Core_Model_Layout
     {
         if (!$this->_layout) {
             // Ensure we're using adminhtml design area for PDF layouts
@@ -200,11 +192,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Render documents to HTML using layout/templates
-     *
-     * @param array $documents
-     * @return string
      */
-    protected function _renderDocumentsHtml($documents)
+    protected function _renderDocumentsHtml(array $documents): string
     {
         if (empty($documents)) {
             return '';
@@ -259,10 +248,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Get block class name for direct instantiation
-     *
-     * @return string
      */
-    protected function _getBlockClass()
+    protected function _getBlockClass(): string
     {
         // Default implementation - subclasses should override
         return 'Mage_Core_Block_Template';
@@ -270,11 +257,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Wrap HTML content with document structure
-     *
-     * @param string $html
-     * @return string
      */
-    protected function _wrapHtmlDocument($html)
+    protected function _wrapHtmlDocument(string $html): string
     {
         $css = $this->_getCssContent();
 
@@ -292,10 +276,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Get CSS content for PDF
-     *
-     * @return string
      */
-    protected function _getCssContent()
+    protected function _getCssContent(): string
     {
         // Ensure we're in adminhtml design area for CSS loading
         $originalArea = Mage::getDesign()->getArea();
@@ -321,10 +303,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Get default CSS
-     *
-     * @return string
      */
-    protected function _getDefaultCss()
+    protected function _getDefaultCss(): string
     {
         return '
 @page {
@@ -418,11 +398,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Initialize renderer
-     *
-     * @param string $type
-     * @return void
      */
-    protected function _initRenderer($type)
+    protected function _initRenderer(string $type): void
     {
         $renderers = Mage::getConfig()->getNode('global/pdf/item_renderers/' . $type);
         if ($renderers) {
@@ -437,11 +414,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Get item renderer
-     *
-     * @param string $type
-     * @return Mage_Core_Block_Abstract|null
      */
-    public function getItemRenderer($type)
+    public function getItemRenderer(string $type): ?Mage_Core_Block_Abstract
     {
         if (!isset($this->_renderers[$type])) {
             $type = 'default';
@@ -462,11 +436,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Get total list
-     *
-     * @param Mage_Sales_Model_Abstract $source
-     * @return array
      */
-    protected function _getTotalsList($source)
+    protected function _getTotalsList(Mage_Sales_Model_Abstract $source): array
     {
         $totals = Mage::getConfig()->getNode('global/pdf/totals')->asArray();
         usort($totals, [$this, '_sortTotalsList']);
@@ -493,12 +464,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Sort totals list
-     *
-     * @param  array $a
-     * @param  array $b
-     * @return int
      */
-    protected function _sortTotalsList($a, $b)
+    protected function _sortTotalsList(array $a, array $b): int
     {
         if (!isset($a['sort_order']) || !isset($b['sort_order'])) {
             return 0;

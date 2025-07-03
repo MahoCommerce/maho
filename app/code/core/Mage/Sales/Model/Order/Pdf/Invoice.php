@@ -17,6 +17,7 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
      *
      * @return string
      */
+    #[\Override]
     protected function _getLayoutHandle()
     {
         return 'sales_pdf_invoice';
@@ -27,6 +28,7 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
      *
      * @return string
      */
+    #[\Override]
     protected function _getBlockName()
     {
         return 'sales.pdf.invoice';
@@ -34,11 +36,9 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
 
     /**
      * Get block class name for direct instantiation
-     *
-     * @return string
      */
     #[\Override]
-    protected function _getBlockClass()
+    protected function _getBlockClass(): string
     {
         return 'Mage_Sales_Block_Order_Pdf_Invoice';
     }
@@ -47,10 +47,9 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
      * Return PDF document
      *
      * @param  Mage_Sales_Model_Order_Invoice[] $invoices
-     * @return string
      */
     #[\Override]
-    public function getPdf($invoices = [])
+    public function getPdf(array $invoices = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('invoice');

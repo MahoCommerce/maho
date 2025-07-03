@@ -17,6 +17,7 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
      *
      * @return string
      */
+    #[\Override]
     protected function _getLayoutHandle()
     {
         return 'sales_pdf_creditmemo';
@@ -27,6 +28,7 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
      *
      * @return string
      */
+    #[\Override]
     protected function _getBlockName()
     {
         return 'sales.pdf.creditmemo';
@@ -34,11 +36,9 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
 
     /**
      * Get block class name for direct instantiation
-     *
-     * @return string
      */
     #[\Override]
-    protected function _getBlockClass()
+    protected function _getBlockClass(): string
     {
         return 'Mage_Sales_Block_Order_Pdf_Creditmemo';
     }
@@ -47,10 +47,9 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
      * Return PDF document
      *
      * @param  Mage_Sales_Model_Order_Creditmemo[] $creditmemos
-     * @return string
      */
     #[\Override]
-    public function getPdf($creditmemos = [])
+    public function getPdf(array $creditmemos = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('creditmemo');

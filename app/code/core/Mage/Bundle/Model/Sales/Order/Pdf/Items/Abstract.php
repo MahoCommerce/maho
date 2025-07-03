@@ -211,6 +211,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * @return Mage_Sales_Model_Order_Item
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function getOrderItem()
     {
         return $this->getItem()->getOrderItem();

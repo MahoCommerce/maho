@@ -17,6 +17,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
      *
      * @return string
      */
+    #[\Override]
     protected function _getLayoutHandle()
     {
         return 'sales_pdf_shipment';
@@ -27,6 +28,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
      *
      * @return string
      */
+    #[\Override]
     protected function _getBlockName()
     {
         return 'sales.pdf.shipment';
@@ -34,11 +36,9 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
 
     /**
      * Get block class name for direct instantiation
-     *
-     * @return string
      */
     #[\Override]
-    protected function _getBlockClass()
+    protected function _getBlockClass(): string
     {
         return 'Mage_Sales_Block_Order_Pdf_Shipment';
     }
@@ -47,10 +47,9 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
      * Return PDF document
      *
      * @param  Mage_Sales_Model_Order_Shipment[] $shipments
-     * @return string
      */
     #[\Override]
-    public function getPdf($shipments = [])
+    public function getPdf(array $shipments = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('shipment');

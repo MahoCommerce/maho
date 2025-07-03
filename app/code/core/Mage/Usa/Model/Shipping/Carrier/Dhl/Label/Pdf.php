@@ -22,17 +22,13 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf extends Mage_Core_Block_Temp
 {
     /**
      * Label Information
-     *
-     * @var SimpleXMLElement
      */
-    protected $_info;
+    protected ?SimpleXMLElement $_info = null;
 
     /**
      * Shipment Request (DHL specific)
-     *
-     * @var Mage_Shipping_Model_Shipment_Request
      */
-    protected $_shipmentRequest;
+    protected ?Mage_Shipping_Model_Shipment_Request $_shipmentRequest = null;
 
     /**
      * Dhl International Label Creation Class constructor
@@ -53,10 +49,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf extends Mage_Core_Block_Temp
 
     /**
      * Create Label using HTML/CSS and dompdf
-     *
-     * @return string
      */
-    public function render()
+    public function render(): string
     {
         try {
             // Generate HTML from template
@@ -79,20 +73,16 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf extends Mage_Core_Block_Temp
 
     /**
      * Get label information for template
-     *
-     * @return SimpleXMLElement
      */
-    public function getLabelInfo()
+    public function getLabelInfo(): ?SimpleXMLElement
     {
         return $this->_info;
     }
 
     /**
      * Get shipment request for template
-     *
-     * @return Mage_Shipping_Model_Shipment_Request
      */
-    public function getShipmentRequest()
+    public function getShipmentRequest(): ?Mage_Shipping_Model_Shipment_Request
     {
         return $this->_shipmentRequest;
     }
@@ -116,11 +106,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf extends Mage_Core_Block_Temp
 
     /**
      * Generate PDF from HTML using dompdf
-     *
-     * @param string $html
-     * @return string
      */
-    protected function _generatePdfFromHtml($html)
+    protected function _generatePdfFromHtml(string $html): string
     {
         $options = new Options();
 

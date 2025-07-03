@@ -10906,24 +10906,6 @@ parameters:
 			message: '#^Method Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo\:\:draw\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Creditmemo.php
-
-		-
-			message: '#^Method Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Invoice.php
-
-		-
-			message: '#^Method Mage_Bundle_Model_Sales_Order_Pdf_Items_Shipment\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Shipment.php
-
-		-
-			message: '#^Method Mage_Bundle_Adminhtml_Bundle_Product_EditController\:\:formAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: app/code/core/Mage/Bundle/controllers/Adminhtml/Bundle/Product/EditController.php
 
 		-
@@ -19871,36 +19853,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Resource/Sample.php
-
-		-
-			message: '#^Method Mage_Downloadable_Model_Sales_Order_Pdf_Items_Creditmemo\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Creditmemo.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:getSku\(\) expects Mage_Sales_Model_Order_Creditmemo_Item\|Mage_Sales_Model_Order_Invoice_Item, Varien_Object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Creditmemo.php
-
-		-
-			message: '#^Method Mage_Downloadable_Model_Sales_Order_Pdf_Items_Invoice\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Invoice.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:getSku\(\) expects Mage_Sales_Model_Order_Creditmemo_Item\|Mage_Sales_Model_Order_Invoice_Item, Varien_Object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Invoice.php
-
-		-
-			message: '#^Method Mage_Downloadable_Adminhtml_Downloadable_FileController\:\:uploadAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/FileController.php
 
 		-
 			message: '#^Method Mage_Downloadable_Adminhtml_Downloadable_Product_EditController\:\:_processDownload\(\) has no return type specified\.$#'
@@ -29174,12 +29126,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page\:\:drawText\(\) has parameter \$align with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/Page.php
 
 		-
 			message: '#^Call to an undefined method Zend_Pdf_Page\:\:drawLines\(\)\.$#'

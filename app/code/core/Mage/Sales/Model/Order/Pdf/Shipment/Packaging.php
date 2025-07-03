@@ -12,7 +12,7 @@
 
 class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Order_Pdf_Abstract
 {
-    protected $y = 800;
+    protected int $y = 800;
 
     /**
      * Get layout handle for this PDF type
@@ -38,23 +38,18 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
 
     /**
      * Get block class name for direct instantiation
-     *
-     * @return string
      */
     #[\Override]
-    protected function _getBlockClass()
+    protected function _getBlockClass(): string
     {
         return 'Mage_Sales_Block_Order_Pdf_Shipment_Packaging';
     }
 
     /**
      * Format pdf file
-     *
-     * @param  Mage_Sales_Model_Order_Shipment $shipment
-     * @return string
      */
     #[\Override]
-    public function getPdf($shipment = null)
+    public function getPdf(?Mage_Sales_Model_Order_Shipment $shipment = null): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('shipment');
@@ -71,18 +66,22 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     }
 
     /**
+     * @param mixed $page
+     * @return $this
      * @deprecated No longer used with HTML/CSS approach
      */
-    protected function _drawHeaderBlock($page = null)
+    protected function _drawHeaderBlock($page = null): self
     {
         // Legacy method - no longer used with HTML/CSS approach
         return $this;
     }
 
     /**
+     * @param mixed $page
+     * @return $this
      * @deprecated No longer used with HTML/CSS approach
      */
-    protected function _drawPackageBlock($page = null)
+    protected function _drawPackageBlock($page = null): self
     {
         // Legacy method - no longer used with HTML/CSS approach
         return $this;
@@ -91,10 +90,9 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     /**
      * Set packaging block for custom packaging data
      *
-     * @param mixed $block
      * @return $this
      */
-    public function setPackageShippingBlock($block)
+    public function setPackageShippingBlock(mixed $block): self
     {
         $this->setData('package_shipping_block', $block);
         return $this;
@@ -102,10 +100,8 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
 
     /**
      * Get packaging block
-     *
-     * @return mixed
      */
-    public function getPackageShippingBlock()
+    public function getPackageShippingBlock(): mixed
     {
         return $this->getData('package_shipping_block');
     }
