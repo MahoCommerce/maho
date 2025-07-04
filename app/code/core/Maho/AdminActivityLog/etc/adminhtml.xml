@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <system>
+            <children>
+                <adminactivitylog translate="title" module="adminactivitylog">
+                    <title>Admin Activity Log</title>
+                    <sort_order>100</sort_order>
+                    <children>
+                        <activity translate="title" module="adminactivitylog">
+                            <title>Activity Log</title>
+                            <action>adminhtml/adminactivitylog_activity</action>
+                            <sort_order>10</sort_order>
+                        </activity>
+                        <login translate="title" module="adminactivitylog">
+                            <title>Login Activity</title>
+                            <action>adminhtml/adminactivitylog_login</action>
+                            <sort_order>20</sort_order>
+                        </login>
+                    </children>
+                </adminactivitylog>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <adminactivitylog translate="title" module="adminactivitylog">
+                                <title>Admin Activity Log</title>
+                                <sort_order>100</sort_order>
+                                <children>
+                                    <activity translate="title" module="adminactivitylog">
+                                        <title>View Activity Log</title>
+                                    </activity>
+                                    <login translate="title" module="adminactivitylog">
+                                        <title>View Login Activity</title>
+                                    </login>
+                                </children>
+                            </adminactivitylog>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

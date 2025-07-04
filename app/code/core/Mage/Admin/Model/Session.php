@@ -121,6 +121,20 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
+     * Logout user from admin
+     */
+    public function logout(): void
+    {
+        $user = $this->getUser();
+        if ($user) {
+            Mage::dispatchEvent('admin_session_user_logout', ['user' => $user]);
+        }
+
+        $this->unsetAll();
+        $this->getCookie()->delete($this->getSessionName());
+    }
+
+    /**
      * Check if 2fa is required
      */
     public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null): void
