@@ -241,10 +241,10 @@ $content = '
         <strong><span>Company</span></strong>
     </div>
     <ul>
-        <li><a href="{{store url=""}}about-maho-demo-store/">About Us</a></li>
-        <li><a href="{{store url=""}}contacts/">Contact Us</a></li>
-        <li><a href="{{store url=""}}customer-service/">Customer Service</a></li>
-        <li><a href="{{store url=""}}privacy-policy-cookie-restriction-mode/">Privacy Policy</a></li>
+        <li><a href="{{store url="about-maho-demo-store"}}">About Us</a></li>
+        <li><a href="{{store url="contacts"}}">Contact Us</a></li>
+        <li><a href="{{store url="customer-service"}}">Customer Service</a></li>
+        <li><a href="{{store url="privacy-policy-cookie-restriction-mode"}}">Privacy Policy</a></li>
     </ul>
 </div>';
 
