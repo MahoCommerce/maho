@@ -22,7 +22,7 @@ const widgetTools = {
         targetEl.append(...fragment.children);
     },
 
-    async openDialog(widgetUrl) {
+    async openDialog(widgetUrl, opts) {
         if (document.getElementById(this.dialogWindowId)) {
             return;
         }
@@ -35,10 +35,9 @@ const widgetTools = {
                 className: 'magento',
                 windowClassName: 'popup-window',
                 width: 950,
-                onClose: this.closeDialog.bind(this)
+                ...opts,
             });
         } catch (error) {
-            console.error(error);
             alert(error.message);
         }
     },
@@ -46,6 +45,10 @@ const widgetTools = {
     closeDialog(window) {
         window ??= this.dialogWindow;
         window?.close();
+    },
+
+    initOptionValues(obj) {
+        window.wWidget?.initOptionValues(obj);
     },
 };
 
@@ -66,12 +69,7 @@ WysiwygWidget.Widget = class {
         this.optionValues = new Map();
         this.widgetTargetId = widgetTargetId;
 
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
-            this.bMark = tinyMCE.activeEditor.selection.getBookmark();
-        }
-
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
-        this.initOptionValues();
     }
 
     getOptionsContainerId() {
@@ -122,33 +120,24 @@ WysiwygWidget.Widget = class {
         containerEl.classList.add('no-display');
     }
 
-    // Assign widget options values when existing widget selected in WYSIWYG
-    initOptionValues() {
-        if (!this.wysiwygExists()) {
-            return false;
-        }
-
-        const el = this.getWysiwygNode();
-        if (!el || !el.id) {
+    initOptionValues(obj) {
+        if (typeof obj !== 'object' || obj === null) {
             return;
         }
-
-        const widgetCode = Base64.idDecode(e.id);
-        if (widgetCode.indexOf('{{widget') === -1) {
-            return;
-        }
-
-        this.optionValues = new Map();
-
-        widgetCode.replaceAll(/([a-z0-9\_]+)\s*\=\s*[\"]{1}([^\"]+)[\"]{1}/gi, (...match) => {
-            if (match[1] == 'type') {
-                this.widgetEl.value = match[2];
+        // Assign widget options values when existing widget selected in WYSIWYG
+        for (const [key, value] of Object.entries(obj)) {
+            if (key === 'type') {
+                this.widgetEl.value = value;
+            } else if (key === 'as_json') {
+                this.formEl.elements.as_json.value = value;
             } else {
-                this.optionValues.set(match[1], match[2]);
+                this.optionValues.set(key, value);
             }
-        });
-
-        this.loadOptions();
+        }
+        // Load options for the selected widget type
+        if (obj.type) {
+            this.loadOptions();
+        }
     }
 
     async loadOptions() {
@@ -204,63 +193,36 @@ WysiwygWidget.Widget = class {
 
     async insertWidget() {
         const widgetOptionsForm = new varienForm(this.formEl);
-        if (widgetOptionsForm.validator && widgetOptionsForm.validator.validate() || !widgetOptionsForm.validator) {
-            try {
-                const formData = new FormData();
-                for (const el of this.formEl.elements) {
-                    if (!el.classList.contains('skip-submit')) {
-                        formData.append(el.name, el.value);
-                    }
+        if (widgetOptionsForm.validator && !widgetOptionsForm.validator.validate()) {
+            return;
+        }
+        try {
+            const formData = new FormData();
+
+            // Add form elements
+            for (const el of this.formEl.elements) {
+                if (!el.classList.contains('skip-submit')) {
+                    formData.append(el.name, el.value);
                 }
-
-                // Add as_is flag to parameters if wysiwyg editor doesn't exist
-                if (!this.wysiwygExists()) {
-                    formData.set('as_is', 1);
-                }
-
-                const html = await mahoFetch(this.formEl.action, {
-                    method: 'POST',
-                    body: formData,
-                })
-
-                Windows.close('widget_window');
-
-                if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
-                    tinyMCE.activeEditor.focus();
-                    if (this.bMark) {
-                        tinyMCE.activeEditor.selection.moveToBookmark(this.bMark);
-                    }
-                }
-
-                this.updateContent(html);
-
-            } catch(error) {
-                console.error(error);
-                alert(error.message);
             }
+
+            // Returns {{widget type="cms/some_type" ...params}}
+            const directive = await mahoFetch(this.formEl.action, {
+                method: 'POST',
+                body: formData,
+            })
+
+            // Close the dialog, and send directive as dialog.returnValue
+            Dialog.close(directive);
+
+            const textareaElm = document.getElementById(this.widgetTargetId);
+            if (textareaElm?.checkVisibility()) {
+                updateElementAtCursor(textareaElm, directive);
+            }
+        } catch(error) {
+            console.error(error);
+            alert(error.message);
         }
-    }
-
-    updateContent(content) {
-        if (this.wysiwygExists()) {
-            this.getWysiwyg().execCommand('mceInsertContent', false, content);
-        } else {
-            const textarea = document.getElementById(this.widgetTargetId);
-            updateElementAtCursor(textarea, content);
-            varienGlobalEvents.fireEvent('tinymceChange');
-        }
-    }
-
-    wysiwygExists() {
-        return typeof tinyMCE !== 'undefined' && tinyMCE.get(this.widgetTargetId);
-    }
-
-    getWysiwyg() {
-        return tinyMCE.activeEditor;
-    }
-
-    getWysiwygNode() {
-        return tinyMCE.activeEditor.selection.getNode();
     }
 };
 

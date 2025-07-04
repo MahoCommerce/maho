@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,13 +18,13 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
     #[\Override]
     protected function _prepareLayout()
     {
+        parent::_prepareLayout();
         /** @var Mage_Page_Block_Html_Head $head */
         $head = $this->getLayout()->getBlock('head');
-        if ($head) {
-            $head->addItem('js', 'maho-dialog.js')
-                ->addItem('js', 'mage/adminhtml/variables.js');
+        if ($head && Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
+            $head->setCanLoadWysiwyg(false);
         }
-        return parent::_prepareLayout();
+        return $this;
     }
 
     /**
@@ -103,18 +103,17 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
         ]);
 
         $fieldset->addField('template_text', 'textarea', [
-            'name' => 'template_text',
-            'label' => Mage::helper('adminhtml')->__('Template Content'),
-            'title' => Mage::helper('adminhtml')->__('Template Content'),
-            'required' => true,
-            'style' => 'height:24em;',
+            'name'      => 'template_text',
+            'label'     => Mage::helper('adminhtml')->__('Template Content'),
+            'title'     => Mage::helper('adminhtml')->__('Template Content'),
+            'required'  => true,
+            'style'     => 'height:24em;',
         ]);
 
         if (!$this->getEmailTemplate()->isPlain()) {
             $fieldset->addField('template_styles', 'textarea', [
                 'name' => 'template_styles',
                 'label' => Mage::helper('adminhtml')->__('Template Styles'),
-                'container_id' => 'field_template_styles',
             ]);
         }
 

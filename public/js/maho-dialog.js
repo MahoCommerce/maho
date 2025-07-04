@@ -70,6 +70,9 @@
             padding: 15px 20px;
             border-top: 1px solid #e0e0e0;
         }
+        .dialog-buttons:empty {
+            display: none;
+        }
     `;
     document.head.appendChild(style);
 
@@ -86,14 +89,24 @@
                 <button title="Close">&times;</button>
             </div>
             <div class="dialog-content" tabindex="-1"></div>
+            <div class="dialog-buttons"></div>
         `;
-        if (options.ok || options.cancel) {
-            dialog.innerHTML += `
-            <div class="dialog-buttons">
-                ${options.cancel ? `<button id="${dialog.id}-cancel" class="cancel">Cancel</button>` : ''}
-                ${options.ok ? `<button id="${dialog.id}-ok" class="ok">${options.okLabel || "OK"}</button>` : ''}
-            </div>
-        `;
+
+        const buttons = Array.from(options.extraButtons ?? []);
+        if (options.cancel) {
+            buttons.push({ id: `${dialog.id}-cancel`, class: 'cancel', label: 'Cancel' });
+        }
+        if (options.ok) {
+            buttons.push({ id: `${dialog.id}-ok`, class: 'ok', label: options.okLabel ?? 'OK' });
+        }
+        for (const button of buttons) {
+            const { label, ...attrs } = button;
+            const buttonEl = dialog.querySelector('.dialog-buttons').appendChild(document.createElement('button'));
+            buttonEl.type = 'button';
+            buttonEl.textContent = label;
+            for (const [key, val] of Object.entries(attrs)) {
+                buttonEl.setAttribute(key, val);
+            }
         }
 
         if (options.content) {
@@ -111,13 +124,13 @@
         document.body.appendChild(dialog);
 
         async function closeDialog(action) {
-            if (action === 'ok' && typeof options.ok === 'function') {
-                const result = await options.ok(dialog);
+            if (action === 'ok' && typeof options.onOk === 'function') {
+                const result = await options.onOk(dialog);
                 if (result === false) {
                     return;
                 }
-            } else if (action === 'cancel' && typeof options.cancel === 'function') {
-                options.cancel(dialog);
+            } else if (action === 'cancel' && typeof options.onCancel === 'function') {
+                options.onCancel(dialog);
             }
 
             dialog.remove();
@@ -136,7 +149,9 @@
 
         dialog.querySelector('.dialog-header button').addEventListener('click', () => closeDialog('cancel'));
         dialog.addEventListener('close', () => {
-            if (!dialog.returnValue) {
+            if (dialog.returnValue) {
+                closeDialog('ok');
+            } else {
                 closeDialog('cancel');
             }
         });
@@ -150,6 +165,13 @@
 
         dialog.showModal();
         dialog.querySelector('.dialog-content')?.focus();
+
+
+        if (typeof options.onOpen === 'function') {
+            queueMicrotask(() => {
+                options.onOpen(dialog);
+            });
+        }
 
         return dialog;
     }
@@ -170,8 +192,8 @@
         const dialog = [...document.querySelectorAll('dialog[open]')].pop();
         dialog?.querySelector('.dialog-content')?.focus();
     };
-    Windows.close = Dialog.close = function() {
+    Windows.close = Dialog.close = function(returnValue) {
         const dialog = [...document.querySelectorAll('dialog[open]')].pop();
-        dialog?.close();
+        dialog?.close(returnValue);
     };
 })();

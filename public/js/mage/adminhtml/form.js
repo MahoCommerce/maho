@@ -29,6 +29,9 @@ varienForm.prototype = {
     },
 
     validate : function(){
+        if (typeof varienGlobalEvents !== 'undefined') {
+            varienGlobalEvents.fireEvent('formValidate', this.formId);
+        }
         if(this.validator && this.validator.validate()){
             if(this.validationUrl){
                 this._validate();

@@ -6,6 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,31 +21,26 @@ class Mage_Core_Model_Variable_Config
     public function getWysiwygPluginSettings($config)
     {
         $variableConfig = [];
-        $onclickParts = [
-            'search' => ['html_id'],
-            'subject' => 'OpenmagevariablePlugin.loadChooser(\'' . $this->getVariablesWysiwygActionUrl() . '\', \'{{html_id}}\');',
-        ];
-        $variableWysiwygPlugin = [['name' => 'openmagevariable',
-            'src' => $this->getWysiwygJsPluginSrc(),
+
+        // Add variable URL for WYSIWYG editor
+        $variableConfig['variable_window_url'] = $this->getVariablesWysiwygActionUrl();
+
+        // Add plugin for plain text editor
+        $pluginConfig = [
+            'name' => 'variables',
             'options' => [
                 'title' => Mage::helper('adminhtml')->__('Insert Variable...'),
-                'url' => $this->getVariablesWysiwygActionUrl(),
-                'onclick' => $onclickParts,
+                'onclick' => [
+                    'search' => ['html_id'],
+                    'subject' => "Variables.openDialog('{$this->getVariablesWysiwygActionUrl()}', { target_id: '{{html_id}}' });",
+                ],
                 'class'   => 'add-variable plugin',
-            ]]];
-        $configPlugins = $config->getData('plugins');
-        $variableConfig['plugins'] = array_merge($configPlugins, $variableWysiwygPlugin);
-        return $variableConfig;
-    }
+            ],
+        ];
 
-    /**
-     * Return url to wysiwyg plugin
-     *
-     * @return string
-     */
-    public function getWysiwygJsPluginSrc()
-    {
-        return Mage::getBaseUrl('js') . 'mage/adminhtml/wysiwyg/tinymce/plugins/openmagevariable.js';
+        $variableConfig['plugins'] = array_merge($config->getData('plugins'), [$pluginConfig]);
+
+        return $variableConfig;
     }
 
     /**
