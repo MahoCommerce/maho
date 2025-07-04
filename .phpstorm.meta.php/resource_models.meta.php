@@ -45,6 +45,8 @@ namespace PHPSTORM_META {
         'api_resource/rules_collection' => \Mage_Api_Model_Resource_Rules_Collection::class,
         'api_resource/user' => \Mage_Api_Model_Resource_User::class,
         'api_resource/user_collection' => \Mage_Api_Model_Resource_User_Collection::class,
+        'blog_resource/post' => \Maho_Blog_Model_Resource_Post::class,
+        'blog_resource/post_collection' => \Maho_Blog_Model_Resource_Post_Collection::class,
         'bundle_resource/bundle' => \Mage_Bundle_Model_Resource_Bundle::class,
         'bundle_resource/indexer_price' => \Mage_Bundle_Model_Resource_Indexer_Price::class,
         'bundle_resource/indexer_stock' => \Mage_Bundle_Model_Resource_Indexer_Stock::class,
