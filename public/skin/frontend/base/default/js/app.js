@@ -508,6 +508,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let originalParent = null;
         let movedElement = null;
+        let originalLayeredNavHTML = null;
+        
+        // Store original layered nav state immediately on page load
+        const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
+        if (sidebar && !isCustomerAccount) {
+            const layeredNav = sidebar.querySelector('.block-layered-nav');
+            if (layeredNav) {
+                originalLayeredNavHTML = layeredNav.outerHTML;
+            }
+        }
+        
         
         // Set offcanvas title
         function setOffcanvasTitle() {
@@ -565,8 +576,18 @@ document.addEventListener('DOMContentLoaded', () => {
         function moveFromOffcanvas() {
             if (movedElement && originalParent) {
                 originalParent.appendChild(movedElement);
+                
+                // Restore original layered nav state
+                if (!isCustomerAccount && originalLayeredNavHTML) {
+                    const layeredNav = movedElement.querySelector('.block-layered-nav');
+                    if (layeredNav) {
+                        layeredNav.outerHTML = originalLayeredNavHTML;
+                    }
+                }
+                
                 movedElement = null;
                 originalParent = null;
+                originalLayeredNavHTML = null;
             }
         }
         
@@ -588,6 +609,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (movedElement) {
                     moveFromOffcanvas();
                 }
+                // Ensure filters are visible on desktop
+                ensureDesktopVisibility();
             }
         });
     }

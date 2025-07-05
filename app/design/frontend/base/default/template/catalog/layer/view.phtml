@@ -19,7 +19,7 @@
             <div class="actions"><a href="<?= $this->getClearUrl() ?>"><?= $this->__('Clear All') ?></a></div>
         <?php endif ?>
         <?php if($this->canShowOptions()): ?>
-            <dl id="narrow-by-list" class="no-display">
+            <dl id="narrow-by-list">
                 <?php $_filters = $this->getFilters() ?>
                 <?php foreach ($_filters as $_filter): ?>
                 <?php if($_filter->getItemsCount()): ?>
