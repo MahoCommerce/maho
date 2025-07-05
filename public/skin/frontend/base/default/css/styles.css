@@ -361,11 +361,6 @@ h6, .h6 {
 .col-left-first {
   margin-bottom: 20px;
 }
-
-.col-left-first .block:last-of-type {
-  margin-bottom: 0;
-}
-
 .block-title {
   position: relative;
   padding: 10px 0 0;
@@ -438,53 +433,13 @@ body:not(.customer-account) .block:first-child .block-title {
 }
 
 @media only screen and (max-width: 770px) {
-  .sidebar .block:not(.block-layered-nav) {
-    margin-bottom: 0;
-  }
   .sidebar .block:not(.block-layered-nav) .block-title {
-    padding: 0;
+    cursor: pointer;
+    padding: 4px 12px;
     margin-top: 0;
     border-bottom: none;
     border-top: none;
     margin-bottom: 0;
-  }
-  .sidebar .block:not(.block-layered-nav) .block-title > strong {
-    margin: 0;
-    margin-bottom: 10px;
-    color: var(--maho-color-text-primary);
-    font-size: 0.875rem;
-    font-weight: bold;
-    font-style: normal;
-    line-height: 1.4;
-    text-rendering: optimizeSpeed;
-    text-transform: uppercase;
-    user-select: none;
-    font-weight: normal;
-    margin-bottom: 0px;
-    padding: 7px 10px 7px 24px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--maho-color-border);
-    position: relative;
-    background-color: var(--maho-color-background-alt);
-    display: block;
-    width: 100%;
-    cursor: pointer;
-    border-bottom: 0;
-  }
-  .sidebar .block:not(.block-layered-nav) .block-title > strong:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
-    border-left: 4px solid var(--maho-color-primary);
-    border-right: none;
-    left: 10px;
-    top: 50%;
-    margin-top: -3px;
   }
   .sidebar .block:not(.block-layered-nav) .block-title > strong:hover {
     background-color: var(--maho-color-background-hover);
@@ -532,9 +487,6 @@ body:not(.customer-account) .block:first-child .block-title {
     border-width: 0 1px;
     border-style: solid;
     border-color: var(--maho-color-border);
-  }
-  .sidebar .block:last-of-type {
-    border-bottom: 1px solid var(--maho-color-border);
   }
 }
 /* -------------------------------------------- *
@@ -4460,39 +4412,19 @@ body:not(.catalog-product-view) .add-to-links a {
   align-self: center;
 }
 
-/* Sidebar trigger label - normal on desktop */
-.sidebar-trigger-label {
-  cursor: default;
-  display: block;
-}
-
 @media only screen and (max-width: 770px) {
   .sidebar-trigger {
     display: inline-block;
   }
 
-  /* Make My Account title clickable on mobile */
-  .sidebar-trigger-label {
-    cursor: pointer;
-    position: relative;
-    padding-right: 20px;
+  .customer-account .block-account .block-title {
+    background: var(--maho-color-primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    display: inline-block;
   }
 
-  /* Add arrow indicator on mobile */
-  .sidebar-trigger-label::after {
-    content: '▼';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 12px;
-  }
-
-  .sidebar-toggle:checked ~ * .sidebar-trigger-label::after {
-    content: '▲';
-  }
-
-  /* Hide account navigation content on mobile (but keep the header) */
   .customer-account .block-account .block-content {
     display: none;
   }

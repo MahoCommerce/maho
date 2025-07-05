@@ -494,80 +494,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==============================================
-    // Offcanvas Sidebar - Responsive DOM management
+    // Offcanvas Sidebar - On-demand DOM management
     // ==============================================
     
-    function handleOffcanvasSidebar() {
-        const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
-        const offcanvas = document.querySelector('.sidebar-offcanvas');
+    function initOffcanvasSidebar() {
         const checkbox = document.querySelector('#sidebar-toggle');
+        const offcanvas = document.querySelector('.sidebar-offcanvas');
         
-        if (!sidebar || !offcanvas) return;
+        if (!checkbox || !offcanvas) return;
         
-        // Check if this is a customer account page
         const isCustomerAccount = document.body.classList.contains('customer-account');
-        
-        // Store original parent immediately
-        const originalParent = sidebar.parentNode;
-        
         const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
         
-        // Set offcanvas title based on context
+        let originalParent = null;
+        let movedElement = null;
+        
+        // Set offcanvas title
         function setOffcanvasTitle() {
             const titleElement = offcanvas.querySelector('.sidebar-offcanvas-title');
             
             if (titleElement) {
                 if (isCustomerAccount) {
-                    // Customer account pages always show "My Account"
                     titleElement.textContent = 'My Account';
                 } else {
-                    // Other pages: use the trigger button text
                     const triggerElement = document.querySelector('.sidebar-trigger');
                     titleElement.textContent = triggerElement ? triggerElement.textContent : 'Menu';
                 }
             }
         }
         
-        function handleMediaChange(mq) {
-            if (mq.matches) {
-                // Set the appropriate title
-                setOffcanvasTitle();
-                
-                if (isCustomerAccount) {
-                    // Customer account pages: only move the navigation content, not the header
-                    const accountNav = sidebar.querySelector('.block-account .block-content');
-                    if (accountNav && accountNav.parentNode !== offcanvas) {
-                        offcanvas.appendChild(accountNav);
-                    }
-                } else {
-                    // Other pages: move entire sidebar to offcanvas
-                    if (sidebar.parentNode !== offcanvas) {
-                        offcanvas.appendChild(sidebar);
-                    }
+        // Move content to offcanvas
+        function moveToOffcanvas() {
+            const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
+            if (!sidebar) return;
+            
+            if (isCustomerAccount) {
+                // Customer account: only move navigation content
+                movedElement = sidebar.querySelector('.block-account .block-content');
+                if (movedElement && movedElement.parentNode !== offcanvas) {
+                    originalParent = movedElement.parentNode;
+                    offcanvas.appendChild(movedElement);
                 }
-                // Reset checkbox state
-                if (checkbox) checkbox.checked = false;
             } else {
-                // Desktop: restore original structure
-                if (isCustomerAccount) {
-                    // Customer account pages: move navigation content back
-                    const accountNav = offcanvas.querySelector('.block-content');
-                    const accountBlock = sidebar.querySelector('.block-account');
-                    if (accountNav && accountBlock) {
-                        accountBlock.appendChild(accountNav);
-                    }
-                } else {
-                    // Other pages: move sidebar back to original position
-                    if (sidebar.parentNode === offcanvas && originalParent) {
-                        originalParent.appendChild(sidebar);
-                    }
+                // Other pages: move entire sidebar
+                movedElement = sidebar;
+                if (movedElement.parentNode !== offcanvas) {
+                    originalParent = movedElement.parentNode;
+                    offcanvas.appendChild(movedElement);
                 }
-                
-                // Restore desktop behavior - remove any offcanvas styling
-                sidebar.style.display = '';
-                
-                // Clear all inline styles that might interfere
-                const allElements = sidebar.querySelectorAll('*');
+            }
+            
+            // Ensure all content is visible in offcanvas
+            if (movedElement) {
+                const allElements = movedElement.querySelectorAll('*');
                 allElements.forEach(el => {
                     el.style.display = '';
                     el.style.visibility = '';
@@ -575,29 +554,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.style.opacity = '';
                 });
                 
-                // Manually restore desktop state - show all block content
-                const blockContents = sidebar.querySelectorAll('.block-content, #narrow-by-list');
+                const blockContents = movedElement.querySelectorAll('.block-content, #narrow-by-list');
                 blockContents.forEach(content => {
                     content.classList.remove('no-display');
                 });
-                
-                // Reset checkbox state
-                if (checkbox) checkbox.checked = false;
             }
         }
         
-        // Initial setup
-        handleMediaChange(mobileMediaQuery);
+        // Move content back from offcanvas
+        function moveFromOffcanvas() {
+            if (movedElement && originalParent) {
+                originalParent.appendChild(movedElement);
+                movedElement = null;
+                originalParent = null;
+            }
+        }
         
-        // Listen for changes
-        mobileMediaQuery.addEventListener('change', handleMediaChange);
+        // Handle checkbox change
+        checkbox.addEventListener('change', function() {
+            if (this.checked && mobileMediaQuery.matches) {
+                setOffcanvasTitle();
+                moveToOffcanvas();
+            } else if (!this.checked && movedElement) {
+                moveFromOffcanvas();
+            }
+        });
+        
+        // Handle window resize
+        mobileMediaQuery.addEventListener('change', (mq) => {
+            if (!mq.matches) {
+                // Desktop: move content back and uncheck
+                checkbox.checked = false;
+                moveFromOffcanvas();
+            }
+        });
     }
     
-    // Initialize after a small delay to ensure layered nav is rendered
-    // This is needed because layered nav might be rendered after DOMContentLoaded
-    setTimeout(() => {
-        handleOffcanvasSidebar();
-    }, 100);
+    // Initialize
+    initOffcanvasSidebar();
 
     // ==============================================
     // Layered Navigation Block

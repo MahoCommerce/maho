@@ -12,9 +12,9 @@
 /** @var Mage_Customer_Block_Account_Navigation $this */
 ?>
 <div class="block block-account">
-    <div class="block-title">
-        <strong><label for="sidebar-toggle" class="sidebar-trigger-label"><span><?= $this->__('My Account') ?></span></label></strong>
-    </div>
+    <label for="sidebar-toggle" class="block-title sidebar-trigger-label">
+        <?= $this->__('My Account') ?>
+    </label>
     <div class="block-content">
         <ul>
             <?php $links = $this->getLinks(); ?>
