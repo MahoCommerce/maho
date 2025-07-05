@@ -647,7 +647,6 @@ document.addEventListener('DOMContentLoaded', () => {
         reposition3rdColumn(maxWidth1000MediaQuery);
     }
 
-
     // ==============================================
     // Checkout Cart - events
     // ==============================================
