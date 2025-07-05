@@ -19,7 +19,6 @@
             <div class="actions"><a href="<?= $this->getClearUrl() ?>"><?= $this->__('Clear All') ?></a></div>
         <?php endif ?>
         <?php if($this->canShowOptions()): ?>
-            <p class="block-subtitle block-subtitle--filter"><?= $this->__('Filter') ?></p>
             <dl id="narrow-by-list" class="no-display">
                 <?php $_filters = $this->getFilters() ?>
                 <?php foreach ($_filters as $_filter): ?>

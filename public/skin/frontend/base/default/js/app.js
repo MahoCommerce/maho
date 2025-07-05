@@ -492,118 +492,95 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==============================================
-    // UI Pattern - ToggleSingle
-    // ==============================================
-
-    // Use this plugin to toggle the visibility of content based on a toggle link/element.
-    // This pattern differs from the accordion functionality in the Toggle pattern in that each toggle group acts
-    // independently of the others. It is named so as not to be confused with the Toggle pattern below
-    //
-    // This plugin requires a specific markup structure. The plugin expects a set of elements that it
-    // will use as the toggle link. It then hides all immediately following siblings and toggles the sibling's
-    // visibility when the toggle link is clicked.
-    //
-    // Example markup:
-    // <div class="block">
-    //     <div class="block-title">Trigger</div>
-    //     <div class="block-content">Content that should show when </div>
-    // </div>
-    //
-    // Options:
-    //     destruct: defaults to false, but if true, the plugin will remove itself, display content, and remove event handlers
-
-    function toggleSingle(elements, options = {}) {
-        const settings = {
-            destruct: false,
-            ...options
-        };
-
-        elements.forEach(element => {
-            // Remove event listener if it exists
-            if (element.toggleSingleHandler) {
-                element.removeEventListener('click', element.toggleSingleHandler);
-                element.toggleSingleHandler = null;
-            }
-
-            if (!settings.destruct) {
-                element.toggleSingleHandler = function() {
-                    this.classList.toggle('active');
-                    const nextElement = this.nextElementSibling;
-                    if (nextElement) {
-                        nextElement.classList.toggle('no-display');
-                    }
-                };
-                element.addEventListener('click', element.toggleSingleHandler);
-
-                // Hide the content if it's not already hidden
-                const nextElement = element.nextElementSibling;
-                if (nextElement && !nextElement.classList.contains('no-display')) {
-                    nextElement.classList.add('no-display');
-                }
-            } else {
-                // Remove all classes that were added by this function
-                element.classList.remove('active');
-                const nextElement = element.nextElementSibling;
-                if (nextElement) {
-                    nextElement.classList.remove('no-display');
-                }
-            }
-        });
-    }
 
     // ==============================================
-    // Offcanvas Filters - Responsive DOM management
+    // Offcanvas Sidebar - Responsive DOM management
     // ==============================================
     
-    function handleOffcanvasFilters() {
-        const layeredNav = document.querySelector('.block-layered-nav');
-        const offcanvas = document.querySelector('.filters-offcanvas');
-        const checkbox = document.querySelector('#filters-toggle');
+    function handleOffcanvasSidebar() {
+        const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
+        const offcanvas = document.querySelector('.sidebar-offcanvas');
+        const checkbox = document.querySelector('#sidebar-toggle');
         
-        if (!layeredNav || !offcanvas) return;
+        if (!sidebar || !offcanvas) return;
+        
+        // Check if this is a customer account page
+        const isCustomerAccount = document.body.classList.contains('customer-account');
         
         // Store original parent immediately
-        const originalParent = layeredNav.parentNode;
+        const originalParent = sidebar.parentNode;
         
         const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
         
+        // Set offcanvas title based on context
+        function setOffcanvasTitle() {
+            const titleElement = offcanvas.querySelector('.sidebar-offcanvas-title');
+            
+            if (titleElement) {
+                if (isCustomerAccount) {
+                    // Customer account pages always show "My Account"
+                    titleElement.textContent = 'My Account';
+                } else {
+                    // Other pages: use the trigger button text
+                    const triggerElement = document.querySelector('.sidebar-trigger');
+                    titleElement.textContent = triggerElement ? triggerElement.textContent : 'Menu';
+                }
+            }
+        }
+        
         function handleMediaChange(mq) {
             if (mq.matches) {
-                // Mobile: move layered nav to offcanvas
-                if (layeredNav.parentNode !== offcanvas) {
-                    offcanvas.appendChild(layeredNav);
+                // Set the appropriate title
+                setOffcanvasTitle();
+                
+                if (isCustomerAccount) {
+                    // Customer account pages: only move the navigation content, not the header
+                    const accountNav = sidebar.querySelector('.block-account .block-content');
+                    if (accountNav && accountNav.parentNode !== offcanvas) {
+                        offcanvas.appendChild(accountNav);
+                    }
+                } else {
+                    // Other pages: move entire sidebar to offcanvas
+                    if (sidebar.parentNode !== offcanvas) {
+                        offcanvas.appendChild(sidebar);
+                    }
                 }
                 // Reset checkbox state
                 if (checkbox) checkbox.checked = false;
             } else {
-                // Desktop: move layered nav back to original position
-                if (layeredNav.parentNode === offcanvas && originalParent) {
-                    originalParent.appendChild(layeredNav);
-                    
-                    // Restore desktop behavior - remove any offcanvas styling
-                    layeredNav.style.display = '';
-                    
-                    // Clear all inline styles that might interfere
-                    const allElements = layeredNav.querySelectorAll('*');
-                    allElements.forEach(el => {
-                        el.style.display = '';
-                        el.style.visibility = '';
-                        el.style.height = '';
-                        el.style.opacity = '';
-                    });
-                    
-                    // Manually restore desktop state without toggleSingle
-                    const blockContent = layeredNav.querySelector('.block-content');
-                    const narrowByList = layeredNav.querySelector('#narrow-by-list');
-                    
-                    if (blockContent) {
-                        blockContent.classList.remove('no-display');
+                // Desktop: restore original structure
+                if (isCustomerAccount) {
+                    // Customer account pages: move navigation content back
+                    const accountNav = offcanvas.querySelector('.block-content');
+                    const accountBlock = sidebar.querySelector('.block-account');
+                    if (accountNav && accountBlock) {
+                        accountBlock.appendChild(accountNav);
                     }
-                    if (narrowByList) {
-                        narrowByList.classList.remove('no-display');
+                } else {
+                    // Other pages: move sidebar back to original position
+                    if (sidebar.parentNode === offcanvas && originalParent) {
+                        originalParent.appendChild(sidebar);
                     }
                 }
+                
+                // Restore desktop behavior - remove any offcanvas styling
+                sidebar.style.display = '';
+                
+                // Clear all inline styles that might interfere
+                const allElements = sidebar.querySelectorAll('*');
+                allElements.forEach(el => {
+                    el.style.display = '';
+                    el.style.visibility = '';
+                    el.style.height = '';
+                    el.style.opacity = '';
+                });
+                
+                // Manually restore desktop state - show all block content
+                const blockContents = sidebar.querySelectorAll('.block-content, #narrow-by-list');
+                blockContents.forEach(content => {
+                    content.classList.remove('no-display');
+                });
+                
                 // Reset checkbox state
                 if (checkbox) checkbox.checked = false;
             }
@@ -616,8 +593,11 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileMediaQuery.addEventListener('change', handleMediaChange);
     }
     
-    // Initialize
-    handleOffcanvasFilters();
+    // Initialize after a small delay to ensure layered nav is rendered
+    // This is needed because layered nav might be rendered after DOMContentLoaded
+    setTimeout(() => {
+        handleOffcanvasSidebar();
+    }, 100);
 
     // ==============================================
     // Layered Navigation Block
@@ -666,25 +646,6 @@ document.addEventListener('DOMContentLoaded', () => {
         reposition3rdColumn(maxWidth1000MediaQuery);
     }
 
-    // ==============================================
-    // Block collapsing (on smaller viewports)
-    // ==============================================
-
-    const toggleElementsForMediumSize = (mq) => {
-        const elements = document.querySelectorAll(
-            '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
-            '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
-            '.sidebar:not(.col-left-first) .block .block-title'
-        );
-
-        if (mq.matches) {
-            toggleSingle(elements);
-        } else {
-            toggleSingle(elements, { destruct: true });
-        }
-    };
-    maxWidthMediumMediaQuery.addEventListener('change', toggleElementsForMediumSize);
-    toggleElementsForMediumSize(maxWidthMediumMediaQuery);
 
     // ==============================================
     // Checkout Cart - events

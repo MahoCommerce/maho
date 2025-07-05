@@ -3723,46 +3723,6 @@ p.product-name a:hover {
 /* ============================================ *
  * Layered Navigation
  * ============================================ */
-.block-layered-nav .block-subtitle--filter {
-  display: none;
-  margin: 0;
-  margin-bottom: 10px;
-  color: var(--maho-color-text-primary);
-  font-size: 0.875rem;
-  font-weight: bold;
-  font-style: normal;
-  line-height: 1.4;
-  text-rendering: optimizeSpeed;
-  text-transform: uppercase;
-  user-select: none;
-  font-weight: normal;
-  margin-bottom: 0px;
-  padding: 7px 10px 7px 24px;
-  border-width: 1px;
-  border-style: solid;
-  border-color: var(--maho-color-border);
-  position: relative;
-  background-color: var(--maho-color-background-alt);
-  cursor: pointer;
-}
-.block-layered-nav .block-subtitle--filter:after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 0;
-  display: block;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
-  border-top: 4px solid var(--maho-color-primary);
-  border-bottom: none;
-  left: 10px;
-  top: 50%;
-  margin-top: -3px;
-}
-.block-layered-nav .block-subtitle--filter:hover {
-  background-color: var(--maho-color-background-hover);
-}
-
 .block-layered-nav .block-content .toggle-tabs {
   display: none;
 }
@@ -3886,28 +3846,6 @@ p.product-name a:hover {
   }
   .block-layered-nav .block-content.accordion-open > dl > dd.current {
     display: block;
-  }
-
-  .block-layered-nav .block-subtitle--filter {
-    background-color: var(--maho-color-primary);
-    border: 0;
-    margin-bottom: 0;
-    display: block;
-    color: var(--maho-color-background);
-  }
-  .block-layered-nav .block-subtitle--filter:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
-    border-left: 4px solid white;
-    border-right: none;
-    right: 10px;
-    top: 50%;
-    margin-top: -5px;
   }
   .block-layered-nav .block-subtitle--filter:hover {
     background-color: var(--maho-color-primary-hover);
@@ -4410,8 +4348,8 @@ body:not(.catalog-product-view) .add-to-links a {
   clear: both;
 }
 
-/* Offcanvas filters */
-.filters-offcanvas {
+/* Offcanvas sidebar */
+.sidebar-offcanvas {
   position: fixed;
   top: 0;
   left: -100%;
@@ -4422,19 +4360,20 @@ body:not(.catalog-product-view) .add-to-links a {
   z-index: 1000;
   transition: left 0.3s ease;
   overflow-y: auto;
+  padding: 20px;
 }
 
 /* CSS-only toggle using checkbox */
-.filters-toggle:checked ~ .filters-offcanvas {
+.sidebar-toggle:checked ~ .sidebar-offcanvas {
   left: 0;
 }
 
-.filters-toggle:checked ~ .filters-overlay {
+.sidebar-toggle:checked ~ .sidebar-overlay {
   opacity: 1;
   visibility: visible;
 }
 
-.filters-overlay {
+.sidebar-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -4447,11 +4386,41 @@ body:not(.catalog-product-view) .add-to-links a {
   transition: all 0.3s ease;
 }
 
-.filters-overlay label {
+.sidebar-overlay label {
   display: block;
   width: 100%;
   height: 100%;
   cursor: pointer;
+}
+
+.sidebar-offcanvas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--maho-color-border-light);
+  margin: -20px -20px 20px -20px;
+}
+
+.sidebar-offcanvas-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--maho-color-text-primary);
+}
+
+.sidebar-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--maho-color-text-primary);
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filters-header {
@@ -4472,11 +4441,11 @@ body:not(.catalog-product-view) .add-to-links a {
 }
 
 /* Hide the checkbox */
-.filters-toggle {
+.sidebar-toggle {
   display: none;
 }
 
-.filters-trigger {
+.sidebar-trigger {
   display: none;
   background: var(--maho-color-primary);
   color: white;
@@ -4491,47 +4460,73 @@ body:not(.catalog-product-view) .add-to-links a {
   align-self: center;
 }
 
+/* Sidebar trigger label - normal on desktop */
+.sidebar-trigger-label {
+  cursor: default;
+  display: block;
+}
+
 @media only screen and (max-width: 770px) {
-  .filters-trigger {
+  .sidebar-trigger {
     display: inline-block;
+  }
+
+  /* Make My Account title clickable on mobile */
+  .sidebar-trigger-label {
+    cursor: pointer;
+    position: relative;
+    padding-right: 20px;
+  }
+
+  /* Add arrow indicator on mobile */
+  .sidebar-trigger-label::after {
+    content: '▼';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+  }
+
+  .sidebar-toggle:checked ~ * .sidebar-trigger-label::after {
+    content: '▲';
+  }
+
+  /* Hide account navigation content on mobile (but keep the header) */
+  .customer-account .block-account .block-content {
+    display: none;
   }
 }
 
-/* Expand all filters in offcanvas */
-.filters-offcanvas #narrow-by-list,
-.filters-offcanvas #narrow-by-list.no-display,
-.filters-offcanvas .block-layered-nav dd,
-.filters-offcanvas .block-layered-nav dd.no-display,
-.filters-offcanvas .sidebar .block .block-content,
-.filters-offcanvas .sidebar .block .block-content.no-display,
-.filters-offcanvas .col-left-first .block .block-content,
-.filters-offcanvas .col-left-first .block .block-content.no-display {
+/* Expand all content in sidebar offcanvas */
+.sidebar-offcanvas #narrow-by-list,
+.sidebar-offcanvas #narrow-by-list.no-display,
+.sidebar-offcanvas .block .block-content,
+.sidebar-offcanvas .block .block-content.no-display,
+.sidebar-offcanvas .block-layered-nav dd,
+.sidebar-offcanvas .block-layered-nav dd.no-display {
   display: block !important;
   visibility: visible !important;
   height: auto !important;
   opacity: 1 !important;
 }
 
-/* Hide the redundant outer filters header */
-.filters-offcanvas .filters-header {
-  display: none !important;
-}
-
-.filters-offcanvas .block-layered-nav dt,
-.filters-offcanvas .sidebar .block .block-title,
-.filters-offcanvas .col-left-first .block .block-title {
+.sidebar-offcanvas .block-title,
+.sidebar-offcanvas .block-layered-nav dt,
+.sidebar-offcanvas .block-subtitle--filter {
   cursor: default !important;
   color: var(--maho-color-text-primary);
   font-weight: 600;
-  margin: 0;
-  padding: 0;
+  margin: 0 0 10px 0;
+  padding: 10px 0;
   border: none;
+  border-bottom: 1px solid var(--maho-color-border-light);
   pointer-events: none !important;
 }
 
 /* Remove any toggle arrows/icons in offcanvas */
-.filters-offcanvas .block-title::after,
-.filters-offcanvas dt::after {
+.sidebar-offcanvas .block-title::after,
+.sidebar-offcanvas dt::after {
   display: none !important;
 }
 

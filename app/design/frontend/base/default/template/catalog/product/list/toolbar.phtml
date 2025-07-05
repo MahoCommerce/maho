@@ -12,9 +12,9 @@
 /** @var Mage_Catalog_Block_Product_List_Toolbar $this */
 ?>
 <?php if($this->getCollection()->getSize()): ?>
-<input type="checkbox" id="filters-toggle" class="filters-toggle">
+<input type="checkbox" id="sidebar-toggle" class="sidebar-toggle">
 <div class="toolbar">
-    <label for="filters-toggle" class="filters-trigger">Filters</label>
+    <label for="sidebar-toggle" class="sidebar-trigger">Filters</label>
     <?php if( $this->isExpanded() ): ?>
         <div class="sorter">
             <div class="sort-by">
@@ -88,12 +88,15 @@
     </div>
 </div>
 
-<!-- Offcanvas filters overlay and sidebar -->
-<div class="filters-overlay">
-    <label for="filters-toggle"></label>
+<!-- Offcanvas sidebar overlay and panel -->
+<div class="sidebar-overlay">
+    <label for="sidebar-toggle"></label>
 </div>
-<div class="filters-offcanvas">
-    <label for="filters-toggle" class="filters-close">&times;</label>
-    <!-- Content will be moved here by JavaScript -->
+<div class="sidebar-offcanvas">
+    <div class="sidebar-offcanvas-header">
+        <h2 class="sidebar-offcanvas-title"></h2>
+        <label for="sidebar-toggle" class="sidebar-close">&times;</label>
+    </div>
+    <!-- All sidebar content will be moved here by JavaScript -->
 </div>
 <?php endif ?>
