@@ -593,11 +593,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         el.style.opacity = '';
                     });
                     
-                    // Re-initialize desktop toggle behavior for this specific layered nav
-                    const filterElements = layeredNav.querySelectorAll('.block-subtitle--filter, .block-title');
-                    if (filterElements.length > 0) {
-                        // Desktop: destruct toggle behavior (show all content)
-                        toggleSingle(filterElements, { destruct: true });
+                    // Manually restore desktop state without toggleSingle
+                    const blockContent = layeredNav.querySelector('.block-content');
+                    const narrowByList = layeredNav.querySelector('#narrow-by-list');
+                    
+                    if (blockContent) {
+                        blockContent.classList.remove('no-display');
+                    }
+                    if (narrowByList) {
+                        narrowByList.classList.remove('no-display');
                     }
                 }
                 // Reset checkbox state
