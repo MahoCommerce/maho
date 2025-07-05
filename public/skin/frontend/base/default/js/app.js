@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (movedElement) {
                     moveFromOffcanvas();
                 }
-                    }
+            }
         });
     }
 

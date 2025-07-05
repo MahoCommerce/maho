@@ -4424,6 +4424,7 @@ body:not(.catalog-product-view) .add-to-links a {
   }
 }
 
+@media only screen and (max-width: 770px) {
   .customer-account .block-account .block-title {
     background: var(--maho-color-primary);
     color: white;
@@ -4436,6 +4437,7 @@ body:not(.catalog-product-view) .add-to-links a {
     display: none;
   }
 }
+
 
 /* Ensure layered nav is visible on desktop */
 @media only screen and (min-width: 771px) {
