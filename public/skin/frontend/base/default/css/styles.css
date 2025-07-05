@@ -4285,7 +4285,6 @@ body:not(.catalog-product-view) .add-to-links a {
   z-index: 1000;
   transition: left 0.3s ease;
   overflow-y: auto;
-  padding: 20px;
 }
 
 /* Class-based toggle */
@@ -4318,7 +4317,6 @@ body:not(.catalog-product-view) .add-to-links a {
   align-items: center;
   padding: 15px 20px;
   border-bottom: 1px solid var(--maho-color-border);
-  margin: -20px -20px 20px -20px;
 }
 
 .sidebar-offcanvas-title {
@@ -4446,16 +4444,6 @@ label.sidebar-trigger {
 .sidebar-offcanvas .block-title::after,
 .sidebar-offcanvas dt::after {
   display: none !important;
-}
-
-/* Remove padding only for primary navigation in offcanvas */
-.sidebar-offcanvas #nav {
-  margin: -20px;
-}
-
-/* Apply nav-primary styling to customer account navigation in offcanvas only */
-.sidebar-offcanvas .nav-account {
-  margin: -20px;
 }
 
 /* Mobile styles - simplified */
