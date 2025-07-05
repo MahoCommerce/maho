@@ -433,55 +433,33 @@ body:not(.customer-account) .block:first-child .block-title {
 }
 
 @media only screen and (max-width: 770px) {
-  .sidebar .block:not(.block-layered-nav) .block-title {
-    cursor: pointer;
-    padding: 4px 12px;
-    margin-top: 0;
-    border: none;
-    margin-bottom: 0;
+  /* Style specific sidebar blocks like main content sections, but not account block */
+  .sidebar .block:not(.block-layered-nav):not(.block-account) {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--maho-color-border-light);
   }
-  .sidebar .block:not(.block-layered-nav) .block-title > strong:hover {
-    background-color: var(--maho-color-background-hover);
-  }
-  .sidebar .block:not(.block-layered-nav) .block-title.active > strong {
-    margin: 0;
-    margin-bottom: 10px;
-    color: var(--maho-color-text-primary);
-    font-size: 0.875rem;
-    font-weight: bold;
-    font-style: normal;
-    line-height: 1.4;
-    text-rendering: optimizeSpeed;
-    text-transform: uppercase;
-    user-select: none;
-    font-weight: normal;
-    margin-bottom: 0px;
-    padding: 7px 10px 7px 24px;
-    border: none;
-    position: relative;
-    background-color: var(--maho-color-background-alt);
-  }
-  .sidebar .block:not(.block-layered-nav) .block-title.active > strong:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
-    border-top: 4px solid var(--maho-color-primary);
+  
+  .sidebar .block:not(.block-layered-nav):not(.block-account):last-child {
     border-bottom: none;
-    left: 10px;
-    top: 50%;
-    margin-top: -3px;
   }
-  .sidebar .block:not(.block-layered-nav) .block-title.active > strong:hover {
-    background-color: var(--maho-color-background-hover);
-  }
-  .sidebar .block:not(.block-layered-nav) .block-content {
-    padding: 10px;
-    margin-top: 0;
+  
+  .sidebar .block:not(.block-layered-nav):not(.block-account) .block-title {
+    color: var(--maho-color-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding: 0;
     border: none;
+    background: none;
+  }
+  
+  .sidebar .block:not(.block-layered-nav):not(.block-account) .block-content {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: none;
   }
 }
 /* -------------------------------------------- *
