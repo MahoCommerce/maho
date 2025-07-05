@@ -2681,7 +2681,7 @@ body {
  * ============================================ */
 @media only screen and (max-width: 770px) {
   #header-account li a,
-  .nav-primary a.level0 {
+  :is(.nav-primary, .nav-account) a.level0 {
     padding: 0 15px 0 25px;
     border-bottom: 1px solid var(--maho-color-border);
     text-align: left;
@@ -2691,12 +2691,12 @@ body {
   }
 
   #header-account li:last-child a,
-  .nav-primary li.level0:last-child a.level0 {
+  :is(.nav-primary, .nav-account)y li.level0:last-child a.level0 {
     border-bottom: 0;
   }
 
   .no-touch #header-account a:hover,
-  .no-touch .nav-primary a:hover {
+  .no-touch :is(.nav-primary, .nav-account) a:hover {
     background-color: var(--maho-color-background-alt);
     text-decoration: none;
   }
@@ -2731,7 +2731,7 @@ body {
  * Nav Primary
  * ============================================ */
 @media only screen and (min-width: 771px) {
-  .nav-primary {
+  .nav-primary, .nav-account {
     display: block;
     margin-top: 15px;
   }
@@ -2739,26 +2739,26 @@ body {
 /* ============================================ *
  * General Navigation Styles
  * ============================================ */
-.nav-primary a {
+:is(.nav-primary, .nav-account) a {
   text-decoration: none;
   position: relative;
   display: block;
   color: var(--maho-color-text-primary);
   line-height: 30px;
 }
-.nav-primary li {
+:is(.nav-primary, .nav-account) li {
   position: relative;
 }
-.nav-primary li.level1 a {
+:is(.nav-primary, .nav-account) li.level1 a {
   border-bottom: 1px solid var(--maho-color-border);
 }
 
-.nav-primary .menu-active > ul.level0,
-.nav-primary li.level0 li.sub-menu-active > ul {
+:is(.nav-primary, .nav-account) .menu-active > ul.level0,
+:is(.nav-primary, .nav-account) li.level0 li.sub-menu-active > ul{
   display: block;
 }
 
-.nav-primary li.level0 > a {
+:is(.nav-primary, .nav-account) li.level0 > a {
   text-transform: uppercase;
 }
 
@@ -2766,20 +2766,20 @@ body {
  * Small Viewports - Accordion Style Menu
  * ============================================ */
 @media only screen and (max-width: 770px) {
-  .nav-primary a.level0,
-  .nav-primary a {
+  :is(.nav-primary, .nav-account) a.level0,
+  :is(.nav-primary, .nav-account) a {
     line-height: 35px;
   }
-  .nav-primary li.level0 ul {
+  :is(.nav-primary, .nav-account) li.level0 ul {
     display: none;
   }
-  .nav-primary li.level0 li {
+  :is(.nav-primary, .nav-account) li.level0 li {
     padding: 0 0 0 25px;
   }
-  .nav-primary li.level1 a {
+  :is(.nav-primary, .nav-account) li.level1 a {
     padding: 0 15px 0 25px;
   }
-  .nav-primary li.parent > a:after {
+  :is(.nav-primary, .nav-account) li.parent > a:after {
     content: '';
     position: absolute;
     width: 0;
@@ -2794,8 +2794,8 @@ body {
     right: auto;
     margin-top: -5px;
   }
-  .nav-primary li.parent.sub-menu-active > a:after,
-  .nav-primary li.parent.menu-active > a:after {
+  :is(.nav-primary, .nav-account) li.parent.sub-menu-active > a:after,
+  :is(.nav-primary, .nav-account) li.parent.menu-active > a:after {
     content: '';
     position: absolute;
     width: 0;
@@ -2810,8 +2810,8 @@ body {
     right: auto;
     margin-top: -5px;
   }
-  .nav-primary li.menu-active > a,
-  .nav-primary li.sub-menu-active > a {
+  :is(.nav-primary, .nav-account) li.menu-active > a,
+  :is(.nav-primary, .nav-account) li.sub-menu-active > a {
     color: var(--maho-color-primary);
   }
 }
@@ -4285,7 +4285,7 @@ body:not(.catalog-product-view) .add-to-links a {
   z-index: 1000;
   transition: left 0.3s ease;
   overflow-y: auto;
-  padding: 0;
+  padding: 20px;
 }
 
 /* CSS-only toggle using checkbox */
@@ -4323,8 +4323,8 @@ body:not(.catalog-product-view) .add-to-links a {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid var(--maho-color-border-light);
-  margin: 0 0 0 0;
+  border-bottom: 1px solid var(--maho-color-border);
+  margin: -20px -20px 20px -20px;
 }
 
 .sidebar-offcanvas-title {
@@ -4455,6 +4455,16 @@ label.sidebar-trigger {
 .sidebar-offcanvas .block-title::after,
 .sidebar-offcanvas dt::after {
   display: none !important;
+}
+
+/* Remove padding only for primary navigation in offcanvas */
+.sidebar-offcanvas #nav {
+  margin: -20px;
+}
+
+/* Apply nav-primary styling to customer account navigation in offcanvas only */
+.sidebar-offcanvas .nav-account {
+  margin: -20px;
 }
 
 /* Mobile styles - simplified */
