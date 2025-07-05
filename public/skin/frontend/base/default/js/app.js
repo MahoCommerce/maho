@@ -498,10 +498,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================
 
     function initOffcanvasSidebar() {
-        const checkbox = document.querySelector('#sidebar-toggle');
         const offcanvas = document.querySelector('.sidebar-offcanvas');
+        const overlay = document.querySelector('.sidebar-overlay');
 
-        if (!checkbox || !offcanvas) return;
+        if (!offcanvas || !overlay) return;
 
         const isCustomerAccount = document.body.classList.contains('customer-account');
         const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
@@ -580,36 +580,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Capture clicks on trigger elements
+        // Function to open offcanvas
+        function openOffcanvas() {
+            offcanvas.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Function to close offcanvas
+        function closeOffcanvas() {
+            offcanvas.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            if (movedElement) {
+                moveFromOffcanvas();
+            }
+        }
+
+        // Handle trigger clicks
         document.addEventListener('click', function(e) {
-            const trigger = e.target.closest('label[for="sidebar-toggle"], .sidebar-trigger');
+            const trigger = e.target.closest('.sidebar-trigger');
             if (trigger) {
-                lastClickedTrigger = trigger;
                 e.preventDefault();
-                checkbox.checked = !checkbox.checked;
-                const changeEvent = new Event('change', { bubbles: true });
-                checkbox.dispatchEvent(changeEvent);
+                lastClickedTrigger = trigger;
+                if (mobileMediaQuery.matches) {
+                    setOffcanvasTitle(lastClickedTrigger);
+                    moveToOffcanvas();
+                    openOffcanvas();
+                }
             }
         });
 
-        // Handle checkbox change
-        checkbox.addEventListener('change', function() {
-            if (this.checked && mobileMediaQuery.matches) {
-                setOffcanvasTitle(lastClickedTrigger);
-                moveToOffcanvas();
-            } else if (!this.checked && movedElement) {
-                moveFromOffcanvas();
-            }
-        });
+        // Handle close button
+        const closeButton = offcanvas.querySelector('.sidebar-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', closeOffcanvas);
+        }
+
+        // Handle overlay click
+        overlay.addEventListener('click', closeOffcanvas);
 
         // Handle window resize
         mobileMediaQuery.addEventListener('change', (mq) => {
             if (!mq.matches) {
-                // Desktop: move content back and uncheck
-                checkbox.checked = false;
-                if (movedElement) {
-                    moveFromOffcanvas();
-                }
+                // Desktop: move content back and close offcanvas
+                closeOffcanvas();
             }
         });
     }
