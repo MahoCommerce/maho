@@ -553,69 +553,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==============================================
-    // Offcanvas Filters
+    // Offcanvas Filters - Responsive DOM management
     // ==============================================
     
-    // Create offcanvas structure
-    function initOffcanvasFilters() {
+    function handleOffcanvasFilters() {
         const layeredNav = document.querySelector('.block-layered-nav');
-        const toolbar = document.querySelector('.toolbar');
-        if (!layeredNav || !toolbar) return;
+        const offcanvas = document.querySelector('.filters-offcanvas');
+        const checkbox = document.querySelector('#filters-toggle');
         
-        // Create trigger button
-        const triggerBtn = document.createElement('button');
-        triggerBtn.className = 'filters-trigger';
-        triggerBtn.textContent = 'Filters';
+        if (!layeredNav || !offcanvas) return;
         
-        // Insert at the beginning of toolbar
-        toolbar.insertBefore(triggerBtn, toolbar.firstChild);
+        // Store original parent immediately
+        const originalParent = layeredNav.parentNode;
         
-        // Create offcanvas container
-        const offcanvas = document.createElement('div');
-        offcanvas.className = 'filters-offcanvas';
-        offcanvas.innerHTML = `
-            <div class="filters-header">
-                <h3>Filters</h3>
-                <button class="filters-close">&times;</button>
-            </div>
-        `;
+        const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
         
-        // Create overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'filters-overlay';
+        function handleMediaChange(mq) {
+            if (mq.matches) {
+                // Mobile: move layered nav to offcanvas
+                if (layeredNav.parentNode !== offcanvas) {
+                    offcanvas.appendChild(layeredNav);
+                }
+                // Reset checkbox state
+                if (checkbox) checkbox.checked = false;
+            } else {
+                // Desktop: move layered nav back to original position
+                if (layeredNav.parentNode === offcanvas && originalParent) {
+                    originalParent.appendChild(layeredNav);
+                    
+                    // Restore desktop behavior - remove any offcanvas styling
+                    layeredNav.style.display = '';
+                    
+                    // Clear all inline styles that might interfere
+                    const allElements = layeredNav.querySelectorAll('*');
+                    allElements.forEach(el => {
+                        el.style.display = '';
+                        el.style.visibility = '';
+                        el.style.height = '';
+                        el.style.opacity = '';
+                    });
+                    
+                    // Re-initialize desktop toggle behavior for this specific layered nav
+                    const filterElements = layeredNav.querySelectorAll('.block-subtitle--filter, .block-title');
+                    if (filterElements.length > 0) {
+                        // Desktop: destruct toggle behavior (show all content)
+                        toggleSingle(filterElements, { destruct: true });
+                    }
+                }
+                // Reset checkbox state
+                if (checkbox) checkbox.checked = false;
+            }
+        }
         
-        // Clone and move layered nav into offcanvas
-        const clonedNav = layeredNav.cloneNode(true);
-        offcanvas.appendChild(clonedNav);
+        // Initial setup
+        handleMediaChange(mobileMediaQuery);
         
-        // Append to body
-        document.body.appendChild(overlay);
-        document.body.appendChild(offcanvas);
-        
-        // Hide original layered nav on mobile
-        layeredNav.style.display = 'none';
-        
-        // Event listeners
-        triggerBtn.addEventListener('click', () => {
-            offcanvas.classList.add('open');
-            overlay.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        });
-        
-        const closeFilters = () => {
-            offcanvas.classList.remove('open');
-            overlay.classList.remove('open');
-            document.body.style.overflow = '';
-        };
-        
-        offcanvas.querySelector('.filters-close').addEventListener('click', closeFilters);
-        overlay.addEventListener('click', closeFilters);
+        // Listen for changes
+        mobileMediaQuery.addEventListener('change', handleMediaChange);
     }
     
-    // Initialize on mobile
-    if (window.innerWidth <= 770) {
-        initOffcanvasFilters();
-    }
+    // Initialize
+    handleOffcanvasFilters();
 
     // ==============================================
     // Layered Navigation Block

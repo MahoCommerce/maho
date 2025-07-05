@@ -4424,8 +4424,14 @@ body:not(.catalog-product-view) .add-to-links a {
   overflow-y: auto;
 }
 
-.filters-offcanvas.open {
+/* CSS-only toggle using checkbox */
+.filters-toggle:checked ~ .filters-offcanvas {
   left: 0;
+}
+
+.filters-toggle:checked ~ .filters-overlay {
+  opacity: 1;
+  visibility: visible;
 }
 
 .filters-overlay {
@@ -4441,9 +4447,11 @@ body:not(.catalog-product-view) .add-to-links a {
   transition: all 0.3s ease;
 }
 
-.filters-overlay.open {
-  opacity: 1;
-  visibility: visible;
+.filters-overlay label {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
 }
 
 .filters-header {
@@ -4463,6 +4471,11 @@ body:not(.catalog-product-view) .add-to-links a {
   color: var(--maho-color-text-primary);
 }
 
+/* Hide the checkbox */
+.filters-toggle {
+  display: none;
+}
+
 .filters-trigger {
   display: none;
   background: var(--maho-color-primary);
@@ -4476,6 +4489,12 @@ body:not(.catalog-product-view) .add-to-links a {
   font-weight: normal;
   height: auto;
   align-self: center;
+}
+
+@media only screen and (max-width: 770px) {
+  .filters-trigger {
+    display: inline-block;
+  }
 }
 
 /* Expand all filters in offcanvas */
