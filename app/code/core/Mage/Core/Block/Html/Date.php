@@ -52,14 +52,27 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 
         $setupObj['enableTime'] = (bool) ($this->config['enableTime'] ?? $this->getTime());
 
-        // Modern ICU format
+        // Always use standardized internal format
+        $hasTime = $setupObj['enableTime'] || ($this->config['noCalendar'] ?? false);
+        if ($hasTime && !($this->config['noCalendar'] ?? false)) {
+            // Date and time
+            $setupObj['inputFormat'] = 'yyyy-MM-dd HH:mm:ss';
+        } elseif ($this->config['noCalendar'] ?? false) {
+            // Time only
+            $setupObj['inputFormat'] = 'HH:mm:ss';
+        } else {
+            // Date only
+            $setupObj['inputFormat'] = 'yyyy-MM-dd';
+        }
+
+        // Override with explicit input format if provided (for backward compatibility)
         if ($this->getInputFormat()) {
             $setupObj['inputFormat'] = (string) $this->getInputFormat();
         }
 
-        // Legacy strftime format
-        if ($this->getFormat()) {
-            $setupObj['ifFormat'] = Varien_Date::convertZendToStrftime($this->getFormat(), true, $setupObj['enableTime']);
+        // Legacy strftime format (for display only if no displayFormat is set)
+        if ($this->getFormat() && !$this->getDisplayFormat()) {
+            $setupObj['displayFormat'] = $this->getFormat();
         }
 
         // Optional ICU display format

@@ -93,7 +93,6 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             ->setId("options_{$option->getId()}_date")
             ->setName("options[{$option->getId()}][date]")
             ->setClass('product-custom-option datetime-picker input-text')
-            ->setInputFormat('MM/dd/yyyy')
             ->setDisplayFormat(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
             ->setValue($value)
             ->setYearsRange("[$yearStart , $yearEnd]");
@@ -108,7 +107,6 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
 
             $calendar
                 ->setConfig('enableTime', true)
-                ->setInputFormat($calendar->getInputFormat() . ' HH:mm')
                 ->setDisplayFormat($calendar->getDisplayFormat() . " $timeFormat");
         }
 
@@ -170,7 +168,6 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             ->setId("options_{$option->getId()}_time")
             ->setName("options[{$option->getId()}][time]")
             ->setClass('product-custom-option datetime-picker input-text')
-            ->setInputFormat('HH:mm')
             ->setConfig([
                 'noCalendar' => true,
                 'enableTime' => true,

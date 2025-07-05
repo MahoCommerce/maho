@@ -510,7 +510,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
                     }
                 }
             }
-            $productData = $this->_filterDates($productData, $dateFields);
             $product->addData($productData);
 
             /* set restrictions for date ranges */

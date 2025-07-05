@@ -6,7 +6,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -104,7 +104,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
 
     /**
      * Get date value as string.
-     * Format can be specified, or it will be taken from $this->getInputFormat()
+     * Format can be specified, or it will be taken from standardized format
      *
      * @param string $format (compatible with Zend_Date)
      * @return string
@@ -115,7 +115,9 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             return '';
         }
         if (null === $format) {
-            $format = $this->getInputFormat();
+            // Use standardized internal format
+            $hasTime = (bool) $this->getTime();
+            $format = $hasTime ? 'yyyy-MM-dd HH:mm:ss' : 'yyyy-MM-dd';
         }
         return $this->_value->toString($format);
     }
@@ -160,23 +162,27 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             'enableTime' => (bool) $this->getTime(),
         ];
 
-        // Modern ICU format
+        // Always use standardized internal format
+        $hasTime = $setupObj['enableTime'];
+        if ($hasTime) {
+            $setupObj['inputFormat'] = 'yyyy-MM-dd HH:mm:ss';
+        } else {
+            $setupObj['inputFormat'] = 'yyyy-MM-dd';
+        }
+
+        // Override with explicit input format if provided (for backward compatibility)
         if ($this->getInputFormat()) {
             $setupObj['inputFormat'] = (string) $this->getInputFormat();
         }
 
-        // Legacy strftime format
+        // Use format as display format if no explicit display format is set
         if ($this->getFormat()) {
-            $setupObj['ifFormat'] = Varien_Date::convertZendToStrftime($this->getFormat(), true, $setupObj['enableTime']);
+            $setupObj['displayFormat'] = $this->getFormat();
         }
 
-        // Optional ICU display format
+        // Optional explicit display format (overrides format)
         if ($this->getDisplayFormat()) {
             $setupObj['displayFormat'] = $this->getDisplayFormat();
-        }
-
-        if (empty($setupObj['inputFormat']) && empty($setupObj['ifFormat'])) {
-            throw new Exception('Output format is not specified. Please, specify "format" key in constructor, or set it using setInputFormat() or setFormat().');
         }
 
         $setupObj = json_encode($setupObj);

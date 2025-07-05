@@ -121,7 +121,6 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
                 if (Mage::helper('adminhtml')->hasTags($data['rule'], ['attribute'], false)) {
                     Mage::throwException(Mage::helper('catalogrule')->__('Wrong rule specified'));
                 }
-                $data = $this->_filterDates($data, ['from_date', 'to_date']);
                 if ($id = $this->getRequest()->getParam('rule_id')) {
                     $model->load($id);
                     if ($id != $model->getId()) {

@@ -129,7 +129,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
                 if (Mage::helper('adminhtml')->hasTags($data['rule'], ['attribute'], false)) {
                     Mage::throwException(Mage::helper('catalogrule')->__('Wrong rule specified'));
                 }
-                $data = $this->_filterDates($data, ['from_date', 'to_date']);
                 $id = $this->getRequest()->getParam('rule_id');
                 if ($id) {
                     $model->load($id);
@@ -394,9 +393,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         } else {
             try {
                 $data = $this->getRequest()->getParams();
-                if (!empty($data['to_date'])) {
-                    $data = array_merge($data, $this->_filterDates($data, ['to_date']));
-                }
 
                 /** @var Mage_SalesRule_Model_Coupon_Massgenerator $generator */
                 $generator = $rule::getCouponMassGenerator();

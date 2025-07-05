@@ -37,27 +37,28 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $matches = [];
 
         if (isset($value['date']) && $this->useCalendar()) {
+            // Only support standardized yyyy-MM-dd format
             $pattern = $this->_timeExists()
-                ? '/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})$/'
-                : '/^(\d{2})\/(\d{2})\/(\d{4})$/';
-            $isValid = (bool) preg_match($pattern, $value['date'] ?? '', $matches);
+                ? '/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/'
+                : '/^(\d{4})-(\d{2})-(\d{2})$/';
 
-            if ($isValid) {
-                $value['day']      = $matches[1] ?? null;
-                $value['month']    = $matches[2] ?? null;
-                $value['year']     = $matches[3] ?? null;
+            if (preg_match($pattern, $value['date'] ?? '', $matches)) {
+                $value['year']     = $matches[1];
+                $value['month']    = $matches[2];
+                $value['day']      = $matches[3];
                 $value['hour']     = $matches[4] ?? null;
                 $value['minute']   = $matches[5] ?? null;
             } else {
                 $isValid = $dateValid = false;
             }
         } elseif (isset($value['time']) && $this->useCalendar()) {
-            $pattern = '/^(\d{2}):(\d{2})$/';
+            // Support both HH:mm and HH:mm:ss formats
+            $pattern = '/^(\d{2}):(\d{2})(?::(\d{2}))?$/';
             $isValid = (bool) preg_match($pattern, $value['time'] ?? '', $matches);
 
             if ($isValid) {
-                $value['hour']     = $matches[1] ?? null;
-                $value['minute']   = $matches[2] ?? null;
+                $value['hour']     = $matches[1];
+                $value['minute']   = $matches[2];
             } else {
                 $isValid = $timeValid = false;
             }

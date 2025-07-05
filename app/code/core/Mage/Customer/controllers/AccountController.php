@@ -1066,18 +1066,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Filtering posted data. Converting localized data if needed
-     *
-     * @param array $data
-     * @return array
-     */
-    protected function _filterPostData($data)
-    {
-        $data = $this->_filterDates($data, ['dob']);
-        return $data;
-    }
-
-    /**
      * Check whether VAT ID validation is enabled
      *
      * @param Mage_Core_Model_Store|string|int $store
