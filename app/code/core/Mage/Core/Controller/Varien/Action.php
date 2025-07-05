@@ -967,51 +967,6 @@ abstract class Mage_Core_Controller_Varien_Action
         }
     }
 
-    /**
-     * Convert dates in array from localized to internal format
-     *
-     * @param   array $array
-     * @param   array $dateFields
-     * @return  array
-     */
-    protected function _filterDates($array, $dateFields)
-    {
-        if (empty($dateFields)) {
-            return $array;
-        }
-
-        $filter = new Varien_Data_Form_Filter_Date(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
-        foreach ($dateFields as $dateField) {
-            if (!empty($dateField) && isset($array[$dateField]) && $array[$dateField] !== '') {
-                $array[$dateField] = $filter->inputFilter($array[$dateField]);
-            }
-        }
-
-        return $array;
-    }
-
-    /**
-     * Convert dates with time in array from localized to internal format
-     *
-     * @param   array $array
-     * @param   array $dateFields
-     * @return  array
-     */
-    protected function _filterDateTime($array, $dateFields)
-    {
-        if (empty($dateFields)) {
-            return $array;
-        }
-
-        $filter = new Varien_Data_Form_Filter_Datetime(Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
-        foreach ($dateFields as $dateField) {
-            if (!empty($dateField) && isset($array[$dateField]) && $array[$dateField] !== '') {
-                $array[$dateField] = $filter->inputFilter($array[$dateField]);
-            }
-        }
-
-        return $array;
-    }
 
     /**
      * Declare headers and content file in response for file download

@@ -31,46 +31,70 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $option = $this->getOption();
         $value = $this->getUserValue();
 
-        $dateValid = true;
-        if ($this->_dateExists()) {
-            if ($this->useCalendar()) {
-                $dateValid = isset($value['date']) && preg_match('/^\d{1,4}.+\d{1,4}.+\d{1,4}$/', $value['date']);
+        $isValid = $dateValid = $timeValid = true;
+
+        $pattern = null;
+        $matches = [];
+
+        if (isset($value['date']) && $this->useCalendar()) {
+            // Only support standardized yyyy-MM-dd format
+            $pattern = $this->_timeExists()
+                ? '/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/'
+                : '/^(\d{4})-(\d{2})-(\d{2})$/';
+
+            if (preg_match($pattern, $value['date'] ?? '', $matches)) {
+                $value['year']     = $matches[1];
+                $value['month']    = $matches[2];
+                $value['day']      = $matches[3];
+                $value['hour']     = $matches[4] ?? null;
+                $value['minute']   = $matches[5] ?? null;
             } else {
-                $dateValid = isset($value['day']) && isset($value['month']) && isset($value['year'])
-                    && $value['day'] > 0 && $value['month'] > 0 && $value['year'] > 0;
+                $isValid = $dateValid = false;
+            }
+        } elseif (isset($value['time']) && $this->useCalendar()) {
+            // Support both HH:mm and HH:mm:ss formats
+            $pattern = '/^(\d{2}):(\d{2})(?::(\d{2}))?$/';
+            $isValid = (bool) preg_match($pattern, $value['time'] ?? '', $matches);
+
+            if ($isValid) {
+                $value['hour']     = $matches[1];
+                $value['minute']   = $matches[2];
+            } else {
+                $isValid = $timeValid = false;
+            }
+        } else {
+            if ($this->_dateExists()) {
+                if (($value['day'] ?? 0) <= 0 || ($value['month'] ?? 0) <= 0 || ($value['year'] ?? 0) <= 0) {
+                    $isValid = $dateValid = false;
+                }
+            }
+            if ($this->_timeExists()) {
+                if (!is_numeric($value['hour'] ?? '') || !is_numeric($value['minute'] ?? '')) {
+                    $isValid = $timeValid = false;
+                }
             }
         }
 
-        $timeValid = true;
-        if ($this->_timeExists()) {
-            $timeValid = isset($value['hour']) && isset($value['minute'])
-                && is_numeric($value['hour']) && is_numeric($value['minute']);
-        }
-
-        $isValid = $dateValid && $timeValid;
-
         if ($isValid) {
-            $this->setUserValue(
-                [
-                    'date' => $value['date'] ?? '',
-                    'year' => isset($value['year']) ? (int) $value['year'] : 0,
-                    'month' => isset($value['month']) ? (int) $value['month'] : 0,
-                    'day' => isset($value['day']) ? (int) $value['day'] : 0,
-                    'hour' => isset($value['hour']) ? (int) $value['hour'] : 0,
-                    'minute' => isset($value['minute']) ? (int) $value['minute'] : 0,
-                    'day_part' => $value['day_part'] ?? '',
-                    'date_internal' => $value['date_internal'] ?? '',
-                ],
-            );
+            $this->setUserValue([
+                'year' => (int) ($value['year'] ?? 0),
+                'month' => (int) ($value['month'] ?? 0),
+                'day' => (int) ($value['day'] ?? 0),
+                'hour' => (int) ($value['hour'] ?? 0),
+                'minute' => (int) ($value['minute'] ?? 0),
+                'day_part' => $value['day_part'] ?? '',
+                'date_internal' => $value['date_internal'] ?? '',
+            ]);
         } elseif ($option->getIsRequired() && !$this->getSkipCheckRequiredOption()) {
             $this->setIsValid(false);
             if (!$dateValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify date required option <em>%s</em>.', $option->getTitle()));
+                $message = 'Please specify date required option <em>%s</em>.';
             } elseif (!$timeValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify time required option <em>%s</em>.', $option->getTitle()));
+                $message = 'Please specify time required option <em>%s</em>.';
             } else {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+                $message = 'Please specify the product required option <em>%s</em>.';
             }
+            Mage::throwException(Mage::helper('catalog')->__($message, $option->getTitle()));
         } else {
             $this->setUserValue(null);
             return $this;
@@ -100,19 +124,14 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $timestamp = 0;
 
             if ($this->_dateExists()) {
-                if ($this->useCalendar()) {
-                    $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                    $timestamp += Mage::app()->getLocale()->date($value['date'], $format, null, false)->getTimestamp();
-                } else {
-                    $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
-                }
+                $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
             } else {
                 $timestamp += mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y'));
             }
 
             if ($this->_timeExists()) {
                 // 24hr hour conversion
-                if (!$this->is24hTimeFormat()) {
+                if (!$this->is24hTimeFormat() && !$this->useCalendar()) {
                     $pmDayPart = (strtolower($value['day_part']) == 'pm');
                     if ($value['hour'] == 12) {
                         $value['hour'] = $pmDayPart ? 12 : 0;
@@ -147,17 +166,20 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
     {
         if ($this->_formattedOptionValue === null) {
             $option = $this->getOption();
-            if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
-                $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-                $result = Mage::app()->getLocale()->date($optionValue, Zend_Date::ISO_8601, null, false)
+            $locale = Mage::app()->getLocale();
+            $timeType = $this->is24hTimeFormat() ? $locale::FORMAT_TIME_24H : $locale::FORMAT_TIME_12H;
+            if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
+                $format = $locale->getDateFormat($locale::FORMAT_TYPE_MEDIUM);
+                $result = $locale->date($optionValue, Zend_Date::ISO_8601, null, false)
                     ->toString($format);
-            } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
-                $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                $result = Mage::app()->getLocale()
-                    ->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)->toString($format);
-            } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
-                $date = new Zend_Date($optionValue);
-                $result = date($this->is24hTimeFormat() ? 'H:i' : 'h:i a', $date->getTimestamp());
+            } elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
+                $format = $locale->getDateTimeFormat($locale::FORMAT_TYPE_SHORT, $timeType);
+                $result = $locale->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                    ->toString($format);
+            } elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
+                $format = $locale->getTimeFormat($timeType);
+                $result = $locale->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                    ->toString($format);
             } else {
                 $result = $optionValue;
             }

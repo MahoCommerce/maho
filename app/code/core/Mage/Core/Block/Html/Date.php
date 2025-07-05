@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,12 +15,14 @@
  * @method $this setClass(string $value)
  * @method string getExtraParams()
  * @method $this setExtraParams(string $value)
- * @method string getFormat()
- * @method $this setFormat(string $value)
+ * @method string getInputFormat()
+ * @method $this setInputFormat(string $value)
+ * @method string getDisplayFormat()
+ * @method $this setDisplayFormat(string $value)
  * @method string getName()
  * @method $this setName(string $value)
  * @method string getTime()
- * @method $this setTime(string $value)
+ * @method $this setTime(bool $value)
  * @method $this setTitle(string $value)
  * @method string getValue()
  * @method $this setValue(string $value)
@@ -29,50 +31,75 @@
  */
 class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 {
+    protected array $config = [];
+
+    protected array $defaultConfig = [
+        'allowInput' => true,
+    ];
+
     /**
      * @return string
      */
     #[\Override]
     protected function _toHtml()
     {
-        $displayFormat = Varien_Date::convertZendToStrftime($this->getFormat(), true, (bool) $this->getTime());
+        $setupObj = [
+            ...$this->defaultConfig,
+            ...$this->config,
+        ];
 
-        $html  = '<input type="text" name="' . $this->getName() . '" id="' . $this->getId() . '" ';
-        $html .= 'value="' . $this->escapeHtml($this->getValue()) . '" class="' . $this->getClass() . '" ' . $this->getExtraParams() . '/> ';
+        $setupObj['inputField'] = (string) $this->getId();
 
-        $html .=
-        '<script type="text/javascript">
-            var calendarSetupObject = {
-                inputField  : "' . $this->getId() . '",
-                ifFormat    : "' . $displayFormat . '",
-                showsTime   : ' . ($this->getTime() ? 'true' : 'false') . '
-            }';
+        $setupObj['enableTime'] = (bool) ($this->config['enableTime'] ?? $this->getTime());
 
-        $calendarYearsRange = $this->getYearsRange();
-        if ($calendarYearsRange) {
-            $html .= '
-                calendarSetupObject.range = ' . $calendarYearsRange . '
-                ';
+        // Always use standardized internal format
+        $hasTime = $setupObj['enableTime'] || ($this->config['noCalendar'] ?? false);
+        if ($hasTime && !($this->config['noCalendar'] ?? false)) {
+            // Date and time
+            $setupObj['inputFormat'] = 'yyyy-MM-dd HH:mm:ss';
+        } elseif ($this->config['noCalendar'] ?? false) {
+            // Time only
+            $setupObj['inputFormat'] = 'HH:mm:ss';
+        } else {
+            // Date only
+            $setupObj['inputFormat'] = 'yyyy-MM-dd';
         }
 
-        $html .= '
-            Calendar.setup(calendarSetupObject);
-        </script>';
+        // Override with explicit input format if provided (for backward compatibility)
+        if ($this->getInputFormat()) {
+            $setupObj['inputFormat'] = (string) $this->getInputFormat();
+        }
 
-        return $html;
+        // Legacy strftime format (for display only if no displayFormat is set)
+        if ($this->getFormat() && !$this->getDisplayFormat()) {
+            $setupObj['displayFormat'] = $this->getFormat();
+        }
+
+        // Optional ICU display format
+        if ($this->getDisplayFormat()) {
+            $setupObj['displayFormat'] = $this->getDisplayFormat();
+        }
+
+        if ($calendarYearsRange = $this->getYearsRange()) {
+            $setupObj['range'] = $calendarYearsRange;
+        }
+
+        $setupObj = Mage::helper('core')->jsonEncode($setupObj);
+
+        return <<<HTML
+            <input type="text" name="{$this->getName()}" id="{$this->getId()}" value="{$this->escapeHtml($this->getValue())}" class="{$this->getClass()}" {$this->getExtraParams()} />
+            <script>Calendar.setup({$setupObj});</script>
+        HTML;
     }
 
-    /**
-     * @param null $index deprecated
-     * @return string
-     */
-    public function getEscapedValue($index = null)
+    public function setConfig(string|array $key, mixed $value = null): self
     {
-        if ($this->getFormat() && $this->getValue()) {
-            return date($this->getFormat(), strtotime($this->getValue()));
+        if (is_array($key)) {
+            $this->config = [...$this->config, ...$key];
+        } else {
+            $this->config[$key] = $value;
         }
-
-        return htmlspecialchars($this->getValue());
+        return $this;
     }
 
     /**

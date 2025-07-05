@@ -639,18 +639,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     }
 
     /**
-     * Filtering posted data. Converting localized data if needed
-     *
-     * @param array $data
-     * @return array
-     */
-    protected function _filterPostData($data)
-    {
-        $data = $this->_filterDates($data, ['dob']);
-        return $data;
-    }
-
-    /**
      * Check can page show for unregistered users
      *
      * @return bool

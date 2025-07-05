@@ -6,6 +6,7 @@
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,19 +19,6 @@
  */
 class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
 {
-    /**
-     * @deprecated after 1.3.2.3
-     */
-    protected $_track_id;
-    /**
-     * @deprecated after 1.3.2.3
-     */
-    protected $_order_id;
-    /**
-     * @deprecated after 1.3.2.3
-     */
-    protected $_ship_id;
-
     /**
      * @param int $oid
      * @return Mage_Shipping_Block_Tracking_Popup
@@ -236,7 +224,7 @@ class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
 
         $locale = Mage::app()->getLocale();
 
-        $format = $locale->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+        $format = $locale->getTimeFormat();
         return $locale->date(strtotime($time), Zend_Date::TIMESTAMP, null, false)
             ->toString($format);
     }
