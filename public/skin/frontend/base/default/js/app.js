@@ -585,7 +585,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!mq.matches) {
                 // Desktop: move content back and uncheck
                 checkbox.checked = false;
-                moveFromOffcanvas();
+                if (movedElement) {
+                    moveFromOffcanvas();
+                }
             }
         });
     }

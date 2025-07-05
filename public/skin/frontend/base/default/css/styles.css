@@ -4430,6 +4430,13 @@ body:not(.catalog-product-view) .add-to-links a {
   }
 }
 
+/* Ensure layered nav is visible on desktop */
+@media only screen and (min-width: 771px) {
+  #narrow-by-list.no-display {
+    display: block !important;
+  }
+}
+
 /* Expand all content in sidebar offcanvas */
 .sidebar-offcanvas #narrow-by-list,
 .sidebar-offcanvas #narrow-by-list.no-display,
