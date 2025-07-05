@@ -492,140 +492,130 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
     // ==============================================
-    // UI Pattern - ToggleSingle
+    // Offcanvas Sidebar - On-demand DOM management
     // ==============================================
 
-    // Use this plugin to toggle the visibility of content based on a toggle link/element.
-    // This pattern differs from the accordion functionality in the Toggle pattern in that each toggle group acts
-    // independently of the others. It is named so as not to be confused with the Toggle pattern below
-    //
-    // This plugin requires a specific markup structure. The plugin expects a set of elements that it
-    // will use as the toggle link. It then hides all immediately following siblings and toggles the sibling's
-    // visibility when the toggle link is clicked.
-    //
-    // Example markup:
-    // <div class="block">
-    //     <div class="block-title">Trigger</div>
-    //     <div class="block-content">Content that should show when </div>
-    // </div>
-    //
-    // Options:
-    //     destruct: defaults to false, but if true, the plugin will remove itself, display content, and remove event handlers
+    function initOffcanvasSidebar() {
+        const checkbox = document.querySelector('#sidebar-toggle');
+        const offcanvas = document.querySelector('.sidebar-offcanvas');
 
-    function toggleSingle(elements, options = {}) {
-        const settings = {
-            destruct: false,
-            ...options
-        };
+        if (!checkbox || !offcanvas) return;
 
-        elements.forEach(element => {
-            // Remove event listener if it exists
-            if (element.toggleSingleHandler) {
-                element.removeEventListener('click', element.toggleSingleHandler);
-                element.toggleSingleHandler = null;
+        const isCustomerAccount = document.body.classList.contains('customer-account');
+        const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
+
+        let originalParent = null;
+        let movedElement = null;
+        let originalLayeredNavHTML = null;
+        let lastClickedTrigger = null;
+
+        // Store original layered nav state immediately on page load
+        const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
+        if (sidebar && !isCustomerAccount) {
+            const layeredNav = sidebar.querySelector('.block-layered-nav');
+            if (layeredNav) {
+                originalLayeredNavHTML = layeredNav.outerHTML;
+            }
+        }
+
+        function setOffcanvasTitle(triggerElement) {
+            const titleElement = offcanvas.querySelector('.sidebar-offcanvas-title');
+            if (titleElement && triggerElement) {
+                titleElement.textContent = triggerElement.textContent.trim();
+            }
+        }
+
+        function moveToOffcanvas() {
+            // Check if this was triggered by the hamburger menu
+            if (lastClickedTrigger && lastClickedTrigger.classList.contains('skip-nav')) {
+                // Move primary navigation
+                const nav = document.querySelector('#nav');
+                if (nav && nav.parentNode !== offcanvas) {
+                    movedElement = nav;
+                    originalParent = nav.parentNode;
+                    offcanvas.appendChild(nav);
+                }
+                return;
             }
 
-            if (!settings.destruct) {
-                element.toggleSingleHandler = function() {
-                    this.classList.toggle('active');
-                    const nextElement = this.nextElementSibling;
-                    if (nextElement) {
-                        nextElement.classList.toggle('no-display');
-                    }
-                };
-                element.addEventListener('click', element.toggleSingleHandler);
+            // Original sidebar logic
+            const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
+            if (!sidebar) return;
 
-                // Hide the content if it's not already hidden
-                const nextElement = element.nextElementSibling;
-                if (nextElement && !nextElement.classList.contains('no-display')) {
-                    nextElement.classList.add('no-display');
+            if (isCustomerAccount) {
+                // Customer account: only move navigation content
+                movedElement = sidebar.querySelector('.block-account .block-content');
+                if (movedElement && movedElement.parentNode !== offcanvas) {
+                    originalParent = movedElement.parentNode;
+                    offcanvas.appendChild(movedElement);
                 }
             } else {
-                // Remove all classes that were added by this function
-                element.classList.remove('active');
-                const nextElement = element.nextElementSibling;
-                if (nextElement) {
-                    nextElement.classList.remove('no-display');
+                // Other pages: move entire sidebar
+                movedElement = sidebar;
+                if (movedElement.parentNode !== offcanvas) {
+                    originalParent = movedElement.parentNode;
+                    offcanvas.appendChild(movedElement);
+                }
+            }
+        }
+
+        // Move content back from offcanvas
+        function moveFromOffcanvas() {
+            if (movedElement && originalParent) {
+                originalParent.appendChild(movedElement);
+
+                // Restore original layered nav state (only for sidebar content, not primary nav)
+                if (!isCustomerAccount && originalLayeredNavHTML && movedElement.id !== 'nav') {
+                    const layeredNav = movedElement.querySelector('.block-layered-nav');
+                    if (layeredNav) {
+                        layeredNav.outerHTML = originalLayeredNavHTML;
+                    }
+                }
+
+                movedElement = null;
+                originalParent = null;
+                originalLayeredNavHTML = null;
+            }
+        }
+
+        // Capture clicks on trigger elements
+        document.addEventListener('click', function(e) {
+            const trigger = e.target.closest('label[for="sidebar-toggle"], .sidebar-trigger');
+            if (trigger) {
+                lastClickedTrigger = trigger;
+                e.preventDefault();
+                checkbox.checked = !checkbox.checked;
+                const changeEvent = new Event('change', { bubbles: true });
+                checkbox.dispatchEvent(changeEvent);
+            }
+        });
+
+        // Handle checkbox change
+        checkbox.addEventListener('change', function() {
+            if (this.checked && mobileMediaQuery.matches) {
+                setOffcanvasTitle(lastClickedTrigger);
+                moveToOffcanvas();
+            } else if (!this.checked && movedElement) {
+                moveFromOffcanvas();
+            }
+        });
+
+        // Handle window resize
+        mobileMediaQuery.addEventListener('change', (mq) => {
+            if (!mq.matches) {
+                // Desktop: move content back and uncheck
+                checkbox.checked = false;
+                if (movedElement) {
+                    moveFromOffcanvas();
                 }
             }
         });
     }
 
-    // ==============================================
-    // UI Pattern - Toggle Content (tabs and accordions in one setup)
-    // ==============================================
-
-    document.querySelectorAll('.toggle-content').forEach(wrapper => {
-        const hasTabs = wrapper.classList.contains('tabs');
-        const hasAccordion = wrapper.classList.contains('accordion');
-        const startOpen = wrapper.classList.contains('open');
-        const dl = wrapper.querySelector('dl');
-        if (!dl) return;
-        const dts = Array.from(dl.querySelectorAll(':scope > dt'));
-        const panes = Array.from(dl.querySelectorAll('dd'));
-        const groups = [dts, panes];
-
-        // Create a ul for tabs if necessary
-        let lis = [];
-        if (hasTabs) {
-            const ul = document.createElement('ul');
-            ul.className = 'toggle-tabs';
-            ul.role = 'tablist';
-            dts.forEach(dt => {
-                const li = document.createElement('li');
-                li.id = dt.id;
-                li.role = 'tab';
-                li.innerHTML = dt.innerHTML;
-                ul.appendChild(li);
-            });
-            dl.parentNode.insertBefore(ul, dl);
-            lis = Array.from(ul.children);
-            groups.push(lis);
-        }
-
-        // Add "last" classes
-        groups.forEach(group => {
-            group[group.length - 1].classList.add('last');
-        });
-
-        function toggleClasses(clickedItem, group) {
-            const index = group.indexOf(clickedItem);
-            groups.forEach(g => {
-                g.forEach(item => item.classList.remove('current'));
-                g[index].classList.add('current');
-            });
-        }
-
-        // Toggle on dt click
-        dts.forEach(dt => {
-            dt.addEventListener('click', () => {
-                if (dt.classList.contains('current') && wrapper.classList.contains('accordion-open')) {
-                    wrapper.classList.remove('accordion-open');
-                } else {
-                    wrapper.classList.add('accordion-open');
-                }
-                toggleClasses(dt, dts);
-            });
-        });
-
-        // Toggle on li click (for tabs)
-        if (hasTabs) {
-            lis.forEach(li => {
-                li.addEventListener('click', () => {
-                    toggleClasses(li, lis);
-                });
-            });
-            // Open the first tab
-            lis[0].click();
-        }
-
-        // Open the first accordion if desired
-        if (startOpen) {
-            dts[0].click();
-        }
-    });
-
+    // Initialize
+    initOffcanvasSidebar();
 
     // ==============================================
     // Layered Navigation Block
@@ -673,26 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
         maxWidth1000MediaQuery.addEventListener('change', reposition3rdColumn);
         reposition3rdColumn(maxWidth1000MediaQuery);
     }
-
-    // ==============================================
-    // Block collapsing (on smaller viewports)
-    // ==============================================
-
-    const toggleElementsForMediumSize = (mq) => {
-        const elements = document.querySelectorAll(
-            '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
-            '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
-            '.sidebar:not(.col-left-first) .block .block-title'
-        );
-
-        if (mq.matches) {
-            toggleSingle(elements);
-        } else {
-            toggleSingle(elements, { destruct: true });
-        }
-    };
-    maxWidthMediumMediaQuery.addEventListener('change', toggleElementsForMediumSize);
-    toggleElementsForMediumSize(maxWidthMediumMediaQuery);
 
     // ==============================================
     // Checkout Cart - events

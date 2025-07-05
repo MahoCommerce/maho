@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -19,8 +19,7 @@
             <div class="actions"><a href="<?= $this->getClearUrl() ?>"><?= $this->__('Clear All') ?></a></div>
         <?php endif ?>
         <?php if($this->canShowOptions()): ?>
-            <p class="block-subtitle block-subtitle--filter"><?= $this->__('Filter') ?></p>
-            <dl id="narrow-by-list" class="no-display">
+            <dl id="narrow-by-list">
                 <?php $_filters = $this->getFilters() ?>
                 <?php foreach ($_filters as $_filter): ?>
                 <?php if($_filter->getItemsCount()): ?>
