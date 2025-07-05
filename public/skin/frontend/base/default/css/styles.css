@@ -437,8 +437,7 @@ body:not(.customer-account) .block:first-child .block-title {
     cursor: pointer;
     padding: 4px 12px;
     margin-top: 0;
-    border-bottom: none;
-    border-top: none;
+    border: none;
     margin-bottom: 0;
   }
   .sidebar .block:not(.block-layered-nav) .block-title > strong:hover {
@@ -458,9 +457,7 @@ body:not(.customer-account) .block:first-child .block-title {
     font-weight: normal;
     margin-bottom: 0px;
     padding: 7px 10px 7px 24px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--maho-color-border);
+    border: none;
     position: relative;
     background-color: var(--maho-color-background-alt);
   }
@@ -484,9 +481,7 @@ body:not(.customer-account) .block:first-child .block-title {
   .sidebar .block:not(.block-layered-nav) .block-content {
     padding: 10px;
     margin-top: 0;
-    border-width: 0 1px;
-    border-style: solid;
-    border-color: var(--maho-color-border);
+    border: none;
   }
 }
 /* -------------------------------------------- *
