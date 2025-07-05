@@ -546,18 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     offcanvas.appendChild(movedElement);
                 }
             }
-
-            // Ensure all content is visible in offcanvas
-            if (movedElement) {
-                const allElements = movedElement.querySelectorAll('*');
-                allElements.forEach(el => {
-                    el.style.display = '';
-                    el.style.visibility = '';
-                    el.style.height = '';
-                    el.style.opacity = '';
-                });
-
-            }
         }
 
         // Move content back from offcanvas
