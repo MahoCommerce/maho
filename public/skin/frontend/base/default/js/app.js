@@ -528,6 +528,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function moveToOffcanvas() {
+            // Check if this was triggered by the hamburger menu
+            if (lastClickedTrigger && lastClickedTrigger.classList.contains('skip-nav')) {
+                // Move primary navigation
+                const nav = document.querySelector('#nav');
+                if (nav && nav.parentNode !== offcanvas) {
+                    movedElement = nav;
+                    originalParent = nav.parentNode;
+                    offcanvas.appendChild(nav);
+                }
+                return;
+            }
+
+            // Original sidebar logic
             const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
             if (!sidebar) return;
 
@@ -553,8 +566,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (movedElement && originalParent) {
                 originalParent.appendChild(movedElement);
 
-                // Restore original layered nav state
-                if (!isCustomerAccount && originalLayeredNavHTML) {
+                // Restore original layered nav state (only for sidebar content, not primary nav)
+                if (!isCustomerAccount && originalLayeredNavHTML && movedElement.id !== 'nav') {
                     const layeredNav = movedElement.querySelector('.block-layered-nav');
                     if (layeredNav) {
                         layeredNav.outerHTML = originalLayeredNavHTML;
@@ -572,6 +585,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const trigger = e.target.closest('label[for="sidebar-toggle"], .sidebar-trigger');
             if (trigger) {
                 lastClickedTrigger = trigger;
+                e.preventDefault();
+                checkbox.checked = !checkbox.checked;
+                const changeEvent = new Event('change', { bubbles: true });
+                checkbox.dispatchEvent(changeEvent);
             }
         });
 
