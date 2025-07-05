@@ -565,10 +565,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.style.opacity = '';
                 });
                 
-                const blockContents = movedElement.querySelectorAll('.block-content, #narrow-by-list');
-                blockContents.forEach(content => {
-                    content.classList.remove('no-display');
-                });
             }
         }
         
@@ -609,9 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (movedElement) {
                     moveFromOffcanvas();
                 }
-                // Ensure filters are visible on desktop
-                ensureDesktopVisibility();
-            }
+                    }
         });
     }
     
