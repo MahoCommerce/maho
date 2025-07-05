@@ -3721,6 +3721,12 @@ p.product-name a:hover {
   }
 }
 @media only screen and (max-width: 770px) {
+  .sidebar-offcanvas .currently {
+      padding: 20px 20px 0 20px;
+  }
+  .sidebar-offcanvas .actions {
+      padding: 10px 20px 10px 20px;
+  }
   .sidebar .block.block-layered-nav {
     border-bottom: none;
   }
@@ -3728,32 +3734,8 @@ p.product-name a:hover {
   .block-layered-nav .block-content {
     padding-top: 0;
   }
-  .block-layered-nav .block-content > dl > dt {
-    cursor: pointer;
-    border-bottom-width: 0;
-  }
-  .block-layered-nav .block-content > dl > dt:hover {
-    color: var(--maho-color-primary);
-  }
-  .block-layered-nav .block-content > dl > dt:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
-    border-left: 4px solid var(--maho-color-primary);
-    border-right: none;
-  }
-  .block-layered-nav .block-content > dl > dt.last {
-    border-bottom-width: 1px;
-  }
-  .block-layered-nav .block-content > dl > dd {
-    display: none;
-  }
-  .block-layered-nav .block-content.accordion-open > dl > dt.current {
-    border-bottom-width: 1px;
+  .block-layered-nav .block-content > dl > :is(dt, dd) {
+    border: none;
   }
   .block-layered-nav .block-content.accordion-open > dl > dt.current:after {
     content: '';
