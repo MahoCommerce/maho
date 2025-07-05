@@ -1690,7 +1690,7 @@ span.weee {
   .star-rating__label:hover,
   .star-rating__label:hover ~ .star-rating__label {
     content: var(--star-rating__icon-active);
-  } 
+  }
   .star-rating__value:checked + .star-rating__label:hover,
   .star-rating__value:checked + .star-rating__label:hover ~ .star-rating__label,
   .star-rating__value:checked ~ .star-rating__label:hover,
@@ -4326,171 +4326,128 @@ body:not(.catalog-product-view) .add-to-links a {
   clear: both;
 }
 
-.collateral-tabs dd h2 {
+/* Hide radio inputs */
+.product-collateral .tab-selector {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Tab list styling */
+.product-collateral .collateral-tab-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  border: 1px solid var(--maho-color-border);
+  background-color: var(--maho-color-background-alt);
+}
+
+.product-collateral .collateral-tab-list li {
+  flex: 0 0 auto;
+}
+
+.product-collateral .collateral-tab-list label {
+  display: block;
+  padding: 0 30px;
+  height: 40px;
+  line-height: 40px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  position: relative;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.product-collateral .collateral-tab-list label:hover {
+  color: var(--maho-color-primary);
+}
+
+/* Tab content panels */
+.product-collateral .collateral-tabs-content {
+  position: relative;
+  border: 1px solid var(--maho-color-border);
+  border-top: 0;
+}
+
+.product-collateral .tab-panel {
+  display: none;
+  padding: 15px;
+}
+
+/* Show selected tab content */
+.product-collateral .tab-selector:checked + * + * + * .tab-panel {
   display: none;
 }
+
+.product-collateral .tab-selector:nth-of-type(1):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(1),
+.product-collateral .tab-selector:nth-of-type(2):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(2),
+.product-collateral .tab-selector:nth-of-type(3):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(3),
+.product-collateral .tab-selector:nth-of-type(4):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(4),
+.product-collateral .tab-selector:nth-of-type(5):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(5) {
+  display: block;
+}
+
+/* Style active tab */
+.product-collateral .tab-selector:nth-of-type(1):checked ~ .collateral-tab-list li:nth-of-type(1) label,
+.product-collateral .tab-selector:nth-of-type(2):checked ~ .collateral-tab-list li:nth-of-type(2) label,
+.product-collateral .tab-selector:nth-of-type(3):checked ~ .collateral-tab-list li:nth-of-type(3) label,
+.product-collateral .tab-selector:nth-of-type(4):checked ~ .collateral-tab-list li:nth-of-type(4) label,
+.product-collateral .tab-selector:nth-of-type(5):checked ~ .collateral-tab-list li:nth-of-type(5) label {
+  background-color: var(--maho-color-background);
+  color: var(--maho-color-primary);
+  border-left: 1px solid var(--maho-color-border);
+  border-right: 1px solid var(--maho-color-border);
+  margin: 0 -1px;
+  position: relative;
+  bottom: -1px;
+  z-index: 1;
+}
+
 
 .box-collateral {
   clear: both;
 }
 
-@media only screen and (min-width: 771px) {
-  .product-collateral .toggle-tabs {
+/* Mobile styles - simplified */
+@media only screen and (max-width: 770px) {
+  /* Hide radio inputs and tab list */
+  .product-collateral .tab-selector {
+    display: none;
+  }
+  
+  .product-collateral .collateral-tab-list {
+    display: none;
+  }
+  
+  .product-collateral .collateral-tabs-content {
+    border: none;
+  }
+  
+  /* Show all content sections with headers */
+  .product-collateral .tab-panel {
     display: block;
-    width: 100%;
-    position: relative;
-    border: 1px solid var(--maho-color-border);
-    background-color: var(--maho-color-background-alt);
+    margin-bottom: 30px;
+    padding: 0;
   }
-  .product-collateral .toggle-tabs li {
-    float: left;
-    border-right: 1px solid transparent;
-    border-left: 1px solid transparent;
-  }
-  .product-collateral .toggle-tabs li > span {
-    user-select: none;
-    display: inline-block;
-    padding: 0 30px;
-    height: 40px;
-    line-height: 40px;
-    cursor: pointer;
+  
+  .product-collateral .tab-panel::before {
+    content: attr(data-title);
+    display: block;
+    font-weight: 600;
+    font-size: 0.875rem;
     text-transform: uppercase;
-    font-size: 0.75rem;
-    position: relative;
-    bottom: -1px;
-  }
-  .product-collateral .toggle-tabs li.current {
-    border-right: 1px solid var(--maho-color-border);
-    border-left: 1px solid var(--maho-color-border);
-  }
-  .product-collateral .toggle-tabs li.current > span {
-    background-color: var(--maho-color-background);
-    z-index: 5;
-  }
-  .product-collateral .toggle-tabs li.current span,
-  .product-collateral .toggle-tabs li:hover span {
-    color: var(--maho-color-primary);
-  }
-  .product-collateral .toggle-tabs li:first-child {
-    border-left: none;
-  }
-  .product-collateral .toggle-tabs:after {
-    content: '';
-    display: table;
-    clear: both;
-  }
-  .product-collateral > dl {
-    width: 100%;
-  }
-  .product-collateral > dl > dt {
-    display: none;
-  }
-  .product-collateral > dl > dd {
-    width: 100%;
-    display: none;
-    padding: 15px;
-    border: 1px solid var(--maho-color-border);
-    border-top: 0;
-  }
-  .product-collateral > dl > dd.current {
-    display: block;
+    color: var(--maho-color-text-primary);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--maho-color-primary);
   }
 }
-@media only screen and (max-width: 770px) {
-  .product-collateral .toggle-tabs {
+/* Keep desktop tab styles separate */
+@media only screen and (min-width: 771px) {
+  .product-collateral .tab-panel::before {
     display: none;
-  }
-  .product-collateral > dl > dt {
-    margin: 0;
-    margin-bottom: 10px;
-    color: var(--maho-color-text-primary);
-    font-size: 0.875rem;
-    font-weight: bold;
-    font-style: normal;
-    line-height: 1.4;
-    text-rendering: optimizeSpeed;
-    text-transform: uppercase;
-    user-select: none;
-    font-weight: normal;
-    margin-bottom: 0px;
-    padding: 7px 10px 7px 24px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--maho-color-border);
-    position: relative;
-    background-color: var(--maho-color-background-alt);
-    display: block;
-  }
-  .product-collateral > dl > dt:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
-    border-top: 4px solid var(--maho-color-primary);
-    border-bottom: none;
-    left: 10px;
-    top: 50%;
-    margin-top: -3px;
-  }
-  .product-collateral > dl > dt:hover {
-    background-color: var(--maho-color-background-hover);
-  }
-  .product-collateral > dl > dd {
-    padding: 10px;
-    margin: 0;
-    border-width: 0 1px;
-    border-style: solid;
-    border-color: var(--maho-color-border);
-  }
-  .product-collateral > dl > dd:last-child {
-    border-width: 0 1px 1px 1px;
-  }
-  .product-collateral > dl > dt {
-    cursor: pointer;
-    border-bottom-width: 0;
-  }
-  .product-collateral > dl > dt:hover {
-    color: var(--maho-color-primary);
-  }
-  .product-collateral > dl > dt:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
-    border-left: 4px solid var(--maho-color-primary);
-    border-right: none;
-  }
-  .product-collateral > dl > dt.last {
-    border-bottom-width: 1px;
-  }
-  .product-collateral > dl > dd {
-    display: none;
-  }
-  .product-collateral.accordion-open > dl > dt.current {
-    border-bottom-width: 1px;
-  }
-  .product-collateral.accordion-open > dl > dt.current:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
-    border-top: 4px solid var(--maho-color-primary);
-    border-bottom: none;
-    left: 6px;
-    top: 50%;
-    margin-top: -3px;
-  }
-  .product-collateral.accordion-open > dl > dd.current {
-    display: block;
   }
 }
 @media only screen and (max-width: 770px) {
