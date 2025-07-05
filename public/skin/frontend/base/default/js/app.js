@@ -496,20 +496,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================
     // Offcanvas Sidebar - On-demand DOM management
     // ==============================================
-    
+
     function initOffcanvasSidebar() {
         const checkbox = document.querySelector('#sidebar-toggle');
         const offcanvas = document.querySelector('.sidebar-offcanvas');
-        
+
         if (!checkbox || !offcanvas) return;
-        
+
         const isCustomerAccount = document.body.classList.contains('customer-account');
         const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
-        
+
         let originalParent = null;
         let movedElement = null;
         let originalLayeredNavHTML = null;
-        
+        let lastClickedTrigger = null;
+
         // Store original layered nav state immediately on page load
         const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
         if (sidebar && !isCustomerAccount) {
@@ -518,27 +519,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 originalLayeredNavHTML = layeredNav.outerHTML;
             }
         }
-        
-        
-        // Set offcanvas title
-        function setOffcanvasTitle() {
+
+        function setOffcanvasTitle(triggerElement) {
             const titleElement = offcanvas.querySelector('.sidebar-offcanvas-title');
-            
-            if (titleElement) {
-                if (isCustomerAccount) {
-                    titleElement.textContent = 'My Account';
-                } else {
-                    const triggerElement = document.querySelector('.sidebar-trigger');
-                    titleElement.textContent = triggerElement ? triggerElement.textContent : 'Menu';
-                }
+            if (titleElement && triggerElement) {
+                titleElement.textContent = triggerElement.textContent.trim();
             }
         }
-        
-        // Move content to offcanvas
+
         function moveToOffcanvas() {
             const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
             if (!sidebar) return;
-            
+
             if (isCustomerAccount) {
                 // Customer account: only move navigation content
                 movedElement = sidebar.querySelector('.block-account .block-content');
@@ -554,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     offcanvas.appendChild(movedElement);
                 }
             }
-            
+
             // Ensure all content is visible in offcanvas
             if (movedElement) {
                 const allElements = movedElement.querySelectorAll('*');
@@ -564,15 +556,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.style.height = '';
                     el.style.opacity = '';
                 });
-                
+
             }
         }
-        
+
         // Move content back from offcanvas
         function moveFromOffcanvas() {
             if (movedElement && originalParent) {
                 originalParent.appendChild(movedElement);
-                
+
                 // Restore original layered nav state
                 if (!isCustomerAccount && originalLayeredNavHTML) {
                     const layeredNav = movedElement.querySelector('.block-layered-nav');
@@ -580,23 +572,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         layeredNav.outerHTML = originalLayeredNavHTML;
                     }
                 }
-                
+
                 movedElement = null;
                 originalParent = null;
                 originalLayeredNavHTML = null;
             }
         }
-        
+
+        // Capture clicks on trigger elements
+        document.addEventListener('click', function(e) {
+            const trigger = e.target.closest('label[for="sidebar-toggle"], .sidebar-trigger');
+            if (trigger) {
+                lastClickedTrigger = trigger;
+            }
+        });
+
         // Handle checkbox change
         checkbox.addEventListener('change', function() {
             if (this.checked && mobileMediaQuery.matches) {
-                setOffcanvasTitle();
+                setOffcanvasTitle(lastClickedTrigger);
                 moveToOffcanvas();
             } else if (!this.checked && movedElement) {
                 moveFromOffcanvas();
             }
         });
-        
+
         // Handle window resize
         mobileMediaQuery.addEventListener('change', (mq) => {
             if (!mq.matches) {
@@ -608,7 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
         });
     }
-    
+
     // Initialize
     initOffcanvasSidebar();
 
