@@ -4410,28 +4410,137 @@ body:not(.catalog-product-view) .add-to-links a {
   clear: both;
 }
 
+/* Offcanvas filters */
+.filters-offcanvas {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 300px;
+  height: 100vh;
+  background: var(--maho-color-background);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+}
+
+.filters-offcanvas.open {
+  left: 0;
+}
+
+.filters-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.filters-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--maho-color-border);
+}
+
+.filters-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--maho-color-text-primary);
+}
+
+.filters-trigger {
+  display: none;
+  background: var(--maho-color-primary);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 15px;
+  font-size: 14px;
+  font-weight: normal;
+  height: auto;
+  align-self: center;
+}
+
+/* Expand all filters in offcanvas */
+.filters-offcanvas #narrow-by-list,
+.filters-offcanvas #narrow-by-list.no-display,
+.filters-offcanvas .block-layered-nav dd,
+.filters-offcanvas .block-layered-nav dd.no-display,
+.filters-offcanvas .sidebar .block .block-content,
+.filters-offcanvas .sidebar .block .block-content.no-display,
+.filters-offcanvas .col-left-first .block .block-content,
+.filters-offcanvas .col-left-first .block .block-content.no-display {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  opacity: 1 !important;
+}
+
+/* Hide the redundant outer filters header */
+.filters-offcanvas .filters-header {
+  display: none !important;
+}
+
+.filters-offcanvas .block-layered-nav dt,
+.filters-offcanvas .sidebar .block .block-title,
+.filters-offcanvas .col-left-first .block .block-title {
+  cursor: default !important;
+  color: var(--maho-color-text-primary);
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  border: none;
+  pointer-events: none !important;
+}
+
+/* Remove any toggle arrows/icons in offcanvas */
+.filters-offcanvas .block-title::after,
+.filters-offcanvas dt::after {
+  display: none !important;
+}
+
 /* Mobile styles - simplified */
 @media only screen and (max-width: 770px) {
+  .filters-trigger {
+    display: block;
+  }
   /* Hide radio inputs and tab list */
   .product-collateral .tab-selector {
     display: none;
   }
-  
+
   .product-collateral .collateral-tab-list {
     display: none;
   }
-  
+
   .product-collateral .collateral-tabs-content {
     border: none;
   }
-  
+
   /* Show all content sections with headers */
   .product-collateral .tab-panel {
     display: block;
     margin-bottom: 30px;
     padding: 0;
   }
-  
+
   .product-collateral .tab-panel::before {
     content: attr(data-title);
     display: block;
