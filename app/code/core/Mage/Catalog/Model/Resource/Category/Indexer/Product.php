@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -117,6 +117,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         $this->_refreshAnchorRelations($allCategoryIds, $productId);
         $this->_refreshDirectRelations($categoryIds, $productId);
         $this->_refreshRootRelations($productId);
+
         return $this;
     }
 
@@ -172,6 +173,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         $this->_refreshAnchorRelations($allCategoryIds, $productIds);
         $this->_refreshDirectRelations($categoryIds, $productIds);
         $this->_refreshRootRelations($productIds);
+
         return $this;
     }
 
@@ -290,6 +292,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                 $this->_refreshNotAnchorRootCategories($reindexRootCategoryIds);
             }
         }
+
     }
 
     /**
@@ -786,6 +789,9 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     #[\Override]
     public function reindexAll()
     {
+        // Process all dynamic categories BEFORE regular indexing
+        $this->_processDynamicCategories();
+
         $this->useIdxTable(true);
         $this->beginTransaction();
         try {
@@ -1173,5 +1179,19 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
             return $this->getTable('catalog/category_product_indexer_idx');
         }
         return $this->getTable('catalog/category_product_indexer_tmp');
+    }
+
+    /**
+     * Process dynamic categories during reindex
+     */
+    protected function _processDynamicCategories(): void
+    {
+        try {
+            /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
+            $processor = Mage::getModel('catalog/category_dynamic_processor');
+            $processor->processAllDynamicCategories();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
     }
 }

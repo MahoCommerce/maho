@@ -67,6 +67,8 @@ namespace PHPSTORM_META {
         'catalog_resource/category_attribute_source_mode' => \Mage_Catalog_Model_Resource_Category_Attribute_Source_Mode::class,
         'catalog_resource/category_attribute_source_page' => \Mage_Catalog_Model_Resource_Category_Attribute_Source_Page::class,
         'catalog_resource/category_collection' => \Mage_Catalog_Model_Resource_Category_Collection::class,
+        'catalog_resource/category_dynamic_rule' => \Mage_Catalog_Model_Resource_Category_Dynamic_Rule::class,
+        'catalog_resource/category_dynamic_rule_collection' => \Mage_Catalog_Model_Resource_Category_Dynamic_Rule_Collection::class,
         'catalog_resource/category_flat' => \Mage_Catalog_Model_Resource_Category_Flat::class,
         'catalog_resource/category_flat_collection' => \Mage_Catalog_Model_Resource_Category_Flat_Collection::class,
         'catalog_resource/category_indexer_product' => \Mage_Catalog_Model_Resource_Category_Indexer_Product::class,
