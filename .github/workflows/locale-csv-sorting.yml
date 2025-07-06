@@ -26,7 +26,11 @@ jobs:
           php -r '
             foreach (glob("app/locale/en_US/*.csv") as $file) {
               $lines = file($file, FILE_IGNORE_NEW_LINES);
-              natcasesort($lines);
+              usort($lines, function($a, $b) {
+                $a = str_getcsv($a)[0] ?? "";
+                $b = str_getcsv($b)[0] ?? "";
+                return strnatcasecmp($a, $b);
+              });
               file_put_contents($file, implode(PHP_EOL, $lines) . PHP_EOL);
             }
           '
@@ -46,7 +50,11 @@ jobs:
             echo "php -r '"
             echo "  foreach (glob(\"app/locale/en_US/*.csv\") as \$file) {"
             echo "    \$lines = file(\$file, FILE_IGNORE_NEW_LINES);"
-            echo "    natcasesort(\$lines);"
+            echo "    usort(\$lines, function(\$a, \$b) {"
+            echo "      \$a = str_getcsv(\$a)[0] ?? \"\";"
+            echo "      \$b = str_getcsv(\$b)[0] ?? \"\";"
+            echo "      return strnatcasecmp(\$a, \$b);"
+            echo "    });"
             echo "    file_put_contents(\$file, implode(PHP_EOL, \$lines) . PHP_EOL);"
             echo "  }"
             echo "'"
