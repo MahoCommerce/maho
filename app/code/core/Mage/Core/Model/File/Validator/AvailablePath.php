@@ -54,7 +54,7 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Constraint
         ?array $availablePaths = null,
         ?string $protectedPathMessage = null,
         ?string $notAvailablePathMessage = null,
-        ?string $protectedLfiMessage = null
+        ?string $protectedLfiMessage = null,
     ) {
         parent::__construct($options, $groups, $payload);
 

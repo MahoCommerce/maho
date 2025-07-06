@@ -30,7 +30,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
         ?array $groups = null,
         mixed $payload = null,
         ?array $protectedExtensions = null,
-        ?string $protectedExtensionMessage = null
+        ?string $protectedExtensionMessage = null,
     ) {
         parent::__construct($options, $groups, $payload);
 

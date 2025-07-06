@@ -40,7 +40,7 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
         ?string $encoding = null,
         ?string $name = null,
         ?string $tooShortMessage = null,
-        ?string $tooLongMessage = null
+        ?string $tooLongMessage = null,
     ) {
         parent::__construct($options, $groups, $payload);
 

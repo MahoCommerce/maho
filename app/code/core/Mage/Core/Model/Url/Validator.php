@@ -25,7 +25,7 @@ class Mage_Core_Model_Url_Validator extends Url
         mixed $options = null,
         ?array $groups = null,
         mixed $payload = null,
-        ?string $message = null
+        ?string $message = null,
     ) {
         // Set default message if not provided
         $message ??= 'Invalid URL "{{ value }}".';

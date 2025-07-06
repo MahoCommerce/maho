@@ -42,7 +42,7 @@ class Mage_Core_Model_Layout_Validator extends Constraint
         ?string $invalidTemplatePathMessage = null,
         ?string $invalidBlockNameMessage = null,
         ?string $protectedHelperMessage = null,
-        ?string $invalidXmlObjectMessage = null
+        ?string $invalidXmlObjectMessage = null,
     ) {
         parent::__construct($options, $groups, $payload);
 

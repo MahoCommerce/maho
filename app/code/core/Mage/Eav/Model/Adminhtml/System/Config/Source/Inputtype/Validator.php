@@ -32,7 +32,7 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends 
         mixed $payload = null,
         ?array $haystack = null,
         ?bool $strict = null,
-        ?string $notInArrayMessage = null
+        ?string $notInArrayMessage = null,
     ) {
         parent::__construct($options, $groups, $payload);
 
