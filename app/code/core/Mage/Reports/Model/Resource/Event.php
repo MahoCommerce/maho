@@ -62,7 +62,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
         $eventTypeId,
         $eventSubjectId,
         $subtype,
-        $skipIds = []
+        $skipIds = [],
     ) {
         $idFieldName = $collection->getResource()->getIdFieldName();
 

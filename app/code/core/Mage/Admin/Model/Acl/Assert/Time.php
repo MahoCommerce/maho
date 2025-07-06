@@ -23,7 +23,7 @@ class Mage_Admin_Model_Acl_Assert_Time implements Mage_Admin_Model_Acl_Assert_In
         Mage_Admin_Model_Acl $acl,
         ?Mage_Admin_Model_Acl_Role $role = null,
         ?Mage_Admin_Model_Acl_Resource $resource = null,
-        $privilege = null
+        $privilege = null,
     ) {
         return $this->_isCleanTime(time());
     }

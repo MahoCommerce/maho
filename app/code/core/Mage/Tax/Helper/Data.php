@@ -477,7 +477,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         $ctc = null,
         $store = null,
         $priceIncludesTax = null,
-        $roundPrice = true
+        $roundPrice = true,
     ) {
         if (!$price) {
             return $price;

@@ -104,7 +104,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
         Mage_Sales_Model_Order_Payment_Transaction $transaction,
         $orderId,
         $paymentId,
-        $txnId
+        $txnId,
     ) {
         $select = $this->_getLoadByUniqueKeySelect($orderId, $paymentId, $txnId);
         $data   = $this->_getWriteAdapter()->fetchRow($select);

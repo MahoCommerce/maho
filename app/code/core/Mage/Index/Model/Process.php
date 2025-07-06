@@ -349,7 +349,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
      */
     protected function _processEventsCollection(
         Mage_Index_Model_Resource_Event_Collection $eventsCollection,
-        $skipUnmatched = true
+        $skipUnmatched = true,
     ) {
         // We can't reload the collection because of transaction
         while ($event = $eventsCollection->fetchItem()) {
@@ -583,6 +583,24 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
             $this->unlock();
             throw $e;
         }
+        return $this;
+    }
+
+    public function reindexEntity(int|array $entityIds): self
+    {
+        if ($this->isLocked()) {
+            Mage::throwException(Mage::helper('index')->__('Process is locked.'));
+        }
+
+        $this->lock();
+        try {
+            $this->getIndexer()->reindexEntity($entityIds);
+            $this->unlock();
+        } catch (Exception $e) {
+            $this->unlock();
+            throw $e;
+        }
+
         return $this;
     }
 

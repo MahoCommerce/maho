@@ -812,7 +812,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $columnName,
         $refTableName,
         $refColumnName,
-        $onDelete = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE
+        $onDelete = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
     ) {
         $onDelete = strtoupper($onDelete);
         if ($onDelete == Varien_Db_Adapter_Interface::FK_ACTION_CASCADE
@@ -865,7 +865,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $refColumnName,
         $onDelete = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
         $onUpdate = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
-        $purge = false
+        $purge = false,
     ) {
         return $this->addForeignKey(
             $fkName,
@@ -1005,7 +1005,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $newColumnName,
         $definition,
         $flushData = false,
-        $schemaName = null
+        $schemaName = null,
     ) {
         if (!$this->tableColumnExists($tableName, $oldColumnName, $schemaName)) {
             throw new Zend_Db_Exception(sprintf(
@@ -2197,7 +2197,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $table,
         array $fields = [],
         $mode = false,
-        $step = 10000
+        $step = 10000,
     ) {
         $limitOffset = 0;
         $totalAffectedRows = 0;
@@ -2801,7 +2801,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $indexName,
         $fields,
         $indexType = Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX,
-        $schemaName = null
+        $schemaName = null,
     ) {
         $columns = $this->describeTable($tableName, $schemaName);
         $keyList = $this->getIndexList($tableName, $schemaName);
@@ -2906,7 +2906,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $onUpdate = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
         $purge = false,
         $schemaName = null,
-        $refSchemaName = null
+        $refSchemaName = null,
     ) {
         $this->dropForeignKey($tableName, $fkName, $schemaName);
 

@@ -379,7 +379,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         $shippingAddress = null,
         $billingAddress = null,
         $customerTaxClass = null,
-        $store = null
+        $store = null,
     ) {
         if ($shippingAddress === false && $billingAddress === false && $customerTaxClass === false) {
             return $this->getRateOriginRequest($store);

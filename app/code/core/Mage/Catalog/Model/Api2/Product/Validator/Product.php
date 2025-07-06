@@ -444,7 +444,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         $field,
         $required = true,
         $equalsZero = false,
-        $skipIfConfigValueUsed = false
+        $skipIfConfigValueUsed = false,
     ) {
         // in case when 'Use Config Settings' is selected no validation needed
         if (!($skipIfConfigValueUsed && $this->_isConfigValueUsed($data, $field))) {
@@ -478,7 +478,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         $fieldSet,
         $field,
         $required = false,
-        $skipIfConfigValueUsed = false
+        $skipIfConfigValueUsed = false,
     ) {
         // in case when 'Use Config Settings' is selected no validation needed
         if (!($skipIfConfigValueUsed && $this->_isConfigValueUsed($data, $field))) {

@@ -91,13 +91,10 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      * Since the session is used as a singleton, the value will be in $_isFirstPageAfterLogin until the end of request,
      * unless it is reset intentionally from somewhere
      *
-     * @param string $namespace
-     * @param string $sessionName
-     * @return $this
      * @see self::login()
      */
     #[\Override]
-    public function init($namespace, $sessionName = null)
+    public function init(string $namespace, ?string $sessionName = null): self
     {
         parent::init($namespace, $sessionName);
         $this->isFirstPageAfterLogin();

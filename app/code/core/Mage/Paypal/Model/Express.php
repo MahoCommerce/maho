@@ -491,7 +491,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     #[\Override]
     public function submitRecurringProfile(
         Mage_Payment_Model_Recurring_Profile $profile,
-        Mage_Payment_Model_Info $paymentInfo
+        Mage_Payment_Model_Info $paymentInfo,
     ) {
         $token = $paymentInfo->
             getAdditionalInformation(Mage_Paypal_Model_Express_Checkout::PAYMENT_INFO_TRANSPORT_TOKEN);

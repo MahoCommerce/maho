@@ -23,7 +23,7 @@ class Mage_Api_Model_Acl_Assert_Ip implements Mage_Api_Model_Acl_Assert_Interfac
         Mage_Api_Model_Acl $acl,
         ?Mage_Api_Model_Acl_Role $role = null,
         ?Mage_Api_Model_Acl_Resource $resource = null,
-        $privilege = null
+        $privilege = null,
     ) {
         return $this->_isCleanIP(Mage::helper('core/http')->getRemoteAddr());
     }

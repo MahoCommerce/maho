@@ -39,7 +39,7 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
      */
     public function getSelectionFinalPrice(
         Mage_Catalog_Model_Product_Configuration_Item_Interface $item,
-        $selectionProduct
+        $selectionProduct,
     ) {
         $selectionProduct->unsetData('final_price');
         return $item->getProduct()->getPriceModel()->getSelectionFinalTotalPrice(
