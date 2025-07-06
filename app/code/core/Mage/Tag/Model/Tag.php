@@ -6,7 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -206,20 +206,6 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
     public function productDeleteEventAction($observer)
     {
         $this->_getResource()->decrementProducts($this->_getProductEventTagsCollection($observer)->getAllIds());
-        return $this;
-    }
-
-    /**
-     * Add summary data to current object
-     *
-     * @deprecated after 1.4.0.0
-     * @param int $storeId
-     * @return $this
-     */
-    public function addSummary($storeId)
-    {
-        $this->setStoreId($storeId);
-        $this->_getResource()->addSummary($this);
         return $this;
     }
 

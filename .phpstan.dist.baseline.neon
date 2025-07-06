@@ -28003,42 +28003,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/sql/salesrule_setup/upgrade-1.6.0.2-1.6.0.3.php
 
 		-
-			message: '#^Method Mage_Shipping_Block_Tracking_Popup\:\:getOrderId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Method Mage_Shipping_Block_Tracking_Popup\:\:getShipId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Method Mage_Shipping_Block_Tracking_Popup\:\:getTrackId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_order_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_ship_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_track_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
 			message: '#^Call to an undefined method Mage_Shipping_Model_Carrier_Abstract\:\:_getQuotes\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -28445,15 +28409,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Tag/Model/Resource/Tag/Relation.php
-
-		-
-			message: '''
-				#^Call to deprecated method aggregate\(\) of class Mage_Tag_Model_Resource_Tag\:
-				after 1\.4\.0\.0$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Tag.php
 
 		-
 			message: '#^Method Mage_Tag_Model_Tag\:\:getApprovedStatus\(\) has no return type specified\.$#'
