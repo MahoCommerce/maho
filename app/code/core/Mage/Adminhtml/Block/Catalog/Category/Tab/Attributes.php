@@ -138,6 +138,11 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
         $form->addValues($this->getCategory()->getData());
 
+        // Add note to the "Is Dynamic Category" field
+        if ($element = $form->getElement('is_dynamic')) {
+            $element->setNote(Mage::helper('catalog')->__('When enabled, associated products are automatically recalculated when reindex runs.'));
+        }
+
         // If this is the Dynamic Category attribute group, add the dynamic rules form
         if ($group->getAttributeGroupName() == 'Dynamic Category') {
             // Add dynamic rules fieldset
