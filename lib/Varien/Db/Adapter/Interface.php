@@ -237,7 +237,7 @@ interface Varien_Db_Adapter_Interface
         $newColumnName,
         $definition,
         $flushData = false,
-        $schemaName = null
+        $schemaName = null,
     );
 
     /**
@@ -344,7 +344,7 @@ interface Varien_Db_Adapter_Interface
         $onUpdate = self::FK_ACTION_CASCADE,
         $purge = false,
         $schemaName = null,
-        $refSchemaName = null
+        $refSchemaName = null,
     );
 
     /**

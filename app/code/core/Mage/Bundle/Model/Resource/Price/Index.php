@@ -452,7 +452,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
     protected function _addAttributeDataToSelect(
         Varien_Db_Select $select,
         $attributeCode,
-        Mage_Core_Model_Website $website
+        Mage_Core_Model_Website $website,
     ) {
         $attribute  = $this->_getAttribute($attributeCode);
         $store      = $website->getDefaultStore();
@@ -723,7 +723,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         $priceData,
         $priceIndex,
         $website,
-        $group
+        $group,
     ) {
         $minPrice = $maxPrice = $basePrice;
         $optPrice = 0;

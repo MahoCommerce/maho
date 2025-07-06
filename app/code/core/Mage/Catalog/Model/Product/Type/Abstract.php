@@ -346,7 +346,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     public function processConfiguration(
         Varien_Object $buyRequest,
         $product = null,
-        $processMode = self::PROCESS_MODE_LITE
+        $processMode = self::PROCESS_MODE_LITE,
     ) {
         $_products = $this->_prepareProduct($buyRequest, $product, $processMode);
 

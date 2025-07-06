@@ -321,7 +321,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
         $shippingAddress = null,
         $billingAddress = null,
         $ctc = null,
-        $priceIncludesTax = null
+        $priceIncludesTax = null,
     ) {
         $product = $this->_getProduct();
         $store = $this->_getStore();
