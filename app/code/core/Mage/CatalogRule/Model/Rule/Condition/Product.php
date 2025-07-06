@@ -27,6 +27,9 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
         if ($attrCode == 'attribute_set_id') {
             return $this->validateAttribute($object->getData($attrCode));
         }
+        if ($attrCode == 'type_id') {
+            return $this->validateAttribute($object->getData($attrCode));
+        }
 
         $oldAttrValue = $object->hasData($attrCode) ? $object->getData($attrCode) : null;
         $object->setData($attrCode, $this->_getAttributeValue($object));
