@@ -182,18 +182,6 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
     }
 
     /**
-     * Get Model
-     *
-     * @param string $modelName
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getModel()
-     */
-    protected function _getModel($modelName)
-    {
-        return Mage::getModel($modelName);
-    }
-
-    /**
      * Get Rate
      *
      * @return array|bool

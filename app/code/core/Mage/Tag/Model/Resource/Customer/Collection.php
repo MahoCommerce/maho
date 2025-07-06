@@ -6,7 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,50 +44,6 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
         parent::_initSelect();
         $this->_joinFields();
         $this->_setIdFieldName('tag_relation_id');
-        return $this;
-    }
-
-    /**
-     * Set flag about joined table.
-     * setFlag method must be used in future.
-     *
-     * @deprecated after 1.3.2.3
-     *
-     * @param string $table
-     * @return $this
-     */
-    public function setJoinFlag($table)
-    {
-        $this->setFlag($table, true);
-        return $this;
-    }
-
-    /**
-     * Get flag's status about joined table.
-     * getFlag method must be used in future.
-     *
-     * @deprecated after 1.3.2.3
-     *
-     * @param string $table
-     * @return bool
-     */
-    public function getJoinFlag($table)
-    {
-        return $this->getFlag($table);
-    }
-
-    /**
-     * Unset value of join flag.
-     * Set false (bool) value to flag instead in future.
-     *
-     * @deprecated after 1.3.2.3
-     *
-     * @param string $table
-     * @return $this
-     */
-    public function unsetJoinFlag($table = null)
-    {
-        $this->setFlag($table, false);
         return $this;
     }
 
