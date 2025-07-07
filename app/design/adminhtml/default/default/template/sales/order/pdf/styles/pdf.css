@@ -1,14 +1,14 @@
 @page {
     size: A4;
     margin: 15mm;
-    font-family: "DejaVu Sans", sans-serif;
+    font-family: sans-serif;
 }
 
 .pdf-document {
     width: 100%;
     font-size: 10pt;
     color: #000;
-    font-family: "DejaVu Sans", sans-serif;
+    font-family: sans-serif;
     line-height: 1.4;
 }
 
