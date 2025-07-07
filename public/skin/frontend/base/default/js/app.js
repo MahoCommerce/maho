@@ -363,6 +363,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const d = document;
     const body = document.body;
 
+    const maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
+    const maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
+
     /* Wishlist Toggle Class */
     document.querySelectorAll('.change').forEach(element => {
         element.addEventListener('click', function(e) {
@@ -424,52 +427,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // Header Menus
     // ==============================================
 
-    MenuManager.init();
+    if (document.getElementById('header-nav')) {
+        MenuManager.init();
 
-    // Prevent sub menus from spilling out of the window.
-    function preventMenuSpill() {
-        const windowWidth = window.innerWidth;
-        document.querySelectorAll('ul.level0').forEach(ul => {
-            // Show it long enough to get info, then hide it.
-            ul.classList.add('position-test');
-            ul.classList.remove('spill');
+        // Prevent sub menus from spilling out of the window.
+        function preventMenuSpill() {
+            const windowWidth = window.innerWidth;
+            document.querySelectorAll('ul.level0').forEach(ul => {
+                // Show it long enough to get info, then hide it.
+                ul.classList.add('position-test');
+                ul.classList.remove('spill');
 
-            const width = ul.offsetWidth;
-            const offset = ul.getBoundingClientRect().left;
+                const width = ul.offsetWidth;
+                const offset = ul.getBoundingClientRect().left;
 
-            ul.classList.remove('position-test');
+                ul.classList.remove('position-test');
 
-            // Add the spill class if it will spill off the page.
-            if ((offset + width) > windowWidth) {
-                ul.classList.add('spill');
-            }
-        });
+                // Add the spill class if it will spill off the page.
+                if ((offset + width) > windowWidth) {
+                    ul.classList.add('spill');
+                }
+            });
+        }
+        preventMenuSpill();
+        window.addEventListener('delayed-resize', preventMenuSpill);
     }
-    preventMenuSpill();
-    window.addEventListener('delayed-resize', preventMenuSpill);
 
     // ==============================================
     // Menu State
     // ==============================================
 
-    const resetMenuState = (mq) => {
-        document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
-        document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
-        document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
+    if (document.querySelector('.page-header')) {
+        const resetMenuState = (mq) => {
+            document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
+            document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
+            document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
 
-        let minicart = document.getElementById('header-cart');
-        let mobileContainer = document.getElementById('minicart-container-mobile');
-        if (mq.matches) {
-            mobileContainer.appendChild(minicart);
-        } else {
-            document.querySelector('.skip-cart').after(minicart);
-        }
-    };
+            let minicart = document.getElementById('header-cart');
+            let mobileContainer = document.getElementById('minicart-container-mobile');
+            if (mq.matches) {
+                mobileContainer.appendChild(minicart);
+            } else {
+                document.querySelector('.skip-cart').after(minicart);
+            }
+        };
 
-    let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
-    let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
-    maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
-    resetMenuState(maxWidthMediumMediaQuery);
+        maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
+        resetMenuState(maxWidthMediumMediaQuery);
+    }
 
     // ==============================================
     // UI Pattern - Media Switcher
@@ -566,9 +571,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasTabs) {
             const ul = document.createElement('ul');
             ul.className = 'toggle-tabs';
+            ul.role = 'tablist';
             dts.forEach(dt => {
                 const li = document.createElement('li');
                 li.id = dt.id;
+                li.role = 'tab';
                 li.innerHTML = dt.innerHTML;
                 ul.appendChild(li);
             });
@@ -641,7 +648,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const maxWidthMediumMediaQuery = window.matchMedia('(max-width: 770px)');
         maxWidthMediumMediaQuery.addEventListener('change', repositionLayered);
         repositionLayered(maxWidthMediumMediaQuery);
     }
@@ -687,23 +693,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     maxWidthMediumMediaQuery.addEventListener('change', toggleElementsForMediumSize);
     toggleElementsForMediumSize(maxWidthMediumMediaQuery);
-
-    // ==============================================
-    // OPC - Progress Block
-    // ==============================================
-
-    if (document.body.classList.contains('checkout-onepage-index')) {
-        const repositionCheckoutProgress = (mq) => {
-            const checkoutProgressWrapper = document.getElementById('checkout-progress-wrapper');
-            if (mq.matches) {
-                document.getElementById('checkout-step-review').prepend(checkoutProgressWrapper);
-            } else {
-                document.querySelector('.col-right').prepend(checkoutProgressWrapper);
-            }
-        };
-        maxWidthLargeMediaQuery.addEventListener('change', repositionCheckoutProgress);
-        repositionCheckoutProgress(maxWidthLargeMediaQuery);
-    }
 
     // ==============================================
     // Checkout Cart - events

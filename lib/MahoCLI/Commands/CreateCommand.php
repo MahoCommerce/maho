@@ -113,7 +113,7 @@ class CreateCommand extends BaseMahoCommand
     private function generateCommandContent(
         string $className,
         string $commandName,
-        string $description
+        string $description,
     ): string {
         return <<<FILECONTENT
 <?php

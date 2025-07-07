@@ -117,7 +117,8 @@ async function mahoFetch(url, options) {
 
         if (typeof result === 'object' && result !== null) {
             if (result.error) {
-                throw new MahoError(result.message ?? result.error);
+                const message = result.message ?? result.error;
+                throw new MahoError(typeof message === 'string' ? message : 'An error occurred.');
             } else if (result.ajaxExpired && result.ajaxRedirect) {
                 setLocation(result.ajaxRedirect);
                 await new Promise((resolve) => {});
@@ -182,6 +183,53 @@ function generateRandomString(length) {
         return [...Array(length)].map(() => Math.random().toString(36)[2]).join('');
     }
     return '';
+}
+
+/**
+ * Set Varien type route params, i.e. /id/1/
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setRouteParams(url, params = {}) {
+    url = new URL(url);
+
+    const noTrailingSlash = !url.pathname.endsWith('/');
+    if (noTrailingSlash) {
+        url.pathname += '/';
+    }
+    for (const [ key, val ] of Object.entries(params)) {
+        const regex = new RegExp(String.raw`\/${key}\/(.*?)\/`);
+        if (val === null || val === false) {
+            url.pathname = url.pathname.replace(regex, '/');
+        } else if (url.pathname.match(regex)) {
+            url.pathname = url.pathname.replace(regex, `/${key}/${val}/`);
+        } else {
+            url.pathname += `${key}/${val}/`;
+        }
+    }
+    if (noTrailingSlash) {
+        url.pathname = url.pathname.slice(0, -1);
+    }
+    return url.toString();
+}
+
+/**
+ * Set query params, i.e. ?id=1
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setQueryParams(url, params = {}) {
+    url = new URL(url);
+    for (const [ key, val ] of Object.entries(params)) {
+        if (val === null || val === false) {
+            url.searchParams.delete(key);
+        } else {
+            url.searchParams.set(key, val);
+        }
+    }
+    return url.toString();
 }
 
 /**

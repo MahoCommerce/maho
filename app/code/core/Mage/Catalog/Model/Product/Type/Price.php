@@ -363,7 +363,7 @@ class Mage_Catalog_Model_Product_Type_Price
         $rulePrice = false,
         $wId = null,
         $gId = null,
-        $productId = null
+        $productId = null,
     ) {
         Varien_Profiler::start('__PRODUCT_CALCULATE_PRICE__');
         if ($wId instanceof Mage_Core_Model_Store) {
@@ -410,7 +410,7 @@ class Mage_Catalog_Model_Product_Type_Price
         $specialPrice,
         $specialPriceFrom,
         $specialPriceTo,
-        $store = null
+        $store = null,
     ) {
         if (!is_null($specialPrice) && $specialPrice != false) {
             if (Mage::app()->getLocale()->isStoreDateInInterval($store, $specialPriceFrom, $specialPriceTo)) {

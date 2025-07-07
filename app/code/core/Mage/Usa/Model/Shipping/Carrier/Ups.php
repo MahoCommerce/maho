@@ -1609,7 +1609,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         array $allowedCurrencies,
         array &$costArr,
         array &$priceArr,
-        bool $negotiatedActive
+        bool $negotiatedActive,
     ): void {
         $code = $shipElement['Service']['Code'] ?? '';
         if (in_array($code, $allowedMethods)) {

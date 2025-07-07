@@ -1,6 +1,10 @@
 {
     "name": "mahocommerce/maho",
-    "description": "",
+    "description": "Free and open source ecommerce platform, created in 2024 on the M1 platform, PHP 8.3+",
+    "keywords": [
+        "ecommerce", "e-commerce", "magento", "openmage", "shopping-cart", "php", "symfony", "payment",
+        "security", "libsodium" ,"2fa", "two-factor-authentication", "cli", "web-shop", "online-store"
+    ],
     "homepage": "https://mahocommerce.com",
     "license": [
         "OSL-3.0",
@@ -8,7 +12,7 @@
     ],
     "type": "maho-source",
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-dom": "*",
@@ -31,23 +35,24 @@
         "ext-sodium": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
+        "altcha-org/altcha": "^1.1.0",
+        "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
+        "intervention/image": "^3.11",
+        "lbuchs/webauthn": "^2.2",
+        "mahocommerce/icons": "^1",
         "mahocommerce/maho-composer-plugin": "^3",
         "pelago/emogrifier": "^7.0",
         "shardj/zf1-future": "^1.24.1",
-        "symfony/console": "^7.1",
         "spomky-labs/otphp": "^11.3",
-        "bacon/bacon-qr-code": "^3.0",
-        "symfony/polyfill-php83": "^1.31",
-        "lbuchs/webauthn": "^2.2",
-        "altcha-org/altcha": "^1.1.0",
-        "mahocommerce/icons": "^1",
-        "symfony/mailer": "^7.2",
+        "symfony/cache": "^7.3",
+        "symfony/console": "^7.3",
+        "symfony/http-foundation": "^7.3",
+        "symfony/mailer": "^7.3",
         "symfony/polyfill-php84": "^1.31",
-        "intervention/image": "^3.11",
-        "symfony/cache": "^7.2"
+        "symfony/var-dumper": "^7.3"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "*",
@@ -60,22 +65,24 @@
         "symfony/polyfill-intl-normalizer": "*",
         "symfony/polyfill-php80": "*",
         "symfony/polyfill-php81": "*",
-        "symfony/polyfill-php82": "*"
+        "symfony/polyfill-php82": "*",
+        "symfony/polyfill-php83": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
         "mahocommerce/maho-phpstan-plugin": "^3",
         "phpstan/phpstan": "^2.0",
-        "phpstan/phpstan-deprecation-rules": "^2.0"
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "rector/rector": "^2"
     },
     "suggest": {
-        "colinmollenhour/magento-redis-session": "Redis support for PHP sessions",
-        "fballiano/openmage-cssjs-minify":  "Minification support for CSS/JS",
-        "fballiano/openmage-defer-javascripts":  "Move all javascripts to the end of all pages, preserving execution order",
+        "fballiano/openmage-cssjs-minify": "Minification support for CSS/JS",
+        "fballiano/openmage-defer-javascripts": "Move all javascripts to the end of all pages, preserving execution order",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution"
     },
     "conflict": {
-        "colinmollenhour/cache-backend-redis": "*"
+        "colinmollenhour/cache-backend-redis": "*",
+        "colinmollenhour/magento-redis-session": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -87,7 +94,6 @@
     "extra": {
         "patches": {
             "shardj/zf1-future": {
-                "MAG-1.1.1": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/c0a65fb380c98ae1e0618014d1bbe4e56fa39e01/MAG-1.1.1.patch",
                 "MAG-1.9.3.0": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/c0a65fb380c98ae1e0618014d1bbe4e56fa39e01/MAG-1.9.3.0.patch",
                 "MAG-1.9.3.7 - SUPEE-10415": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/MAG-1.9.3.7.patch",
                 "OM-918 - Add runtime cache to Zend_Locale_Data": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-918.patch",
@@ -108,7 +114,7 @@
             "mahocommerce/maho-composer-plugin": true
         },
         "platform": {
-            "php": "8.2"
+            "php": "8.3"
         }
     }
 }

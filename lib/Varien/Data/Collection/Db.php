@@ -721,7 +721,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * @param bool $printQuery
      * @param bool $logQuery
-     * @return Varien_Data_Collection|Varien_Data_Collection_Db
+     * @return $this
      */
     #[\Override]
     public function loadData($printQuery = false, $logQuery = false)

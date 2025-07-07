@@ -88,39 +88,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     /**
-     * Retrieve array of collection names by code specified in request
-     *
-     * @deprecated after 1.4.0.1
-     * @return array
-     */
-    protected function _getCollectionNames()
-    {
-        return [];
-    }
-
-    /**
-     * Refresh statistics for last 25 hours
-     *
-     * @deprecated after 1.4.0.1
-     * @return $this
-     */
-    public function refreshRecentAction()
-    {
-        return $this->_forward('refreshRecent', 'report_statistics');
-    }
-
-    /**
-     * Refresh statistics for all period
-     *
-     * @deprecated after 1.4.0.1
-     * @return $this
-     */
-    public function refreshLifetimeAction()
-    {
-        return $this->_forward('refreshLifetime', 'report_statistics');
-    }
-
-    /**
      * Export sales report grid to CSV format
      */
     public function exportSalesCsvAction()
@@ -343,14 +310,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_coupons_grid');
         $this->_initReportAction($grid);
         $this->_prepareDownloadResponse(...$grid->getExcelFile('coupons.xml', -1));
-    }
-
-    /**
-     * @deprecated after 1.4.0.1
-     */
-    public function refreshStatisticsAction()
-    {
-        return $this->_forward('index', 'report_statistics');
     }
 
     #[\Override]

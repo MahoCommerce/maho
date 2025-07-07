@@ -3091,12 +3091,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
 
 		-
-			message: '#^Parameter \#1 \$emptyLabel of method Mage_Directory_Model_Resource_Country_Collection\:\:toOptionArray\(\) expects string, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Gui/Edit/Tab/Wizard.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard\:\:\$_addMapButtonHtml has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -3815,12 +3809,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column.php
-
-		-
-			message: '#^Parameter \#1 \$emptyLabel of method Mage_Directory_Model_Resource_Country_Collection\:\:toOptionArray\(\) expects string, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Filter/Country.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date\:\:getValue\(\) has no return type specified\.$#'
@@ -5227,12 +5215,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Allregion.php
 
 		-
-			message: '#^Parameter \#1 \$emptyLabel of method Mage_Directory_Model_Resource_Country_Collection\:\:toOptionArray\(\) expects string, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Allregion.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Allregion\:\:\$_countries has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -5319,12 +5301,6 @@ parameters:
 		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Country\:\:toOptionArray\(\) has parameter \$isMultiselect with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Country.php
-
-		-
-			message: '#^Method Varien_Data_Collection\:\:toOptionArray\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Country.php
 
@@ -6247,18 +6223,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/WidgetController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:_decodeInput\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:_decodeInput\(\) has parameter \$encoded with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:_filterStockData\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6296,12 +6260,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:alertsStockGridAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:bundlesAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
@@ -6763,12 +6721,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/System/Config/ValidatevatController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_CustomerController\:\:_sendUploadResponse\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_CustomerController\:\:cartAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7171,12 +7123,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Newsletter/QueueController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Newsletter_SubscriberController\:\:_sendUploadResponse\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Newsletter/SubscriberController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Newsletter_SubscriberController\:\:exportCsvAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7472,12 +7418,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Promo_CatalogController\:\:_initAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Promo_CatalogController\:\:addToAlersAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
@@ -7801,18 +7741,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:exportOrderedCsvAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:exportOrderedExcelAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:exportSoldCsvAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7838,12 +7766,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:lowstockAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:orderedAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
@@ -8030,12 +7952,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Report_SalesController\:\:invoicedAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/SalesController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Report_SalesController\:\:refreshStatisticsAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Report/SalesController.php
@@ -10197,18 +10113,6 @@ parameters:
 		-
 			message: '#^Property Mage_Api_Model_Session\:\:\$sessionIds has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Api/Model/Session.php
-
-		-
-			message: '#^Return type \(bool\) of method Mage_Api_Model_Session\:\:clear\(\) should be compatible with return type \(\$this\(Mage_Core_Model_Session_Abstract_Varien\)\) of method Mage_Core_Model_Session_Abstract_Varien\:\:clear\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Session.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_Api_Model_Session\:\:revalidateCookie\(\) should be compatible with return type \(\$this\(Mage_Core_Model_Session_Abstract_Varien\)\) of method Mage_Core_Model_Session_Abstract_Varien\:\:revalidateCookie\(\)$#'
-			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Session.php
 
@@ -12426,12 +12330,6 @@ parameters:
 		-
 			message: '#^Property Mage_Catalog_Model_Product_Image\:\:\$_watermarkWidth has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} and false will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Image.php
 
@@ -14839,24 +14737,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
 
 		-
-			message: '#^Method Mage_Checkout_Model_Type_Abstract\:\:_emailOrderConfirmation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
-
-		-
-			message: '#^Parameter \#2 \$value of method Mage_Core_Model_Email\:\:setTemplateVar\(\) expects string\|null, Mage_Sales_Model_Order given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
-
-		-
-			message: '#^Parameter \#2 \$value of method Mage_Core_Model_Email\:\:setTemplateVar\(\) expects string\|null, Mage_Sales_Model_Quote given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
-
-		-
 			message: '#^Method Mage_Sales_Model_Quote\:\:getBillingAddress\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -16381,12 +16261,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Domainpolicy.php
 
 		-
-			message: '#^Property Mage_Core_Model_Email\:\:\$_tplVars has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email.php
-
-		-
 			message: '#^Method Mage_Core_Model_Email_Template\:\:getProcessedTemplate\(\) invoked with 2 parameters, 0\-1 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -16412,12 +16286,6 @@ parameters:
 
 		-
 			message: '#^Property Mage_Core_Model_Email_Template\:\:\$_defaultTemplates has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template.php
-
-		-
-			message: '#^Property Mage_Core_Model_Email_Template\:\:\$_mail has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Email/Template.php
@@ -16593,12 +16461,6 @@ parameters:
 		-
 			message: '#^Method Mage_Core_Model_Locale\:\:revert\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
-
-		-
-			message: '#^Parameter \#3 \$value of method Zend_Locale\:\:getTranslationList\(\) expects string\|null, int given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Locale.php
 
@@ -16915,18 +16777,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Resource.php
 
 		-
-			message: '#^Method Mage_Core_Model_Resource_Session\:\:setStaticSaveHandler\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Session.php
-
-		-
-			message: '#^Parameter \#6 \$gc of function session_set_save_handler expects callable\(string\)\: bool, array\{\$this\(Mage_Core_Model_Resource_Session\), ''gc''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Session.php
-
-		-
 			message: '#^Method Mage_Core_Model_Resource_Setup\:\:applyAllDataUpdates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -16987,12 +16837,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Type/Abstract.php
 
 		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Type/Db/Mysqli.php
-
-		-
 			message: '#^Method Mage_Core_Model_Resource_Url_Rewrite\:\:_construct\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -17021,36 +16865,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Session.php
-
-		-
-			message: '#^Parameter \#1 \$host of method Mage_Core_Model_Session_Abstract\:\:addHost\(\) expects string, true given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Core/Model/Session/Abstract.php
-
-		-
-			message: '#^Call to Mage\:\:getSingleton\(''cm_redissession/session''\) resulted in invalid type Mage_Cm_Redissession_Model_Session\.$#'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
-
-		-
-			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Varien\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
-
-		-
-			message: '#^Access to an undefined property Zend_Session_Namespace\:\:\$data\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Zend.php
-
-		-
-			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Zend\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Zend.php
 
 		-
 			message: '#^Method Mage_Core_Model_Store\:\:_getSession\(\) should return Mage_Core_Model_Session but returns Mage_Core_Model_Session_Abstract\.$#'
@@ -17189,12 +17003,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Url.php
-
-		-
-			message: '#^Method Mage_Core_Model_Url_Rewrite\:\:_sendRedirectHeaders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Url/Rewrite.php
 
 		-
 			message: '#^Method Mage_Core_Model_Url_Rewrite\:\:setTags\(\) invoked with 2 parameters, 1 required\.$#'
@@ -20816,36 +20624,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/GoogleAnalytics/Model/Observer.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:authorize\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:authorize\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:cancel\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:cancel\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:capture\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:capture\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:refund\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:refund\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:void\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:void\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
 
 		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
@@ -24649,12 +24427,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/System/Config/Source/BuyerCountry.php
 
 		-
-			message: '#^Method Varien_Data_Collection\:\:toOptionArray\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/BuyerCountry.php
-
-		-
 			message: '#^Method Mage_Paypal_Model_System_Config_Source_FetchingSchedule\:\:toOptionArray\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -24675,12 +24447,6 @@ parameters:
 		-
 			message: '#^Method Mage_Paypal_Model_System_Config_Source_MerchantCountry\:\:toOptionArray\(\) has parameter \$isMultiselect with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/MerchantCountry.php
-
-		-
-			message: '#^Method Varien_Data_Collection\:\:toOptionArray\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/System/Config/Source/MerchantCountry.php
 
@@ -28177,42 +27943,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/sql/salesrule_setup/upgrade-1.6.0.2-1.6.0.3.php
 
 		-
-			message: '#^Method Mage_Shipping_Block_Tracking_Popup\:\:getOrderId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Method Mage_Shipping_Block_Tracking_Popup\:\:getShipId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Method Mage_Shipping_Block_Tracking_Popup\:\:getTrackId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_order_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_ship_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_track_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
 			message: '#^Call to an undefined method Mage_Shipping_Model_Carrier_Abstract\:\:_getQuotes\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -28619,15 +28349,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Tag/Model/Resource/Tag/Relation.php
-
-		-
-			message: '''
-				#^Call to deprecated method aggregate\(\) of class Mage_Tag_Model_Resource_Tag\:
-				after 1\.4\.0\.0$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Tag/Model/Tag.php
 
 		-
 			message: '#^Method Mage_Tag_Model_Tag\:\:getApprovedStatus\(\) has no return type specified\.$#'
@@ -31012,24 +30733,6 @@ parameters:
 			path: app/design/frontend/base/default/template/cms/widget/static_block/default.phtml
 
 		-
-			message: '#^Variable \$html might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/base/default/template/core/messages.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/core/messages.phtml
-
-		-
-			message: '#^Variable \$types might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/core/messages.phtml
-
-		-
 			message: '#^Variable \$customer might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -32122,7 +31825,7 @@ parameters:
 			path: lib/Varien/Data/Collection/Db.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: array\<int\<0, max\>, string\> given\.$#'
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: array\<int\<0, max\>, non\-empty\-string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Varien/Data/Collection/Db.php
@@ -32510,180 +32213,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:addColumn\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:addColumn\(\) has parameter \$columnName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:addColumn\(\) has parameter \$definition with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:addColumn\(\) has parameter \$tableName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:addConstraint\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:clear_result\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:convertDate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:convertDate\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:convertDateTime\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:convertDateTime\(\) has parameter \$datetime with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropColumn\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropColumn\(\) has parameter \$columnName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropColumn\(\) has parameter \$tableName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropForeignKey\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropForeignKey\(\) has parameter \$fk with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropForeignKey\(\) has parameter \$table with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropKey\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropKey\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:dropKey\(\) has parameter \$table with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:multi_query\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:multi_query\(\) has parameter \$sql with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:raw_fetchRow\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:raw_fetchRow\(\) has parameter \$field with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:raw_fetchRow\(\) has parameter \$sql with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:tableColumnExists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:tableColumnExists\(\) has parameter \$columnName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Method Varien_Db_Adapter_Mysqli\:\:tableColumnExists\(\) has parameter \$tableName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Parameter \#2 \$value of method mysqli\:\:options\(\) expects int\|string, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
-
-		-
-			message: '#^Variable \$result might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: lib/Varien/Db/Adapter/Mysqli.php
 
 		-
 			message: '#^Cannot access offset ''Engine'' on bool\.$#'

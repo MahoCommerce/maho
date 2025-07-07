@@ -104,7 +104,7 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
         $itemsQty = [],
         $comment = null,
         $notifyCustomer = false,
-        $includeComment = false
+        $includeComment = false,
     ) {
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
 

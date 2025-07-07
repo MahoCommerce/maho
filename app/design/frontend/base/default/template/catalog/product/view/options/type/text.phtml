@@ -11,17 +11,18 @@
 
 /** @var Mage_Catalog_Block_Product_View_Options_Type_Text $this */
 $option = $this->getOption();
+$optionId = $option->getId();
 ?>
 <dt>
-    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?=  $this->escapeHtml($option->getTitle()) ?></label>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?> for="option_<?= $optionId ?>"><?=  $this->escapeHtml($option->getTitle()) ?></label>
     <?= $this->getFormatedPrice() ?>
 </dt>
 <dd>
     <div class="input-box">
     <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD): ?>
-        <input type="text" id="options_<?= $option->getId() ?>_text" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" onchange="opConfig.reloadPrice()" />
+        <input type="text" id="option_<?= $optionId ?>" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" onchange="opConfig.reloadPrice()" />
     <?php elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_AREA): ?>
-        <textarea id="options_<?= $option->getId() ?>_text" class="<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" rows="5" cols="25" onchange="opConfig.reloadPrice()"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
+        <textarea id="option_<?= $optionId ?>" class="<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" rows="5" cols="25" onchange="opConfig.reloadPrice()"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
     <?php endif ?>
     <?php if ($option->getMaxCharacters()): ?>
         <p class="note"><?= Mage::helper('catalog')->__('Maximum number of characters:')?> <strong><?= $option->getMaxCharacters() ?></strong></p>

@@ -156,6 +156,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     {
         $attributes['attribute_set_id'] = Mage::helper('catalogrule')->__('Attribute Set');
         $attributes['category_ids'] = Mage::helper('catalogrule')->__('Category');
+        $attributes['type_id'] = Mage::helper('catalogrule')->__('Product Type');
     }
 
     /**
@@ -215,6 +216,12 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
                 ->setEntityTypeFilter($entityTypeId)
                 ->load()
                 ->toOptionArray();
+        } elseif ($this->getAttribute() === 'type_id') {
+            $selectOptions = [];
+            $productTypes = Mage::getSingleton('catalog/product_type')->getOptionArray();
+            foreach ($productTypes as $value => $label) {
+                $selectOptions[] = ['value' => $value, 'label' => $label];
+            }
         } elseif (is_object($this->getAttributeObject())) {
             $attributeObject = $this->getAttributeObject();
             if ($attributeObject->usesSource()) {
@@ -334,6 +341,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
         if ($this->getAttribute() === 'attribute_set_id') {
             return 'select';
         }
+        if ($this->getAttribute() === 'type_id') {
+            return 'select';
+        }
         if (!is_object($this->getAttributeObject())) {
             return 'string';
         }
@@ -358,6 +368,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     public function getValueElementType()
     {
         if ($this->getAttribute() === 'attribute_set_id') {
+            return 'select';
+        }
+        if ($this->getAttribute() === 'type_id') {
             return 'select';
         }
         if (!is_object($this->getAttributeObject())) {

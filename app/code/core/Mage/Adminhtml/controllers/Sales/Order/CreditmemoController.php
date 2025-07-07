@@ -397,43 +397,6 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     }
 
     /**
-     * Decides if we need to create dummy invoice item or not
-     * for example we don't need create dummy parent if all
-     * children are not in process
-     *
-     * @deprecated after 1.4, Mage_Sales_Model_Service_Order used
-     * @param Mage_Sales_Model_Order_Item $item
-     * @param array $qtys
-     * @return bool
-     */
-    protected function _needToAddDummy($item, $qtys)
-    {
-        if ($item->getHasChildren()) {
-            foreach ($item->getChildrenItems() as $child) {
-                if (isset($qtys[$child->getId()])
-                    && isset($qtys[$child->getId()]['qty'])
-                    && $qtys[$child->getId()]['qty'] > 0
-                ) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        if ($item->getParentItem()) {
-            if (isset($qtys[$item->getParentItem()->getId()])
-                && isset($qtys[$item->getParentItem()->getId()]['qty'])
-                && $qtys[$item->getParentItem()->getId()]['qty'] > 0
-            ) {
-                return true;
-            }
-            return false;
-        }
-
-        return false;
-    }
-
-    /**
      * Create pdf for current creditmemo
      */
     #[\Override]

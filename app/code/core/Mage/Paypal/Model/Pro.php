@@ -343,7 +343,7 @@ class Mage_Paypal_Model_Pro
      */
     public function submitRecurringProfile(
         Mage_Payment_Model_Recurring_Profile $profile,
-        Mage_Payment_Model_Info $paymentInfo
+        Mage_Payment_Model_Info $paymentInfo,
     ) {
         $api = $this->getApi();
         Varien_Object_Mapper::accumulateByMap($profile, $api, [

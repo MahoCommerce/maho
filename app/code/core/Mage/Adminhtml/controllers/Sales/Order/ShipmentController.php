@@ -441,47 +441,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     }
 
     /**
-     * Decides if we need to create dummy shipment item or not
-     * for example we don't need create dummy parent if all
-     * children are not in process
-     *
-     * @deprecated after 1.4, Mage_Sales_Model_Service_Order used
-     * @param Mage_Sales_Model_Order_Item $item
-     * @param array $qtys
-     * @return bool
-     */
-    protected function _needToAddDummy($item, $qtys)
-    {
-        if ($item->getHasChildren()) {
-            foreach ($item->getChildrenItems() as $child) {
-                if ($child->getIsVirtual()) {
-                    continue;
-                }
-                if ((isset($qtys[$child->getId()]) && $qtys[$child->getId()] > 0)
-                        || (!isset($qtys[$child->getId()]) && $child->getQtyToShip())
-                ) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        if ($item->getParentItem()) {
-            if ($item->getIsVirtual()) {
-                return false;
-            }
-            if ((isset($qtys[$item->getParentItem()->getId()]) && $qtys[$item->getParentItem()->getId()] > 0)
-                || (!isset($qtys[$item->getParentItem()->getId()]) && $item->getParentItem()->getQtyToShip())
-            ) {
-                return true;
-            }
-            return false;
-        }
-
-        return false;
-    }
-
-    /**
      * Create shipping label for specific shipment with validation.
      *
      * @return bool

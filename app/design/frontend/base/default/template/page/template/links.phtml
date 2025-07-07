@@ -15,7 +15,7 @@
 <?php if(count($_links)>0): ?>
 <div class="links">
     <?php if($this->getTitle()): ?>
-    <div class="block-title"><strong><span><?= $this->__($this->getTitle()) ?></span></strong></div>
+    <div class="block-title"><?= $this->__($this->getTitle()) ?></div>
     <?php endif ?>
     <ul<?php if($this->getName()): ?> id="<?= $this->getName() ?>"<?php endif ?>>
         <?php foreach($_links as $_link): ?>
