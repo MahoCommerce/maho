@@ -396,6 +396,9 @@
                     <category_anchor_products_indexer_tmp>
                         <table>catalog_category_anc_products_index_tmp</table>
                     </category_anchor_products_indexer_tmp>
+                    <category_dynamic_rule>
+                        <table>catalog_category_dynamic_rule</table>
+                    </category_dynamic_rule>
                 </entities>
             </catalog_resource>
         </models>
