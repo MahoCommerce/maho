@@ -12,10 +12,6 @@
 // Primary Break Points
 // =============================================
 
-// These should be used with the bp (max-width, xx) mixin
-// where a min-width is used, remember to +1 to break correctly
-// If these are changed, they must also be updated in _var.scss
-
 var bp = {
     xsmall: 479,
     small: 599,
