@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================
 
     function initOffcanvas() {
-        const offcanvas = document.querySelector('dialog.offcanvas');
+        const offcanvas = document.getElementById('offcanvas');
         if (!offcanvas) return;
 
         const isCustomerAccount = document.body.classList.contains('customer-account');

@@ -83,7 +83,7 @@
 
             <block type="core/text_list" name="content" as="content" translate="label">
                 <label>Main Content Area</label>
-                <block type="core/template" name="sidebar.offcanvas.toggle" template="customer/account/offcanvas.phtml" before="-"/>
+                <block type="core/template" name="sidebar.offcanvas.toggle" template="page/html/offcanvas.phtml" before="-"/>
             </block>
 
             <block type="core/text_list" name="right" as="right" translate="label">

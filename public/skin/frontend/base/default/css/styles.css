@@ -3721,10 +3721,10 @@ p.product-name a:hover {
   }
 }
 @media only screen and (max-width: 770px) {
-  .offcanvas .currently {
+  #offcanvas .currently {
       padding: 20px 20px 0 20px;
   }
-  .offcanvas .actions {
+  #offcanvas .actions {
       padding: 10px 20px 10px 20px;
   }
   .sidebar .block.block-layered-nav {
@@ -4256,7 +4256,7 @@ body:not(.catalog-product-view) .add-to-links a {
 }
 
 /* Native dialog offcanvas */
-dialog.offcanvas {
+#offcanvas {
   position: fixed;
   top: 0;
   left: 0;
@@ -4274,12 +4274,12 @@ dialog.offcanvas {
   transition: transform 0.3s ease;
 }
 
-dialog.offcanvas[open] {
+#offcanvas[open] {
   transform: translateX(0);
 }
 
 /* Dialog backdrop (replaces overlay) */
-dialog.offcanvas::backdrop {
+#offcanvas::backdrop {
   background: rgba(0,0,0,0.5);
   animation: fade-in 0.3s ease;
 }
@@ -4397,20 +4397,20 @@ label.sidebar-trigger {
 
 /* Expand all content in sidebar offcanvas */
 .sidebar-offcanvas #narrow-by-list,
-.offcanvas #narrow-by-list.no-display,
-.offcanvas .block .block-content,
-.offcanvas .block .block-content.no-display,
-.offcanvas .block-layered-nav dd,
-.offcanvas .block-layered-nav dd.no-display {
+#offcanvas #narrow-by-list.no-display,
+#offcanvas .block .block-content,
+#offcanvas .block .block-content.no-display,
+#offcanvas .block-layered-nav dd,
+#offcanvas .block-layered-nav dd.no-display {
   display: block !important;
   visibility: visible !important;
   height: auto !important;
   opacity: 1 !important;
 }
 
-.offcanvas .block-title,
-.offcanvas .block-layered-nav dt,
-.offcanvas .block-subtitle--filter {
+#offcanvas .block-title,
+#offcanvas .block-layered-nav dt,
+#offcanvas .block-subtitle--filter {
   cursor: default !important;
   color: var(--maho-color-text-primary);
   font-weight: 600;
@@ -4422,8 +4422,8 @@ label.sidebar-trigger {
 }
 
 /* Remove any toggle arrows/icons in offcanvas */
-.offcanvas .block-title::after,
-.offcanvas dt::after {
+#offcanvas .block-title::after,
+#offcanvas dt::after {
   display: none !important;
 }
 
@@ -7678,39 +7678,39 @@ div.calendar table td.button {
  * Dynamic Offcanvas Positioning
  * ============================================ */
 /* Right-side positioning modifier for dialog */
-dialog.offcanvas.offcanvas-right {
+#offcanvas.offcanvas-right {
   left: auto;
   right: 0;
   transform: translateX(100%);
   box-shadow: -2px 0 10px rgba(0,0,0,0.1);
 }
 
-dialog.offcanvas.offcanvas-right[open] {
+#offcanvas.offcanvas-right[open] {
   transform: translateX(0);
 }
 
 /* Minicart specific styles when in offcanvas */
-.offcanvas .minicart-wrapper {
+#offcanvas .minicart-wrapper {
   padding: 0;
 }
 
-.offcanvas .minicart-wrapper .block-subtitle {
+#offcanvas .minicart-wrapper .block-subtitle {
   padding: 15px 20px;
   margin: 0;
   border-bottom: 1px solid var(--maho-color-border);
   font-weight: 600;
 }
 
-.offcanvas .minicart-wrapper .mini-products-list {
+#offcanvas .minicart-wrapper .mini-products-list {
   padding: 0;
 }
 
-.offcanvas .minicart-wrapper .mini-products-list li {
+#offcanvas .minicart-wrapper .mini-products-list li {
   padding: 15px 20px;
   border-bottom: 1px solid var(--maho-color-border-light);
 }
 
-.offcanvas .minicart-wrapper .subtotal {
+#offcanvas .minicart-wrapper .subtotal {
   padding: 15px 20px;
   border-top: 1px solid var(--maho-color-border);
   border-bottom: 1px solid var(--maho-color-border);
@@ -7718,11 +7718,11 @@ dialog.offcanvas.offcanvas-right[open] {
   background: var(--maho-color-background-alt);
 }
 
-.offcanvas .minicart-wrapper .minicart-actions {
+#offcanvas .minicart-wrapper .minicart-actions {
   padding: 0 20px 20px;
 }
 
-.offcanvas .minicart-wrapper .empty {
+#offcanvas .minicart-wrapper .empty {
   padding: 40px 20px;
   text-align: center;
 }
@@ -7734,7 +7734,7 @@ dialog.offcanvas.offcanvas-right[open] {
   }
 
   /* Hide the close link in offcanvas minicart */
-  .offcanvas .minicart-wrapper .skip-link-close {
+  #offcanvas .minicart-wrapper .skip-link-close {
     display: none;
   }
 }
