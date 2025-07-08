@@ -45,7 +45,7 @@
                     <td class="status"><em><?= $_order->getStatusLabel() ?></em></td>
                     <td class="a-center view">
                         <span class="nobr">
-                        <a href="<?= $this->getViewUrl($_order) ?>"><?= $this->__('View Order') ?></a>
+                        <a href="<?= $this->getViewUrl($_order) ?>"><?= $this->__('View') ?></a>
                         <?php if ($this->helper('sales/reorder')->canReorder($_order)) : ?>
                             <span class="separator">|</span> <a href="<?= $this->getReorderUrl($_order) ?>" class="link-reorder"><?= $this->__('Reorder') ?></a>
                         <?php endif ?>

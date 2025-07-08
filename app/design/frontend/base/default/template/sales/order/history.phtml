@@ -45,8 +45,7 @@
             <td class="total"><?= $_order->formatPrice($_order->getGrandTotal()) ?></td>
             <td class="status"><em><?= $_order->getStatusLabel() ?></em></td>
             <td class="a-center view">
-                <span class="nobr"><a href="<?= $this->getViewUrl($_order) ?>"><?= $this->__('View Order') ?></a>
-                    <?php /*<span class="separator">|</span><a href="<?= $this->getTrackUrl($_order) ?>"><?= $this->__('Track Order') ?></a>&nbsp;*/ ?>
+                <span class="nobr"><a href="<?= $this->getViewUrl($_order) ?>"><?= $this->__('View') ?></a>
                     <?php if ($this->helper('sales/reorder')->canReorder($_order)) : ?>
                     <span class="separator">|</span> <a href="<?= $this->getReorderUrl($_order) ?>" class="link-reorder"><?= $this->__('Reorder') ?></a>
                 <?php endif ?>
