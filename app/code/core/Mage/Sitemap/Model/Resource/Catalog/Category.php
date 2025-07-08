@@ -6,7 +6,7 @@
  * @package    Mage_Sitemap
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,18 +56,6 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
         $this->_addFilter($storeId, 'is_active', 1);
 
         return $this->_loadEntities();
-    }
-
-    /**
-     * Prepare category
-     *
-     * @deprecated after 1.7.0.2
-     *
-     * @return Varien_Object
-     */
-    protected function _prepareCategory(array $categoryRow)
-    {
-        return $this->_prepareObject($categoryRow);
     }
 
     /**

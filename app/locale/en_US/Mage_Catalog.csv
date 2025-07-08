@@ -315,6 +315,7 @@
 "Filterable (with results)","Filterable (with results)"
 "Filter model name must be declared.","Filter model name must be declared."
 "Filter must be an object. Please set correct filter.","Filter must be an object. Please set correct filter."
+"Filters","Filters"
 "First Name","First Name"
 "Fixed","Fixed"
 "For internal use.","For internal use."
