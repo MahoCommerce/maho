@@ -601,6 +601,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function openOffcanvas() {
+            offcanvas.style.transition = 'none';
+            offcanvas.offsetHeight;
+            offcanvas.style.transition = '';
             offcanvas.showModal();
         }
 
