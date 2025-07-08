@@ -492,9 +492,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const offcanvas = document.getElementById('offcanvas');
         if (!offcanvas) return;
 
-        const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
+        const mobileMediaQuery = window.matchMedia(`(max-width: ${bp.medium}px)`);
         const movedElements = new Map(); // Store moved elements with their original parents
-        let currentTrigger = null; // Store the current trigger for desktop permission check
 
         function setOffcanvasTitle(title) {
             const titleElement = offcanvas.querySelector('.offcanvas-title');
@@ -539,7 +538,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function openOffcanvas() {
-            // Force reflow to ensure smooth animation
             offcanvas.style.transition = 'none';
             offcanvas.offsetHeight;
             offcanvas.style.transition = '';
@@ -562,16 +560,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const position = trigger.getAttribute('data-offcanvas-position') || 'left';
             const allowDesktop = trigger.getAttribute('data-offcanvas-desktop') === 'true';
 
-            // Check if we should show offcanvas (mobile only unless explicitly allowed on desktop)
             if (!allowDesktop && !mobileMediaQuery.matches) return;
-
-            // Target selector is required
             if (!targetSelector) return;
 
-            // Store current trigger for desktop permission check
-            currentTrigger = trigger;
+            // Store trigger on offcanvas element for other event handlers
+            offcanvas.currentTrigger = trigger;
 
-            // Setup and show offcanvas
             setOffcanvasPosition(position);
             setOffcanvasTitle(title);
             moveToOffcanvas(targetSelector);
@@ -594,14 +588,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle dialog close (ESC key or programmatic close)
         offcanvas.addEventListener('close', function() {
             restoreElements();
-            currentTrigger = null; // Clear current trigger
+            offcanvas.currentTrigger = null;
         });
 
         // Handle window resize
         mobileMediaQuery.addEventListener('change', (mq) => {
             if (!mq.matches) {
                 // Desktop: close offcanvas unless current trigger allows desktop
-                const allowDesktop = currentTrigger && currentTrigger.getAttribute('data-offcanvas-desktop') === 'true';
+                const allowDesktop = offcanvas.currentTrigger && offcanvas.currentTrigger.getAttribute('data-offcanvas-desktop') === 'true';
                 if (!allowDesktop) {
                     closeOffcanvas();
                 }
