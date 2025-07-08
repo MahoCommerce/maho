@@ -195,6 +195,7 @@ textarea:focus,
 [tabindex]:focus {
   outline-color: var(--maho-color-primary-hover);
   outline-offset: 2px;
+  outline-width: 2px;
 }
 
 ol,
@@ -2694,6 +2695,7 @@ body {
     color: var(--maho-color-text-primary);
     text-transform: uppercase;
     line-height: 30px;
+    outline-offset: -1px;
   }
 
   #header-account li:last-child a,
