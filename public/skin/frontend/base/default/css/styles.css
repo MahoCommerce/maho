@@ -1509,28 +1509,6 @@ span.weee {
   display: block;
 }
 
-@media only screen and (max-width: 479px) {
-  .truncated {
-    cursor: inherit;
-  }
-  .truncated a.details {
-    display: none;
-  }
-  .truncated .truncated_full_value .item-options {
-    display: block;
-    position: static;
-    z-index: 1;
-    width: 100%;
-    border: none;
-    background-color: transparent;
-  }
-  .truncated .truncated_full_value .item-options p {
-    float: none;
-  }
-  .truncated .truncated_full_value .item-options:after {
-    display: none;
-  }
-}
 /* -------------------------------------------- *
  * Printer Friendly Page
  */
