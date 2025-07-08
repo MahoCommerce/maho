@@ -3652,10 +3652,9 @@ p.product-name a:hover {
   #offcanvas .actions {
       padding: 10px 20px 10px 20px;
   }
-  .sidebar .block.block-layered-nav {
-    border-bottom: none;
+  .sidebar.col-left {
+    display: none;
   }
-
   .block-layered-nav .block-content {
     padding-top: 0;
   }

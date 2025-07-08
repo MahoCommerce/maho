@@ -597,34 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // Initialize unified offcanvas
     initOffcanvas();
-
-    // ==============================================
-    // Layered Navigation Block
-    // ==============================================
-
-    // On product list pages, we want to show the layered nav/category menu immediately above the product list.
-    // While it would make more sense to just move the .block-layered-nav block rather than .col-left-first
-    // (since other blocks can be inserted into left_first), it creates simpler code to move the entire
-    // .col-left-first block, so that is the approach we're taking
-    if (document.querySelector('.col-left-first > .block') && document.querySelector('div.category-products')) {
-        const repositionLayered = (mq) => {
-            const colLeftFirst = document.querySelector('.col-left-first');
-            const categoryProducts = document.querySelector('div.category-products');
-            const colMain = document.querySelector('.col-main');
-
-            if (mq.matches) {
-                categoryProducts.parentNode.insertBefore(colLeftFirst, categoryProducts);
-            } else {
-                colMain.parentNode.insertBefore(colLeftFirst, colMain);
-            }
-        };
-
-        maxWidthMediumMediaQuery.addEventListener('change', repositionLayered);
-        repositionLayered(maxWidthMediumMediaQuery);
-    }
 
     // ==============================================
     // 3 column layout
