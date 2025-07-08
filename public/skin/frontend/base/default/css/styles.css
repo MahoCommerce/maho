@@ -5269,16 +5269,12 @@ body.customer-account .my-account .title-buttons {
 }
 body.customer-account .my-account .title-buttons h1 {
   text-align: left;
+  flex-grow: 1;
 }
 body.customer-account .my-account .title-buttons .button {
   position: absolute;
   right: 0;
   top: 0;
-}
-body.customer-account .my-account .title-buttons a,
-body.customer-account .my-account .title-buttons span.separator {
-  position: relative;
-  top: -42px;
 }
 body.customer-account .my-account .fieldset h2,
 body.customer-account .my-account .addresses-list h2,
