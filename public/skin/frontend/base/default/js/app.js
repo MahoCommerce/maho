@@ -485,122 +485,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==============================================
-    // Offcanvas - Supports both left and right positioning
+    // Offcanvas - Data-attribute driven, supports both left and right positioning
     // ==============================================
 
     function initOffcanvas() {
         const offcanvas = document.getElementById('offcanvas');
         if (!offcanvas) return;
 
-        const isCustomerAccount = document.body.classList.contains('customer-account');
         const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
+        const movedElements = new Map(); // Store moved elements with their original parents
+        let currentTrigger = null; // Store the current trigger for desktop permission check
 
-        let originalParent = null;
-        let movedElement = null;
-        let originalLayeredNavHTML = null;
-        let lastClickedTrigger = null;
-        let currentPosition = 'left'; // Track current position
-
-        // Store original layered nav state immediately on page load
-        const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
-        if (sidebar && !isCustomerAccount) {
-            const layeredNav = sidebar.querySelector('.block-layered-nav');
-            if (layeredNav) {
-                originalLayeredNavHTML = layeredNav.outerHTML;
-            }
-        }
-
-        function setOffcanvasTitle(triggerElement, customTitle = null) {
+        function setOffcanvasTitle(title) {
             const titleElement = offcanvas.querySelector('.offcanvas-title');
             if (titleElement) {
-                titleElement.textContent = customTitle || (triggerElement ? triggerElement.textContent.trim() : '');
+                titleElement.textContent = title || '';
             }
         }
 
         function setOffcanvasPosition(position) {
             if (position === 'right') {
                 offcanvas.classList.add('offcanvas-right');
-                currentPosition = 'right';
             } else {
                 offcanvas.classList.remove('offcanvas-right');
-                currentPosition = 'left';
             }
         }
 
-        function moveToOffcanvas() {
-            // Clear any existing content
+        function moveToOffcanvas(targetSelector) {
             const offcanvasContent = offcanvas.querySelector('.offcanvas-content');
-            if (offcanvasContent) {
-                offcanvasContent.innerHTML = '';
-            }
+            if (!offcanvasContent) return;
 
-            // Check if this was triggered by the minicart
-            if (lastClickedTrigger && lastClickedTrigger.classList.contains('skip-cart')) {
-                // Move minicart content
-                const headerCart = document.getElementById('header-cart');
-                if (!headerCart) return;
+            // Clear any existing content
+            offcanvasContent.innerHTML = '';
 
-                const minicartContent = headerCart.querySelector('.minicart-wrapper');
-                if (minicartContent && minicartContent.parentNode !== offcanvasContent) {
-                    movedElement = minicartContent;
-                    originalParent = minicartContent.parentNode;
-                    offcanvasContent.appendChild(minicartContent);
+            // Find target element(s)
+            const targets = document.querySelectorAll(targetSelector);
+            targets.forEach(target => {
+                if (target && target.parentNode !== offcanvasContent) {
+                    // Store original parent for restoration
+                    movedElements.set(target, target.parentNode);
+                    offcanvasContent.appendChild(target);
                 }
-                return;
-            }
-
-            // Check if this was triggered by the hamburger menu
-            if (lastClickedTrigger && lastClickedTrigger.classList.contains('skip-nav')) {
-                // Move primary navigation
-                const nav = document.querySelector('#nav');
-                if (nav && nav.parentNode !== offcanvasContent) {
-                    movedElement = nav;
-                    originalParent = nav.parentNode;
-                    offcanvasContent.appendChild(nav);
-                }
-                return;
-            }
-
-            // Original sidebar logic
-            const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
-            if (!sidebar) return;
-
-            if (isCustomerAccount) {
-                // Customer account: only move navigation content
-                movedElement = sidebar.querySelector('.block-account .block-content');
-                if (movedElement && movedElement.parentNode !== offcanvasContent) {
-                    originalParent = movedElement.parentNode;
-                    offcanvasContent.appendChild(movedElement);
-                }
-            } else {
-                // Other pages: move entire sidebar
-                movedElement = sidebar;
-                if (movedElement.parentNode !== offcanvasContent) {
-                    originalParent = movedElement.parentNode;
-                    offcanvasContent.appendChild(movedElement);
-                }
-            }
+            });
         }
 
-        // Move content back from offcanvas
-        function moveFromOffcanvas() {
-            if (movedElement && originalParent) {
-                originalParent.appendChild(movedElement);
-
-                // Restore original layered nav state (only for sidebar content, not primary nav or minicart)
-                if (!isCustomerAccount && originalLayeredNavHTML && movedElement.id !== 'nav' && !movedElement.classList.contains('minicart-wrapper')) {
-                    const layeredNav = movedElement.querySelector('.block-layered-nav');
-                    if (layeredNav) {
-                        layeredNav.outerHTML = originalLayeredNavHTML;
-                    }
+        function restoreElements() {
+            movedElements.forEach((originalParent, element) => {
+                if (originalParent && element) {
+                    originalParent.appendChild(element);
                 }
-
-                movedElement = null;
-                originalParent = null;
-            }
+            });
+            movedElements.clear();
         }
 
         function openOffcanvas() {
+            // Force reflow to ensure smooth animation
             offcanvas.style.transition = 'none';
             offcanvas.offsetHeight;
             offcanvas.style.transition = '';
@@ -614,27 +553,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle trigger clicks
         document.addEventListener('click', function(e) {
             const trigger = e.target.closest('.offcanvas-trigger');
-            if (trigger) {
-                e.preventDefault();
-                lastClickedTrigger = trigger;
-                // Allow minicart offcanvas on all screen sizes, others only on mobile
-                const isMinicart = trigger.classList.contains('skip-cart');
-                if (isMinicart || mobileMediaQuery.matches) {
-                    // Set position based on data attribute or class
-                    const position = trigger.getAttribute('data-offcanvas-position') || 'left';
-                    setOffcanvasPosition(position);
+            if (!trigger) return;
 
-                    // Set custom title for specific triggers
-                    if (isMinicart) {
-                        setOffcanvasTitle(null, 'Shopping Cart');
-                    } else {
-                        setOffcanvasTitle(lastClickedTrigger);
-                    }
+            e.preventDefault();
 
-                    moveToOffcanvas();
-                    openOffcanvas();
-                }
-            }
+            const targetSelector = trigger.getAttribute('data-offcanvas-target');
+            const title = trigger.getAttribute('data-offcanvas-title') || trigger.textContent.trim();
+            const position = trigger.getAttribute('data-offcanvas-position') || 'left';
+            const allowDesktop = trigger.getAttribute('data-offcanvas-desktop') === 'true';
+
+            // Check if we should show offcanvas (mobile only unless explicitly allowed on desktop)
+            if (!allowDesktop && !mobileMediaQuery.matches) return;
+
+            // Target selector is required
+            if (!targetSelector) return;
+
+            // Store current trigger for desktop permission check
+            currentTrigger = trigger;
+
+            // Setup and show offcanvas
+            setOffcanvasPosition(position);
+            setOffcanvasTitle(title);
+            moveToOffcanvas(targetSelector);
+            openOffcanvas();
         });
 
         // Handle close button
@@ -643,26 +584,25 @@ document.addEventListener('DOMContentLoaded', () => {
             closeButton.addEventListener('click', closeOffcanvas);
         }
 
-        // Handle backdrop click (native dialog does NOT close automatically on backdrop click)
+        // Handle backdrop click
         offcanvas.addEventListener('click', function(e) {
-            // Close dialog when clicking on the backdrop (outside the dialog content)
             if (e.target === offcanvas) {
                 closeOffcanvas();
             }
         });
 
-        // Handle ESC key (native dialog handles this automatically, but we need cleanup)
+        // Handle dialog close (ESC key or programmatic close)
         offcanvas.addEventListener('close', function() {
-            if (movedElement) {
-                moveFromOffcanvas();
-            }
+            restoreElements();
+            currentTrigger = null; // Clear current trigger
         });
 
         // Handle window resize
         mobileMediaQuery.addEventListener('change', (mq) => {
             if (!mq.matches) {
-                // Desktop: close offcanvas only if it's not minicart (minicart works on all screen sizes)
-                if (movedElement && !movedElement.classList.contains('minicart-wrapper')) {
+                // Desktop: close offcanvas unless current trigger allows desktop
+                const allowDesktop = currentTrigger && currentTrigger.getAttribute('data-offcanvas-desktop') === 'true';
+                if (!allowDesktop) {
                     closeOffcanvas();
                 }
             }
