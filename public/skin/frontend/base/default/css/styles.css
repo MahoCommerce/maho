@@ -7462,11 +7462,9 @@ div.calendar table td.button {
   flex-wrap: wrap;
 }
 
-#offcanvas .minicart-wrapper .mini-products-list .info-wrapper th,
-#offcanvas .minicart-wrapper .mini-products-list .info-wrapper td {
-  font-size: 0.75rem;
-  color: var(--maho-color-text-secondary);
-  padding: 0;
+#offcanvas .minicart-wrapper .qty-wrapper td {
+    display: flex;
+    gap: 0.2rem;
 }
 
 #offcanvas .minicart-wrapper .subtotal {
