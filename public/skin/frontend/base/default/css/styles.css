@@ -4343,19 +4343,6 @@ label.sidebar-trigger {
   opacity: 1 !important;
 }
 
-#offcanvas .block-title,
-#offcanvas .block-layered-nav dt,
-#offcanvas .block-subtitle--filter {
-  cursor: default !important;
-  color: var(--maho-color-text-primary);
-  font-weight: 600;
-  margin: 0 0 10px 0;
-  padding: 10px 0;
-  border: none;
-  border-bottom: 1px solid var(--maho-color-border-light);
-  pointer-events: none !important;
-}
-
 /* Remove any toggle arrows/icons in offcanvas */
 #offcanvas .block-title::after,
 #offcanvas dt::after {
