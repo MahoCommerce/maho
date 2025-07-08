@@ -4215,6 +4215,8 @@ body:not(.catalog-product-view) .add-to-links a {
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
   transform: translateX(-100%);
   transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 #offcanvas[open] {
@@ -4237,6 +4239,11 @@ body:not(.catalog-product-view) .add-to-links a {
   align-items: center;
   padding: 15px 20px;
   border-bottom: 1px solid var(--maho-color-border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: var(--maho-color-background);
+  z-index: 1;
 }
 
 .offcanvas-title {
@@ -4258,6 +4265,12 @@ body:not(.catalog-product-view) .add-to-links a {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.offcanvas-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
 }
 
 .filters-header {
@@ -7351,6 +7364,9 @@ div.calendar table td.button {
 /* Enhanced Minicart styling for offcanvas */
 #offcanvas .minicart-wrapper {
   padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 #offcanvas .minicart-wrapper .block-subtitle {
@@ -7363,9 +7379,18 @@ div.calendar table td.button {
   background: var(--maho-color-background-alt);
 }
 
+/* Scrollable content area for minicart */
+#offcanvas .minicart-wrapper .minicart-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 #offcanvas .minicart-wrapper .mini-products-list {
   padding: 0;
   margin: 0;
+  flex: 1;
 }
 
 #offcanvas .minicart-wrapper .mini-products-list li {
@@ -7473,14 +7498,17 @@ div.calendar table td.button {
 }
 
 #offcanvas .minicart-wrapper .minicart-actions {
-  padding: 20px;
+  padding: 15px 20px 10px 20px;
   background: var(--maho-color-background);
   border-top: 1px solid var(--maho-color-border-light);
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
 }
 
 #offcanvas .minicart-wrapper .minicart-actions .checkout-button {
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   padding: 12px;
   background: var(--maho-color-primary);
   color: white;

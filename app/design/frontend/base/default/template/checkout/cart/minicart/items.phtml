@@ -27,37 +27,39 @@ if(empty($_cartQty)) {
     <?php $_items = $this->getItems() ?>
     <?php $countItems = count($_items); ?>
     <?php if($countItems): ?>
-        <div>
-            <ul id="cart-sidebar" class="mini-products-list">
-                <?php foreach($_items as $_item): ?>
-                    <?= $this->getItemHtml($_item) ?>
-                <?php endforeach ?>
-            </ul>
-        </div>
-        <script type="text/javascript">
-            truncateOptions();
-            document.addEventListener('DOMContentLoaded', function() {
-                var Mini = new Minicart({
-                    formKey: "<?= $this->getFormKey() ?>"
+        <div class="minicart-content">
+            <div>
+                <ul id="cart-sidebar" class="mini-products-list">
+                    <?php foreach($_items as $_item): ?>
+                        <?= $this->getItemHtml($_item) ?>
+                    <?php endforeach ?>
+                </ul>
+            </div>
+            <script type="text/javascript">
+                truncateOptions();
+                document.addEventListener('DOMContentLoaded', function() {
+                    var Mini = new Minicart({
+                        formKey: "<?= $this->getFormKey() ?>"
+                    });
+                    Mini.init();
                 });
-                Mini.init();
-            });
-        </script>
+            </script>
 
-        <div id="minicart-widgets">
-            <?= $this->getChildHtml('cart_promotion') ?>
-        </div>
-        <div class="block-content">
-            <p class="subtotal">
-                <?php if ($this->canApplyMsrp()): ?>
-                    <span class="map-cart-sidebar-total"><?= $this->__('ORDER TOTAL WILL BE DISPLAYED BEFORE YOU SUBMIT THE ORDER') ?></span>
-                <?php else: ?>
-                    <span class="label"><?= $this->__('Cart Subtotal:') ?></span> <?= Mage::helper('checkout')->formatPrice($this->getSubtotal()) ?>
-                    <?php if ($_subtotalInclTax = $this->getSubtotalInclTax()): ?>
-                        <br />(<?= Mage::helper('checkout')->formatPrice($_subtotalInclTax) ?> <?= Mage::helper('tax')->getIncExcText(true) ?>)
+            <div id="minicart-widgets">
+                <?= $this->getChildHtml('cart_promotion') ?>
+            </div>
+            <div class="block-content">
+                <p class="subtotal">
+                    <?php if ($this->canApplyMsrp()): ?>
+                        <span class="map-cart-sidebar-total"><?= $this->__('ORDER TOTAL WILL BE DISPLAYED BEFORE YOU SUBMIT THE ORDER') ?></span>
+                    <?php else: ?>
+                        <span class="label"><?= $this->__('Cart Subtotal:') ?></span> <?= Mage::helper('checkout')->formatPrice($this->getSubtotal()) ?>
+                        <?php if ($_subtotalInclTax = $this->getSubtotalInclTax()): ?>
+                            <br />(<?= Mage::helper('checkout')->formatPrice($_subtotalInclTax) ?> <?= Mage::helper('tax')->getIncExcText(true) ?>)
+                        <?php endif ?>
                     <?php endif ?>
-                <?php endif ?>
-            </p>
+                </p>
+            </div>
         </div>
 
 
