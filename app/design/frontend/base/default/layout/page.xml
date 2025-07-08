@@ -83,7 +83,6 @@
 
             <block type="core/text_list" name="content" as="content" translate="label">
                 <label>Main Content Area</label>
-                <!-- Offcanvas sidebar toggle for all pages -->
                 <block type="core/template" name="sidebar.offcanvas.toggle" template="customer/account/offcanvas.phtml" before="-"/>
             </block>
 
