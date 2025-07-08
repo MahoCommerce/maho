@@ -498,10 +498,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================
 
     function initOffcanvas() {
-        const offcanvas = document.querySelector('.offcanvas');
-        const overlay = document.querySelector('.offcanvas-overlay');
-
-        if (!offcanvas || !overlay) return;
+        const offcanvas = document.querySelector('dialog.offcanvas');
+        if (!offcanvas) return;
 
         const isCustomerAccount = document.body.classList.contains('customer-account');
         const mobileMediaQuery = window.matchMedia('(max-width: 770px)');
@@ -550,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Move minicart content
                 const headerCart = document.getElementById('header-cart');
                 if (!headerCart) return;
-                
+
                 const minicartContent = headerCart.querySelector('.minicart-wrapper');
                 if (minicartContent && minicartContent.parentNode !== offcanvasContent) {
                     movedElement = minicartContent;
@@ -611,23 +609,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Function to open offcanvas
         function openOffcanvas() {
-            offcanvas.classList.add('active');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            offcanvas.showModal();
         }
 
-        // Function to close offcanvas
         function closeOffcanvas() {
-            offcanvas.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-            if (movedElement) {
-                moveFromOffcanvas();
-            }
-            // Reset position to default left after closing
-            setOffcanvasPosition('left');
+            offcanvas.close();
         }
 
         // Handle trigger clicks
@@ -640,14 +627,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Set position based on data attribute or class
                     const position = trigger.getAttribute('data-offcanvas-position') || 'left';
                     setOffcanvasPosition(position);
-                    
+
                     // Set custom title for specific triggers
                     if (trigger.classList.contains('skip-cart')) {
                         setOffcanvasTitle(null, 'Shopping Cart');
                     } else {
                         setOffcanvasTitle(lastClickedTrigger);
                     }
-                    
+
                     moveToOffcanvas();
                     openOffcanvas();
                 }
@@ -660,8 +647,20 @@ document.addEventListener('DOMContentLoaded', () => {
             closeButton.addEventListener('click', closeOffcanvas);
         }
 
-        // Handle overlay click
-        overlay.addEventListener('click', closeOffcanvas);
+        // Handle backdrop click (native dialog does NOT close automatically on backdrop click)
+        offcanvas.addEventListener('click', function(e) {
+            // Close dialog when clicking on the backdrop (outside the dialog content)
+            if (e.target === offcanvas) {
+                closeOffcanvas();
+            }
+        });
+
+        // Handle ESC key (native dialog handles this automatically, but we need cleanup)
+        offcanvas.addEventListener('close', function() {
+            if (movedElement) {
+                moveFromOffcanvas();
+            }
+        });
 
         // Handle window resize
         mobileMediaQuery.addEventListener('change', (mq) => {

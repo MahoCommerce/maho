@@ -9,13 +9,12 @@
 
 /** @var Mage_Core_Block_Template $this */
 ?>
-<div class="offcanvas-overlay"></div>
-<div class="offcanvas">
+<dialog class="offcanvas" id="offcanvas-dialog">
     <div class="offcanvas-header">
         <h2 class="offcanvas-title"></h2>
-        <button class="offcanvas-close" aria-label="<?= $this->__('Close') ?>">&times;</button>
+        <button class="offcanvas-close" aria-label="<?= $this->__('Close') ?>" type="button">&times;</button>
     </div>
     <div class="offcanvas-content">
         <!-- All content will be moved here by JavaScript -->
     </div>
-</div>
+</dialog>
