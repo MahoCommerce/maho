@@ -83,7 +83,6 @@
 
             <block type="core/text_list" name="content" as="content" translate="label">
                 <label>Main Content Area</label>
-                <block type="core/template" name="sidebar.offcanvas.toggle" template="page/html/offcanvas.phtml" before="-"/>
             </block>
 
             <block type="core/text_list" name="right" as="right" translate="label">
@@ -116,6 +115,7 @@
             <block type="core/text_list" name="before_body_end" as="before_body_end" translate="label">
                 <label>Page Bottom</label>
                 <block type="page/html_cookieNotice" name="global_cookie_notice" as ="global_cookie_notice" template="page/html/cookienotice.phtml" before="-" />
+                <block type="core/template" name="offcanvas" template="page/html/offcanvas.phtml" />
             </block>
         </block>
 
