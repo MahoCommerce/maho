@@ -623,13 +623,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (trigger) {
                 e.preventDefault();
                 lastClickedTrigger = trigger;
-                if (mobileMediaQuery.matches) {
+                // Allow minicart offcanvas on all screen sizes, others only on mobile
+                const isMinicart = trigger.classList.contains('skip-cart');
+                if (isMinicart || mobileMediaQuery.matches) {
                     // Set position based on data attribute or class
                     const position = trigger.getAttribute('data-offcanvas-position') || 'left';
                     setOffcanvasPosition(position);
 
                     // Set custom title for specific triggers
-                    if (trigger.classList.contains('skip-cart')) {
+                    if (isMinicart) {
                         setOffcanvasTitle(null, 'Shopping Cart');
                     } else {
                         setOffcanvasTitle(lastClickedTrigger);
@@ -665,8 +667,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle window resize
         mobileMediaQuery.addEventListener('change', (mq) => {
             if (!mq.matches) {
-                // Desktop: move content back and close offcanvas
-                closeOffcanvas();
+                // Desktop: close offcanvas only if it's not minicart (minicart works on all screen sizes)
+                if (movedElement && !movedElement.classList.contains('minicart-wrapper')) {
+                    closeOffcanvas();
+                }
             }
         });
     }
