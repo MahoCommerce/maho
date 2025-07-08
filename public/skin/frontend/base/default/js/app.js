@@ -613,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle trigger clicks
         document.addEventListener('click', function(e) {
-            const trigger = e.target.closest('.sidebar-trigger');
+            const trigger = e.target.closest('.offcanvas-trigger');
             if (trigger) {
                 e.preventDefault();
                 lastClickedTrigger = trigger;

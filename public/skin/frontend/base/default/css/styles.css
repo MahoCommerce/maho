@@ -4292,8 +4292,8 @@ body:not(.catalog-product-view) .add-to-links a {
   color: var(--maho-color-text-primary);
 }
 
-button.sidebar-trigger,
-label.sidebar-trigger {
+button.offcanvas-trigger,
+label.offcanvas-trigger {
   display: none;
   background: var(--maho-color-primary);
   color: white;
@@ -4304,8 +4304,8 @@ label.sidebar-trigger {
 }
 
 @media only screen and (max-width: 770px) {
-  button.sidebar-trigger,
-  label.sidebar-trigger {
+  button.offcanvas-trigger,
+  label.offcanvas-trigger {
     display: inline-block;
   }
 
