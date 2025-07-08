@@ -411,15 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
-
-        document.querySelector('#header-cart .skip-link-close').addEventListener('click', (e) => {
-            const parent = e.target.closest('.skip-content');
-            const link = parent.parentElement.querySelector('.skip-link');
-            parent.classList.remove('skip-active');
-            link.classList.remove('skip-active');
-            e.preventDefault();
-        });
     }
 
 

@@ -23,12 +23,8 @@ if(empty($_cartQty)) {
 
 <div class="minicart-wrapper">
 
-    <p class="block-subtitle">
-        <?= $this->__('Recently added item(s)') ?>
-        <a class="close skip-link-close" href="#" title="<?= $this->quoteEscape($this->__('Close')) ?>">&times;</a>
-    </p>
 
-    <?php $_items = $this->getRecentItems() ?>
+    <?php $_items = $this->getItems() ?>
     <?php $countItems = count($_items); ?>
     <?php if($countItems): ?>
         <div>
