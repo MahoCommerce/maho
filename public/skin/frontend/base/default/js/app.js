@@ -497,9 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function setOffcanvasTitle(title) {
             const titleElement = offcanvas.querySelector('.offcanvas-title');
-            if (titleElement) {
-                titleElement.textContent = title || '';
-            }
+            if (titleElement) titleElement.textContent = title || '';
         }
 
         function setOffcanvasPosition(position) {
@@ -566,17 +564,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Store trigger on offcanvas element for other event handlers
             offcanvas.currentTrigger = trigger;
 
-            setOffcanvasPosition(position);
             setOffcanvasTitle(title);
+            setOffcanvasPosition(position);
             moveToOffcanvas(targetSelector);
             openOffcanvas();
         });
 
         // Handle close button
-        const closeButton = offcanvas.querySelector('.offcanvas-close');
-        if (closeButton) {
-            closeButton.addEventListener('click', closeOffcanvas);
-        }
+        offcanvas.querySelector('.offcanvas-close')?.addEventListener('click', closeOffcanvas);
 
         // Handle backdrop click
         offcanvas.addEventListener('click', function(e) {
