@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==============================================
-    // Unified Offcanvas - Supports both left and right positioning
+    // Offcanvas - Supports both left and right positioning
     // ==============================================
 
     function initOffcanvas() {
