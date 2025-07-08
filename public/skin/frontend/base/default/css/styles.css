@@ -2699,7 +2699,7 @@ body {
   }
 
   #header-account li:last-child a,
-  :is(.nav-primary, .nav-account)y li.level0:last-child a.level0 {
+  :is(.nav-primary, .nav-account) li.level0:last-child a.level0 {
     border-bottom: 0;
   }
 
