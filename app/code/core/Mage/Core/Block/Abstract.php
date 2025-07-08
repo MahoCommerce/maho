@@ -1158,7 +1158,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * @param string $role ARIA role, see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles
      */
-    public function getIconSvg(string $name, string $variant = 'outline', string $role = 'none'): string
+    public function getIconSvg(string $name, ?string $variant = 'outline', string $role = 'none'): string
     {
         $name = basename(strtolower($name));
         $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
@@ -1196,7 +1196,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         return $iconSvg;
     }
 
-    public function getIconDataUrl(string $name, string $variant = 'outline', array $attributes = []): string
+    public function getIconDataUrl(string $name, ?string $variant = 'outline', ?array $attributes = []): string
     {
         $svg = $this->getIconSvg($name, $variant);
 
