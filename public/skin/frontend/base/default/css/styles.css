@@ -4194,7 +4194,6 @@ body:not(.catalog-product-view) .add-to-links a {
   clear: both;
 }
 
-/* Native dialog offcanvas */
 #offcanvas {
   position: fixed;
   top: 0;
@@ -4217,7 +4216,6 @@ body:not(.catalog-product-view) .add-to-links a {
   transform: translateX(0);
 }
 
-/* Dialog backdrop (replaces overlay) */
 #offcanvas::backdrop {
   background: rgba(0,0,0,0.5);
   animation: fade-in 0.3s ease;
@@ -4279,7 +4277,6 @@ body:not(.catalog-product-view) .add-to-links a {
   cursor: pointer;
   color: var(--maho-color-text-primary);
 }
-
 
 button.sidebar-trigger,
 label.sidebar-trigger {
@@ -7449,6 +7446,17 @@ div.calendar table td.button {
   border-radius: 3px;
   text-align: center;
   font-size: 0.875rem;
+}
+
+#offcanvas .minicart-wrapper .truncated {
+    display: inline;
+    position: relative;
+}
+
+#offcanvas .minicart-wrapper .truncated_full_value {
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
 #offcanvas .minicart-wrapper .mini-products-list .info-wrapper {
