@@ -70,6 +70,8 @@ html {
   /* Prevent tap highlight on iOS/Android */
   -webkit-text-size-adjust: 100%;
   /* Prevent automatic scaling on iOS */
+  scrollbar-gutter: stable both-edges;
+  /* Reserve space for scrollbar to prevent layout shift */
 }
 
 body {
@@ -139,6 +141,10 @@ q:after {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+body:has(dialog[open]) {
+    overflow: hidden;
 }
 
 /* ============================================ *
@@ -4207,7 +4213,6 @@ body:not(.catalog-product-view) .add-to-links a {
   padding: 0;
   margin: 0;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-  overflow-y: auto;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
 }
@@ -4239,12 +4244,6 @@ body:not(.catalog-product-view) .add-to-links a {
   font-weight: 600;
   margin: 0;
   color: var(--maho-color-text-primary);
-}
-
-.offcanvas-content {
-  padding: 0;
-  overflow-y: auto;
-  height: calc(100vh - 60px); /* Account for header height */
 }
 
 .offcanvas-close {
