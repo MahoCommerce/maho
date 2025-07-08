@@ -3721,10 +3721,10 @@ p.product-name a:hover {
   }
 }
 @media only screen and (max-width: 770px) {
-  .sidebar-offcanvas .currently {
+  .offcanvas .currently {
       padding: 20px 20px 0 20px;
   }
-  .sidebar-offcanvas .actions {
+  .offcanvas .actions {
       padding: 10px 20px 10px 20px;
   }
   .sidebar .block.block-layered-nav {
@@ -4256,7 +4256,7 @@ body:not(.catalog-product-view) .add-to-links a {
 }
 
 /* Offcanvas sidebar */
-.sidebar-offcanvas {
+.offcanvas {
   position: fixed;
   top: 0;
   left: -100%;
@@ -4270,16 +4270,16 @@ body:not(.catalog-product-view) .add-to-links a {
 }
 
 /* Class-based toggle */
-.sidebar-offcanvas.active {
+.offcanvas.active {
   left: 0;
 }
 
-.sidebar-overlay.active {
+.offcanvas-overlay.active {
   opacity: 1;
   visibility: visible;
 }
 
-.sidebar-overlay {
+.offcanvas-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -4292,7 +4292,7 @@ body:not(.catalog-product-view) .add-to-links a {
   transition: all 0.3s ease;
 }
 
-.sidebar-offcanvas-header {
+.offcanvas-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -4300,14 +4300,20 @@ body:not(.catalog-product-view) .add-to-links a {
   border-bottom: 1px solid var(--maho-color-border);
 }
 
-.sidebar-offcanvas-title {
+.offcanvas-title {
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
   color: var(--maho-color-text-primary);
 }
 
-.sidebar-close {
+.offcanvas-content {
+  padding: 0;
+  overflow-y: auto;
+  height: calc(100vh - 60px); /* Account for header height */
+}
+
+.offcanvas-close {
   background: none;
   border: none;
   font-size: 24px;
@@ -4339,22 +4345,19 @@ body:not(.catalog-product-view) .add-to-links a {
 }
 
 
+button.sidebar-trigger,
 label.sidebar-trigger {
   display: none;
   background: var(--maho-color-primary);
   color: white;
   border: none;
-  padding: 4px 8px;
+  padding: 4px 12px;
   border-radius: 3px;
   cursor: pointer;
-  margin-right: 15px;
-  font-size: 14px;
-  font-weight: normal;
-  height: auto;
-  align-self: center;
 }
 
 @media only screen and (max-width: 770px) {
+  button.sidebar-trigger,
   label.sidebar-trigger {
     display: inline-block;
   }
@@ -4397,20 +4400,20 @@ label.sidebar-trigger {
 
 /* Expand all content in sidebar offcanvas */
 .sidebar-offcanvas #narrow-by-list,
-.sidebar-offcanvas #narrow-by-list.no-display,
-.sidebar-offcanvas .block .block-content,
-.sidebar-offcanvas .block .block-content.no-display,
-.sidebar-offcanvas .block-layered-nav dd,
-.sidebar-offcanvas .block-layered-nav dd.no-display {
+.offcanvas #narrow-by-list.no-display,
+.offcanvas .block .block-content,
+.offcanvas .block .block-content.no-display,
+.offcanvas .block-layered-nav dd,
+.offcanvas .block-layered-nav dd.no-display {
   display: block !important;
   visibility: visible !important;
   height: auto !important;
   opacity: 1 !important;
 }
 
-.sidebar-offcanvas .block-title,
-.sidebar-offcanvas .block-layered-nav dt,
-.sidebar-offcanvas .block-subtitle--filter {
+.offcanvas .block-title,
+.offcanvas .block-layered-nav dt,
+.offcanvas .block-subtitle--filter {
   cursor: default !important;
   color: var(--maho-color-text-primary);
   font-weight: 600;
@@ -4422,8 +4425,8 @@ label.sidebar-trigger {
 }
 
 /* Remove any toggle arrows/icons in offcanvas */
-.sidebar-offcanvas .block-title::after,
-.sidebar-offcanvas dt::after {
+.offcanvas .block-title::after,
+.offcanvas dt::after {
   display: none !important;
 }
 
@@ -7672,4 +7675,73 @@ div.calendar table td.button {
   background: inherit;
   color: inherit;
   text-transform: none;
+}
+
+/* ============================================ *
+ * Dynamic Offcanvas Positioning
+ * ============================================ */
+/* Right-side positioning modifier */
+.offcanvas.offcanvas-right {
+  left: auto;
+  right: -100%;
+  transition: right 0.3s ease;
+}
+
+.offcanvas.offcanvas-right.active {
+  right: 0;
+}
+
+/* Adjust shadow for right-side */
+.offcanvas.offcanvas-right {
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+}
+
+/* Minicart specific styles when in offcanvas */
+.offcanvas .minicart-wrapper {
+  padding: 0;
+}
+
+.offcanvas .minicart-wrapper .block-subtitle {
+  padding: 15px 20px;
+  margin: 0;
+  border-bottom: 1px solid var(--maho-color-border);
+  font-weight: 600;
+}
+
+.offcanvas .minicart-wrapper .mini-products-list {
+  padding: 0;
+}
+
+.offcanvas .minicart-wrapper .mini-products-list li {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--maho-color-border-light);
+}
+
+.offcanvas .minicart-wrapper .subtotal {
+  padding: 15px 20px;
+  border-top: 1px solid var(--maho-color-border);
+  border-bottom: 1px solid var(--maho-color-border);
+  margin: 15px 0;
+  background: var(--maho-color-background-alt);
+}
+
+.offcanvas .minicart-wrapper .minicart-actions {
+  padding: 0 20px 20px;
+}
+
+.offcanvas .minicart-wrapper .empty {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+/* Hide the regular minicart dropdown on mobile */
+@media only screen and (max-width: 770px) {
+  #header-cart.skip-content {
+    display: none !important;
+  }
+
+  /* Hide the close link in offcanvas minicart */
+  .offcanvas .minicart-wrapper .skip-link-close {
+    display: none;
+  }
 }

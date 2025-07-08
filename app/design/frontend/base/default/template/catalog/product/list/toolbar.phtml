@@ -13,7 +13,7 @@
 ?>
 <?php if($this->getCollection()->getSize()): ?>
 <div class="toolbar">
-    <label for="sidebar-toggle" class="sidebar-trigger">Filters</label>
+    <button class="sidebar-trigger filters-trigger">Filters</button>
     <?php if( $this->isExpanded() ): ?>
         <div class="sorter">
             <div class="sort-by">
@@ -85,17 +85,5 @@
         <?= $this->getPagerHtml() ?>
 
     </div>
-</div>
-
-<!-- Offcanvas sidebar overlay and panel -->
-<div class="sidebar-overlay">
-    <label for="sidebar-toggle"></label>
-</div>
-<div class="sidebar-offcanvas">
-    <div class="sidebar-offcanvas-header">
-        <h2 class="sidebar-offcanvas-title"></h2>
-        <label for="sidebar-toggle" class="sidebar-close">&times;</label>
-    </div>
-    <!-- All sidebar content will be moved here by JavaScript -->
 </div>
 <?php endif ?>

@@ -494,12 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==============================================
-    // Offcanvas Sidebar - On-demand DOM management
+    // Unified Offcanvas - Supports both left and right positioning
     // ==============================================
 
-    function initOffcanvasSidebar() {
-        const offcanvas = document.querySelector('.sidebar-offcanvas');
-        const overlay = document.querySelector('.sidebar-overlay');
+    function initOffcanvas() {
+        const offcanvas = document.querySelector('.offcanvas');
+        const overlay = document.querySelector('.offcanvas-overlay');
 
         if (!offcanvas || !overlay) return;
 
@@ -510,6 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let movedElement = null;
         let originalLayeredNavHTML = null;
         let lastClickedTrigger = null;
+        let currentPosition = 'left'; // Track current position
 
         // Store original layered nav state immediately on page load
         const sidebar = document.querySelector('.col-left-first') || document.querySelector('.sidebar');
@@ -520,22 +521,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        function setOffcanvasTitle(triggerElement) {
-            const titleElement = offcanvas.querySelector('.sidebar-offcanvas-title');
-            if (titleElement && triggerElement) {
-                titleElement.textContent = triggerElement.textContent.trim();
+        function setOffcanvasTitle(triggerElement, customTitle = null) {
+            const titleElement = offcanvas.querySelector('.offcanvas-title');
+            if (titleElement) {
+                titleElement.textContent = customTitle || (triggerElement ? triggerElement.textContent.trim() : '');
+            }
+        }
+
+        function setOffcanvasPosition(position) {
+            if (position === 'right') {
+                offcanvas.classList.add('offcanvas-right');
+                currentPosition = 'right';
+            } else {
+                offcanvas.classList.remove('offcanvas-right');
+                currentPosition = 'left';
             }
         }
 
         function moveToOffcanvas() {
+            // Clear any existing content
+            const offcanvasContent = offcanvas.querySelector('.offcanvas-content');
+            if (offcanvasContent) {
+                offcanvasContent.innerHTML = '';
+            }
+
+            // Check if this was triggered by the minicart
+            if (lastClickedTrigger && lastClickedTrigger.classList.contains('skip-cart')) {
+                // Move minicart content
+                const headerCart = document.getElementById('header-cart');
+                if (!headerCart) return;
+                
+                const minicartContent = headerCart.querySelector('.minicart-wrapper');
+                if (minicartContent && minicartContent.parentNode !== offcanvasContent) {
+                    movedElement = minicartContent;
+                    originalParent = minicartContent.parentNode;
+                    offcanvasContent.appendChild(minicartContent);
+                }
+                return;
+            }
+
             // Check if this was triggered by the hamburger menu
             if (lastClickedTrigger && lastClickedTrigger.classList.contains('skip-nav')) {
                 // Move primary navigation
                 const nav = document.querySelector('#nav');
-                if (nav && nav.parentNode !== offcanvas) {
+                if (nav && nav.parentNode !== offcanvasContent) {
                     movedElement = nav;
                     originalParent = nav.parentNode;
-                    offcanvas.appendChild(nav);
+                    offcanvasContent.appendChild(nav);
                 }
                 return;
             }
@@ -547,16 +579,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isCustomerAccount) {
                 // Customer account: only move navigation content
                 movedElement = sidebar.querySelector('.block-account .block-content');
-                if (movedElement && movedElement.parentNode !== offcanvas) {
+                if (movedElement && movedElement.parentNode !== offcanvasContent) {
                     originalParent = movedElement.parentNode;
-                    offcanvas.appendChild(movedElement);
+                    offcanvasContent.appendChild(movedElement);
                 }
             } else {
                 // Other pages: move entire sidebar
                 movedElement = sidebar;
-                if (movedElement.parentNode !== offcanvas) {
+                if (movedElement.parentNode !== offcanvasContent) {
                     originalParent = movedElement.parentNode;
-                    offcanvas.appendChild(movedElement);
+                    offcanvasContent.appendChild(movedElement);
                 }
             }
         }
@@ -566,8 +598,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (movedElement && originalParent) {
                 originalParent.appendChild(movedElement);
 
-                // Restore original layered nav state (only for sidebar content, not primary nav)
-                if (!isCustomerAccount && originalLayeredNavHTML && movedElement.id !== 'nav') {
+                // Restore original layered nav state (only for sidebar content, not primary nav or minicart)
+                if (!isCustomerAccount && originalLayeredNavHTML && movedElement.id !== 'nav' && !movedElement.classList.contains('minicart-wrapper')) {
                     const layeredNav = movedElement.querySelector('.block-layered-nav');
                     if (layeredNav) {
                         layeredNav.outerHTML = originalLayeredNavHTML;
@@ -576,7 +608,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 movedElement = null;
                 originalParent = null;
-                originalLayeredNavHTML = null;
             }
         }
 
@@ -595,6 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (movedElement) {
                 moveFromOffcanvas();
             }
+            // Reset position to default left after closing
+            setOffcanvasPosition('left');
         }
 
         // Handle trigger clicks
@@ -604,7 +637,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 lastClickedTrigger = trigger;
                 if (mobileMediaQuery.matches) {
-                    setOffcanvasTitle(lastClickedTrigger);
+                    // Set position based on data attribute or class
+                    const position = trigger.getAttribute('data-offcanvas-position') || 'left';
+                    setOffcanvasPosition(position);
+                    
+                    // Set custom title for specific triggers
+                    if (trigger.classList.contains('skip-cart')) {
+                        setOffcanvasTitle(null, 'Shopping Cart');
+                    } else {
+                        setOffcanvasTitle(lastClickedTrigger);
+                    }
+                    
                     moveToOffcanvas();
                     openOffcanvas();
                 }
@@ -612,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Handle close button
-        const closeButton = offcanvas.querySelector('.sidebar-close');
+        const closeButton = offcanvas.querySelector('.offcanvas-close');
         if (closeButton) {
             closeButton.addEventListener('click', closeOffcanvas);
         }
@@ -629,8 +672,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialize
-    initOffcanvasSidebar();
+    // Initialize unified offcanvas
+    initOffcanvas();
 
     // ==============================================
     // Layered Navigation Block
