@@ -129,13 +129,13 @@
         </sales>
         <pdf>
             <invoice>
-                <bundle>bundle/sales_order_pdf_items_invoice</bundle>
+                <bundle>sales/order_pdf_items_invoice_default</bundle>
             </invoice>
             <shipment>
-                <bundle>bundle/sales_order_pdf_items_shipment</bundle>
+                <bundle>sales/order_pdf_items_shipment_default</bundle>
             </shipment>
             <creditmemo>
-                <bundle>bundle/sales_order_pdf_items_creditmemo</bundle>
+                <bundle>sales/order_pdf_items_creditmemo_default</bundle>
             </creditmemo>
         </pdf>
         <events>

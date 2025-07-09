@@ -6,105 +6,53 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Default extends Mage_Sales_Model_Order_Pdf_Items_Abstract
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setTemplate('sales/order/pdf/creditmemo/items/default.phtml');
+    }
+
     /**
-     * Draw process
+     * Draw process (deprecated - now renders HTML)
+     *
+     * @deprecated Use toHtml() instead
      */
     #[\Override]
     public function draw()
     {
-        $order  = $this->getOrder();
-        $item   = $this->getItem();
-        $pdf    = $this->getPdf();
-        $page   = $this->getPage();
-        $lines  = [];
+        // This method is deprecated, use toHtml() instead
+        return;
+    }
 
-        // draw Product name
-        $lines[0] = [[
-            'text' => Mage::helper('core/string')->str_split($item->getName(), 35, true, true),
-            'feed' => 35,
-        ]];
+    /**
+     * Get SKU
+     *
+     * @return string
+     */
+    public function getSku()
+    {
+        $item = $this->getItem();
+        return $item ? $item->getSku() : '';
+    }
 
-        // draw SKU
-        $lines[0][] = [
-            'text'  => Mage::helper('core/string')->str_split($this->getSku($item), 17),
-            'feed'  => 255,
-            'align' => 'right',
-        ];
-
-        // draw Total (ex)
-        $lines[0][] = [
-            'text'  => $order->formatPriceTxt($item->getRowTotal()),
-            'feed'  => 330,
-            'font'  => 'bold',
-            'align' => 'right',
-        ];
-
-        // draw Discount
-        $lines[0][] = [
-            'text'  => $order->formatPriceTxt(-$item->getDiscountAmount()),
-            'feed'  => 380,
-            'font'  => 'bold',
-            'align' => 'right',
-        ];
-
-        // draw QTY
-        $lines[0][] = [
-            'text'  => $item->getQty() * 1,
-            'feed'  => 445,
-            'font'  => 'bold',
-            'align' => 'right',
-        ];
-
-        // draw Tax
-        $lines[0][] = [
-            'text'  => $order->formatPriceTxt($item->getTaxAmount()),
-            'feed'  => 495,
-            'font'  => 'bold',
-            'align' => 'right',
-        ];
-
-        // draw Total (inc)
-        $subtotal = $item->getRowTotal() + $item->getTaxAmount() + $item->getHiddenTaxAmount()
-            - $item->getDiscountAmount();
-        $lines[0][] = [
-            'text'  => $order->formatPriceTxt($subtotal),
-            'feed'  => 565,
-            'font'  => 'bold',
-            'align' => 'right',
-        ];
-
-        // draw options
-        $options = $this->getItemOptions();
-        if ($options) {
-            foreach ($options as $option) {
-                // draw options label
-                $lines[][] = [
-                    'text' => Mage::helper('core/string')->str_split(strip_tags($option['label']), 40, true, true),
-                    'font' => 'italic',
-                    'feed' => 35,
-                ];
-
-                // draw options value
-                $printValue = $option['print_value'] ?? strip_tags($option['value']);
-                $lines[][] = [
-                    'text' => Mage::helper('core/string')->str_split($printValue, 30, true, true),
-                    'feed' => 40,
-                ];
-            }
+    /**
+     * Get item total including tax and excluding discount
+     *
+     * @return float
+     */
+    public function getItemTotalInclTax()
+    {
+        $item = $this->getItem();
+        if (!$item) {
+            return 0.0;
         }
 
-        $lineBlock = [
-            'lines'  => $lines,
-            'height' => 20,
-        ];
-
-        $page = $pdf->drawLineBlocks($page, [$lineBlock], ['table_header' => true]);
-        $this->setPage($page);
+        return $item->getRowTotal() + $item->getTaxAmount() + $item->getHiddenTaxAmount() - $item->getDiscountAmount();
     }
 }
