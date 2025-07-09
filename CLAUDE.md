@@ -141,4 +141,4 @@ While there's no dedicated test suite, ensure code quality through:
 ## Git Commit Rules
 - **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
 - **NEVER** mention Claude, AI, or assistant in commit messages
-- Keep commits professional and focused only on code changes 
+- Keep commits professional and focused only on code changes
