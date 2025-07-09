@@ -41,6 +41,7 @@
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^3.11",
+        "laminas/laminas-soap": "^2.14",
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^1",
         "mahocommerce/maho-composer-plugin": "^3",
@@ -52,8 +53,7 @@
         "symfony/http-foundation": "^7.3",
         "symfony/mailer": "^7.3",
         "symfony/polyfill-php84": "^1.31",
-        "symfony/var-dumper": "^7.3",
-        "laminas/laminas-soap": "^2.14"
+        "symfony/var-dumper": "^7.3"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "*",
