@@ -11,8 +11,8 @@ Maho is an open-source ecommerce platform forked from OpenMage, designed for med
 ### Code Quality & Standards
 ```bash
 # Code style (PER-CS2.0 standard)
-PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --dry-run --diff    # Check code style
-PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix                     # Fix code style
+vendor/bin/php-cs-fixer fix --dry-run --diff    # Check code style
+vendor/bin/php-cs-fixer fix                     # Fix code style
 
 # Static Analysis (PHPStan level 6)
 vendor/bin/phpstan analyze    # Run static analysis
