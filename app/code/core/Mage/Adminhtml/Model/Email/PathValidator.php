@@ -43,13 +43,10 @@ class Mage_Adminhtml_Model_Email_PathValidator extends Constraint
     public function isValid(mixed $value): bool
     {
         $this->_messages = [];
-        $validator = Validation::createValidator();
-        $violations = $validator->validate($value, $this);
+        $pathNode = is_array($value) ? array_shift($value) : $value;
 
-        if (count($violations) > 0) {
-            foreach ($violations as $violation) {
-                $this->_messages[] = $violation->getMessage();
-            }
+        if (!$this->isEncryptedNodePath($pathNode)) {
+            $this->_messages[] = $this->invalidPathMessage;
             return false;
         }
         return true;

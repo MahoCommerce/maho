@@ -58,7 +58,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
      */
     protected $_protectedExpressions = [];
 
-    protected array $_messageTemplates;
+    protected array $_messageTemplates = [];
 
     public function __construct()
     {

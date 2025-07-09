@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @method Mage_Admin_Model_Resource_Variable _getResource()
@@ -40,17 +38,12 @@ class Mage_Admin_Model_Variable extends Mage_Core_Model_Abstract
     public function validate()
     {
         $errors = [];
-        $validator = Validation::createValidator();
 
-        // Validate variable name not empty
-        $violations = $validator->validate($this->getVariableName(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getVariableName())) {
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is required field.');
         }
 
-        // Validate variable name format
-        $violations = $validator->validate($this->getVariableName(), new Assert\Regex(['pattern' => '/^[-_a-zA-Z0-9\/]*$/']));
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateRegex($this->getVariableName(), '/^[-_a-zA-Z0-9\/]*$/')) {
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is incorrect.');
         }
 

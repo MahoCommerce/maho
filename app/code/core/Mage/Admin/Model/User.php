@@ -752,29 +752,20 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function validate()
     {
         $errors = new ArrayObject();
-        $validator = Validation::createValidator();
 
-        // Validate username
-        $violations = $validator->validate($this->getUsername(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getUsername())) {
             $errors->append(Mage::helper('adminhtml')->__('User Name is required field.'));
         }
 
-        // Validate first name
-        $violations = $validator->validate($this->getFirstname(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getFirstname())) {
             $errors->append(Mage::helper('adminhtml')->__('First Name is required field.'));
         }
 
-        // Validate last name
-        $violations = $validator->validate($this->getLastname(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getLastname())) {
             $errors->append(Mage::helper('adminhtml')->__('Last Name is required field.'));
         }
 
-        // Validate email
-        $violations = $validator->validate($this->getEmail(), new Assert\Email());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateEmail($this->getEmail())) {
             $errors->append(Mage::helper('adminhtml')->__('Please enter a valid email.'));
         }
 
@@ -827,10 +818,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function validateCurrentPassword(#[\SensitiveParameter] $password)
     {
         $result = [];
-        $validator = Validation::createValidator();
 
-        $violations = $validator->validate($password, new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($password)) {
             $result[] = Mage::helper('adminhtml')->__('Current password field cannot be empty.');
         } elseif (is_null($this->getId()) || !Mage::helper('core')->validateHash($password, $this->getPassword())) {
             $result[] = Mage::helper('adminhtml')->__('Invalid current password.');

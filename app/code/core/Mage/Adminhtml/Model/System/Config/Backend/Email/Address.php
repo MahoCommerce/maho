@@ -10,18 +10,13 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 class Mage_Adminhtml_Model_System_Config_Backend_Email_Address extends Mage_Core_Model_Config_Data
 {
     #[\Override]
     protected function _beforeSave()
     {
         $value = $this->getValue();
-        $validator = Validation::createValidator();
-        $violations = $validator->validate($value, new Assert\Email());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateEmail($value)) {
             Mage::throwException(Mage::helper('adminhtml')->__('Invalid email address "%s".', $value));
         }
         return $this;

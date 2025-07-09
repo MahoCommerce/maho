@@ -115,65 +115,28 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
             $constraintOptions['message'] = $message;
         }
 
-        switch ($type) {
-            case 'NotEmpty':
-                return new Assert\NotBlank($constraintOptions);
-            case 'EmailAddress':
-                return new Assert\Email($constraintOptions);
-            case 'StringLength':
-                $constraintOptions = [];
-                if (isset($options['min'])) {
-                    $constraintOptions['min'] = $options['min'];
-                }
-                if (isset($options['max'])) {
-                    $constraintOptions['max'] = $options['max'];
-                }
-                if ($message) {
-                    $constraintOptions['minMessage'] = $message;
-                    $constraintOptions['maxMessage'] = $message;
-                }
-                return new Assert\Length($constraintOptions);
-            case 'Regex':
-                if (isset($options['pattern'])) {
-                    $constraintOptions['pattern'] = $options['pattern'];
-                }
-                return new Assert\Regex($constraintOptions);
-            case 'Digits':
-                return new Assert\Regex([
-                    'pattern' => '/^\d+$/',
-                    'message' => $message ?: 'This value should contain only digits.',
-                ]);
-            case 'Alnum':
-                return new Assert\Regex([
-                    'pattern' => '/^[a-zA-Z0-9]+$/',
-                    'message' => $message ?: 'This value should contain only letters and numbers.',
-                ]);
-            case 'Alpha':
-                return new Assert\Regex([
-                    'pattern' => '/^[a-zA-Z]+$/',
-                    'message' => $message ?: 'This value should contain only letters.',
-                ]);
-            case 'Between':
-                $constraintOptions = [];
-                if (isset($options['min'])) {
-                    $constraintOptions['min'] = $options['min'];
-                }
-                if (isset($options['max'])) {
-                    $constraintOptions['max'] = $options['max'];
-                }
-                if ($message) {
-                    $constraintOptions['minMessage'] = $message;
-                    $constraintOptions['maxMessage'] = $message;
-                }
-                return new Assert\Range($constraintOptions);
-            case 'Url':
-                return new Assert\Url($constraintOptions);
-            case 'Date':
-                return new Assert\Date($constraintOptions);
-            default:
-                // For unsupported validators, create a basic regex constraint
-                throw new Exception("Validator type '{$type}' is not supported in Symfony conversion");
-        }
+        return match ($type) {
+            'NotEmpty', 'NotBlank' => new Assert\NotBlank($constraintOptions),
+            'Email', 'EmailAddress' => new Assert\Email($constraintOptions),
+            'Regex' => new Assert\Regex($constraintOptions),
+            'Length', 'StringLength' => new Assert\Length($constraintOptions),
+            'Range', 'Between' => new Assert\Range($constraintOptions),
+            'Url' => new Assert\Url($constraintOptions),
+            'Date' => new Assert\Date($constraintOptions),
+            'Digits' => new Assert\Regex([
+                'pattern' => '/^\d+$/',
+                'message' => $message ?: 'This value should contain only digits.',
+            ]),
+            'Alnum' => new Assert\Regex([
+                'pattern' => '/^[a-zA-Z0-9]+$/',
+                'message' => $message ?: 'This value should contain only letters and numbers.',
+            ]),
+            'Alpha' => new Assert\Regex([
+                'pattern' => '/^[a-zA-Z]+$/',
+                'message' => $message ?: 'This value should contain only letters.',
+            ]),
+            default => throw new Exception("Unsupported constraint type: {$type}"),
+        };
     }
 
     /**

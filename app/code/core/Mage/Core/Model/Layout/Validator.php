@@ -112,15 +112,24 @@ class Mage_Core_Model_Layout_Validator extends Constraint
     public function isValid(mixed $value): bool
     {
         $this->_messages = [];
-        $validator = Validation::createValidator();
-        $violations = $validator->validate($value, $this);
 
-        if (count($violations) > 0) {
-            foreach ($violations as $violation) {
-                $this->_messages[] = $violation->getMessage();
-            }
+        // Basic XML validation
+        if (empty($value)) {
+            $this->_messages[] = 'Layout XML cannot be empty';
             return false;
         }
+
+        // Check if it's valid XML
+        libxml_use_internal_errors(true);
+        $doc = simplexml_load_string($value);
+        $errors = libxml_get_errors();
+        libxml_clear_errors();
+
+        if ($doc === false || !empty($errors)) {
+            $this->_messages[] = 'Invalid XML format';
+            return false;
+        }
+
         return true;
     }
 
