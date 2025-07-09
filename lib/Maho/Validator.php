@@ -18,7 +18,7 @@ class Maho_Validator
 {
     private static ?ValidatorInterface $validator = null;
 
-    private static function getValidator(): ValidatorInterface
+    public static function getValidator(): ValidatorInterface
     {
         if (self::$validator === null) {
             self::$validator = Validation::createValidator();
