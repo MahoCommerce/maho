@@ -388,7 +388,7 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
         }
 
         // Validate email
-        $violations = $validator->validate($this->getEmail(), new Assert\Email(['mode' => 'loose']));
+        $violations = $validator->validate($this->getEmail(), new Assert\Email());
         if (count($violations) > 0) {
             $errors->append(Mage::helper('api')->__('Please enter a valid email.'));
         }

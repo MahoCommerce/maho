@@ -1060,7 +1060,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         }
 
         // Validate email
-        $violations = $validator->validate($this->getEmail(), new Assert\Email(['mode' => 'loose']));
+        $violations = $validator->validate($this->getEmail(), new Assert\Email());
         if (count($violations) > 0) {
             $errors[] = Mage::helper('customer')->__('Invalid email address "%s".', $this->getEmail());
         }

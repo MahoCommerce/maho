@@ -76,7 +76,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                     $error = true;
                 }
                 // Validate email
-                elseif (count($validator->validate(trim($post['email']), new Assert\Email(['mode' => 'loose']))) > 0) {
+                elseif (count($validator->validate(trim($post['email']), new Assert\Email())) > 0) {
                     $error = true;
                 }
 

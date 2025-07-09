@@ -479,7 +479,7 @@ class Mage_Checkout_Model_Type_Onepage
         } elseif (self::METHOD_GUEST == $this->getQuote()->getCheckoutMethod()) {
             $email = $address->getData('email');
             $validator = Validation::createValidator();
-            $violations = $validator->validate($email, new Assert\Email(['mode' => 'loose']));
+            $violations = $validator->validate($email, new Assert\Email());
             if (count($violations) > 0) {
                 return [
                     'error'   => -1,

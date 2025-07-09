@@ -20,7 +20,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Email_Address extends Mage_Core
     {
         $value = $this->getValue();
         $validator = Validation::createValidator();
-        $violations = $validator->validate($value, new Assert\Email(['mode' => 'loose']));
+        $violations = $validator->validate($value, new Assert\Email());
         if (count($violations) > 0) {
             Mage::throwException(Mage::helper('adminhtml')->__('Invalid email address "%s".', $value));
         }

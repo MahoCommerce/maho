@@ -32,7 +32,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
 
             try {
                 $validator = Validation::createValidator();
-                $violations = $validator->validate($email, new Assert\Email(['mode' => 'loose']));
+                $violations = $validator->validate($email, new Assert\Email());
                 if (count($violations) > 0) {
                     Mage::throwException($this->__('Please enter a valid email address.'));
                 }

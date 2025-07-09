@@ -740,7 +740,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             }
 
             $validator = Validation::createValidator();
-            $violations = $validator->validate($email, new Assert\Email(['mode' => 'loose']));
+            $violations = $validator->validate($email, new Assert\Email());
             if (count($violations) > 0) {
                 $this->_getSession()->setForgottenEmail($email);
                 $this->_getSession()->addError($this->__('Invalid email address.'));
