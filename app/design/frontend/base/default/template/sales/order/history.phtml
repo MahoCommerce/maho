@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -45,8 +45,7 @@
             <td class="total"><?= $_order->formatPrice($_order->getGrandTotal()) ?></td>
             <td class="status"><em><?= $_order->getStatusLabel() ?></em></td>
             <td class="a-center view">
-                <span class="nobr"><a href="<?= $this->getViewUrl($_order) ?>"><?= $this->__('View Order') ?></a>
-                    <?php /*<span class="separator">|</span><a href="<?= $this->getTrackUrl($_order) ?>"><?= $this->__('Track Order') ?></a>&nbsp;*/ ?>
+                <span class="nobr"><a href="<?= $this->getViewUrl($_order) ?>"><?= $this->__('View') ?></a>
                     <?php if ($this->helper('sales/reorder')->canReorder($_order)) : ?>
                     <span class="separator">|</span> <a href="<?= $this->getReorderUrl($_order) ?>" class="link-reorder"><?= $this->__('Reorder') ?></a>
                 <?php endif ?>
