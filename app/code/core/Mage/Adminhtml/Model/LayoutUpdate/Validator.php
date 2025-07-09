@@ -15,8 +15,6 @@
  *
  * Validator checked XML validation and protected expressions
  * Now uses Symfony validation via Core Layout Validator
- *
- * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Model_LayoutUpdate_Validator
 {
