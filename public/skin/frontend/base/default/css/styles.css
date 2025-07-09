@@ -6162,7 +6162,7 @@ div.paypal-logo span > img {
   overflow-x: auto;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
-  margin-bottom: 20px;
+  margin-bottom: 41px;
 }
 
 .slideshow ul {
@@ -6186,7 +6186,7 @@ div.paypal-logo span > img {
 
 .slideshow-dots {
   text-align: center;
-  margin-top: -20px;
+  margin-top: -41px;
   margin-bottom: 20px;
 }
 
