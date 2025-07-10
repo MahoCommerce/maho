@@ -70,7 +70,7 @@ const GlobalAttributes = Node.create({
 
 export {
     Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,
-    Table, TableRow, TableCell, TableHeader, BubbleMenu, BulletList, OrderedList,
+    Table, TableRow, TableCell, TableHeader, BubbleMenu,
     GlobalAttributes,
 };
 

@@ -203,7 +203,23 @@ class tiptapWysiwygSetup {
                 TiptapModules.GlobalAttributes,
                 TiptapModules.StarterKit.configure({
                     heading: {
-                        levels: [1, 2, 3, 4, 5]
+                        levels: [1, 2, 3, 4, 5],
+                        HTMLAttributes: {class: null, style: null}
+                    },
+                    paragraph: {
+                        HTMLAttributes: {class: null, style: null}
+                    },
+                    bulletList: {
+                        HTMLAttributes: {class: null, style: null}
+                    },
+                    orderedList: {
+                        HTMLAttributes: {class: null, style: null}
+                    },
+                    listItem: {
+                        HTMLAttributes: {class: null, style: null}
+                    },
+                    blockquote: {
+                        HTMLAttributes: {class: null, style: null}
                     }
                 }),
                 TiptapModules.MahoImage.configure({
@@ -236,14 +252,23 @@ class tiptapWysiwygSetup {
                     HTMLAttributes: {
                         rel: null,
                         target: null,
+                        class: null,
+                        style: null
                     },
                 }),
                 TiptapModules.Table.configure({
                     resizable: true,
+                    HTMLAttributes: {class: null, style: null}
                 }),
-                TiptapModules.TableRow,
-                TiptapModules.TableCell,
-                TiptapModules.TableHeader,
+                TiptapModules.TableRow.configure({
+                    HTMLAttributes: {class: null, style: null}
+                }),
+                TiptapModules.TableCell.configure({
+                    HTMLAttributes: {class: null, style: null}
+                }),
+                TiptapModules.TableHeader.configure({
+                    HTMLAttributes: {class: null, style: null}
+                }),
                 TiptapModules.TextAlign.configure({
                     types: ['heading', 'paragraph'],
                 }),
