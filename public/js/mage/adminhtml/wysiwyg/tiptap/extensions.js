@@ -18,9 +18,60 @@ import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.25.0';
 import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.25.0';
 import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.25.0';
 
+// Create a custom extension to add global attributes
+const GlobalAttributes = Node.create({
+    name: 'globalAttributes',
+
+    addGlobalAttributes() {
+        return [
+            {
+                types: [
+                    'heading',
+                    'paragraph',
+                    'bulletList',
+                    'orderedList',
+                    'listItem',
+                    'blockquote',
+                    'codeBlock',
+                    'horizontalRule',
+                    'image',
+                    'table',
+                    'tableRow',
+                    'tableCell',
+                    'tableHeader',
+                    'mahoDiv',
+                ],
+                attributes: {
+                    class: {
+                        default: null,
+                        parseHTML: element => element.getAttribute('class') || null,
+                        renderHTML: attributes => {
+                            if (!attributes.class) {
+                                return {};
+                            }
+                            return { class: attributes.class };
+                        },
+                    },
+                    style: {
+                        default: null,
+                        parseHTML: element => element.getAttribute('style') || null,
+                        renderHTML: attributes => {
+                            if (!attributes.style) {
+                                return {};
+                            }
+                            return { style: attributes.style };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+});
+
 export {
     Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,
-    Table, TableRow, TableCell, TableHeader, BubbleMenu,
+    Table, TableRow, TableCell, TableHeader, BubbleMenu, BulletList, OrderedList,
+    GlobalAttributes,
 };
 
 
@@ -72,8 +123,8 @@ const renderDirectiveImageUrl = (src, directiveObj, directivesUrl) => {
  */
 export const MahoWidget = Node.create({
     name: 'mahoWidget',
-    group: 'inline',
-    inline: true,
+    group: 'block',
+    inline: false,
     draggable: true,
     atom: true,
 

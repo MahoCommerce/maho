@@ -200,6 +200,7 @@ class tiptapWysiwygSetup {
             enableContentCheck: true,
             content: this.convertFromPlain(this.textarea.value),
             extensions: [
+                TiptapModules.GlobalAttributes,
                 TiptapModules.StarterKit.configure({
                     heading: {
                         levels: [1, 2, 3, 4, 5]
