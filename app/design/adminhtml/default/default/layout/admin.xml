@@ -112,6 +112,13 @@
         </reference>
     </adminhtml_cache_index>
 
+    <adminhtml_system_email_template_edit>
+        <update handle="editor"/>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/system/email-template.js</name></action>
+        </reference>
+    </adminhtml_system_email_template_edit>
+
     <adminhtml_catalog_product_attribute_edit>
         <update handle="adminhtml_input_counter_handle"/>
     </adminhtml_catalog_product_attribute_edit>

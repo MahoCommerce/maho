@@ -12,12 +12,16 @@ const MediabrowserUtility = {
 
     dialogWindow: null,
     dialogWindowId: 'browser_window',
+    lastSelectedNode: null,
 
     async openDialog(url, width, height, title, options) {
         if (document.getElementById(this.dialogWindowId)) {
             return;
         }
         try {
+            if (!url.match(/\/node\/(.*?)\//)) {
+                url = setRouteParams(url, { node: this.lastSelectedNode });
+            }
             const result = await mahoFetch(url);
 
             this.dialogWindow = Dialog.info(result, {
@@ -43,13 +47,6 @@ const MediabrowserUtility = {
 
 class Mediabrowser {
 
-    targetElementId = null;
-    contentsUrl = null;
-    onInsertUrl = null;
-    newFolderUrl = null;
-    deleteFolderUrl = null;
-    deleteFilesUrl = null;
-    headerText = null;
     tree = null;
     currentNode = null;
     storeId = null;
@@ -59,16 +56,29 @@ class Mediabrowser {
     }
 
     initialize(setup) {
-        this.newFolderPrompt = setup.newFolderPrompt;
-        this.deleteFolderConfirmationMessage = setup.deleteFolderConfirmationMessage;
-        this.deleteFileConfirmationMessage = setup.deleteFileConfirmationMessage;
         this.targetElementId = setup.targetElementId;
+        this.indexUrl = setup.indexUrl;
         this.contentsUrl = setup.contentsUrl;
         this.onInsertUrl = setup.onInsertUrl;
         this.newFolderUrl = setup.newFolderUrl;
         this.deleteFolderUrl = setup.deleteFolderUrl;
         this.deleteFilesUrl = setup.deleteFilesUrl;
         this.headerText = setup.headerText;
+        this.canInsertImage = setup.canInsertImage;
+    }
+
+    static {
+        document.addEventListener('uploader:filesAdded', (event) => {
+            MediabrowserInstance.deselectFiles();
+        });
+        document.addEventListener('uploader:beforeUpload', (event) => {
+            event.detail.instance.uploaderConfig.target = setRouteParams(event.detail.instance.uploaderConfig.target, {
+                node: MediabrowserInstance.currentNode.id,
+            });
+        });
+        document.addEventListener('uploader:success', (event) => {
+            MediabrowserInstance.handleUploadComplete(event.detail.files);
+        });
     }
 
     setTree(tree) {
@@ -80,8 +90,8 @@ class Mediabrowser {
         return this.tree;
     }
 
-    selectFolder(node) {
-        if (this.currentNode === node) {
+    async selectFolder(node, forceRefresh = false) {
+        if (this.currentNode === node && !forceRefresh) {
             return;
         }
 
@@ -97,10 +107,13 @@ class Mediabrowser {
             this.showElement('button_delete_folder');
         }
 
+        this.updateUrl(this.currentNode);
         this.updateHeader(this.currentNode);
         this.drawBreadcrumbs(this.currentNode);
 
-        this.updateContent();
+        MediabrowserUtility.lastSelectedNode = node.id;
+
+        return this.updateContent();
     }
 
     async updateContent() {
@@ -113,13 +126,21 @@ class Mediabrowser {
             });
 
             const contentsEl = document.getElementById('contents');
-            if (contentsEl) {
-                updateElementHtmlAndExecuteScripts(contentsEl, html);
-                contentsEl.querySelectorAll('div.filecnt').forEach((el) => {
-                    el.addEventListener('click', this.selectFile.bind(this));
-                    el.addEventListener('dblclick', this.insert.bind(this));
-                });
+            if (!contentsEl) {
+                return;
             }
+            updateElementHtmlAndExecuteScripts(contentsEl, html);
+
+            for (const el of contentsEl.querySelectorAll('div.filecnt')) {
+                el.addEventListener('click', this.selectFile.bind(this));
+                if (this.canInsertImage) {
+                    el.addEventListener('dblclick', this.insert.bind(this));
+                }
+            }
+
+            document.getElementById('contents-uploader')?.prepend(
+                document.getElementById('contents-alt-text'),
+            );
         } catch(error) {
             alert(error.message);
         }
@@ -133,30 +154,43 @@ class Mediabrowser {
         const div = event.target.closest('div.filecnt');
         const selected = !div.classList.contains('selected');
 
-        document.querySelectorAll('div.filecnt.selected').forEach((el) => el.classList.remove('selected'));
+        this.deselectFiles();
         div.classList.toggle('selected', selected);
 
         if (selected) {
             this.showFileButtons();
-        } else {
-            this.hideFileButtons();
         }
+    }
+
+    selectFileById(fileId) {
+        document.getElementById(fileId)?.click();
+    }
+
+    deselectFiles() {
+        for (const el of document.querySelectorAll('div.filecnt.selected')) {
+            el.classList.remove('selected')
+        }
+        this.hideFileButtons();
     }
 
     showFileButtons() {
         this.showElement('button_delete_files');
-        this.showElement('button_insert_files');
+        if (this.canInsertImage) {
+            this.showElement('button_insert_files');
+            this.showElement('contents-alt-text');
+        }
     }
 
     hideFileButtons() {
         this.hideElement('button_delete_files');
         this.hideElement('button_insert_files');
+        this.hideElement('contents-alt-text');
     }
 
     handleUploadComplete(files) {
-        document.querySelectorAll('div[class*="file-row complete"]').forEach((el) => {
+        for (const el of document.querySelectorAll('div[class*="file-row complete"]')) {
             document.getElementById(el.id)?.remove();
-        });
+        }
         this.updateContent();
     }
 
@@ -169,40 +203,29 @@ class Mediabrowser {
             return false;
         }
 
-        const targetEl = this.getTargetElement();
-        if (!targetEl) {
-            alert('Target element not found for content update');
-            MediabrowserUtility.closeDialog();
-            return;
-        }
-
         try {
             const params = new URLSearchParams({
                 filename: div.id,
                 node: this.currentNode.id,
-                store: this.storeId
+                store: this.storeId,
+                alt: document.querySelector('input[name=alt]')?.value,
             });
 
-            if (targetEl.tagName && targetEl.tagName === 'TEXTAREA') {
-                params.set('as_is', 1);
-            }
-
-            const text = await mahoFetch(this.onInsertUrl, {
+            const html = await mahoFetch(this.onInsertUrl, {
                 method: 'POST',
                 body: params,
-            })
+            });
 
-            if (this.getMediaBrowserCallback()) {
-                window.blur();
-            }
-            MediabrowserUtility.closeDialog();
+            // Close the dialog, and send html as dialog.returnValue
+            Dialog.close(html);
 
-            if (targetEl.tagName === 'INPUT') {
-                targetEl.value = text;
-            } else if (targetEl.tagName === 'TEXTAREA') {
-                updateElementAtCursor(targetEl, text);
-            } else {
-                targetEl(text);
+            const targetEl = document.getElementById(this.targetElementId);
+            if (targetEl) {
+                if (targetEl.tagName === 'INPUT') {
+                    targetEl.value = html;
+                } else if (targetEl.tagName === 'TEXTAREA') {
+                    updateElementAtCursor(targetEl, html);
+                }
             }
 
         } catch (error) {
@@ -210,36 +233,8 @@ class Mediabrowser {
         }
     }
 
-    /**
-     * Find document target element in next order:
-     *  in acive file browser opener:
-     *  - input field with ID: "src" in opener window
-     *  - input field with ID: "href" in opener window
-     *  in document:
-     *  - element with target ID
-     *
-     * return HTMLelement | null
-     */
-    getTargetElement() {
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId)) {
-            return this.getMediaBrowserCallback();
-        } else {
-            return document.getElementById(this.targetElementId);
-        }
-    }
-
-    /**
-     * return object|null
-     */
-    getMediaBrowserCallback() {
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId) && typeof tinyMceEditors !== 'undefined') {
-            return tinyMceEditors.get(this.targetElementId).getMediaBrowserCallback();
-        }
-        return null;
-    }
-
     async newFolder() {
-        const folderName = prompt(this.newFolderPrompt);
+        const folderName = prompt(Translator.translate('New Folder Name:'));
         if (!folderName) {
             return false;
         }
@@ -247,6 +242,7 @@ class Mediabrowser {
             const result = await mahoFetch(this.newFolderUrl, {
                 method: 'POST',
                 body: new URLSearchParams({
+                    node: this.currentNode.id,
                     name: folderName,
                 }),
             });
@@ -268,11 +264,17 @@ class Mediabrowser {
     }
 
     async deleteFolder() {
-        if (!confirm(this.deleteFolderConfirmationMessage)) {
+        const message = Translator.translate('Are you sure you want to delete current folder?');
+        if (!confirm(message)) {
             return false;
         }
         try {
-            await mahoFetch(this.deleteFolderUrl, { method: 'POST' });
+            await mahoFetch(this.deleteFolderUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    node: this.currentNode.id,
+                }),
+            });
 
             const parent = this.currentNode.parentNode;
             parent.removeChild(this.currentNode);
@@ -284,7 +286,8 @@ class Mediabrowser {
     }
 
     async deleteFiles() {
-        if (!confirm(this.deleteFileConfirmationMessage)) {
+        const message = Translator.translate('Are you sure you want to delete the selected file?');
+        if (!confirm(message)) {
             return false;
         }
 
@@ -297,6 +300,7 @@ class Mediabrowser {
             await mahoFetch(this.deleteFilesUrl, {
                 method: 'POST',
                 body: new URLSearchParams({
+                    node: this.currentNode.id,
                     files: JSON.stringify(ids),
                 }),
             });
@@ -317,17 +321,42 @@ class Mediabrowser {
             document.getElementById('content_header')?.after(breadcrumbsEl);
         }
 
+        breadcrumbsEl.innerHTML = '';
+
         if (node.id === 'root') {
-            breadcrumbsEl.innerHTML = '';
             return;
         }
 
-        const crumbs = node.getPath().split('/').map((id) => {
-            const currNode = this.tree.getNodeById(id);
-            return `<li><a href="#" onclick="MediabrowserInstance.selectFolderById('${currNode.id}');">${currNode.text}</a></li>`;
-        });
+        const crumbs = node.getPath().split('/');
+        for (let i = 0; i < crumbs.length; i++) {
+            const currNode = this.tree.getNodeById(crumbs[i]);
+            const crumbEl = breadcrumbsEl.appendChild(document.createElement('li'));
 
-        breadcrumbsEl.innerHTML = crumbs.join(' <span>/</span> ');
+            if (i < crumbs.length - 1) {
+                const linkEl = crumbEl.appendChild(document.createElement('a'));
+                linkEl.href = '#';
+                linkEl.textContent = currNode.text;
+                linkEl.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.selectFolder(currNode);
+                });
+
+                const spanEl = breadcrumbsEl.appendChild(document.createElement('span'));
+                spanEl.textContent = ' / ';
+
+            } else {
+                const spanEl = crumbEl.appendChild(document.createElement('span'));
+                spanEl.textContent = currNode.text;
+            }
+        }
+    }
+
+    updateUrl(node) {
+        // Don't update URL in modal view
+        if (document.getElementById('contents')?.closest('dialog')) {
+            return;
+        }
+        history.replaceState(null, '', setRouteParams(this.indexUrl, { node: node.id }));
     }
 
     updateHeader(node) {
