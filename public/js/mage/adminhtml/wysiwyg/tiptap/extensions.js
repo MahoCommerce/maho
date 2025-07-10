@@ -72,8 +72,8 @@ const renderDirectiveImageUrl = (src, directiveObj, directivesUrl) => {
  */
 export const MahoWidget = Node.create({
     name: 'mahoWidget',
-    group: 'inline',
-    inline: true,
+    group: 'block',
+    inline: false,
     draggable: true,
     atom: true,
 
