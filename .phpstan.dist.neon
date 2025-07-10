@@ -6,7 +6,7 @@ includes:
 
 parameters:
     level: 6
-    tmpDir: .phpstan.cache
+    tmpDir: .phpstan/cache
     reportUnmatchedIgnoredErrors: true
     checkFunctionNameCase: true
     checkInternalClassCaseSensitivity: true
