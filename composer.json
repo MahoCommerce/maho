@@ -41,7 +41,6 @@
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^3.11",
-        "laminas/laminas-soap": "^2.14",
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^1",
         "mahocommerce/maho-composer-plugin": "^3",
