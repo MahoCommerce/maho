@@ -6,9 +6,11 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Laminas\Soap\Exception\ExceptionInterface as LaminasSoapException;
 
 class Mage_Api_Model_Server_V2_Adapter_Soap extends Mage_Api_Model_Server_Adapter_Soap
 {
@@ -66,7 +68,7 @@ class Mage_Api_Model_Server_V2_Adapter_Soap extends Mage_Api_Model_Server_Adapte
                     ->setHeader('Content-Type', 'text/xml; charset=' . $apiConfigCharset)
                     ->setHeader('Content-Length', strlen($content), true)
                     ->setBody($content);
-            } catch (Zend_Soap_Server_Exception $e) {
+            } catch (LaminasSoapException $e) {
                 $this->fault($e->getCode(), $e->getMessage());
             } catch (Exception $e) {
                 $this->fault($e->getCode(), $e->getMessage());
