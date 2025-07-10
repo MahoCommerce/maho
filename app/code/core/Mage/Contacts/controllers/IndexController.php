@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
 {
     public const XML_PATH_ENABLED                    = 'contacts/contacts/enabled';
@@ -64,19 +61,17 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
 
                 // check data
                 $error = false;
-                $validator = Validation::createValidator();
 
                 // Validate name
-                $violations = $validator->validate(trim($post['name']), new Assert\NotBlank());
-                if (count($violations) > 0) {
+                if (!Maho_Validator::validateNotBlank(trim($post['name']))) {
                     $error = true;
                 }
                 // Validate comment
-                elseif (count($validator->validate(trim($post['comment']), new Assert\NotBlank())) > 0) {
+                elseif (!Maho_Validator::validateNotBlank(trim($post['comment']))) {
                     $error = true;
                 }
                 // Validate email
-                elseif (count($validator->validate(trim($post['email']), new Assert\Email())) > 0) {
+                elseif (!Maho_Validator::validateEmail(trim($post['email']))) {
                     $error = true;
                 }
 

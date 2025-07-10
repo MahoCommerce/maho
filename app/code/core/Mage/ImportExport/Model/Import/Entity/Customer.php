@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_Model_Import_Entity_Abstract
 {
     /**
@@ -609,9 +606,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                 $this->addRowError(self::ERROR_EMAIL_SITE_NOT_FOUND, $rowNum);
             }
         } elseif (self::SCOPE_DEFAULT == $rowScope) { // row is SCOPE_DEFAULT = new customer block begins
-            $validator = Validation::createValidator();
-            $violations = $validator->validate($email, new Assert\Email());
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateEmail($email)) {
                 $this->addRowError(self::ERROR_INVALID_EMAIL, $rowNum);
             } elseif (!isset($this->_websiteCodeToId[$website])) {
                 $this->addRowError(self::ERROR_INVALID_WEBSITE, $rowNum);

@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 /**
  * @method Mage_Eav_Model_Resource_Entity_Attribute _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute getResource()
@@ -132,12 +129,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
          * Check for maximum attribute_code length
          */
         if (isset($this->_data['attribute_code'])) {
-            $validator = Validation::createValidator();
-            $violations = $validator->validate(
-                $this->_data['attribute_code'],
-                new Assert\Length(['max' => self::ATTRIBUTE_CODE_MAX_LENGTH]),
-            );
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateLength($this->_data['attribute_code'], null, self::ATTRIBUTE_CODE_MAX_LENGTH)) {
                 throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
             }
         }

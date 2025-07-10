@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 /**
  * Customer model
  *
@@ -1045,31 +1042,26 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public function validate()
     {
         $errors = [];
-        $validator = Validation::createValidator();
 
         // Validate first name
-        $violations = $validator->validate(trim($this->getFirstname()), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank(trim($this->getFirstname()))) {
             $errors[] = Mage::helper('customer')->__('The first name cannot be empty.');
         }
 
         // Validate last name
-        $violations = $validator->validate(trim($this->getLastname()), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank(trim($this->getLastname()))) {
             $errors[] = Mage::helper('customer')->__('The last name cannot be empty.');
         }
 
         // Validate email
-        $violations = $validator->validate($this->getEmail(), new Assert\Email());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateEmail($this->getEmail())) {
             $errors[] = Mage::helper('customer')->__('Invalid email address "%s".', $this->getEmail());
         }
 
         $password = $this->getPassword();
         // Validate password not empty for new customers
         if (!$this->getId()) {
-            $violations = $validator->validate($password, new Assert\NotBlank());
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateNotBlank($password)) {
                 $errors[] = Mage::helper('customer')->__('The password cannot be empty.');
             }
         }
@@ -1077,8 +1069,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $minPasswordLength = $this->getMinPasswordLength();
         // Validate minimum password length
         if (strlen($password)) {
-            $violations = $validator->validate($password, new Assert\Length(['min' => $minPasswordLength]));
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateLength($password, $minPasswordLength)) {
                 $errors[] = Mage::helper('customer')
                     ->__('The minimum password length is %s', $minPasswordLength);
             }
@@ -1086,8 +1077,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         // Validate maximum password length
         if (strlen($password)) {
-            $violations = $validator->validate($password, new Assert\Length(['max' => self::MAXIMUM_PASSWORD_LENGTH]));
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateLength($password, null, self::MAXIMUM_PASSWORD_LENGTH)) {
                 $errors[] = Mage::helper('customer')
                     ->__('Please enter a password with at most %s characters.', self::MAXIMUM_PASSWORD_LENGTH);
             }
@@ -1126,25 +1116,21 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     {
         $errors   = [];
         $password = $this->getPassword();
-        $validator = Validation::createValidator();
 
         // Validate password not empty
-        $violations = $validator->validate($password, new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($password)) {
             $errors[] = Mage::helper('customer')->__('The password cannot be empty.');
         }
 
         $minPasswordLength = $this->getMinPasswordLength();
         // Validate minimum password length
-        $violations = $validator->validate($password, new Assert\Length(['min' => $minPasswordLength]));
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateLength($password, $minPasswordLength)) {
             $errors[] = Mage::helper('customer')
                 ->__('The minimum password length is %s', $minPasswordLength);
         }
 
         // Validate maximum password length
-        $violations = $validator->validate($password, new Assert\Length(['max' => self::MAXIMUM_PASSWORD_LENGTH]));
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateLength($password, null, self::MAXIMUM_PASSWORD_LENGTH)) {
             $errors[] = Mage::helper('customer')
                 ->__('Please enter a password with at most %s characters.', self::MAXIMUM_PASSWORD_LENGTH);
         }
