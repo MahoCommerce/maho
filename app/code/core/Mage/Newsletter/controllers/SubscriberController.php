@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -31,9 +28,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
             $email              = (string) $this->getRequest()->getPost('email');
 
             try {
-                $validator = Validation::createValidator();
-                $violations = $validator->validate($email, new Assert\Email());
-                if (count($violations) > 0) {
+                if (!Maho_Validator::validateEmail($email)) {
                     Mage::throwException($this->__('Please enter a valid email address.'));
                 }
 
