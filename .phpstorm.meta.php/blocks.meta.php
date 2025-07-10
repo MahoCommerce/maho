@@ -1,6 +1,14 @@
 <?php
 namespace PHPSTORM_META {
     override(\Mage_Core_Model_Layout::createBlock(0), map([
+        'adminactivitylog/adminhtml_activity' => \Maho_AdminActivityLog_Block_Adminhtml_Activity::class,
+        'adminactivitylog/adminhtml_activity_grid' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid::class,
+        'adminactivitylog/adminhtml_activity_grid_renderer_entityname' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_EntityName::class,
+        'adminactivitylog/adminhtml_activity_grid_renderer_url' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_Url::class,
+        'adminactivitylog/adminhtml_activity_view' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_View::class,
+        'adminactivitylog/adminhtml_activity_view_form' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form::class,
+        'adminactivitylog/adminhtml_login' => \Maho_AdminActivityLog_Block_Adminhtml_Login::class,
+        'adminactivitylog/adminhtml_login_grid' => \Maho_AdminActivityLog_Block_Adminhtml_Login_Grid::class,
         'adminhtml/abstract' => \Mage_Adminhtml_Block_Abstract::class,
         'adminhtml/api_buttons' => \Mage_Adminhtml_Block_Api_Buttons::class,
         'adminhtml/api_editroles' => \Mage_Adminhtml_Block_Api_Editroles::class,
@@ -707,7 +715,6 @@ namespace PHPSTORM_META {
         'adminhtml/widget_container' => \Mage_Adminhtml_Block_Widget_Container::class,
         'adminhtml/widget_form' => \Mage_Adminhtml_Block_Widget_Form::class,
         'adminhtml/widget_form_container' => \Mage_Adminhtml_Block_Widget_Form_Container::class,
-        'adminhtml/widget_form_element' => \Mage_Adminhtml_Block_Widget_Form_Element::class,
         'adminhtml/widget_form_element_dependence' => \Mage_Adminhtml_Block_Widget_Form_Element_Dependence::class,
         'adminhtml/widget_form_element_gallery' => \Mage_Adminhtml_Block_Widget_Form_Element_Gallery::class,
         'adminhtml/widget_form_renderer_element' => \Mage_Adminhtml_Block_Widget_Form_Renderer_Element::class,
@@ -1292,6 +1299,14 @@ namespace PHPSTORM_META {
         'wishlist/share_wishlist' => \Mage_Wishlist_Block_Share_Wishlist::class,
     ]));
     override(\Mage_Core_Model_Layout::getBlockSingleton(0), map([
+        'adminactivitylog/adminhtml_activity' => \Maho_AdminActivityLog_Block_Adminhtml_Activity::class,
+        'adminactivitylog/adminhtml_activity_grid' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid::class,
+        'adminactivitylog/adminhtml_activity_grid_renderer_entityname' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_EntityName::class,
+        'adminactivitylog/adminhtml_activity_grid_renderer_url' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_Url::class,
+        'adminactivitylog/adminhtml_activity_view' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_View::class,
+        'adminactivitylog/adminhtml_activity_view_form' => \Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form::class,
+        'adminactivitylog/adminhtml_login' => \Maho_AdminActivityLog_Block_Adminhtml_Login::class,
+        'adminactivitylog/adminhtml_login_grid' => \Maho_AdminActivityLog_Block_Adminhtml_Login_Grid::class,
         'adminhtml/abstract' => \Mage_Adminhtml_Block_Abstract::class,
         'adminhtml/api_buttons' => \Mage_Adminhtml_Block_Api_Buttons::class,
         'adminhtml/api_editroles' => \Mage_Adminhtml_Block_Api_Editroles::class,
@@ -1998,7 +2013,6 @@ namespace PHPSTORM_META {
         'adminhtml/widget_container' => \Mage_Adminhtml_Block_Widget_Container::class,
         'adminhtml/widget_form' => \Mage_Adminhtml_Block_Widget_Form::class,
         'adminhtml/widget_form_container' => \Mage_Adminhtml_Block_Widget_Form_Container::class,
-        'adminhtml/widget_form_element' => \Mage_Adminhtml_Block_Widget_Form_Element::class,
         'adminhtml/widget_form_element_dependence' => \Mage_Adminhtml_Block_Widget_Form_Element_Dependence::class,
         'adminhtml/widget_form_element_gallery' => \Mage_Adminhtml_Block_Widget_Form_Element_Gallery::class,
         'adminhtml/widget_form_renderer_element' => \Mage_Adminhtml_Block_Widget_Form_Renderer_Element::class,

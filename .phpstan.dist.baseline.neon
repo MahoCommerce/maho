@@ -3529,60 +3529,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Container.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setElement\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setElement\(\) has parameter \$element with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setForm\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setForm\(\) has parameter \$form with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setFormBlock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setFormBlock\(\) has parameter \$formBlock with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Form_Element\:\:\$_element has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Form_Element\:\:\$_form has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Form_Element\:\:\$_formBlock has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element_Dependence\:\:addConfigOption\(\) has parameter \$value with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -5345,12 +5291,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Wysiwyg/Enabled.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Cms_Wysiwyg_Skin\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Wysiwyg/Skin.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Country\:\:toOptionArray\(\) has no return type specified\.$#'
@@ -30638,18 +30578,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
-
-		-
-			message: '#^Variable \$element might not be defined\.$#'
-			identifier: variable.undefined
-			count: 62
-			path: app/design/adminhtml/default/default/template/widget/form/element.phtml
-
-		-
-			message: '#^Variable \$formBlock might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/form/element.phtml
 
 		-
 			message: '''

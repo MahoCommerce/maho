@@ -1,0 +1,752 @@
+/* Tiptap editor styles - Simple Editor Template */
+.tiptap-wrapper {
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: white;
+    overflow: hidden;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.tiptap-toolbar {
+    background: #fafafa;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.125rem;
+    align-items: center;
+}
+
+.tiptap-toolbar button {
+    background-color: transparent;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.25rem;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    position: relative;
+    color: #4b5563;
+}
+
+.tiptap-toolbar button:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.tiptap-toolbar button:active {
+    background-color: #d1d5db;
+}
+
+.tiptap-toolbar button.is-active {
+    background-color: #1f2937;
+    color: white;
+}
+
+.tiptap-toolbar button.is-active:hover {
+    background-color: #374151;
+}
+
+.tiptap-toolbar button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.tiptap-toolbar button:disabled:hover {
+    background-color: transparent;
+    color: #4b5563;
+}
+
+.tiptap-toolbar .toolbar-group {
+    display: flex;
+    gap: 0.125rem;
+}
+
+.tiptap-toolbar .toolbar-separator {
+    width: 1px;
+    background-color: #d1d5db;
+    margin: 0 0.375rem;
+    height: 1.75rem;
+    align-self: center;
+}
+
+.tiptap-toolbar select {
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.375rem 2rem 0.375rem 0.75rem;
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.375rem center;
+    background-size: 1.25rem;
+    cursor: pointer;
+    height: 2.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #4b5563;
+    transition: all 0.15s ease-in-out;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    min-width: 8rem;
+    width: 150px !important;
+}
+
+.tiptap-toolbar select:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.ProseMirror {
+    min-height: 400px;
+    padding: 1.25rem;
+    outline: none;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: #1f2937;
+}
+
+.ProseMirror:focus {
+    outline: none;
+}
+
+.ProseMirror > * + * {
+    margin-top: 0.75em;
+}
+
+.ProseMirror:focus-visible {
+    outline: none;
+}
+
+/* Typography styles */
+.ProseMirror h1 {
+    font-size: 2.125rem;
+    line-height: 2.5rem;
+    margin: 1.5rem 0 1rem 0;
+    font-weight: 700;
+    color: #111827;
+}
+
+.ProseMirror h2 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    margin: 1.5rem 0 0.75rem 0;
+    font-weight: 600;
+    color: #111827;
+}
+
+.ProseMirror h3 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    margin: 1.25rem 0 0.75rem 0;
+    font-weight: 600;
+    color: #111827;
+}
+
+.ProseMirror h4 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    margin: 1rem 0 0.5rem 0;
+    font-weight: 600;
+    color: #111827;
+}
+
+.ProseMirror h5 {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+    margin: 1rem 0 0.5rem 0;
+    font-weight: 600;
+    color: #111827;
+}
+
+.ProseMirror h6 {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    margin: 1rem 0 0.5rem 0;
+    font-weight: 600;
+    color: #111827;
+}
+
+.ProseMirror p {
+    margin: 0.75rem 0;
+    line-height: 1.625;
+}
+
+.ProseMirror blockquote {
+    margin: 1rem 0;
+    padding-left: 1rem;
+    border-left: 3px solid #e5e7eb;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.ProseMirror ul, .ProseMirror ol {
+    margin: 0.75rem 0;
+    padding-left: 1.625rem;
+}
+
+.ProseMirror ul {
+    list-style: disc outside;
+}
+
+.ProseMirror ol {
+    list-style: decimal outside;
+}
+
+.ProseMirror li {
+    margin: 0.25rem 0;
+    line-height: 1.625;
+}
+
+.ProseMirror a {
+    color: #2563eb;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.ProseMirror a:hover {
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+.ProseMirror code {
+    background-color: #f3f4f6;
+    border-radius: 0.25rem;
+    color: #374151;
+    font-family: 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    font-size: 0.875em;
+    padding: 0.125rem 0.25rem;
+}
+
+.ProseMirror pre {
+    background-color: #1f2937;
+    border-radius: 0.5rem;
+    color: #e5e7eb;
+    font-family: 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 1rem 0;
+    overflow-x: auto;
+    padding: 1rem;
+}
+
+.ProseMirror pre code {
+    background-color: transparent;
+    color: inherit;
+    font-size: inherit;
+    padding: 0;
+}
+
+.ProseMirror hr {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 2rem 0;
+}
+
+/* Table styles */
+.ProseMirror table {
+    border-collapse: collapse;
+    margin: 0;
+    overflow: hidden;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.ProseMirror td, .ProseMirror th {
+    border: 1px solid #e5e7eb;
+    box-sizing: border-box;
+    min-width: 1em;
+    padding: 0.5rem;
+    position: relative;
+    vertical-align: top;
+}
+
+.ProseMirror td > *, .ProseMirror th > * {
+    margin-bottom: 0;
+}
+
+.ProseMirror th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    text-align: left;
+}
+
+.ProseMirror .selectedCell:after {
+    background: rgba(59, 130, 246, 0.15);
+    content: "";
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+}
+
+.ProseMirror .column-resize-handle {
+    background-color: #3b82f6;
+    bottom: -2px;
+    position: absolute;
+    right: -2px;
+    pointer-events: none;
+    top: 0;
+    width: 4px;
+}
+
+.ProseMirror .tableWrapper {
+    margin: 1em 0;
+    overflow-x: auto;
+}
+
+.ProseMirror .resize-cursor {
+    cursor: col-resize;
+}
+
+/* Widget placeholder styles */
+.ProseMirror span[data-type=maho-widget] {
+    position: relative;
+    display: inline;
+    padding: 4px;
+    border: 1px dotted #adb5bd;
+    cursor: pointer;
+
+    font-size: 1rem;
+    font-weight: normal;
+    font-style: normal;
+    vertical-align: bottom;
+
+    svg {
+        display: inline-block;
+        width: 24px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+
+    &:hover, &.ProseMirror-selectednode {
+        border-color: transparent;
+        outline: 2px solid #3b82f6;
+        outline-offset: 1px;
+    }
+}
+
+/* Tooltip for widgets and images */
+.ProseMirror span[data-type=maho-widget],
+.ProseMirror div[data-type=maho-slideshow],
+.ProseMirror .image-container {
+    &[title] {
+        position: relative;
+
+        &::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            background: #1f2937;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        &:hover::after {
+            opacity: 1;
+        }
+    }
+}
+
+
+/* Placeholder text */
+.ProseMirror p.is-editor-empty:first-child::before {
+    color: #adb5bd;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Icons for toolbar buttons */
+.tiptap-toolbar button svg {
+    width: 60%;
+    height: 60%;
+}
+
+/* Image resize handles */
+.ProseMirror .image-container {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.ProseMirror .image-container img {
+    display: block;
+    max-width: 100%;
+    min-width: 50px;
+    min-height: 50px;
+    height: auto;
+    cursor: pointer;
+}
+
+.ProseMirror .image-container img.placeholder {
+    border: 1px dotted #adb5bd;
+}
+
+.ProseMirror .image-container:hover,
+.ProseMirror .image-container.ProseMirror-selectednode {
+    outline: 2px solid #3b82f6;
+    outline-offset: 1px;
+}
+
+.ProseMirror .image-container .resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #3b82f6;
+    border: 1px solid white;
+    display: none;
+}
+
+.ProseMirror .image-container:hover .resize-handle {
+    display: block;
+}
+
+.ProseMirror .image-container .resize-handle-nw {
+    cursor: nw-resize;
+    top: -5px; left: -5px;
+}
+
+.ProseMirror .image-container .resize-handle-ne {
+    cursor: nw-resize;
+    top: -5px; right: -5px;
+}
+
+.ProseMirror .image-container .resize-handle-sw {
+    cursor: nw-resize;
+    bottom: -5px; left: -5px;
+}
+
+.ProseMirror .image-container .resize-handle-se {
+    cursor: nw-resize;
+    bottom: -5px; right: -5px;
+}
+
+/* Slideshow placeholder */
+.ProseMirror div[data-type=maho-slideshow] {
+    max-width: 1260px;
+    img {
+        max-width: 100%;
+    }
+    .slideshow:empty {
+        aspect-ratio: 2;
+        border: 1px dotted #636363;
+    }
+    .slideshow-dots {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .slideshow-dots .dot {
+        height: 8px;
+        width: 8px;
+        background-color: #cccccc;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+    .slideshow-dots .dot.active {
+        background-color: #636363;
+    }
+    &:hover, &.ProseMirror-selectednode {
+        border-color: transparent;
+        outline: 2px solid #3b82f6;
+        outline-offset: 1px;
+    }
+}
+
+/* Tooltip styles for custom buttons */
+.tiptap-toolbar button[title] {
+    position: relative;
+}
+
+.tiptap-toolbar button[title]::after {
+    content: attr(title);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: #1f2937;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 999;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.tiptap-toolbar button[title]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(4px);
+}
+
+/* Bubble menu styles */
+.tiptap-bubble-menu {
+    font-family: inherit;
+    backdrop-filter: blur(8px);
+    background-color: white;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.15s ease-out;
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    white-space: nowrap !important;
+    padding: 6px 8px;
+    max-width: auto !important;
+    width: auto !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.tiptap-bubble-menu button {
+    color: #4b5563 !important;
+    transition: all 0.15s ease !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    padding: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: #4b5563;
+}
+
+.tiptap-bubble-menu button:hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    transform: scale(1.05);
+}
+
+.tiptap-bubble-menu button:active {
+    transform: scale(0.95);
+}
+
+.tiptap-bubble-menu svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
+/* Tooltip styles for bubble menu items */
+.tiptap-bubble-menu button[title] {
+    position: relative;
+}
+
+.tiptap-bubble-menu button[title]::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: #1f2937;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 1001;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tiptap-bubble-menu button[title]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+}
+
+/* Ensure separators stay inline */
+.tiptap-bubble-menu .toolbar-separator {
+    width: 0 !important;
+    height: 24px !important;
+    border-left: 1px solid #e2e8f0;
+}
+
+/* MahoDiv */
+.ProseMirror div[data-div-info] {
+    position: relative;
+    border: 2px dashed #3b82f6;
+    border-radius: 4px;
+    margin: 8px 0;
+    padding: 8px;
+    background: none !important;
+}
+
+.ProseMirror div[data-div-info]:hover {
+    border-color: #1d4ed8;
+}
+
+.ProseMirror div[data-div-info]::before {
+    content: attr(data-div-info);
+    position: absolute;
+    top: -10px;
+    left: 8px;
+    background: #3b82f6;
+    color: white;
+    padding: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: monospace;
+    line-height: 1;
+    z-index: 1;
+}
+
+.ProseMirror div[data-div-info].ProseMirror-selectednode {
+    border-color: #1d4ed8;
+}
+
+.ProseMirror div[data-div-info].ProseMirror-selectednode::before {
+    background: #1d4ed8;
+}
+
+/* Slideshow Editor Dialog */
+.slideshow-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.slideshow-editor .slides-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.slideshow-editor .slide-item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: #fafafa;
+}
+
+.slideshow-editor .slide-item.dragging {
+    opacity: 0.5;
+}
+
+.slideshow-editor .slide-handle {
+    color: #999;
+    font-size: 18px;
+    cursor: grab;
+    user-select: none;
+    align-self: stretch;
+}
+
+.slideshow-editor .slide-handle svg {
+    width: 24px;
+    height: 100%;
+}
+
+.slideshow-editor .slide-handle:active {
+    cursor: grabbing;
+}
+
+.slideshow-editor .slide-preview {
+    width: 120px;
+    height: 80px;
+    flex-shrink: 0;
+}
+
+.slideshow-editor .slide-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.slideshow-editor .slide-controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.slideshow-editor .slide-controls input {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.slideshow-editor .slide-controls input:invalid {
+    border-color: #dc3545;
+}
+
+.slideshow-editor .remove-slide {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.slideshow-editor .remove-slide:hover {
+    background: #c82333;
+}
+
+.slideshow-editor .remove-slide svg {
+    width: 20px;
+    height: 20px;
+}
+
+.slideshow-editor .add-slide-btn {
+    background: #3b82f6;
+    color: white;
+}
+
+.slideshow-editor .add-slide-btn:hover {
+    background: #1d4ed8;
+}

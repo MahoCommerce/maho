@@ -56,7 +56,7 @@
 
                 <?php if ($_product->getShortDescription()):?>
                     <div class="short-description">
-                        <div class="std"><?= $_helper->productAttribute($_product, nl2br($_product->getShortDescription()), 'short_description') ?></div>
+                        <div class="std"><?= $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description') ?></div>
                     </div>
                 <?php endif ?>
 
@@ -156,16 +156,32 @@
         </script>
     </div>
 
-    <div class="product-collateral toggle-content tabs">
+    <div class="product-collateral">
         <?php if ($detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml')):?>
-            <dl id="collateral-tabs" class="collateral-tabs">
-                <?php foreach ($detailedInfoGroup as $alias => $html):?>
-                    <dt class="tab" id="product-tab-<?= $alias ?>"><span><?= $this->escapeHtml($this->getChildData($alias, 'title')) ?></span></dt>
-                    <dd class="tab-container">
-                        <div class="tab-content"><?= $html ?></div>
-                    </dd>
+            <?php $tabIndex = 0; ?>
+            <div class="collateral-tabs-wrapper">
+                <!-- Radio inputs for tab selection -->
+                <?php foreach ($detailedInfoGroup as $alias => $html): ?>
+                    <input type="radio" name="collateral-tab" id="tab-<?= $alias ?>" class="tab-selector" <?= $tabIndex === 0 ? 'checked' : '' ?>>
+                    <?php $tabIndex++; ?>
                 <?php endforeach ?>
-            </dl>
+                
+                <!-- Tab labels -->
+                <ul class="collateral-tab-list">
+                    <?php foreach ($detailedInfoGroup as $alias => $html): ?>
+                        <li><label for="tab-<?= $alias ?>"><?= $this->escapeHtml($this->getChildData($alias, 'title')) ?></label></li>
+                    <?php endforeach ?>
+                </ul>
+                
+                <!-- Tab content panels -->
+                <div class="collateral-tabs-content">
+                    <?php foreach ($detailedInfoGroup as $alias => $html): ?>
+                        <div class="tab-panel" id="panel-<?= $alias ?>" data-title="<?= $this->escapeHtml($this->getChildData($alias, 'title')) ?>">
+                            <?= $html ?>
+                        </div>
+                    <?php endforeach ?>
+                </div>
+            </div>
         <?php endif ?>
     </div>
 
