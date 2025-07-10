@@ -31,7 +31,7 @@
 .php-cs-fixer.cache
 
 # PHPStan
-.phpstan/cache
+.phpstan.cache
 .phpstan*.neon
 phpstan*.neon
 !.phpstan.dist*.neon
