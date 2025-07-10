@@ -101,9 +101,6 @@
                 "OM-1081 - Not detecting HTTPS behind a proxy": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-1081.patch",
                 "OM-2047 - Pass delimiter char to preg_quote": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-2047.patch",
                 "OM-2050 - Prevent checking known date codes": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-2050.patch"
-            },
-            "colinmollenhour/magento-redis-session": {
-                "Cm_RedisSession-Revert-190": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/0424e4b13657d2745931b9063020b005428b9334/Cm_RedisSession-Revert-190.patch"
             }
         }
     },
