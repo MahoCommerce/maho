@@ -2997,16 +2997,16 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v3.0.2",
+            "version": "v3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "eff39f0cb4369ce30ced5ff63b4a3fd91b687884"
+                "reference": "568b84918f8b6d7563bac322eb0ccbf1f3e5a73c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/eff39f0cb4369ce30ced5ff63b4a3fd91b687884",
-                "reference": "eff39f0cb4369ce30ced5ff63b4a3fd91b687884",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/568b84918f8b6d7563bac322eb0ccbf1f3e5a73c",
+                "reference": "568b84918f8b6d7563bac322eb0ccbf1f3e5a73c",
                 "shasum": ""
             },
             "require": {
@@ -3036,9 +3036,9 @@
             ],
             "description": "Extension for PHPStan to allow static analysis of Maho projects.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v3.0.2"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v3.0.3"
             },
-            "time": "2025-04-28T15:32:30+00:00"
+            "time": "2025-07-10T22:32:56+00:00"
         },
         {
             "name": "phpstan/phpstan",
