@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 abstract class Mage_Eav_Model_Attribute_Data_Abstract
 {
     /**
@@ -261,39 +258,28 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
         $validateRules = $this->getAttribute()->getValidateRules();
 
         if (!empty($validateRules['input_validation'])) {
-            $validator = Validation::createValidator();
-            $violations = null;
+            $isValid = true;
+            $errorMessage = '';
 
             switch ($validateRules['input_validation']) {
                 case 'alphanumeric':
-                    $constraint = new Assert\Regex([
-                        'pattern' => '/^[a-zA-Z0-9\s]+$/',
-                        'message' => Mage::helper('eav')->__('"%s" has not only alphabetic and digit characters.', $label),
-                    ]);
-                    $violations = $validator->validate($value, $constraint);
+                    $isValid = Maho_Validator::validateRegex($value, '/^[a-zA-Z0-9\s]+$/');
+                    $errorMessage = Mage::helper('eav')->__('"%s" has not only alphabetic and digit characters.', $label);
                     break;
 
                 case 'numeric':
-                    $constraint = new Assert\Regex([
-                        'pattern' => '/^\d+$/',
-                        'message' => Mage::helper('eav')->__('"%s" contains not only digit characters.', $label),
-                    ]);
-                    $violations = $validator->validate($value, $constraint);
+                    $isValid = Maho_Validator::validateRegex($value, '/^\d+$/');
+                    $errorMessage = Mage::helper('eav')->__('"%s" contains not only digit characters.', $label);
                     break;
 
                 case 'alpha':
-                    $constraint = new Assert\Regex([
-                        'pattern' => '/^[a-zA-Z\s]+$/',
-                        'message' => Mage::helper('eav')->__('"%s" has not only alphabetic characters.', $label),
-                    ]);
-                    $violations = $validator->validate($value, $constraint);
+                    $isValid = Maho_Validator::validateRegex($value, '/^[a-zA-Z\s]+$/');
+                    $errorMessage = Mage::helper('eav')->__('"%s" has not only alphabetic characters.', $label);
                     break;
 
                 case 'email':
-                    $constraint = new Assert\Email([
-                        'message' => Mage::helper('eav')->__('"%s" is not a valid email address.', $label),
-                    ]);
-                    $violations = $validator->validate($value, $constraint);
+                    $isValid = Maho_Validator::validateEmail($value);
+                    $errorMessage = Mage::helper('eav')->__('"%s" is not a valid email address.', $label);
                     break;
 
                 case 'url':
@@ -303,19 +289,13 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
                         return [Mage::helper('eav')->__('"%s" is not a valid URL.', $label)];
                     }
 
-                    // Use Symfony URL validator
-                    $constraint = new Assert\Url([
-                        'message' => Mage::helper('eav')->__('"%s" is not a valid URL.', $label),
-                    ]);
-                    $violations = $validator->validate($value, $constraint);
+                    $isValid = Maho_Validator::validateUrl($value);
+                    $errorMessage = Mage::helper('eav')->__('"%s" is not a valid URL.', $label);
                     break;
 
                 case 'date':
-                    // Create a date constraint that matches Varien_Date::DATE_INTERNAL_FORMAT (Y-m-d)
-                    $constraint = new Assert\Date([
-                        'message' => Mage::helper('eav')->__('"%s" is not a valid date.', $label),
-                    ]);
-                    $violations = $validator->validate($value, $constraint);
+                    $isValid = Maho_Validator::validateDate($value);
+                    $errorMessage = Mage::helper('eav')->__('"%s" is not a valid date.', $label);
 
                     // Additional check for specific date format if needed
                     if (count($violations) === 0) {
@@ -328,13 +308,8 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
                     break;
             }
 
-            // Process violations and return error messages
-            if ($violations && count($violations) > 0) {
-                $messages = [];
-                foreach ($violations as $violation) {
-                    $messages[] = $violation->getMessage();
-                }
-                return array_unique($messages);
+            if (!$isValid) {
+                return [$errorMessage];
             }
         }
         return true;

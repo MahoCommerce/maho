@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 /**
  * Address abstract model
  *
@@ -444,50 +441,41 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      */
     protected function _basicCheck()
     {
-        $validator = Validation::createValidator();
-
         // Validate first name
-        $violations = $validator->validate($this->getFirstname(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getFirstname())) {
             $this->addError(Mage::helper('customer')->__('Please enter the first name.'));
         }
 
         // Validate last name
-        $violations = $validator->validate($this->getLastname(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getLastname())) {
             $this->addError(Mage::helper('customer')->__('Please enter the last name.'));
         }
 
         // Validate street
-        $violations = $validator->validate($this->getStreet(1), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getStreet(1))) {
             $this->addError(Mage::helper('customer')->__('Please enter the street.'));
         }
 
         // Validate city
-        $violations = $validator->validate($this->getCity(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getCity())) {
             $this->addError(Mage::helper('customer')->__('Please enter the city.'));
         }
 
         // Validate telephone
-        $violations = $validator->validate($this->getTelephone(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getTelephone())) {
             $this->addError(Mage::helper('customer')->__('Please enter the telephone number.'));
         }
 
         // Validate postcode
         $havingOptionalZip = Mage::helper('directory')->getCountriesWithOptionalZip();
         if (!in_array($this->getCountryId(), $havingOptionalZip)) {
-            $violations = $validator->validate($this->getPostcode(), new Assert\NotBlank());
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateNotBlank($this->getPostcode())) {
                 $this->addError(Mage::helper('customer')->__('Please enter the zip/postal code.'));
             }
         }
 
         // Validate country
-        $violations = $validator->validate($this->getCountryId(), new Assert\NotBlank());
-        if (count($violations) > 0) {
+        if (!Maho_Validator::validateNotBlank($this->getCountryId())) {
             $this->addError(Mage::helper('customer')->__('Please enter the country.'));
         }
 
@@ -495,8 +483,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         if ($this->getCountryModel()->getRegionCollection()->getSize()
             && Mage::helper('directory')->isRegionRequired($this->getCountryId())
         ) {
-            $violations = $validator->validate($this->getRegionId(), new Assert\NotBlank());
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateNotBlank($this->getRegionId())) {
                 $this->addError(Mage::helper('customer')->__('Please enter the state/province.'));
             }
         }

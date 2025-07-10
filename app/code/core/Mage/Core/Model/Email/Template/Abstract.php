@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 /**
  * @method string getInlineCssFile()
  * @method $this setTemplateType(int $value)
@@ -222,11 +219,9 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
                 '_theme' => $theme,
             ],
         );
-        $validator = Validation::createValidator();
-        $constraint = new Assert\File(['extensions' => ['css']]);
-        $violations = $validator->validate($filePath, $constraint);
-
-        if (count($violations) === 0 && is_readable($filePath)) {
+        // Validate file extension and readability
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        if ($extension === 'css' && is_readable($filePath)) {
             return (string) file_get_contents($filePath);
         }
 
