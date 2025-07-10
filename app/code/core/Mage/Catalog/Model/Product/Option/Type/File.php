@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 /**
  * @method array getCustomOptionUrlParams()
  */
@@ -329,7 +326,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
 
-        $constraints = [];
+        $errors = [];
 
         // Image size validation
         $_dimentions = [];
@@ -343,56 +340,51 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
         if (count($_dimentions) > 0) {
-            $constraints[] = new Assert\Image([
-                'maxWidth' => $_dimentions['maxwidth'] ?? null,
-                'maxHeight' => $_dimentions['maxheight'] ?? null,
-            ]);
+            $imageInfo = getimagesize($fileFullPath);
+            if ($imageInfo !== false) {
+                [$width, $height] = $imageInfo;
+                if (isset($_dimentions['maxwidth']) && $width > $_dimentions['maxwidth']) {
+                    $errors[] = sprintf('The image width (%d px) is too big (max %d px allowed).', $width, $_dimentions['maxwidth']);
+                }
+                if (isset($_dimentions['maxheight']) && $height > $_dimentions['maxheight']) {
+                    $errors[] = sprintf('The image height (%d px) is too big (max %d px allowed).', $height, $_dimentions['maxheight']);
+                }
+            }
         }
 
         // File extension validation
         $_allowed = $this->_parseExtensionsString($option->getFileExtension());
         if ($_allowed !== null) {
-            $constraints[] = new Assert\File([
-                'extensions' => $_allowed,
-            ]);
+            $extension = strtolower(pathinfo($fileFullPath, PATHINFO_EXTENSION));
+            if (!in_array($extension, array_map('strtolower', $_allowed))) {
+                $errors[] = sprintf('The file extension "%s" is not allowed.', $extension);
+            }
         } else {
             $_forbidden = $this->_parseExtensionsString($this->getConfigData('forbidden_extensions'));
             if ($_forbidden !== null) {
-                // For forbidden extensions, we'll validate against allowed extensions by excluding forbidden ones
-                $allExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'csv', 'xls', 'xlsx'];
-                $allowedExts = array_diff($allExtensions, $_forbidden);
-                if (!empty($allowedExts)) {
-                    $constraints[] = new Assert\File([
-                        'extensions' => $allowedExts,
-                    ]);
+                $extension = strtolower(pathinfo($fileFullPath, PATHINFO_EXTENSION));
+                if (in_array($extension, array_map('strtolower', $_forbidden))) {
+                    $errors[] = sprintf('The file extension "%s" is not allowed.', $extension);
                 }
             }
         }
 
-        // Maximum filesize
-        $constraints[] = new Assert\File([
-            'maxSize' => $this->_getUploadMaxFilesize(),
-        ]);
+        // Maximum filesize validation
+        $maxSize = $this->_getUploadMaxFilesize();
+        if (file_exists($fileFullPath)) {
+            $fileSize = filesize($fileFullPath);
+            if ($fileSize > $maxSize) {
+                $errors[] = sprintf('The file is too big (%d bytes). Allowed maximum size is %d bytes.', $fileSize, $maxSize);
+            }
+        }
 
-        $validator = Validation::createValidator();
-        $violations = $validator->validate($fileFullPath, $constraints);
-
-        if (count($violations) === 0) {
+        if (count($errors) === 0) {
             return is_readable($fileFullPath)
                 && isset($optionValue['secret_key'])
                 && substr(md5(file_get_contents($fileFullPath)), 0, 20) == $optionValue['secret_key'];
         } else {
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[] = $violation->getMessage();
-            }
-
-            if (count($errors) > 0) {
-                $this->setIsValid(false);
-                Mage::throwException(implode("\n", $errors));
-            }
             $this->setIsValid(false);
-            Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option(s)'));
+            Mage::throwException(implode("\n", $errors));
         }
     }
 

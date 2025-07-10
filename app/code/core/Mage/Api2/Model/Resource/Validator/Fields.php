@@ -10,10 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource_Validator
 {
     /**
@@ -29,8 +25,8 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     protected $_resource;
 
     /**
-     * List of Validators (Symfony Constraints)
-     * The key is a field name, a value is array of constraints for this field
+     * List of validation rules
+     * The key is a field name, a value is array of validation rules for this field
      *
      * @var array
      */
@@ -43,16 +39,8 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
      */
     protected $_requiredFields = [];
 
-    /**
-     * Symfony validator instance
-     *
-     * @var ValidatorInterface
-     */
-    protected $_validator;
-
     public function __construct()
     {
-        $this->_validator = Validation::createValidator();
         // Get validation config from resource if it exists
         $validationConfig = [];
         if ($this->_resource && method_exists($this->_resource, 'getValidationConfig')) {
@@ -74,68 +62,62 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     {
         foreach ($validationConfig as $field => $validatorsConfig) {
             if (count($validatorsConfig)) {
-                $constraintsForField = [];
+                $rulesForField = [];
                 foreach ($validatorsConfig as $validatorName => $validatorConfig) {
                     // it is required field
                     if ($validatorName == 'required' && $validatorConfig == 1) {
                         $this->_requiredFields[] = $field;
                         continue;
                     }
-                    // instantiation of the validator constraint
+                    // store validation rule
                     if (!isset($validatorConfig['type'])) {
                         throw new Exception("Validator type is not set for {$validatorName}");
                     }
-                    $constraint = $this->_getConstraintInstance(
-                        $validatorConfig['type'],
-                        !empty($validatorConfig['options']) ? $validatorConfig['options'] : [],
-                        $validatorConfig['message'] ?? null,
-                    );
-                    // add to list of constraints
-                    $constraintsForField[] = $constraint;
+                    $rule = [
+                        'type' => $validatorConfig['type'],
+                        'options' => !empty($validatorConfig['options']) ? $validatorConfig['options'] : [],
+                        'message' => $validatorConfig['message'] ?? null,
+                    ];
+                    // add to list of rules
+                    $rulesForField[] = $rule;
                 }
-                $this->_validators[$field] = $constraintsForField;
+                $this->_validators[$field] = $rulesForField;
             }
         }
     }
 
     /**
-     * Get constraint object instance
-     * Converts Zend validators to Symfony constraints
+     * Validate a value using Maho_Validator
+     * Converts validation types to Maho_Validator calls
      *
+     * @param mixed $value
      * @param string $type
      * @param array $options
-     * @param string|null $message
-     * @return mixed
+     * @return bool
      * @throws Exception If validator type is not supported
      */
-    protected function _getConstraintInstance($type, $options, $message = null)
+    protected function _validateValue($value, $type, $options)
     {
-        $constraintOptions = $options;
-        if ($message) {
-            $constraintOptions['message'] = $message;
-        }
-
         return match ($type) {
-            'NotEmpty', 'NotBlank' => new Assert\NotBlank($constraintOptions),
-            'Email', 'EmailAddress' => new Assert\Email($constraintOptions),
-            'Regex' => new Assert\Regex($constraintOptions),
-            'Length', 'StringLength' => new Assert\Length($constraintOptions),
-            'Range', 'Between' => new Assert\Range($constraintOptions),
-            'Url' => new Assert\Url($constraintOptions),
-            'Date' => new Assert\Date($constraintOptions),
-            'Digits' => new Assert\Regex([
-                'pattern' => '/^\d+$/',
-                'message' => $message ?: 'This value should contain only digits.',
-            ]),
-            'Alnum' => new Assert\Regex([
-                'pattern' => '/^[a-zA-Z0-9]+$/',
-                'message' => $message ?: 'This value should contain only letters and numbers.',
-            ]),
-            'Alpha' => new Assert\Regex([
-                'pattern' => '/^[a-zA-Z]+$/',
-                'message' => $message ?: 'This value should contain only letters.',
-            ]),
-            default => throw new Exception("Unsupported constraint type: {$type}"),
+            'NotEmpty', 'NotBlank' => Maho_Validator::validateNotBlank($value),
+            'Email', 'EmailAddress' => Maho_Validator::validateEmail($value),
+            'Regex' => Maho_Validator::validateRegex($value, $options['pattern'] ?? '/.*/'),
+            'Length', 'StringLength' => Maho_Validator::validateLength(
+                $value,
+                $options['min'] ?? 0,
+                $options['max'] ?? PHP_INT_MAX,
+            ),
+            'Range', 'Between' => Maho_Validator::validateRange(
+                $value,
+                $options['min'] ?? PHP_INT_MIN,
+                $options['max'] ?? PHP_INT_MAX,
+            ),
+            'Url' => Maho_Validator::validateUrl($value),
+            'Date' => Maho_Validator::validateDate($value),
+            'Digits' => Maho_Validator::validateRegex($value, '/^\d+$/'),
+            'Alnum' => Maho_Validator::validateRegex($value, '/^[a-zA-Z0-9]+$/'),
+            'Alpha' => Maho_Validator::validateRegex($value, '/^[a-zA-Z]+$/'),
+            default => throw new Exception("Unsupported validator type: {$type}"),
         };
     }
 
@@ -156,12 +138,9 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
         if (!$isPartial && count($this->_requiredFields) > 0) {
             foreach ($this->_requiredFields as $requiredField) {
                 $value = $data[$requiredField] ?? null;
-                $violations = $this->_validator->validate($value, new Assert\NotBlank());
-                if (count($violations) > 0) {
+                if (!Maho_Validator::validateNotBlank($value)) {
                     $isValid = false;
-                    foreach ($violations as $violation) {
-                        $this->_addError(sprintf('%s: %s', $requiredField, $violation->getMessage()));
-                    }
+                    $this->_addError(sprintf('%s: This value should not be blank.', $requiredField));
                 }
             }
         }
@@ -169,12 +148,12 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
         // fields rules
         foreach ($data as $field => $value) {
             if (isset($this->_validators[$field])) {
-                $constraints = $this->_validators[$field];
-                $violations = $this->_validator->validate($value, $constraints);
-                if (count($violations) > 0) {
-                    $isValid = false;
-                    foreach ($violations as $violation) {
-                        $this->_addError(sprintf('%s: %s', $field, $violation->getMessage()));
+                $rules = $this->_validators[$field];
+                foreach ($rules as $rule) {
+                    if (!$this->_validateValue($value, $rule['type'], $rule['options'])) {
+                        $isValid = false;
+                        $message = $rule['message'] ?: 'This value is not valid.';
+                        $this->_addError(sprintf('%s: %s', $field, $message));
                     }
                 }
             }

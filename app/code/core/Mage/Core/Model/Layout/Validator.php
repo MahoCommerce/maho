@@ -10,14 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
-use Symfony\Component\Validator\Validation;
-
-#[\Attribute]
-class Mage_Core_Model_Layout_Validator extends Constraint
+class Mage_Core_Model_Layout_Validator
 {
     public string $invalidXmlMessage = 'XML data is invalid.';
     public string $invalidTemplatePathMessage = 'Invalid template path used in layout update.';
@@ -44,8 +37,8 @@ class Mage_Core_Model_Layout_Validator extends Constraint
         ?string $protectedHelperMessage = null,
         ?string $invalidXmlObjectMessage = null,
     ) {
-        parent::__construct($options, $groups, $payload);
-
+        // Symfony constraint compatibility parameters (unused but kept for backward compatibility)
+        unset($options, $groups, $payload);
         $this->disallowedBlocks = $disallowedBlocks ?? $this->_getDefaultDisallowedBlocks();
         $this->protectedExpressions = $protectedExpressions ?? $this->_getDefaultProtectedExpressions();
         $this->disallowedXPathExpressions = $disallowedXPathExpressions ?? $this->_getDefaultDisallowedXPathExpressions();
@@ -56,10 +49,12 @@ class Mage_Core_Model_Layout_Validator extends Constraint
         $this->invalidXmlObjectMessage = $invalidXmlObjectMessage ?? $this->invalidXmlObjectMessage;
     }
 
-    public function validate(mixed $value, ExecutionContextInterface $context): void
+    public function validate(mixed $value): bool
     {
+        $this->_messages = [];
+
         if (null === $value || '' === $value) {
-            return;
+            return true;
         }
 
         // Handle string input - convert to XML
@@ -68,22 +63,19 @@ class Mage_Core_Model_Layout_Validator extends Constraint
             try {
                 $value = new Varien_Simplexml_Element('<config>' . $value . '</config>');
             } catch (Exception $e) {
-                $context->buildViolation($this->invalidXmlMessage)
-                    ->addViolation();
-                return;
+                $this->_messages[] = $this->invalidXmlMessage;
+                return false;
             }
         } elseif (!($value instanceof Varien_Simplexml_Element)) {
-            $context->buildViolation($this->invalidXmlObjectMessage)
-                ->addViolation();
-            return;
+            $this->_messages[] = $this->invalidXmlObjectMessage;
+            return false;
         }
 
         // Validate against disallowed blocks
         $xpathBlockValidation = $this->_getXpathBlockValidationExpression($this->disallowedBlocks);
         if ($xpathBlockValidation && $value->xpath($xpathBlockValidation)) {
-            $context->buildViolation($this->invalidBlockNameMessage)
-                ->addViolation();
-            return;
+            $this->_messages[] = $this->invalidBlockNameMessage;
+            return false;
         }
 
         // Validate template paths
@@ -92,23 +84,22 @@ class Mage_Core_Model_Layout_Validator extends Constraint
             try {
                 $this->_validateTemplatePath($templatePaths);
             } catch (Exception $e) {
-                $context->buildViolation($this->invalidTemplatePathMessage)
-                    ->addViolation();
-                return;
+                $this->_messages[] = $this->invalidTemplatePathMessage;
+                return false;
             }
         }
 
         // Validate protected expressions
         foreach ($this->protectedExpressions as $key => $xpr) {
             if ($value->xpath($xpr)) {
-                $context->buildViolation($this->protectedHelperMessage)
-                    ->addViolation();
-                return;
+                $this->_messages[] = $this->protectedHelperMessage;
+                return false;
             }
         }
+
+        return true;
     }
 
-    // Backward compatibility methods
     public function isValid(mixed $value): bool
     {
         $this->_messages = [];

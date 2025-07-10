@@ -10,14 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
-use Symfony\Component\Validator\Validation;
-
-#[\Attribute]
-class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
+class Mage_Oauth_Model_Consumer_Validator_KeyLength
 {
     public string $tooShortMessage = '{{ name }} "{{ value }}" is too short. It must have length {{ min }} symbols.';
     public string $tooLongMessage = '{{ name }} "{{ value }}" is too long. It must have length {{ max }} symbols.';
@@ -42,8 +35,8 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
         ?string $tooShortMessage = null,
         ?string $tooLongMessage = null,
     ) {
-        parent::__construct($options, $groups, $payload);
-
+        // Symfony constraint compatibility parameters (unused but kept for backward compatibility)
+        unset($options, $groups, $payload);
         $this->min = $min ?? $this->min;
         $this->max = $max ?? $this->max;
         $this->encoding = $encoding ?? $this->encoding;
@@ -56,49 +49,33 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
         }
     }
 
-    public function validate(mixed $value, ExecutionContextInterface $context): void
+    public function validate(mixed $value): bool
     {
+        $this->_messages = [];
+
         if (null === $value || '' === $value) {
-            return;
+            return true;
         }
 
         if (!is_string($value)) {
-            throw new UnexpectedValueException($value, 'string');
+            $this->_messages[] = 'Value must be a string';
+            return false;
         }
 
         $length = iconv_strlen($value, $this->encoding);
 
         if (null !== $this->min && $length < $this->min) {
-            $context->buildViolation($this->tooShortMessage)
-                ->setParameter('{{ value }}', $value)
-                ->setParameter('{{ min }}', (string) $this->min)
-                ->setParameter('{{ name }}', $this->name)
-                ->addViolation();
-            return;
+            $message = str_replace(['{{ value }}', '{{ min }}', '{{ name }}'], [$value, (string) $this->min, $this->name], $this->tooShortMessage);
+            $this->_messages[] = $message;
+            return false;
         }
 
         if (null !== $this->max && $length > $this->max) {
-            $context->buildViolation($this->tooLongMessage)
-                ->setParameter('{{ value }}', $value)
-                ->setParameter('{{ max }}', (string) $this->max)
-                ->setParameter('{{ name }}', $this->name)
-                ->addViolation();
-        }
-    }
-
-    // Backward compatibility methods
-    public function isValid(mixed $value): bool
-    {
-        $this->_messages = [];
-        $validator = Validation::createValidator();
-        $violations = $validator->validate($value, $this);
-
-        if (count($violations) > 0) {
-            foreach ($violations as $violation) {
-                $this->_messages[] = $violation->getMessage();
-            }
+            $message = str_replace(['{{ value }}', '{{ max }}', '{{ name }}'], [$value, (string) $this->max, $this->name], $this->tooLongMessage);
+            $this->_messages[] = $message;
             return false;
         }
+
         return true;
     }
 
@@ -110,6 +87,11 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
     public function getMessage(): string
     {
         return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    public function isValid(mixed $value): bool
+    {
+        return $this->validate($value);
     }
 
     public function setLength(int $length): self

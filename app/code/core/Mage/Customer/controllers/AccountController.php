@@ -147,7 +147,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 } catch (Mage_Core_Exception $e) {
                     switch ($e->getCode()) {
                         case Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED:
-                            /** @var Helper $helper */
+                            /** @var Mage_Customer_Helper_Data $helper */
                             $helper = Mage::helper('customer');
                             $value = $helper->getEmailConfirmationUrl($login['username']);
                             $message = $helper->__('This account is not confirmed. <a href="%s">Click here</a> to resend confirmation email.', $value);
@@ -177,7 +177,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function _loginPostRedirect()
     {
         Mage::dispatchEvent('customer_controller_account_login_post_redirect_before', ['controller' => $this]);
-        /** @var Helper $helper */
+        /** @var Mage_Customer_Helper_Data $helper */
         $helper = Mage::helper('customer');
 
         $session = $this->_getSession();
@@ -329,7 +329,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $store->getId(),
                 $this->getRequest()->getPost('password'),
             );
-            /** @var Helper $customerHelper */
+            /** @var Mage_Customer_Helper_Data $customerHelper */
             $customerHelper = Mage::helper('customer');
             $session->addSuccess($this->__(
                 'Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please <a href="%s">click here</a>.',
@@ -749,7 +749,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $customerId = $customer->getId();
             if ($customerId) {
                 try {
-                    /** @var Helper $helper */
+                    /** @var Mage_Customer_Helper_Data $helper */
                     $helper = Mage::helper('customer');
                     $newResetPasswordLinkToken = $helper->generateResetPasswordLinkToken();
                     $newResetPasswordLinkCustomerId = $helper->generateResetPasswordLinkCustomerId($customerId);

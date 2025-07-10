@@ -298,7 +298,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
                     $errorMessage = Mage::helper('eav')->__('"%s" is not a valid date.', $label);
 
                     // Additional check for specific date format if needed
-                    if (count($violations) === 0) {
+                    if ($isValid) {
                         $dateFormat = Varien_Date::DATE_INTERNAL_FORMAT;
                         $dateTime = DateTime::createFromFormat($dateFormat, $value);
                         if (!$dateTime || $dateTime->format($dateFormat) !== $value) {

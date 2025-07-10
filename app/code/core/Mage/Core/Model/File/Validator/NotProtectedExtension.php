@@ -10,14 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
-use Symfony\Component\Validator\Validation;
-
-#[\Attribute]
-class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
+class Mage_Core_Model_File_Validator_NotProtectedExtension
 {
     public string $protectedExtensionMessage = 'File with an extension "{{ value }}" is protected and cannot be uploaded.';
 
@@ -32,44 +25,32 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
         ?array $protectedExtensions = null,
         ?string $protectedExtensionMessage = null,
     ) {
-        parent::__construct($options, $groups, $payload);
-
+        // Symfony constraint compatibility parameters (unused but kept for backward compatibility)
+        unset($options, $groups, $payload);
         $this->protectedExtensions = $protectedExtensions ?? $this->_getDefaultProtectedExtensions();
         $this->protectedExtensionMessage = $protectedExtensionMessage ?? $this->protectedExtensionMessage;
     }
 
-    public function validate(mixed $value, ExecutionContextInterface $context): void
+    public function validate(mixed $value): bool
     {
+        $this->_messages = [];
+
         if (null === $value || '' === $value) {
-            return;
+            return true;
         }
 
         if (!is_string($value)) {
-            throw new UnexpectedValueException($value, 'string');
+            $this->_messages[] = 'Value must be a string';
+            return false;
         }
 
         $value = strtolower(trim($value));
 
         if (in_array($value, $this->protectedExtensions)) {
-            $context->buildViolation($this->protectedExtensionMessage)
-                ->setParameter('{{ value }}', $value)
-                ->addViolation();
-        }
-    }
-
-    // Backward compatibility methods
-    public function isValid(mixed $value): bool
-    {
-        $this->_messages = [];
-        $validator = Validation::createValidator();
-        $violations = $validator->validate($value, $this);
-
-        if (count($violations) > 0) {
-            foreach ($violations as $violation) {
-                $this->_messages[] = $violation->getMessage();
-            }
+            $this->_messages[] = str_replace('{{ value }}', $value, $this->protectedExtensionMessage);
             return false;
         }
+
         return true;
     }
 
@@ -81,6 +62,11 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
     public function getMessage(): string
     {
         return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    public function isValid(mixed $value): bool
+    {
+        return $this->validate($value);
     }
 
     private function _getDefaultProtectedExtensions(): array

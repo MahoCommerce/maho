@@ -10,46 +10,35 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Constraints\Url;
-use Symfony\Component\Validator\Validation;
-
 /**
  * URL validation extending Symfony's built-in Url constraint
  */
-#[\Attribute]
-class Mage_Core_Model_Url_Validator extends Url
+class Mage_Core_Model_Url_Validator
 {
     private array $_messages = [];
 
+    public string $message = 'Invalid URL "{{ value }}".';
+
     public function __construct(
-        mixed $options = null,
-        ?array $groups = null,
-        mixed $payload = null,
         ?string $message = null,
     ) {
         // Set default message if not provided
-        $message ??= 'Invalid URL "{{ value }}".';
-
-        parent::__construct(
-            message: $message,
-            groups: $groups,
-            payload: $payload,
-        );
+        $this->message = $message ?? $this->message;
     }
 
-    // Backward compatibility methods
-    public function isValid(mixed $value): bool
+    public function validate(mixed $value): bool
     {
         $this->_messages = [];
-        $validator = Validation::createValidator();
-        $violations = $validator->validate($value, $this);
 
-        if (count($violations) > 0) {
-            foreach ($violations as $violation) {
-                $this->_messages[] = $violation->getMessage();
-            }
+        if (null === $value || '' === $value) {
+            return true;
+        }
+
+        if (!Maho_Validator::validateUrl($value)) {
+            $this->_messages[] = str_replace('{{ value }}', (string) $value, $this->message);
             return false;
         }
+
         return true;
     }
 
@@ -61,5 +50,10 @@ class Mage_Core_Model_Url_Validator extends Url
     public function getMessage(): string
     {
         return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    public function isValid(mixed $value): bool
+    {
+        return $this->validate($value);
     }
 }

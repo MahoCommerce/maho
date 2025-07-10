@@ -10,45 +10,27 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Validation;
-
-/**
- * Email path validation constraint and validator
- */
-#[\Attribute]
-class Mage_Adminhtml_Model_Email_PathValidator extends Constraint
+class Mage_Adminhtml_Model_Email_PathValidator
 {
     public string $invalidPathMessage = 'The configuration path is not valid for email templates.';
     private array $_messages = [];
 
-    public function validate(mixed $value, ExecutionContextInterface $context): void
-    {
-        if (null === $value || '' === $value) {
-            return;
-        }
-
-        $pathNode = is_array($value) ? array_shift($value) : $value;
-
-        if (!$this->isEncryptedNodePath($pathNode)) {
-            $context->buildViolation($this->invalidPathMessage)
-                ->setParameter('{{ value }}', (string) $pathNode)
-                ->addViolation();
-        }
-    }
-
-    // Backward compatibility methods
-    public function isValid(mixed $value): bool
+    public function validate(mixed $value): bool
     {
         $this->_messages = [];
+
+        if (null === $value || '' === $value) {
+            $this->_messages[] = $this->invalidPathMessage;
+            return false;
+        }
+
         $pathNode = is_array($value) ? array_shift($value) : $value;
 
         if (!$this->isEncryptedNodePath($pathNode)) {
             $this->_messages[] = $this->invalidPathMessage;
             return false;
         }
+
         return true;
     }
 
@@ -60,6 +42,11 @@ class Mage_Adminhtml_Model_Email_PathValidator extends Constraint
     public function getMessage(): string
     {
         return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    public function isValid(mixed $value): bool
+    {
+        return $this->validate($value);
     }
 
     public function isEncryptedNodePath(string $path): bool
