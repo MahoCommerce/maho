@@ -10,10 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Mage_Customer_Helper_Data as Helper;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
-
 class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
     public const CUSTOMER_ID_SESSION_NAME = 'customerId';
@@ -191,8 +187,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $session->setBeforeAuthUrl($helper->getAccountUrl());
             // Redirect customer to the last page visited after logging in
             if ($session->isLoggedIn()) {
-                if (!Mage::getStoreConfigFlag(Helper::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
-                    $referer = $this->getRequest()->getParam(Helper::REFERER_QUERY_PARAM_NAME);
+                if (!Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
+                    $referer = $this->getRequest()->getParam(Mage_Customer_Helper_Data::REFERER_QUERY_PARAM_NAME);
                     if ($referer) {
                         // Rebuild referer URL to handle the case when SID was changed
                         $referer = Mage::getModel('core/url')
@@ -228,7 +224,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $session = $this->_getSession();
         $session->logout()->renewSession();
 
-        if (Mage::getStoreConfigFlag(Helper::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
+        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
             $session->setBeforeAuthUrl(Mage::getBaseUrl());
         } else {
             $session->setBeforeAuthUrl($this->_getRefererUrl());
@@ -739,9 +735,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            $validator = Validation::createValidator();
-            $violations = $validator->validate($email, new Assert\Email());
-            if (count($violations) > 0) {
+            if (!Maho_Validator::validateEmail($email)) {
                 $this->_getSession()->setForgottenEmail($email);
                 $this->_getSession()->addError($this->__('Invalid email address.'));
                 $this->_redirect('*/*/forgotpassword');
