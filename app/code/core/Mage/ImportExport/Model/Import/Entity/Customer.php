@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -606,7 +606,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                 $this->addRowError(self::ERROR_EMAIL_SITE_NOT_FOUND, $rowNum);
             }
         } elseif (self::SCOPE_DEFAULT == $rowScope) { // row is SCOPE_DEFAULT = new customer block begins
-            if (!Zend_Validate::is($email, 'EmailAddress')) {
+            if (!Maho_Validator::validateEmail($email)) {
                 $this->addRowError(self::ERROR_INVALID_EMAIL, $rowNum);
             } elseif (!isset($this->_websiteCodeToId[$website])) {
                 $this->addRowError(self::ERROR_INVALID_WEBSITE, $rowNum);

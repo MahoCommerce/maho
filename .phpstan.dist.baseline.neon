@@ -10495,12 +10495,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource/Validator/Eav.php
 
 		-
-			message: '#^Call to an undefined method Zend_Validate_Interface\:\:setMessage\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource/Validator/Fields.php
-
-		-
 			message: '#^Method Mage_Api2_Model_Resource_Validator_Fields\:\:_buildValidatorsChain\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -16505,12 +16499,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			message: '#^Method Mage_Core_Model_Layout_Validator\:\:validateTemplatePath\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout/Validator.php
 
 		-
 			message: '#^Method Mage_Core_Model_Locale\:\:emulate\(\) has no return type specified\.$#'

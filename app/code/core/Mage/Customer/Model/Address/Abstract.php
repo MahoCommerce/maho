@@ -441,42 +441,51 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      */
     protected function _basicCheck()
     {
-        if (!Zend_Validate::is($this->getFirstname(), 'NotEmpty')) {
+        // Validate first name
+        if (!Maho_Validator::validateNotBlank($this->getFirstname())) {
             $this->addError(Mage::helper('customer')->__('Please enter the first name.'));
         }
 
-        if (!Zend_Validate::is($this->getLastname(), 'NotEmpty')) {
+        // Validate last name
+        if (!Maho_Validator::validateNotBlank($this->getLastname())) {
             $this->addError(Mage::helper('customer')->__('Please enter the last name.'));
         }
 
-        if (!Zend_Validate::is($this->getStreet(1), 'NotEmpty')) {
+        // Validate street
+        if (!Maho_Validator::validateNotBlank($this->getStreet(1))) {
             $this->addError(Mage::helper('customer')->__('Please enter the street.'));
         }
 
-        if (!Zend_Validate::is($this->getCity(), 'NotEmpty')) {
+        // Validate city
+        if (!Maho_Validator::validateNotBlank($this->getCity())) {
             $this->addError(Mage::helper('customer')->__('Please enter the city.'));
         }
 
-        if (!Zend_Validate::is($this->getTelephone(), 'NotEmpty')) {
+        // Validate telephone
+        if (!Maho_Validator::validateNotBlank($this->getTelephone())) {
             $this->addError(Mage::helper('customer')->__('Please enter the telephone number.'));
         }
 
+        // Validate postcode
         $havingOptionalZip = Mage::helper('directory')->getCountriesWithOptionalZip();
-        if (!in_array($this->getCountryId(), $havingOptionalZip)
-            && !Zend_Validate::is($this->getPostcode(), 'NotEmpty')
-        ) {
-            $this->addError(Mage::helper('customer')->__('Please enter the zip/postal code.'));
+        if (!in_array($this->getCountryId(), $havingOptionalZip)) {
+            if (!Maho_Validator::validateNotBlank($this->getPostcode())) {
+                $this->addError(Mage::helper('customer')->__('Please enter the zip/postal code.'));
+            }
         }
 
-        if (!Zend_Validate::is($this->getCountryId(), 'NotEmpty')) {
+        // Validate country
+        if (!Maho_Validator::validateNotBlank($this->getCountryId())) {
             $this->addError(Mage::helper('customer')->__('Please enter the country.'));
         }
 
+        // Validate region
         if ($this->getCountryModel()->getRegionCollection()->getSize()
-            && !Zend_Validate::is($this->getRegionId(), 'NotEmpty')
             && Mage::helper('directory')->isRegionRequired($this->getCountryId())
         ) {
-            $this->addError(Mage::helper('customer')->__('Please enter the state/province.'));
+            if (!Maho_Validator::validateNotBlank($this->getRegionId())) {
+                $this->addError(Mage::helper('customer')->__('Please enter the state/province.'));
+            }
         }
     }
 

@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -128,14 +128,10 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         /**
          * Check for maximum attribute_code length
          */
-        if (isset($this->_data['attribute_code']) &&
-            !Zend_Validate::is(
-                $this->_data['attribute_code'],
-                'StringLength',
-                ['max' => self::ATTRIBUTE_CODE_MAX_LENGTH],
-            )
-        ) {
-            throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
+        if (isset($this->_data['attribute_code'])) {
+            if (!Maho_Validator::validateLength($this->_data['attribute_code'], null, self::ATTRIBUTE_CODE_MAX_LENGTH)) {
+                throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
+            }
         }
 
         $defaultValue   = $this->getDefaultValue();
