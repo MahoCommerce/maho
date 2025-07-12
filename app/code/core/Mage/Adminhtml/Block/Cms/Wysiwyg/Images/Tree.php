@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree extends Mage_Adminhtml_Block_
                 'children' => $item->getSubdirCount() === 0 ? [] : null,
             ];
         }
-        return Zend_Json::encode($jsonArray);
+        return Mage::helper('core')->jsonEncode($jsonArray);
     }
 
     /**

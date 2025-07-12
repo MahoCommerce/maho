@@ -78,7 +78,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
     #[\Override]
     public function run()
     {
-        $this->_jsonRpc = new Zend_Json_Server();
+        $this->_jsonRpc = new Laminas\Json\Server\Server();
         $this->_jsonRpc->setClass($this->getHandler());
 
         // Allow soap_v2 style request.
@@ -119,6 +119,6 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
     #[\Override]
     public function fault($code, $message): never
     {
-        throw new Zend_Json_Exception($message, $code);
+        throw new Exception($message, $code);
     }
 }

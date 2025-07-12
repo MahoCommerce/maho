@@ -538,7 +538,7 @@ class Varien_Object implements ArrayAccess
     protected function __toJson(array $arrAttributes = [])
     {
         $arrData = $this->toArray($arrAttributes);
-        $json = Zend_Json::encode($arrData);
+        $json = json_encode($arrData);
         return $json;
     }
 

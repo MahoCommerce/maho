@@ -26,7 +26,7 @@ class Mage_Api2_Model_Renderer_Json implements Mage_Api2_Model_Renderer_Interfac
     #[\Override]
     public function render($data)
     {
-        return Zend_Json::encode($data);
+        return Mage::helper('core')->jsonEncode($data);
     }
 
     /**

@@ -43,5 +43,5 @@ $_data = [
 ];
 ?>
 <script type="text/javascript">
-    var Translator = new Translate(<?= Zend_Json::encode($_data) ?>);
+    var Translator = new Translate(<?= Mage::helper('core')->jsonEncode($_data) ?>);
 </script>

@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Ajax_Serializer extends Mage
                 $result[$id] = $product->toArray(['qty', 'position']);
             }
         }
-        return $result ? Zend_Json::encode($result) : '{}';
+        return $result ? Mage::helper('core')->jsonEncode($result) : '{}';
     }
 
     /**
