@@ -203,7 +203,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
 
         $template->loadDefault($templateCode, $this->getRequest()->getParam('locale'));
         $template->setData('orig_template_code', $templateCode);
-        $template->setData('template_variables', Zend_Json::encode($template->getVariablesOptionArray(true)));
+        $template->setData('template_variables', Mage::helper('core')->jsonEncode($template->getVariablesOptionArray(true)));
 
         $templateBlock = $this->getLayout()->createBlock('adminhtml/system_email_template_edit');
         $template->setData('orig_template_used_default_for', $templateBlock->getUsedDefaultForPaths(false));

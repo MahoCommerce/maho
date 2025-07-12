@@ -677,7 +677,11 @@ XML;
      */
     public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
     {
-        $json = Zend_Json::encode($valueToEncode, $cycleCheck, $options);
+        $json = json_encode($valueToEncode);
+        if ($json === false) {
+            throw new Exception('Unable to encode value to JSON: ' . json_last_error_msg());
+        }
+
         /** @var Mage_Core_Model_Translate_Inline $inline */
         $inline = Mage::getSingleton('core/translate_inline');
         if ($inline->isAllowed()) {
@@ -698,28 +702,24 @@ XML;
      * @param string $encodedValue
      * @param int $objectDecodeType
      * @return mixed
-     * @throws Zend_Json_Exception
+     * @throws Exception
      */
-    public function jsonDecode($encodedValue, $objectDecodeType = Zend_Json::TYPE_ARRAY)
+    public function jsonDecode($encodedValue, $objectDecodeType = 1)
     {
-        switch (true) {
-            case ($encodedValue === null):
-                $encodedValue = 'null';
-                break;
-            case ($encodedValue === true):
-                $encodedValue = 'true';
-                break;
-            case ($encodedValue === false):
-                $encodedValue = 'false';
-                break;
-            case ($encodedValue === ''):
-                $encodedValue = '""';
-                break;
-            default:
-                // do nothing
+        $encodedValue = match ($encodedValue) {
+            null => 'null',
+            true => 'true',
+            false => 'false',
+            '' => '""',
+            default => $encodedValue,
+        };
+
+        $result = json_decode($encodedValue, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Unable to decode JSON: ' . json_last_error_msg());
         }
 
-        return Zend_Json::decode($encodedValue, $objectDecodeType);
+        return $result;
     }
 
     /**

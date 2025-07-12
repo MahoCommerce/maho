@@ -84,7 +84,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
 
         $fieldset->addField('variables', 'hidden', [
             'name' => 'variables',
-            'value' => Zend_Json::encode($this->getVariables()),
+            'value' => Mage::helper('core')->jsonEncode($this->getVariables()),
         ]);
 
         $fieldset->addField('template_variables', 'hidden', [
