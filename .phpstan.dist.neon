@@ -27,6 +27,9 @@ parameters:
         - maho
         - public
 
+    scanDirectories:
+        - .phpstan.mock
+
     typeAliases:
         Cm_RedisSession_Model_Session: 'Mage_Core_Model_Resource_Session'
 
