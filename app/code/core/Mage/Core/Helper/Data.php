@@ -714,7 +714,7 @@ XML;
             default => $encodedValue,
         };
 
-        $result = json_decode($encodedValue, true);
+        $result = json_decode($encodedValue, (bool) $objectDecodeType);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('Unable to decode JSON: ' . json_last_error_msg());
         }
