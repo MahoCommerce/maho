@@ -115,10 +115,11 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      *
      * @param int $code
      * @param string $message
+     * @throws Laminas\Json\Server\Exception\RuntimeException
      */
     #[\Override]
     public function fault($code, $message): never
     {
-        throw new Exception($message, $code);
+        throw new Laminas\Json\Server\Exception\RuntimeException($message, $code);
     }
 }
