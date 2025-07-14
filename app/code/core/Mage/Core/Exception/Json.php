@@ -35,7 +35,7 @@ class Mage_Core_Exception_Json extends Mage_Core_Exception
         $message = sprintf(
             'Unable to %s JSON: %s',
             $operation,
-            $errorMsg ?: 'Unknown error'
+            $errorMsg ?: 'Unknown error',
         );
 
         $exception = new self($message);
