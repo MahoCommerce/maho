@@ -75,7 +75,7 @@ class Mage_Paypal_Model_Observer
                 $controller = $observer->getEvent()->getData('controller_action');
                 $result = Mage::helper('core')->jsonDecode(
                     $controller->getResponse()->getBody('default'),
-                    1,
+                    true,
                 );
 
                 if (empty($result['error'])) {

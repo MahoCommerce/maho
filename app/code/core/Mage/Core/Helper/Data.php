@@ -700,11 +700,11 @@ XML;
      * switch added to prevent exceptions in json_decode
      *
      * @param string $encodedValue
-     * @param int $objectDecodeType
+     * @param bool $associative When true, JSON objects will be returned as associative arrays
      * @return mixed
      * @throws Exception
      */
-    public function jsonDecode($encodedValue, $objectDecodeType = 1)
+    public function jsonDecode($encodedValue, $associative = true)
     {
         $encodedValue = match ($encodedValue) {
             null => 'null',
@@ -714,7 +714,7 @@ XML;
             default => $encodedValue,
         };
 
-        $result = json_decode($encodedValue, (bool) $objectDecodeType);
+        $result = json_decode($encodedValue, $associative);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('Unable to decode JSON: ' . json_last_error_msg());
         }

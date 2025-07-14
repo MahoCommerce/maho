@@ -1398,9 +1398,9 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * @see Mage_Core_Helper_Data::jsonDecode()
      * @throws Exception
      */
-    public function jsonDecode(string $encodedValue, int $objectDecodeType = 1): mixed
+    public function jsonDecode(string $encodedValue, bool $associative = true): mixed
     {
-        return Mage::helper('core')->jsonDecode($encodedValue, $objectDecodeType);
+        return Mage::helper('core')->jsonDecode($encodedValue, $associative);
     }
 
     /**
