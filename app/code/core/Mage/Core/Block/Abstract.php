@@ -1396,7 +1396,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * Decodes the given $encodedValue string which is encoded in the JSON format
      *
      * @see Mage_Core_Helper_Data::jsonDecode()
-     * @throws Exception
+     * @throws Mage_Core_Exception_Json
      */
     public function jsonDecode(string $encodedValue, bool $associative = true): mixed
     {
