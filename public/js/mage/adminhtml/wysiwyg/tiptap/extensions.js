@@ -660,7 +660,7 @@ export const MahoDiv = Node.create({
             },
             classList: {
                 parseHTML: (element) => element.classList,
-                renderHTML: (attributes) => attributes.classList ? { class: attributes.classList } : {},
+                renderHTML: (attributes) => attributes.classList.length ? { class: attributes.classList } : {},
             },
         };
     },
