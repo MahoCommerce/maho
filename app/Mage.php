@@ -766,33 +766,48 @@ final class Mage
             return;
         }
 
-        try {
-            $logActive = self::getStoreConfig('dev/log/active');
-            if (empty($file)) {
-                $file = self::getStoreConfig('dev/log/file');
-            }
-        } catch (Exception $e) {
+        // Check if XML log configuration exists - if so, bypass backend settings
+        if (self::isLogConfigManagedByXml()) {
             $logActive = true;
-        }
+            $maxLogLevel = self::LOG_DEBUG; // XML handlers manage their own levels
+            if (empty($file)) {
+                $file = 'system.log'; // Default file when using XML config
+            }
+        } else {
+            // Use backend configuration when no XML config present
+            try {
+                $logActive = self::getStoreConfig('dev/log/active');
+                if (empty($file)) {
+                    $file = self::getStoreConfig('dev/log/file');
+                }
+            } catch (Exception $e) {
+                $logActive = true;
+            }
 
-        if (!self::$_isDeveloperMode && !$logActive && !$forceLog) {
-            return;
-        }
+            if (!self::$_isDeveloperMode && !$logActive && !$forceLog) {
+                return;
+            }
 
-        try {
-            $maxLogLevel = (int) self::getStoreConfig('dev/log/max_level');
-        } catch (Throwable $e) {
-            $maxLogLevel = self::LOG_DEBUG;
+            try {
+                $maxLogLevel = (int) self::getStoreConfig('dev/log/max_level');
+            } catch (Throwable $e) {
+                $maxLogLevel = self::LOG_DEBUG;
+            }
         }
 
         $level  = is_null($level) ? self::LOG_DEBUG : $level;
 
-        if (!self::$_isDeveloperMode && $level > $maxLogLevel && !$forceLog) {
+        if (!self::$_isDeveloperMode && !self::isLogConfigManagedByXml() && $level > $maxLogLevel && !$forceLog) {
             return;
         }
 
-        $file = empty($file) ?
-            (string) self::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE) : basename($file);
+        if (empty($file)) {
+            $file = self::isLogConfigManagedByXml() ?
+                'system.log' :
+                (string) self::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE);
+        } else {
+            $file = basename($file);
+        }
 
         try {
             if (!isset(self::$_loggers[$file])) {
@@ -981,6 +996,17 @@ final class Mage
         return sodium_bin2hex(sodium_crypto_secretbox_keygen());
     }
 
+    public static function isLogConfigManagedByXml(): bool
+    {
+        $config = self::getConfig();
+        if (!$config) {
+            return false;
+        }
+
+        $handlers = $config->getNode('global/log/handlers');
+        return $handlers && $handlers->hasChildren();
+    }
+
     /**
      * Convert old Zend_Log level constants to Monolog Level objects
      */
@@ -1020,7 +1046,7 @@ final class Mage
 
         $hasActiveHandler = false;
         foreach ($handlers->children() as $handlerName => $handlerConfig) {
-            if (!(bool)$handlerConfig->enabled) {
+            if (!(bool) $handlerConfig->enabled) {
                 continue;
             }
 
@@ -1042,8 +1068,8 @@ final class Mage
      */
     private static function createHandler(string $name, object $config, string $logFile, Level $defaultLevel): ?object
     {
-        $className = (string)$config->class;
-        
+        $className = (string) $config->class;
+
         // Validate class name
         if (!class_exists($className)) {
             self::log("Handler class does not exist: {$className}", self::LOG_ERR);
@@ -1052,7 +1078,7 @@ final class Mage
 
         try {
             $reflection = new ReflectionClass($className);
-            
+
             // Get constructor parameters
             $constructor = $reflection->getConstructor();
             if (!$constructor) {
@@ -1061,7 +1087,7 @@ final class Mage
 
             $args = self::buildConstructorArgs($constructor, $config, $logFile, $defaultLevel);
             return $reflection->newInstanceArgs($args);
-            
+
         } catch (Exception $e) {
             self::log("Failed to create log handler {$className}: " . $e->getMessage(), self::LOG_ERR);
             return null;
@@ -1075,24 +1101,24 @@ final class Mage
     {
         $args = [];
         $params = $constructor->getParameters();
-        
+
         foreach ($params as $param) {
             $paramName = $param->getName();
             $paramType = $param->getType();
-            
+
             // Handle common parameter patterns
             $value = match ($paramName) {
                 'stream', 'filename', 'file', 'path' => $logFile,
-                'level' => isset($config->params->level) ? 
-                    Level::fromName((string)$config->params->level) : $defaultLevel,
-                'bubble' => isset($config->params->bubble) ? 
-                    (bool)$config->params->bubble : true,
-                default => self::getConfigValue($config, $paramName, $param)
+                'level' => isset($config->params->level) ?
+                    Level::fromName((string) $config->params->level) : $defaultLevel,
+                'bubble' => isset($config->params->bubble) ?
+                    (bool) $config->params->bubble : true,
+                default => self::getConfigValue($config, $paramName, $param),
             };
-            
+
             $args[] = $value;
         }
-        
+
         return $args;
     }
 
@@ -1102,23 +1128,23 @@ final class Mage
     private static function getConfigValue(object $config, string $paramName, ReflectionParameter $param): mixed
     {
         $configValue = $config->params->{$paramName} ?? null;
-        
+
         if ($configValue === null) {
             return $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
         }
-        
+
         $paramType = $param->getType();
         if (!$paramType) {
-            return (string)$configValue;
+            return (string) $configValue;
         }
-        
+
         // Type conversion based on parameter type
         return match ($paramType->getName()) {
-            'int' => (int)$configValue,
-            'float' => (float)$configValue,
-            'bool' => (bool)$configValue,
-            'array' => is_array($configValue) ? $configValue : [(string)$configValue],
-            default => (string)$configValue,
+            'int' => (int) $configValue,
+            'float' => (float) $configValue,
+            'bool' => (bool) $configValue,
+            'array' => is_array($configValue) ? $configValue : [(string) $configValue],
+            default => (string) $configValue,
         };
     }
 }

@@ -67,6 +67,15 @@ $adapter->log();
 
 ## Configuration
 
+### Configuration Modes
+
+Maho supports two configuration modes for logging:
+
+1. **Admin Panel Mode** - Simple configuration via System → Configuration → Advanced → Developer → Log Settings
+2. **XML Mode** - Advanced configuration via XML files (local.xml)
+
+**Important**: When XML log configuration is present, the admin panel logging section is automatically hidden to prevent conflicts.
+
 ### Basic Configuration
 
 Add logging configuration to your `app/etc/local.xml`:
@@ -553,6 +562,13 @@ The system automatically handles the migration:
 - **Understand level filtering** - Handlers process messages at or above their configured level
 - **Avoid duplicate notifications** - Consider that multiple handlers may trigger for the same log entry
 - **Group by purpose** - Use descriptive names that indicate the handler's purpose
+
+### 6. Configuration Override
+
+- **XML overrides admin** - When XML log configuration exists, admin panel settings are ignored
+- **All-or-nothing** - If any XML handlers are configured, all backend settings are bypassed
+- **Admin section hidden** - The logging section disappears from admin when XML config is detected
+- **Clear separation** - Use admin for simple setups, XML for advanced configurations
 
 ## Troubleshooting
 
