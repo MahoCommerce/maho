@@ -1139,7 +1139,8 @@ final class Mage
         }
 
         // Type conversion based on parameter type
-        return match ($paramType->getName()) {
+        $typeName = $paramType instanceof ReflectionNamedType ? $paramType->getName() : 'mixed';
+        return match ($typeName) {
             'int' => (int) $configValue,
             'float' => (float) $configValue,
             'bool' => (bool) $configValue,
