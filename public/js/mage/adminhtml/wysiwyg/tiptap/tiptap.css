@@ -308,9 +308,8 @@
 }
 
 /* Widget placeholder styles */
-.ProseMirror span[data-type=maho-widget] {
+.ProseMirror [data-type=maho-widget] {
     position: relative;
-    display: inline;
     padding: 4px;
     border: 1px dotted #adb5bd;
     cursor: pointer;
@@ -319,6 +318,11 @@
     font-weight: normal;
     font-style: normal;
     vertical-align: bottom;
+
+    div& {
+        /* hack to make the div shrink */
+        display: table;
+    }
 
     svg {
         display: inline-block;
@@ -335,7 +339,7 @@
 }
 
 /* Tooltip for widgets and images */
-.ProseMirror span[data-type=maho-widget],
+.ProseMirror [data-type=maho-widget],
 .ProseMirror div[data-type=maho-slideshow],
 .ProseMirror .image-container {
     &[title] {

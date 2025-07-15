@@ -105,7 +105,26 @@ class tiptapWysiwygSetup {
             return `<span data-type="maho-widget" data-directive="${escapedDirective}"></span>`;
         });
 
-        return content;
+        // Convert any <span> widget into <div> if they only have other <div> parents
+        const blockTags = ['DIV'];
+        const doc = new DOMParser().parseFromString(content, 'text/html');
+
+        for (const widget of doc.body.querySelectorAll('span[data-type=maho-widget]')) {
+            let ref = widget.parentElement;
+            while (blockTags.includes(ref.tagName)) {
+                ref = ref.parentElement;
+            }
+            if (ref.tagName !== 'BODY') {
+                continue;
+            }
+            const newWidget = document.createElement('div');
+            newWidget.dataset.type = widget.dataset.type;
+            newWidget.dataset.directive = widget.dataset.directive;
+            newWidget.innerHTML = widget.innerHTML;
+            widget.replaceWith(newWidget);
+        }
+
+        return doc.body.innerHTML;
     }
 
     convertToPlain(content) {
@@ -113,7 +132,7 @@ class tiptapWysiwygSetup {
         content = html_beautify(content, { indent_size: 4 });
 
         // Extract directives from MahoWidget nodes
-        content = content.replace(/<span data-type="maho-widget" data-directive="(.*?)"><\/span>/gi, (match, directive) => {
+        content = content.replace(/<(div|span) data-type="maho-widget" data-directive="(.*?)"><\/\1>/gi, (match, tagName, directive) => {
             return directive;
         });
 
@@ -240,7 +259,15 @@ class tiptapWysiwygSetup {
                         filetype: 'image',
                     }),
                 }),
-                TiptapModules.MahoWidget.configure({
+                TiptapModules.MahoWidgetBlock.configure({
+                    widgetUrl: setRouteParams(this.config.widget_window_url, {
+                        widget_target_id: this.id,
+                    }),
+                    variableUrl: setRouteParams(this.config.variable_window_url, {
+                        variable_target_id: this.id,
+                    }),
+                }),
+                TiptapModules.MahoWidgetInline.configure({
                     widgetUrl: setRouteParams(this.config.widget_window_url, {
                         widget_target_id: this.id,
                     }),

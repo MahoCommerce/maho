@@ -60,13 +60,39 @@ const renderDirectiveImageUrl = (src, directiveObj, directivesUrl) => {
     return src;
 };
 
+const getWidgetTypeForSelection = (state) => {
+    const { from, to } = state.selection
+
+    // If we have a selected maho widget, return the same type
+    const selectedNode = state.doc.nodeAt(from, to);
+    if (selectedNode?.type.name.startsWith('mahoWidget')) {
+        return selectedNode.type.name;
+    }
+
+    // Otherwise traverse parent nodes skipping empty tags
+    const pos = state.doc.resolve(from);
+
+    let cur = pos.parent;
+    while (cur.content.size === 0 && ['paragraph', 'heading'].includes(cur.type.name)) {
+        cur = pos.node(pos.depth - 1);
+    }
+
+    // Use a block if allowed in this context
+    if (cur.type.spec.content.includes('block')) {
+        return 'mahoWidgetBlock';
+    }
+
+    return 'mahoWidgetInline';
+}
+
+
 /**
  * Maho Widget Node View Extension
  *
  * This extension adds widget and variable support
  */
-export const MahoWidget = Node.create({
-    name: 'mahoWidget',
+export const MahoWidgetBlock = Node.create({
+    name: 'mahoWidgetBlock',
     group: 'block',
     inline: false,
     draggable: true,
@@ -84,19 +110,22 @@ export const MahoWidget = Node.create({
     },
 
     parseHTML() {
+        const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         return [{
-            tag: 'span[data-type=maho-widget]',
+            tag: tagName + '[data-type=maho-widget]',
         }];
     },
 
     renderHTML({ node }) {
+        const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         const directiveStr = renderDirective(node.attrs.directiveObj);
-        return ['span', { 'data-type': 'maho-widget', 'data-directive': directiveStr }];
+        return [tagName, { 'data-type': 'maho-widget', 'data-directive': directiveStr }];
     },
 
     addNodeView() {
         return ({ node, editor }) => {
-            const dom = document.createElement('span');
+            const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
+            const dom = document.createElement(tagName);
             dom.dataset.type = 'maho-widget';
             dom.contentEditable = 'false';
 
@@ -137,6 +166,7 @@ export const MahoWidget = Node.create({
         return {
             insertMahoWidget: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
+                const type = getWidgetTypeForSelection(state);
 
                 widgetTools.openDialog(this.options.widgetUrl, {
                     onOpen: () => {
@@ -145,7 +175,7 @@ export const MahoWidget = Node.create({
                     onOk: (dialog) => {
                         const directiveObj = parseDirective(dialog.returnValue);
                         editor.commands.insertContentAt({ from, to }, {
-                            type: this.name,
+                            type,
                             attrs: { directiveObj },
                         });
                     },
@@ -153,6 +183,7 @@ export const MahoWidget = Node.create({
             },
             insertMahoVariable: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
+                const type = getWidgetTypeForSelection(state);
 
                 Variables.openDialog(this.options.variableUrl, {
                     onOpen: () => {
@@ -161,7 +192,7 @@ export const MahoWidget = Node.create({
                     onOk: (dialog) => {
                         const directiveObj = parseDirective(dialog.returnValue);
                         editor.commands.insertContentAt({ from, to }, {
-                            type: this.name,
+                            type,
                             attrs: { directiveObj },
                         });
                     },
@@ -169,6 +200,12 @@ export const MahoWidget = Node.create({
             },
         }
     },
+});
+
+export const MahoWidgetInline = MahoWidgetBlock.extend({
+    name: 'mahoWidgetInline',
+    group: 'inline',
+    inline: true,
 });
 
 /**
