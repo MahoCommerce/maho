@@ -674,10 +674,15 @@ XML;
      * @param bool $cycleCheck Optional; whether or not to check for object recursion; off by default
      * @param  array $options Additional options used during encoding
      * @return string
+     * @throws Mage_Core_Exception_Json
      */
     public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
     {
-        $json = Zend_Json::encode($valueToEncode, $cycleCheck, $options);
+        $json = json_encode($valueToEncode);
+        if ($json === false) {
+            throw Mage_Core_Exception_Json::createFromLastError('encode');
+        }
+
         /** @var Mage_Core_Model_Translate_Inline $inline */
         $inline = Mage::getSingleton('core/translate_inline');
         if ($inline->isAllowed()) {
@@ -696,30 +701,26 @@ XML;
      * switch added to prevent exceptions in json_decode
      *
      * @param string $encodedValue
-     * @param int $objectDecodeType
+     * @param bool $associative When true, JSON objects will be returned as associative arrays
      * @return mixed
-     * @throws Zend_Json_Exception
+     * @throws Mage_Core_Exception_Json
      */
-    public function jsonDecode($encodedValue, $objectDecodeType = Zend_Json::TYPE_ARRAY)
+    public function jsonDecode($encodedValue, $associative = true)
     {
-        switch (true) {
-            case ($encodedValue === null):
-                $encodedValue = 'null';
-                break;
-            case ($encodedValue === true):
-                $encodedValue = 'true';
-                break;
-            case ($encodedValue === false):
-                $encodedValue = 'false';
-                break;
-            case ($encodedValue === ''):
-                $encodedValue = '""';
-                break;
-            default:
-                // do nothing
+        $encodedValue = match ($encodedValue) {
+            null => 'null',
+            true => 'true',
+            false => 'false',
+            '' => '""',
+            default => $encodedValue,
+        };
+
+        $result = json_decode($encodedValue, $associative);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw Mage_Core_Exception_Json::createFromLastError('decode');
         }
 
-        return Zend_Json::decode($encodedValue, $objectDecodeType);
+        return $result;
     }
 
     /**

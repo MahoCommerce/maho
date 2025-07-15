@@ -424,7 +424,7 @@ var WidgetInstance = {
 
 document.addEventListener('DOMContentLoaded', () => {
     <?php foreach ($this->getPageGroups() as $pageGroup): ?>
-        WidgetInstance.addPageGroup(<?= Zend_Json::encode($pageGroup) ?>);
+        WidgetInstance.addPageGroup(<?= Mage::helper('core')->jsonEncode($pageGroup) ?>);
     <?php endforeach ?>
     Event.observe(document, 'product:changed', function(event){
         WidgetInstance.checkProduct(event);

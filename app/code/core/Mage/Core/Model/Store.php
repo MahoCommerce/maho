@@ -463,31 +463,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Convert config values for url paths
-     *
-     * @deprecated after 1.4.2.0
-     * @param string $value
-     * @return string
-     */
-    public function processSubst($value)
-    {
-        if (!is_string($value)) {
-            return $value;
-        }
-
-        if (str_contains($value, '{{unsecure_base_url}}')) {
-            $unsecureBaseUrl = $this->getConfig(self::XML_PATH_UNSECURE_BASE_URL);
-            $value = str_replace('{{unsecure_base_url}}', $unsecureBaseUrl, $value);
-        } elseif (str_contains($value, '{{secure_base_url}}')) {
-            $secureBaseUrl = $this->getConfig(self::XML_PATH_SECURE_BASE_URL);
-            $value = str_replace('{{secure_base_url}}', $secureBaseUrl, $value);
-        } elseif (str_contains($value, '{{') && !str_contains($value, '{{base_url}}')) {
-            $value = Mage::getConfig()->substDistroServerVars($value);
-        }
-        return $value;
-    }
-
-    /**
      * Retrieve default base path
      *
      * @return string
@@ -713,10 +688,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         return Mage::app()->isCurrentlySecure();
     }
-
-    /*************************************************************************************
-     * Store currency interface
-     */
 
     /**
      * Retrieve store base currency code
