@@ -107,7 +107,7 @@ class tiptapWysiwygSetup {
 
         // Convert any <span> widget into <div> if they only have other <div> parents
         const blockTags = ['DIV'];
-        const doc = new DOMParser().parseFromString(content, 'text/html');
+        const doc = new DOMParser().parseFromString(xssFilter(content), 'text/html');
 
         for (const widget of doc.body.querySelectorAll('span[data-type=maho-widget]')) {
             let ref = widget.parentElement;
