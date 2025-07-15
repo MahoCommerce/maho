@@ -219,6 +219,15 @@ class tiptapWysiwygSetup {
                     },
                     blockquote: {
                         HTMLAttributes: {class: null, style: null}
+                    },
+                    link: {
+                        openOnClick: false,
+                        HTMLAttributes: {
+                            rel: null,
+                            target: null,
+                            class: null,
+                            style: null
+                        }
                     }
                 }),
                 TiptapModules.MahoImage.configure({
@@ -246,15 +255,6 @@ class tiptapWysiwygSetup {
                         filetype: 'image',
                     }),
                 }),
-                TiptapModules.Link.configure({
-                    openOnClick: false,
-                    HTMLAttributes: {
-                        rel: null,
-                        target: null,
-                        class: null,
-                        style: null
-                    },
-                }),
                 TiptapModules.Table.configure({
                     resizable: true,
                     HTMLAttributes: {class: null, style: null}
@@ -271,7 +271,6 @@ class tiptapWysiwygSetup {
                 TiptapModules.TextAlign.configure({
                     types: ['heading', 'paragraph'],
                 }),
-                TiptapModules.Underline,
                 TiptapModules.BubbleMenu.configure({
                     element: tableBubbleMenu,
                     shouldShow: ({ editor, view, state, oldState }) => {

@@ -6,17 +6,15 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, mergeAttributes } from 'https://cdn.jsdelivr.net/npm/@tiptap/core@3.0/+esm';
-import StarterKit from 'https://cdn.jsdelivr.net/npm/@tiptap/starter-kit@3.0/+esm';
-import Link from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-link@3.0/+esm';
-import Image from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-image@3.0/+esm';
-import TextAlign from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-text-align@3.0/+esm';
-import Underline from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-underline@3.0/+esm';
-import { Table, TableRow, TableCell, TableHeader } from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-table@3.0/+esm';
-import BubbleMenu from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-bubble-menu@3.0/+esm';
+import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.0.1';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.0.1';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.0.1';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.0.1';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.0.1';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.0.1';
 
 export {
-    Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,
+    Editor, Node, Mark, StarterKit, TextAlign,
     Table, TableRow, TableCell, TableHeader, BubbleMenu,
 };
 
@@ -532,8 +530,7 @@ export const MahoSlideshow = Node.create({
                             });
                         };
 
-                        // Add slide button handler
-                        dialog.querySelector('.add-slide-btn').addEventListener('click', () => {
+                        const addSlide = (isInitialAdd = false) => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
                                 onOk: (dialog) => {
                                     //  Parse out the directive and alt text
@@ -552,13 +549,30 @@ export const MahoSlideshow = Node.create({
                                     } else {
                                         console.error('Could not parse image from:', dialog.returnValue);
                                     }
+                                },
+                                onCancel: () => {
+                                    // If this was the initial add and user cancelled, close the slideshow dialog too
+                                    if (isInitialAdd && slides.length === 0) {
+                                        const slideshowDialog = document.getElementById('slideshow-editor-dialog');
+                                        if (slideshowDialog) {
+                                            slideshowDialog.close();
+                                        }
+                                    }
                                 }
                             });
-                        });
+                        };
+
+                        // Add slide button handler
+                        dialog.querySelector('.add-slide-btn').addEventListener('click', addSlide);
 
                         // Initial render
                         renderSlides();
                         bindSortable();
+
+                        // If this is a new slideshow (no slides), automatically open the image browser
+                        if (slides.length === 0) {
+                            addSlide(true);
+                        }
                     },
                     onOk: (dialog) => {
                         if (slides.length === 0) {
