@@ -10,17 +10,39 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
+use Monolog\Logger;
+
 /**
  * Main Mage hub class
  */
 final class Mage
 {
     /**
+     * Log level constants (kept for backward compatibility)
+     */
+    public const LOG_EMERG  = 0;
+    public const LOG_ALERT  = 1;
+    public const LOG_CRIT   = 2;
+    public const LOG_ERR    = 3;
+    public const LOG_WARN   = 4;
+    public const LOG_NOTICE = 5;
+    public const LOG_INFO   = 6;
+    public const LOG_DEBUG  = 7;
+    /**
      * Registry collection
      *
      * @var array
      */
     private static $_registry = [];
+
+    /**
+     * Logger instances
+     *
+     * @var array<string, Logger>
+     */
+    private static $_loggers = [];
 
     /**
      * Application root absolute path
@@ -757,15 +779,13 @@ final class Mage
             return;
         }
 
-        static $loggers = [];
-
         try {
             $maxLogLevel = (int) self::getStoreConfig('dev/log/max_level');
         } catch (Throwable $e) {
-            $maxLogLevel = Zend_Log::DEBUG;
+            $maxLogLevel = self::LOG_DEBUG;
         }
 
-        $level  = is_null($level) ? Zend_Log::DEBUG : $level;
+        $level  = is_null($level) ? self::LOG_DEBUG : $level;
 
         if (!self::$_isDeveloperMode && $level > $maxLogLevel && !$forceLog) {
             return;
@@ -775,7 +795,7 @@ final class Mage
             (string) self::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE) : basename($file);
 
         try {
-            if (!isset($loggers[$file])) {
+            if (!isset(self::$_loggers[$file])) {
                 // Validate file extension before save. Allowed file extensions: log, txt, html, csv
                 $_allowedFileExtensions = explode(
                     ',',
@@ -793,29 +813,36 @@ final class Mage
                     chmod($logDir, 0750);
                 }
 
-                if (!file_exists($logFile)) {
-                    file_put_contents($logFile, '');
-                    chmod($logFile, 0640);
+                $logger = new Logger(pathinfo($file, PATHINFO_FILENAME));
+
+                // Convert old Zend_Log level to Monolog level for configuration
+                $configLevel = self::convertLogLevel($maxLogLevel);
+                if ($forceLog || self::$_isDeveloperMode) {
+                    $configLevel = Level::Debug;
                 }
 
-                $format = '%timestamp% %priorityName% (%priority%): %message%' . PHP_EOL;
-                $formatter = new Zend_Log_Formatter_Simple($format);
-                $writerModel = (string) self::getConfig()->getNode('global/log/core/writer_model');
-                if (!self::$_app || !$writerModel) {
-                    $writer = new Zend_Log_Writer_Stream($logFile);
-                } else {
-                    $writer = new $writerModel($logFile);
+                // Add configured handlers
+                self::addConfiguredHandlers($logger, $logFile, $configLevel);
+
+                self::$_loggers[$file] = $logger;
+
+                // Set file permissions
+                if (!file_exists($logFile)) {
+                    touch($logFile);
                 }
-                $writer->setFormatter($formatter);
-                $loggers[$file] = new Zend_Log($writer);
+                chmod($logFile, 0640);
             }
 
             if (is_array($message) || is_object($message)) {
                 $message = print_r($message, true);
             }
 
-            $message = addcslashes($message, '<?');
-            $loggers[$file]->log($message, $level);
+            // Escape PHP tags for security
+            $message = str_replace('<?', '< ?', $message);
+
+            // Convert log level and log the message
+            $monologLevel = self::convertLogLevel($level);
+            self::$_loggers[$file]->log($monologLevel, $message);
         } catch (Exception $e) {
         }
     }
@@ -829,7 +856,7 @@ final class Mage
             return;
         }
         $file = self::getStoreConfig('dev/log/exception_file');
-        self::log("\n" . $e->__toString(), Zend_Log::ERR, $file);
+        self::log("\n" . $e->__toString(), self::LOG_ERR, $file);
     }
 
     /**
@@ -952,5 +979,146 @@ final class Mage
     public static function generateEncryptionKeyAsHex(): string
     {
         return sodium_bin2hex(sodium_crypto_secretbox_keygen());
+    }
+
+    /**
+     * Convert old Zend_Log level constants to Monolog Level objects
+     */
+    private static function convertLogLevel(int $level): Level
+    {
+        return match ($level) {
+            self::LOG_EMERG => Level::Emergency,
+            self::LOG_ALERT => Level::Alert,
+            self::LOG_CRIT => Level::Critical,
+            self::LOG_ERR => Level::Error,
+            self::LOG_WARN => Level::Warning,
+            self::LOG_NOTICE => Level::Notice,
+            self::LOG_INFO => Level::Info,
+            self::LOG_DEBUG => Level::Debug,
+            default => Level::Debug,
+        };
+    }
+
+    /**
+     * Add configured handlers to logger
+     */
+    private static function addConfiguredHandlers(Logger $logger, string $logFile, Level $defaultLevel): void
+    {
+        $config = self::getConfig();
+        if (!$config) {
+            // Fallback to basic StreamHandler if no config
+            $logger->pushHandler(new StreamHandler($logFile, $defaultLevel));
+            return;
+        }
+
+        $handlers = $config->getNode('global/log/handlers');
+        if (!$handlers) {
+            // Fallback to basic StreamHandler if no handlers configured
+            $logger->pushHandler(new StreamHandler($logFile, $defaultLevel));
+            return;
+        }
+
+        $hasActiveHandler = false;
+        foreach ($handlers->children() as $handlerName => $handlerConfig) {
+            if (!(bool)$handlerConfig->enabled) {
+                continue;
+            }
+
+            $handler = self::createHandler($handlerName, $handlerConfig, $logFile, $defaultLevel);
+            if ($handler) {
+                $logger->pushHandler($handler);
+                $hasActiveHandler = true;
+            }
+        }
+
+        // Always ensure at least one handler is active
+        if (!$hasActiveHandler) {
+            $logger->pushHandler(new StreamHandler($logFile, $defaultLevel));
+        }
+    }
+
+    /**
+     * Create a handler based on configuration using reflection
+     */
+    private static function createHandler(string $name, object $config, string $logFile, Level $defaultLevel): ?object
+    {
+        $className = (string)$config->class;
+        
+        // Validate class name
+        if (!class_exists($className)) {
+            self::log("Handler class does not exist: {$className}", self::LOG_ERR);
+            return null;
+        }
+
+        try {
+            $reflection = new ReflectionClass($className);
+            
+            // Get constructor parameters
+            $constructor = $reflection->getConstructor();
+            if (!$constructor) {
+                return new $className();
+            }
+
+            $args = self::buildConstructorArgs($constructor, $config, $logFile, $defaultLevel);
+            return $reflection->newInstanceArgs($args);
+            
+        } catch (Exception $e) {
+            self::log("Failed to create log handler {$className}: " . $e->getMessage(), self::LOG_ERR);
+            return null;
+        }
+    }
+
+    /**
+     * Build constructor arguments for handler using reflection and configuration
+     */
+    private static function buildConstructorArgs(ReflectionMethod $constructor, object $config, string $logFile, Level $defaultLevel): array
+    {
+        $args = [];
+        $params = $constructor->getParameters();
+        
+        foreach ($params as $param) {
+            $paramName = $param->getName();
+            $paramType = $param->getType();
+            
+            // Handle common parameter patterns
+            $value = match ($paramName) {
+                'stream', 'filename', 'file', 'path' => $logFile,
+                'level' => isset($config->params->level) ? 
+                    Level::fromName((string)$config->params->level) : $defaultLevel,
+                'bubble' => isset($config->params->bubble) ? 
+                    (bool)$config->params->bubble : true,
+                default => self::getConfigValue($config, $paramName, $param)
+            };
+            
+            $args[] = $value;
+        }
+        
+        return $args;
+    }
+
+    /**
+     * Get configuration value with type conversion
+     */
+    private static function getConfigValue(object $config, string $paramName, ReflectionParameter $param): mixed
+    {
+        $configValue = $config->params->{$paramName} ?? null;
+        
+        if ($configValue === null) {
+            return $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
+        }
+        
+        $paramType = $param->getType();
+        if (!$paramType) {
+            return (string)$configValue;
+        }
+        
+        // Type conversion based on parameter type
+        return match ($paramType->getName()) {
+            'int' => (int)$configValue,
+            'float' => (float)$configValue,
+            'bool' => (bool)$configValue,
+            'array' => is_array($configValue) ? $configValue : [(string)$configValue],
+            default => (string)$configValue,
+        };
     }
 }

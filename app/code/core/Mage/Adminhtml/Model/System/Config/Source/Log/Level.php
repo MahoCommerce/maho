@@ -16,14 +16,14 @@ class Mage_Adminhtml_Model_System_Config_Source_Log_Level
         $helper = Mage::helper('adminhtml');
 
         return [
-            Zend_Log::EMERG  => $helper->__('Emergency'),
-            Zend_Log::ALERT  => $helper->__('Alert'),
-            Zend_Log::CRIT   => $helper->__('Critical'),
-            Zend_Log::ERR    => $helper->__('Error'),
-            Zend_Log::WARN   => $helper->__('Warning'),
-            Zend_Log::NOTICE => $helper->__('Notice'),
-            Zend_Log::INFO   => $helper->__('Informational'),
-            Zend_Log::DEBUG  => $helper->__('Debug'),
+            Mage::LOG_EMERG  => $helper->__('Emergency'),
+            Mage::LOG_ALERT  => $helper->__('Alert'),
+            Mage::LOG_CRIT   => $helper->__('Critical'),
+            Mage::LOG_ERR    => $helper->__('Error'),
+            Mage::LOG_WARN   => $helper->__('Warning'),
+            Mage::LOG_NOTICE => $helper->__('Notice'),
+            Mage::LOG_INFO   => $helper->__('Informational'),
+            Mage::LOG_DEBUG  => $helper->__('Debug'),
         ];
     }
 }

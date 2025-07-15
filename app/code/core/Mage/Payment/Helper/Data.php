@@ -124,7 +124,7 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
         } else {
             Mage::log(
                 sprintf('Payment method was not found: %s', $method),
-                Zend_Log::NOTICE,
+                Mage::LOG_NOTICE,
             );
             return ($this->getLayout() ?? Mage::app()->getLayout())
                 ->createBlock('core/text')

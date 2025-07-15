@@ -44,6 +44,7 @@
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^1",
         "mahocommerce/maho-composer-plugin": "^3",
+        "monolog/monolog": "^3.9",
         "pelago/emogrifier": "^7.0",
         "shardj/zf1-future": "^1.24.1",
         "spomky-labs/otphp": "^11.3",

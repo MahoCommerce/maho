@@ -497,7 +497,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             } elseif (PHP_SAPI === 'cli') {
                 throw new Exception('Could not get lock on cache save operation.');
             } else {
-                Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Zend_Log::NOTICE);
+                Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Mage::LOG_NOTICE);
                 Maho::errorReport();
                 die();
             }

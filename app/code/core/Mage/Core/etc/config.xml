@@ -149,9 +149,16 @@
             <direct_front_name/>
         </request>
         <log>
-            <core>
-                <writer_model>Zend_Log_Writer_Stream</writer_model>
-            </core>
+            <handlers>
+                <!-- Default file handler -->
+                <file>
+                    <class>Monolog\Handler\StreamHandler</class>
+                    <enabled>1</enabled>
+                    <params>
+                        <level>DEBUG</level>
+                    </params>
+                </file>
+            </handlers>
         </log>
         <url_rewrite>
             <model>core/url_rewrite</model>
