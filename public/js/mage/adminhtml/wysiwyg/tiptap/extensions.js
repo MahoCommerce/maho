@@ -6,17 +6,14 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@2.25.0';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.25.0';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.25.0';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.25.0';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.25.0';
-import Underline from 'https://esm.sh/@tiptap/extension-underline@2.25.0';
-import Table from 'https://esm.sh/@tiptap/extension-table@2.25.0';
-import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.25.0';
-import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.25.0';
-import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.25.0';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.25.0';
+import { Editor, Node, Mark, mergeAttributes } from 'https://cdn.jsdelivr.net/npm/@tiptap/core@3.0/+esm';
+import StarterKit from 'https://cdn.jsdelivr.net/npm/@tiptap/starter-kit@3.0/+esm';
+import Link from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-link@3.0/+esm';
+import Image from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-image@3.0/+esm';
+import TextAlign from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-text-align@3.0/+esm';
+import Underline from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-underline@3.0/+esm';
+import { Table, TableRow, TableCell, TableHeader } from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-table@3.0/+esm';
+import BubbleMenu from 'https://cdn.jsdelivr.net/npm/@tiptap/extension-bubble-menu@3.0/+esm';
 
 export {
     Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,

@@ -274,15 +274,12 @@ class tiptapWysiwygSetup {
                 TiptapModules.Underline,
                 TiptapModules.BubbleMenu.configure({
                     element: tableBubbleMenu,
-                    shouldShow: ({ editor, state }) => {
-                        return editor.isActive('tableCell') || editor.isActive('tableHeader');
-                    },
-                    tippyOptions: {
-                        placement: 'top',
-                        arrow: false,
-                        animation: 'fade',
-                        duration: 150,
-                        offset: [0, 8],
+                    shouldShow: ({ editor, view, state, oldState }) => {
+                        const isInTable = editor.isActive('table');
+                        const isInCell = editor.isActive('tableCell') || editor.isActive('tableHeader');
+                        const shouldShow = isInTable && isInCell;
+                        tableBubbleMenu.style.display = shouldShow ? 'flex' : 'none';
+                        return shouldShow;
                     },
                 }),
                 TiptapModules.MahoDiv,
@@ -545,7 +542,6 @@ class tiptapWysiwygSetup {
         'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
         'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
         'table': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M3 10h18"/><path d="M10 3v18"/>',
-        //'widget': '<path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>',
         'widget': '<path d="M18 16v.01"/><path d="M6 16v.01"/><path d="M12 5v.01"/><path d="M12 12v.01"/><path d="M12 1a4 4 0 0 1 2.001 7.464l.001 .072a3.998 3.998 0 0 1 1.987 3.758l.22 .128a3.978 3.978 0 0 1 1.591 -.417l.2 -.005a4 4 0 1 1 -3.994 3.77l-.28 -.16c-.522 .25 -1.108 .39 -1.726 .39c-.619 0 -1.205 -.14 -1.728 -.391l-.279 .16l.007 .231a4 4 0 1 1 -2.212 -3.579l.222 -.129a3.998 3.998 0 0 1 1.988 -3.756l.002 -.071a4 4 0 0 1 -1.995 -3.265l-.005 -.2a4 4 0 0 1 4 -4z"/>',
         'variable': '<path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/>',
         'slideshow': '<path d="M15 6l.01 0"/><path d="M3 3m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z"/><path d="M3 13l4 -4a3 5 0 0 1 3 0l4 4"/><path d="M13 12l2 -2a3 5 0 0 1 3 0l3 3"/><path d="M8 21l.01 0"/><path d="M12 21l.01 0"/><path d="M16 21l.01 0"/>',
