@@ -6,7 +6,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.0';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.0';
 import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.0';
 import Image from 'https://esm.sh/@tiptap/extension-image@3.0';
 import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.0';
@@ -85,6 +85,49 @@ const getWidgetTypeForSelection = (state) => {
     return 'mahoWidgetInline';
 }
 
+/**
+ * This extension preserves class and style attributes on all HTML elements
+ */
+export const GlobalAttributes = Extension.create({
+    name: 'globalAttributes',
+
+    addGlobalAttributes() {
+        return [
+            {
+                types: [
+                    'heading', 'paragraph', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock',
+                    'tableRow', 'tableCell', 'tableHeader', 'table',
+                ],
+                attributes: {
+                    class: {
+                        default: null,
+                        parseHTML: element => element.getAttribute('class') || null,
+                        renderHTML: attributes => {
+                            if (!attributes.class) {
+                                return {};
+                            }
+                            return {
+                                class: attributes.class,
+                            };
+                        },
+                    },
+                    style: {
+                        default: null,
+                        parseHTML: element => element.getAttribute('style') || null,
+                        renderHTML: attributes => {
+                            if (!attributes.style) {
+                                return {};
+                            }
+                            return {
+                                style: attributes.style,
+                            };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+});
 
 /**
  * Maho Widget Node View Extension

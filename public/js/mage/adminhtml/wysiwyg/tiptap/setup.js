@@ -219,33 +219,16 @@ class tiptapWysiwygSetup {
             enableContentCheck: true,
             content: this.convertFromPlain(this.textarea.value),
             extensions: [
+                TiptapModules.GlobalAttributes,
                 TiptapModules.StarterKit.configure({
                     heading: {
-                        levels: [1, 2, 3, 4, 5],
-                        HTMLAttributes: {class: null, style: null}
-                    },
-                    paragraph: {
-                        HTMLAttributes: {class: null, style: null}
-                    },
-                    bulletList: {
-                        HTMLAttributes: {class: null, style: null}
-                    },
-                    orderedList: {
-                        HTMLAttributes: {class: null, style: null}
-                    },
-                    listItem: {
-                        HTMLAttributes: {class: null, style: null}
-                    },
-                    blockquote: {
-                        HTMLAttributes: {class: null, style: null}
+                        levels: [1, 2, 3, 4, 5]
                     },
                     link: {
                         openOnClick: false,
                         HTMLAttributes: {
                             rel: null,
-                            target: null,
-                            class: null,
-                            style: null
+                            target: null
                         }
                     }
                 }),
@@ -283,18 +266,11 @@ class tiptapWysiwygSetup {
                     }),
                 }),
                 TiptapModules.Table.configure({
-                    resizable: true,
-                    HTMLAttributes: {class: null, style: null}
+                    resizable: true
                 }),
-                TiptapModules.TableRow.configure({
-                    HTMLAttributes: {class: null, style: null}
-                }),
-                TiptapModules.TableCell.configure({
-                    HTMLAttributes: {class: null, style: null}
-                }),
-                TiptapModules.TableHeader.configure({
-                    HTMLAttributes: {class: null, style: null}
-                }),
+                TiptapModules.TableRow,
+                TiptapModules.TableCell,
+                TiptapModules.TableHeader,
                 TiptapModules.TextAlign.configure({
                     types: ['heading', 'paragraph'],
                 }),
