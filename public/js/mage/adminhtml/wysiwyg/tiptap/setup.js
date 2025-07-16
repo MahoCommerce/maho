@@ -222,31 +222,26 @@ class tiptapWysiwygSetup {
                 TiptapModules.StarterKit.configure({
                     heading: {
                         levels: [1, 2, 3, 4, 5],
-                        HTMLAttributes: {class: null, style: null}
+                        HTMLAttributes: {class: null}
                     },
                     paragraph: {
-                        HTMLAttributes: {class: null, style: null}
+                        HTMLAttributes: {class: null}
                     },
                     bulletList: {
-                        HTMLAttributes: {class: null, style: null}
+                        HTMLAttributes: {class: null}
                     },
                     orderedList: {
-                        HTMLAttributes: {class: null, style: null}
+                        HTMLAttributes: {class: null}
                     },
                     listItem: {
-                        HTMLAttributes: {class: null, style: null}
+                        HTMLAttributes: {class: null}
                     },
                     blockquote: {
-                        HTMLAttributes: {class: null, style: null}
+                        HTMLAttributes: {class: null}
                     },
                     link: {
                         openOnClick: false,
-                        HTMLAttributes: {
-                            rel: null,
-                            target: null,
-                            class: null,
-                            style: null
-                        }
+                        HTMLAttributes: {rel: null, target: null, class: null}
                     }
                 }),
                 TiptapModules.MahoImage.configure({
@@ -284,16 +279,16 @@ class tiptapWysiwygSetup {
                 }),
                 TiptapModules.Table.configure({
                     resizable: true,
-                    HTMLAttributes: {class: null, style: null}
+                    HTMLAttributes: {class: null}
                 }),
                 TiptapModules.TableRow.configure({
-                    HTMLAttributes: {class: null, style: null}
+                    HTMLAttributes: {class: null}
                 }),
                 TiptapModules.TableCell.configure({
-                    HTMLAttributes: {class: null, style: null}
+                    HTMLAttributes: {class: null}
                 }),
                 TiptapModules.TableHeader.configure({
-                    HTMLAttributes: {class: null, style: null}
+                    HTMLAttributes: {class: null}
                 }),
                 TiptapModules.TextAlign.configure({
                     types: ['heading', 'paragraph'],
