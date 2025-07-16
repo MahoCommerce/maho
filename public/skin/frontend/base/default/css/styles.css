@@ -5219,9 +5219,14 @@ label.offcanvas-trigger {
   display: none;
 }
 
+.customer-account-forgotpassword #form-validate {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+}
 .customer-account-forgotpassword .fieldset,
 .customer-account-forgotpassword .buttons-set {
-  margin-left: 30px;
+  width: 100%;
   max-width: 400px;
 }
 @media only screen and (max-width: 479px) {
