@@ -307,8 +307,8 @@
     cursor: col-resize;
 }
 
-/* Widget placeholder styles */
-.ProseMirror [data-type=maho-widget] {
+/* Unified styles for all directive types */
+.ProseMirror [data-type^="maho-"] {
     position: relative;
     padding: 4px;
     border: 1px dotted #adb5bd;
@@ -339,8 +339,7 @@
 }
 
 /* Tooltip for widgets and images */
-.ProseMirror [data-type=maho-widget],
-.ProseMirror div[data-type=maho-slideshow],
+.ProseMirror [data-type^="maho-"],
 .ProseMirror .image-container {
     &[title] {
         position: relative;

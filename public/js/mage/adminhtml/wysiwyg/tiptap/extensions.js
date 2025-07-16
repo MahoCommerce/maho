@@ -112,21 +112,22 @@ export const MahoWidgetBlock = Node.create({
     parseHTML() {
         const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         return [{
-            tag: tagName + '[data-type=maho-widget]',
+            tag: tagName + '[data-type^="maho-"]',
         }];
     },
 
     renderHTML({ node }) {
         const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         const directiveStr = renderDirective(node.attrs.directiveObj);
-        return [tagName, { 'data-type': 'maho-widget', 'data-directive': directiveStr }];
+        const dataType = `maho-${node.attrs.directiveObj.type}`;
+        return [tagName, { 'data-type': dataType, 'data-directive': directiveStr }];
     },
 
     addNodeView() {
         return ({ node, editor }) => {
             const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
             const dom = document.createElement(tagName);
-            dom.dataset.type = 'maho-widget';
+            dom.dataset.type = `maho-${node.attrs.directiveObj.type}`;
             dom.contentEditable = 'false';
 
             let icon, label, dblclick;
@@ -148,6 +149,11 @@ export const MahoWidgetBlock = Node.create({
                 icon = 'widget';
                 label = node.attrs.directiveObj.params.type;
                 dblclick = () => editor.commands.insertMahoWidget(node);
+            }
+            else if (node.attrs.directiveObj.type === 'block') {
+                icon = 'block';
+                label = node.attrs.directiveObj.params.block_id;
+                // TODO: Add double-click to manage blocks
             }
 
             dom.innerHTML = editor.options.wysiwygSetup.getIcon(icon ?? 'widget')
