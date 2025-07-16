@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
     /**
      * XmlRpc Server
      *
-     * @var Zend_XmlRpc_Server
+     * @var Laminas\XmlRpc\Server
      */
     protected $_xmlRpc = null;
 
@@ -85,7 +85,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
     {
         $apiConfigCharset = Mage::getStoreConfig('api/config/charset');
 
-        $this->_xmlRpc = new Zend_XmlRpc_Server();
+        $this->_xmlRpc = new Laminas\XmlRpc\Server();
         $this->_xmlRpc->setEncoding($apiConfigCharset)
             ->setClass($this->getHandler());
         $this->getController()->getResponse()
@@ -104,6 +104,6 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
     #[\Override]
     public function fault($code, $message): never
     {
-        throw new Zend_XmlRpc_Server_Exception($message, $code);
+        throw new Laminas\XmlRpc\Server\Exception\RuntimeException($message, $code);
     }
 }
