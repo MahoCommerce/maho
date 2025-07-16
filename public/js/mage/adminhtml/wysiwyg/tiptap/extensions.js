@@ -6,20 +6,15 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@2.25.0';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.25.0';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.25.0';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.25.0';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.25.0';
-import Underline from 'https://esm.sh/@tiptap/extension-underline@2.25.0';
-import Table from 'https://esm.sh/@tiptap/extension-table@2.25.0';
-import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.25.0';
-import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.25.0';
-import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.25.0';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.25.0';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.0';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.0';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.0';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.0';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.0';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.0';
 
 export {
-    Editor, Node, Mark, StarterKit, Link, TextAlign, Underline,
+    Editor, Node, Mark, StarterKit, TextAlign,
     Table, TableRow, TableCell, TableHeader, BubbleMenu,
 };
 
@@ -65,15 +60,84 @@ const renderDirectiveImageUrl = (src, directiveObj, directivesUrl) => {
     return src;
 };
 
+const getWidgetTypeForSelection = (state) => {
+    const { from, to } = state.selection
+
+    // If we have a selected maho widget, return the same type
+    const selectedNode = state.doc.nodeAt(from, to);
+    if (selectedNode?.type.name.startsWith('mahoWidget')) {
+        return selectedNode.type.name;
+    }
+
+    // Otherwise traverse parent nodes skipping empty tags
+    const pos = state.doc.resolve(from);
+
+    let cur = pos.parent;
+    while (cur.content.size === 0 && ['paragraph', 'heading'].includes(cur.type.name)) {
+        cur = pos.node(pos.depth - 1);
+    }
+
+    // Use a block if allowed in this context
+    if (cur.type.spec.content.includes('block')) {
+        return 'mahoWidgetBlock';
+    }
+
+    return 'mahoWidgetInline';
+}
+
+/**
+ * This extension preserves class and style attributes on all HTML elements
+ */
+export const GlobalAttributes = Extension.create({
+    name: 'globalAttributes',
+
+    addGlobalAttributes() {
+        return [
+            {
+                types: [
+                    'heading', 'paragraph', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock',
+                    'tableRow', 'tableCell', 'tableHeader', 'table',
+                ],
+                attributes: {
+                    class: {
+                        default: null,
+                        parseHTML: element => element.getAttribute('class') || null,
+                        renderHTML: attributes => {
+                            if (!attributes.class) {
+                                return {};
+                            }
+                            return {
+                                class: attributes.class,
+                            };
+                        },
+                    },
+                    style: {
+                        default: null,
+                        parseHTML: element => element.getAttribute('style') || null,
+                        renderHTML: attributes => {
+                            if (!attributes.style) {
+                                return {};
+                            }
+                            return {
+                                style: attributes.style,
+                            };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+});
+
 /**
  * Maho Widget Node View Extension
  *
  * This extension adds widget and variable support
  */
-export const MahoWidget = Node.create({
-    name: 'mahoWidget',
-    group: 'inline',
-    inline: true,
+export const MahoWidgetBlock = Node.create({
+    name: 'mahoWidgetBlock',
+    group: 'block',
+    inline: false,
     draggable: true,
     atom: true,
 
@@ -89,20 +153,23 @@ export const MahoWidget = Node.create({
     },
 
     parseHTML() {
+        const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         return [{
-            tag: 'span[data-type=maho-widget]',
+            tag: tagName + '[data-type=maho-widget]',
         }];
     },
 
     renderHTML({ node }) {
+        const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         const directiveStr = renderDirective(node.attrs.directiveObj);
-        return ['span', { 'data-type': 'maho-widget', 'data-directive': directiveStr }];
+        return [tagName, { 'data-type': 'maho-widget', 'data-directive': directiveStr }];
     },
 
     addNodeView() {
         return ({ node, editor }) => {
-            const dom = document.createElement('span');
-            dom.dataset.type = 'maho-widget';
+            const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
+            const dom = document.createElement(tagName);
+            dom.dataset.type = `maho-${node.attrs.directiveObj.type}`;
             dom.contentEditable = 'false';
 
             let icon, label, dblclick;
@@ -125,6 +192,11 @@ export const MahoWidget = Node.create({
                 label = node.attrs.directiveObj.params.type;
                 dblclick = () => editor.commands.insertMahoWidget(node);
             }
+            else if (node.attrs.directiveObj.type === 'block') {
+                icon = 'block';
+                label = node.attrs.directiveObj.params.block_id;
+                // TODO: Add double-click to manage blocks
+            }
 
             dom.innerHTML = editor.options.wysiwygSetup.getIcon(icon ?? 'widget')
                 + escapeHtml(label ?? renderDirective(node.attrs.directiveObj));
@@ -142,6 +214,7 @@ export const MahoWidget = Node.create({
         return {
             insertMahoWidget: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
+                const type = getWidgetTypeForSelection(state);
 
                 widgetTools.openDialog(this.options.widgetUrl, {
                     onOpen: () => {
@@ -150,7 +223,7 @@ export const MahoWidget = Node.create({
                     onOk: (dialog) => {
                         const directiveObj = parseDirective(dialog.returnValue);
                         editor.commands.insertContentAt({ from, to }, {
-                            type: this.name,
+                            type,
                             attrs: { directiveObj },
                         });
                     },
@@ -158,6 +231,7 @@ export const MahoWidget = Node.create({
             },
             insertMahoVariable: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
+                const type = getWidgetTypeForSelection(state);
 
                 Variables.openDialog(this.options.variableUrl, {
                     onOpen: () => {
@@ -166,7 +240,7 @@ export const MahoWidget = Node.create({
                     onOk: (dialog) => {
                         const directiveObj = parseDirective(dialog.returnValue);
                         editor.commands.insertContentAt({ from, to }, {
-                            type: this.name,
+                            type,
                             attrs: { directiveObj },
                         });
                     },
@@ -174,6 +248,12 @@ export const MahoWidget = Node.create({
             },
         }
     },
+});
+
+export const MahoWidgetInline = MahoWidgetBlock.extend({
+    name: 'mahoWidgetInline',
+    group: 'inline',
+    inline: true,
 });
 
 /**
@@ -535,8 +615,7 @@ export const MahoSlideshow = Node.create({
                             });
                         };
 
-                        // Add slide button handler
-                        dialog.querySelector('.add-slide-btn').addEventListener('click', () => {
+                        const addSlide = (isInitialAdd = false) => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
                                 onOk: (dialog) => {
                                     //  Parse out the directive and alt text
@@ -555,13 +634,30 @@ export const MahoSlideshow = Node.create({
                                     } else {
                                         console.error('Could not parse image from:', dialog.returnValue);
                                     }
+                                },
+                                onCancel: () => {
+                                    // If this was the initial add and user cancelled, close the slideshow dialog too
+                                    if (isInitialAdd && slides.length === 0) {
+                                        const slideshowDialog = document.getElementById('slideshow-editor-dialog');
+                                        if (slideshowDialog) {
+                                            slideshowDialog.close();
+                                        }
+                                    }
                                 }
                             });
-                        });
+                        };
+
+                        // Add slide button handler
+                        dialog.querySelector('.add-slide-btn').addEventListener('click', addSlide);
 
                         // Initial render
                         renderSlides();
                         bindSortable();
+
+                        // If this is a new slideshow (no slides), automatically open the image browser
+                        if (slides.length === 0) {
+                            addSlide(true);
+                        }
                     },
                     onOk: (dialog) => {
                         if (slides.length === 0) {
@@ -612,7 +708,7 @@ export const MahoDiv = Node.create({
             },
             classList: {
                 parseHTML: (element) => element.classList,
-                renderHTML: (attributes) => attributes.classList ? { class: attributes.classList } : {},
+                renderHTML: (attributes) => attributes.classList.length ? { class: attributes.classList } : {},
             },
         };
     },

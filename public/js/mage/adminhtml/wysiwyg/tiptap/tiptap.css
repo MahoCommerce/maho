@@ -307,10 +307,9 @@
     cursor: col-resize;
 }
 
-/* Widget placeholder styles */
-.ProseMirror span[data-type=maho-widget] {
+/* Unified styles for all directive types */
+.ProseMirror [data-type^="maho-"] {
     position: relative;
-    display: inline;
     padding: 4px;
     border: 1px dotted #adb5bd;
     cursor: pointer;
@@ -319,6 +318,11 @@
     font-weight: normal;
     font-style: normal;
     vertical-align: bottom;
+
+    div& {
+        /* hack to make the div shrink */
+        display: table;
+    }
 
     svg {
         display: inline-block;
@@ -335,8 +339,7 @@
 }
 
 /* Tooltip for widgets and images */
-.ProseMirror span[data-type=maho-widget],
-.ProseMirror div[data-type=maho-slideshow],
+.ProseMirror [data-type^="maho-"],
 .ProseMirror .image-container {
     &[title] {
         position: relative;
@@ -512,8 +515,6 @@
     border: 1px solid rgba(226, 232, 240, 0.8) !important;
     border-radius: 8px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    animation: fadeIn 0.15s ease-out;
-    display: flex !important;
     align-items: center !important;
     gap: 2px !important;
     white-space: nowrap !important;
