@@ -155,15 +155,14 @@ export const MahoWidgetBlock = Node.create({
     parseHTML() {
         const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         return [{
-            tag: tagName + '[data-type^="maho-"]',
+            tag: tagName + '[data-type=maho-widget]',
         }];
     },
 
     renderHTML({ node }) {
         const tagName = this.name == 'mahoWidgetBlock' ? 'div' : 'span';
         const directiveStr = renderDirective(node.attrs.directiveObj);
-        const dataType = `maho-${node.attrs.directiveObj.type}`;
-        return [tagName, { 'data-type': dataType, 'data-directive': directiveStr }];
+        return [tagName, { 'data-type': 'maho-widget', 'data-directive': directiveStr }];
     },
 
     addNodeView() {

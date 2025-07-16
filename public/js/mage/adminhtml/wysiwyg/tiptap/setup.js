@@ -132,7 +132,7 @@ class tiptapWysiwygSetup {
         content = html_beautify(content, { indent_size: 4 });
 
         // Extract directives from MahoWidget nodes
-        content = content.replace(/<(div|span) data-type="maho-[^"]*" data-directive="(.*?)"><\/\1>/gi, (match, tagName, directive) => {
+        content = content.replace(/<(div|span) data-type="maho-widget" data-directive="(.*?)"><\/\1>/gi, (match, tagName, directive) => {
             return directive;
         });
 
