@@ -19555,18 +19555,6 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Currency/Filter.php
 
 		-
-			message: '#^Method Mage_Directory_Model_Currency_Import_Webservicex\:\:_convert\(\) should return float\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Import/Webservicex.php
-
-		-
-			message: '#^Property Mage_Directory_Model_Currency_Import_Webservicex\:\:\$_url has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Import/Webservicex.php
-
-		-
 			message: '#^Method Mage_Directory_Model_Observer\:\:scheduledUpdateCurrencyRates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
