@@ -22,7 +22,7 @@ class Mage_Paypal_IpnController extends Mage_Core_Controller_Front_Action
 
         try {
             $data = $this->getRequest()->getPost();
-            Mage::getModel('paypal/ipn')->processIpnRequest($data, new Varien_Http_Adapter_Curl());
+            Mage::getModel('paypal/ipn')->processIpnRequest($data, true);
         } catch (Mage_Paypal_UnavailableException $e) {
             Mage::logException($e);
             $this->getResponse()->setHeader('HTTP/1.1', '503 Service Unavailable')->sendResponse();

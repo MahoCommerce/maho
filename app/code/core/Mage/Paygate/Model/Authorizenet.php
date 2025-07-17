@@ -1297,27 +1297,25 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
         $result = Mage::getModel('paygate/authorizenet_result');
 
-        $client = new Varien_Http_Client();
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'max_redirects' => 0,
+            'timeout' => 30,
+            'verify_host' => true,
+            'verify_peer' => true,
+        ]);
 
         $uri = $this->getConfigData('cgi_url');
-        $client->setUri($uri ?: self::CGI_URL);
-        $client->setConfig([
-            'maxredirects' => 0,
-            'timeout' => 30,
-            'verifyhost' => 2,
-            'verifypeer' => true,
-            //'ssltransport' => 'tcp',
-        ]);
+        $uri = $uri ?: self::CGI_URL;
+
         foreach ($request->getData() as $key => $value) {
             $request->setData($key, str_replace(self::RESPONSE_DELIM_CHAR, '', $value ?? ''));
         }
         $request->setXDelimChar(self::RESPONSE_DELIM_CHAR);
 
-        $client->setParameterPost($request->getData());
-        $client->setMethod(Zend_Http_Client::POST);
-
         try {
-            $response = $client->request();
+            $response = $client->request('POST', $uri, [
+                'body' => $request->getData(),
+            ]);
         } catch (Exception $e) {
             $result->setResponseCode(-1)
                 ->setResponseReasonCode($e->getCode())
@@ -1328,7 +1326,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
             Mage::throwException($this->_wrapGatewayError($e->getMessage()));
         }
 
-        $responseBody = $response->getBody();
+        $responseBody = $response->getContent();
 
         $r = explode(self::RESPONSE_DELIM_CHAR, $responseBody);
 
@@ -1569,18 +1567,13 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
             $transactionId,
         );
 
-        $client = new Varien_Http_Client();
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'timeout' => 45,
+            'verify_host' => true,
+            'verify_peer' => true,
+        ]);
         $uri = $this->getConfigData('cgi_url_td');
         $uri = $uri ?: self::CGI_URL_TD;
-        $client->setUri($uri);
-        $client->setConfig([
-            'timeout' => 45,
-            'verifyhost' => 2,
-            'verifypeer' => true,
-        ]);
-        $client->setHeaders(['Content-Type: text/xml']);
-        $client->setMethod(Zend_Http_Client::POST);
-        $client->setRawData($requestBody);
 
         $debugData = [
             'url' => $uri,
@@ -1588,7 +1581,11 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
         ];
 
         try {
-            $responseBody = $client->request()->getBody();
+            $response = $client->request('POST', $uri, [
+                'headers' => ['Content-Type' => 'text/xml'],
+                'body' => $requestBody,
+            ]);
+            $responseBody = $response->getContent();
             $debugData['result'] = $responseBody;
             libxml_use_internal_errors(true);
             $responseXmlDocument = new Varien_Simplexml_Element($responseBody);

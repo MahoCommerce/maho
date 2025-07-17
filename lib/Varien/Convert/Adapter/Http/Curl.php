@@ -24,19 +24,17 @@ class Varien_Convert_Adapter_Http_Curl extends Varien_Convert_Adapter_Abstract
             $this->addException("Expecting a valid 'uri' parameter");
         }
 
-        // use Varien curl adapter
-        $http = new Varien_Http_Adapter_Curl();
+        // use Symfony HttpClient
+        $client = \Symfony\Component\HttpClient\HttpClient::create();
 
-        // send GET request
-        $http->write('GET', $uri);
-
-        // read the remote file
-        $data = $http->read();
-
-        $http->close();
-
-        $data = preg_split('/^\r?$/m', $data, 2);
-        $data = trim($data[1]);
+        try {
+            // send GET request and read the remote file
+            $response = $client->request('GET', $uri);
+            $data = trim($response->getContent());
+        } catch (Exception $e) {
+            $this->addException('Error fetching data from URI: ' . $e->getMessage());
+            return $this;
+        }
 
         // save contents into container
         $this->setData($data);

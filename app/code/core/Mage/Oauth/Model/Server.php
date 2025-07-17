@@ -204,9 +204,9 @@ class Mage_Oauth_Model_Server
                 }
             }
         }
-        $contentTypeHeader = $this->_request->getHeader(Zend_Http_Client::CONTENT_TYPE);
+        $contentTypeHeader = $this->_request->getHeader('content-type');
 
-        if ($contentTypeHeader && str_starts_with($contentTypeHeader, Zend_Http_Client::ENC_URLENCODED)) {
+        if ($contentTypeHeader && str_starts_with($contentTypeHeader, 'application/x-www-form-urlencoded')) {
             $protocolParamsNotSet = !$this->_protocolParams;
 
             parse_str($this->_request->getRawBody(), $bodyParams);
@@ -687,7 +687,7 @@ class Mage_Oauth_Model_Server
     {
         $this->_response = $response;
 
-        $this->_response->setHeader(Zend_Http_Client::CONTENT_TYPE, Zend_Http_Client::ENC_URLENCODED, true);
+        $this->_response->setHeader('content-type', 'application/x-www-form-urlencoded', true);
         $this->_response->setHttpResponseCode(self::HTTP_OK);
 
         return $this;

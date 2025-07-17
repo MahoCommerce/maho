@@ -124,18 +124,14 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
      */
     public function getFeedData()
     {
-        $curl = new Varien_Http_Adapter_Curl();
-        $curl->setConfig([
-            'timeout'   => 2,
-        ]);
-        $curl->write(Zend_Http_Client::GET, $this->getFeedUrl(), '1.0');
-        $data = $curl->read();
-        if ($data === false) {
+        $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 2]);
+
+        try {
+            $response = $client->request('GET', $this->getFeedUrl());
+            $data = trim($response->getContent());
+        } catch (Exception $e) {
             return false;
         }
-        $data = preg_split('/^\r?$/m', $data, 2);
-        $data = trim($data[1]);
-        $curl->close();
 
         try {
             $xml  = new SimpleXMLElement($data);

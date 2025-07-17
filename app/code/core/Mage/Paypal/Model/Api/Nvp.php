@@ -926,53 +926,37 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         $debugData = ['url' => $this->getApiEndpoint(), $methodName => $request];
 
         try {
-            $http = new Varien_Http_Adapter_Curl();
             $config = [
                 'timeout'    => 60,
-                'verifypeer' => $this->_config->verifyPeer,
+                'verify_peer' => $this->_config->verifyPeer,
             ];
 
             if ($this->getUseProxy()) {
                 $config['proxy'] = $this->getProxyHost() . ':' . $this->getProxyPort();
             }
             if ($this->getUseCertAuthentication()) {
-                $config['ssl_cert'] = $this->getApiCertificate();
+                $config['local_cert'] = $this->getApiCertificate();
             }
-            $http->setConfig($config);
-            $http->write(
-                Zend_Http_Client::POST,
-                $this->getApiEndpoint(),
-                '1.1',
-                $this->_headers,
-                $this->_buildQuery($request),
-            );
-            $response = $http->read();
+
+            $client = \Symfony\Component\HttpClient\HttpClient::create($config);
+
+            $httpResponse = $client->request('POST', $this->getApiEndpoint(), [
+                'headers' => $this->_headers,
+                'body' => $this->_buildQuery($request),
+            ]);
+            $response = $httpResponse->getContent();
         } catch (Exception $e) {
             $debugData['http_error'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
             $this->_debug($debugData);
             throw $e;
         }
 
-        $response = preg_split('/^\r?$/m', $response, 2);
-        $response = trim($response[1]);
+        $response = trim($response);
         $response = $this->_deformatNVP($response);
 
         $debugData['response'] = $response;
         $this->_debug($debugData);
         $response = $this->_postProcessResponse($response);
-
-        // handle transport error
-        if ($http->getErrno()) {
-            Mage::logException(new Exception(
-                sprintf('PayPal NVP CURL connection error #%s: %s', $http->getErrno(), $http->getError()),
-            ));
-            $http->close();
-
-            Mage::throwException(Mage::helper('paypal')->__('Unable to communicate with the PayPal gateway.'));
-        }
-
-        // cUrl resource must be closed after checking it for errors
-        $http->close();
 
         if (!$this->_validateResponse($methodName, $response)) {
             Mage::logException(new Exception(

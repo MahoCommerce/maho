@@ -78,7 +78,7 @@ class Mage_Paypal_Model_Ipn
      *
      * @throws Mage_Core_Exception
      */
-    public function processIpnRequest(array $request, ?Zend_Http_Client_Adapter_Interface $httpAdapter = null)
+    public function processIpnRequest(array $request, bool $validateRequest = true)
     {
         $this->_request   = $request;
         $this->_debugData = ['ipn' => $request];
@@ -87,14 +87,14 @@ class Mage_Paypal_Model_Ipn
         try {
             if (isset($this->_request['txn_type']) && $this->_request['txn_type'] == 'recurring_payment') {
                 $this->_getRecurringProfile();
-                if ($httpAdapter) {
-                    $this->_postBack($httpAdapter);
+                if ($validateRequest) {
+                    $this->_postBack();
                 }
                 $this->_processRecurringProfile();
             } else {
                 $this->_getOrder();
-                if ($httpAdapter) {
-                    $this->_postBack($httpAdapter);
+                if ($validateRequest) {
+                    $this->_postBack();
                 }
                 $this->_processOrder();
             }
@@ -111,23 +111,24 @@ class Mage_Paypal_Model_Ipn
      *
      * @throws Exception
      */
-    protected function _postBack(Zend_Http_Client_Adapter_Interface $httpAdapter)
+    protected function _postBack()
     {
         $postbackQuery = http_build_query($this->_request) . '&cmd=_notify-validate';
         $postbackUrl = $this->_config->getPostbackUrl();
         $this->_debugData['postback_to'] = $postbackUrl;
 
-        $httpAdapter->setConfig(['verifypeer' => $this->_config->verifyPeer]);
-        $httpAdapter->write(
-            Zend_Http_Client::POST,
-            $postbackUrl,
-            '1.1',
-            ['Connection: close'],
-            $postbackQuery,
-        );
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'verify_peer' => $this->_config->verifyPeer,
+        ]);
 
         try {
-            $postbackResult = $httpAdapter->read();
+            $response = $client->request('POST', $postbackUrl, [
+                'headers' => ['Connection' => 'close'],
+                'body' => $postbackQuery,
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $responseBody = $response->getContent();
         } catch (Exception $e) {
             $this->_debugData['http_error'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
             throw $e;
@@ -136,22 +137,20 @@ class Mage_Paypal_Model_Ipn
         /*
          * Handle errors on PayPal side.
          */
-        $responseCode = Zend_Http_Response::extractCode($postbackResult);
-        if (empty($postbackResult) || in_array($responseCode, ['500', '502', '503'])) {
-            if (empty($postbackResult)) {
+        if (empty($responseBody) || in_array($statusCode, [500, 502, 503])) {
+            if (empty($responseBody)) {
                 $reason = 'Empty response.';
             } else {
-                $reason = 'Response code: ' . $responseCode . '.';
+                $reason = 'Response code: ' . $statusCode . '.';
             }
             $this->_debugData['exception'] = 'PayPal IPN postback failure. ' . $reason;
             throw new Mage_Paypal_UnavailableException($reason);
         }
 
-        $response = preg_split('/^\r?$/m', $postbackResult);
-        $response = trim(end($response));
-        if ($response != 'VERIFIED') {
+        $responseContent = trim($responseBody);
+        if ($responseContent != 'VERIFIED') {
             $this->_debugData['postback'] = $postbackQuery;
-            $this->_debugData['postback_result'] = $postbackResult;
+            $this->_debugData['postback_result'] = $responseBody;
             throw new Exception('PayPal IPN postback failure. See ' . self::DEFAULT_LOG_FILE . ' for details.');
         }
     }

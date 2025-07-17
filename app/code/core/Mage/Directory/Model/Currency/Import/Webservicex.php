@@ -24,13 +24,13 @@ class Mage_Directory_Model_Currency_Import_Webservicex extends Mage_Directory_Mo
     /**
      * HTTP client
      *
-     * @var Varien_Http_Client
+     * @var \Symfony\Contracts\HttpClient\HttpClientInterface
      */
     protected $_httpClient;
 
     public function __construct()
     {
-        $this->_httpClient = new Varien_Http_Client();
+        $this->_httpClient = \Symfony\Component\HttpClient\HttpClient::create();
     }
 
     /**
@@ -46,13 +46,12 @@ class Mage_Directory_Model_Currency_Import_Webservicex extends Mage_Directory_Mo
         $url = str_replace('{{CURRENCY_TO}}', $currencyTo, $url);
 
         try {
-            $response = $this->_httpClient
-                ->setUri($url)
-                ->setConfig(['timeout' => Mage::getStoreConfig('currency/webservicex/timeout')])
-                ->request('GET')
-                ->getBody();
+            $response = $this->_httpClient->request('GET', $url, [
+                'timeout' => Mage::getStoreConfig('currency/webservicex/timeout'),
+            ]);
+            $responseBody = $response->getContent();
 
-            $xml = simplexml_load_string($response, null, LIBXML_NOERROR);
+            $xml = simplexml_load_string($responseBody, null, LIBXML_NOERROR);
             if (!$xml) {
                 $this->_messages[] = Mage::helper('directory')->__('Cannot retrieve rate from %s.', $url);
                 return null;

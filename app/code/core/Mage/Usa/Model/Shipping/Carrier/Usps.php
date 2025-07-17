@@ -398,13 +398,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 if (!$url) {
                     $url = $this->_defaultGatewayUrl;
                 }
-                $client = new Zend_Http_Client();
-                $client->setUri($url);
-                $client->setConfig(['maxredirects' => 0, 'timeout' => 30]);
-                $client->setParameterGet('API', $api);
-                $client->setParameterGet('XML', $request);
-                $response = $client->request();
-                $responseBody = $response->getBody();
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
+                    'timeout' => 30,
+                ]);
+                $response = $client->request('GET', $url, [
+                    'query' => [
+                        'API' => $api,
+                        'XML' => $request,
+                    ],
+                ]);
+                $responseBody = $response->getContent();
 
                 $debugData['result'] = $responseBody;
                 $this->_setCachedQuotes($request, $responseBody);
@@ -936,13 +940,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 if (!$url) {
                     $url = $this->_defaultGatewayUrl;
                 }
-                $client = new Zend_Http_Client();
-                $client->setUri($url);
-                $client->setConfig(['maxredirects' => 0, 'timeout' => 30]);
-                $client->setParameterGet('API', $api);
-                $client->setParameterGet('XML', $request);
-                $response = $client->request();
-                $responseBody = $response->getBody();
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
+                    'timeout' => 30,
+                ]);
+                $response = $client->request('GET', $url, [
+                    'query' => [
+                        'API' => $api,
+                        'XML' => $request,
+                    ],
+                ]);
+                $responseBody = $response->getContent();
                 $debugData['result'] = $responseBody;
             } catch (Exception $e) {
                 $debugData['result'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
@@ -1724,12 +1732,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         if (!$url) {
             $url = $this->_defaultGatewayUrl;
         }
-        $client = new Zend_Http_Client();
-        $client->setUri($url);
-        $client->setConfig(['maxredirects' => 0, 'timeout' => 30]);
-        $client->setParameterGet('API', $api);
-        $client->setParameterGet('XML', $requestXml);
-        $response = $client->request()->getBody();
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'max_redirects' => 0,
+            'timeout' => 30,
+        ]);
+        $httpResponse = $client->request('GET', $url, [
+            'query' => [
+                'API' => $api,
+                'XML' => $requestXml,
+            ],
+        ]);
+        $response = $httpResponse->getContent();
 
         $response = simplexml_load_string($response);
         if ($response === false || $response->getName() == 'Error') {

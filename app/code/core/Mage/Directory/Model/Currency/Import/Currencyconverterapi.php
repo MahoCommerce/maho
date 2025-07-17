@@ -39,7 +39,7 @@ class Mage_Directory_Model_Currency_Import_Currencyconverterapi extends Mage_Dir
     /**
      * HTTP client
      *
-     * @var Varien_Http_Client
+     * @var \Symfony\Contracts\HttpClient\HttpClientInterface
      */
     protected $_httpClient;
 
@@ -48,7 +48,7 @@ class Mage_Directory_Model_Currency_Import_Currencyconverterapi extends Mage_Dir
      */
     public function __construct()
     {
-        $this->_httpClient = new Varien_Http_Client();
+        $this->_httpClient = \Symfony\Component\HttpClient\HttpClient::create();
     }
 
     #[\Override]
@@ -142,11 +142,10 @@ class Mage_Directory_Model_Currency_Import_Currencyconverterapi extends Mage_Dir
     {
         $response = [];
         try {
-            $jsonResponse = $this->_httpClient
-                ->setUri($url)
-                ->setConfig(['timeout' => Mage::getStoreConfig(self::XML_PATH_CURRENCY_CONVERTER_TIMEOUT)])
-                ->request('GET')
-                ->getBody();
+            $httpResponse = $this->_httpClient->request('GET', $url, [
+                'timeout' => Mage::getStoreConfig(self::XML_PATH_CURRENCY_CONVERTER_TIMEOUT),
+            ]);
+            $jsonResponse = $httpResponse->getContent();
 
             $response = json_decode($jsonResponse, true);
         } catch (Exception $e) {

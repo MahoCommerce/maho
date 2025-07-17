@@ -23848,12 +23848,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Ipn.php
 
 		-
-			message: '#^Parameter \#2 \$url of method Zend_Http_Client_Adapter_Interface\:\:write\(\) expects Zend_Uri_Http, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
 			message: '#^Call to an undefined method Mage_Paypal_Model_Api_Abstract\:\:callDoReferenceTransaction\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -33167,12 +33161,6 @@ parameters:
 			identifier: booleanOr.leftAlwaysFalse
 			count: 1
 			path: lib/Varien/Filter/Template/Tokenizer/Variable.php
-
-		-
-			message: '#^Method Varien_Http_Client\:\:_trySetCurlAdapter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Http/Client.php
 
 		-
 			message: '#^Method Varien_Io_Abstract\:\:allowedPath\(\) has no return type specified\.$#'
