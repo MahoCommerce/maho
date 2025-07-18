@@ -222,7 +222,7 @@ function xssFilter(str) {
             }
         }
     });
-    return doc.body.innerHTML;
+    return doc.body.textContent;
 }
 
 /**
