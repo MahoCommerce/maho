@@ -674,14 +674,11 @@ XML;
      * @param bool $cycleCheck Optional; whether or not to check for object recursion; off by default
      * @param  array $options Additional options used during encoding
      * @return string
-     * @throws Mage_Core_Exception_Json
+     * @throws JsonException
      */
     public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
     {
-        $json = json_encode($valueToEncode);
-        if ($json === false) {
-            throw Mage_Core_Exception_Json::createFromLastError('encode');
-        }
+        $json = json_encode($valueToEncode, JSON_THROW_ON_ERROR);
 
         /** @var Mage_Core_Model_Translate_Inline $inline */
         $inline = Mage::getSingleton('core/translate_inline');
@@ -703,7 +700,7 @@ XML;
      * @param string $encodedValue
      * @param bool $associative When true, JSON objects will be returned as associative arrays
      * @return mixed
-     * @throws Mage_Core_Exception_Json
+     * @throws JsonException
      */
     public function jsonDecode($encodedValue, $associative = true)
     {
@@ -715,12 +712,7 @@ XML;
             default => $encodedValue,
         };
 
-        $result = json_decode($encodedValue, $associative);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw Mage_Core_Exception_Json::createFromLastError('decode');
-        }
-
-        return $result;
+        return json_decode($encodedValue, $associative, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
