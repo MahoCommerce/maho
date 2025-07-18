@@ -789,7 +789,7 @@ function setMessagesDiv(message, type = 'success', div = null) {
 */
 function setMessagesDivHtml(html, div = null) {
     if (div ??= document.getElementById('messages')) {
-        div.innerHTML = xssFilter(html);
+        div.replaceChildren(...xssFilter(html, true));
     }
 }
 
