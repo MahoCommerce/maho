@@ -818,3 +818,15 @@ function debounce(func, delay) {
         }, delay);
     };
 }
+
+// https://cdn.jsdelivr.net/npm/xsskillah@0.1.3/src/xsskillah.js
+(function() {
+    const sandboxes=new Set,globalDefaults={allowTags:[],allowTagRules:[],xssDocReset:8},xssDoc=document.implementation.createHTMLDocument(),SAFE_URL_PATTERN=/^(?!javascript:)(?:[a-z0-9+.-]+:|[^&:\/?#]*(?:[\/?#]|$))/i,sanitizeUrl=e=>(e=String(e)).match(SAFE_URL_PATTERN)?e:"unsafe:"+e,vulnerableAttributes=["href","src","srcset","style","background","action","formaction","xmlns"],vulnerableTags=["script","iframe","object","embed","meta","base","style","canvas","link","marquee","applet","frame","frameset"],xssKillah=(e={})=>(t,s)=>{{const t=Object.hasOwn(e,"xssDocReset")?e.xssDocReset:globalDefaults.xssDocReset;if(sandboxes.size===t){for(const e of sandboxes){e.deref().remove()}sandboxes.clear()}}const a=document.createTreeWalker(xssDoc.body,NodeFilter.SHOW_ELEMENT),o={},l=[];let n;const r=document.createElement("div");xssDoc.body.appendChild(r),r.innerHTML=t;const c=new WeakRef(r);sandboxes.add(c);const i=s?.allowTags||e?.allowTags||globalDefaults.allowTags,u=s?.allowTagRules||e?.allowTagRules||globalDefaults.allowTagRules;for(const e of u)o[e]=!0;for(vulnerableTags.filter((e=>!i.includes(e))).forEach((e=>{r.querySelectorAll(e).forEach((e=>e.remove()))}));n=a.nextNode();){const e=l.indexOf(n);if(e>-1){l.splice(e,1);continue}const t=n.nodeType;if(1===t)for(const e of n.attributes){const s=e.value,a=e.name;if("input"===t&&"type"===a&&"text/javascript"===s&&o.inputTypeJS&&n.remove(),"form"===t&&"action"===a&&o.formAction){const e=n.querySelectorAll("*");l.push(...e),n.remove()}a.startsWith("on")&&!o.onEvents?n.removeAttribute(a):e.value=sanitizeUrl(s);const r=a.startsWith('"')&&!o.strayDoubleQuotes,c=a.startsWith("'")&&!o.straySingleQuote,i=a.startsWith("`")&&!o.strayBackTicks;(r||c||i)&&n.removeAttribute(a),(vulnerableAttributes.includes(a)||a.startsWith("data"))&&(e.value=sanitizeUrl(s))}}return r.childNodes};xssKillah.makeAlive=(e,t=document)=>{const s=t.querySelectorAll(e),a=s[0];if(s.length>1||"SCRIPT"!==a.tagName)return void console.warn("makeAlive requires a unique selector");const o=document.createElement("script");o.textContent=a.textContent,a.replaceWith(o)};
+    window.xssKillah = xssKillah;
+})();
+
+function xssFilter(str) {
+    const sanitize = xssKillah();
+    const safeNodes = sanitize(str);
+    return Array.from(safeNodes).map(n => n.outerHTML || n.textContent).join('');
+}
