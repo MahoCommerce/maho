@@ -29,7 +29,7 @@
     <catalogsearch_result_index translate="label">
         <label>Quick Search Form</label>
         <reference name="root">
-            <action method="setTemplate"><template>page/3columns.phtml</template></action>
+            <action method="setTemplate"><template>page/2columns-left.phtml</template></action>
         </reference>
         <reference name="left_first">
             <block type="catalogsearch/layer" name="catalogsearch.leftnav" after="currency" template="catalog/layer/view.phtml">
