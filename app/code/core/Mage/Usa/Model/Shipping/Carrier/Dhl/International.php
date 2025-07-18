@@ -813,16 +813,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      */
     protected function _getQuotesFromServer($request)
     {
-        $client = new Varien_Http_Client();
-        $client->setUri((string) $this->getConfigData('gateway_url'));
-        $client->setConfig([
-            'maxredirects' => 0,
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'max_redirects' => 0,
             'timeout' => 30,
-            'verifypeer' => $this->getConfigFlag('verify_peer'),
-            'verifyhost' => 2,
+            'verify_peer' => $this->getConfigFlag('verify_peer'),
+            'verify_host' => true,
         ]);
-        $client->setRawData(mb_convert_encoding($request, 'UTF-8', 'ISO-8859-1'));
-        return $client->request(Varien_Http_Client::POST)->getBody();
+
+        $response = $client->request('POST', (string) $this->getConfigData('gateway_url'), [
+            'body' => mb_convert_encoding($request, 'UTF-8', 'ISO-8859-1'),
+        ]);
+        return $response->getContent();
     }
 
     /**
@@ -1382,16 +1383,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($responseBody === null) {
             $debugData = ['request' => $request];
             try {
-                $client = new Varien_Http_Client();
-                $client->setUri((string) $this->getConfigData('gateway_url'));
-                $client->setConfig([
-                    'maxredirects' => 0,
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
                     'timeout' => 30,
-                    'verifypeer' => $this->getConfigFlag('verify_peer'),
-                    'verifyhost' => 2,
+                    'verify_peer' => $this->getConfigFlag('verify_peer'),
+                    'verify_host' => true,
                 ]);
-                $client->setRawData($request);
-                $responseBody = $client->request(Varien_Http_Client::POST)->getBody();
+
+                $response = $client->request('POST', (string) $this->getConfigData('gateway_url'), [
+                    'body' => $request,
+                ]);
+                $responseBody = $response->getContent();
                 $debugData['result'] = $responseBody;
                 $this->_setCachedQuotes($request, $responseBody);
             } catch (Exception $e) {
@@ -1582,16 +1584,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($responseBody === null) {
             $debugData = ['request' => $request];
             try {
-                $client = new Varien_Http_Client();
-                $client->setUri((string) $this->getConfigData('gateway_url'));
-                $client->setConfig([
-                    'maxredirects' => 0,
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
                     'timeout' => 30,
-                    'verifypeer' => $this->getConfigFlag('verify_peer'),
-                    'verifyhost' => 2,
+                    'verify_peer' => $this->getConfigFlag('verify_peer'),
+                    'verify_host' => true,
                 ]);
-                $client->setRawData($request);
-                $responseBody = $client->request(Varien_Http_Client::POST)->getBody();
+
+                $response = $client->request('POST', (string) $this->getConfigData('gateway_url'), [
+                    'body' => $request,
+                ]);
+                $responseBody = $response->getContent();
                 $debugData['result'] = $responseBody;
                 $this->_setCachedQuotes($request, $responseBody);
             } catch (Exception $e) {
