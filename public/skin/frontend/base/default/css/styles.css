@@ -1525,7 +1525,6 @@ span.weee {
 .no-touch .product-img-box .product-image:not(.zoom-available):hover {
   position: relative;
   display: block;
-  border: 1px solid var(--maho-color-border-light);
 }
 
 @media only screen and (max-width: 770px) {
@@ -1652,16 +1651,11 @@ span.weee {
  * Toolbar
  */
 .toolbar {
-  margin-bottom: 15px;
-  border-bottom: 1px solid var(--maho-color-border);
-  border-top: 1px solid var(--maho-color-border);
-  background: var(--maho-color-background-alt);
-  padding: 3px 10px;
   justify-content: space-between;
   align-items: center;
   display: flex;
   width: 100%;
-  min-height: 40px;
+  margin-bottom: 1.5rem;
 }
 
 .pager-no-toolbar {
@@ -3287,9 +3281,9 @@ p.product-name a:hover {
 .products-grid {
   display: grid;
   grid-auto-rows: 1fr;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  grid-gap: 10px;
-  grid-row-gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 0.5rem;
+  grid-row-gap: 2rem;
   text-align: center;
 }
 
@@ -3314,12 +3308,13 @@ p.product-name a:hover {
 
 .products-grid > li > div:first-child ul {
   position: absolute;
-  bottom: 0;
+  top: 0.5rem;
   right: 0;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
   background-color: var(--maho-color-background);
+  padding: 0.1rem;
 }
 .products-grid > li > div:first-child ul a {
   font-size: 0;
@@ -3333,9 +3328,11 @@ p.product-name a:hover {
   width: 28px;
   height: 28px;
   stroke-width: 1;
+  transition: transform 0.2s ease, stroke-width 0.2s ease;
 }
 .products-grid > li > div:first-child ul a:hover svg {
   stroke-width: 1.3;
+  transform: scale(1.1);
 }
 
 .products-grid .product-image img {
@@ -3406,16 +3403,6 @@ p.product-name a:hover {
 }
 .products-grid .product-image.loading:before, .products-grid .product-image.loading:after {
   display: block;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .products-grid > li > div:first-child ul:has(.link-wishlist, link-compare) {
-    display: none;
-  }
-
-  .products-grid > li:hover > div:first-child ul:has(.link-wishlist, link-compare) {
-    display: block;
-  }
 }
 
 /* ============================================ *
@@ -3558,13 +3545,11 @@ p.product-name a:hover {
 /* ============================================ *
  * Catalog - List
  * ============================================ */
-.category-image {
-  border: 1px solid var(--maho-color-border);
-}
 .category-image img {
   width: 100%;
   max-width: 100%;
   height: auto;
+  border-radius: 0.5rem;
 }
 .category-image img:hidden {
   display: none;
