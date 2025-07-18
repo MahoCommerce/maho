@@ -211,18 +211,20 @@ function stripTags(str, removeScriptAndStyleContent = false) {
 
 /**
  * Alternative to PrototypeJS's string.stripScripts() method that also removes event attributes
+ * @param {string} str - HTML string to sanitize
+ * @param {boolean} returnDOM - If true, returns sanitized DOM nodes; if false, returns HTML string
  */
-function xssFilter(str) {
+function xssFilter(str, returnDOM = false) {
     const doc = new DOMParser().parseFromString(str, 'text/html');
     doc.querySelectorAll('script').forEach(script => script.remove());
     doc.querySelectorAll('*').forEach((el) => {
-        for (const attr of el.attributes) {
+        for (const attr of [...el.attributes]) {
             if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
-                el.attributes.removeNamedItem(attr.name);
+                el.removeAttribute(attr.name);
             }
         }
     });
-    return doc.body.innerHTML;
+    return returnDOM ? doc.body.childNodes : doc.body.innerHTML;
 }
 
 /**
