@@ -3293,6 +3293,15 @@ p.product-name a:hover {
   gap: 0.5rem;
   width: 100%;
   max-width: 210px;
+  border-radius: 0.5rem;
+  box-shadow: rgba(0, 0, 0, 0.04) 0px 8px 24px;
+  transition: transform 0.3s ease;
+}
+.products-grid > li:has(.ratings,.actions) {
+    padding-bottom: 0.5rem;
+}
+.products-grid > li:hover {
+  transform: scale(1.05);
 }
 .products-grid > li .product-info {
   flex-grow: 1;
@@ -3360,7 +3369,7 @@ p.product-name a:hover {
 .products-grid .price-box {
   color: var(--maho-color-text-secondary);
   font-size: 0.813rem;
-  margin: 0 0 5px;
+  margin: 0;
 }
 
 .add-to-links {
