@@ -3646,7 +3646,7 @@ p.product-name a:hover {
   #offcanvas .actions {
       padding: 10px 20px 10px 20px;
   }
-  .sidebar.col-left {
+  .sidebar.col-left:not(:has(.offcanvas-trigger)) {
     display: none;
   }
   .block-layered-nav .block-content {
@@ -4334,8 +4334,16 @@ label.offcanvas-trigger {
 
 /* Mobile styles - simplified */
 @media only screen and (max-width: 770px) {
-  .filters-trigger {
+  button.filters-trigger {
     display: block;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0;
+    background: none;
+    color: var(--maho-color-text-primary);
+  }
+  button.filters-trigger:hover {
+    color: var(--maho-color-primary);
   }
   /* Hide radio inputs and tab list */
   .product-collateral .tab-selector {
