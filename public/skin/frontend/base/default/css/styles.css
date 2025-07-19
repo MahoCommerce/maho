@@ -4216,6 +4216,7 @@ body:not(.catalog-product-view) .add-to-links a {
 }
 
 .offcanvas-title {
+  text-transform: uppercase;
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
