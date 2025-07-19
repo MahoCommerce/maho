@@ -3751,10 +3751,6 @@ p.product-name a:hover {
   display: none;
   float: left;
 }
-.product-view .product-shop .product-name .h1 {
-  float: left;
-  margin-bottom: 5px;
-}
 .product-view .product-shop .extra-info {
   float: left;
   padding-right: 15px;
