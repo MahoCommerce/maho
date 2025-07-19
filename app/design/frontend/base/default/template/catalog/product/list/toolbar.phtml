@@ -13,7 +13,7 @@
 ?>
 <?php if($this->getCollection()->getSize()): ?>
 <div class="toolbar">
-    <button class="offcanvas-trigger filters-trigger" data-offcanvas-target=".block-layered-nav" data-offcanvas-title="<?= $this->__('Filters') ?>"><?= $this->getIconSvg('adjustments-horizontal') ?></button>
+    <button class="offcanvas-trigger filters-trigger" data-offcanvas-target=".block-layered-nav" data-offcanvas-title="<?= $this->__('Filters') ?>" aria-label="<?= $this->__('Filters') ?>"><?= $this->getIconSvg('adjustments-horizontal') ?></button>
     <?php if( $this->isExpanded() ): ?>
         <div class="sorter">
             <div class="sort-by">
