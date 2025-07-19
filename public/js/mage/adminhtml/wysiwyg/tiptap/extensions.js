@@ -548,7 +548,7 @@ export const MahoSlideshow = Node.create({
                     </div>
                     <div class="slide-controls">
                         <input type="text" class="slide-alt" placeholder="Alt text">
-                        <input type="url" class="slide-href" placeholder="Link URL (optional)">
+                        <input type="text" class="slide-href" placeholder="Link URL (optional)">
                     </div>
                     <button type="button" class="remove-slide" title="Remove slide">
                         ${editor.options.wysiwygSetup.getIcon('trash')}
@@ -662,15 +662,6 @@ export const MahoSlideshow = Node.create({
                     onOk: (dialog) => {
                         if (slides.length === 0) {
                             alert(editor.options.wysiwygSetup.translate('Please add at least one image to the slideshow'));
-                            return false;
-                        }
-
-                        // Check validity of link URLs
-                        let isValid = true;
-                        for (const input of dialog.querySelectorAll('.slide-href')) {
-                            isValid &&= input.checkValidity();
-                        }
-                        if (!isValid) {
                             return false;
                         }
 
