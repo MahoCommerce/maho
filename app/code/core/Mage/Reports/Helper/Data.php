@@ -30,6 +30,16 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfigFlag(self::XML_PATH_REPORTS_ENABLED);
     }
 
+    public function isRecentlyViewedEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('catalog/recently_products/enabled_recently_viewed');
+    }
+
+    public function isProductCompareEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('catalog/recently_products/enabled_product_compare');
+    }
+
     /**
      * Retrieve array of intervals
      *

@@ -110,7 +110,7 @@ class Mage_Reports_Model_Event_Observer
      */
     public function catalogProductView(Varien_Event_Observer $observer)
     {
-        if (!$this->_enabledReports) {
+        if (!$this->_enabledReports || !Mage::helper('reports')->isRecentlyViewedEnabled()) {
             return $this;
         }
 
@@ -165,7 +165,7 @@ class Mage_Reports_Model_Event_Observer
      */
     public function catalogProductCompareAddProduct(Varien_Event_Observer $observer)
     {
-        if (!$this->_enabledReports) {
+        if (!$this->_enabledReports || !Mage::helper('reports')->isProductCompareEnabled()) {
             return $this;
         }
 

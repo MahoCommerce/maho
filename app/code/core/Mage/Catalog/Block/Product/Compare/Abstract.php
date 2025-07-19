@@ -31,4 +31,9 @@ abstract class Mage_Catalog_Block_Product_Compare_Abstract extends Mage_Catalog_
     {
         return $this->_getHelper()->getRemoveUrl($item);
     }
+
+    public function isEnabled(): bool
+    {
+        return $this->_getHelper()->isEnabled();
+    }
 }

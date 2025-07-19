@@ -283,6 +283,14 @@ class Mage_Catalog_Helper_Product_Compare extends Mage_Core_Helper_Url
     }
 
     /**
+     * Check if product compare functionality is enabled
+     */
+    public function isEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('catalog/recently_products/enabled_product_compare');
+    }
+
+    /**
      * Set is allow used flat (for collection)
      *
      * @param bool $flag
@@ -325,6 +333,10 @@ class Mage_Catalog_Helper_Product_Compare extends Mage_Core_Helper_Url
      */
     public function getAddUrlCustom($product, $addFormKey = true)
     {
+        if (!$this->isEnabled()) {
+            return '';
+        }
+
         if ($this->_logCondition->isVisitorLogEnabled() || $this->_customerSession->isLoggedIn()) {
             return $this->_getUrl('catalog/product_compare/add', $this->_getUrlCustomParams($product, $addFormKey));
         }

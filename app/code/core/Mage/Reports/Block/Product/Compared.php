@@ -48,6 +48,9 @@ class Mage_Reports_Block_Product_Compared extends Mage_Reports_Block_Product_Abs
     #[\Override]
     protected function _toHtml()
     {
+        if (!Mage::helper('reports')->isProductCompareEnabled()) {
+            return '';
+        }
         if (!$this->getCount()) {
             return '';
         }
