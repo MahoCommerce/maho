@@ -77,7 +77,6 @@
     },
     "suggest": {
         "fballiano/openmage-cssjs-minify": "Minification support for CSS/JS",
-        "fballiano/openmage-defer-javascripts": "Move all javascripts to the end of all pages, preserving execution order",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution",
         "laminas/laminas-json-server": "Install this package if you need JSON-RPC web services functionality",
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
