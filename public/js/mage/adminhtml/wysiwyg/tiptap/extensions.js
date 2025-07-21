@@ -749,3 +749,71 @@ export const MahoDiv = Node.create({
         };
     },
 });
+
+/**
+ * Maho Fullscreen Extension
+ * 
+ * Provides fullscreen editing capabilities for the Tiptap editor
+ */
+export const MahoFullscreen = Extension.create({
+    name: 'mahoFullscreen',
+
+    addOptions() {
+        return {
+            enabled: true,
+        };
+    },
+
+    addStorage() {
+        return {
+            isFullscreen: false,
+        };
+    },
+
+    addCommands() {
+        return {
+            toggleFullscreen: () => ({ editor, commands }) => {
+                const wysiwygSetup = editor.options.wysiwygSetup;
+                if (!wysiwygSetup) return false;
+
+                const wrapper = wysiwygSetup.wrapper;
+                if (!wrapper) return false;
+
+                const isFullscreen = wrapper.classList.contains('tiptap-fullscreen');
+                
+                if (isFullscreen) {
+                    // Exit fullscreen
+                    wrapper.classList.remove('tiptap-fullscreen');
+                    document.body.style.overflow = '';
+                    this.storage.isFullscreen = false;
+                } else {
+                    // Enter fullscreen
+                    wrapper.classList.add('tiptap-fullscreen');
+                    document.body.style.overflow = 'hidden';
+                    this.storage.isFullscreen = true;
+                }
+
+                // Update button state, icon, and title
+                const button = wrapper.querySelector('button[data-command="toggleFullscreen"]');
+                if (button) {
+                    button.classList.toggle('is-active', !isFullscreen);
+                    const wysiwygSetup = editor.options.wysiwygSetup;
+                    if (!isFullscreen) {
+                        // Entering fullscreen - show minimize icon
+                        button.innerHTML = wysiwygSetup.getIcon('fullscreen-minimize');
+                        button.title = wysiwygSetup.translate('Exit Fullscreen');
+                    } else {
+                        // Exiting fullscreen - show maximize icon
+                        button.innerHTML = wysiwygSetup.getIcon('fullscreen-maximize');
+                        button.title = wysiwygSetup.translate('Fullscreen');
+                    }
+                }
+
+                // Focus back to editor
+                editor.commands.focus();
+                
+                return true;
+            },
+        };
+    },
+});
