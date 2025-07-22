@@ -74,6 +74,10 @@
     align-self: center;
 }
 
+.tiptap-toolbar .toolbar-spacer {
+    flex: 1;
+}
+
 .tiptap-toolbar select {
     border: none;
     border-radius: 0.375rem;
@@ -750,4 +754,48 @@
 
 .slideshow-editor .add-slide-btn:hover {
     background: #1d4ed8;
+}
+
+/* Fullscreen styles */
+.tiptap-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    background: white !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.tiptap-fullscreen .tiptap-toolbar {
+    flex-shrink: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+}
+
+.tiptap-fullscreen .ProseMirror {
+    flex: 1 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 2rem !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+}
+
+.tiptap-fullscreen .ProseMirror:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
