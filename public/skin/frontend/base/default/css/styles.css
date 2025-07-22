@@ -1525,7 +1525,6 @@ span.weee {
 .no-touch .product-img-box .product-image:not(.zoom-available):hover {
   position: relative;
   display: block;
-  border: 1px solid var(--maho-color-border-light);
 }
 
 @media only screen and (max-width: 770px) {
@@ -1652,16 +1651,11 @@ span.weee {
  * Toolbar
  */
 .toolbar {
-  margin-bottom: 15px;
-  border-bottom: 1px solid var(--maho-color-border);
-  border-top: 1px solid var(--maho-color-border);
-  background: var(--maho-color-background-alt);
-  padding: 3px 10px;
   justify-content: space-between;
   align-items: center;
   display: flex;
   width: 100%;
-  min-height: 40px;
+  margin-bottom: 1.5rem;
 }
 
 .pager-no-toolbar {
@@ -3287,9 +3281,9 @@ p.product-name a:hover {
 .products-grid {
   display: grid;
   grid-auto-rows: 1fr;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  grid-gap: 10px;
-  grid-row-gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 0.5rem;
+  grid-row-gap: 2rem;
   text-align: center;
 }
 
@@ -3299,6 +3293,15 @@ p.product-name a:hover {
   gap: 0.5rem;
   width: 100%;
   max-width: 210px;
+  border-radius: 0.5rem;
+  box-shadow: rgba(0, 0, 0, 0.04) 0px 8px 24px;
+  transition: transform 0.3s ease;
+}
+.products-grid > li:has(.ratings,.actions) {
+    padding-bottom: 0.5rem;
+}
+.products-grid > li:hover {
+  transform: scale(1.05);
 }
 .products-grid > li .product-info {
   flex-grow: 1;
@@ -3314,12 +3317,13 @@ p.product-name a:hover {
 
 .products-grid > li > div:first-child ul {
   position: absolute;
-  bottom: 0;
+  top: 0.5rem;
   right: 0;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
   background-color: var(--maho-color-background);
+  padding: 0.1rem;
 }
 .products-grid > li > div:first-child ul a {
   font-size: 0;
@@ -3333,9 +3337,11 @@ p.product-name a:hover {
   width: 28px;
   height: 28px;
   stroke-width: 1;
+  transition: transform 0.2s ease, stroke-width 0.2s ease;
 }
 .products-grid > li > div:first-child ul a:hover svg {
   stroke-width: 1.3;
+  transform: scale(1.1);
 }
 
 .products-grid .product-image img {
@@ -3363,7 +3369,7 @@ p.product-name a:hover {
 .products-grid .price-box {
   color: var(--maho-color-text-secondary);
   font-size: 0.813rem;
-  margin: 0 0 5px;
+  margin: 0;
 }
 
 .add-to-links {
@@ -3406,16 +3412,6 @@ p.product-name a:hover {
 }
 .products-grid .product-image.loading:before, .products-grid .product-image.loading:after {
   display: block;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .products-grid > li > div:first-child ul:has(.link-wishlist, link-compare) {
-    display: none;
-  }
-
-  .products-grid > li:hover > div:first-child ul:has(.link-wishlist, link-compare) {
-    display: block;
-  }
 }
 
 /* ============================================ *
@@ -3558,13 +3554,11 @@ p.product-name a:hover {
 /* ============================================ *
  * Catalog - List
  * ============================================ */
-.category-image {
-  border: 1px solid var(--maho-color-border);
-}
 .category-image img {
   width: 100%;
   max-width: 100%;
   height: auto;
+  border-radius: 0.5rem;
 }
 .category-image img:hidden {
   display: none;
@@ -3652,7 +3646,7 @@ p.product-name a:hover {
   #offcanvas .actions {
       padding: 10px 20px 10px 20px;
   }
-  .sidebar.col-left {
+  .sidebar.col-left:not(:has(.offcanvas-trigger)) {
     display: none;
   }
   .block-layered-nav .block-content {
@@ -3756,10 +3750,6 @@ p.product-name a:hover {
 .product-view .product-shop .product-name {
   display: none;
   float: left;
-}
-.product-view .product-shop .product-name .h1 {
-  float: left;
-  margin-bottom: 5px;
 }
 .product-view .product-shop .extra-info {
   float: left;
@@ -4226,6 +4216,7 @@ body:not(.catalog-product-view) .add-to-links a {
 }
 
 .offcanvas-title {
+  text-transform: uppercase;
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
@@ -4343,8 +4334,16 @@ label.offcanvas-trigger {
 
 /* Mobile styles - simplified */
 @media only screen and (max-width: 770px) {
-  .filters-trigger {
+  button.filters-trigger {
     display: block;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0;
+    background: none;
+    color: var(--maho-color-text-primary);
+  }
+  button.filters-trigger:hover {
+    color: var(--maho-color-primary);
   }
   /* Hide radio inputs and tab list */
   .product-collateral .tab-selector {
