@@ -222,9 +222,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                 case 'skin_js':   // skin/*/*.js
                 case 'js_css':    // js/*.css
                 case 'skin_css':  // skin/*/*.css
-                    // Use minified URL if available, otherwise use original name
-                    $itemName = $item['minified_url'] ?? $item['name'];
-                    $lines[$if][$item['type']][$params][$itemName] = $itemName;
+                    $lines[$if][$item['type']][$params][$item['name']] = $item;
                     break;
                 default:
                     $this->_separateOtherHtmlHeadElements($lines, $if, $item['type'], $params, $item['name'], $item);
@@ -288,10 +286,10 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
 
         // get static files from the js folder, no need in lookups
         foreach ($staticItems as $params => $rows) {
-            foreach ($rows as $name) {
-                // Check if it's already a full URL (minified file)
-                if (str_starts_with($name, 'http://') || str_starts_with($name, 'https://') || str_starts_with($name, '//')) {
-                    $items[$params][] = $name;
+            foreach ($rows as $name => $itemData) {
+                // If we have a minified URL, use it directly
+                if (is_array($itemData) && isset($itemData['minified_url'])) {
+                    $items[$params][] = $itemData['minified_url'];
                 } else {
                     $items[$params][] = $baseJsUrl . $name;
                 }
@@ -300,10 +298,10 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
 
         // lookup each file basing on current theme configuration
         foreach ($skinItems as $params => $rows) {
-            foreach ($rows as $name) {
-                // Check if it's already a full URL (minified file)
-                if (str_starts_with($name, 'http://') || str_starts_with($name, 'https://') || str_starts_with($name, '//')) {
-                    $items[$params][] = $name;
+            foreach ($rows as $name => $itemData) {
+                // If we have a minified URL, use it directly
+                if (is_array($itemData) && isset($itemData['minified_url'])) {
+                    $items[$params][] = $itemData['minified_url'];
                 } else {
                     $items[$params][] = $designPackage->getSkinUrl($name, []);
                 }
