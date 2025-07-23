@@ -1231,25 +1231,12 @@
                                 <hsts_enabled>1</hsts_enabled>
                             </depends>
                         </hsts_max_age>
-                        <hsts_include_subdomains translate="label comment">
-                            <label>HSTS Include Subdomains</label>
-                            <comment>Apply HSTS to all subdomains</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>8</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends>
-                                <hsts_enabled>1</hsts_enabled>
-                            </depends>
-                        </hsts_include_subdomains>
                         <content_type_options_enabled translate="label comment">
                             <label>Enable X-Content-Type-Options</label>
                             <comment>Prevents browsers from MIME-sniffing responses. Recommended for security.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>9</sort_order>
+                            <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -1259,7 +1246,7 @@
                             <comment>Enables browser XSS filtering. Note: Modern browsers prefer CSP over this header.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -1269,7 +1256,7 @@
                             <comment>Controls how much referrer information is sent with requests</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>core/system_config_source_security_referrer_policy</source_model>
-                            <sort_order>11</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>

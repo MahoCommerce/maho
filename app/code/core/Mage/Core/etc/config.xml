@@ -437,9 +437,8 @@
                 <use_form_key>1</use_form_key>
                 <domain_policy_backend>2</domain_policy_backend>
                 <domain_policy_frontend>2</domain_policy_frontend>
-                <hsts_enabled>1</hsts_enabled>
+                <hsts_enabled>0</hsts_enabled>
                 <hsts_max_age>31536000</hsts_max_age>
-                <hsts_include_subdomains>1</hsts_include_subdomains>
                 <content_type_options_enabled>1</content_type_options_enabled>
                 <xss_protection_enabled>1</xss_protection_enabled>
                 <referrer_policy>strict-origin-when-cross-origin</referrer_policy>

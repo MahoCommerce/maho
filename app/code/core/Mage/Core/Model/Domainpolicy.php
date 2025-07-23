@@ -37,7 +37,6 @@ class Mage_Core_Model_Domainpolicy
      */
     public const XML_HSTS_ENABLED = 'admin/security/hsts_enabled';
     public const XML_HSTS_MAX_AGE = 'admin/security/hsts_max_age';
-    public const XML_HSTS_INCLUDE_SUBDOMAINS = 'admin/security/hsts_include_subdomains';
     public const XML_CONTENT_TYPE_OPTIONS = 'admin/security/content_type_options_enabled';
     public const XML_XSS_PROTECTION = 'admin/security/xss_protection_enabled';
     public const XML_REFERRER_POLICY = 'admin/security/referrer_policy';
@@ -163,16 +162,7 @@ class Mage_Core_Model_Domainpolicy
 
         $header = "max-age={$maxAge}";
 
-        if ($this->isHstsSubdomainsEnabled()) {
-            $header .= '; includeSubDomains';
-        }
-
         return $header;
-    }
-
-    public function isHstsSubdomainsEnabled(): bool
-    {
-        return (bool) $this->_store->getConfig(self::XML_HSTS_INCLUDE_SUBDOMAINS);
     }
 
     public function isContentTypeOptionsEnabled(): bool
