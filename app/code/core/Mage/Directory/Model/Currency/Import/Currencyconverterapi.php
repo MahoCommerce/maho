@@ -123,7 +123,13 @@ class Mage_Directory_Model_Currency_Import_Currencyconverterapi extends Mage_Dir
                         ->__('We can\'t retrieve a rate from %s for %s.', $url, $currencyTo);
                     $data[$currencyFrom][$currencyTo] = null;
                 } else {
-                    $data[$currencyFrom][$currencyTo] = $this->_numberFormat((float) $response[$currenciesCombined]);
+                    if (isset($response[$currenciesCombined])) {
+                        $data[$currencyFrom][$currencyTo] = $this->_numberFormat((float) $response[$currenciesCombined]);
+                    } else {
+                        $this->_messages[] = Mage::helper('directory')
+                            ->__('We can\'t retrieve a rate from %s for %s.', $url, $currencyTo);
+                        $data[$currencyFrom][$currencyTo] = null;
+                    }
                 }
             }
         }
