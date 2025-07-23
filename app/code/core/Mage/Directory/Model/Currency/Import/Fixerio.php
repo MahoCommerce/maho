@@ -170,7 +170,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
      */
     protected function _validateResponse(array $response, $baseCurrency)
     {
-        if (!$response['success']) {
+        if (!isset($response['success']) || !$response['success']) {
             $errorCodes = [
                 101 => Mage::helper('directory')
                     ->__('No API Key was specified or an invalid API Key was specified.'),
@@ -188,7 +188,8 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
                     ->__('One or more invalid symbols have been specified.'),
             ];
 
-            $this->_messages[] = $errorCodes[$response['error']['code']] ?? Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
+            $errorCode = $response['error']['code'] ?? null;
+            $this->_messages[] = $errorCodes[$errorCode] ?? Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
 
             return false;
         }
