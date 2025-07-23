@@ -19615,18 +19615,6 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Currency/Filter.php
 
 		-
-			message: '#^Method Mage_Directory_Model_Currency_Import_Webservicex\:\:_convert\(\) should return float\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Import/Webservicex.php
-
-		-
-			message: '#^Property Mage_Directory_Model_Currency_Import_Webservicex\:\:\$_url has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Import/Webservicex.php
-
-		-
 			message: '#^Method Mage_Directory_Model_Observer\:\:scheduledUpdateCurrencyRates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -23905,12 +23893,6 @@ parameters:
 			message: '#^Parameter \#1 \$amount of method Mage_Sales_Model_Order_Payment\:\:registerCaptureNotification\(\) expects float, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			message: '#^Parameter \#2 \$url of method Zend_Http_Client_Adapter_Interface\:\:write\(\) expects Zend_Uri_Http, string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Paypal/Model/Ipn.php
 
 		-
@@ -33233,12 +33215,6 @@ parameters:
 			identifier: booleanOr.leftAlwaysFalse
 			count: 1
 			path: lib/Varien/Filter/Template/Tokenizer/Variable.php
-
-		-
-			message: '#^Method Varien_Http_Client\:\:_trySetCurlAdapter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Http/Client.php
 
 		-
 			message: '#^Method Varien_Io_Abstract\:\:allowedPath\(\) has no return type specified\.$#'
