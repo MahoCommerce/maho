@@ -70,7 +70,7 @@ html {
   /* Prevent tap highlight on iOS/Android */
   -webkit-text-size-adjust: 100%;
   /* Prevent automatic scaling on iOS */
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: stable;
   /* Reserve space for scrollbar to prevent layout shift */
 }
 
