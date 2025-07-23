@@ -5,7 +5,7 @@
  *
  * @package    MahoCLI
  * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://www.openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -172,7 +172,7 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Core_Model_Mysql4_Design' => 'Mage_Core_Model_Resource_Design',
             'Mage_Core_Model_Mysql4_Design_Collection' => 'Mage_Core_Model_Resource_Design_Collection',
             'Mage_Core_Model_Mysql4_Design_Package_Collection' => 'Mage_Core_Model_Resource_Design_Package_Collection',
-            'Mage_Core_Model_Mysql4_Design_Theme_Collection' => 'Varien_Directory_Collection',
+            'Mage_Core_Model_Mysql4_Design_Theme_Collection' => 'Mage_Core_Model_Resource_Design_Theme_Collection',
             'Mage_Core_Model_Mysql4_Email_Template' => 'Mage_Core_Model_Resource_Email_Template',
             'Mage_Core_Model_Mysql4_Email_Template_Collection' => 'Mage_Core_Model_Resource_Email_Template_Collection',
             'Mage_Core_Model_Mysql4_File_Storage_Abstract' => 'Mage_Core_Model_Resource_File_Storage_Abstract',
