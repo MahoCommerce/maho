@@ -543,6 +543,10 @@
                 <schedule><cron_expr>30 3 * * *</cron_expr></schedule>
                 <run><model>core/session::cleanExpiredSessions</model></run>
             </core_session_clean>
+            <core_minify_cleanup>
+                <schedule><cron_expr>0 4 * * *</cron_expr></schedule>
+                <run><model>core/observer::cleanOldMinifiedFiles</model></run>
+            </core_minify_cleanup>
         </jobs>
     </crontab>
 </config>

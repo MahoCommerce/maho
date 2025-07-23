@@ -37,5 +37,13 @@
             <?= Mage::helper('adminhtml')->__('Pregenerated configurable swatches image files.') ?>
         </td>
     </tr>
+    <tr>
+        <td class="scope-label">
+            <button onclick="setLocation('<?= $this->getCleanMinifiedFilesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Minified CSS/JS Cache') ?></span></button>
+        </td>
+        <td class="scope-label">
+            <?= Mage::helper('adminhtml')->__('Minified CSS and JavaScript files.') ?>
+        </td>
+    </tr>
 </table>
 <?= $this->getChildHtml() ?>

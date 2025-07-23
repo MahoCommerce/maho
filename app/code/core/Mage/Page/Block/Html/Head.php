@@ -137,12 +137,45 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         if ($type === 'skin_css' && empty($params)) {
             $params = 'media="all"';
         }
+
+        // Apply minification if enabled and store result separately (frontend only)
+        $minifyHelper = Mage::helper('core/minify');
+        $minifiedUrl = null;
+        $isAdmin = Mage::app()->getStore()->isAdmin();
+
+        if (!$isAdmin && $type === 'skin_css' && $minifyHelper->isCssMinificationEnabled()) {
+            $skinUrl = Mage::getDesign()->getSkinUrl($name, []);
+            $minifiedUrl = $minifyHelper->minifyCss($skinUrl);
+            if ($minifiedUrl === $skinUrl) {
+                $minifiedUrl = null; // No minification applied
+            }
+        } elseif (!$isAdmin && $type === 'js' && $minifyHelper->isJsMinificationEnabled()) {
+            $jsUrl = Mage::getBaseUrl('js') . $name;
+            $minifiedUrl = $minifyHelper->minifyJs($jsUrl);
+            if ($minifiedUrl === $jsUrl) {
+                $minifiedUrl = null; // No minification applied
+            }
+        } elseif (!$isAdmin && $type === 'skin_js' && $minifyHelper->isJsMinificationEnabled()) {
+            $skinJsUrl = Mage::getDesign()->getSkinUrl($name, []);
+            $minifiedUrl = $minifyHelper->minifyJs($skinJsUrl);
+            if ($minifiedUrl === $skinJsUrl) {
+                $minifiedUrl = null; // No minification applied
+            }
+        } elseif (!$isAdmin && $type === 'js_css' && $minifyHelper->isCssMinificationEnabled()) {
+            $jsCssUrl = Mage::getBaseUrl('js') . $name;
+            $minifiedUrl = $minifyHelper->minifyCss($jsCssUrl);
+            if ($minifiedUrl === $jsCssUrl) {
+                $minifiedUrl = null; // No minification applied
+            }
+        }
+
         $this->_data['items'][$type . '/' . $name] = [
             'type' => $type,
             'name' => $name,
             'params' => $params,
             'if' => $if,
             'cond' => $cond,
+            'minified_url' => $minifiedUrl, // Store minified URL separately
         ];
 
         // that is the standard behaviour
@@ -189,7 +222,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                 case 'skin_js':   // skin/*/*.js
                 case 'js_css':    // js/*.css
                 case 'skin_css':  // skin/*/*.css
-                    $lines[$if][$item['type']][$params][$item['name']] = $item['name'];
+                    // Use minified URL if available, otherwise use original name
+                    $itemName = $item['minified_url'] ?? $item['name'];
+                    $lines[$if][$item['type']][$params][$itemName] = $itemName;
                     break;
                 default:
                     $this->_separateOtherHtmlHeadElements($lines, $if, $item['type'], $params, $item['name'], $item);
@@ -254,14 +289,24 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         // get static files from the js folder, no need in lookups
         foreach ($staticItems as $params => $rows) {
             foreach ($rows as $name) {
-                $items[$params][] = $baseJsUrl . $name;
+                // Check if it's already a full URL (minified file)
+                if (str_starts_with($name, 'http://') || str_starts_with($name, 'https://') || str_starts_with($name, '//')) {
+                    $items[$params][] = $name;
+                } else {
+                    $items[$params][] = $baseJsUrl . $name;
+                }
             }
         }
 
         // lookup each file basing on current theme configuration
         foreach ($skinItems as $params => $rows) {
             foreach ($rows as $name) {
-                $items[$params][] = $designPackage->getSkinUrl($name, []);
+                // Check if it's already a full URL (minified file)
+                if (str_starts_with($name, 'http://') || str_starts_with($name, 'https://') || str_starts_with($name, '//')) {
+                    $items[$params][] = $name;
+                } else {
+                    $items[$params][] = $designPackage->getSkinUrl($name, []);
+                }
             }
         }
 
