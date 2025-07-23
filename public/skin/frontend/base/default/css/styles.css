@@ -1131,7 +1131,7 @@ a.button:hover {
  * Messages
  */
 .success {
-  color: var(--maho-color-succes);
+  color: var(--maho-color-success);
 }
 
 .error {
@@ -1203,7 +1203,7 @@ a.button:hover {
 
 .messages .success-msg li {
   color: black;
-  border-left: 5px solid var(--maho-color-succes);
+  border-left: 5px solid var(--maho-color-success);
   background-color: var(--maho-color-background-alt);
 }
 
@@ -1215,7 +1215,7 @@ a.button:hover {
   display: block;
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
-  border-left: 6px solid var(--maho-color-succes);
+  border-left: 6px solid var(--maho-color-success);
   border-right: none;
 }
 
