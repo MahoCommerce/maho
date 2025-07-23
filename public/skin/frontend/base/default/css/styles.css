@@ -70,7 +70,7 @@ html {
   /* Prevent tap highlight on iOS/Android */
   -webkit-text-size-adjust: 100%;
   /* Prevent automatic scaling on iOS */
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: stable;
   /* Reserve space for scrollbar to prevent layout shift */
 }
 
@@ -2038,7 +2038,9 @@ span.required em {
  * Select
  */
 select {
-  font-size: 0.875rem;
+  font-size: 0.938rem;
+  padding: 0 8px;
+  height: 30px;
 }
 
 select + select {
@@ -2059,7 +2061,7 @@ textarea {
   box-sizing: border-box;
   width: 100%;
   max-width: 450px;
-  padding: 5px;
+  padding: 8px;
 }
 
 /* -------------------------------------------- *
@@ -2165,7 +2167,6 @@ p.required,
   margin-bottom: 10px;
 }
 .form-list select {
-  margin-top: 4px;
   width: 365px;
   max-width: 100%;
 }
