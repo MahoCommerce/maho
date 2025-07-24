@@ -120,7 +120,6 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
      * @param array $data
      * @return $this
      * @throws Mage_Core_Exception
-     * @throws Zend_Http_Client_Exception
      */
     protected function _checkHostsInfo($data)
     {
@@ -139,15 +138,14 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
      * @param bool $secure
      * @return $this
      * @throws Mage_Core_Exception
-     * @throws Zend_Http_Client_Exception
      */
     protected function _checkUrl($url, $secure = false)
     {
         $prefix = $secure ? 'install/wizard/checkSecureHost/' : 'install/wizard/checkHost/';
         try {
-            $client = new Varien_Http_Client($url . 'index.php/' . $prefix);
-            $response = $client->request('GET');
-            $body = $response->getBody();
+            $client = \Symfony\Component\HttpClient\HttpClient::create();
+            $response = $client->request('GET', $url . 'index.php/' . $prefix);
+            $body = $response->getContent();
         } catch (Exception $e) {
             $this->_getInstaller()->getDataModel()
                 ->addError(Mage::helper('install')->__('The URL "%s" is not accessible.', $url));

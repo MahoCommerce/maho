@@ -81,6 +81,14 @@ async function mahoFetch(url, options) {
     }
 }
 
+function mahoOnReady(callback) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', callback);
+    } else {
+        callback();
+    }
+}
+
 function popWin(url,win,para) {
     var win = window.open(url,win,para);
     win.focus();
@@ -184,6 +192,7 @@ function escapeHtml(str, escapeQuotes = false) {
  * Alternative to PrototypeJS's string.unescapeHTML() method
  */
 function unescapeHtml(str) {
+    if (!str) return '';
     const doc = new DOMParser().parseFromString(str, 'text/html');
     return doc.documentElement.textContent;
 }
@@ -191,26 +200,13 @@ function unescapeHtml(str) {
 /**
  * Alternative to PrototypeJS's string.stripTags() method
  */
-function stripTags(str) {
-    const div = document.createElement('div');
-    div.innerHTML = str;
-    return div.textContent;
-}
-
-/**
- * Alternative to PrototypeJS's string.stripScripts() method that also removes event attributes
- */
-function xssFilter(str) {
+function stripTags(str, removeScriptAndStyleContent = false) {
     const doc = new DOMParser().parseFromString(str, 'text/html');
-    doc.querySelectorAll('script').forEach(script => script.remove());
-    doc.querySelectorAll('*').forEach((el) => {
-        for (const attr of el.attributes) {
-            if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
-                el.attributes.removeNamedItem(attr.name);
-            }
-        }
-    });
-    return doc.body.innerHTML;
+    if (removeScriptAndStyleContent) {
+        doc.querySelectorAll('script').forEach(script => script.remove());
+        doc.querySelectorAll('style').forEach(style => style.remove());
+    }
+    return doc.body.textContent;
 }
 
 /**

@@ -26,10 +26,6 @@
 
 <?= $this->getCssJsHtml() ?>
 
-<?php if ($this->getCanLoadTinyMce()): // TinyMCE is broken when loaded through index.php?>
-<script type="text/javascript" src="<?= $this->getJsUrl() ?>tinymce/tinymce.min.js"></script>
-<?php endif ?>
-
 <script type="text/javascript">
     Fieldset.addToPrefix(<?= Mage::helper('adminhtml')->getCurrentUserId() ?>);
 </script>

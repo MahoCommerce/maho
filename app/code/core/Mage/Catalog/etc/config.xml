@@ -784,6 +784,7 @@
                 <flat_catalog_category>0</flat_catalog_category>
                 <default_sort_by>position</default_sort_by>
                 <parse_url_directives>1</parse_url_directives>
+                <enable_addtocart_in_product_listings>1</enable_addtocart_in_product_listings>
             </frontend>
             <sitemap>
                 <tree_mode>0</tree_mode>

@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -71,19 +72,28 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
         $setupObject = new Varien_Object();
 
         $setupObject->setData([
-            'newFolderPrompt'                 => $this->helper('cms')->__('New Folder Name:'),
-            'deleteFolderConfirmationMessage' => $this->helper('cms')->__('Are you sure you want to delete current folder?'),
-            'deleteFileConfirmationMessage'   => $this->helper('cms')->__('Are you sure you want to delete the selected file?'),
             'targetElementId' => $this->getTargetElementId(),
+            'indexUrl'        => $this->getMediaLibraryUrl(),
             'contentsUrl'     => $this->getContentsUrl(),
             'onInsertUrl'     => $this->getOnInsertUrl(),
             'newFolderUrl'    => $this->getNewfolderUrl(),
             'deleteFolderUrl' => $this->getDeletefolderUrl(),
             'deleteFilesUrl'  => $this->getDeleteFilesUrl(),
             'headerText'      => $this->getHeaderText(),
+            'canInsertImage'  => $this->getCanInsertImage(),
         ]);
 
         return Mage::helper('core')->jsonEncode($setupObject);
+    }
+
+    /**
+     * Main Media Library URL
+     *
+     * @return string
+     */
+    public function getMediaLibraryUrl()
+    {
+        return $this->getUrl('*/*/index');
     }
 
     /**
@@ -132,5 +142,14 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     public function getTargetElementId()
     {
         return $this->getRequest()->getParam('target_element_id');
+    }
+
+    /**
+     * Current alt text value passed from client
+     */
+    public function getAltText(): string
+    {
+        $alt = $this->getRequest()->getParam('alt');
+        return $alt ? Mage::helper('cms')->urlDecode($alt) : '';
     }
 }
