@@ -375,7 +375,7 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
             { type: 'button', title: 'Insert Variable', icon: 'variable', command: 'insertMahoVariable', enabled: this.config.add_variables},
             { type: 'spacer' },
-            { type: 'button', title: 'Fullscreen', icon: 'fullscreen-maximize', command: 'toggleFullscreen' },
+            { type: 'button', title: 'Fullscreen', icon: 'fullscreen-maximize', command: 'toggleFullscreen', enabled: !this.textarea.closest('dialog') },
         ]);
 
         toolbar.id = `${this.id}_toolbar`;
