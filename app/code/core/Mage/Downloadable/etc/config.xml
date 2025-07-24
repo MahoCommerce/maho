@@ -163,10 +163,10 @@
         </catalog>
         <pdf>
             <invoice>
-                <downloadable>sales/order_pdf_items_invoice_default</downloadable>
+                <downloadable>downloadable/sales_order_pdf_items_invoice</downloadable>
             </invoice>
             <creditmemo>
-                <downloadable>sales/order_pdf_items_creditmemo_default</downloadable>
+                <downloadable>downloadable/sales_order_pdf_items_creditmemo</downloadable>
             </creditmemo>
         </pdf>
     </global>

@@ -2,12 +2,12 @@
 /**
  * Maho
  *
- * @package    Mage_Sales
+ * @package    Mage_Bundle
  * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Sales_Model_Order_Pdf_Items_Invoice_Grouped $this */
+/** @var Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo $this */
 $item = $this->getItem();
 $order = $this->getOrder();
 ?>
@@ -15,13 +15,34 @@ $order = $this->getOrder();
 <td class="col-products">
     <div class="item-name"><?php echo $this->escapeHtml($this->getItemName()) ?></div>
 
-    <?php if ($children = $this->getChildrenItems()): ?>
-    <div class="grouped-children">
-        <?php foreach ($children as $child): ?>
-        <div class="child-item">
-            <?php echo $this->escapeHtml($child->getName()) ?>
-            (<?php echo $this->__('Qty') ?>: <?php echo $child->getQtyOrdered() * 1 ?>)
+    <?php if ($bundleOptions = $this->getBundleOptions()): ?>
+    <div class="bundle-options">
+        <?php foreach ($bundleOptions as $option): ?>
+        <div class="bundle-option">
+            <strong><?php echo $this->escapeHtml($option['label']) ?></strong>
+            <?php if (isset($option['value']) && is_array($option['value'])): ?>
+                <?php foreach ($option['value'] as $value): ?>
+                <div class="option-value">
+                    <?php echo $this->escapeHtml($value['title']) ?>
+                    <?php if (isset($value['qty'])): ?>
+                        (<?php echo $this->__('Qty') ?>: <?php echo $value['qty'] * 1 ?>)
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($children = $this->getBundleChildren()): ?>
+    <div class="bundle-children">
+        <?php foreach ($children as $child): ?>
+        <?php if ($this->canShowPriceInfo($child)): ?>
+        <div class="child-item">
+            <?php echo $this->escapeHtml($this->getValueHtml($child)) ?>
+        </div>
+        <?php endif; ?>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>

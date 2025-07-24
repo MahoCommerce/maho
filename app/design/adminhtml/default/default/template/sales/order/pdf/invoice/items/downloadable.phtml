@@ -2,12 +2,12 @@
 /**
  * Maho
  *
- * @package    Mage_Sales
+ * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Sales_Model_Order_Pdf_Items_Invoice_Grouped $this */
+/** @var Mage_Downloadable_Model_Sales_Order_Pdf_Items_Invoice $this */
 $item = $this->getItem();
 $order = $this->getOrder();
 ?>
@@ -15,14 +15,18 @@ $order = $this->getOrder();
 <td class="col-products">
     <div class="item-name"><?php echo $this->escapeHtml($this->getItemName()) ?></div>
 
-    <?php if ($children = $this->getChildrenItems()): ?>
-    <div class="grouped-children">
-        <?php foreach ($children as $child): ?>
-        <div class="child-item">
-            <?php echo $this->escapeHtml($child->getName()) ?>
-            (<?php echo $this->__('Qty') ?>: <?php echo $child->getQtyOrdered() * 1 ?>)
+    <?php if ($this->hasPurchasedLinks()): ?>
+    <div class="downloadable-links">
+        <div class="links-title">
+            <strong><?php echo $this->escapeHtml($this->getLinksTitle()) ?></strong>
         </div>
-        <?php endforeach; ?>
+        <div class="links-list">
+            <?php foreach ($this->getPurchasedLinks() as $link): ?>
+            <div class="download-link">
+                <?php echo $this->escapeHtml($link['title']) ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
     </div>
     <?php endif; ?>
 
