@@ -1,0 +1,70 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Mage_Sales_Model_Order_Pdf_Items_Invoice_Grouped $this */
+$item = $this->getItem();
+$order = $this->getOrder();
+?>
+
+<td class="col-products">
+    <div class="item-name"><?php echo $this->escapeHtml($this->getItemName()) ?></div>
+
+    <?php if ($children = $this->getChildrenItems()): ?>
+    <div class="grouped-children">
+        <?php foreach ($children as $child): ?>
+        <div class="child-item">
+            <?php echo $this->escapeHtml($child->getName()) ?>
+            (<?php echo $this->__('Qty') ?>: <?php echo $child->getQtyOrdered() * 1 ?>)
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($options = $this->getItemOptions()): ?>
+    <div class="item-options">
+        <?php foreach ($options as $option): ?>
+        <div class="option">
+            <span class="option-label"><?php echo $this->escapeHtml($option['label']) ?>:</span>
+            <span class="option-value"><?php echo $this->escapeHtml($option['value']) ?></span>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+</td>
+
+<td class="col-sku text-right">
+    <?php echo $this->escapeHtml($this->getSku()) ?>
+</td>
+
+<td class="col-price text-right">
+    <?php $prices = $this->getItemPricesForDisplay() ?>
+    <?php foreach ($prices as $priceData): ?>
+        <?php if (isset($priceData['label'])): ?>
+        <div class="price-label"><?php echo $this->escapeHtml($priceData['label']) ?></div>
+        <?php endif; ?>
+        <div class="price-value"><?php echo $priceData['price'] ?></div>
+    <?php endforeach; ?>
+</td>
+
+<td class="col-qty text-right">
+    <?php echo $this->getItemQty() * 1 ?>
+</td>
+
+<td class="col-tax text-right">
+    <?php echo $this->formatPrice($this->getItemTax()) ?>
+</td>
+
+<td class="col-subtotal text-right">
+    <?php foreach ($prices as $priceData): ?>
+        <?php if (isset($priceData['label'])): ?>
+        <div class="subtotal-label"><?php echo $this->escapeHtml($priceData['label']) ?></div>
+        <?php endif; ?>
+        <div class="subtotal-value"><?php echo $priceData['subtotal'] ?></div>
+    <?php endforeach; ?>
+</td>
