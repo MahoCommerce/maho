@@ -232,6 +232,11 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     public function getImageUrlAction(): void
     {
         try {
+            // Validate CSRF token for POST requests
+            if ($this->getRequest()->isPost() && !$this->_validateFormKey()) {
+                throw new Exception('Invalid form key. Please refresh the page and try again.');
+            }
+
             $fileId = $this->getRequest()->getParam('file_id');
             $fileId = Mage::helper('cms/wysiwyg_images')->idDecode($fileId);
 
@@ -283,6 +288,11 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 throw new Exception('Wrong request method.');
             }
 
+            // Validate CSRF token
+            if (!$this->_validateFormKey()) {
+                throw new Exception('Invalid form key. Please refresh the page and try again.');
+            }
+
             $fileId = $this->getRequest()->getParam('file_id');
             $fileId = Mage::helper('cms/wysiwyg_images')->idDecode($fileId);
 
@@ -314,13 +324,13 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             // Get new filename from request or use original
             $newFilename = $this->getRequest()->getParam('new_filename');
             $originalPathInfo = pathinfo($originalFilePath);
-            
+
             // Determine target path
             if ($newFilename && $newFilename !== $originalPathInfo['basename']) {
                 // User changed the filename - save as new file
                 $newFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($newFilename);
                 $targetPath = $currentPath . DS . $newFilename;
-                
+
                 // Check if new filename already exists
                 if (file_exists($targetPath)) {
                     throw new Exception('A file with this name already exists.');

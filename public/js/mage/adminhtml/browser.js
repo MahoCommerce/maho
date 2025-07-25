@@ -404,6 +404,7 @@ class Mediabrowser {
                 body: new URLSearchParams({
                     file_id: fileId,
                     node: this.currentNode.id,
+                    form_key: this.getFormKey(),
                 }),
             });
             
@@ -413,7 +414,6 @@ class Mediabrowser {
                 throw new Error(response.message || 'Failed to get image URL');
             }
         } catch (error) {
-            console.warn('Failed to get image URL from server:', error);
             // Fallback to basic construction
             const baseUrl = window.location.origin;
             const mediaPath = '/media/wysiwyg';
@@ -586,12 +586,11 @@ class Mediabrowser {
 
     async saveEditedImage(fileId, editedImageObject) {
         try {
-            console.log('Save called with editedImageObject:', editedImageObject);
-            
             // Convert edited image to FormData
             const formData = new FormData();
             formData.append('file_id', fileId);
             formData.append('node', this.currentNode.id);
+            formData.append('form_key', this.getFormKey());
             
             // Extract filename from the edited image object or use default
             let filename = 'edited_image.png';
@@ -600,8 +599,6 @@ class Mediabrowser {
             } else if (editedImageObject.name) {
                 filename = editedImageObject.name;
             }
-            
-            console.log('Using filename:', filename);
             
             // Append filename for server processing
             formData.append('new_filename', filename);
@@ -654,6 +651,35 @@ class Mediabrowser {
         // Remove any editor-specific styles
         const editorStyles = document.querySelectorAll('style[data-editor-styles]');
         editorStyles.forEach(style => style.remove());
+    }
+
+    getFormKey() {
+        // Try multiple methods to get the form key
+        
+        // Method 1: Global variable
+        if (window.FORM_KEY) {
+            return window.FORM_KEY;
+        }
+        
+        // Method 2: Meta tag
+        const metaFormKey = document.querySelector('meta[name="form_key"]');
+        if (metaFormKey) {
+            return metaFormKey.getAttribute('content');
+        }
+        
+        // Method 3: Hidden input field
+        const inputFormKey = document.querySelector('input[name="form_key"]');
+        if (inputFormKey) {
+            return inputFormKey.value;
+        }
+        
+        // Method 4: From any existing form
+        const formKeyInput = document.querySelector('form input[name="form_key"]');
+        if (formKeyInput) {
+            return formKeyInput.value;
+        }
+        
+        return '';
     }
 
     preloadImage(url) {
