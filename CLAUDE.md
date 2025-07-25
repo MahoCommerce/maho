@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Maho is an open-source ecommerce platform forked from OpenMage, designed for medium-to-small on-premise projects. It's based on the Magento 1 architecture but modernized with PHP 8.2+ support and contemporary development tools.
+Maho is an open-source ecommerce platform forked from OpenMage, designed for medium-to-small on-premise projects. It's based on the Magento 1 architecture but modernized with PHP 8.3+ support and contemporary development tools.
 
 ## Essential Commands
 
 ### Code Quality & Standards
 ```bash
 # Code style (PER-CS2.0 standard)
-PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --dry-run --diff    # Check code style
-PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix                     # Fix code style
+vendor/bin/php-cs-fixer fix --dry-run --diff    # Check code style
+vendor/bin/php-cs-fixer fix                     # Fix code style
 
 # Static Analysis (PHPStan level 6)
 vendor/bin/phpstan analyze    # Run static analysis
@@ -33,20 +33,6 @@ vendor/bin/phpstan analyze    # Run static analysis
 ./maho index:list         # List all indexes
 ./maho index:reindex      # Reindex specific index
 ./maho index:reindex:all  # Reindex all indexes
-```
-
-### Admin & Customer Management
-```bash
-./maho admin:user:list                          # List admin users
-./maho admin:user:create                        # Create admin user
-./maho admin:user:changepassword <username>     # Change admin password
-./maho customer:list                            # List customers
-./maho customer:create                          # Create customer
-```
-
-### Installation
-```bash
-./maho install            # Install Maho (non interactive)
 ```
 
 ## Architecture Overview
@@ -114,7 +100,7 @@ Observers are configured in module's `config.xml`.
 ## Development Guidelines
 
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
-- When you write Javascript, never use prototypejs or jquery, only vanilla's
+- When you write Javascript, never use prototypejs or jquery, only the most modern vanillajs
 - If you're integrating new tools/libraries, always use their latest available version
 - Update headers of the PHP files, adding the current year for the copyright Maho line
 - Before committing, ensure all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in the corresponding CSV files in `app/locale/en_US/`
@@ -123,7 +109,7 @@ Observers are configured in module's `config.xml`.
 - If you've to create a new module, use the `app/code/core/Maho/` namespace 
 - Declare module in `app/etc/modules/`
 - Follow existing module patterns for consistency
-- Add strict typing to all new code and use modern PHP8.2+ features
+- Add strict typing to all new code and use modern PHP8.3+ features
 
 ### Modifying Existing Features
 - Do not increment module's version number in module's `config.xml`
@@ -151,3 +137,8 @@ While there's no dedicated test suite, ensure code quality through:
 - PHP-CS-Fixer for code standards
 - Manual testing of features
 - GitHub Actions CI for automated checks
+
+## Git Commit Rules
+- **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
+- **NEVER** mention Claude, AI, or assistant in commit messages
+- Keep commits professional and focused only on code changes

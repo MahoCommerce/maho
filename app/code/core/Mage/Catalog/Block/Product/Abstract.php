@@ -271,7 +271,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
     public function getReviewsSummaryHtml(
         Mage_Catalog_Model_Product $product,
         $templateType = false,
-        $displayIfNoReviews = false
+        $displayIfNoReviews = false,
     ) {
         if ($this->_initReviewsHelperBlock()) {
             return $this->_reviewsHelperBlock->getSummaryHtml($product, $templateType, $displayIfNoReviews);

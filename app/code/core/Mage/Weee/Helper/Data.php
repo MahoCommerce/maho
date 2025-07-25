@@ -222,7 +222,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         $shipping = null,
         $billing = null,
         $website = null,
-        $calculateTaxes = false
+        $calculateTaxes = false,
     ) {
         return Mage::getSingleton('weee/tax')
             ->getProductWeeeAttributes($product, $shipping, $billing, $website, $calculateTaxes);
@@ -302,7 +302,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         $shipping = null,
         $billing = null,
         $website = null,
-        $calculateTaxes = false
+        $calculateTaxes = false,
     ) {
         if ($this->isEnabled()) {
             return $this->getProductWeeeAttributes(

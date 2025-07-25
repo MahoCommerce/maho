@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,7 +39,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     /**
      * HTTP client
      *
-     * @var Varien_Http_Client
+     * @var \Symfony\Contracts\HttpClient\HttpClientInterface
      */
     protected $_httpClient;
 
@@ -48,7 +48,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
      */
     public function __construct()
     {
-        $this->_httpClient = new Varien_Http_Client();
+        $this->_httpClient = \Symfony\Component\HttpClient\HttpClient::create();
     }
 
     #[\Override]
@@ -147,11 +147,10 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     {
         $response = [];
         try {
-            $jsonResponse = $this->_httpClient
-                ->setUri($url)
-                ->setConfig(['timeout' => Mage::getStoreConfig(self::XML_PATH_FIXERIO_TIMEOUT)])
-                ->request('GET')
-                ->getBody();
+            $httpResponse = $this->_httpClient->request('GET', $url, [
+                'timeout' => Mage::getStoreConfig(self::XML_PATH_FIXERIO_TIMEOUT),
+            ]);
+            $jsonResponse = $httpResponse->getContent();
 
             $response = json_decode($jsonResponse, true);
         } catch (Exception $e) {
@@ -171,7 +170,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
      */
     protected function _validateResponse(array $response, $baseCurrency)
     {
-        if (!$response['success']) {
+        if (!isset($response['success']) || !$response['success']) {
             $errorCodes = [
                 101 => Mage::helper('directory')
                     ->__('No API Key was specified or an invalid API Key was specified.'),
@@ -189,7 +188,8 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
                     ->__('One or more invalid symbols have been specified.'),
             ];
 
-            $this->_messages[] = $errorCodes[$response['error']['code']] ?? Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
+            $errorCode = $response['error']['code'] ?? null;
+            $this->_messages[] = $errorCodes[$errorCode] ?? Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
 
             return false;
         }

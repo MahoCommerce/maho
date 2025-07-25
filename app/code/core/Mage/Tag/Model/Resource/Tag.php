@@ -6,7 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -109,8 +109,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Getting base popularity per store view for specified tag
      *
-     * @deprecated after 1.4.0.0
-     *
      * @param int $tagId
      * @return array
      */
@@ -130,8 +128,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
 
     /**
      * Get aggregation data per store view
-     *
-     * @deprecated after 1.4.0.0
      *
      * @param int $tagId
      * @return array
@@ -202,8 +198,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Get global aggregation data for row with store_id = 0
      *
-     * @deprecated after 1.4.0.0
-     *
      * @param int $tagId
      * @return array
      */
@@ -264,8 +258,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Getting statistics data into buffer.
      * Replacing our buffer array with new statistics and incoming data.
-     *
-     * @deprecated after 1.4.0.0
      *
      * @param Mage_Tag_Model_Tag $object
      * @return Mage_Tag_Model_Tag
@@ -336,42 +328,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
             ['products' => new Zend_Db_Expr('products - 1')],
             ['tag_id IN (?)' => $tagsId],
         );
-    }
-
-    /**
-     * Add summary data to specified object
-     *
-     * @deprecated after 1.4.0.0
-     *
-     * @param Mage_Tag_Model_Tag $object
-     * @return Mage_Tag_Model_Tag
-     */
-    public function addSummary($object)
-    {
-        $read = $this->_getReadAdapter();
-        $select = $read->select()
-            ->from(['relation' => $this->getTable('tag/relation')], [])
-            ->joinLeft(
-                ['summary' => $this->getTable('tag/summary')],
-                'relation.tag_id = summary.tag_id AND relation.store_id = summary.store_id',
-                [
-                    'customers',
-                    'products',
-                    'popularity',
-                ],
-            )
-            ->where('relation.tag_id = :tag_id')
-            ->where('relation.store_id = :store_id')
-            ->limit(1);
-        $bind = [
-            'tag_id' => (int) $object->getId(),
-            'store_id' => (int) $object->getStoreId(),
-        ];
-        $row = $read->fetchRow($select, $bind);
-        if ($row) {
-            $object->addData($row);
-        }
-        return $object;
     }
 
     /**

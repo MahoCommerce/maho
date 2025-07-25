@@ -200,7 +200,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                         [$emailAddress, $name, $type] = $recipient;
                         $address = new Address($emailAddress, $name);
 
-                        match ($type) {
+                        match ((int) $type) {
                             self::EMAIL_TYPE_BCC => $email->addBcc($address),
                             self::EMAIL_TYPE_CC => $email->addCc($address),
                             default => $email->addTo($address),

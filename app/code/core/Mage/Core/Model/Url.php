@@ -982,6 +982,7 @@ class Mage_Core_Model_Url extends Varien_Object
         }
 
         $url = $this->getRouteUrl($routePath, $routeParams);
+
         /**
          * Apply query params, need call after getRouteUrl for rewrite _current values
          */
@@ -1009,6 +1010,8 @@ class Mage_Core_Model_Url extends Varien_Object
         if ($this->getFragment()) {
             $url .= '#' . $this->getFragment();
         }
+
+        $url = Mage::helper('core/url')->addOrRemoveTrailingSlash($url);
 
         return $this->escape($url);
     }

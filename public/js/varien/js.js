@@ -56,7 +56,8 @@ async function mahoFetch(url, options) {
 
         if (typeof result === 'object' && result !== null) {
             if (result.error) {
-                throw new MahoError(result.message ?? result.error);
+                const message = result.message ?? result.error;
+                throw new MahoError(typeof message === 'string' ? message : 'An error occurred.');
             } else if (result.ajaxExpired && result.ajaxRedirect) {
                 setLocation(result.ajaxRedirect);
                 await new Promise((resolve) => {});
@@ -77,6 +78,14 @@ async function mahoFetch(url, options) {
             hideLoader();
         }
         throw error;
+    }
+}
+
+function mahoOnReady(callback) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', callback);
+    } else {
+        callback();
     }
 }
 
@@ -122,6 +131,53 @@ function generateRandomString(length) {
 }
 
 /**
+ * Set Varien type route params, i.e. /id/1/
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setRouteParams(url, params = {}) {
+    url = new URL(url);
+
+    const noTrailingSlash = !url.pathname.endsWith('/');
+    if (noTrailingSlash) {
+        url.pathname += '/';
+    }
+    for (const [ key, val ] of Object.entries(params)) {
+        const regex = new RegExp(String.raw`\/${key}\/(.*?)\/`);
+        if (val === null || val === false) {
+            url.pathname = url.pathname.replace(regex, '/');
+        } else if (url.pathname.match(regex)) {
+            url.pathname = url.pathname.replace(regex, `/${key}/${val}/`);
+        } else {
+            url.pathname += `${key}/${val}/`;
+        }
+    }
+    if (noTrailingSlash) {
+        url.pathname = url.pathname.slice(0, -1);
+    }
+    return url.toString();
+}
+
+/**
+ * Set query params, i.e. ?id=1
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setQueryParams(url, params = {}) {
+    url = new URL(url);
+    for (const [ key, val ] of Object.entries(params)) {
+        if (val === null || val === false) {
+            url.searchParams.delete(key);
+        } else {
+            url.searchParams.set(key, val);
+        }
+    }
+    return url.toString();
+}
+
+/**
  * Alternative to PrototypeJS's string.escapeHTML() method
  */
 function escapeHtml(str, escapeQuotes = false) {
@@ -136,6 +192,7 @@ function escapeHtml(str, escapeQuotes = false) {
  * Alternative to PrototypeJS's string.unescapeHTML() method
  */
 function unescapeHtml(str) {
+    if (!str) return '';
     const doc = new DOMParser().parseFromString(str, 'text/html');
     return doc.documentElement.textContent;
 }
@@ -143,26 +200,13 @@ function unescapeHtml(str) {
 /**
  * Alternative to PrototypeJS's string.stripTags() method
  */
-function stripTags(str) {
-    const div = document.createElement('div');
-    div.innerHTML = str;
-    return div.textContent;
-}
-
-/**
- * Alternative to PrototypeJS's string.stripScripts() method that also removes event attributes
- */
-function xssFilter(str) {
+function stripTags(str, removeScriptAndStyleContent = false) {
     const doc = new DOMParser().parseFromString(str, 'text/html');
-    doc.querySelectorAll('script').forEach(script => script.remove());
-    doc.querySelectorAll('*').forEach((el) => {
-        for (const attr of el.attributes) {
-            if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
-                el.attributes.removeNamedItem(attr.name);
-            }
-        }
-    });
-    return doc.body.innerHTML;
+    if (removeScriptAndStyleContent) {
+        doc.querySelectorAll('script').forEach(script => script.remove());
+        doc.querySelectorAll('style').forEach(style => style.remove());
+    }
+    return doc.body.textContent;
 }
 
 /**

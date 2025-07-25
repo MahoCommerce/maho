@@ -14,7 +14,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
 {
     public const DIRECTORY_NAME_REGEXP = '/^[a-z0-9\-\_]+$/si';
     public const THUMBS_DIRECTORY_NAME = '.thumbs';
-    public const THUMB_PLACEHOLDER_PATH_SUFFIX = 'images/placeholder/thumbnail.jpg';
+    public const THUMB_PLACEHOLDER_PATH_SUFFIX = 'images/wysiwyg/placeholder-image.svg';
 
     /**
      * Config object
@@ -123,7 +123,10 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
 
                 // generate thumbnail "on the fly" if it does not exists
                 if (!$thumbUrl) {
-                    $thumbUrl = Mage::getSingleton('adminhtml/url')->getUrl('*/*/thumbnail', ['file' => $item->getId()]);
+                    $thumbUrl = Mage::getSingleton('adminhtml/url')->getUrl('*/*/thumbnail', [
+                        'file' => $item->getId(),
+                        'node' => $helper->convertPathToId($path),
+                    ]);
                 }
 
                 $size = @getimagesize($item->getFilename());
@@ -132,7 +135,9 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
                     $item->setWidth($size[0]);
                     $item->setHeight($size[1]);
                 }
-            } else {
+            }
+
+            if (empty($thumbUrl)) {
                 $thumbUrl = Mage::getDesign()->getSkinBaseUrl() . self::THUMB_PLACEHOLDER_PATH_SUFFIX;
             }
 
@@ -384,10 +389,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      */
     public function resizeOnTheFly($filename)
     {
-        $path = $this->getSession()->getCurrentPath();
-        if (!$path) {
-            $path = $this->getHelper()->getCurrentPath();
-        }
+        $path = $this->getHelper()->getCurrentPath();
         return $this->resizeFile($path . DS . $filename);
     }
 

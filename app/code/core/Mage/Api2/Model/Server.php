@@ -5,7 +5,7 @@
  *
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -87,6 +87,11 @@ class Mage_Api2_Model_Server
             if ($response->isException()) {
                 throw new Mage_Api2_Exception('Unhandled simple errors.', self::HTTP_INTERNAL_ERROR);
             }
+        } catch (Mage_Api2_Exception $e) {
+            if ($e->shouldLog()) {
+                Mage::logException($e);
+            }
+            $this->_renderException($e, $renderer, $response);
         } catch (Exception $e) {
             Mage::logException($e);
             $this->_renderException($e, $renderer, $response);
@@ -191,7 +196,7 @@ class Mage_Api2_Model_Server
     protected function _dispatch(
         Mage_Api2_Model_Request $request,
         Mage_Api2_Model_Response $response,
-        Mage_Api2_Model_Auth_User_Abstract $apiUser
+        Mage_Api2_Model_Auth_User_Abstract $apiUser,
     ) {
         /** @var Mage_Api2_Model_Dispatcher $dispatcher */
         $dispatcher = Mage::getModel('api2/dispatcher');
@@ -219,7 +224,7 @@ class Mage_Api2_Model_Server
     protected function _renderException(
         Exception $exception,
         Mage_Api2_Model_Renderer_Interface $renderer,
-        Mage_Api2_Model_Response $response
+        Mage_Api2_Model_Response $response,
     ) {
         if ($exception instanceof Mage_Api2_Exception && $exception->getCode()) {
             $httpCode = $exception->getCode();

@@ -132,6 +132,15 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </parse_url_directives>
+                        <enable_addtocart_in_product_listings translate="label comment">
+                            <label>Enable Add to cart Button in product listings</label>
+                            <comment>Controls display of Add to Cart and View Details buttons in category pages and product lists. When disabled, only product names and images will be clickable.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>210</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable_addtocart_in_product_listings>
                     </fields>
                 </frontend>
                 <sitemap translate="label">

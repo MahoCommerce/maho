@@ -214,6 +214,11 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             unset($data['general']['path']);
             $category->addData($data['general']);
 
+            // Add dynamic category data if present
+            if (isset($data['category']) && is_array($data['category'])) {
+                $category->addData($data['category']);
+            }
+
             // If new category, set path to parent and other defaults
             if (!$category->getId()) {
                 $parent = Mage::getModel('catalog/category')
@@ -250,6 +255,13 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             if (isset($data['category_products']) && !$category->getProductsReadonly()) {
                 $products = Mage::helper('core/string')->parseQueryStr($data['category_products']);
                 $category->setPostedProducts($products);
+            }
+
+            // Store dynamic category rule data for the observer to handle
+            if (isset($data['rule']) && is_array($data['rule'])) {
+                $category->setDynamicRuleData($data['rule']);
+            } elseif (isset($data['general']['rule']) && is_array($data['general']['rule'])) {
+                $category->setDynamicRuleData($data['general']['rule']);
             }
 
             Mage::dispatchEvent('catalog_category_prepare_save', [
@@ -465,6 +477,67 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if (isset($error)) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
         }
+    }
+
+    /**
+     * Generate condition HTML for dynamic category rules
+     */
+    public function newConditionHtmlAction(): void
+    {
+        $id = $this->getRequest()->getParam('id');
+        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
+        $type = $typeArr[0];
+
+        $model = Mage::getModel($type)
+            ->setId($id)
+            ->setType($type)
+            ->setRule(Mage::getModel('catalog/category_dynamic_rule'))
+            ->setPrefix('conditions');
+        if (!empty($typeArr[1])) {
+            // For rule conditions, set attribute using setData
+            if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+                $model->setData('attribute', $typeArr[1]);
+            }
+        }
+
+        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setJsFormObject($this->getRequest()->getParam('form'));
+            $html = $model->asHtmlRecursive();
+        } else {
+            $html = '';
+        }
+        $this->getResponse()->setBody($html);
+    }
+
+    /**
+     * Process dynamic category rules
+     */
+    public function processDynamicAction(): void
+    {
+        $categoryId = (int) $this->getRequest()->getParam('id');
+
+        try {
+            $category = Mage::getModel('catalog/category')->load($categoryId);
+
+            if (!$category->getId()) {
+                Mage::throwException(Mage::helper('catalog')->__('Category not found.'));
+            }
+
+            if (!$category->getIsDynamic()) {
+                Mage::throwException(Mage::helper('catalog')->__('Category is not dynamic.'));
+            }
+
+            $processor = Mage::getModel('catalog/category_dynamic_processor');
+            $processor->processDynamicCategory($category);
+
+            $this->_getSession()->addSuccess(
+                Mage::helper('catalog')->__('Dynamic category processed successfully.'),
+            );
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        }
+
+        $this->_redirect('*/*/edit', ['id' => $categoryId]);
     }
 
     /**

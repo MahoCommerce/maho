@@ -12,10 +12,6 @@
 // Primary Break Points
 // =============================================
 
-// These should be used with the bp (max-width, xx) mixin
-// where a min-width is used, remember to +1 to break correctly
-// If these are changed, they must also be updated in _var.scss
-
 var bp = {
     xsmall: 479,
     small: 599,
@@ -363,6 +359,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const d = document;
     const body = document.body;
 
+    const maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
+    const maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
+
     /* Wishlist Toggle Class */
     document.querySelectorAll('.change').forEach(element => {
         element.addEventListener('click', function(e) {
@@ -408,68 +407,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
-
-        document.querySelector('#header-cart .skip-link-close').addEventListener('click', (e) => {
-            const parent = e.target.closest('.skip-content');
-            const link = parent.parentElement.querySelector('.skip-link');
-            parent.classList.remove('skip-active');
-            link.classList.remove('skip-active');
-            e.preventDefault();
-        });
     }
-
 
     // ==============================================
     // Header Menus
     // ==============================================
 
-    MenuManager.init();
+    if (document.getElementById('header-nav')) {
+        MenuManager.init();
 
-    // Prevent sub menus from spilling out of the window.
-    function preventMenuSpill() {
-        const windowWidth = window.innerWidth;
-        document.querySelectorAll('ul.level0').forEach(ul => {
-            // Show it long enough to get info, then hide it.
-            ul.classList.add('position-test');
-            ul.classList.remove('spill');
+        // Prevent sub menus from spilling out of the window.
+        function preventMenuSpill() {
+            const windowWidth = window.innerWidth;
+            document.querySelectorAll('ul.level0').forEach(ul => {
+                // Show it long enough to get info, then hide it.
+                ul.classList.add('position-test');
+                ul.classList.remove('spill');
 
-            const width = ul.offsetWidth;
-            const offset = ul.getBoundingClientRect().left;
+                const width = ul.offsetWidth;
+                const offset = ul.getBoundingClientRect().left;
 
-            ul.classList.remove('position-test');
+                ul.classList.remove('position-test');
 
-            // Add the spill class if it will spill off the page.
-            if ((offset + width) > windowWidth) {
-                ul.classList.add('spill');
-            }
-        });
+                // Add the spill class if it will spill off the page.
+                if ((offset + width) > windowWidth) {
+                    ul.classList.add('spill');
+                }
+            });
+        }
+        preventMenuSpill();
+        window.addEventListener('delayed-resize', preventMenuSpill);
     }
-    preventMenuSpill();
-    window.addEventListener('delayed-resize', preventMenuSpill);
 
     // ==============================================
     // Menu State
     // ==============================================
 
-    const resetMenuState = (mq) => {
-        document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
-        document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
-        document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
+    if (document.querySelector('.page-header')) {
+        const resetMenuState = (mq) => {
+            document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
+            document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
+            document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
 
-        let minicart = document.getElementById('header-cart');
-        let mobileContainer = document.getElementById('minicart-container-mobile');
-        if (mq.matches) {
-            mobileContainer.appendChild(minicart);
-        } else {
-            document.querySelector('.skip-cart').after(minicart);
-        }
-    };
+            let minicart = document.getElementById('header-cart');
+            let mobileContainer = document.getElementById('minicart-container-mobile');
+            if (mq.matches) {
+                mobileContainer.appendChild(minicart);
+            } else {
+                document.querySelector('.skip-cart').after(minicart);
+            }
+        };
 
-    let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
-    let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
-    maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
-    resetMenuState(maxWidthMediumMediaQuery);
+        maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
+        resetMenuState(maxWidthMediumMediaQuery);
+    }
 
     // ==============================================
     // UI Pattern - Media Switcher
@@ -487,166 +478,121 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
     // ==============================================
-    // UI Pattern - ToggleSingle
+    // Offcanvas - Data-attribute driven, supports both left and right positioning
     // ==============================================
 
-    // Use this plugin to toggle the visibility of content based on a toggle link/element.
-    // This pattern differs from the accordion functionality in the Toggle pattern in that each toggle group acts
-    // independently of the others. It is named so as not to be confused with the Toggle pattern below
-    //
-    // This plugin requires a specific markup structure. The plugin expects a set of elements that it
-    // will use as the toggle link. It then hides all immediately following siblings and toggles the sibling's
-    // visibility when the toggle link is clicked.
-    //
-    // Example markup:
-    // <div class="block">
-    //     <div class="block-title">Trigger</div>
-    //     <div class="block-content">Content that should show when </div>
-    // </div>
-    //
-    // Options:
-    //     destruct: defaults to false, but if true, the plugin will remove itself, display content, and remove event handlers
+    function initOffcanvas() {
+        const offcanvas = document.getElementById('offcanvas');
+        if (!offcanvas) return;
 
-    function toggleSingle(elements, options = {}) {
-        const settings = {
-            destruct: false,
-            ...options
-        };
+        const mobileMediaQuery = window.matchMedia(`(max-width: ${bp.medium}px)`);
+        const movedElements = new Map(); // Store moved elements with their original parents
 
-        elements.forEach(element => {
-            // Remove event listener if it exists
-            if (element.toggleSingleHandler) {
-                element.removeEventListener('click', element.toggleSingleHandler);
-                element.toggleSingleHandler = null;
-            }
+        function setOffcanvasTitle(title) {
+            const titleElement = offcanvas.querySelector('.offcanvas-title');
+            if (titleElement) titleElement.textContent = title || '';
+        }
 
-            if (!settings.destruct) {
-                element.toggleSingleHandler = function() {
-                    this.classList.toggle('active');
-                    const nextElement = this.nextElementSibling;
-                    if (nextElement) {
-                        nextElement.classList.toggle('no-display');
-                    }
-                };
-                element.addEventListener('click', element.toggleSingleHandler);
-
-                // Hide the content if it's not already hidden
-                const nextElement = element.nextElementSibling;
-                if (nextElement && !nextElement.classList.contains('no-display')) {
-                    nextElement.classList.add('no-display');
-                }
+        function setOffcanvasPosition(position) {
+            if (position === 'right') {
+                offcanvas.classList.add('offcanvas-right');
             } else {
-                // Remove all classes that were added by this function
-                element.classList.remove('active');
-                const nextElement = element.nextElementSibling;
-                if (nextElement) {
-                    nextElement.classList.remove('no-display');
+                offcanvas.classList.remove('offcanvas-right');
+            }
+        }
+
+        function moveToOffcanvas(targetSelector) {
+            const offcanvasContent = offcanvas.querySelector('.offcanvas-content');
+            if (!offcanvasContent) return;
+
+            // Clear any existing content
+            offcanvasContent.innerHTML = '';
+
+            // Find target element(s)
+            const targets = document.querySelectorAll(targetSelector);
+            targets.forEach(target => {
+                if (target && target.parentNode !== offcanvasContent) {
+                    // Store original parent for restoration
+                    movedElements.set(target, target.parentNode);
+                    offcanvasContent.appendChild(target);
+                }
+            });
+        }
+
+        function restoreElements() {
+            movedElements.forEach((originalParent, element) => {
+                if (originalParent && element) {
+                    originalParent.appendChild(element);
+                }
+            });
+            movedElements.clear();
+        }
+
+        function openOffcanvas() {
+            offcanvas.style.transition = 'none';
+            offcanvas.offsetHeight;
+            offcanvas.style.transition = '';
+            offcanvas.showModal();
+        }
+
+        function closeOffcanvas() {
+            offcanvas.close();
+        }
+
+        // Handle trigger clicks
+        document.addEventListener('click', function(e) {
+            const trigger = e.target.closest('.offcanvas-trigger');
+            if (!trigger) return;
+
+            e.preventDefault();
+
+            const targetSelector = trigger.getAttribute('data-offcanvas-target');
+            const title = trigger.getAttribute('data-offcanvas-title') || trigger.textContent.trim();
+            const position = trigger.getAttribute('data-offcanvas-position') || 'left';
+            const allowDesktop = trigger.getAttribute('data-offcanvas-desktop') === 'true';
+
+            if (!allowDesktop && !mobileMediaQuery.matches) return;
+            if (!targetSelector) return;
+
+            // Store trigger on offcanvas element for other event handlers
+            offcanvas.currentTrigger = trigger;
+
+            setOffcanvasTitle(title);
+            setOffcanvasPosition(position);
+            moveToOffcanvas(targetSelector);
+            openOffcanvas();
+        });
+
+        // Handle close button
+        offcanvas.querySelector('.offcanvas-close')?.addEventListener('click', closeOffcanvas);
+
+        // Handle backdrop click
+        offcanvas.addEventListener('click', function(e) {
+            if (e.target === offcanvas) {
+                closeOffcanvas();
+            }
+        });
+
+        // Handle dialog close (ESC key or programmatic close)
+        offcanvas.addEventListener('close', function() {
+            restoreElements();
+            offcanvas.currentTrigger = null;
+        });
+
+        // Handle window resize
+        mobileMediaQuery.addEventListener('change', (mq) => {
+            if (!mq.matches) {
+                // Desktop: close offcanvas unless current trigger allows desktop
+                const allowDesktop = offcanvas.currentTrigger && offcanvas.currentTrigger.getAttribute('data-offcanvas-desktop') === 'true';
+                if (!allowDesktop) {
+                    closeOffcanvas();
                 }
             }
         });
     }
-
-    // ==============================================
-    // UI Pattern - Toggle Content (tabs and accordions in one setup)
-    // ==============================================
-
-    document.querySelectorAll('.toggle-content').forEach(wrapper => {
-        const hasTabs = wrapper.classList.contains('tabs');
-        const hasAccordion = wrapper.classList.contains('accordion');
-        const startOpen = wrapper.classList.contains('open');
-        const dl = wrapper.querySelector('dl');
-        if (!dl) return;
-        const dts = Array.from(dl.querySelectorAll(':scope > dt'));
-        const panes = Array.from(dl.querySelectorAll('dd'));
-        const groups = [dts, panes];
-
-        // Create a ul for tabs if necessary
-        let lis = [];
-        if (hasTabs) {
-            const ul = document.createElement('ul');
-            ul.className = 'toggle-tabs';
-            ul.role = 'tablist';
-            dts.forEach(dt => {
-                const li = document.createElement('li');
-                li.id = dt.id;
-                li.role = 'tab';
-                li.innerHTML = dt.innerHTML;
-                ul.appendChild(li);
-            });
-            dl.parentNode.insertBefore(ul, dl);
-            lis = Array.from(ul.children);
-            groups.push(lis);
-        }
-
-        // Add "last" classes
-        groups.forEach(group => {
-            group[group.length - 1].classList.add('last');
-        });
-
-        function toggleClasses(clickedItem, group) {
-            const index = group.indexOf(clickedItem);
-            groups.forEach(g => {
-                g.forEach(item => item.classList.remove('current'));
-                g[index].classList.add('current');
-            });
-        }
-
-        // Toggle on dt click
-        dts.forEach(dt => {
-            dt.addEventListener('click', () => {
-                if (dt.classList.contains('current') && wrapper.classList.contains('accordion-open')) {
-                    wrapper.classList.remove('accordion-open');
-                } else {
-                    wrapper.classList.add('accordion-open');
-                }
-                toggleClasses(dt, dts);
-            });
-        });
-
-        // Toggle on li click (for tabs)
-        if (hasTabs) {
-            lis.forEach(li => {
-                li.addEventListener('click', () => {
-                    toggleClasses(li, lis);
-                });
-            });
-            // Open the first tab
-            lis[0].click();
-        }
-
-        // Open the first accordion if desired
-        if (startOpen) {
-            dts[0].click();
-        }
-    });
-
-
-    // ==============================================
-    // Layered Navigation Block
-    // ==============================================
-
-    // On product list pages, we want to show the layered nav/category menu immediately above the product list.
-    // While it would make more sense to just move the .block-layered-nav block rather than .col-left-first
-    // (since other blocks can be inserted into left_first), it creates simpler code to move the entire
-    // .col-left-first block, so that is the approach we're taking
-    if (document.querySelector('.col-left-first > .block') && document.querySelector('div.category-products')) {
-        const repositionLayered = (mq) => {
-            const colLeftFirst = document.querySelector('.col-left-first');
-            const categoryProducts = document.querySelector('div.category-products');
-            const colMain = document.querySelector('.col-main');
-
-            if (mq.matches) {
-                categoryProducts.parentNode.insertBefore(colLeftFirst, categoryProducts);
-            } else {
-                colMain.parentNode.insertBefore(colLeftFirst, colMain);
-            }
-        };
-
-        const maxWidthMediumMediaQuery = window.matchMedia('(max-width: 770px)');
-        maxWidthMediumMediaQuery.addEventListener('change', repositionLayered);
-        repositionLayered(maxWidthMediumMediaQuery);
-    }
+    initOffcanvas();
 
     // ==============================================
     // 3 column layout
@@ -668,43 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxWidth1000MediaQuery = window.matchMedia('(max-width: 1000px)');
         maxWidth1000MediaQuery.addEventListener('change', reposition3rdColumn);
         reposition3rdColumn(maxWidth1000MediaQuery);
-    }
-
-    // ==============================================
-    // Block collapsing (on smaller viewports)
-    // ==============================================
-
-    const toggleElementsForMediumSize = (mq) => {
-        const elements = document.querySelectorAll(
-            '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
-            '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
-            '.sidebar:not(.col-left-first) .block .block-title'
-        );
-
-        if (mq.matches) {
-            toggleSingle(elements);
-        } else {
-            toggleSingle(elements, { destruct: true });
-        }
-    };
-    maxWidthMediumMediaQuery.addEventListener('change', toggleElementsForMediumSize);
-    toggleElementsForMediumSize(maxWidthMediumMediaQuery);
-
-    // ==============================================
-    // OPC - Progress Block
-    // ==============================================
-
-    if (document.body.classList.contains('checkout-onepage-index')) {
-        const repositionCheckoutProgress = (mq) => {
-            const checkoutProgressWrapper = document.getElementById('checkout-progress-wrapper');
-            if (mq.matches) {
-                document.getElementById('checkout-step-review').prepend(checkoutProgressWrapper);
-            } else {
-                document.querySelector('.col-right').prepend(checkoutProgressWrapper);
-            }
-        };
-        maxWidthLargeMediaQuery.addEventListener('change', repositionCheckoutProgress);
-        repositionCheckoutProgress(maxWidthLargeMediaQuery);
     }
 
     // ==============================================
@@ -885,30 +794,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Slideshow management
 document.addEventListener('DOMContentLoaded', () => {
-    const slideshowContainer = document.querySelector('.slideshow');
-    if (!slideshowContainer) {
-        return;
+    for (const slideshowContainer of document.querySelectorAll('.slideshow')) {
+        const slideshow = slideshowContainer.querySelector('ul');
+        const slides = slideshow.querySelectorAll('li');
+
+        const dotsContainer = document.createElement('div');
+        dotsContainer.className = 'slideshow-dots';
+        slides.forEach((_, index) => {
+            const dot = document.createElement('span');
+            dot.className = 'dot';
+            dot.addEventListener('click', () => slideshowContainer.scrollLeft = index * slides[0].offsetWidth);
+            dotsContainer.appendChild(dot);
+        });
+        slideshowContainer.insertAdjacentElement('afterend', dotsContainer);
+
+        const updateDots = () => {
+            const index = Math.round(slideshowContainer.scrollLeft / slides[0].offsetWidth);
+            dotsContainer.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('active', i === index));
+        };
+        slideshowContainer.addEventListener('scroll', updateDots);
+        updateDots();
     }
-
-    const slideshow = slideshowContainer.querySelector('ul');
-    const slides = slideshow.querySelectorAll('li');
-
-    const dotsContainer = document.createElement('div');
-    dotsContainer.className = 'slideshow-dots';
-    slides.forEach((_, index) => {
-        const dot = document.createElement('span');
-        dot.className = 'dot';
-        dot.addEventListener('click', () => slideshowContainer.scrollLeft = index * slides[0].offsetWidth);
-        dotsContainer.appendChild(dot);
-    });
-    slideshowContainer.insertAdjacentElement('afterend', dotsContainer);
-
-    const updateDots = () => {
-        const index = Math.round(slideshowContainer.scrollLeft / slides[0].offsetWidth);
-        dotsContainer.querySelectorAll('.dot').forEach((dot, i) =>
-            dot.classList.toggle('active', i === index)
-        );
-    };
-    slideshowContainer.addEventListener('scroll', updateDots);
-    updateDots();
 });

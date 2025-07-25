@@ -657,6 +657,25 @@
                         </exception_file>
                     </fields>
                 </log>
+                <js translate="label">
+                    <label>JavaScript Settings</label>
+                    <sort_order>50</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <defer_mode translate="label comment">
+                            <label>JavaScript Deferral Mode</label>
+                            <comment><![CDATA[<strong>Disabled:</strong> No deferral (default behavior)<br/><strong>Defer Only:</strong> Moves all script tags to the end of the page, improving initial render performance<br/><strong>Load on Intent:</strong> <strong style="color:red">Highly Experimental!</strong> Defers all scripts until user interaction (click, scroll, hover, etc.) - designed for pure vanilla JavaScript and may not work with PrototypeJS or jQuery]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>core/source_js_defer</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </defer_mode>
+                    </fields>
+                </js>
             </groups>
         </dev>
         <general translate="label" module="core">
@@ -908,6 +927,15 @@
                                 <set_return_path>2</set_return_path>
                             </depends>
                         </return_path_email>
+                        <region translate="label comment">
+                            <label>Region</label>
+                            <comment>Optional region for providers that support it (e.g. us-east-1 for AWS)</comment>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled separator=",">ses+smtp,ses+https,ses+api,azure+api,scaleway+smtp,scaleway+api,mailgun+smtp,mailgun+https,mailgun+api</enabled></depends>
+                        </region>
                     </fields>
                 </smtp>
                 <media_storage_configuration translate="label" module="core">
@@ -1177,9 +1205,62 @@
                             <sort_order>5</sort_order>
                             <source_model>adminhtml/system_config_source_security_domainpolicy</source_model>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
+                            <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </domain_policy_frontend>
+                        <hsts_enabled translate="label comment">
+                            <label>Enable HSTS (HTTP Strict Transport Security)</label>
+                            <comment>Forces browsers to use HTTPS. Only works on HTTPS connections.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </hsts_enabled>
+                        <hsts_max_age translate="label comment">
+                            <label>HSTS Max Age (seconds)</label>
+                            <comment>How long browsers should remember to use HTTPS. Default: 31536000 (1 year)</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <hsts_enabled>1</hsts_enabled>
+                            </depends>
+                        </hsts_max_age>
+                        <content_type_options_enabled translate="label comment">
+                            <label>Enable X-Content-Type-Options</label>
+                            <comment>Prevents browsers from MIME-sniffing responses. Recommended for security.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </content_type_options_enabled>
+                        <xss_protection_enabled translate="label comment">
+                            <label>Enable X-XSS-Protection</label>
+                            <comment>Enables browser XSS filtering. Note: Modern browsers prefer CSP over this header.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </xss_protection_enabled>
+                        <referrer_policy translate="label comment">
+                            <label>Referrer Policy</label>
+                            <comment>Controls how much referrer information is sent with requests</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>core/system_config_source_security_referrer_policy</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </referrer_policy>
                         <crate_admin_user_notification translate="label comment">
                             <label>New Admin User Create Notification</label>
                             <comment>This setting enable notification when new admin user created.</comment>
@@ -1246,6 +1327,16 @@
                             <show_in_store>0</show_in_store>
                             <comment>I.e. redirect from http://example.com/store/ to http://www.example.com/store/</comment>
                         </redirect_to_base>
+                        <trailing_slash_behavior translate="label comment">
+                            <label>Trailing Slash Behavior</label>
+                            <comment>Without this setting, a page could be accessible with both URLs: "example.com/category" and "example.com/category/". This creates duplicate content issues for SEO. Use this setting to automatically redirect to a canonical URL format.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_catalog_trailingslash</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </trailing_slash_behavior>
                     </fields>
                 </url>
                 <unsecure translate="label">

@@ -982,7 +982,7 @@ abstract class Mage_Core_Controller_Varien_Action
         $fileName,
         $content,
         $contentType = 'application/octet-stream',
-        $contentLength = null
+        $contentLength = null,
     ) {
         $session = Mage::getSingleton('admin/session');
         if ($session->isFirstPageAfterLogin()) {

@@ -159,7 +159,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
         bool $showTime = false,
-        bool $useTimezone = true
+        bool $useTimezone = true,
     ): string {
         if (!in_array($format, $this->_allowedFormats, true)) {
             return $date;
@@ -228,7 +228,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Decrypt data using application key
      */
-    public function decrypt(string $data): string
+    public function decrypt(?string $data): string
     {
         if (!Mage::isInstalled()) {
             return $data;
@@ -674,10 +674,12 @@ XML;
      * @param bool $cycleCheck Optional; whether or not to check for object recursion; off by default
      * @param  array $options Additional options used during encoding
      * @return string
+     * @throws JsonException
      */
     public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
     {
-        $json = Zend_Json::encode($valueToEncode, $cycleCheck, $options);
+        $json = json_encode($valueToEncode, JSON_THROW_ON_ERROR);
+
         /** @var Mage_Core_Model_Translate_Inline $inline */
         $inline = Mage::getSingleton('core/translate_inline');
         if ($inline->isAllowed()) {
@@ -696,30 +698,21 @@ XML;
      * switch added to prevent exceptions in json_decode
      *
      * @param string $encodedValue
-     * @param int $objectDecodeType
+     * @param bool $associative When true, JSON objects will be returned as associative arrays
      * @return mixed
-     * @throws Zend_Json_Exception
+     * @throws JsonException
      */
-    public function jsonDecode($encodedValue, $objectDecodeType = Zend_Json::TYPE_ARRAY)
+    public function jsonDecode($encodedValue, $associative = true)
     {
-        switch (true) {
-            case ($encodedValue === null):
-                $encodedValue = 'null';
-                break;
-            case ($encodedValue === true):
-                $encodedValue = 'true';
-                break;
-            case ($encodedValue === false):
-                $encodedValue = 'false';
-                break;
-            case ($encodedValue === ''):
-                $encodedValue = '""';
-                break;
-            default:
-                // do nothing
-        }
+        $encodedValue = match ($encodedValue) {
+            null => 'null',
+            true => 'true',
+            false => 'false',
+            '' => '""',
+            default => $encodedValue,
+        };
 
-        return Zend_Json::decode($encodedValue, $objectDecodeType);
+        return json_decode($encodedValue, $associative, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -943,7 +936,9 @@ XML;
         $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
-        return match ($emailTransport) {
+        $region = Mage::getStoreConfig('system/smtp/region');
+
+        $dsn = match ($emailTransport) {
             'smtp' => "$emailTransport://$user:$pass@$host:$port",
             'ses+smtp' => "$emailTransport://$user:$pass@default",
             'ses+https' => "$emailTransport://$user:$pass@default",
@@ -980,7 +975,13 @@ XML;
             'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
             'sweego+api' => "$emailTransport://$pass@default",
             'sendmail' => "$emailTransport://default",
-            default => ''
+            default => '',
         };
+
+        if ($region) {
+            $dsn .= "?region=$region";
+        }
+
+        return $dsn;
     }
 }
