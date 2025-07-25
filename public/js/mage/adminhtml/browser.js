@@ -586,21 +586,39 @@ class Mediabrowser {
 
     async saveEditedImage(fileId, editedImageObject) {
         try {
+            console.log('Save called with editedImageObject:', editedImageObject);
+            
             // Convert edited image to FormData
             const formData = new FormData();
             formData.append('file_id', fileId);
             formData.append('node', this.currentNode.id);
+            
+            // Extract filename from the edited image object or use default
+            let filename = 'edited_image.png';
+            if (editedImageObject.fullName) {
+                filename = editedImageObject.fullName;
+            } else if (editedImageObject.name) {
+                filename = editedImageObject.name;
+            }
+            
+            console.log('Using filename:', filename);
+            
+            // Append filename for server processing
+            formData.append('new_filename', filename);
             
             // Convert image to blob if it's a canvas or base64
             if (editedImageObject.canvas) {
                 const blob = await new Promise(resolve => {
                     editedImageObject.canvas.toBlob(resolve, 'image/png');
                 });
-                formData.append('edited_image', blob, 'edited_image.png');
+                formData.append('edited_image', blob, filename);
             } else if (editedImageObject.imageBase64) {
                 const response = await fetch(editedImageObject.imageBase64);
                 const blob = await response.blob();
-                formData.append('edited_image', blob, 'edited_image.png');
+                formData.append('edited_image', blob, filename);
+            } else if (editedImageObject.file) {
+                // If it's a file object directly
+                formData.append('edited_image', editedImageObject.file, filename);
             }
 
             // Save the edited image

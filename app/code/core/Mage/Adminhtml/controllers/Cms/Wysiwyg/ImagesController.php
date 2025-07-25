@@ -311,15 +311,28 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 throw new Exception('Invalid file path.');
             }
 
-            // Get original file info
-            $pathInfo = pathinfo($originalFilePath);
-            $originalExtension = strtolower($pathInfo['extension']);
+            // Get new filename from request or use original
+            $newFilename = $this->getRequest()->getParam('new_filename');
+            $originalPathInfo = pathinfo($originalFilePath);
+            
+            // Determine target path
+            if ($newFilename && $newFilename !== $originalPathInfo['basename']) {
+                // User changed the filename - save as new file
+                $newFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($newFilename);
+                $targetPath = $currentPath . DS . $newFilename;
+                
+                // Check if new filename already exists
+                if (file_exists($targetPath)) {
+                    throw new Exception('A file with this name already exists.');
+                }
+            } else {
+                // Same filename - replace original (create backup first)
+                $targetPath = $originalFilePath;
+                $backupPath = $originalPathInfo['dirname'] . DS . $originalPathInfo['filename'] . '_backup_' . time() . '.' . $originalPathInfo['extension'];
+                copy($originalFilePath, $backupPath);
+            }
 
-            // Create backup of original (optional)
-            $backupPath = $pathInfo['dirname'] . DS . $pathInfo['filename'] . '_backup_' . time() . '.' . $originalExtension;
-            copy($originalFilePath, $backupPath);
-
-            // Move uploaded edited image to replace original
+            // Move uploaded edited image
             $uploadedFile = $_FILES['edited_image']['tmp_name'];
 
             // Validate uploaded file is an image
@@ -328,8 +341,6 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 throw new Exception('Uploaded file is not a valid image.');
             }
 
-            // Keep original extension format if possible
-            $targetPath = $originalFilePath;
             if (!move_uploaded_file($uploadedFile, $targetPath)) {
                 throw new Exception('Failed to save edited image.');
             }
