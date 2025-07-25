@@ -63,6 +63,8 @@ class Mediabrowser {
         this.newFolderUrl = setup.newFolderUrl;
         this.deleteFolderUrl = setup.deleteFolderUrl;
         this.deleteFilesUrl = setup.deleteFilesUrl;
+        this.editImageUrl = setup.editImageUrl;
+        this.getImageUrlAction = setup.getImageUrl;
         this.headerText = setup.headerText;
         this.canInsertImage = setup.canInsertImage;
     }
@@ -179,11 +181,17 @@ class Mediabrowser {
             this.showElement('button_insert_files');
             this.showElement('contents-alt-text');
         }
+        
+        // Show edit button only for image files
+        if (this.isSelectedFileImage()) {
+            this.showElement('button_edit_image');
+        }
     }
 
     hideFileButtons() {
         this.hideElement('button_delete_files');
         this.hideElement('button_insert_files');
+        this.hideElement('button_edit_image');
         this.hideElement('contents-alt-text');
     }
 
@@ -376,5 +384,266 @@ class Mediabrowser {
 
     showElement(id) {
         document.getElementById(id)?.classList.remove('no-display');
+    }
+
+    isSelectedFileImage() {
+        const selectedFile = document.querySelector('div.filecnt.selected');
+        if (!selectedFile) {
+            return false;
+        }
+        
+        // Check if the file has an image thumbnail (indication it's an image)
+        const img = selectedFile.querySelector('img');
+        return !!img;
+    }
+
+    async getImageUrl(fileId) {
+        try {
+            const response = await mahoFetch(this.getImageUrlAction, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    file_id: fileId,
+                    node: this.currentNode.id,
+                }),
+            });
+            
+            if (response.success && response.url) {
+                return response.url;
+            } else {
+                throw new Error(response.message || 'Failed to get image URL');
+            }
+        } catch (error) {
+            console.warn('Failed to get image URL from server:', error);
+            // Fallback to basic construction
+            const baseUrl = window.location.origin;
+            const mediaPath = '/media/wysiwyg';
+            return `${baseUrl}${mediaPath}/${fileId}`;
+        }
+    }
+
+    async editImage() {
+        const selectedFile = document.querySelector('div.filecnt.selected');
+        if (!selectedFile || !this.isSelectedFileImage()) {
+            return false;
+        }
+
+        try {
+            // Load filerobot-image-editor if not already loaded
+            if (!window.FilerobotImageEditor) {
+                await this.loadFilerobotEditor();
+            }
+
+            // Get the image source URL - construct full image URL from file info
+            const img = selectedFile.querySelector('img');
+            let imageUrl = img.src;
+            
+            // Always get the full image URL using the file ID
+            const fileId = selectedFile.id;
+            if (fileId) {
+                // Get actual image URL using media browser's storage URL
+                imageUrl = await this.getImageUrl(fileId);
+            } else {
+                // Fallback: if it's a thumbnail URL, convert to full image
+                if (imageUrl.includes('.thumbs')) {
+                    // Remove .thumbs from path and query parameters
+                    imageUrl = imageUrl
+                        .replace('/.thumbs', '')
+                        .replace('/wysiwyg//', '/wysiwyg/')
+                        .split('?')[0]; // Remove query params
+                }
+            }
+            
+            // Additional fallback: if we still have thumbs in URL, try another approach
+            if (imageUrl.includes('.thumbs')) {
+                const fileName = imageUrl.split('/').pop().split('?')[0];
+                imageUrl = `${window.location.origin}/media/wysiwyg/${fileName}`;
+            }
+
+            // Create editor container
+            const editorContainer = this.createEditorContainer();
+            
+            // Wait for container to be properly sized before initializing editor
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Preload the image to ensure it's available
+            await this.preloadImage(imageUrl);
+            
+            // Initialize the image editor with proper configuration
+            const imageEditor = new window.FilerobotImageEditor(editorContainer, {
+                source: imageUrl,
+                defaultSavedImageType: 'png',
+                defaultSavedImageQuality: 0.9,
+                theme: {
+                    palette: {
+                        'primary': '#007cba',
+                        'secondary': '#2d3748'
+                    }
+                },
+                avoidChangesNotSavedAlertOnLeave: true,
+                showCanvasOnly: false,
+                useBackendTranslations: false,
+                observePluginContainerSize: true,
+                cropPresets: [
+                    {
+                        titleKey: 'classicTv',
+                        descriptionKey: '4:3',
+                        ratio: 4 / 3,
+                    },
+                    {
+                        titleKey: 'cinemascope',
+                        descriptionKey: '16:9',
+                        ratio: 16 / 9,
+                    }
+                ],
+                tabsIds: ['Adjust', 'Filters', 'Finetune', 'Resize', 'Watermark', 'Annotate'],
+                defaultTabId: 'Adjust',
+                closeAfterSave: false,
+                onSave: (editedImageObject, designState) => {
+                    this.saveEditedImage(selectedFile.id, editedImageObject);
+                },
+                onClose: (closingReason) => {
+                    this.closeImageEditor();
+                }
+            });
+
+            imageEditor.render({
+                onClose: () => this.closeImageEditor()
+            });
+
+            // Store reference for potential debugging
+            this.currentImageEditor = imageEditor;
+
+        } catch (error) {
+            alert('Error loading image editor: ' + error.message);
+        }
+    }
+
+    async loadFilerobotEditor() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://scaleflex.cloudimg.io/v7/plugins/filerobot-image-editor/latest/filerobot-image-editor.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    createEditorContainer() {
+        // Remove existing editor container if any
+        const existingContainer = document.getElementById('image-editor-container');
+        if (existingContainer) {
+            existingContainer.remove();
+        }
+
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'image-editor-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        // Create container
+        const container = document.createElement('div');
+        container.id = 'image-editor-container';
+        container.style.cssText = `
+            width: 95vw;
+            height: 95vh;
+            max-width: 1400px;
+            max-height: 800px;
+            min-width: 800px;
+            min-height: 600px;
+            background: white;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1250;
+        `;
+
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
+
+        // Add minimal CSS for editor
+        const style = document.createElement('style');
+        style.setAttribute('data-editor-styles', 'true');
+        style.textContent = `
+            #image-editor-overlay * {
+                box-sizing: border-box;
+            }
+        `;
+        document.head.appendChild(style);
+
+        return container;
+    }
+
+    async saveEditedImage(fileId, editedImageObject) {
+        try {
+            // Convert edited image to FormData
+            const formData = new FormData();
+            formData.append('file_id', fileId);
+            formData.append('node', this.currentNode.id);
+            
+            // Convert image to blob if it's a canvas or base64
+            if (editedImageObject.canvas) {
+                const blob = await new Promise(resolve => {
+                    editedImageObject.canvas.toBlob(resolve, 'image/png');
+                });
+                formData.append('edited_image', blob, 'edited_image.png');
+            } else if (editedImageObject.imageBase64) {
+                const response = await fetch(editedImageObject.imageBase64);
+                const blob = await response.blob();
+                formData.append('edited_image', blob, 'edited_image.png');
+            }
+
+            // Save the edited image
+            const result = await mahoFetch(this.editImageUrl, {
+                method: 'POST',
+                body: formData,
+            });
+
+            this.closeImageEditor();
+            this.updateContent(); // Refresh the file list
+        } catch (error) {
+            alert('Error saving edited image: ' + error.message);
+        }
+    }
+
+    closeImageEditor() {
+        // Clean up the editor instance
+        if (this.currentImageEditor && typeof this.currentImageEditor.terminate === 'function') {
+            try {
+                this.currentImageEditor.terminate();
+            } catch (e) {
+                console.warn('Error terminating image editor:', e);
+            }
+        }
+        this.currentImageEditor = null;
+
+        // Remove overlay and styles
+        const overlay = document.getElementById('image-editor-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+        
+        // Remove any editor-specific styles
+        const editorStyles = document.querySelectorAll('style[data-editor-styles]');
+        editorStyles.forEach(style => style.remove());
+    }
+
+    preloadImage(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = url;
+        });
     }
 };

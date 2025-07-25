@@ -227,6 +227,130 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     /**
+     * Get image URL for editing
+     */
+    public function getImageUrlAction(): void
+    {
+        try {
+            $fileId = $this->getRequest()->getParam('file_id');
+            $fileId = Mage::helper('cms/wysiwyg_images')->idDecode($fileId);
+
+            if (!$fileId) {
+                throw new Exception('File ID is required.');
+            }
+
+            /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
+            $helper = Mage::helper('cms/wysiwyg_images');
+            $currentPath = $helper->getCurrentPath();
+
+            // Get file path
+            $filePath = $currentPath . DS . $fileId;
+
+            // Validate file exists and is within allowed path
+            if (!file_exists($filePath)) {
+                throw new Exception('File not found.');
+            }
+
+            if (!str_starts_with(realpath($filePath), realpath($helper->getStorageRoot()))) {
+                throw new Exception('Invalid file path.');
+            }
+
+            // Construct URL
+            $mediaUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
+            $relativePath = str_replace($helper->getStorageRoot(), '', $filePath);
+            $imageUrl = $mediaUrl . 'wysiwyg' . str_replace(DS, '/', $relativePath);
+
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'url' => $imageUrl,
+            ]);
+
+        } catch (Exception $e) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Save edited image from image editor
+     */
+    public function editImageAction(): void
+    {
+        try {
+            if (!$this->getRequest()->isPost()) {
+                throw new Exception('Wrong request method.');
+            }
+
+            $fileId = $this->getRequest()->getParam('file_id');
+            $fileId = Mage::helper('cms/wysiwyg_images')->idDecode($fileId);
+
+            if (!$fileId) {
+                throw new Exception('File ID is required.');
+            }
+
+            // Check if edited image file was uploaded
+            if (!isset($_FILES['edited_image']) || $_FILES['edited_image']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('No edited image provided.');
+            }
+
+            /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
+            $helper = Mage::helper('cms/wysiwyg_images');
+            $currentPath = $helper->getCurrentPath();
+
+            // Get original file path
+            $originalFilePath = $currentPath . DS . $fileId;
+
+            // Validate file exists and is within allowed path
+            if (!file_exists($originalFilePath)) {
+                throw new Exception('Original file not found.');
+            }
+
+            if (!str_starts_with(realpath($originalFilePath), realpath($helper->getStorageRoot()))) {
+                throw new Exception('Invalid file path.');
+            }
+
+            // Get original file info
+            $pathInfo = pathinfo($originalFilePath);
+            $originalExtension = strtolower($pathInfo['extension']);
+
+            // Create backup of original (optional)
+            $backupPath = $pathInfo['dirname'] . DS . $pathInfo['filename'] . '_backup_' . time() . '.' . $originalExtension;
+            copy($originalFilePath, $backupPath);
+
+            // Move uploaded edited image to replace original
+            $uploadedFile = $_FILES['edited_image']['tmp_name'];
+
+            // Validate uploaded file is an image
+            $imageInfo = getimagesize($uploadedFile);
+            if (!$imageInfo) {
+                throw new Exception('Uploaded file is not a valid image.');
+            }
+
+            // Keep original extension format if possible
+            $targetPath = $originalFilePath;
+            if (!move_uploaded_file($uploadedFile, $targetPath)) {
+                throw new Exception('Failed to save edited image.');
+            }
+
+            // Clear any cached thumbnails by regenerating
+            $this->getStorage()->resizeOnTheFly($fileId);
+
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'message' => 'Image edited successfully',
+            ]);
+
+        } catch (Exception $e) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Register storage model and return it
      *
      * @return Mage_Cms_Model_Wysiwyg_Images_Storage

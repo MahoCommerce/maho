@@ -50,6 +50,14 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
             'onclick' => 'MediabrowserInstance.insert();',
             'id'      => 'button_insert_files',
         ]);
+
+        $this->_addButton('edit_image', [
+            'class'   => 'save no-display',
+            'label'   => $this->helper('cms')->__('Edit Image'),
+            'type'    => 'button',
+            'onclick' => 'MediabrowserInstance.editImage();',
+            'id'      => 'button_edit_image',
+        ]);
     }
 
     /**
@@ -79,6 +87,8 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
             'newFolderUrl'    => $this->getNewfolderUrl(),
             'deleteFolderUrl' => $this->getDeletefolderUrl(),
             'deleteFilesUrl'  => $this->getDeleteFilesUrl(),
+            'editImageUrl'    => $this->getEditImageUrl(),
+            'getImageUrl'     => $this->getImageUrl(),
             'headerText'      => $this->getHeaderText(),
             'canInsertImage'  => $this->getCanInsertImage(),
         ]);
@@ -122,6 +132,26 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     public function getDeleteFilesUrl()
     {
         return $this->getUrl('*/*/deleteFiles');
+    }
+
+    /**
+     * Edit image action target URL
+     *
+     * @return string
+     */
+    public function getEditImageUrl()
+    {
+        return $this->getUrl('*/*/editImage');
+    }
+
+    /**
+     * Get image URL action
+     *
+     * @return string
+     */
+    public function getImageUrl()
+    {
+        return $this->getUrl('*/*/getImageUrl');
     }
 
     /**
