@@ -324,22 +324,56 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             // Get new filename from request or use original
             $newFilename = $this->getRequest()->getParam('new_filename');
             $originalPathInfo = pathinfo($originalFilePath);
+            
+            // Get configured image file type and extension
+            $configuredType = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
+            $configuredExtension = match ($configuredType) {
+                IMAGETYPE_AVIF => 'avif',
+                IMAGETYPE_GIF  => 'gif',
+                IMAGETYPE_JPEG => 'jpg',
+                IMAGETYPE_PNG  => 'png',
+                default        => 'webp',
+            };
 
-            // Determine target path
-            if ($newFilename && $newFilename !== $originalPathInfo['basename']) {
-                // User changed the filename - save as new file
+            if ($newFilename) {
+                // Always replace extension with configured type
+                $baseFilename = pathinfo($newFilename, PATHINFO_FILENAME);
+                $newFilename = $baseFilename . '.' . $configuredExtension;
+                
+                // Clean filename
                 $newFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($newFilename);
-                $targetPath = $currentPath . DS . $newFilename;
-
-                // Check if new filename already exists
-                if (file_exists($targetPath)) {
-                    throw new Exception('A file with this name already exists.');
+                
+                // Determine if it's the same as original (ignoring extension)
+                $originalBasename = $originalPathInfo['filename'];
+                
+                if ($baseFilename === $originalBasename) {
+                    // Same base name - replace with new extension if different
+                    if ($configuredExtension !== $originalPathInfo['extension']) {
+                        // Different extension - create new file with new extension
+                        $targetPath = $currentPath . DS . $newFilename;
+                    } else {
+                        // Same extension - replace original
+                        $targetPath = $originalFilePath;
+                    }
+                } else {
+                    // Different base name - save as new file
+                    $targetPath = $currentPath . DS . $newFilename;
+                    
+                    // Check if new filename already exists
+                    if (file_exists($targetPath)) {
+                        throw new Exception('A file with this name already exists.');
+                    }
                 }
             } else {
-                // Same filename - replace original (create backup first)
-                $targetPath = $originalFilePath;
-                $backupPath = $originalPathInfo['dirname'] . DS . $originalPathInfo['filename'] . '_backup_' . time() . '.' . $originalPathInfo['extension'];
-                copy($originalFilePath, $backupPath);
+                // No filename provided - use original name with configured extension
+                if ($configuredExtension !== $originalPathInfo['extension']) {
+                    // Different extension - create new file with new extension
+                    $newFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
+                    $targetPath = $currentPath . DS . $newFilename;
+                } else {
+                    // Same extension - replace original
+                    $targetPath = $originalFilePath;
+                }
             }
 
             // Move uploaded edited image

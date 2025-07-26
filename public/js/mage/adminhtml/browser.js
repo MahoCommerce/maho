@@ -184,8 +184,8 @@ class Mediabrowser {
             this.showElement('contents-alt-text');
         }
         
-        // Show edit button only for image files
-        if (this.isSelectedFileImage()) {
+        // Show edit button only for image files and only in CMS Media Library
+        if (this.isSelectedFileImage() && this.isCmsMediaLibrary()) {
             this.showElement('button_edit_image');
         }
     }
@@ -397,6 +397,12 @@ class Mediabrowser {
         // Check if the file has an image thumbnail (indication it's an image)
         const img = selectedFile.querySelector('img');
         return !!img;
+    }
+
+    isCmsMediaLibrary() {
+        // Check if we're in the CMS Media Library (not in popup/modal context)
+        return window.location.pathname.includes('cms_wysiwyg_images') && 
+               !window.location.search.includes('target_element_id');
     }
 
     async getImageUrl(fileId) {
