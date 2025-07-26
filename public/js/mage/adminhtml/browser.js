@@ -614,19 +614,20 @@ class Mediabrowser {
             formData.append('node', this.currentNode.id);
             formData.append('form_key', this.getFormKey());
             
-            // Extract filename from the edited image object or use default
-            let filename = `edited_image.${this.imageFileType.extension}`;
-            if (editedImageObject.fullName) {
+            // Extract filename from the save dialog input or use default
+            let filename = 'edited_image';
+            
+            // Try to get filename from save dialog input first
+            const filenameInput = document.querySelector('.FIE_save-modal input[type="text"], .SfxModal input[type="text"]');
+            if (filenameInput && filenameInput.value.trim()) {
+                filename = filenameInput.value.trim();
+            } else if (editedImageObject.fullName) {
                 filename = editedImageObject.fullName;
             } else if (editedImageObject.name) {
                 filename = editedImageObject.name;
             }
             
-            // Ensure filename has correct extension
-            const baseName = filename.replace(/\.[^/.]+$/, ''); // Remove existing extension
-            filename = `${baseName}.${this.imageFileType.extension}`;
-            
-            // Append filename for server processing
+            // Let PHP handle extension replacement - just pass the filename as-is
             formData.append('new_filename', filename);
             
             // Convert image to blob using configured file type
@@ -641,14 +642,14 @@ class Mediabrowser {
                         editedImageObject.canvas.toBlob(resolve, mimeType);
                     }
                 });
-                formData.append('edited_image', blob, filename);
+                formData.append('edited_image', blob);
             } else if (editedImageObject.imageBase64) {
                 const response = await fetch(editedImageObject.imageBase64);
                 const blob = await response.blob();
-                formData.append('edited_image', blob, filename);
+                formData.append('edited_image', blob);
             } else if (editedImageObject.file) {
                 // If it's a file object directly
-                formData.append('edited_image', editedImageObject.file, filename);
+                formData.append('edited_image', editedImageObject.file);
             }
 
             // Save the edited image

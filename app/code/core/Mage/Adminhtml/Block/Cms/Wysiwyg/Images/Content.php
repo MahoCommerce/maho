@@ -187,13 +187,11 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
 
     /**
      * Get configured image file type from system config
-     *
-     * @return array
      */
     public function getConfiguredImageFileType(): array
     {
         $configuredType = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
-        
+
         // Map image type constants to file extensions and MIME types
         $typeMap = [
             IMAGETYPE_AVIF => ['extension' => 'avif', 'mimeType' => 'image/avif', 'label' => 'AVIF'],
@@ -208,13 +206,11 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
 
     /**
      * Get configured image quality from system config
-     *
-     * @return float
      */
     public function getConfiguredImageQuality(): float
     {
         $quality = (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality');
-        
+
         // Convert to 0-1 scale for filerobot-image-editor
         return $quality / 100;
     }
