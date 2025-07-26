@@ -2851,12 +2851,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Edit.php
 
 		-
-			message: '#^Property name for Varien_Simplexml_Element must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Edit.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_System_Config_Form\:\:_initGroup\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9175,12 +9169,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/System/ConfigController.php
 
 		-
-			message: '#^Property name for Varien_Simplexml_Element must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/ConfigController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_System_Convert_GuiController\:\:downloadAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9861,12 +9849,6 @@ parameters:
 		-
 			message: '#^Method Mage_Api_Helper_Data\:\:wsiArrayUnpacker\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Api/Helper/Data.php
-
-		-
-			message: '#^Property name for object must be a string, but mixed~''complex_filter'' was given\.$#'
-			identifier: property.nameNotString
 			count: 1
 			path: app/code/core/Mage/Api/Helper/Data.php
 
@@ -11575,12 +11557,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category/Api.php
 
 		-
-			message: '#^Property name for array must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 4
-			path: app/code/core/Mage/Catalog/Model/Category/Api/V2.php
-
-		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -12238,12 +12214,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
 
 		-
-			message: '#^Property name for stdClass must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 4
-			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
-
-		-
 			message: '#^Method Mage_Catalog_Model_Product_Attribute_Api\:\:_prepareDataForSave\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12434,12 +12404,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Link.php
-
-		-
-			message: '#^Property name for array must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 4
-			path: app/code/core/Mage/Catalog/Model/Product/Link/Api/V2.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Product_Option_Api\:\:_prepareAdditionalFields\(\) has no return type specified\.$#'
@@ -15982,24 +15946,6 @@ parameters:
 			message: '#^Property Mage_Core_Controller_Varien_Router_Standard\:\:\$_routes has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			message: '#^Property name for Mage_Core_Model_Config_Element\|false must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 3
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			message: '#^Property name for mixed must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			message: '#^Property name for mixed must be a string, but mixed~null was given\.$#'
-			identifier: property.nameNotString
-			count: 2
 			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
 
 		-
@@ -30520,20 +30466,8 @@ parameters:
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/design/adminhtml/default/default/template/system/config/switcher.phtml
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
-			count: 2
-			path: app/design/adminhtml/default/default/template/system/store/tree.phtml
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 2
 			path: app/design/adminhtml/default/default/template/system/store/tree.phtml
 
@@ -30941,12 +30875,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/frontend/base/default/template/cms/widget/static_block/default.phtml
-
-		-
-			message: '#^Property name for mixed must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
-			count: 1
-			path: app/design/frontend/base/default/template/configurableswatches/catalog/product/view/type/options/configurable/swatches.phtml
 
 		-
 			message: '#^Variable \$customer might not be defined\.$#'
@@ -33717,11 +33645,5 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$filename of method Varien_Simplexml_Element\:\:asNiceXml\(\) expects string, int given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Varien/Simplexml/Element.php
-
-		-
-			message: '#^Property name for mixed must be a string, but mixed was given\.$#'
-			identifier: property.nameNotString
 			count: 1
 			path: lib/Varien/Simplexml/Element.php
