@@ -91,6 +91,8 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
             'getImageUrl'     => $this->getImageUrl(),
             'headerText'      => $this->getHeaderText(),
             'canInsertImage'  => $this->getCanInsertImage(),
+            'imageFileType'   => $this->getConfiguredImageFileType(),
+            'imageQuality'    => $this->getConfiguredImageQuality(),
         ]);
 
         return Mage::helper('core')->jsonEncode($setupObject);
@@ -181,5 +183,39 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     {
         $alt = $this->getRequest()->getParam('alt');
         return $alt ? Mage::helper('cms')->urlDecode($alt) : '';
+    }
+
+    /**
+     * Get configured image file type from system config
+     *
+     * @return array
+     */
+    public function getConfiguredImageFileType(): array
+    {
+        $configuredType = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
+        
+        // Map image type constants to file extensions and MIME types
+        $typeMap = [
+            IMAGETYPE_AVIF => ['extension' => 'avif', 'mimeType' => 'image/avif', 'label' => 'AVIF'],
+            IMAGETYPE_GIF  => ['extension' => 'gif',  'mimeType' => 'image/gif',  'label' => 'GIF'],
+            IMAGETYPE_JPEG => ['extension' => 'jpg',  'mimeType' => 'image/jpeg', 'label' => 'JPG'],
+            IMAGETYPE_PNG  => ['extension' => 'png',  'mimeType' => 'image/png',  'label' => 'PNG'],
+            IMAGETYPE_WEBP => ['extension' => 'webp', 'mimeType' => 'image/webp', 'label' => 'WebP'],
+        ];
+
+        return $typeMap[$configuredType] ?? $typeMap[IMAGETYPE_WEBP]; // Default to WebP
+    }
+
+    /**
+     * Get configured image quality from system config
+     *
+     * @return float
+     */
+    public function getConfiguredImageQuality(): float
+    {
+        $quality = (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality');
+        
+        // Convert to 0-1 scale for filerobot-image-editor
+        return $quality / 100;
     }
 }

@@ -67,6 +67,8 @@ class Mediabrowser {
         this.getImageUrlAction = setup.getImageUrl;
         this.headerText = setup.headerText;
         this.canInsertImage = setup.canInsertImage;
+        this.imageFileType = setup.imageFileType;
+        this.imageQuality = setup.imageQuality;
     }
 
     static {
@@ -471,8 +473,9 @@ class Mediabrowser {
             // Initialize the image editor with proper configuration
             const imageEditor = new window.FilerobotImageEditor(editorContainer, {
                 source: imageUrl,
-                defaultSavedImageType: 'png',
-                defaultSavedImageQuality: 0.9,
+                defaultSavedImageType: this.imageFileType.extension,
+                defaultSavedImageQuality: this.imageQuality,
+                forceToPngInEllipticalCrop: false,
                 theme: {
                     palette: {
                         'primary': '#007cba',
@@ -498,6 +501,10 @@ class Mediabrowser {
                 tabsIds: ['Adjust', 'Filters', 'Finetune', 'Resize', 'Watermark', 'Annotate'],
                 defaultTabId: 'Adjust',
                 closeAfterSave: false,
+                savingPixelRatio: 1,
+                previewPixelRatio: 1,
+                getCurrentImgDataFnRef: null,
+                saveMode: 'download-save',
                 onSave: (editedImageObject, designState) => {
                     this.saveEditedImage(selectedFile.id, editedImageObject);
                 },
@@ -571,12 +578,21 @@ class Mediabrowser {
         overlay.appendChild(container);
         document.body.appendChild(overlay);
 
-        // Add minimal CSS for editor
+        // Add CSS for editor and hide file type selector
         const style = document.createElement('style');
         style.setAttribute('data-editor-styles', 'true');
         style.textContent = `
             #image-editor-overlay * {
                 box-sizing: border-box;
+            }
+            
+            /* Hide file type selector in save dialog since we use configured type */
+            .FIE_save-modal .FIE_save-extension-selector,
+            .FIE_save-modal .SfxSelect-wrapper[data-testid*="extension"],
+            .FIE_save-modal .SfxSelect[data-testid*="extension"],
+            [data-testid="save-image-type-selector"],
+            [data-testid="save-extension-selector"] {
+                display: none !important;
             }
         `;
         document.head.appendChild(style);
@@ -593,20 +609,31 @@ class Mediabrowser {
             formData.append('form_key', this.getFormKey());
             
             // Extract filename from the edited image object or use default
-            let filename = 'edited_image.png';
+            let filename = `edited_image.${this.imageFileType.extension}`;
             if (editedImageObject.fullName) {
                 filename = editedImageObject.fullName;
             } else if (editedImageObject.name) {
                 filename = editedImageObject.name;
             }
             
+            // Ensure filename has correct extension
+            const baseName = filename.replace(/\.[^/.]+$/, ''); // Remove existing extension
+            filename = `${baseName}.${this.imageFileType.extension}`;
+            
             // Append filename for server processing
             formData.append('new_filename', filename);
             
-            // Convert image to blob if it's a canvas or base64
+            // Convert image to blob using configured file type
+            const mimeType = this.imageFileType.mimeType;
+            const quality = this.imageQuality;
+            
             if (editedImageObject.canvas) {
                 const blob = await new Promise(resolve => {
-                    editedImageObject.canvas.toBlob(resolve, 'image/png');
+                    if (mimeType === 'image/jpeg') {
+                        editedImageObject.canvas.toBlob(resolve, mimeType, quality);
+                    } else {
+                        editedImageObject.canvas.toBlob(resolve, mimeType);
+                    }
                 });
                 formData.append('edited_image', blob, filename);
             } else if (editedImageObject.imageBase64) {
