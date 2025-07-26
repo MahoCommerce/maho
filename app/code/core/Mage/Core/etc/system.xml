@@ -657,6 +657,24 @@
                         </exception_file>
                     </fields>
                 </log>
+                <css translate="label">
+                    <label>CSS Settings</label>
+                    <sort_order>45</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <minify_enabled translate="label comment">
+                            <label>Minify CSS Files</label>
+                            <comment>Minifies CSS files and caches them in media/mahominify for improved performance</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </minify_enabled>
+                    </fields>
+                </css>
                 <js translate="label">
                     <label>JavaScript Settings</label>
                     <sort_order>50</sort_order>
@@ -664,12 +682,21 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+                        <minify_enabled translate="label comment">
+                            <label>Minify JavaScript Files</label>
+                            <comment>Minifies JavaScript files and caches them in media/mahominify for improved performance</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </minify_enabled>
                         <defer_mode translate="label comment">
                             <label>JavaScript Deferral Mode</label>
                             <comment><![CDATA[<strong>Disabled:</strong> No deferral (default behavior)<br/><strong>Defer Only:</strong> Moves all script tags to the end of the page, improving initial render performance<br/><strong>Load on Intent:</strong> <strong style="color:red">Highly Experimental!</strong> Defers all scripts until user interaction (click, scroll, hover, etc.) - designed for pure vanilla JavaScript and may not work with PrototypeJS or jQuery]]></comment>
                             <frontend_type>select</frontend_type>
                             <source_model>core/source_js_defer</source_model>
-                            <sort_order>1</sort_order>
+                            <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

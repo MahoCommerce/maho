@@ -100,6 +100,14 @@ class Mage_Core_Model_Observer
     }
 
     /**
+     * Clean up old minified CSS/JS files (cron job)
+     */
+    public function cleanOldMinifiedFiles(Mage_Cron_Model_Schedule $schedule): void
+    {
+        Mage::helper('core/minify')->cleanupOldVersions();
+    }
+
+    /**
      * Checks method availability for processing in variable
      *
      * @throws Exception

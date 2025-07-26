@@ -28,6 +28,7 @@ $application->add(new \MahoCLI\Commands\AdminUserDisable());
 $application->add(new \MahoCLI\Commands\CacheEnable());
 $application->add(new \MahoCLI\Commands\CacheDisable());
 $application->add(new \MahoCLI\Commands\CacheFlush());
+$application->add(new \MahoCLI\Commands\CacheMinifyFlush());
 
 $application->add(new \MahoCLI\Commands\CustomerCreate());
 $application->add(new \MahoCLI\Commands\CustomerChangepassword());

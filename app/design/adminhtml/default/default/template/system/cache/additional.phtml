@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -35,6 +35,14 @@
         </td>
         <td class="scope-label">
             <?= Mage::helper('adminhtml')->__('Pregenerated configurable swatches image files.') ?>
+        </td>
+    </tr>
+    <tr>
+        <td class="scope-label">
+            <button onclick="setLocation('<?= $this->getCleanMinifiedFilesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Minified CSS/JS Cache') ?></span></button>
+        </td>
+        <td class="scope-label">
+            <?= Mage::helper('adminhtml')->__('Minified CSS and JavaScript files.') ?>
         </td>
     </tr>
 </table>

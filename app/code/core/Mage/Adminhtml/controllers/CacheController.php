@@ -183,4 +183,23 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
         }
         $this->_redirect('*/*');
     }
+
+    public function cleanMinifiedFilesAction(): void
+    {
+        try {
+            Mage::helper('core/minify')->clearCache();
+            Mage::dispatchEvent('clean_minified_cache_after');
+            $this->_getSession()->addSuccess(
+                Mage::helper('adminhtml')->__('The minified CSS/JS cache was cleaned.'),
+            );
+        } catch (Mage_Core_Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        } catch (Exception $e) {
+            $this->_getSession()->addException(
+                $e,
+                Mage::helper('adminhtml')->__('An error occurred while clearing the minified CSS/JS cache.'),
+            );
+        }
+        $this->_redirect('*/*');
+    }
 }
