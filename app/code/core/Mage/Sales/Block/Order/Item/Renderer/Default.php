@@ -121,6 +121,23 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
             return $_default;
         }
 
+        if (isset($optionInfo['option_type'], $optionInfo['option_value']) && in_array($optionInfo['option_type'], ['date', 'date_time', 'time'])) {
+            $locale = Mage::app()->getLocale();
+            $locale->setLocaleCode(Mage::app()->getStore()->getConfig('general/locale/code'));
+
+            $formattedValue = match ($optionInfo['option_type']) {
+                'date' => $locale->date($optionInfo['option_value'], Zend_Date::ISO_8601, null, false)
+                    ->toString($locale->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM)),
+                'date_time' => $locale->date($optionInfo['option_value'], Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                    ->toString($locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, Mage_Core_Model_Locale::FORMAT_TIME_12H)),
+                'time' => $locale->date($optionInfo['option_value'], Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                    ->toString($locale->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_12H)),
+                default => $optionInfo['print_value'],
+            };
+
+            return ['value' => $formattedValue];
+        }
+
         // truncate standard view
         $result = [];
         if (is_array($optionValue)) {

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -106,7 +106,6 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     {
         // check if data sent
         if ($data = $this->getRequest()->getPost()) {
-            $data = $this->_filterPostData($data);
             //init model and set data
             $model = Mage::getModel('cms/page');
 
@@ -221,18 +220,6 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
             'delete' => Mage::getSingleton('admin/session')->isAllowed('cms/page/delete'),
             default => Mage::getSingleton('admin/session')->isAllowed('cms/page'),
         };
-    }
-
-    /**
-     * Filtering posted data. Converting localized data if needed
-     *
-     * @param array $data
-     * @return array
-     */
-    protected function _filterPostData($data)
-    {
-        $data = $this->_filterDates($data, ['custom_theme_from', 'custom_theme_to']);
-        return $data;
     }
 
     /**

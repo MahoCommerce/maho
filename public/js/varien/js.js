@@ -759,94 +759,88 @@ function buttonDisabler() {
     });
 }
 
-const Calendar = {};
-Calendar.setup = function(config) {
-    const { inputField = '' } = config;
-
-    // Store config on the input element itself
-    const input = document.getElementById(inputField);
-    if (input) {
-        input.dataset.calendarConfig = JSON.stringify(config);
-        const initHandler = (event) => Calendar.initialize(event);
-        input.addEventListener('focus', initHandler);
-        input.addEventListener('click', initHandler);
-    }
-};
-
-Calendar.initialize = async function(event) {
-    if (!event?.target) return;
-
-    try {
-        // Get config from the input element
-        const config = JSON.parse(event.target.dataset.calendarConfig || '{}');
+const Calendar = {
+    async setup(config) {
+        const inputEl = document.getElementById(config.inputField ?? '');
+        if (!inputEl) {
+            throw new Error(`Input with ID ${config.inputField} not found in DOM`);
+        }
 
         if (typeof flatpickr === 'undefined') {
-            // Load flatpickr CSS
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = '/js/flatpickr/flatpickr.min.css';
-            document.head.appendChild(link);
-            await new Promise(resolve => link.onload = resolve);
-
-            // Load flatpickr JS
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = '/js/flatpickr/flatpickr.min.js';
-                script.onload = resolve;
-                script.onerror = reject;
-                document.body.appendChild(script);
-            });
+            // Load flatpickr JS + CSS
+            await Promise.all([
+                new Promise((resolve, reject) => {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = '/js/flatpickr/flatpickr.min.css';
+                    link.onload = resolve;
+                    link.onerror = () => reject(`${link.href} Not Found`);
+                    document.head.appendChild(link);
+                }),
+                new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = '/js/flatpickr/flatpickr.min.js';
+                    script.onload = resolve;
+                    script.onerror = () => reject(`${script.src} Not Found`);
+                    document.head.appendChild(script);
+                }),
+            ]);
         }
 
-        const {
-            inputField = '',
-            ifFormat = '',
-            showsTime = '',
-            range = ''
-        } = config;
+        if (config.inputFormat) {
+            config.dateFormat = this.convertIcuToFlatpickrFormat(config.inputFormat);
+            delete config.inputFormat;
+        } else if (config.ifFormat) {
+            config.dateFormat = this.convertStrftimeToFlatpickrFormat(config.ifFormat);
+            delete config.ifFormat;
+        }
 
-        const strftimeToDateConvertionMap = {
-            '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
-            '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'A',
-            '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
-        };
+        if (config.displayFormat) {
+            config.altInput = true;
+            config.altFormat = this.convertIcuToFlatpickrFormat(config.displayFormat);
+            delete config.displayFormat;
+        }
 
-        const dateFormat = ifFormat.replace(/%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g,
-            match => strftimeToDateConvertionMap[match] || match
-        );
+        if (config.showsTime) {
+            config.enableTime = true;
+            delete config.showsTime;
+        }
 
-        let flatpickrOptions = {
-            allowInput: true,
-            dateFormat: dateFormat,
-            enableTime: showsTime
-        };
-
-        if (Array.isArray(range)) {
-            const [yearStart, yearEnd] = range;
+        if (Array.isArray(config.range)) {
+            const [ yearStart, yearEnd ] = config.range;
             if (yearStart) {
-                const minDate = new Date(yearStart, 0, 1);
-                flatpickrOptions.minDate = flatpickr.formatDate(minDate, dateFormat, {});
+                config.minDate = new Date(yearStart, 0, 1);
             }
             if (yearEnd) {
-                const maxDate = new Date(yearEnd, 11, 31);
-                flatpickrOptions.maxDate = flatpickr.formatDate(maxDate, dateFormat, {});
+                config.maxDate = new Date(yearEnd, 11, 31);
             }
         }
 
-        // Initialize flatpickr and trigger it
-        flatpickr('#' + inputField, flatpickrOptions);
-        document.getElementById(inputField).click();
+        if (inputEl.closest('dialog')) {
+            config.static = true;
+        }
 
-        // remove our event handlers
-        const input = event.target;
-        const initHandler = (event) => Calendar.initialize(event);
-        input.removeEventListener('focus', initHandler);
-        input.removeEventListener('click', initHandler);
-        input.removeEventListener('touchstart', initHandler);
+        flatpickr(inputEl, config);
+    },
 
-        // Clean up the stored config
-        delete input.dataset.calendarConfig;
-    } catch (error) {}
+    convertIcuToFlatpickrFormat(format) {
+        const map = {
+            'yyyy': 'Y', 'yy': 'y', 'y': 'Y', 'r': 'Y', 'MMMM': 'F', 'MMM': 'M', 'MM': 'm', 'M': 'n',
+            'ww': 'W', 'w': 'W', 'dd': 'd', 'd': 'j', 'EEEE': 'l', 'EEE': 'D', 'EE': 'D', 'E': 'D',
+            'aaaa': 'K', 'aaa': 'K', 'aa': 'K', 'a': 'K', 'hh': 'G', 'h': 'h', 'HH': 'H', 'H': 'H',
+            'mm': 'i', 'm': 'i', 'ss': 'S', 's': 's',
+        };
+        return format.replace(/(y+|Y+|M+|E+|a+|h+|H+|d+|m+|s+|w+|r)/g, (match) => map[match] || match);
+    },
+
+    convertStrftimeToFlatpickrFormat(format) {
+        const map = {
+            '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
+            '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'K',
+            '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
+        };
+        return format.replace(/%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g, (match) => map[match] || match);
+    },
 }
 
 class Template
