@@ -281,12 +281,14 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      */
     public function getYearStart()
     {
-        $_range = explode(',', $this->getConfigData('year_range'));
-        if (isset($_range[0]) && !empty($_range[0])) {
-            return $_range[0];
-        } else {
-            return date('Y');
+        $yearRange = $this->getConfigData('year_range');
+        if ($yearRange) {
+            $_range = explode(',', $yearRange);
+            if (isset($_range[0]) && !empty($_range[0])) {
+                return $_range[0];
+            }
         }
+        return (int) date('Y') - 10;
     }
 
     /**
@@ -296,12 +298,14 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      */
     public function getYearEnd()
     {
-        $_range = explode(',', $this->getConfigData('year_range'));
-        if (isset($_range[1]) && !empty($_range[1])) {
-            return $_range[1];
-        } else {
-            return date('Y');
+        $yearRange = $this->getConfigData('year_range');
+        if ($yearRange) {
+            $_range = explode(',', $yearRange);
+            if (isset($_range[1]) && !empty($_range[1])) {
+                return $_range[1];
+            }
         }
+        return (int) date('Y') + 10;
     }
 
     /**
