@@ -174,7 +174,9 @@
         <catalog>
             <recently_products>
                 <scope>website</scope>
+                <enabled_recently_viewed>1</enabled_recently_viewed>
                 <viewed_count>5</viewed_count>
+                <enabled_product_compare>1</enabled_product_compare>
                 <compared_count>5</compared_count>
             </recently_products>
         </catalog>

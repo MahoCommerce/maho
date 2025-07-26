@@ -188,4 +188,13 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
 
         return $helper->getAddUrlWithParams($product, $params);
     }
+
+    #[\Override]
+    protected function _toHtml(): string
+    {
+        if (!$this->isEnabled()) {
+            return '';
+        }
+        return parent::_toHtml();
+    }
 }

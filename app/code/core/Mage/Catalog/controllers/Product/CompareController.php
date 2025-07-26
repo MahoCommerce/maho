@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,6 +25,24 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
      * @var null|int
      */
     protected $_customerId = null;
+
+    /**
+     * Check if module functionality is enabled
+     *
+     * @return Mage_Core_Controller_Front_Action
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        parent::preDispatch();
+
+        if (!Mage::helper('catalog/product_compare')->isEnabled()) {
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            $this->_redirect('noroute');
+        }
+
+        return $this;
+    }
 
     public function indexAction()
     {
