@@ -22,7 +22,25 @@
             <?php if (isset($_option['custom_view']) && $_option['custom_view']): ?>
                 <?= $this->getCustomizedOptionValue($_option) ?>
             <?php else: ?>
-                <?php $_option = $this->getFormattedOption($_option['value']); ?>
+                <?php
+                $optionValue = $_option['value'];
+                if (isset($_option['option_type'], $_option['option_value']) && in_array($_option['option_type'], ['date', 'date_time', 'time'])) {
+                    $order = $this->getItem()->getOrder();
+                    $locale = Mage::app()->getLocale();
+                    $locale->setLocaleCode(Mage::getStoreConfig('general/locale/code', $order->getStoreId()));
+                    
+                    $optionValue = match ($_option['option_type']) {
+                        'date' => $locale->date($_option['option_value'], Zend_Date::ISO_8601, null, false)
+                            ->toString($locale->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM)),
+                        'date_time' => $locale->date($_option['option_value'], Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                            ->toString($locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, Mage_Core_Model_Locale::FORMAT_TIME_12H)),
+                        'time' => $locale->date($_option['option_value'], Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                            ->toString($locale->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_12H)),
+                        default => $_option['print_value'],
+                    };
+                }
+                $_option = $this->getFormattedOption($optionValue);
+                ?>
                 <?= $_option['value'] ?><?php if (isset($_option['remainder']) && $_option['remainder']): ?><span id="<?= $_dots = 'dots' . uniqid()?>"> ...</span><span id="<?= $_id = 'id' . uniqid() ?>"><?= $_option['remainder'] ?></span>
                     <script type="text/javascript">
                     $('<?= $_id ?>').hide();
