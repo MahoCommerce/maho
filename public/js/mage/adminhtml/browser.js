@@ -183,7 +183,7 @@ class Mediabrowser {
             this.showElement('button_insert_files');
             this.showElement('contents-alt-text');
         }
-        
+
         // Show edit button only for image files and only in CMS Media Library
         if (this.isSelectedFileImage() && this.isCmsMediaLibrary()) {
             this.showElement('button_edit_image');
@@ -393,7 +393,7 @@ class Mediabrowser {
         if (!selectedFile) {
             return false;
         }
-        
+
         // Check if the file has an image thumbnail (indication it's an image)
         const img = selectedFile.querySelector('img');
         return !!img;
@@ -401,7 +401,7 @@ class Mediabrowser {
 
     isCmsMediaLibrary() {
         // Check if we're in the CMS Media Library (not in popup/modal context)
-        return window.location.pathname.includes('cms_wysiwyg_images') && 
+        return window.location.pathname.includes('cms_wysiwyg_images') &&
                !window.location.search.includes('target_element_id');
     }
 
@@ -415,7 +415,7 @@ class Mediabrowser {
                     form_key: this.getFormKey(),
                 }),
             });
-            
+
             if (response.success && response.url) {
                 return response.url;
             } else {
@@ -435,6 +435,9 @@ class Mediabrowser {
             return false;
         }
 
+        // Hide the edit button immediately when clicked
+        this.hideElement('button_edit_image');
+
         try {
             // Load filerobot-image-editor if not already loaded
             if (!window.FilerobotImageEditor) {
@@ -444,7 +447,7 @@ class Mediabrowser {
             // Get the image source URL - construct full image URL from file info
             const img = selectedFile.querySelector('img');
             let imageUrl = img.src;
-            
+
             // Always get the full image URL using the file ID
             const fileId = selectedFile.id;
             if (fileId) {
@@ -460,7 +463,7 @@ class Mediabrowser {
                         .split('?')[0]; // Remove query params
                 }
             }
-            
+
             // Additional fallback: if we still have thumbs in URL, try another approach
             if (imageUrl.includes('.thumbs')) {
                 const fileName = imageUrl.split('/').pop().split('?')[0];
@@ -469,13 +472,13 @@ class Mediabrowser {
 
             // Create editor container
             const editorContainer = this.createEditorContainer();
-            
+
             // Wait for container to be properly sized before initializing editor
             await new Promise(resolve => setTimeout(resolve, 100));
-            
+
             // Preload the image to ensure it's available
             await this.preloadImage(imageUrl);
-            
+
             // Initialize the image editor with proper configuration
             const imageEditor = new window.FilerobotImageEditor(editorContainer, {
                 source: imageUrl,
@@ -591,7 +594,7 @@ class Mediabrowser {
             #image-editor-overlay * {
                 box-sizing: border-box;
             }
-            
+
             /* Hide file type selector in save dialog since we use configured type */
             .FIE_save-modal .FIE_save-extension-selector,
             .FIE_save-modal .SfxSelect-wrapper[data-testid*="extension"],
@@ -613,10 +616,10 @@ class Mediabrowser {
             formData.append('file_id', fileId);
             formData.append('node', this.currentNode.id);
             formData.append('form_key', this.getFormKey());
-            
+
             // Extract filename from the save dialog input or use default
             let filename = 'edited_image';
-            
+
             // Try to get filename from save dialog input first
             const filenameInput = document.querySelector('.FIE_save-modal input[type="text"], .SfxModal input[type="text"]');
             if (filenameInput && filenameInput.value.trim()) {
@@ -626,14 +629,14 @@ class Mediabrowser {
             } else if (editedImageObject.name) {
                 filename = editedImageObject.name;
             }
-            
+
             // Let PHP handle extension replacement - just pass the filename as-is
             formData.append('new_filename', filename);
-            
+
             // Convert image to blob using configured file type
             const mimeType = this.imageFileType.mimeType;
             const quality = this.imageQuality;
-            
+
             if (editedImageObject.canvas) {
                 const blob = await new Promise(resolve => {
                     if (mimeType === 'image/jpeg') {
@@ -659,7 +662,7 @@ class Mediabrowser {
             });
 
             this.closeImageEditor();
-            this.updateContent(); // Refresh the file list
+            this.updateContent();
         } catch (error) {
             alert('Error saving edited image: ' + error.message);
         }
@@ -681,7 +684,7 @@ class Mediabrowser {
         if (overlay) {
             overlay.remove();
         }
-        
+
         // Remove any editor-specific styles
         const editorStyles = document.querySelectorAll('style[data-editor-styles]');
         editorStyles.forEach(style => style.remove());
@@ -689,30 +692,30 @@ class Mediabrowser {
 
     getFormKey() {
         // Try multiple methods to get the form key
-        
+
         // Method 1: Global variable
         if (window.FORM_KEY) {
             return window.FORM_KEY;
         }
-        
+
         // Method 2: Meta tag
         const metaFormKey = document.querySelector('meta[name="form_key"]');
         if (metaFormKey) {
             return metaFormKey.getAttribute('content');
         }
-        
+
         // Method 3: Hidden input field
         const inputFormKey = document.querySelector('input[name="form_key"]');
         if (inputFormKey) {
             return inputFormKey.value;
         }
-        
+
         // Method 4: From any existing form
         const formKeyInput = document.querySelector('form input[name="form_key"]');
         if (formKeyInput) {
             return formKeyInput.value;
         }
-        
+
         return '';
     }
 
