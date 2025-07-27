@@ -48,6 +48,14 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
      */
     public function getDateHtml()
     {
+        $option = $this->getOption();
+        
+        // For datetime options, use datetime-local input
+        if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
+            return $this->getDateTimeLocalHtml();
+        }
+        
+        // For date-only options, use date input
         if ($this->useCalendar()) {
             return $this->getCalendarDateHtml();
         } else {
@@ -65,25 +73,41 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         $option = $this->getOption();
         $value = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/date');
 
-        //$require = $this->getOption()->getIsRequire() ? ' required-entry' : '';
-        $require = '';
-
         $yearStart = Mage::getSingleton('catalog/product_option_type_date')->getYearStart();
         $yearEnd = Mage::getSingleton('catalog/product_option_type_date')->getYearEnd();
 
-        $calendar = $this->getLayout()
-            ->createBlock('core/html_date')
-            ->setId('options_' . $this->getOption()->getId() . '_date')
-            ->setName('options[' . $this->getOption()->getId() . '][date]')
-            ->setClass('product-custom-option datetime-picker input-text' . $require)
-            ->setFormat(Mage::app()->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
-            ->setValue($value)
-            ->setYearsRange('[' . $yearStart . ', ' . $yearEnd . ']');
-        if (!$this->getSkipJsReloadPrice()) {
-            $calendar->setExtraParams('onchange="opConfig.reloadPrice()"');
+        // Convert value to ISO format if needed
+        $isoValue = '';
+        if ($value) {
+            try {
+                $dateTime = new DateTime($value);
+                $isoValue = $dateTime->format('Y-m-d');
+            } catch (Exception $e) {
+                $isoValue = $value;
+            }
         }
 
-        return $calendar->getHtml();
+        $html = '<input type="date" '
+            . 'id="options_' . $this->getOption()->getId() . '_date" '
+            . 'name="options[' . $this->getOption()->getId() . '][date]" '
+            . 'class="product-custom-option datetime-picker input-text" '
+            . 'value="' . $this->escapeHtml($isoValue) . '" ';
+        
+        // Add min/max attributes for year range
+        if ($yearStart) {
+            $html .= 'min="' . $yearStart . '-01-01" ';
+        }
+        if ($yearEnd) {
+            $html .= 'max="' . $yearEnd . '-12-31" ';
+        }
+        
+        if (!$this->getSkipJsReloadPrice()) {
+            $html .= 'onchange="opConfig.reloadPrice()" ';
+        }
+        
+        $html .= '/>';
+
+        return $html;
     }
 
     /**
@@ -113,30 +137,53 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     }
 
     /**
-     * Time (hh:mm am/pm) html drop-downs
+     * Time input - now uses native time input
      *
      * @return string Formatted Html
      */
     public function getTimeHtml()
     {
-        if (Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat()) {
-            $hourStart = 0;
-            $hourEnd = 23;
-            $dayPartHtml = '';
-        } else {
-            $hourStart = 1;
-            $hourEnd = 12;
-            $dayPartHtml = $this->_getHtmlSelect('day_part')
-                ->setOptions([
-                    'am' => Mage::helper('catalog')->__('AM'),
-                    'pm' => Mage::helper('catalog')->__('PM'),
-                ])
-                ->getHtml();
-        }
-        $hoursHtml = $this->_getSelectFromToHtml('hour', $hourStart, $hourEnd);
-        $minutesHtml = $this->_getSelectFromToHtml('minute', 0, 59);
+        $option = $this->getOption();
+        $value = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/time');
 
-        return $hoursHtml . '&nbsp;<b>:</b>&nbsp;' . $minutesHtml . '&nbsp;' . $dayPartHtml;
+        // Convert value to HH:mm format if needed
+        $timeValue = '';
+        if ($value) {
+            try {
+                // Handle various time formats
+                if (is_array($value) && isset($value['hour']) && isset($value['minute'])) {
+                    $hour = (int) $value['hour'];
+                    $minute = (int) $value['minute'];
+                    
+                    // Handle 12-hour format conversion
+                    if (isset($value['day_part']) && $value['day_part'] === 'pm' && $hour < 12) {
+                        $hour += 12;
+                    } elseif (isset($value['day_part']) && $value['day_part'] === 'am' && $hour === 12) {
+                        $hour = 0;
+                    }
+                    
+                    $timeValue = sprintf('%02d:%02d', $hour, $minute);
+                } else {
+                    $timeValue = $value;
+                }
+            } catch (Exception $e) {
+                $timeValue = $value;
+            }
+        }
+
+        $html = '<input type="time" '
+            . 'id="options_' . $this->getOption()->getId() . '_time" '
+            . 'name="options[' . $this->getOption()->getId() . '][time]" '
+            . 'class="product-custom-option datetime-picker input-text" '
+            . 'value="' . $this->escapeHtml($timeValue) . '" ';
+        
+        if (!$this->getSkipJsReloadPrice()) {
+            $html .= 'onchange="opConfig.reloadPrice()" ';
+        }
+        
+        $html .= '/>';
+
+        return $html;
     }
 
     /**
@@ -207,5 +254,82 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             return $value;
         }
         return $value < 10 ? '0' . $value : $value;
+    }
+
+    /**
+     * DateTime-local input for combined date and time
+     *
+     * @return string Formatted Html
+     */
+    public function getDateTimeLocalHtml()
+    {
+        $option = $this->getOption();
+        $dateValue = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/date');
+        $timeValue = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/time');
+
+        $yearStart = Mage::getSingleton('catalog/product_option_type_date')->getYearStart();
+        $yearEnd = Mage::getSingleton('catalog/product_option_type_date')->getYearEnd();
+
+        // Convert values to ISO datetime-local format (YYYY-MM-DDTHH:mm)
+        $isoValue = '';
+        if ($dateValue || $timeValue) {
+            try {
+                $dateTime = new DateTime();
+                
+                // Set date part
+                if ($dateValue) {
+                    $dateTime = new DateTime($dateValue);
+                } else {
+                    $dateTime = new DateTime('today');
+                }
+                
+                // Set time part
+                if (is_array($timeValue) && isset($timeValue['hour']) && isset($timeValue['minute'])) {
+                    $hour = (int) $timeValue['hour'];
+                    $minute = (int) $timeValue['minute'];
+                    
+                    // Handle 12-hour format conversion
+                    if (isset($timeValue['day_part']) && $timeValue['day_part'] === 'pm' && $hour < 12) {
+                        $hour += 12;
+                    } elseif (isset($timeValue['day_part']) && $timeValue['day_part'] === 'am' && $hour === 12) {
+                        $hour = 0;
+                    }
+                    
+                    $dateTime->setTime($hour, $minute);
+                } elseif ($timeValue) {
+                    // Parse time string
+                    $timeParts = explode(':', $timeValue);
+                    if (count($timeParts) >= 2) {
+                        $dateTime->setTime((int)$timeParts[0], (int)$timeParts[1]);
+                    }
+                }
+                
+                $isoValue = $dateTime->format('Y-m-d\TH:i');
+            } catch (Exception $e) {
+                $isoValue = '';
+            }
+        }
+
+        $html = '<input type="datetime-local" '
+            . 'id="options_' . $this->getOption()->getId() . '_datetime" '
+            . 'name="options[' . $this->getOption()->getId() . '][datetime]" '
+            . 'class="product-custom-option datetime-picker input-text" '
+            . 'value="' . $this->escapeHtml($isoValue) . '" ';
+        
+        // Add min/max attributes for year range
+        if ($yearStart) {
+            $html .= 'min="' . $yearStart . '-01-01T00:00" ';
+        }
+        if ($yearEnd) {
+            $html .= 'max="' . $yearEnd . '-12-31T23:59" ';
+        }
+        
+        if (!$this->getSkipJsReloadPrice()) {
+            $html .= 'onchange="opConfig.reloadPrice()" ';
+        }
+        
+        $html .= '/>';
+
+        return $html;
     }
 }

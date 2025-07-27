@@ -39,31 +39,51 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');
         $htmlId = $this->_getHtmlId() . time();
-        $format = $this->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+        
+        // Convert values to ISO format for native date input
+        $fromValue = '';
+        $toValue = '';
+        
+        if ($fromDate = $this->getValue('from')) {
+            try {
+                if ($fromDate instanceof Zend_Date) {
+                    $fromValue = $fromDate->toString('yyyy-MM-dd');
+                } else {
+                    $dateTime = new DateTime($fromDate);
+                    $fromValue = $dateTime->format('Y-m-d');
+                }
+            } catch (Exception $e) {
+                $fromValue = '';
+            }
+        }
+        
+        if ($toDate = $this->getValue('to')) {
+            try {
+                if ($toDate instanceof Zend_Date) {
+                    $toValue = $toDate->toString('yyyy-MM-dd');
+                } else {
+                    $dateTime = new DateTime($toDate);
+                    $toValue = $dateTime->format('Y-m-d');
+                }
+            } catch (Exception $e) {
+                $toValue = '';
+            }
+        }
+        
         $html = '<div class="range"><div class="range-line date">'
             . '<span class="label">' . $fromLabel . '</span>'
-            . '<input type="text" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
+            . '<input type="date" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
                 . ' placeholder="' . $fromLabel . '"'
-                . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"/>'
+                . ' value="' . $this->escapeHtml($fromValue) . '" class="input-text no-changes"/>'
             . '</div>';
         $html .= '<div class="range-line date">'
             . '<span class="label">' . $toLabel . '</span>'
-            . '<input type="text" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
-                . ' placeholder="' . $fromLabel . '"'
-                . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"/>'
+            . '<input type="date" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
+                . ' placeholder="' . $toLabel . '"'
+                . ' value="' . $this->escapeHtml($toValue) . '" class="input-text no-changes"/>'
             . '</div></div>';
         $html .= '<input type="hidden" name="' . $this->_getHtmlName() . '[locale]"'
             . 'value="' . $this->getLocale()->getLocaleCode() . '"/>';
-        $html .= '<script type="text/javascript">
-            Calendar.setup({
-                inputField : "' . $htmlId . '_from",
-                ifFormat : "' . $format . '"
-            });
-            Calendar.setup({
-                inputField : "' . $htmlId . '_to",
-                ifFormat : "' . $format . '"
-            });
-        </script>';
         return $html;
     }
 
@@ -140,6 +160,26 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
     protected function _convertDate($date, $locale)
     {
         try {
+            // Check if date is in ISO format from native date input
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                // Native date input format (YYYY-MM-DD)
+                $dateTime = new DateTime($date);
+                
+                // Set timezone to store timezone
+                $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+                $dateTime->setTimezone(new DateTimeZone($storeTimezone));
+                
+                // Set beginning of day
+                $dateTime->setTime(0, 0, 0);
+                
+                // Convert to UTC
+                $dateTime->setTimezone(new DateTimeZone('UTC'));
+                
+                // Convert to Zend_Date for compatibility
+                return new Zend_Date($dateTime->format('Y-m-d H:i:s'), 'yyyy-MM-dd HH:mm:ss');
+            }
+            
+            // Legacy format handling
             $dateObj = $this->getLocale()->date(null, null, $locale, false);
 
             //set default timezone for store (admin)

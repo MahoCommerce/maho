@@ -49,7 +49,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
      * Prepare date for save in DB
      *
      * string format used from input fields (all date input fields need apply locale settings)
-     * int value can be declared in code (this meen whot we use valid date)
+     * int value can be declared in code (this means we use valid date)
      *
      * @param   string|int $date
      * @return  string|null
@@ -59,22 +59,45 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
         if (empty($date)) {
             return null;
         }
-        // unix timestamp given - simply instantiate date object
-        if (preg_match('/^[0-9]+$/', $date)) {
-            $date = new Zend_Date((int) $date);
-        } elseif (preg_match('#^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$#', $date)) {
-            // international format
-            $zendDate = new Zend_Date();
-            $date = $zendDate->setIso($date);
-        } else {
-            // parse this date in current locale, do not apply GMT offset
-            $date = Mage::app()->getLocale()->date(
-                $date,
-                Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-                null,
-                false,
+        
+        try {
+            // Unix timestamp given
+            if (preg_match('/^[0-9]+$/', $date)) {
+                $dateTime = new DateTime();
+                $dateTime->setTimestamp((int) $date);
+                return $dateTime->format('Y-m-d H:i:s');
+            }
+            
+            // ISO 8601 date format from native input (YYYY-MM-DD)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                $dateTime = DateTime::createFromFormat('Y-m-d', $date);
+                return $dateTime ? $dateTime->format('Y-m-d 00:00:00') : null;
+            }
+            
+            // ISO 8601 datetime-local format from native input (YYYY-MM-DDTHH:mm)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
+                $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', substr($date, 0, 16));
+                return $dateTime ? $dateTime->format('Y-m-d H:i:s') : null;
+            }
+            
+            // MySQL datetime format (already correct)
+            if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $date)) {
+                return $date;
+            }
+            
+            // Legacy: parse with locale format (compatibility mode)
+            $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+            // Convert Zend format to PHP format for createFromFormat
+            $phpFormat = str_replace(
+                ['dd', 'MM', 'yyyy', 'HH', 'mm', 'ss'],
+                ['d', 'm', 'Y', 'H', 'i', 's'],
+                $format
             );
+            
+            $dateTime = DateTime::createFromFormat($phpFormat, $date);
+            return $dateTime ? $dateTime->format('Y-m-d H:i:s') : null;
+        } catch (Exception $e) {
+            return null;
         }
-        return $date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
     }
 }

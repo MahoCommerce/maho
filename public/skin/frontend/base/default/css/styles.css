@@ -4535,8 +4535,16 @@ label.offcanvas-trigger {
   padding-top: 0;
 }
 
+/* Native date/time inputs */
+.product-options dd input[type="date"],
+.product-options dd input[type="time"],
+.product-options dd input[type="datetime-local"],
 .product-options dd input.datetime-picker {
-  width: 150px;
+  width: auto;
+  min-width: 150px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
 }
 
 .product-options dd .time-picker {
@@ -7320,16 +7328,26 @@ body[class*="checkout-multishipping-"] #review-buttons-container {
   }
 }
 /* ============================================ *
- * Calendar styles (restore styles from /js/calendar)
+ * Native Date Input Styles
  * ============================================ */
-div.calendar table {
-  border-collapse: separate;
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
 }
-div.calendar table td.button {
-  display: table-cell;
-  background: inherit;
-  color: inherit;
-  text-transform: none;
+
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus {
+  border-color: #007bdb;
+  outline: none;
+  box-shadow: 0 0 3px rgba(0, 123, 219, 0.3);
 }
 
 /* ============================================ *

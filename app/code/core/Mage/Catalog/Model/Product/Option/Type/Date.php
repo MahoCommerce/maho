@@ -33,7 +33,14 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
 
         $dateValid = true;
         if ($this->_dateExists()) {
-            if ($this->useCalendar()) {
+            // Check for native datetime-local input format (for datetime options)
+            if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME && isset($value['datetime'])) {
+                $dateValid = preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['datetime']);
+            }
+            // Check for native date input format (ISO 8601)
+            elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
+                $dateValid = true;
+            } elseif ($this->useCalendar()) {
                 $dateValid = isset($value['date']) && preg_match('/^\d{1,4}.+\d{1,4}.+\d{1,4}$/', $value['date']);
             } else {
                 $dateValid = isset($value['day']) && isset($value['month']) && isset($value['year'])
@@ -43,8 +50,19 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
 
         $timeValid = true;
         if ($this->_timeExists()) {
-            $timeValid = isset($value['hour']) && isset($value['minute'])
-                && is_numeric($value['hour']) && is_numeric($value['minute']);
+            // For datetime options, time is included in the datetime field
+            if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
+                $timeValid = true; // Already validated above
+            }
+            // For time-only options, check for native time input format
+            elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME && isset($value['time'])) {
+                $timeValid = preg_match('/^\d{2}:\d{2}/', $value['time']);
+            }
+            // Legacy format validation
+            else {
+                $timeValid = isset($value['hour']) && isset($value['minute'])
+                    && is_numeric($value['hour']) && is_numeric($value['minute']);
+            }
         }
 
         $isValid = $dateValid && $timeValid;
@@ -97,40 +115,88 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 return $value['date_internal'];
             }
 
-            $timestamp = 0;
-
-            if ($this->_dateExists()) {
-                if ($this->useCalendar()) {
-                    $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                    $timestamp += Mage::app()->getLocale()->date($value['date'], $format, null, false)->getTimestamp();
-                } else {
-                    $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
+            try {
+                // Check if datetime-local format from native input (for datetime options)
+                if (isset($value['datetime']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['datetime'])) {
+                    // Parse ISO datetime-local format directly
+                    $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['datetime'], 0, 16));
+                    $result = $dateTime->format('Y-m-d H:i:s');
                 }
-            } else {
-                $timestamp += mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y'));
-            }
-
-            if ($this->_timeExists()) {
-                // 24hr hour conversion
-                if (!$this->is24hTimeFormat()) {
-                    $pmDayPart = (strtolower($value['day_part']) == 'pm');
-                    if ($value['hour'] == 12) {
-                        $value['hour'] = $pmDayPart ? 12 : 0;
-                    } elseif ($pmDayPart) {
-                        $value['hour'] += 12;
+                // Check if time-only format from native input
+                elseif (isset($value['time']) && preg_match('/^\d{2}:\d{2}/', $value['time'])) {
+                    // For time-only options, use today's date with the specified time
+                    $dateTime = new DateTime('today');
+                    $timeParts = explode(':', $value['time']);
+                    $dateTime->setTime((int)$timeParts[0], (int)$timeParts[1]);
+                    $result = $dateTime->format('Y-m-d H:i:s');
+                }
+                // Check if date is in ISO format from native input
+                elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
+                    // Parse ISO date format
+                    $dateTime = new DateTime($value['date']);
+                    
+                    // Add time if exists
+                    if ($this->_timeExists() && isset($value['hour']) && isset($value['minute'])) {
+                        $hour = (int) $value['hour'];
+                        $minute = (int) $value['minute'];
+                        
+                        // Handle 12-hour format
+                        if (!$this->is24hTimeFormat() && isset($value['day_part'])) {
+                            $pmDayPart = (strtolower($value['day_part']) == 'pm');
+                            if ($hour == 12) {
+                                $hour = $pmDayPart ? 12 : 0;
+                            } elseif ($pmDayPart) {
+                                $hour += 12;
+                            }
+                        }
+                        
+                        $dateTime->setTime($hour, $minute);
                     }
+                    
+                    $result = $dateTime->format('Y-m-d H:i:s');
+                } else {
+                    // Legacy handling for non-native inputs
+                    $timestamp = 0;
+
+                    if ($this->_dateExists()) {
+                        if ($this->useCalendar() && isset($value['date'])) {
+                            $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+                            $timestamp += Mage::app()->getLocale()->date($value['date'], $format, null, false)->getTimestamp();
+                        } elseif (isset($value['month']) && isset($value['day']) && isset($value['year'])) {
+                            $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
+                        }
+                    } else {
+                        $timestamp += mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y'));
+                    }
+
+                    if ($this->_timeExists()) {
+                        // 24hr hour conversion
+                        $hour = (int) ($value['hour'] ?? 0);
+                        $minute = (int) ($value['minute'] ?? 0);
+                        
+                        if (!$this->is24hTimeFormat() && isset($value['day_part'])) {
+                            $pmDayPart = (strtolower($value['day_part']) == 'pm');
+                            if ($hour == 12) {
+                                $hour = $pmDayPart ? 12 : 0;
+                            } elseif ($pmDayPart) {
+                                $hour += 12;
+                            }
+                        }
+
+                        $timestamp += 60 * 60 * $hour + 60 * $minute;
+                    }
+
+                    $date = new Zend_Date($timestamp);
+                    $result = $date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
                 }
 
-                $timestamp += 60 * 60 * $value['hour'] + 60 * $value['minute'];
+                // Save date in internal format to avoid locale date bugs
+                $this->_setInternalInRequest($result);
+
+                return $result;
+            } catch (Exception $e) {
+                return null;
             }
-
-            $date = new Zend_Date($timestamp);
-            $result = $date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
-
-            // Save date in internal format to avoid locale date bugs
-            $this->_setInternalInRequest($result);
-
-            return $result;
         } else {
             return null;
         }
@@ -234,22 +300,24 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
 
     /**
      * Use Calendar on frontend or not
+     * Always returns true as we only use native inputs now
      *
      * @return bool
      */
     public function useCalendar()
     {
-        return (bool) $this->getConfigData('use_calendar');
+        return true;
     }
 
     /**
      * Time Format
+     * Always returns true for 24h format as native inputs handle this
      *
      * @return bool
      */
     public function is24hTimeFormat()
     {
-        return (bool) ($this->getConfigData('time_format') == '24h');
+        return true;
     }
 
     /**
