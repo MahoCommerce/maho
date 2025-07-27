@@ -29,14 +29,21 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
             $value['datetime'] = true;
         }
         if (!empty($value['to']) && !$this->getColumn()->getFilterTime()) {
-            $datetimeTo = $value['to'];
-
-            //calculate end date considering timezone specification
-            $datetimeTo->setTimezone(
-                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE),
-            );
-            $datetimeTo->addDay(1)->subSecond(1);
-            $datetimeTo->setTimezone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
+            $dateTime = new DateTime($value['to']);
+            
+            // Set timezone to store timezone
+            $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+            $dateTime->setTimezone(new DateTimeZone($storeTimezone));
+            
+            // Add one day and subtract one second for end of day
+            $dateTime->add(new DateInterval('P1D'));
+            $dateTime->sub(new DateInterval('PT1S'));
+            
+            // Convert to UTC
+            $dateTime->setTimezone(new DateTimeZone('UTC'));
+            
+            // Update the value with the processed date string
+            $value['to'] = $dateTime->format('Y-m-d H:i:s');
         }
         return $value;
     }
@@ -46,7 +53,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
      *
      * @param string $date
      * @param string $locale
-     * @return Zend_Date|null
+     * @return string|null
      */
     #[\Override]
     protected function _convertDate($date, $locale)
@@ -65,8 +72,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                     // Convert to UTC
                     $dateTime->setTimezone(new DateTimeZone('UTC'));
 
-                    // Convert to Zend_Date for compatibility
-                    return new Zend_Date($dateTime->format('Y-m-d H:i:s'), 'yyyy-MM-dd HH:mm:ss');
+                    return $dateTime->format('Y-m-d H:i:s');
                 }
 
                 // Legacy format handling
@@ -87,7 +93,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                 //convert store date to default date in UTC timezone without DST
                 $dateObj->setTimezone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
 
-                return $dateObj;
+                return $dateObj->toString('yyyy-MM-dd HH:mm:ss');
             } catch (Exception $e) {
                 return null;
             }
@@ -117,19 +123,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
 
         if ($fromDate = $this->getValue('from')) {
             try {
-                if ($fromDate instanceof Zend_Date) {
-                    if ($this->getColumn()->getFilterTime()) {
-                        $fromValue = $fromDate->toString('yyyy-MM-dd\'T\'HH:mm');
-                    } else {
-                        $fromValue = $fromDate->toString('yyyy-MM-dd');
-                    }
+                $dateTime = new DateTime($fromDate);
+                if ($this->getColumn()->getFilterTime()) {
+                    $fromValue = $dateTime->format('Y-m-d\\TH:i');
                 } else {
-                    $dateTime = new DateTime($fromDate);
-                    if ($this->getColumn()->getFilterTime()) {
-                        $fromValue = $dateTime->format('Y-m-d\\TH:i');
-                    } else {
-                        $fromValue = $dateTime->format('Y-m-d');
-                    }
+                    $fromValue = $dateTime->format('Y-m-d');
                 }
             } catch (Exception $e) {
                 $fromValue = '';
@@ -138,19 +136,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
 
         if ($toDate = $this->getValue('to')) {
             try {
-                if ($toDate instanceof Zend_Date) {
-                    if ($this->getColumn()->getFilterTime()) {
-                        $toValue = $toDate->toString('yyyy-MM-dd\'T\'HH:mm');
-                    } else {
-                        $toValue = $toDate->toString('yyyy-MM-dd');
-                    }
+                $dateTime = new DateTime($toDate);
+                if ($this->getColumn()->getFilterTime()) {
+                    $toValue = $dateTime->format('Y-m-d\\TH:i');
                 } else {
-                    $dateTime = new DateTime($toDate);
-                    if ($this->getColumn()->getFilterTime()) {
-                        $toValue = $dateTime->format('Y-m-d\\TH:i');
-                    } else {
-                        $toValue = $dateTime->format('Y-m-d');
-                    }
+                    $toValue = $dateTime->format('Y-m-d');
                 }
             } catch (Exception $e) {
                 $toValue = '';
@@ -183,16 +173,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
     #[\Override]
     public function getEscapedValue($index = null)
     {
-        if ($this->getColumn()->getFilterTime()) {
-            $value = $this->getValue($index);
-            if ($value instanceof Zend_Date) {
-                return $value->toString(
-                    $this->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-                );
-            }
-            return $this->escapeHtml($value);
-        }
-
-        return $this->escapeHtml(parent::getEscapedValue($index));
+        return $this->escapeHtml($this->getValue($index));
     }
 }

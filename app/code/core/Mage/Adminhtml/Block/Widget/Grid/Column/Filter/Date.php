@@ -40,12 +40,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
 
         if ($fromDate = $this->getValue('from')) {
             try {
-                if ($fromDate instanceof Zend_Date) {
-                    $fromValue = $fromDate->toString('yyyy-MM-dd');
-                } else {
-                    $dateTime = new DateTime($fromDate);
-                    $fromValue = $dateTime->format('Y-m-d');
-                }
+                $dateTime = new DateTime($fromDate);
+                $fromValue = $dateTime->format('Y-m-d');
             } catch (Exception $e) {
                 $fromValue = '';
             }
@@ -53,12 +49,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
 
         if ($toDate = $this->getValue('to')) {
             try {
-                if ($toDate instanceof Zend_Date) {
-                    $toValue = $toDate->toString('yyyy-MM-dd');
-                } else {
-                    $dateTime = new DateTime($toDate);
-                    $toValue = $dateTime->format('Y-m-d');
-                }
+                $dateTime = new DateTime($toDate);
+                $toValue = $dateTime->format('Y-m-d');
             } catch (Exception $e) {
                 $toValue = '';
             }
@@ -84,11 +76,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
     #[\Override]
     public function getEscapedValue($index = null)
     {
-        $value = $this->getValue($index);
-        if ($value instanceof Zend_Date) {
-            return $value->toString($this->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
-        }
-        return $value;
+        return $this->getValue($index);
     }
 
     public function getValue($index = null)
@@ -149,7 +137,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
      *
      * @param string $date
      * @param string $locale
-     * @return Zend_Date|null
+     * @return string|null
      */
     protected function _convertDate($date, $locale)
     {
@@ -169,8 +157,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
                 // Convert to UTC
                 $dateTime->setTimezone(new DateTimeZone('UTC'));
 
-                // Convert to Zend_Date for compatibility
-                return new Zend_Date($dateTime->format('Y-m-d H:i:s'), 'yyyy-MM-dd HH:mm:ss');
+                return $dateTime->format('Y-m-d H:i:s');
             }
 
             // Legacy format handling
@@ -192,7 +179,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
             //convert store date to default date in UTC timezone without DST
             $dateObj->setTimezone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
 
-            return $dateObj;
+            return $dateObj->toString('yyyy-MM-dd HH:mm:ss');
         } catch (Exception $e) {
             return null;
         }
