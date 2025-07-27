@@ -40,9 +40,13 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             // Check for native date input format (ISO 8601)
             elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
                 $dateValid = true;
-            } elseif ($this->useCalendar()) {
-                $dateValid = isset($value['date']) && preg_match('/^\d{1,4}.+\d{1,4}.+\d{1,4}$/', $value['date']);
-            } else {
+            }
+            // Handle case where datetime value might be passed as 'date' field
+            elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
+                $dateValid = true;
+            }
+            // Fallback validation for any remaining edge cases
+            else {
                 $dateValid = isset($value['day']) && isset($value['month']) && isset($value['year'])
                     && $value['day'] > 0 && $value['month'] > 0 && $value['year'] > 0;
             }
@@ -130,6 +134,12 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     $dateTime = new DateTime('today');
                     $timeParts = explode(':', $value['time']);
                     $dateTime->setTime((int) $timeParts[0], (int) $timeParts[1]);
+                    $result = $dateTime->format('Y-m-d H:i:s');
+                }
+                // Check if datetime-local format is passed in the 'date' field
+                elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
+                    // Parse ISO datetime-local format directly
+                    $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['date'], 0, 16));
                     $result = $dateTime->format('Y-m-d H:i:s');
                 }
                 // Check if date is in ISO format from native input
@@ -305,6 +315,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * Always returns true as we only use native inputs now
      *
      * @return bool
+     * @deprecated since 25.9.0
      */
     public function useCalendar()
     {
@@ -316,6 +327,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * Always returns true for 24h format as native inputs handle this
      *
      * @return bool
+     * @deprecated since 25.9.0
      */
     public function is24hTimeFormat()
     {
