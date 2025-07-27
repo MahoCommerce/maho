@@ -103,11 +103,9 @@ class Packaging
         this.window = Dialog.confirm(template.innerHTML, {
             title: Translator.translate('Create Packages'),
             className: 'packaging-window',
-            ok: true,
-            cancel: true,
-            okLabel: Translator.translate('Submit Shipment'),
             onOk: this.confirmPackaging.bind(this),
             onCancel: this.cancelPackaging.bind(this),
+            okLabel: Translator.translate('Submit Shipment'),
         });
 
         this.packagesContent = this.window.querySelector('#packages_content');
