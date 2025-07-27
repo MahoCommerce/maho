@@ -334,8 +334,10 @@ class ProductConfigure // Maho.Admin.Controller.ProductConfigurePopup
     _showWindow() {
         this.window = Dialog.confirm(null, {
             title: Translator.translate('Configure Product'),
-            ok: this.onConfirmBtn.bind(this),
-            cancel: this.onCancelBtn.bind(this),
+            ok: true,
+            cancel: true,
+            onOk: this.onConfirmBtn.bind(this),
+            onCancel: this.onCancelBtn.bind(this),
         });
 
         this.window.querySelector('.dialog-content').appendChild(this.blockForm);

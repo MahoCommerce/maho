@@ -16,79 +16,8 @@
     Event.observe(window, 'load',  function() {
         if (window.productConfigure) {
             productConfigure.addListType('product_to_add', {
-                urlFetch: '<?= $this->getUrl('*/sales_order_create/configureProductToAdd') ?>',
-                urlSubmit: '<?= $this->getUrl('*/sales_order_create/loadBlock') ?>'
+                urlFetch: '<?= $this->getUrl('*/sales_order_create/configureProductToAdd') ?>'
             });
-            
-            // Override the dialog creation to replace the OK button with our custom handler
-            const originalShowWindow = productConfigure._showWindow;
-            productConfigure._showWindow = function() {
-                const result = originalShowWindow.call(this);
-                
-                // Replace the OK button with our custom handler
-                setTimeout(() => {
-                    if (this.window) {
-                        const okButton = this.window.querySelector('.ok');
-                        if (okButton) {
-                            // Remove any existing click handlers and replace with our own
-                            const newOkButton = okButton.cloneNode(true);
-                            okButton.parentNode.replaceChild(newOkButton, okButton);
-                            
-                            newOkButton.addEventListener('click', async (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                
-                                console.log('OK button clicked - saving configuration');
-                                
-                                const productId = productConfigure.current.itemId;
-                                if (!productId) {
-                                    console.error('No product ID found for configuration');
-                                    return;
-                                }
-                                
-                                try {
-                                    // Validate the form first
-                                    if (!productConfigure.varienForm.validate()) {
-                                        console.log('Form validation failed');
-                                        return;
-                                    }
-                                    
-                                    // Store the configuration (like the original onConfirmBtn does)
-                                    productConfigure._processFieldsData('item_confirm');
-                                    
-                                    // Call any configured confirm callback
-                                    if (typeof productConfigure.confirmCallback[productConfigure.current.listType] === 'function') {
-                                        productConfigure.confirmCallback[productConfigure.current.listType]();
-                                    }
-                                    
-                                    console.log('Configuration saved successfully');
-                                    
-                                    // Close dialog using multiple methods to ensure it closes
-                                    try {
-                                        if (productConfigure.window && productConfigure.window.close) {
-                                            productConfigure.window.close();
-                                        }
-                                        if (typeof Dialog !== 'undefined' && Dialog.close) {
-                                            Dialog.close();
-                                        }
-                                        if (productConfigure.window && productConfigure.window.remove) {
-                                            productConfigure.window.remove();
-                                        }
-                                        console.log('Dialog closed successfully');
-                                    } catch (closeError) {
-                                        console.error('Error closing dialog:', closeError);
-                                    }
-                                    
-                                } catch (error) {
-                                    console.error('Error during configuration saving:', error);
-                                }
-                            });
-                        }
-                    }
-                }, 100);
-                
-                return result;
-            };
             
             productConfigure.addListType('quote_items', {
                 urlFetch: '<?= $this->getUrl('*/sales_order_create/configureQuoteItems') ?>'
