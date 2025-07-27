@@ -35,10 +35,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
      * Use JS calendar settings
      *
      * @return bool
+     * @deprecated since 25.9.0
      */
     public function useCalendar()
     {
-        return Mage::getSingleton('catalog/product_option_type_date')->useCalendar();
+        return true; // Always use native date inputs
     }
 
     /**
@@ -55,12 +56,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             return $this->getDateTimeLocalHtml();
         }
 
-        // For date-only options, use date input
-        if ($this->useCalendar()) {
-            return $this->getCalendarDateHtml();
-        } else {
-            return $this->getDropDownsDateHtml();
-        }
+        return $this->getCalendarDateHtml();
     }
 
     /**

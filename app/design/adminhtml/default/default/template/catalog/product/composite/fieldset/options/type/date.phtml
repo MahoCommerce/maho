@@ -20,15 +20,6 @@ $optionId = $option->getId();
 <dd>
 <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE): ?>
     <?= $this->getDateHtml() ?>
-
-    <?php if (!$this->useCalendar()): ?>
-    <script type="module">
-        const dateOption = productConfigure.opConfig.dateOption;
-        const reloadMonth = dateOption.reloadMonth.bind(dateOption);
-        document.getElementById('options_<?= $optionId ?>_month').addEventListener('change', reloadMonth);
-        document.getElementById('options_<?= $optionId ?>_year').addEventListener('change', reloadMonth);
-    </script>
-    <?php endif ?>
 <?php endif ?>
 
 <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME): ?>

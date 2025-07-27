@@ -153,7 +153,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                         $minute = (int) $value['minute'];
 
                         // Handle 12-hour format
-                        if (!$this->is24hTimeFormat() && isset($value['day_part'])) {
+                        if (isset($value['day_part'])) {
                             $pmDayPart = (strtolower($value['day_part']) == 'pm');
                             if ($hour == 12) {
                                 $hour = $pmDayPart ? 12 : 0;
@@ -167,39 +167,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
 
                     $result = $dateTime->format('Y-m-d H:i:s');
                 } else {
-                    // Legacy handling for non-native inputs
-                    $timestamp = 0;
-
-                    if ($this->_dateExists()) {
-                        if ($this->useCalendar() && isset($value['date'])) {
-                            $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                            $timestamp += Mage::app()->getLocale()->date($value['date'], $format, null, false)->getTimestamp();
-                        } elseif (isset($value['month']) && isset($value['day']) && isset($value['year'])) {
-                            $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
-                        }
-                    } else {
-                        $timestamp += mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y'));
-                    }
-
-                    if ($this->_timeExists()) {
-                        // 24hr hour conversion
-                        $hour = (int) ($value['hour'] ?? 0);
-                        $minute = (int) ($value['minute'] ?? 0);
-
-                        if (!$this->is24hTimeFormat() && isset($value['day_part'])) {
-                            $pmDayPart = (strtolower($value['day_part']) == 'pm');
-                            if ($hour == 12) {
-                                $hour = $pmDayPart ? 12 : 0;
-                            } elseif ($pmDayPart) {
-                                $hour += 12;
-                            }
-                        }
-
-                        $timestamp += 60 * 60 * $hour + 60 * $minute;
-                    }
-
-                    $date = new Zend_Date($timestamp);
-                    $result = $date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+                    // Invalid format - return null
+                    return null;
                 }
 
                 // Save date in internal format to avoid locale date bugs
@@ -235,7 +204,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     ->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)->toString($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
                 $date = new Zend_Date($optionValue);
-                $result = date($this->is24hTimeFormat() ? 'H:i' : 'h:i a', $date->getTimestamp());
+                $result = date('H:i', $date->getTimestamp());
             } else {
                 $result = $optionValue;
             }
