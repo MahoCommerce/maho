@@ -77,6 +77,21 @@
     document.head.appendChild(style);
 
     function createDialog(options) {
+        if (typeof options.onOk === 'function') {
+            options.ok = true;
+        }
+        if (typeof options.onCancel === 'function') {
+            options.cancel = true;
+        }
+        if (typeof options.ok === 'function') {
+            options.onOk = options.ok;
+            options.ok = true;
+        }
+        if (typeof options.cancel === 'function') {
+            options.onCancel = options.cancel;
+            options.cancel = true;
+        }
+
         const dialogCount = document.querySelectorAll('dialog').length;
         const dialog = document.createElement('dialog');
         dialog.id = options.id ?? `dialog-${dialogCount + 1}`;
