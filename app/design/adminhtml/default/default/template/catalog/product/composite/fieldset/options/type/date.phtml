@@ -31,7 +31,7 @@ $optionId = $option->getId();
     <?php endif ?>
 <?php endif ?>
 
-<?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME): ?>
+<?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME): ?>
     <span class="time-picker"><?= $this->getTimeHtml() ?></span>
 <?php endif ?>
 
