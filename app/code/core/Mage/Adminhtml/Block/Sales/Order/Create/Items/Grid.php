@@ -373,10 +373,10 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items_Grid extends Mage_Adminhtml_
     public function getInclExclTaxMessage()
     {
         if (Mage::helper('tax')->priceIncludesTax($this->getStore())) {
-            return Mage::helper('sales')->__('* - Enter custom price including tax');
+            return Mage::helper('sales')->__('* Enter custom price including tax');
         }
 
-        return Mage::helper('sales')->__('* - Enter custom price excluding tax');
+        return Mage::helper('sales')->__('* Enter custom price excluding tax');
     }
 
     /**
