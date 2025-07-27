@@ -71,19 +71,28 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     public function getCalendarDateHtml()
     {
         $option = $this->getOption();
-        $value = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/date');
+        $preconfiguredValues = $this->getProduct()->getPreconfiguredValues();
+        $optionValues = $preconfiguredValues->getData('options/' . $option->getId());
 
         $yearStart = Mage::getSingleton('catalog/product_option_type_date')->getYearStart();
         $yearEnd = Mage::getSingleton('catalog/product_option_type_date')->getYearEnd();
 
+        // Extract date value from different possible formats
+        $dateValue = null;
+        if (is_array($optionValues)) {
+            $dateValue = $optionValues['date'] ?? $optionValues['date_internal'] ?? null;
+        } elseif (is_string($optionValues)) {
+            $dateValue = $optionValues;
+        }
+
         // Convert value to ISO format if needed
         $isoValue = '';
-        if ($value) {
+        if ($dateValue) {
             try {
-                $dateTime = new DateTime($value);
+                $dateTime = new DateTime($dateValue);
                 $isoValue = $dateTime->format('Y-m-d');
             } catch (Exception $e) {
-                $isoValue = $value;
+                $isoValue = is_string($dateValue) ? $dateValue : '';
             }
         }
 
@@ -144,7 +153,14 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     public function getTimeHtml()
     {
         $option = $this->getOption();
-        $value = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/time');
+        $preconfiguredValues = $this->getProduct()->getPreconfiguredValues();
+        $optionValues = $preconfiguredValues->getData('options/' . $option->getId());
+
+        // Extract time value from different possible formats
+        $value = null;
+        if (is_array($optionValues)) {
+            $value = $optionValues['time'] ?? null;
+        }
 
         // Convert value to HH:mm format if needed
         $timeValue = '';
@@ -264,24 +280,53 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     public function getDateTimeLocalHtml()
     {
         $option = $this->getOption();
-        $dateValue = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/date');
-        $timeValue = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/time');
+        $preconfiguredValues = $this->getProduct()->getPreconfiguredValues();
+
+        // Get the option value structure from preconfigured values
+        $optionValues = $preconfiguredValues->getData('options/' . $option->getId());
+
+        // Extract datetime value from different possible formats
+        $datetimeValue = null;
+        $dateValue = null;
+        $timeValue = null;
+
+        if (is_array($optionValues)) {
+            // Check for datetime-local format first (native datetime-local input)
+            if (isset($optionValues['datetime'])) {
+                $datetimeValue = $optionValues['datetime'];
+            }
+            // Check for date_internal (fallback format)
+            elseif (isset($optionValues['date_internal'])) {
+                $datetimeValue = $optionValues['date_internal'];
+            }
+            // Check for separate date and time values
+            else {
+                $dateValue = $optionValues['date'] ?? null;
+                $timeValue = $optionValues['time'] ?? null;
+            }
+        } elseif (is_string($optionValues)) {
+            // Direct string value
+            $datetimeValue = $optionValues;
+        }
 
         $yearStart = Mage::getSingleton('catalog/product_option_type_date')->getYearStart();
         $yearEnd = Mage::getSingleton('catalog/product_option_type_date')->getYearEnd();
 
         // Convert values to ISO datetime-local format (YYYY-MM-DDTHH:mm)
         $isoValue = '';
-        if ($dateValue || $timeValue) {
+        if ($datetimeValue) {
+            // Handle single datetime value
             try {
-                $dateTime = new DateTime();
-
+                $dateTime = new DateTime($datetimeValue);
+                $isoValue = $dateTime->format('Y-m-d\TH:i');
+            } catch (Exception $e) {
+                $isoValue = '';
+            }
+        } elseif ($dateValue || $timeValue) {
+            // Handle separate date and time values
+            try {
                 // Set date part
-                if ($dateValue) {
-                    $dateTime = new DateTime($dateValue);
-                } else {
-                    $dateTime = new DateTime('today');
-                }
+                $dateTime = $dateValue ? new DateTime($dateValue) : new DateTime('today');
 
                 // Set time part
                 if (is_array($timeValue) && isset($timeValue['hour']) && isset($timeValue['minute'])) {
