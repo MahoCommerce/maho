@@ -165,7 +165,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             $this->getName(),
             $this->getHtmlId(),
             $this->_escape($isoValue),
-            $this->serialize($this->getHtmlAttributes())
+            $this->serialize($this->getHtmlAttributes()),
         );
 
         $html .= $this->getAfterElementHtml();

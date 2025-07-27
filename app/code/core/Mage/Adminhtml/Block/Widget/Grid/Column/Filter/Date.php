@@ -39,11 +39,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');
         $htmlId = $this->_getHtmlId() . time();
-        
+
         // Convert values to ISO format for native date input
         $fromValue = '';
         $toValue = '';
-        
+
         if ($fromDate = $this->getValue('from')) {
             try {
                 if ($fromDate instanceof Zend_Date) {
@@ -56,7 +56,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
                 $fromValue = '';
             }
         }
-        
+
         if ($toDate = $this->getValue('to')) {
             try {
                 if ($toDate instanceof Zend_Date) {
@@ -69,7 +69,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
                 $toValue = '';
             }
         }
-        
+
         $html = '<div class="range"><div class="range-line date">'
             . '<span class="label">' . $fromLabel . '</span>'
             . '<input type="date" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
@@ -164,21 +164,21 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 // Native date input format (YYYY-MM-DD)
                 $dateTime = new DateTime($date);
-                
+
                 // Set timezone to store timezone
                 $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
                 $dateTime->setTimezone(new DateTimeZone($storeTimezone));
-                
+
                 // Set beginning of day
                 $dateTime->setTime(0, 0, 0);
-                
+
                 // Convert to UTC
                 $dateTime->setTimezone(new DateTimeZone('UTC'));
-                
+
                 // Convert to Zend_Date for compatibility
                 return new Zend_Date($dateTime->format('Y-m-d H:i:s'), 'yyyy-MM-dd HH:mm:ss');
             }
-            
+
             // Legacy format handling
             $dateObj = $this->getLocale()->date(null, null, $locale, false);
 

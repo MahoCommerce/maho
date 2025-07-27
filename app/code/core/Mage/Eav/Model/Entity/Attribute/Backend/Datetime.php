@@ -59,7 +59,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
         if (empty($date)) {
             return null;
         }
-        
+
         try {
             // Unix timestamp given
             if (preg_match('/^[0-9]+$/', $date)) {
@@ -67,33 +67,33 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
                 $dateTime->setTimestamp((int) $date);
                 return $dateTime->format('Y-m-d H:i:s');
             }
-            
+
             // ISO 8601 date format from native input (YYYY-MM-DD)
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 $dateTime = DateTime::createFromFormat('Y-m-d', $date);
                 return $dateTime ? $dateTime->format('Y-m-d 00:00:00') : null;
             }
-            
+
             // ISO 8601 datetime-local format from native input (YYYY-MM-DDTHH:mm)
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                 $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', substr($date, 0, 16));
                 return $dateTime ? $dateTime->format('Y-m-d H:i:s') : null;
             }
-            
+
             // MySQL datetime format (already correct)
             if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $date)) {
                 return $date;
             }
-            
+
             // Legacy: parse with locale format (compatibility mode)
             $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
             // Convert Zend format to PHP format for createFromFormat
             $phpFormat = str_replace(
                 ['dd', 'MM', 'yyyy', 'HH', 'mm', 'ss'],
                 ['d', 'm', 'Y', 'H', 'i', 's'],
-                $format
+                $format,
             );
-            
+
             $dateTime = DateTime::createFromFormat($phpFormat, $date);
             return $dateTime ? $dateTime->format('Y-m-d H:i:s') : null;
         } catch (Exception $e) {

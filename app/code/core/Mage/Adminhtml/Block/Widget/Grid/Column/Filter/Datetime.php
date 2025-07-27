@@ -63,18 +63,18 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                 if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                     // Native datetime-local input format (YYYY-MM-DDTHH:mm)
                     $dateTime = new DateTime($date);
-                    
+
                     // Set timezone to store timezone
                     $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
                     $dateTime->setTimezone(new DateTimeZone($storeTimezone));
-                    
+
                     // Convert to UTC
                     $dateTime->setTimezone(new DateTimeZone('UTC'));
-                    
+
                     // Convert to Zend_Date for compatibility
                     return new Zend_Date($dateTime->format('Y-m-d H:i:s'), 'yyyy-MM-dd HH:mm:ss');
                 }
-                
+
                 // Legacy format handling
                 $dateObj = $this->getLocale()->date(null, null, $locale, false);
 
@@ -113,14 +113,14 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');
         $htmlId = $this->_getHtmlId() . time();
-        
+
         // Determine input type based on whether time is needed
         $inputType = $this->getColumn()->getFilterTime() ? 'datetime-local' : 'date';
-        
+
         // Convert values to ISO format for native inputs
         $fromValue = '';
         $toValue = '';
-        
+
         if ($fromDate = $this->getValue('from')) {
             try {
                 if ($fromDate instanceof Zend_Date) {
@@ -141,7 +141,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                 $fromValue = '';
             }
         }
-        
+
         if ($toDate = $this->getValue('to')) {
             try {
                 if ($toDate instanceof Zend_Date) {

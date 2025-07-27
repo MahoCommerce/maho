@@ -57,7 +57,7 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 
         $html = '<input type="' . $inputType . '" name="' . $this->getName() . '" id="' . $this->getId() . '" ';
         $html .= 'value="' . $this->escapeHtml($isoValue) . '" class="' . $this->getClass() . '" ';
-        
+
         // Add min/max attributes if year range is specified
         $calendarYearsRange = $this->getYearsRange();
         if ($calendarYearsRange) {
@@ -74,7 +74,7 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
                 }
             }
         }
-        
+
         $html .= $this->getExtraParams() . '/>';
 
         return $html;

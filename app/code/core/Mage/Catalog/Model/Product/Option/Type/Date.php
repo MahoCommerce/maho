@@ -127,19 +127,19 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     // For time-only options, use today's date with the specified time
                     $dateTime = new DateTime('today');
                     $timeParts = explode(':', $value['time']);
-                    $dateTime->setTime((int)$timeParts[0], (int)$timeParts[1]);
+                    $dateTime->setTime((int) $timeParts[0], (int) $timeParts[1]);
                     $result = $dateTime->format('Y-m-d H:i:s');
                 }
                 // Check if date is in ISO format from native input
                 elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
                     // Parse ISO date format
                     $dateTime = new DateTime($value['date']);
-                    
+
                     // Add time if exists
                     if ($this->_timeExists() && isset($value['hour']) && isset($value['minute'])) {
                         $hour = (int) $value['hour'];
                         $minute = (int) $value['minute'];
-                        
+
                         // Handle 12-hour format
                         if (!$this->is24hTimeFormat() && isset($value['day_part'])) {
                             $pmDayPart = (strtolower($value['day_part']) == 'pm');
@@ -149,10 +149,10 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                                 $hour += 12;
                             }
                         }
-                        
+
                         $dateTime->setTime($hour, $minute);
                     }
-                    
+
                     $result = $dateTime->format('Y-m-d H:i:s');
                 } else {
                     // Legacy handling for non-native inputs
@@ -173,7 +173,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                         // 24hr hour conversion
                         $hour = (int) ($value['hour'] ?? 0);
                         $minute = (int) ($value['minute'] ?? 0);
-                        
+
                         if (!$this->is24hTimeFormat() && isset($value['day_part'])) {
                             $pmDayPart = (strtolower($value['day_part']) == 'pm');
                             if ($hour == 12) {

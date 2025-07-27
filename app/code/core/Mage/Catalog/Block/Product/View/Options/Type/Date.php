@@ -49,12 +49,12 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     public function getDateHtml()
     {
         $option = $this->getOption();
-        
+
         // For datetime options, use datetime-local input
         if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
             return $this->getDateTimeLocalHtml();
         }
-        
+
         // For date-only options, use date input
         if ($this->useCalendar()) {
             return $this->getCalendarDateHtml();
@@ -92,7 +92,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             . 'name="options[' . $this->getOption()->getId() . '][date]" '
             . 'class="product-custom-option datetime-picker input-text" '
             . 'value="' . $this->escapeHtml($isoValue) . '" ';
-        
+
         // Add min/max attributes for year range
         if ($yearStart) {
             $html .= 'min="' . $yearStart . '-01-01" ';
@@ -100,11 +100,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         if ($yearEnd) {
             $html .= 'max="' . $yearEnd . '-12-31" ';
         }
-        
+
         if (!$this->getSkipJsReloadPrice()) {
             $html .= 'onchange="opConfig.reloadPrice()" ';
         }
-        
+
         $html .= '/>';
 
         return $html;
@@ -154,14 +154,14 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
                 if (is_array($value) && isset($value['hour']) && isset($value['minute'])) {
                     $hour = (int) $value['hour'];
                     $minute = (int) $value['minute'];
-                    
+
                     // Handle 12-hour format conversion
                     if (isset($value['day_part']) && $value['day_part'] === 'pm' && $hour < 12) {
                         $hour += 12;
                     } elseif (isset($value['day_part']) && $value['day_part'] === 'am' && $hour === 12) {
                         $hour = 0;
                     }
-                    
+
                     $timeValue = sprintf('%02d:%02d', $hour, $minute);
                 } else {
                     $timeValue = $value;
@@ -176,11 +176,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             . 'name="options[' . $this->getOption()->getId() . '][time]" '
             . 'class="product-custom-option datetime-picker input-text" '
             . 'value="' . $this->escapeHtml($timeValue) . '" ';
-        
+
         if (!$this->getSkipJsReloadPrice()) {
             $html .= 'onchange="opConfig.reloadPrice()" ';
         }
-        
+
         $html .= '/>';
 
         return $html;
@@ -275,35 +275,35 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         if ($dateValue || $timeValue) {
             try {
                 $dateTime = new DateTime();
-                
+
                 // Set date part
                 if ($dateValue) {
                     $dateTime = new DateTime($dateValue);
                 } else {
                     $dateTime = new DateTime('today');
                 }
-                
+
                 // Set time part
                 if (is_array($timeValue) && isset($timeValue['hour']) && isset($timeValue['minute'])) {
                     $hour = (int) $timeValue['hour'];
                     $minute = (int) $timeValue['minute'];
-                    
+
                     // Handle 12-hour format conversion
                     if (isset($timeValue['day_part']) && $timeValue['day_part'] === 'pm' && $hour < 12) {
                         $hour += 12;
                     } elseif (isset($timeValue['day_part']) && $timeValue['day_part'] === 'am' && $hour === 12) {
                         $hour = 0;
                     }
-                    
+
                     $dateTime->setTime($hour, $minute);
                 } elseif ($timeValue) {
                     // Parse time string
                     $timeParts = explode(':', $timeValue);
                     if (count($timeParts) >= 2) {
-                        $dateTime->setTime((int)$timeParts[0], (int)$timeParts[1]);
+                        $dateTime->setTime((int) $timeParts[0], (int) $timeParts[1]);
                     }
                 }
-                
+
                 $isoValue = $dateTime->format('Y-m-d\TH:i');
             } catch (Exception $e) {
                 $isoValue = '';
@@ -315,7 +315,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             . 'name="options[' . $this->getOption()->getId() . '][datetime]" '
             . 'class="product-custom-option datetime-picker input-text" '
             . 'value="' . $this->escapeHtml($isoValue) . '" ';
-        
+
         // Add min/max attributes for year range
         if ($yearStart) {
             $html .= 'min="' . $yearStart . '-01-01T00:00" ';
@@ -323,11 +323,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         if ($yearEnd) {
             $html .= 'max="' . $yearEnd . '-12-31T23:59" ';
         }
-        
+
         if (!$this->getSkipJsReloadPrice()) {
             $html .= 'onchange="opConfig.reloadPrice()" ';
         }
-        
+
         $html .= '/>';
 
         return $html;
