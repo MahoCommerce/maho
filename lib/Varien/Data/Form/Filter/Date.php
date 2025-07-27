@@ -54,6 +54,12 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
             return $value;
         }
 
+        // Check if value is already in ISO format from native date input
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            // Already in correct format (YYYY-MM-DD), return as-is
+            return $value;
+        }
+
         $filterInput = new Zend_Filter_LocalizedToNormalized([
             'date_format'   => $this->_dateFormat,
             'locale'        => $this->_locale,

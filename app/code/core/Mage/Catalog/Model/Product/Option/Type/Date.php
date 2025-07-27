@@ -71,6 +71,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $this->setUserValue(
                 [
                     'date' => $value['date'] ?? '',
+                    'datetime' => $value['datetime'] ?? '',
+                    'time' => $value['time'] ?? '',
                     'year' => isset($value['year']) ? (int) $value['year'] : 0,
                     'month' => isset($value['month']) ? (int) $value['month'] : 0,
                     'day' => isset($value['day']) ? (int) $value['day'] : 0,
