@@ -4541,7 +4541,6 @@ label.offcanvas-trigger {
 .product-options dd input[type="datetime-local"],
 .product-options dd input.datetime-picker {
   width: auto;
-  min-width: 150px;
   padding: 4px 8px;
   border: 1px solid #ccc;
   border-radius: 3px;
