@@ -133,8 +133,6 @@ class TranslateInline {
             className: 'magento',
             width: 650,
             height: 470,
-            ok: true,
-            cancel: true,
             okLabel: 'Submit',
             onOk: this.formOk.bind(this),
             onCancel: this.formClose.bind(this),

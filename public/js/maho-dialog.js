@@ -85,6 +85,12 @@
             options.onCancel = options.cancel;
             options.cancel = true;
         }
+        if (typeof options.onOk === 'function') {
+            options.ok = true;
+        }
+        if (typeof options.onCancel === 'function') {
+            options.cancel = true;
+        }
 
         const dialogCount = document.querySelectorAll('dialog').length;
         const dialog = document.createElement('dialog');
