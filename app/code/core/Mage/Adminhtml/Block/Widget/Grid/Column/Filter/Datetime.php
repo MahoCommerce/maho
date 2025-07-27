@@ -6,16 +6,10 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Date grid column filter
- *
- * @package    Mage_Adminhtml
- * @todo       date format
- */
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date
 {
     //full day is 86400, we need 23 hours:59 minutes:59 seconds = 86399
