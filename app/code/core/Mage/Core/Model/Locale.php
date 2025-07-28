@@ -912,6 +912,11 @@ class Mage_Core_Model_Locale
      */
     public function getCountryTranslation($countryId, $locale = null)
     {
+        if (!Mage::isInstalled()) {
+            // During installation, use native PHP Intl extension for country translation
+            return $this->getNativeCountryName($countryId, $locale);
+        }
+
         $country = Mage::getModel('directory/country')->load($countryId);
         if ($country->getId()) {
             if ($locale) {
@@ -922,17 +927,84 @@ class Mage_Core_Model_Locale
             }
             return $country->getName();
         }
+
         return false;
     }
 
     /**
      * Returns an array with the name of all countries translated to the given language
      *
-     * @return array
+     * @return array<string, string>
      */
-    public function getCountryTranslationList()
+    public function getCountryTranslationList(): array
     {
+        if (!Mage::isInstalled()) {
+            // During installation, use native PHP Intl extension for country translations
+            return $this->getNativeCountryList();
+        }
+
         return Mage::getResourceModel('directory/country_collection')->toOptionHash();
+    }
+
+    /**
+     * Get native country list using PHP Intl extension (dynamically from ICU data)
+     *
+     * @return array<string, string>
+     */
+    protected function getNativeCountryList(): array
+    {
+        $locale = $this->getLocaleCode();
+        $countries = [];
+        $countryCodes = [];
+
+        // Dynamically extract country codes from available locales
+        $locales = ResourceBundle::getLocales('');
+        foreach ($locales as $localeCode) {
+            $parsed = Locale::parseLocale($localeCode);
+            if (isset($parsed['region']) && strlen($parsed['region']) === 2) {
+                $countryCodes[$parsed['region']] = true;
+            }
+        }
+
+        // Get display names for all discovered country codes
+        foreach (array_keys($countryCodes) as $code) {
+            try {
+                $countryName = Locale::getDisplayRegion('-' . $code, $locale);
+                if ($countryName && $countryName !== $code) {
+                    $countries[$code] = $countryName;
+                } else {
+                    // Use country code itself as fallback when translation fails
+                    $countries[$code] = $code;
+                }
+            } catch (IntlException $e) {
+                // Use country code itself as fallback for exceptions
+                $countries[$code] = $code;
+            }
+        }
+
+        asort($countries);
+        return $countries;
+    }
+
+    /**
+     * Get native country name using PHP Intl extension
+     */
+    protected function getNativeCountryName(string $countryId, ?string $locale = null): string
+    {
+        $displayLocale = $locale ?: $this->getLocaleCode();
+
+        try {
+            $countryName = Locale::getDisplayRegion('-' . $countryId, $displayLocale);
+            if ($countryName && $countryName !== $countryId) {
+                return $countryName;
+            } else {
+                // Use country code itself as fallback when translation fails
+                return $countryId;
+            }
+        } catch (IntlException $e) {
+            // Use country code itself as fallback for exceptions
+            return $countryId;
+        }
     }
 
     /**
