@@ -493,10 +493,6 @@ class Mediabrowser {
                 defaultSavedImageType: this.imageFileType.extension,
                 defaultSavedImageQuality: this.imageQuality,
                 avoidChangesNotSavedAlertOnLeave: true,
-                showCanvasOnly: false,
-                useBackendTranslations: false,
-                observePluginContainerSize: true,
-                saveMode: 'download-save',
                 onSave: (editedImageObject, designState) => {
                     this.saveEditedImage(selectedFile.id, editedImageObject);
                 },
