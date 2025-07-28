@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -339,11 +341,8 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 // Always replace extension with configured type
                 // Handle cases where user typed filename with extension and editor added another extension
 
-                // Strip all extensions by repeatedly removing the last extension until no more exist
-                $baseFilename = $newFilename;
-                while (($ext = pathinfo($baseFilename, PATHINFO_EXTENSION)) !== '') {
-                    $baseFilename = pathinfo($baseFilename, PATHINFO_FILENAME);
-                }
+                // Extract base filename without any extensions
+                $baseFilename = pathinfo($newFilename, PATHINFO_FILENAME);
 
                 $newFilename = $baseFilename . '.' . $configuredExtension;
 
@@ -387,8 +386,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $uploadedFile = $_FILES['edited_image']['tmp_name'];
 
             // Validate uploaded file is an image
-            $imageInfo = getimagesize($uploadedFile);
-            if (!$imageInfo) {
+            if (!getimagesize($uploadedFile)) {
                 throw new Exception('Uploaded file is not a valid image.');
             }
 
