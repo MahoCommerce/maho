@@ -487,9 +487,15 @@ class Mediabrowser {
             // Preload the image to ensure it's available
             await this.preloadImage(imageUrl);
 
+            // Get original filename without extension for display
+            const smallTags = selectedFile.querySelectorAll('small');
+            const originalFilename = smallTags[smallTags.length - 1]?.textContent || 'image';
+            const filenameWithoutExt = originalFilename.split('.')[0];
+
             // Initialize the image editor with proper configuration
             const imageEditor = new window.FilerobotImageEditor(editorContainer, {
                 source: imageUrl,
+                defaultSavedImageName: filenameWithoutExt,
                 defaultSavedImageType: this.imageFileType.extension,
                 defaultSavedImageQuality: this.imageQuality,
                 avoidChangesNotSavedAlertOnLeave: true,
