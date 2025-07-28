@@ -826,7 +826,27 @@ ul.item-options li { padding-left:.7em; }
 .product-options dd.last { border-bottom:0; margin-bottom:0; padding-bottom:0; }
 .product-options dd .input-box { display:block; }
 .product-options dd input.input-text { width:98%; }
-.product-options dd input.datetime-picker { width:150px; }
+/* Native date/time inputs */
+.product-options dd input[type="date"],
+.product-options dd input[type="time"],
+.product-options dd input[type="datetime-local"],
+.product-options dd input.datetime-picker { 
+  width: auto;
+  min-width: 150px;
+  padding: 3px 6px;
+  border: 1px solid #b6b6b6;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.product-options dd input[type="date"]:focus,
+.product-options dd input[type="time"]:focus,
+.product-options dd input[type="datetime-local"]:focus {
+  border-color: #ea7601;
+  outline: none;
+  box-shadow: 0 0 2px rgba(234, 118, 1, 0.3);
+}
 .product-options dd .time-picker { display:-moz-inline-box; display:inline-block; padding:2px 0; vertical-align:middle; }
 .product-options dd .time-picker select { vertical-align:middle; }
 .product-options dd textarea { width:98%; height:8em; }
@@ -1585,3 +1605,28 @@ div.actions:after,
 .files-wide .row:after,
 .grid tr.filter .range .range-line:after,
 .store-scope:after { display:block; clear:both; content:"."; font-size:0; line-height:0; height:0; overflow:hidden; }
+
+
+/* ============================================ *
+ * Native Date Input Styles
+ * ============================================ */
+/* General admin date input styles */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  font-family: "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  padding: 3px 6px;
+  border: 1px solid #b6b6b6;
+  border-radius: 2px;
+  background: #fff;
+}
+
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus {
+  border-color: #ea7601;
+  outline: none;
+  box-shadow: 0 0 2px rgba(234, 118, 1, 0.3);
+}
+EOF < /dev/null

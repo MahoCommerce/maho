@@ -6,7 +6,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,6 +51,12 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
     public function inputFilter($value)
     {
         if ($value === null || $value === '') {
+            return $value;
+        }
+
+        // Check if value is already in ISO format from native date input
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            // Already in correct format (YYYY-MM-DD), return as-is
             return $value;
         }
 
