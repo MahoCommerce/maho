@@ -33,6 +33,7 @@ vendor/bin/rector -c .rector.php
 To bootstrap Maho in any PHP script, simply require the Composer autoloader:
 ```php
 require 'vendor/autoload.php';
+Mage::app();
 // That's it! Maho is now bootstrapped and ready to use
 ```
 No need for complex initialization - the autoloader handles everything.
