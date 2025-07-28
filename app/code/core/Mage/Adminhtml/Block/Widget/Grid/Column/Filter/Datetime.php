@@ -63,7 +63,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
     {
         if ($this->getColumn()->getFilterTime()) {
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
-                return Mage::app()->getLocale()->utcDate(null, $date, true, 'html5');
+                // Validate that the datetime is actually valid (not just format)
+                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($date, 0, 16));
+                if ($dateTime && $dateTime->format('Y-m-d\TH:i') === substr($date, 0, 16)) {
+                    return Mage::app()->getLocale()->utcDate(null, $date, true, 'html5');
+                }
             }
         }
 

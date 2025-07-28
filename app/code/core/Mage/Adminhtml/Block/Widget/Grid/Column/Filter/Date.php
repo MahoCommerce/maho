@@ -132,7 +132,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
     protected function _convertDate($date, $locale)
     {
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-            return Mage::app()->getLocale()->utcDate(null, $date, false, 'html5');
+            // Validate that the date is actually valid (not just format)
+            $dateTime = DateTime::createFromFormat('Y-m-d', $date);
+            if ($dateTime && $dateTime->format('Y-m-d') === $date) {
+                return Mage::app()->getLocale()->utcDate(null, $date, false, 'html5');
+            }
         }
 
         return null;

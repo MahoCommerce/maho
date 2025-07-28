@@ -589,19 +589,23 @@ class Mage_Core_Model_Locale
                 return null;
             }
 
-            $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-            $dateObj = new Zend_Date($date, null, $this->getLocale());
-            $dateObj->setTimezone($timezone);
-            if (!$includeTime) {
-                $dateObj->setHour(0)
-                    ->setMinute(0)
-                    ->setSecond(0);
-            }
+            try {
+                $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
+                $dateObj = new Zend_Date($date, null, $this->getLocale());
+                $dateObj->setTimezone($timezone);
+                if (!$includeTime) {
+                    $dateObj->setHour(0)
+                        ->setMinute(0)
+                        ->setSecond(0);
+                }
 
-            if ($includeTime) {
-                return $dateObj->toString('yyyy-MM-dd\'T\'HH:mm');
-            } else {
-                return $dateObj->toString('yyyy-MM-dd');
+                if ($includeTime) {
+                    return $dateObj->toString('yyyy-MM-dd\'T\'HH:mm');
+                } else {
+                    return $dateObj->toString('yyyy-MM-dd');
+                }
+            } catch (Exception $e) {
+                return null;
             }
         }
 
@@ -639,19 +643,21 @@ class Mage_Core_Model_Locale
         // Special handling for HTML5 native input formats
         if ($format === 'html5' && is_string($date)) {
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
-                // datetime-local format
+                // datetime-local format - validate the datetime
                 $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($date, 0, 16));
+                if ($dateTime === false || $dateTime->format('Y-m-d\TH:i') !== substr($date, 0, 16)) {
+                    return null;
+                }
             } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                // date format
+                // date format - validate the date
                 $dateTime = DateTime::createFromFormat('Y-m-d', $date);
+                if ($dateTime === false || $dateTime->format('Y-m-d') !== $date) {
+                    return null;
+                }
                 if (!$includeTime) {
                     $dateTime->setTime(0, 0, 0);
                 }
             } else {
-                return null;
-            }
-
-            if ($dateTime === false) {
                 return null;
             }
 
