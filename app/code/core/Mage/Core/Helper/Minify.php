@@ -47,22 +47,26 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     public function minifyCss(string $filePath): string
     {
         if (!$this->isCssMinificationEnabled()) {
+            $this->sendEarlyHint($filePath, 'style');
             return $filePath;
         }
 
-        // Don't minify external URLs
+        // Don't minify external URLs, but still send Early Hint
         if ($this->isExternalUrl($filePath)) {
+            $this->sendEarlyHint($filePath, 'style');
             return $filePath;
         }
 
         // Check runtime cache first
         if (isset(self::$processedCssFiles[$filePath])) {
+            $this->sendEarlyHint(self::$processedCssFiles[$filePath], 'style');
             return self::$processedCssFiles[$filePath];
         }
 
         $result = $this->processFile($filePath, 'css');
         self::$processedCssFiles[$filePath] = $result;
 
+        $this->sendEarlyHint($result, 'style');
         return $result;
     }
 
@@ -72,22 +76,26 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     public function minifyJs(string $filePath): string
     {
         if (!$this->isJsMinificationEnabled()) {
+            $this->sendEarlyHint($filePath, 'script');
             return $filePath;
         }
 
-        // Don't minify external URLs
+        // Don't minify external URLs, but still send Early Hint
         if ($this->isExternalUrl($filePath)) {
+            $this->sendEarlyHint($filePath, 'script');
             return $filePath;
         }
 
         // Check runtime cache first
         if (isset(self::$processedJsFiles[$filePath])) {
+            $this->sendEarlyHint(self::$processedJsFiles[$filePath], 'script');
             return self::$processedJsFiles[$filePath];
         }
 
         $result = $this->processFile($filePath, 'js');
         self::$processedJsFiles[$filePath] = $result;
 
+        $this->sendEarlyHint($result, 'script');
         return $result;
     }
 
@@ -272,6 +280,25 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
         // Also clear the runtime cache
         self::$processedCssFiles = [];
         self::$processedJsFiles = [];
+    }
+
+    /**
+     * Send preload hint with Early Hints support for FrankenPHP
+     */
+    private function sendEarlyHint(string $url, string $as): void
+    {
+        // Only send preload hints on frontend and if headers haven't been sent
+        if (Mage::app()->getStore()->isAdmin() || headers_sent()) {
+            return;
+        }
+
+        // Send Link header for preload
+        header("Link: <{$url}>; rel=preload; as={$as}", false);
+
+        // If running under FrankenPHP, send Early Hints
+        if (function_exists('headers_send')) {
+            headers_send(103);
+        }
     }
 
     /**
