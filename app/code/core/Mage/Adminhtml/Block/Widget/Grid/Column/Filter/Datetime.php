@@ -29,21 +29,24 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
             $value['datetime'] = true;
         }
         if (!empty($value['to']) && !$this->getColumn()->getFilterTime()) {
-            $dateTime = new DateTime($value['to']);
+            try {
+                $dateTime = new DateTime($value['to']);
 
-            // Set timezone to store timezone
-            $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
-            $dateTime->setTimezone(new DateTimeZone($storeTimezone));
+                // Set timezone to store timezone
+                $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+                $dateTime->setTimezone(new DateTimeZone($storeTimezone));
 
-            // Add one day and subtract one second for end of day
-            $dateTime->add(new DateInterval('P1D'));
-            $dateTime->sub(new DateInterval('PT1S'));
+                // Add one day and subtract one second for end of day
+                $dateTime->add(new DateInterval('P1D'));
+                $dateTime->sub(new DateInterval('PT1S'));
 
-            // Convert to UTC
-            $dateTime->setTimezone(new DateTimeZone('UTC'));
+                // Convert to UTC
+                $dateTime->setTimezone(new DateTimeZone('UTC'));
 
-            // Update the value with the processed date string
-            $value['to'] = $dateTime->format('Y-m-d H:i:s');
+                // Update the value with the processed date string
+                $value['to'] = $dateTime->format('Y-m-d H:i:s');
+            } catch (Exception $e) {
+            }
         }
         return $value;
     }
@@ -59,43 +62,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
     protected function _convertDate($date, $locale)
     {
         if ($this->getColumn()->getFilterTime()) {
-            try {
-                // Check if date is in ISO format from native datetime-local input
-                if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
-                    // Native datetime-local input format (YYYY-MM-DDTHH:mm)
-                    $dateTime = new DateTime($date);
-
-                    // Set timezone to store timezone
-                    $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
-                    $dateTime->setTimezone(new DateTimeZone($storeTimezone));
-
-                    // Convert to UTC
-                    $dateTime->setTimezone(new DateTimeZone('UTC'));
-
-                    return $dateTime->format('Y-m-d H:i:s');
-                }
-
-                // Legacy format handling
-                $dateObj = $this->getLocale()->date(null, null, $locale, false);
-
-                //set default timezone for store (admin)
-                $dateObj->setTimezone(
-                    Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE),
-                );
-
-                //set date with applying timezone of store
-                $dateObj->set(
-                    $date,
-                    $this->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-                    $locale,
-                );
-
-                //convert store date to default date in UTC timezone without DST
-                $dateObj->setTimezone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
-
-                return $dateObj->toString('yyyy-MM-dd HH:mm:ss');
-            } catch (Exception $e) {
-                return null;
+            if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
+                return Mage::app()->getLocale()->utcDate(null, $date, true, 'html5');
             }
         }
 
@@ -120,31 +88,14 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
         // Convert values to ISO format for native inputs
         $fromValue = '';
         $toValue = '';
+        $isDateOnly = !$this->getColumn()->getFilterTime();
 
         if ($fromDate = $this->getValue('from')) {
-            try {
-                $dateTime = new DateTime($fromDate);
-                if ($this->getColumn()->getFilterTime()) {
-                    $fromValue = $dateTime->format('Y-m-d\\TH:i');
-                } else {
-                    $fromValue = $dateTime->format('Y-m-d');
-                }
-            } catch (Exception $e) {
-                $fromValue = '';
-            }
+            $fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, !$isDateOnly, 'html5') ?? '';
         }
 
         if ($toDate = $this->getValue('to')) {
-            try {
-                $dateTime = new DateTime($toDate);
-                if ($this->getColumn()->getFilterTime()) {
-                    $toValue = $dateTime->format('Y-m-d\\TH:i');
-                } else {
-                    $toValue = $dateTime->format('Y-m-d');
-                }
-            } catch (Exception $e) {
-                $toValue = '';
-            }
+            $toValue = Mage::app()->getLocale()->storeDate(null, $toDate, !$isDateOnly, 'html5') ?? '';
         }
 
         $html = '<div class="range"><div class="range-line date">'

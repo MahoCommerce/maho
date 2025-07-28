@@ -35,20 +35,20 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         if ($this->_dateExists()) {
             // Check for native datetime-local input format (for datetime options)
             if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME && isset($value['datetime'])) {
-                $dateValid = preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['datetime']);
+                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['datetime'], 0, 16));
+                $dateValid = $dateTime !== false;
             }
             // Check for native date input format (ISO 8601)
-            elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
-                $dateValid = true;
+            elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value['date'])) {
+                $dateTime = DateTime::createFromFormat('Y-m-d', $value['date']);
+                $dateValid = $dateTime !== false;
             }
             // Handle case where datetime value might be passed as 'date' field
             elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
-                $dateValid = true;
-            }
-            // Fallback validation for any remaining edge cases
-            else {
-                $dateValid = isset($value['day']) && isset($value['month']) && isset($value['year'])
-                    && $value['day'] > 0 && $value['month'] > 0 && $value['year'] > 0;
+                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['date'], 0, 16));
+                $dateValid = $dateTime !== false;
+            } else {
+                $dateValid = false;
             }
         }
 
@@ -60,12 +60,17 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             }
             // For time-only options, check for native time input format
             elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME && isset($value['time'])) {
-                $timeValid = preg_match('/^\d{2}:\d{2}/', $value['time']);
-            }
-            // Legacy format validation
-            else {
-                $timeValid = isset($value['hour']) && isset($value['minute'])
-                    && is_numeric($value['hour']) && is_numeric($value['minute']);
+                // Validate time format HH:mm
+                $timeParts = explode(':', $value['time']);
+                if (count($timeParts) === 2) {
+                    $hour = (int) $timeParts[0];
+                    $minute = (int) $timeParts[1];
+                    $timeValid = $hour >= 0 && $hour <= 23 && $minute >= 0 && $minute <= 59;
+                } else {
+                    $timeValid = false;
+                }
+            } else {
+                $timeValid = false;
             }
         }
 
@@ -77,12 +82,6 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     'date' => $value['date'] ?? '',
                     'datetime' => $value['datetime'] ?? '',
                     'time' => $value['time'] ?? '',
-                    'year' => isset($value['year']) ? (int) $value['year'] : 0,
-                    'month' => isset($value['month']) ? (int) $value['month'] : 0,
-                    'day' => isset($value['day']) ? (int) $value['day'] : 0,
-                    'hour' => isset($value['hour']) ? (int) $value['hour'] : 0,
-                    'minute' => isset($value['minute']) ? (int) $value['minute'] : 0,
-                    'day_part' => $value['day_part'] ?? '',
                     'date_internal' => $value['date_internal'] ?? '',
                 ],
             );
@@ -144,27 +143,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 }
                 // Check if date is in ISO format from native input
                 elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
-                    // Parse ISO date format
+                    // Parse ISO date format (date-only option)
                     $dateTime = new DateTime($value['date']);
-
-                    // Add time if exists
-                    if ($this->_timeExists() && isset($value['hour']) && isset($value['minute'])) {
-                        $hour = (int) $value['hour'];
-                        $minute = (int) $value['minute'];
-
-                        // Handle 12-hour format
-                        if (isset($value['day_part'])) {
-                            $pmDayPart = (strtolower($value['day_part']) == 'pm');
-                            if ($hour == 12) {
-                                $hour = $pmDayPart ? 12 : 0;
-                            } elseif ($pmDayPart) {
-                                $hour += 12;
-                            }
-                        }
-
-                        $dateTime->setTime($hour, $minute);
-                    }
-
                     $result = $dateTime->format('Y-m-d H:i:s');
                 } else {
                     // Invalid format - return null

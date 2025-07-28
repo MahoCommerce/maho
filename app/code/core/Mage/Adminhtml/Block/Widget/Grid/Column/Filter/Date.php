@@ -39,21 +39,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         $toValue = '';
 
         if ($fromDate = $this->getValue('from')) {
-            try {
-                $dateTime = new DateTime($fromDate);
-                $fromValue = $dateTime->format('Y-m-d');
-            } catch (Exception $e) {
-                $fromValue = '';
-            }
+            $fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, false, 'html5') ?? '';
         }
 
         if ($toDate = $this->getValue('to')) {
-            try {
-                $dateTime = new DateTime($toDate);
-                $toValue = $dateTime->format('Y-m-d');
-            } catch (Exception $e) {
-                $toValue = '';
-            }
+            $toValue = Mage::app()->getLocale()->storeDate(null, $toDate, false, 'html5') ?? '';
         }
 
         $html = '<div class="range"><div class="range-line date">'
@@ -141,47 +131,10 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
      */
     protected function _convertDate($date, $locale)
     {
-        try {
-            // Check if date is in ISO format from native date input
-            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                // Native date input format (YYYY-MM-DD)
-                $dateTime = new DateTime($date);
-
-                // Set timezone to store timezone
-                $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
-                $dateTime->setTimezone(new DateTimeZone($storeTimezone));
-
-                // Set beginning of day
-                $dateTime->setTime(0, 0, 0);
-
-                // Convert to UTC
-                $dateTime->setTimezone(new DateTimeZone('UTC'));
-
-                return $dateTime->format('Y-m-d H:i:s');
-            }
-
-            // Legacy format handling
-            $dateObj = $this->getLocale()->date(null, null, $locale, false);
-
-            //set default timezone for store (admin)
-            $dateObj->setTimezone(
-                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE),
-            );
-
-            //set beginning of day
-            $dateObj->setHour(00);
-            $dateObj->setMinute(00);
-            $dateObj->setSecond(00);
-
-            //set date with applying timezone of store
-            $dateObj->set($date, Zend_Date::DATE_SHORT, $locale);
-
-            //convert store date to default date in UTC timezone without DST
-            $dateObj->setTimezone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
-
-            return $dateObj->toString('yyyy-MM-dd HH:mm:ss');
-        } catch (Exception $e) {
-            return null;
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return Mage::app()->getLocale()->utcDate(null, $date, false, 'html5');
         }
+
+        return null;
     }
 }
