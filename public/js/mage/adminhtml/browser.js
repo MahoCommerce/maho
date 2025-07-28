@@ -574,12 +574,16 @@ class Mediabrowser {
                 box-sizing: border-box;
             }
 
-            /* Hide file type selector in save dialog since we use configured type */
+            /* Hide file type selector and quality slider in save dialog since we use configured values */
             .FIE_save-modal .FIE_save-extension-selector,
             .FIE_save-modal .SfxSelect-wrapper[data-testid*="extension"],
             .FIE_save-modal .SfxSelect[data-testid*="extension"],
             [data-testid="save-image-type-selector"],
-            [data-testid="save-extension-selector"] {
+            [data-testid="save-extension-selector"],
+            .FIE_save-modal .FIE_save-quality-wrapper,
+            .FIE_save-modal .FIE_save-quality-slider,
+            [data-testid="save-quality-slider"],
+            [data-testid="save-image-quality-slider"] {
                 display: none !important;
             }
         `;
