@@ -36,9 +36,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                 $storeTimezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
                 $dateTime->setTimezone(new DateTimeZone($storeTimezone));
 
-                // Add one day and subtract one second for end of day
-                $dateTime->add(new DateInterval('P1D'));
-                $dateTime->sub(new DateInterval('PT1S'));
+                // Set to end of day (23:59:59) - DST-safe
+                $dateTime->setTime(23, 59, 59);
 
                 // Convert to UTC
                 $dateTime->setTimezone(new DateTimeZone('UTC'));
