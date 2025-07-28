@@ -344,7 +344,11 @@ small {
   display: none;
 }
 .grid tr.filter .range div.date {
-  min-width: 140px;
+  min-width: 170px;
+}
+.grid tr.filter .range input[type="date"],
+.grid tr.filter .range input[type="datetime-local"] {
+  width: 100px !important;
 }
 .grid tr.filter .range input, .grid tr.filter .range select {
   width: 75px !important;
