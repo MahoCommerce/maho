@@ -139,6 +139,14 @@ class Mediabrowser {
                 el.addEventListener('click', this.selectFile.bind(this));
                 if (this.canInsertImage) {
                     el.addEventListener('dblclick', this.insert.bind(this));
+                } else if (this.isCmsMediaLibrary()) {
+                    // In CMS Media Library, double-click on images opens editor
+                    el.addEventListener('dblclick', (event) => {
+                        this.selectFile(event);
+                        if (this.isSelectedFileImage()) {
+                            this.editImage();
+                        }
+                    });
                 }
             }
 
