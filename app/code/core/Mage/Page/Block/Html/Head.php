@@ -138,36 +138,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             $params = 'media="all"';
         }
 
-        // Apply minification if enabled and store result separately (frontend only)
-        $minifyHelper = Mage::helper('core/minify');
-        $minifiedUrl = null;
-        $isAdmin = Mage::app()->getStore()->isAdmin();
-
-        if (!$isAdmin && $type === 'skin_css' && $minifyHelper->isCssMinificationEnabled()) {
-            $skinUrl = Mage::getDesign()->getSkinUrl($name, []);
-            $minifiedUrl = $minifyHelper->minifyCss($skinUrl);
-            if ($minifiedUrl === $skinUrl) {
-                $minifiedUrl = null; // No minification applied
-            }
-        } elseif (!$isAdmin && $type === 'js' && $minifyHelper->isJsMinificationEnabled()) {
-            $jsUrl = Mage::getBaseUrl('js') . $name;
-            $minifiedUrl = $minifyHelper->minifyJs($jsUrl);
-            if ($minifiedUrl === $jsUrl) {
-                $minifiedUrl = null; // No minification applied
-            }
-        } elseif (!$isAdmin && $type === 'skin_js' && $minifyHelper->isJsMinificationEnabled()) {
-            $skinJsUrl = Mage::getDesign()->getSkinUrl($name, []);
-            $minifiedUrl = $minifyHelper->minifyJs($skinJsUrl);
-            if ($minifiedUrl === $skinJsUrl) {
-                $minifiedUrl = null; // No minification applied
-            }
-        } elseif (!$isAdmin && $type === 'js_css' && $minifyHelper->isCssMinificationEnabled()) {
-            $jsCssUrl = Mage::getBaseUrl('js') . $name;
-            $minifiedUrl = $minifyHelper->minifyCss($jsCssUrl);
-            if ($minifiedUrl === $jsCssUrl) {
-                $minifiedUrl = null; // No minification applied
-            }
-        }
+        // Store flag to indicate minification should be applied later
+        $shouldMinify = !Mage::app()->getStore()->isAdmin() &&
+                       in_array($type, ['skin_css', 'js', 'skin_js', 'js_css']);
 
         $this->_data['items'][$type . '/' . $name] = [
             'type' => $type,
@@ -175,7 +148,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             'params' => $params,
             'if' => $if,
             'cond' => $cond,
-            'minified_url' => $minifiedUrl, // Store minified URL separately
+            'should_minify' => $shouldMinify, // Flag for deferred minification
         ];
 
         // that is the standard behaviour
@@ -284,27 +257,43 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         $baseJsUrl = Mage::getBaseUrl('js');
         $items = [];
 
+        $minifyHelper = Mage::helper('core/minify');
+
         // get static files from the js folder, no need in lookups
         foreach ($staticItems as $params => $rows) {
             foreach ($rows as $name => $itemData) {
-                // If we have a minified URL, use it directly
-                if (is_array($itemData) && isset($itemData['minified_url'])) {
-                    $items[$params][] = $itemData['minified_url'];
-                } else {
-                    $items[$params][] = $baseJsUrl . $name;
+                $url = $baseJsUrl . $name;
+
+                // Apply minification if needed
+                if (is_array($itemData) && !empty($itemData['should_minify'])) {
+                    $type = $itemData['type'];
+                    if ($type === 'js' && $minifyHelper->isJsMinificationEnabled()) {
+                        $url = $minifyHelper->minifyJs($url);
+                    } elseif ($type === 'js_css' && $minifyHelper->isCssMinificationEnabled()) {
+                        $url = $minifyHelper->minifyCss($url);
+                    }
                 }
+
+                $items[$params][] = $url;
             }
         }
 
         // lookup each file basing on current theme configuration
         foreach ($skinItems as $params => $rows) {
             foreach ($rows as $name => $itemData) {
-                // If we have a minified URL, use it directly
-                if (is_array($itemData) && isset($itemData['minified_url'])) {
-                    $items[$params][] = $itemData['minified_url'];
-                } else {
-                    $items[$params][] = $designPackage->getSkinUrl($name, []);
+                $url = $designPackage->getSkinUrl($name, []);
+
+                // Apply minification if needed
+                if (is_array($itemData) && !empty($itemData['should_minify'])) {
+                    $type = $itemData['type'];
+                    if ($type === 'skin_css' && $minifyHelper->isCssMinificationEnabled()) {
+                        $url = $minifyHelper->minifyCss($url);
+                    } elseif ($type === 'skin_js' && $minifyHelper->isJsMinificationEnabled()) {
+                        $url = $minifyHelper->minifyJs($url);
+                    }
                 }
+
+                $items[$params][] = $url;
             }
         }
 

@@ -132,12 +132,31 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
             return $cachedUrl;
         }
 
-        // Minify and cache
+        // Minify and cache with file locking to prevent race conditions
         try {
             $this->ensureCacheDirectory($type);
-            $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
-            file_put_contents($cachedFile, $minifiedContent);
-            return $cachedUrl;
+
+            $lockFile = $cachedFile . '.lock';
+            $lockHandle = fopen($lockFile, 'c');
+
+            if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+                // If we can't get a lock, return original file (another process is minifying)
+                if ($lockHandle) {
+                    fclose($lockHandle);
+                }
+                return $filePath;
+            }
+
+            try {
+                $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
+                file_put_contents($cachedFile, $minifiedContent);
+                return $cachedUrl;
+            } finally {
+                flock($lockHandle, LOCK_UN);
+                fclose($lockHandle);
+                @unlink($lockFile);
+            }
+
         } catch (Exception $e) {
             Mage::logException($e);
             return $filePath; // Return original on error
@@ -178,27 +197,26 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get absolute file path from relative path
+     * Get absolute file path from relative path or URL
      */
     private function getAbsoluteFilePath(string $filePath): string
     {
-        $basePath = Mage::getBaseDir();
-
         // Handle URLs by converting them to file paths
         if (str_starts_with($filePath, 'http://') || str_starts_with($filePath, 'https://')) {
             // Extract path from URL
             $urlParts = parse_url($filePath);
             $path = $urlParts['path'] ?? '';
-            // Web-accessible files are in the public/ directory
-            return $basePath . '/public' . $path;
+
+            // Remove any query string or fragment from the path
+            $path = strtok($path, '?') ?: $path;
+            $path = strtok($path, '#') ?: $path;
+
+            return Mage::getBaseDir() . '/public' . $path;
         }
 
-        // Handle different path formats
-        if (str_starts_with($filePath, '/')) {
-            return $basePath . '/public' . $filePath;
-        }
-
-        return $basePath . '/public/' . ltrim($filePath, '/');
+        // Handle relative paths - assume they're from public directory
+        $cleanPath = ltrim($filePath, '/');
+        return Mage::getBaseDir() . '/public/' . $cleanPath;
     }
 
     /**
