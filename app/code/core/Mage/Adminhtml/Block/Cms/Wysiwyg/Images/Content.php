@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -50,6 +52,14 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
             'onclick' => 'MediabrowserInstance.insert();',
             'id'      => 'button_insert_files',
         ]);
+
+        $this->_addButton('edit_image', [
+            'class'   => 'save no-display',
+            'label'   => $this->helper('cms')->__('Edit Image'),
+            'type'    => 'button',
+            'onclick' => 'MediabrowserInstance.editImage();',
+            'id'      => 'button_edit_image',
+        ]);
     }
 
     /**
@@ -79,8 +89,12 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
             'newFolderUrl'    => $this->getNewfolderUrl(),
             'deleteFolderUrl' => $this->getDeletefolderUrl(),
             'deleteFilesUrl'  => $this->getDeleteFilesUrl(),
+            'editImageUrl'    => $this->getEditImageUrl(),
+            'getImageUrl'     => $this->getImageUrl(),
             'headerText'      => $this->getHeaderText(),
             'canInsertImage'  => $this->getCanInsertImage(),
+            'imageFileType'   => $this->getConfiguredImageFileType(),
+            'imageQuality'    => $this->getConfiguredImageQuality(),
         ]);
 
         return Mage::helper('core')->jsonEncode($setupObject);
@@ -125,6 +139,26 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     }
 
     /**
+     * Edit image action target URL
+     *
+     * @return string
+     */
+    public function getEditImageUrl()
+    {
+        return $this->getUrl('*/*/editImage');
+    }
+
+    /**
+     * Get image URL action
+     *
+     * @return string
+     */
+    public function getImageUrl()
+    {
+        return $this->getUrl('*/*/getImageUrl');
+    }
+
+    /**
      * New directory action target URL
      *
      * @return string
@@ -151,5 +185,35 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     {
         $alt = $this->getRequest()->getParam('alt');
         return $alt ? Mage::helper('cms')->urlDecode($alt) : '';
+    }
+
+    /**
+     * Get configured image file type from system config
+     */
+    public function getConfiguredImageFileType(): array
+    {
+        $configuredType = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
+
+        // Map image type constants to file extensions and MIME types
+        $typeMap = [
+            IMAGETYPE_AVIF => ['extension' => 'avif', 'mimeType' => 'image/avif', 'label' => 'AVIF'],
+            IMAGETYPE_GIF  => ['extension' => 'gif',  'mimeType' => 'image/gif',  'label' => 'GIF'],
+            IMAGETYPE_JPEG => ['extension' => 'jpg',  'mimeType' => 'image/jpeg', 'label' => 'JPG'],
+            IMAGETYPE_PNG  => ['extension' => 'png',  'mimeType' => 'image/png',  'label' => 'PNG'],
+            IMAGETYPE_WEBP => ['extension' => 'webp', 'mimeType' => 'image/webp', 'label' => 'WebP'],
+        ];
+
+        return $typeMap[$configuredType] ?? $typeMap[IMAGETYPE_WEBP]; // Default to WebP
+    }
+
+    /**
+     * Get configured image quality from system config
+     */
+    public function getConfiguredImageQuality(): float
+    {
+        $quality = (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality');
+
+        // Convert to 0-1 scale for filerobot-image-editor
+        return $quality / 100;
     }
 }
