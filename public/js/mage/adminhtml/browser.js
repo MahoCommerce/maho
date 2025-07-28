@@ -484,35 +484,10 @@ class Mediabrowser {
                 source: imageUrl,
                 defaultSavedImageType: this.imageFileType.extension,
                 defaultSavedImageQuality: this.imageQuality,
-                forceToPngInEllipticalCrop: false,
-                theme: {
-                    palette: {
-                        'primary': '#007cba',
-                        'secondary': '#2d3748'
-                    }
-                },
                 avoidChangesNotSavedAlertOnLeave: true,
                 showCanvasOnly: false,
                 useBackendTranslations: false,
                 observePluginContainerSize: true,
-                cropPresets: [
-                    {
-                        titleKey: 'classicTv',
-                        descriptionKey: '4:3',
-                        ratio: 4 / 3,
-                    },
-                    {
-                        titleKey: 'cinemascope',
-                        descriptionKey: '16:9',
-                        ratio: 16 / 9,
-                    }
-                ],
-                tabsIds: ['Adjust', 'Filters', 'Finetune', 'Resize', 'Watermark', 'Annotate'],
-                defaultTabId: 'Adjust',
-                closeAfterSave: false,
-                savingPixelRatio: 1,
-                previewPixelRatio: 1,
-                getCurrentImgDataFnRef: null,
                 saveMode: 'download-save',
                 onSave: (editedImageObject, designState) => {
                     this.saveEditedImage(selectedFile.id, editedImageObject);
@@ -537,7 +512,7 @@ class Mediabrowser {
     async loadFilerobotEditor() {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'https://scaleflex.cloudimg.io/v7/plugins/filerobot-image-editor/latest/filerobot-image-editor.min.js';
+            script.src = SKIN_URL + '../../../../js/filerobot-image-editor.min.js';
             script.onload = resolve;
             script.onerror = reject;
             document.head.appendChild(script);
