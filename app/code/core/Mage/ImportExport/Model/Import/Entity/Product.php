@@ -1501,16 +1501,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         return $this;
     }
 
-    /**
-     * Retrieve pattern for time formatting
-     *
-     * @deprecated strftime is deprecated in PHP 8.1+. Use Mage_Core_Model_Locale::DATETIME_PHP_FORMAT with DateTime instead.
-     * @return string
-     */
-    protected function _getStrftimeFormat()
-    {
-        return Varien_Date::convertZendToStrftime(Mage_Core_Model_Locale::DATETIME_INTERNAL_FORMAT, true, true);
-    }
 
     /**
      * Retrieve attribute by specified code

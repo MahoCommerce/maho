@@ -524,29 +524,6 @@ class Mage_Core_Model_Locale
         return $this->getDateFormat($type) . ' ' . $this->getTimeFormat($type);
     }
 
-    /**
-     * Retrieve date format by strftime function
-     *
-     * @param   string $type
-     * @return  string
-     * @deprecated strftime is deprecated in PHP 8.1+. Use getDateFormat() with IntlDateFormatter instead.
-     */
-    public function getDateStrFormat($type)
-    {
-        return Varien_Date::convertZendToStrftime($this->getDateFormat($type), true, false);
-    }
-
-    /**
-     * Retrieve time format by strftime function
-     *
-     * @param   string $type
-     * @return  string
-     * @deprecated strftime is deprecated in PHP 8.1+. Use getTimeFormat() with IntlDateFormatter instead.
-     */
-    public function getTimeStrFormat($type)
-    {
-        return Varien_Date::convertZendToStrftime($this->getTimeFormat($type), false, true);
-    }
 
     /**
      * Create DateTime object for current locale
