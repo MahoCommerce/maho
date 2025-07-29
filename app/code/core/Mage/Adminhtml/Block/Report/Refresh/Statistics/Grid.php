@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,7 +25,6 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
     /**
      * @param string $reportCode
      * @return string
-     * @throws Zend_Date_Exception
      */
     protected function _getUpdatedAt($reportCode)
     {
@@ -33,7 +32,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
         return ($flag->hasData())
             ? Mage::app()->getLocale()->storeDate(
                 0,
-                new Zend_Date($flag->getLastUpdate(), Varien_Date::DATETIME_INTERNAL_FORMAT),
+                DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $flag->getLastUpdate()) ?: new DateTime($flag->getLastUpdate()),
                 true,
             )
             : '';

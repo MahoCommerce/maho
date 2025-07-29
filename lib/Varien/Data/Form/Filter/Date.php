@@ -22,15 +22,15 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
     /**
      * Local
      *
-     * @var string|Zend_Locale
+     * @var string
      */
     protected $_locale;
 
     /**
      * Initialize filter
      *
-     * @param string $format    Zend_Date input/output format
-     * @param string|Zend_Locale $locale
+     * @param string $format    DateTime input/output format
+     * @param string $locale
      */
     public function __construct($format = null, $locale = null)
     {

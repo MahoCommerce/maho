@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -103,7 +103,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         // start date, order ref ID, schedule description
         if (!$this->getStartDatetime()) {
             $this->_errors['start_datetime'][] = Mage::helper('payment')->__('Start date is undefined.');
-        } elseif (!Zend_Date::isDate($this->getStartDatetime(), Varien_Date::DATETIME_INTERNAL_FORMAT)) {
+        } elseif (!$this->_isValidDate($this->getStartDatetime(), Varien_Date::DATETIME_PHP_FORMAT)) {
             $this->_errors['start_datetime'][] = Mage::helper('payment')->__('Start date has invalid format.');
         }
         if (!$this->getScheduleDescription()) {
@@ -219,11 +219,11 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
             $this->_ensureLocaleAndStore();
             $dateFormat = $this->_locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
             $localeCode = $this->_locale->getLocaleCode();
-            if (!Zend_Date::isDate($startDate, $dateFormat, $localeCode)) {
+            if (!$this->_isValidDate($startDate, $dateFormat)) {
                 Mage::throwException(Mage::helper('payment')->__('Recurring profile start date has invalid format.'));
             }
             $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, $dateFormat)
-                ->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+                ->format(Varien_Date::DATETIME_PHP_FORMAT);
             $this->setStartDatetime($utcTime)->setImportedStartDatetime($startDate);
         }
         return $this->_filterValues();
@@ -252,8 +252,10 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
                 $options = unserialize($options->getValue(), ['allowed_classes' => false]);
                 if (is_array($options)) {
                     if (isset($options['start_datetime'])) {
-                        $startDatetime = new Zend_Date($options['start_datetime'], Varien_Date::DATETIME_INTERNAL_FORMAT);
-                        $this->setNearestStartDatetime($startDatetime);
+                        $startDatetime = DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $options['start_datetime']);
+                        if ($startDatetime !== false) {
+                            $this->setNearestStartDatetime($startDatetime);
+                        }
                     }
                 }
             }
@@ -290,16 +292,15 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
      * Determine nearest possible profile start date
      *
      * @return $this
-     * @throws Zend_Date_Exception
      */
-    public function setNearestStartDatetime(?Zend_Date $minAllowed = null)
+    public function setNearestStartDatetime(?DateTime $minAllowed = null)
     {
         // TODO: implement proper logic with invoking payment method instance
         $date = $minAllowed;
         if (!$date || $date->getTimestamp() < time()) {
-            $date = new Zend_Date(time());
+            $date = new DateTime();
         }
-        $this->setStartDatetime($date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+        $this->setStartDatetime($date->format(Varien_Date::DATETIME_PHP_FORMAT));
         return $this;
     }
 
@@ -307,17 +308,17 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
      * Convert the start datetime (if set) to proper locale/timezone and return
      *
      * @param bool $asString
-     * @return Zend_Date|string
+     * @return DateTime|string
      */
     public function exportStartDatetime($asString = true)
     {
         $datetime = $this->getStartDatetime();
         if (!$datetime || !$this->_locale || !$this->_store) {
-            return;
+            return '';
         }
         $date = $this->_locale->storeDate($this->_store, strtotime($datetime), true);
         if ($asString) {
-            return $date->toString($this->_locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
+            return $date->format($this->_locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
         }
         return $date;
     }
@@ -510,8 +511,10 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
 
         // automatically determine start date, if not set
         if ($this->getStartDatetime()) {
-            $date = new Zend_Date($this->getStartDatetime(), Varien_Date::DATETIME_INTERNAL_FORMAT);
-            $this->setNearestStartDatetime($date);
+            $date = DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $this->getStartDatetime());
+            if ($date !== false) {
+                $this->setNearestStartDatetime($date);
+            }
         } else {
             $this->setNearestStartDatetime();
         }
@@ -618,5 +621,27 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
             $result[] = Mage::helper('payment')->__('Repeats until suspended or canceled.');
         }
         return $result;
+    }
+
+    /**
+     * Validate date format
+     *
+     * @param string $date
+     * @param string $format
+     * @return bool
+     */
+    protected function _isValidDate($date, $format)
+    {
+        if (!$date || !$format) {
+            return false;
+        }
+
+        // Convert Zend format to PHP format if needed
+        if (str_contains($format, 'yyyy')) {
+            $format = str_replace(['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss'], ['Y', 'm', 'd', 'H', 'i', 's'], $format);
+        }
+
+        $dateTime = DateTime::createFromFormat($format, $date);
+        return $dateTime !== false && $dateTime->format($format) === $date;
     }
 }

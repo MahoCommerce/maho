@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -68,12 +68,12 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
     protected function _getProductCollection()
     {
         $todayStartOfDayDate  = Mage::app()->getLocale()->date()
-            ->setTime('00:00:00')
-            ->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+            ->setTime(0, 0, 0)
+            ->format(Varien_Date::DATETIME_PHP_FORMAT);
 
         $todayEndOfDayDate  = Mage::app()->getLocale()->date()
-            ->setTime('23:59:59')
-            ->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+            ->setTime(23, 59, 59)
+            ->format(Varien_Date::DATETIME_PHP_FORMAT);
 
         /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
         $collection = Mage::getResourceModel('catalog/product_collection');

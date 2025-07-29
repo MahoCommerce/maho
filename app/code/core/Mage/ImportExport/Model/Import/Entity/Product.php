@@ -1945,7 +1945,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     if ($stockItem->verifyNotification()) {
                         $stockItem->setLowStockDate(Mage::app()->getLocale()
                             ->date(null, null, null, false)
-                            ->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+                            ->format(Varien_Date::DATETIME_PHP_FORMAT));
                     }
                     $stockItem->setStockStatusChangedAutomatically((int) !$stockItem->verifyStock());
                 } else {

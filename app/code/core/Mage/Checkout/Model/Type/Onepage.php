@@ -430,7 +430,7 @@ class Mage_Checkout_Model_Type_Onepage
         // set customer date of birth for further usage
         $dob = '';
         if ($address->getDob()) {
-            $dob = Mage::app()->getLocale()->date($address->getDob(), null, null, false)->toString('yyyy-MM-dd');
+            $dob = Mage::app()->getLocale()->date($address->getDob(), null, null, false)->format('Y-m-d');
             $this->getQuote()->setCustomerDob($dob);
         }
 

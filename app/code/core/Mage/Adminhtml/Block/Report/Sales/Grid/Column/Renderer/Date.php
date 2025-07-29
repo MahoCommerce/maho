@@ -12,7 +12,8 @@
 
 class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date
 {
-    #[\Override]
+    protected static ?string $_format = null;
+
     protected function _getFormat(): string
     {
         $column = $this->getColumn();
@@ -40,12 +41,12 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
             $format = $this->_getFormat();
             try {
                 $data = ($column->getGmtoffset())
-                    ? Mage::app()->getLocale()->date($data, $dateFormat)->toString($format)
-                    : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->toString($format);
+                    ? Mage::app()->getLocale()->date($data, $dateFormat)->format($format)
+                    : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->format($format);
             } catch (Exception $e) {
                 $data = ($column->getTimezone())
-                    ? Mage::app()->getLocale()->date($data, $dateFormat)->toString($format)
-                    : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->toString($format);
+                    ? Mage::app()->getLocale()->date($data, $dateFormat)->format($format)
+                    : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->format($format);
             }
             return $data;
         }

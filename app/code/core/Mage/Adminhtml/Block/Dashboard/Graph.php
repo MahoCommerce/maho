@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -126,7 +126,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
     /**
      * @throws Mage_Core_Model_Store_Exception
-     * @throws Zend_Date_Exception
      */
     public function processData(): array
     {
@@ -274,15 +273,16 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                         if ($_label != '') {
                             switch ($this->getDataHelper()->getParam('period')) {
                                 case '24h':
+                                    $dateTime = DateTime::createFromFormat('Y-m-d H:00', $_label) ?: new DateTime($_label);
                                     $this->_axisLabels[$idx][$_index] = $this->formatTime(
-                                        new Zend_Date($_label, 'yyyy-MM-dd HH:00'),
+                                        $dateTime->format('Y-m-d H:i:s'),
                                         'short',
                                     );
                                     break;
                                 case '7d':
                                 case '1m':
                                     $this->_axisLabels[$idx][$_index] = $this->formatDate(
-                                        new Zend_Date($_label, 'yyyy-MM-dd'),
+                                        DateTime::createFromFormat('Y-m-d', $_label) ?: new DateTime($_label),
                                     );
                                     break;
                                 case '1y':

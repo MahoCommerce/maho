@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -762,7 +762,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
             $this->setLowStockDate(null);
             if ($this->verifyNotification()) {
                 $this->setLowStockDate(Mage::app()->getLocale()->date(null, null, null, false)
-                    ->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+                    ->format(Varien_Date::DATETIME_PHP_FORMAT));
             }
 
             $this->setStockStatusChangedAutomatically(0);

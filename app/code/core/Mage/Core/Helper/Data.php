@@ -137,7 +137,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format date using current locale options and time zone.
      *
-     * @param   string|int|Zend_Date|null   $date If empty, return current datetime.
+     * @param   string|int|DateTime|null   $date If empty, return current datetime.
      * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
      * @param   bool                        $showTime Whether to include time
      * @return  string
@@ -150,7 +150,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format date using current locale options and time zone.
      *
-     * @param   string|int|Zend_Date|null   $date If empty, return current locale datetime.
+     * @param   string|int|DateTime|null   $date If empty, return current locale datetime.
      * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
      * @param   bool                        $showTime Whether to include time
      * @param   bool                        $useTimezone Convert to local datetime?
@@ -170,7 +170,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             $date = $locale->date(Mage::getSingleton('core/date')->gmtTimestamp(), null, null, $useTimezone);
         } elseif (is_int($date)) {
             $date = $locale->date($date, null, null, $useTimezone);
-        } elseif (!$date instanceof Zend_Date) {
+        } elseif (!$date instanceof DateTime) {
             if (($time = strtotime($date)) !== false) {
                 $date = $locale->date($time, null, null, $useTimezone);
             } else {
@@ -179,13 +179,13 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         $format = $showTime ? $locale->getDateTimeFormat($format) : $locale->getDateFormat($format);
-        return $date->toString($format);
+        return $date->format($format);
     }
 
     /**
      * Format time using current locale options
      *
-     * @param   string|Zend_Date|null $time
+     * @param   string|DateTime|null $time
      * @param   string              $format
      * @param   bool                $showDate
      * @return  string
@@ -199,7 +199,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $locale = Mage::app()->getLocale();
         if (is_null($time)) {
             $date = $locale->date(time());
-        } elseif ($time instanceof Zend_Date) {
+        } elseif ($time instanceof DateTime) {
             $date = $time;
         } else {
             $date = $locale->date(strtotime($time));
@@ -211,7 +211,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             $format = $locale->getTimeFormat($format);
         }
 
-        return $date->toString($format);
+        return $date->format($format);
     }
 
     /**

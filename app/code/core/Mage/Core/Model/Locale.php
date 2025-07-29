@@ -539,13 +539,13 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Create Zend_Date object for current locale
+     * Create DateTime object for current locale
      *
      * @param mixed              $date
      * @param string             $part
      * @param string|Zend_Locale $locale
      * @param bool               $useTimezone
-     * @return Zend_Date
+     * @return DateTime
      */
     public function date($date = null, $part = null, $locale = null, $useTimezone = true)
     {
@@ -554,13 +554,19 @@ class Mage_Core_Model_Locale
         }
 
         if (!is_int($date) && empty($date)) {
-            // $date may be false, but Zend_Date uses strict compare
+            // $date may be false, but DateTime uses strict compare
             $date = null;
         }
-        $date = new Zend_Date($date, $part, $locale);
+        if ($part === null && is_numeric($date)) {
+            $date = new DateTime('@' . $date);
+        } elseif ($part !== null) {
+            $date = DateTime::createFromFormat($part, $date) ?: new DateTime($date ?: 'now');
+        } else {
+            $date = new DateTime($date ?: 'now');
+        }
         if ($useTimezone) {
             if ($timezone = Mage::app()->getStore()->getConfig(self::XML_PATH_DEFAULT_TIMEZONE)) {
-                $date->setTimezone($timezone);
+                $date->setTimezone(new DateTimeZone($timezone));
             }
         }
 
@@ -568,18 +574,18 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Create Zend_Date object with date converted to store timezone and store Locale
+     * Create DateTime object with date converted to store timezone and store Locale
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store Information about store
-     * @param   string|int|Zend_Date|array|null $date date in UTC
+     * @param   string|int|DateTime|array|null $date date in UTC
      * @param   bool $includeTime flag for including time to date
      * @param   string|null $format Format for date parsing/output:
-     *                              - null: Use locale default format (returns Zend_Date)
+     *                              - null: Use locale default format (returns DateTime)
      *                              - 'html5': Return HTML5 native input format (returns string):
      *                                * type="date": YYYY-MM-DD (e.g., "2024-12-25")
      *                                * type="datetime-local": YYYY-MM-DDTHH:mm (e.g., "2024-12-25T14:30")
-     *                              - Zend format strings: 'yyyy-MM-dd HH:mm:ss', etc. (returns Zend_Date)
-     * @return  Zend_Date|string|null
+     *                              - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
+     * @return  DateTime|string|null
      */
     public function storeDate($store = null, $date = null, $includeTime = false, $format = null)
     {
@@ -591,52 +597,56 @@ class Mage_Core_Model_Locale
 
             try {
                 $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-                $dateObj = new Zend_Date($date, null, $this->getLocale());
-                $dateObj->setTimezone($timezone);
+                $dateObj = new DateTime($date);
+                $dateObj->setTimezone(new DateTimeZone($timezone));
                 if (!$includeTime) {
-                    $dateObj->setHour(0)
-                        ->setMinute(0)
-                        ->setSecond(0);
+                    $dateObj->setTime(0, 0, 0);
                 }
 
                 if ($includeTime) {
-                    return $dateObj->toString('yyyy-MM-dd\'T\'HH:mm');
+                    return $dateObj->format('Y-m-d\TH:i');
                 } else {
-                    return $dateObj->toString('yyyy-MM-dd');
+                    return $dateObj->format('Y-m-d');
                 }
             } catch (Exception $e) {
                 return null;
             }
         }
 
-        // Legacy Zend_Date handling
+        // Native DateTime handling
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-        $date = new Zend_Date($date, $format, $this->getLocale());
-        $date->setTimezone($timezone);
+
+        if ($format && !is_numeric($date)) {
+            $date = DateTime::createFromFormat($format, $date) ?: new DateTime($date ?: 'now');
+        } elseif (is_numeric($date)) {
+            $date = new DateTime('@' . $date);
+        } else {
+            $date = new DateTime($date ?: 'now');
+        }
+
+        $date->setTimezone(new DateTimeZone($timezone));
         if (!$includeTime) {
-            $date->setHour(0)
-                ->setMinute(0)
-                ->setSecond(0);
+            $date->setTime(0, 0, 0);
         }
         return $date;
     }
 
     /**
-     * Create Zend_Date object with date converted from store's timezone
+     * Create DateTime object with date converted from store's timezone
      * to UTC time zone. Date can be passed in format of store's locale
      * or in format which was passed as parameter.
      *
      * @param mixed $store Information about store
-     * @param string|int|Zend_Date|array|null $date date in store's timezone
+     * @param string|int|DateTime|array|null $date date in store's timezone
      * @param bool $includeTime flag for including time to date
      * @param null|string $format Format for date parsing/output:
-     *                             - null: Use locale default format (returns Zend_Date)
+     *                             - null: Use locale default format (returns DateTime)
      *                             - 'html5': Parse HTML5 native input format (returns string):
      *                               * Accepts: YYYY-MM-DD (from type="date") or YYYY-MM-DDTHH:mm (from type="datetime-local")
      *                               * Returns: YYYY-MM-DD HH:mm:ss (MySQL datetime format)
-     *                             - Zend format strings: 'yyyy-MM-dd HH:mm:ss', etc. (returns Zend_Date)
-     *                             - Varien_Date::DATETIME_INTERNAL_FORMAT constant (returns Zend_Date)
-     * @return Zend_Date|string|null
+     *                             - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
+     *                             - Varien_Date::DATETIME_INTERNAL_FORMAT constant (returns DateTime)
+     * @return DateTime|string|null
      */
     public function utcDate($store, $date, $includeTime = false, $format = null)
     {
@@ -671,10 +681,9 @@ class Mage_Core_Model_Locale
             return $dateTime->format('Y-m-d H:i:s');
         }
 
-        // Legacy Zend_Date handling
-        $dateObj = $this->storeDate($store, $date, $includeTime);
-        $dateObj->set($date, $format);
-        $dateObj->setTimezone(self::DEFAULT_TIMEZONE);
+        // Native DateTime handling
+        $dateObj = $this->storeDate($store, $date, $includeTime, $format);
+        $dateObj->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
         return $dateObj;
     }
 

@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,7 +46,7 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get object created at date affected current active store timezone
      *
-     * @return Zend_Date
+     * @return DateTime
      */
     public function getCreatedAtDate()
     {
@@ -61,7 +61,7 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get object created at date affected with object store timezone
      *
-     * @return Zend_Date
+     * @return DateTime
      */
     public function getCreatedAtStoreDate()
     {

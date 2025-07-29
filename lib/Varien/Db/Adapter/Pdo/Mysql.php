@@ -277,7 +277,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Convert date to DB format
      *
-     * @param   int|string|Zend_Date $date
+     * @param   int|string|DateTime $date
      * @return  Zend_Db_Expr
      */
     public function convertDate($date)
@@ -288,7 +288,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Convert date and time to DB format
      *
-     * @param   int|string|Zend_Date $datetime
+     * @param   int|string|DateTime $datetime
      * @return  Zend_Db_Expr
      */
     public function convertDateTime($datetime)
@@ -2938,7 +2938,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Format Date to internal database date format
      *
-     * @param int|string|Zend_Date $date
+     * @param int|string|DateTime $date
      * @param boolean $includeTime
      * @return Zend_Db_Expr
      */

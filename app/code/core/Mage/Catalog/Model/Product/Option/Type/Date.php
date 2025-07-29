@@ -176,15 +176,15 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $option = $this->getOption();
             if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-                $result = Mage::app()->getLocale()->date($optionValue, Zend_Date::ISO_8601, null, false)
-                    ->toString($format);
+                $result = Mage::app()->getLocale()->date($optionValue, DateTime::ATOM, null, false)
+                    ->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
                 $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
                 $result = Mage::app()->getLocale()
-                    ->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)->toString($format);
+                    ->date($optionValue, Varien_Date::DATETIME_PHP_FORMAT, null, false)->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
-                $date = new Zend_Date($optionValue);
-                $result = date('H:i', $date->getTimestamp());
+                $date = new DateTime($optionValue);
+                $result = $date->format('H:i');
             } else {
                 $result = $optionValue;
             }
@@ -232,8 +232,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             return null;
         }
 
-        $date = new Zend_Date($timestamp);
-        return $date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+        $date = new DateTime('@' . $timestamp);
+        return $date->format(Varien_Date::DATETIME_PHP_FORMAT);
     }
 
     /**

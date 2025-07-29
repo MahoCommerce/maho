@@ -353,7 +353,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         }
 
         $periods = $this->_getTZOffsetTransitions(
-            Mage::app()->getLocale()->storeDate($store)->toString(Zend_Date::TIMEZONE_NAME),
+            Mage::app()->getLocale()->storeDate($store)->format('T'),
             $from,
             $to,
         );
@@ -393,26 +393,39 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $tzTransitions = [];
         try {
             if (!empty($from)) {
-                $from = new Zend_Date($from, Varien_Date::DATETIME_INTERNAL_FORMAT);
-                $from = $from->getTimestamp();
+                if ($from instanceof DateTime) {
+                    $from = $from->getTimestamp();
+                } else {
+                    $fromOriginal = $from;
+                    $from = DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $from);
+                    $from = $from ? $from->getTimestamp() : strtotime($fromOriginal);
+                }
             }
 
-            $to = new Zend_Date($to, Varien_Date::DATETIME_INTERNAL_FORMAT);
-            $nextPeriod = $this->_getWriteAdapter()->formatDate($to->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
-            $to = $to->getTimestamp();
+            if ($to instanceof DateTime) {
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Varien_Date::DATETIME_PHP_FORMAT));
+                $to = $to->getTimestamp();
+            } else {
+                $to = DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $to) ?: new DateTime($to);
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Varien_Date::DATETIME_PHP_FORMAT));
+                $to = $to->getTimestamp();
+            }
 
             $dtz = new DateTimeZone($timezone);
             $transitions = $dtz->getTransitions();
-            $dateTimeObject = new Zend_Date('c');
+            if ($transitions === false || !is_array($transitions)) {
+                return $tzTransitions;
+            }
+            $dateTimeObject = new DateTime();
             for ($i = count($transitions) - 1; $i >= 0; $i--) {
                 $tr = $transitions[$i];
                 if (!$this->_isValidTransition($tr, $to)) {
                     continue;
                 }
 
-                $dateTimeObject->set($tr['time']);
+                $dateTimeObject->setTimestamp($tr['ts']);
                 $tr['time'] = $this->_getWriteAdapter()
-                    ->formatDate($dateTimeObject->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+                    ->formatDate($dateTimeObject->format(Varien_Date::DATETIME_PHP_FORMAT));
                 $tzTransitions[$tr['offset']][] = ['from' => $tr['time'], 'to' => $nextPeriod];
 
                 if (!empty($from) && $tr['ts'] < $from) {
@@ -467,22 +480,22 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      */
     protected function _getStoreTimezoneUtcOffset($store = null)
     {
-        return Mage::app()->getLocale()->storeDate($store)->toString(Zend_Date::GMT_DIFF_SEP);
+        return Mage::app()->getLocale()->storeDate($store)->format('P');
     }
 
     /**
      * Retrieve date in UTC timezone
      *
      * @param string|null $date
-     * @return Zend_Date|null
+     * @return DateTime|null
      */
     protected function _dateToUtc($date)
     {
         if ($date === null) {
             return null;
         }
-        $dateUtc = new Zend_Date($date);
-        $dateUtc->setTimezone('Etc/UTC');
+        $dateUtc = new DateTime($date);
+        $dateUtc->setTimezone(new DateTimeZone('Etc/UTC'));
         return $dateUtc;
     }
 }
