@@ -616,7 +616,9 @@ class Mage_Core_Model_Locale
         // Native DateTime handling
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
 
-        if ($format && !is_numeric($date)) {
+        if ($date instanceof DateTime) {
+            // Date is already a DateTime object, use as-is
+        } elseif ($format && !is_numeric($date)) {
             $date = DateTime::createFromFormat($format, $date) ?: new DateTime($date ?: 'now');
         } elseif (is_numeric($date)) {
             $date = new DateTime('@' . $date);
