@@ -148,8 +148,10 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
              * Validate from and to date
              */
             try {
-                $from = $this->getLocale()->date($this->getFilter('report_from'), 'Y-m-d', null, false);
-                $to   = $this->getLocale()->date($this->getFilter('report_to'), 'Y-m-d', null, false);
+                // Use the same format that was used to write the data (locale-specific short date format)
+                $shortDateFormat = $this->getLocale()->getDateFormat('short');
+                $from = $this->getLocale()->date($this->getFilter('report_from'), $shortDateFormat, null, false);
+                $to   = $this->getLocale()->date($this->getFilter('report_to'), $shortDateFormat, null, false);
 
                 $collection->setInterval($from, $to);
             } catch (Exception $e) {
