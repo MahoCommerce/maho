@@ -26,7 +26,7 @@ class Mage_Api_Model_Resource_Role extends Mage_Core_Model_Resource_Db_Abstract
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
-        $now = Varien_Date::now();
+        $now = Mage_Core_Model_Locale::now();
         if (!$object->getId()) {
             $object->setCreated($now);
         }

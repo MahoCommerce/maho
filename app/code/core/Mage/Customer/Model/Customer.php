@@ -1633,7 +1633,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         $tokenExpirationPeriod = Mage::helper('customer')->getResetPasswordLinkExpirationPeriod();
 
-        $currentDate = Varien_Date::now();
+        $currentDate = Mage_Core_Model_Locale::now();
         $currentTimestamp = Varien_Date::toTimestamp($currentDate);
         $tokenTimestamp = Varien_Date::toTimestamp($resetPasswordLinkTokenCreatedAt);
         if ($tokenTimestamp > $currentTimestamp) {

@@ -895,7 +895,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         'entity_id'        => $productId,
                         'has_options'      => 0,
                         'required_options' => 0,
-                        'updated_at'       => Varien_Date::now(),
+                        'updated_at'       => Mage_Core_Model_Locale::now(),
                     ];
                 }
 
@@ -1373,7 +1373,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
                 if (self::SCOPE_DEFAULT == $rowScope) {
                     $rowSku = $rowData[self::COL_SKU];
-                    $now = Varien_Date::now();
+                    $now = Mage_Core_Model_Locale::now();
 
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row

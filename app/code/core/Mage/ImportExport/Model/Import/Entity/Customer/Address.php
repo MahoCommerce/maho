@@ -205,7 +205,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                     || $rowScope == Mage_ImportExport_Model_Import_Entity_Customer::SCOPE_ADDRESS
                 ) {
                     // entity table data
-                    $now = Varien_Date::now();
+                    $now = Mage_Core_Model_Locale::now();
                     $entityRows[] = [
                         'entity_id'      => $entityId,
                         'entity_type_id' => $this->_entityTypeId,

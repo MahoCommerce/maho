@@ -21,7 +21,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Updated extends Mage_Eav_Mode
     #[\Override]
     public function beforeSave($object)
     {
-        $object->setData($this->getAttribute()->getAttributeCode(), Varien_Date::now());
+        $object->setData($this->getAttribute()->getAttributeCode(), Mage_Core_Model_Locale::now());
         return $this;
     }
 }

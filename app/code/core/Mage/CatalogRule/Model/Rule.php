@@ -184,7 +184,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function getNow()
     {
         if (!$this->_now) {
-            return Varien_Date::now();
+            return Mage_Core_Model_Locale::now();
         }
         return $this->_now;
     }

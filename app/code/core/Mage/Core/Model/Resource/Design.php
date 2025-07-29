@@ -133,7 +133,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     public function loadChange($storeId, $date = null)
     {
         if (is_null($date)) {
-            $date = Varien_Date::now();
+            $date = Mage_Core_Model_Locale::now();
         }
 
         $select = $this->_getReadAdapter()->select()

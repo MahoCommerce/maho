@@ -371,7 +371,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                 }
                 if (self::SCOPE_DEFAULT == $this->getRowScope($rowData)) {
                     // entity table data
-                    $now = Varien_Date::now();
+                    $now = Mage_Core_Model_Locale::now();
                     $entityRow = [
                         'group_id'   => empty($rowData['group_id']) ? self::DEFAULT_GROUP_ID : $rowData['group_id'],
                         'store_id'   => empty($rowData[self::COL_STORE])

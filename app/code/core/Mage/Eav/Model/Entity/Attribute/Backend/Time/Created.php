@@ -40,7 +40,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Created extends Mage_Eav_Mode
         $date = $object->getData($attributeCode);
         if (is_null($date)) {
             if ($object->isObjectNew()) {
-                $object->setData($attributeCode, Varien_Date::now());
+                $object->setData($attributeCode, Mage_Core_Model_Locale::now());
             }
         } else {
             // convert to UTC

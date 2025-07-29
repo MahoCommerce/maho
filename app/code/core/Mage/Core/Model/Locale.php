@@ -28,6 +28,26 @@ class Mage_Core_Model_Locale
     public const DATE_PHP_FORMAT = 'Y-m-d';
 
     /**
+     * Get current date and time in standard format
+     *
+     * @return string Current datetime as 'Y-m-d H:i:s'
+     */
+    public static function now(): string
+    {
+        return date(self::DATETIME_PHP_FORMAT);
+    }
+
+    /**
+     * Get current date in standard format (without time)
+     *
+     * @return string Current date as 'Y-m-d'
+     */
+    public static function today(): string
+    {
+        return date(self::DATE_PHP_FORMAT);
+    }
+
+    /**
      * XML path constants
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';

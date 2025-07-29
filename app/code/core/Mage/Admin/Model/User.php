@@ -146,7 +146,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'firstname' => $this->getFirstname(),
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
-            'modified'  => $this->_getDateNow(),
+            'modified'  => Mage_Core_Model_Locale::now(),
             'extra'     => serialize($this->getExtra()),
         ];
 
@@ -843,7 +843,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Invalid password reset token.'));
         }
         $this->setRpToken($newResetPasswordLinkToken);
-        $currentDate = Varien_Date::now();
+        $currentDate = Mage_Core_Model_Locale::now();
         $this->setRpTokenCreatedAt($currentDate);
 
         return $this;
@@ -865,7 +865,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
         $tokenExpirationPeriod = Mage::helper('admin')->getResetPasswordLinkExpirationPeriod();
 
-        $currentDate = Varien_Date::now();
+        $currentDate = Mage_Core_Model_Locale::now();
         $currentTimestamp = Varien_Date::toTimestamp($currentDate);
         $tokenTimestamp = Varien_Date::toTimestamp($resetPasswordLinkTokenCreatedAt);
         if ($tokenTimestamp > $currentTimestamp) {
@@ -894,16 +894,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Simple sql format date
-     *
-     * @param string|bool $dayOnly
-     * @return string
-     */
-    protected function _getDateNow($dayOnly = false)
-    {
-        return Varien_Date::now($dayOnly);
-    }
 
     /**
      * Send notification to general Contact and additional emails when new admin user created.

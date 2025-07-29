@@ -83,7 +83,7 @@ class Mage_Catalog_Model_Resource_Product_Action extends Mage_Catalog_Model_Reso
      */
     protected function _updateUpdatedAt(array $entityIds): void
     {
-        $updatedAt = Varien_Date::now();
+        $updatedAt = Mage_Core_Model_Locale::now();
         $catalogProductTable = $this->getTable('catalog/product');
         $adapter = $this->_getWriteAdapter();
 
