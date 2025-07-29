@@ -16,16 +16,6 @@
 class Varien_Date
 {
     /**
-     * Date format, used as default. Compatible with DateTime
-     *
-     */
-    public const DATETIME_INTERNAL_FORMAT = 'yyyy-MM-dd HH:mm:ss';
-    public const DATE_INTERNAL_FORMAT = 'yyyy-MM-dd';
-
-    public const DATETIME_PHP_FORMAT       = 'Y-m-d H:i:s';
-    public const DATE_PHP_FORMAT           = 'Y-m-d';
-
-    /**
      * Zend Date To local date according Map array
      *
      * @var array
@@ -123,7 +113,7 @@ class Varien_Date
      */
     public static function now($withoutTime = false)
     {
-        $format = $withoutTime ? self::DATE_PHP_FORMAT : self::DATETIME_PHP_FORMAT;
+        $format = $withoutTime ? Mage_Core_Model_Locale::DATE_PHP_FORMAT : Mage_Core_Model_Locale::DATETIME_PHP_FORMAT;
         return date($format);
     }
 
@@ -141,7 +131,7 @@ class Varien_Date
         }
 
         if ($date instanceof DateTime) {
-            $format = $includeTime ? self::DATETIME_PHP_FORMAT : self::DATE_PHP_FORMAT;
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
             return $date->format($format);
         }
 
@@ -153,7 +143,7 @@ class Varien_Date
             $date = self::toTimestamp($date);
         }
 
-        $format = $includeTime ? self::DATETIME_PHP_FORMAT : self::DATE_PHP_FORMAT;
+        $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
         return date($format, $date);
     }
 }

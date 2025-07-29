@@ -377,7 +377,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                         'store_id'   => empty($rowData[self::COL_STORE])
                                         ? 0 : $this->_storeCodeToId[$rowData[self::COL_STORE]],
                         'created_at' => empty($rowData['created_at'])
-                                        ? $now : gmdate(Varien_Date::DATETIME_PHP_FORMAT, strtotime($rowData['created_at'])),
+                                        ? $now : gmdate(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, strtotime($rowData['created_at'])),
                         'updated_at' => $now,
                     ];
 
@@ -409,7 +409,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                             if ($attrParams['type'] === 'select') {
                                 $value = $attrParams['options'][strtolower($value)];
                             } elseif ($attrParams['type'] === 'datetime') {
-                                $value = gmdate(Varien_Date::DATETIME_PHP_FORMAT, strtotime($value));
+                                $value = gmdate(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, strtotime($value));
                             } elseif ($attrParams['type'] === 'multiselect') {
                                 $value = (array) $attrParams['options'][strtolower($value)];
                                 $attribute->getBackend()->beforeSave($resource->setData($attrCode, $value));

@@ -1509,7 +1509,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      */
     protected function _getStrftimeFormat()
     {
-        return Varien_Date::convertZendToStrftime(Varien_Date::DATETIME_INTERNAL_FORMAT, true, true);
+        return Varien_Date::convertZendToStrftime(Mage_Core_Model_Locale::DATETIME_INTERNAL_FORMAT, true, true);
     }
 
     /**
@@ -1558,7 +1558,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             $storeIds = [0];
 
             if ($attribute->getBackendType() === 'datetime' && strtotime($attrValue)) {
-                $attrValue = gmdate(Varien_Date::DATETIME_PHP_FORMAT, strtotime($attrValue));
+                $attrValue = gmdate(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, strtotime($attrValue));
             } elseif ($attribute->getAttributeCode() === 'url_key') {
                 if (empty($attrValue)) {
                     $attrValue = $product->formatUrlKey($product->getName());
@@ -1945,7 +1945,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     if ($stockItem->verifyNotification()) {
                         $stockItem->setLowStockDate(Mage::app()->getLocale()
                             ->date(null, null, null, false)
-                            ->format(Varien_Date::DATETIME_PHP_FORMAT));
+                            ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
                     }
                     $stockItem->setStockStatusChangedAutomatically((int) !$stockItem->verifyStock());
                 } else {

@@ -45,14 +45,14 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     {
         $fromDate = $object->getFromDate();
         if ($fromDate instanceof DateTime) {
-            $object->setFromDate($fromDate->format(Varien_Date::DATETIME_PHP_FORMAT));
+            $object->setFromDate($fromDate->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
         } elseif (!is_string($fromDate) || empty($fromDate)) {
             $object->setFromDate(null);
         }
 
         $toDate = $object->getToDate();
         if ($toDate instanceof DateTime) {
-            $object->setToDate($toDate->format(Varien_Date::DATETIME_PHP_FORMAT));
+            $object->setToDate($toDate->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
         } elseif (!is_string($toDate) || empty($toDate)) {
             $object->setToDate(null);
         }

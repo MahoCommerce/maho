@@ -323,7 +323,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
                 if (in_array($key, ['from_date', 'to_date']) && $value) {
                     $value = Mage::app()->getLocale()->date(
                         $value,
-                        Varien_Date::DATE_INTERNAL_FORMAT,
+                        Mage_Core_Model_Locale::DATE_INTERNAL_FORMAT,
                         null,
                         false,
                     );
@@ -363,8 +363,8 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         }
 
         if ($fromDate && $toDate) {
-            $fromDate = DateTime::createFromFormat(Varien_Date::DATE_PHP_FORMAT, $fromDate);
-            $toDate = DateTime::createFromFormat(Varien_Date::DATE_PHP_FORMAT, $toDate);
+            $fromDate = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_PHP_FORMAT, $fromDate);
+            $toDate = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_PHP_FORMAT, $toDate);
 
             if ($fromDate > $toDate) {
                 $result[] = Mage::helper('rule')->__('End Date must be greater than Start Date.');

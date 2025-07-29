@@ -69,11 +69,11 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
     {
         $todayStartOfDayDate  = Mage::app()->getLocale()->date()
             ->setTime(0, 0, 0)
-            ->format(Varien_Date::DATETIME_PHP_FORMAT);
+            ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
 
         $todayEndOfDayDate  = Mage::app()->getLocale()->date()
             ->setTime(23, 59, 59)
-            ->format(Varien_Date::DATETIME_PHP_FORMAT);
+            ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
 
         /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
         $collection = Mage::getResourceModel('catalog/product_collection');

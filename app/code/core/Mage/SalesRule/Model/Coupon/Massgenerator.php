@@ -149,7 +149,7 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
 
             $expirationDate = $this->getToDate();
             if ($expirationDate instanceof DateTime) {
-                $expirationDate = $expirationDate->format(Varien_Date::DATETIME_PHP_FORMAT);
+                $expirationDate = $expirationDate->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
             }
 
             $coupon->setId(null)

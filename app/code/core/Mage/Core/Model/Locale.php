@@ -20,6 +20,14 @@ class Mage_Core_Model_Locale
     public const DEFAULT_CURRENCY  = 'USD';
 
     /**
+     * Date format constants
+     */
+    public const DATETIME_INTERNAL_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+    public const DATE_INTERNAL_FORMAT = 'yyyy-MM-dd';
+    public const DATETIME_PHP_FORMAT = 'Y-m-d H:i:s';
+    public const DATE_PHP_FORMAT = 'Y-m-d';
+
+    /**
      * XML path constants
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
@@ -647,7 +655,7 @@ class Mage_Core_Model_Locale
      *                               * Accepts: YYYY-MM-DD (from type="date") or YYYY-MM-DDTHH:mm (from type="datetime-local")
      *                               * Returns: YYYY-MM-DD HH:mm:ss (MySQL datetime format)
      *                             - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
-     *                             - Varien_Date::DATETIME_INTERNAL_FORMAT constant (returns DateTime)
+     *                             - Mage_Core_Model_Locale::DATETIME_INTERNAL_FORMAT constant (returns DateTime)
      * @return DateTime|string|null
      */
     public function utcDate($store, $date, $includeTime = false, $format = null)
@@ -702,7 +710,7 @@ class Mage_Core_Model_Locale
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
         $currentTimezone = @date_default_timezone_get();
         @date_default_timezone_set($timezone);
-        $date = date(Varien_Date::DATETIME_PHP_FORMAT);
+        $date = date(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
         @date_default_timezone_set($currentTimezone);
         return strtotime($date);
     }

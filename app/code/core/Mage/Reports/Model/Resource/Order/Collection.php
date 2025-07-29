@@ -797,8 +797,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         }
 
         $this->addFieldToFilter($fieldToFilter, [
-            'from'  => $from->format(Varien_Date::DATETIME_PHP_FORMAT),
-            'to'    => $to->format(Varien_Date::DATETIME_PHP_FORMAT),
+            'from'  => $from->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT),
+            'to'    => $to->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT),
         ]);
 
         return $this;

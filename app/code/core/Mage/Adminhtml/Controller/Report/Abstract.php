@@ -95,7 +95,7 @@ abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_
             if (!empty($lastUpdate)) {
                 try {
                     // Try specific format first
-                    $dateObj = DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $lastUpdate);
+                    $dateObj = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, $lastUpdate);
                     if ($dateObj === false) {
                         // Try generic parsing
                         $dateObj = new DateTime($lastUpdate);
