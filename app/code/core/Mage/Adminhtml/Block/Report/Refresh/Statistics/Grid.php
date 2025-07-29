@@ -29,13 +29,28 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
     protected function _getUpdatedAt($reportCode)
     {
         $flag = Mage::getModel('reports/flag')->setReportFlagCode($reportCode)->loadSelf();
-        return ($flag->hasData())
-            ? Mage::app()->getLocale()->storeDate(
-                0,
-                DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $flag->getLastUpdate()) ?: new DateTime($flag->getLastUpdate()),
-                true,
-            )
-            : '';
+        if (!$flag->hasData()) {
+            return '';
+        }
+
+        $lastUpdate = $flag->getLastUpdate();
+        if (empty($lastUpdate)) {
+            return '';
+        }
+
+        try {
+            // Try specific format first
+            $dateObj = DateTime::createFromFormat(Varien_Date::DATETIME_PHP_FORMAT, $lastUpdate);
+            if ($dateObj === false) {
+                // Try generic parsing
+                $dateObj = new DateTime($lastUpdate);
+            }
+
+            return Mage::app()->getLocale()->storeDate(0, $dateObj, true);
+        } catch (Exception $e) {
+            // Graceful degradation - return raw value
+            return $lastUpdate;
+        }
     }
 
     #[\Override]
