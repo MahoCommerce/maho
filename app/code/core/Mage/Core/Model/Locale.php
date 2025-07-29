@@ -529,6 +529,7 @@ class Mage_Core_Model_Locale
      *
      * @param   string $type
      * @return  string
+     * @deprecated strftime is deprecated in PHP 8.1+. Use getDateFormat() with IntlDateFormatter instead.
      */
     public function getDateStrFormat($type)
     {
@@ -540,6 +541,7 @@ class Mage_Core_Model_Locale
      *
      * @param   string $type
      * @return  string
+     * @deprecated strftime is deprecated in PHP 8.1+. Use getTimeFormat() with IntlDateFormatter instead.
      */
     public function getTimeStrFormat($type)
     {

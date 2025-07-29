@@ -59,6 +59,7 @@ class Varien_Date
      * @param boolean $convertDate
      * @param boolean $convertTime
      * @return string
+     * @deprecated strftime is deprecated in PHP 8.1+. Use ICU patterns with IntlDateFormatter instead.
      */
     public static function convertZendToStrftime($value, $convertDate = true, $convertTime = true)
     {
