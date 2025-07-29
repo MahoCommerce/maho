@@ -30,23 +30,23 @@ class Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract extends Var
     {
         switch ($periodType) {
             case '24h':
-                $customStart = Varien_Date::toTimestamp(true) - 86400;
-                $customEnd   = Varien_Date::toTimestamp(true);
+                $customStart = time() - 86400;
+                $customEnd   = time();
                 break;
 
             case '7d':
-                $customStart = Varien_Date::toTimestamp(true) - 604800;
-                $customEnd   = Varien_Date::toTimestamp(true);
+                $customStart = time() - 604800;
+                $customEnd   = time();
                 break;
 
             case '30d':
-                $customStart = Varien_Date::toTimestamp(true) - 2592000;
-                $customEnd   = Varien_Date::toTimestamp(true);
+                $customStart = time() - 2592000;
+                $customEnd   = time();
                 break;
 
             case '1y':
-                $customStart = Varien_Date::toTimestamp(true) - 31536000;
-                $customEnd   = Varien_Date::toTimestamp(true);
+                $customStart = time() - 31536000;
+                $customEnd   = time();
                 break;
 
             default:

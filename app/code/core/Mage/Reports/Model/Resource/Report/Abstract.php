@@ -50,7 +50,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             $this->_getFlag()->setFlagData($value);
         }
 
-        $time = Varien_Date::toTimestamp(true);
+        $time = time();
         // touch last_update
         $this->_getFlag()->setLastUpdate($this->formatDate($time));
 

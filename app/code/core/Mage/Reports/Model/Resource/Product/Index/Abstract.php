@@ -178,7 +178,7 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
             'customer_id'   => $object->getCustomerId(),
             'store_id'      => $object->getStoreId(),
         ];
-        $addedAt    = Varien_Date::toTimestamp(true);
+        $addedAt    = time();
         $data = [];
         foreach ($productIds as $productId) {
             $productId = (int) $productId;

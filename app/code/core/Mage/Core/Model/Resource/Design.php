@@ -31,7 +31,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
             if (!$validator->isValid($dateFrom) || !$validator->isValid($dateTo)) {
                 Mage::throwException(Mage::helper('core')->__('Invalid date'));
             }
-            if (Varien_Date::toTimestamp($dateFrom) > Varien_Date::toTimestamp($dateTo)) {
+            if (strtotime($dateFrom) > strtotime($dateTo)) {
                 Mage::throwException(Mage::helper('core')->__('Start date cannot be greater than end date.'));
             }
         }

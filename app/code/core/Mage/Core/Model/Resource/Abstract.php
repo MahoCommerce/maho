@@ -129,7 +129,7 @@ abstract class Mage_Core_Model_Resource_Abstract
      */
     public function mktime($str)
     {
-        return Varien_Date::toTimestamp($str);
+        return strtotime($str);
     }
 
     /**

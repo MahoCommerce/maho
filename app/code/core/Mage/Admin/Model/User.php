@@ -866,8 +866,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $tokenExpirationPeriod = Mage::helper('admin')->getResetPasswordLinkExpirationPeriod();
 
         $currentDate = Mage_Core_Model_Locale::now();
-        $currentTimestamp = Varien_Date::toTimestamp($currentDate);
-        $tokenTimestamp = Varien_Date::toTimestamp($resetPasswordLinkTokenCreatedAt);
+        $currentTimestamp = strtotime($currentDate);
+        $tokenTimestamp = strtotime($resetPasswordLinkTokenCreatedAt);
         if ($tokenTimestamp > $currentTimestamp) {
             return true;
         }
