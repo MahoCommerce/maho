@@ -65,7 +65,7 @@ class Mage_Oauth_Model_Resource_Token extends Mage_Core_Model_Resource_Db_Abstra
                 $this->getMainTable(),
                 $adapter->quoteInto(
                     'type = "' . Mage_Oauth_Model_Token::TYPE_REQUEST . '" AND created_at <= ?',
-                    Varien_Date::formatDate(time() - $minutes * 60),
+                    date(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, time() - $minutes * 60),
                 ),
             );
         } else {

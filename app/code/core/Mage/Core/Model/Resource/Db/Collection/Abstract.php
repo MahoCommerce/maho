@@ -694,10 +694,29 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @param int|string|DateTime $date
      * @param bool $includeTime
-     * @return string
+     * @return string|null
      */
     public function formatDate($date, $includeTime = true)
     {
-        return Varien_Date::formatDate($date, $includeTime);
+        if ($date === true) {
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+            return date($format);
+        }
+
+        if ($date instanceof DateTime) {
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+            return $date->format($format);
+        }
+
+        if (empty($date)) {
+            return null;
+        }
+
+        if (!is_numeric($date)) {
+            $date = strtotime($date);
+        }
+
+        $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+        return date($format, $date);
     }
 }
