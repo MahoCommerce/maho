@@ -173,10 +173,10 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                 if ($periodFrom) {
                     // not the first day of the year
                     if ((int) $periodFrom->format('n') != 1 || (int) $periodFrom->format('j') != 1) {
-                        $dtFrom = clone $periodFrom;
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
                         // last day of the year
-                        $dtTo = clone $periodFrom;
-                        $dtTo->setDate((int) $dtTo->format('Y'), 12, 31);
+                        $dtTo = DateTimeImmutable::createFromMutable($periodFrom)
+                            ->setDate((int) $periodFrom->format('Y'), 12, 31);
                         if (!$periodTo || $dtTo < $periodTo) {
                             $selectUnions[] = $this->_makeBoundarySelect(
                                 $dtFrom->format('Y-m-d'),
@@ -184,9 +184,10 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                             );
 
                             // first day of the next year
-                            $nextYear = clone $periodFrom;
-                            $nextYear->modify('+1 year')->setDate((int) $nextYear->format('Y'), 1, 1);
-                            $this->_from = $nextYear->format('Y-m-d');
+                            $this->_from = DateTimeImmutable::createFromMutable($periodFrom)
+                                ->modify('+1 year')
+                                ->setDate($periodFrom->format('Y') + 1, 1, 1)
+                                ->format('Y-m-d');
                         }
                     }
                 }
@@ -194,8 +195,9 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                 if ($periodTo) {
                     // not the last day of the year
                     if ($periodTo->format('n') != 12 || $periodTo->format('j') != 31) {
-                        $dtFrom = (clone $periodTo)->setDate((int) $periodTo->format('Y'), 1, 1);  // first day of the year
-                        $dtTo = clone $periodTo;
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodTo)
+                            ->setDate((int) $periodTo->format('Y'), 1, 1);  // first day of the year
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         if (!$periodFrom || $dtFrom > $periodFrom) {
                             $selectUnions[] = $this->_makeBoundarySelect(
                                 $dtFrom->format('Y-m-d'),
@@ -203,7 +205,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                             );
 
                             // last day of the previous year
-                            $this->_to = (clone $periodTo)
+                            $this->_to = DateTimeImmutable::createFromMutable($periodTo)
                                 ->modify('-1 year')
                                 ->setDate($periodTo->format('Y') - 1, 12, 31)
                                 ->format('Y-m-d');
@@ -214,8 +216,8 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                 if ($periodFrom && $periodTo) {
                     // the same year
                     if ($periodFrom->format('Y') == $periodTo->format('Y')) {
-                        $dtFrom = clone $periodFrom;
-                        $dtTo = clone $periodTo;
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         $selectUnions[] = $this->_makeBoundarySelect(
                             $dtFrom->format('Y-m-d'),
                             $dtTo->format('Y-m-d'),
@@ -228,9 +230,12 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                 if ($periodFrom) {
                     // not the first day of the month
                     if ($periodFrom->format('j') != 1) {
-                        $dtFrom = clone $periodFrom;
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
                         // last day of the month
-                        $dtTo = (clone $periodFrom)->modify('+1 month')->setDate((int) $periodFrom->format('Y'), (int) $periodFrom->format('n') + 1, 1)->modify('-1 day');
+                        $dtTo = DateTimeImmutable::createFromMutable($periodFrom)
+                            ->modify('+1 month')
+                            ->setDate((int) $periodFrom->format('Y'), (int) $periodFrom->format('n') + 1, 1)
+                            ->modify('-1 day');
                         if (!$periodTo || $dtTo < $periodTo) {
                             $selectUnions[] = $this->_makeBoundarySelect(
                                 $dtFrom->format('Y-m-d'),
@@ -238,7 +243,10 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                             );
 
                             // first day of the next month
-                            $this->_from = (clone $periodFrom)->modify('+1 month')->setDate((int) $periodFrom->format('Y'), (int) $periodFrom->format('n') + 1, 1)->format('Y-m-d');
+                            $this->_from = DateTimeImmutable::createFromMutable($periodFrom)
+                                ->modify('+1 month')
+                                ->setDate((int) $periodFrom->format('Y'), (int) $periodFrom->format('n') + 1, 1)
+                                ->format('Y-m-d');
                         }
                     }
                 }
@@ -246,8 +254,9 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                 if ($periodTo) {
                     // not the last day of the month
                     if ($periodTo->format('j') != $periodTo->format('t')) {
-                        $dtFrom = (clone $periodTo)->setDate((int) $periodTo->format('Y'), (int) $periodTo->format('n'), 1);  // first day of the month
-                        $dtTo = clone $periodTo;
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodTo)
+                            ->setDate((int) $periodTo->format('Y'), (int) $periodTo->format('n'), 1);  // first day of the month
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         if (!$periodFrom || $dtFrom > $periodFrom) {
                             $selectUnions[] = $this->_makeBoundarySelect(
                                 $dtFrom->format('Y-m-d'),
@@ -255,7 +264,10 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                             );
 
                             // last day of the previous month
-                            $this->_to = (clone $periodTo)->setDate((int) $periodTo->format('Y'), (int) $periodTo->format('n'), 1)->modify('-1 day')->format('Y-m-d');
+                            $this->_to = DateTimeImmutable::createFromMutable($periodTo)
+                                ->setDate((int) $periodTo->format('Y'), (int) $periodTo->format('n'), 1)
+                                ->modify('-1 day')
+                                ->format('Y-m-d');
                         }
                     }
                 }
@@ -265,8 +277,8 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                     if ($periodFrom->format('Y') == $periodTo->format('Y')
                         && $periodFrom->format('n') == $periodTo->format('n')
                     ) {
-                        $dtFrom = clone $periodFrom;
-                        $dtTo = clone $periodTo;
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         $selectUnions[] = $this->_makeBoundarySelect(
                             $dtFrom->format('Y-m-d'),
                             $dtTo->format('Y-m-d'),

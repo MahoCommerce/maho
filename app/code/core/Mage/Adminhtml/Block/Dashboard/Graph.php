@@ -143,8 +143,9 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             ->getDateRange($this->getDataHelper()->getParam('period'), '', '', true);
         [$dateStart, $dateEnd] = $dateRange;
 
-        $dateStart->setTimezone($timezoneLocal);
-        $dateEnd->setTimezone($timezoneLocal);
+        // Convert to DateTimeImmutable to prevent mutation of original objects
+        $dateStart = DateTimeImmutable::createFromMutable($dateStart)->setTimezone($timezoneLocal);
+        $dateEnd = DateTimeImmutable::createFromMutable($dateEnd)->setTimezone($timezoneLocal);
 
         $d = '';
         $dates = [];
@@ -154,22 +155,22 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             switch ($this->getDataHelper()->getParam('period')) {
                 case '24h':
                     $d = $dateStart->format('Y-m-d H:00');
-                    $dateStart->modify('+1 hour');
+                    $dateStart = $dateStart->modify('+1 hour');
                     break;
                 case '7d':
                 case '1m':
                     $d = $dateStart->format('Y-m-d');
-                    $dateStart->modify('+1 day');
+                    $dateStart = $dateStart->modify('+1 day');
                     break;
                 case '3m':
                 case '6m':
                     $date = $dateStart->format('Y-m-d');
-                    $dateStart->modify('+1 week');
+                    $dateStart = $dateStart->modify('+1 week');
                     break;
                 case '1y':
                 case '2y':
                     $d = $dateStart->format('Y-m');
-                    $dateStart->modify('+1 month');
+                    $dateStart = $dateStart->modify('+1 month');
                     break;
             }
             foreach (array_keys($this->getAllSeries()) as $index) {
