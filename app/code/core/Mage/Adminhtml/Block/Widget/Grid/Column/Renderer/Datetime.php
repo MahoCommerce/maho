@@ -42,14 +42,14 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
                 $locale = $this->getColumn()->getLocale() ?? null;
 
                 $dateObj = Mage::app()->getLocale()
-                    ->date($data, Varien_Date::DATETIME_PHP_FORMAT, $locale, $useTimezone);
+                    ->date($data, Varien_Date::DATETIME_INTERNAL_FORMAT, $locale, $useTimezone);
 
                 return $this->_getFormatter($locale)->format($dateObj);
             } catch (Exception $e) {
                 // Fallback to simple format
                 try {
                     $dateObj = Mage::app()->getLocale()
-                        ->date($data, Varien_Date::DATETIME_PHP_FORMAT);
+                        ->date($data, Varien_Date::DATETIME_INTERNAL_FORMAT);
                     return $dateObj->format('M j, Y, g:i:s A');
                 } catch (Exception $e2) {
                     return $data;
