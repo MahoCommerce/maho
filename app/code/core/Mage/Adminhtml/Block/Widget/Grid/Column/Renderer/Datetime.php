@@ -12,6 +12,22 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
+    protected static ?IntlDateFormatter $_formatter = null;
+
+    protected function _getFormatter(?string $locale = null): IntlDateFormatter
+    {
+        $localeCode = $locale ?? Mage::app()->getLocale()->getLocaleCode();
+
+        // Simple caching - could be enhanced to cache per locale if needed
+        if (is_null(self::$_formatter)) {
+            self::$_formatter = new IntlDateFormatter(
+                $localeCode,
+                IntlDateFormatter::MEDIUM,
+                IntlDateFormatter::MEDIUM,
+            );
+        }
+        return self::$_formatter;
+    }
     /**
      * Renders grid column
      *
@@ -21,21 +37,14 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
     public function render(Varien_Object $row)
     {
         if ($data = $this->_getValue($row)) {
-            // Use IntlDateFormatter directly instead of custom conversion
             try {
-                $formatter = new IntlDateFormatter(
-                    $this->getColumn()->getLocale() ?? Mage::app()->getLocale()->getLocaleCode(),
-                    IntlDateFormatter::MEDIUM,
-                    IntlDateFormatter::MEDIUM,
-                );
-
                 $useTimezone = $this->getColumn()->getUseTimezone() ?? true;
                 $locale = $this->getColumn()->getLocale() ?? null;
 
                 $dateObj = Mage::app()->getLocale()
                     ->date($data, Varien_Date::DATETIME_PHP_FORMAT, $locale, $useTimezone);
 
-                return $formatter->format($dateObj);
+                return $this->_getFormatter($locale)->format($dateObj);
             } catch (Exception $e) {
                 // Fallback to simple format
                 try {

@@ -13,6 +13,19 @@
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     protected $_defaultWidth = 160;
+    protected static ?IntlDateFormatter $_formatter = null;
+
+    protected function _getFormatter(): IntlDateFormatter
+    {
+        if (is_null(self::$_formatter)) {
+            self::$_formatter = new IntlDateFormatter(
+                Mage::app()->getLocale()->getLocaleCode(),
+                IntlDateFormatter::MEDIUM,
+                IntlDateFormatter::NONE,
+            );
+        }
+        return self::$_formatter;
+    }
 
     /**
      * Renders grid column
@@ -23,14 +36,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
     public function render(Varien_Object $row)
     {
         if ($data = $row->getData($this->getColumn()->getIndex())) {
-            // Use IntlDateFormatter directly instead of custom conversion
             try {
-                $formatter = new IntlDateFormatter(
-                    Mage::app()->getLocale()->getLocaleCode(),
-                    IntlDateFormatter::MEDIUM,
-                    IntlDateFormatter::NONE,
-                );
-
                 if ($this->getColumn()->getGmtoffset()) {
                     $dateObj = Mage::app()->getLocale()
                         ->date($data, Varien_Date::DATETIME_PHP_FORMAT);
@@ -39,7 +45,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                         ->date($data, DateTime::ATOM, null, false);
                 }
 
-                return $formatter->format($dateObj);
+                return $this->_getFormatter()->format($dateObj);
             } catch (Exception $e) {
                 // Fallback to simple format
                 try {
