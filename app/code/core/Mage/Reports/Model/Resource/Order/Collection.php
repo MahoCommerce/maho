@@ -291,7 +291,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * @param string $customStart
      * @param string $customEnd
      * @param bool $returnObjects
-     * @return array
+     * @return ($returnObjects is true ? array{0: DateTime, 1: DateTime} : array{from: DateTime, to: DateTime, datetime: true})
      */
     public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
     {

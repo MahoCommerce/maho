@@ -399,7 +399,7 @@ class Mage_Core_Model_Translate
         try {
             if (!empty($args)) {
                 // Convert any non-string values to strings for vsprintf
-                $stringArgs = array_map(function($arg) {
+                $stringArgs = array_map(function ($arg) {
                     if ($arg instanceof DateTime) {
                         return $arg->format('Y-m-d H:i:s');
                     }

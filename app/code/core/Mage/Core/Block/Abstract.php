@@ -1143,7 +1143,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Retrieve formatting time
      *
-     * @param   string $time
+     * @param   string|DateTime|null $time
      * @param   string $format
      * @param   bool $showDate
      * @return  string
