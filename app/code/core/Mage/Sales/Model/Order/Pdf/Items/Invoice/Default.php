@@ -19,18 +19,6 @@ class Mage_Sales_Model_Order_Pdf_Items_Invoice_Default extends Mage_Sales_Model_
     }
 
     /**
-     * Draw item line (deprecated - now renders HTML)
-     *
-     * @deprecated Use toHtml() instead
-     */
-    #[\Override]
-    public function draw()
-    {
-        // This method is deprecated, use toHtml() instead
-        return;
-    }
-
-    /**
      * Get item prices for display
      *
      * @return array
@@ -67,12 +55,7 @@ class Mage_Sales_Model_Order_Pdf_Items_Invoice_Default extends Mage_Sales_Model_
         return $prices;
     }
 
-    /**
-     * Get SKU
-     *
-     * @return string
-     */
-    public function getSku()
+    public function getSku(): string
     {
         $item = $this->getItem();
         return $item ? $item->getSku() : '';

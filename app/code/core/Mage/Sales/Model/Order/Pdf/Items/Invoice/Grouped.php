@@ -18,13 +18,6 @@ class Mage_Sales_Model_Order_Pdf_Items_Invoice_Grouped extends Mage_Sales_Model_
         $this->setTemplate('sales/order/pdf/invoice/items/grouped.phtml');
     }
 
-    #[\Override]
-    public function draw()
-    {
-        // This method is deprecated, use toHtml() instead
-        return;
-    }
-
     /**
      * Get children items for grouped product
      *

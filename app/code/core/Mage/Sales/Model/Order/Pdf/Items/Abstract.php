@@ -254,15 +254,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
         return $result;
     }
 
-
-    /**
-     * Draw item (deprecated - now renders HTML)
-     *
-     * @deprecated Use toHtml() instead
-     * @return void
-     */
-    abstract public function draw();
-
     /**
      * Render item as HTML
      *

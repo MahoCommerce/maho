@@ -34,9 +34,9 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
     }
 
     #[\Override]
-    public function getBundleOptions(): array
+    public function getBundleOptions($item = null): array
     {
-        return parent::getBundleOptions($this->getItem());
+        return parent::getBundleOptions($item ?? $this->getItem());
     }
 
     #[\Override]

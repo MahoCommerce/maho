@@ -18,24 +18,7 @@ class Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Default extends Mage_Sales_Mod
         $this->setTemplate('sales/order/pdf/creditmemo/items/default.phtml');
     }
 
-    /**
-     * Draw process (deprecated - now renders HTML)
-     *
-     * @deprecated Use toHtml() instead
-     */
-    #[\Override]
-    public function draw()
-    {
-        // This method is deprecated, use toHtml() instead
-        return;
-    }
-
-    /**
-     * Get SKU
-     *
-     * @return string
-     */
-    public function getSku()
+    public function getSku(): string
     {
         $item = $this->getItem();
         return $item ? $item->getSku() : '';

@@ -41,9 +41,9 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Shipment extends Mage_Bundle_Model
      * Get bundle options for display
      */
     #[\Override]
-    public function getBundleOptions(): array
+    public function getBundleOptions($item = null): array
     {
-        return parent::getBundleOptions($this->getItem());
+        return parent::getBundleOptions($item ?? $this->getItem());
     }
 
     /**

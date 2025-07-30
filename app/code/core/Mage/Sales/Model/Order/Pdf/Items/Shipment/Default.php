@@ -18,24 +18,7 @@ class Mage_Sales_Model_Order_Pdf_Items_Shipment_Default extends Mage_Sales_Model
         $this->setTemplate('sales/order/pdf/shipment/items/default.phtml');
     }
 
-    /**
-     * Draw item line (deprecated - now renders HTML)
-     *
-     * @deprecated Use toHtml() instead
-     */
-    #[\Override]
-    public function draw()
-    {
-        // This method is deprecated, use toHtml() instead
-        return;
-    }
-
-    /**
-     * Get SKU
-     *
-     * @return string
-     */
-    public function getSku()
+    public function getSku(): string
     {
         $item = $this->getItem();
         return $item ? $item->getSku() : '';

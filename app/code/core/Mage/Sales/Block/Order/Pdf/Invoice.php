@@ -139,7 +139,7 @@ class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Core_Block_Template
 
     public function getStoreAddress(): string
     {
-        return Mage::getStoreConfig('sales/identity/address', $this->getStore());
+        return (string) Mage::getStoreConfig('sales/identity/address', $this->getStore());
     }
 
     public function getItems(): array
