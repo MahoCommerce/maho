@@ -461,7 +461,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             }
             if (isset($pdf) && $pdf instanceof Zend_Pdf) {
                 return $this->_prepareDownloadResponse(
-                    'invoice' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'invoice' . Mage::getSingleton('core/date')->date() . '.pdf',
                     $pdf->render(),
                     'application/pdf',
                 );
@@ -497,7 +497,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             }
             if (isset($pdf) && $pdf instanceof Zend_Pdf) {
                 return $this->_prepareDownloadResponse(
-                    'packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'packingslip' . Mage::getSingleton('core/date')->date() . '.pdf',
                     $pdf->render(),
                     'application/pdf',
                 );
@@ -533,7 +533,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             }
             if (isset($pdf) && $pdf instanceof Zend_Pdf) {
                 return $this->_prepareDownloadResponse(
-                    'creditmemo' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'creditmemo' . Mage::getSingleton('core/date')->date() . '.pdf',
                     $pdf->render(),
                     'application/pdf',
                 );
@@ -593,7 +593,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             }
             if (isset($pdf) && $pdf instanceof Zend_Pdf) {
                 return $this->_prepareDownloadResponse(
-                    'docs' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'docs' . Mage::getSingleton('core/date')->date() . '.pdf',
                     $pdf->render(),
                     'application/pdf',
                 );
