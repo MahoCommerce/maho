@@ -41,7 +41,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                     $dateObj = Mage::app()->getLocale()
                         ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
                 } else {
-                    $dateObj = Mage::getSingleton('core/locale')
+                    $dateObj = Mage::app()->getLocale()
                         ->date($data, DateTime::ATOM, null, false);
                 }
 
@@ -53,7 +53,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                         $dateObj = Mage::app()->getLocale()
                             ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
                     } else {
-                        $dateObj = Mage::getSingleton('core/locale')->date($data, null, null, false);
+                        $dateObj = Mage::app()->getLocale()->date($data, null, null, false);
                     }
                     return $dateObj->format('M j, Y');
                 } catch (Exception $e2) {
