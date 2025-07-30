@@ -24,6 +24,7 @@ class Mage_Core_Model_Locale
      */
     public const DATETIME_FORMAT = 'Y-m-d H:i:s';
     public const DATE_FORMAT = 'Y-m-d';
+    public const HTML5_DATETIME_FORMAT = 'Y-m-d\TH:i';
 
     /**
      * Get current date and time in standard format
@@ -630,7 +631,7 @@ class Mage_Core_Model_Locale
                 }
 
                 if ($includeTime) {
-                    return $dateObj->format('Y-m-d\TH:i');
+                    return $dateObj->format(self::HTML5_DATETIME_FORMAT);
                 } else {
                     return $dateObj->format(self::DATE_FORMAT);
                 }
@@ -681,8 +682,8 @@ class Mage_Core_Model_Locale
         if ($format === 'html5' && is_string($date)) {
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                 // datetime-local format - validate the datetime
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($date, 0, 16));
-                if ($dateTime === false || $dateTime->format('Y-m-d\TH:i') !== substr($date, 0, 16)) {
+                $dateTime = DateTime::createFromFormat(self::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
+                if ($dateTime === false || $dateTime->format(self::HTML5_DATETIME_FORMAT) !== substr($date, 0, 16)) {
                     return null;
                 }
             } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {

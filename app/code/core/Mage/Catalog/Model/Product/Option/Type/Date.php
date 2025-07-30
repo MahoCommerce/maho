@@ -35,7 +35,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         if ($this->_dateExists()) {
             // Check for native datetime-local input format (for datetime options)
             if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME && isset($value['datetime'])) {
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['datetime'], 0, 16));
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['datetime'], 0, 16));
                 $dateValid = $dateTime !== false;
             }
             // Check for native date input format (ISO 8601)
@@ -45,7 +45,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             }
             // Handle case where datetime value might be passed as 'date' field
             elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['date'], 0, 16));
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['date'], 0, 16));
                 $dateValid = $dateTime !== false;
             } else {
                 $dateValid = false;
@@ -124,7 +124,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 // Check if datetime-local format from native input (for datetime options)
                 if (isset($value['datetime']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['datetime'])) {
                     // Parse ISO datetime-local format directly
-                    $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['datetime'], 0, 16));
+                    $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['datetime'], 0, 16));
                     $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if time-only format from native input
@@ -138,7 +138,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 // Check if datetime-local format is passed in the 'date' field
                 elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
                     // Parse ISO datetime-local format directly
-                    $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['date'], 0, 16));
+                    $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['date'], 0, 16));
                     $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if date is in ISO format from native input

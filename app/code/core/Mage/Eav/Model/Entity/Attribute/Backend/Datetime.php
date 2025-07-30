@@ -80,9 +80,9 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
 
             // ISO 8601 datetime-local format from native input (YYYY-MM-DDTHH:mm)
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
-                $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', substr($date, 0, 16));
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
                 // Validate the datetime is actually valid (not just format)
-                if ($dateTime && $dateTime->format('Y-m-d\\TH:i') === substr($date, 0, 16)) {
+                if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT) === substr($date, 0, 16)) {
                     return $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 return null;

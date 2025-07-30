@@ -221,7 +221,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
             if (!Mage_Core_Model_Locale::isValidDate($startDate)) {
                 Mage::throwException(Mage::helper('payment')->__('Recurring profile start date has invalid format.'));
             }
-            $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, 'Y-m-d\TH:i')
+            $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT)
                 ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             $this->setStartDatetime($utcTime)->setImportedStartDatetime($startDate);
         }
