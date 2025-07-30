@@ -67,11 +67,11 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
      */
     protected function _getProductCollection()
     {
-        $todayStartOfDayDate  = Mage::app()->getLocale()->date()
+        $todayStartOfDayDate  = Mage::app()->getLocale()->dateImmutable()
             ->setTime(0, 0, 0)
             ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
 
-        $todayEndOfDayDate  = Mage::app()->getLocale()->date()
+        $todayEndOfDayDate  = Mage::app()->getLocale()->dateImmutable()
             ->setTime(23, 59, 59)
             ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
 

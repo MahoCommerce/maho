@@ -167,8 +167,7 @@ class Mage_SalesRule_Model_Observer
     public function aggregateSalesReportCouponsData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
-        $date = $currentDate->modify('-25 hours');
+        $date = Mage::app()->getLocale()->dateImmutable()->modify('-25 hours');
         Mage::getResourceModel('salesrule/report_rule')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;

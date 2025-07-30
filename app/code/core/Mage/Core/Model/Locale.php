@@ -581,6 +581,32 @@ class Mage_Core_Model_Locale
     }
 
     /**
+     * Create mutable DateTime object for current locale
+     * Alias for date() method with explicit name
+     */
+    public function dateMutable(
+        string|int|DateTime|null $date = null,
+        ?string $part = null,
+        string|Zend_Locale|null $locale = null,
+        bool $useTimezone = true,
+    ): DateTime {
+        return $this->date($date, $part, $locale, $useTimezone);
+    }
+
+    /**
+     * Create immutable DateTime object for current locale
+     */
+    public function dateImmutable(
+        string|int|DateTime|null $date = null,
+        ?string $part = null,
+        string|Zend_Locale|null $locale = null,
+        bool $useTimezone = true,
+    ): DateTimeImmutable {
+        $dateTime = $this->date($date, $part, $locale, $useTimezone);
+        return DateTimeImmutable::createFromMutable($dateTime);
+    }
+
+    /**
      * Create DateTime object with date converted to store timezone and store Locale
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store Information about store
