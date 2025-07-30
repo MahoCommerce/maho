@@ -398,17 +398,17 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
                     $from = $from->getTimestamp();
                 } else {
                     $fromOriginal = $from;
-                    $from = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, $from);
+                    $from = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $from);
                     $from = $from ? $from->getTimestamp() : strtotime($fromOriginal);
                 }
             }
 
             if ($to instanceof DateTime) {
-                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
             } else {
-                $to = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, $to) ?: new DateTime($to);
-                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
+                $to = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $to) ?: new DateTime($to);
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
             }
 
@@ -426,7 +426,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
 
                 $dateTimeObject->setTimestamp($tr['ts']);
                 $tr['time'] = $this->_getWriteAdapter()
-                    ->formatDate($dateTimeObject->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
+                    ->formatDate($dateTimeObject->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $tzTransitions[$tr['offset']][] = ['from' => $tr['time'], 'to' => $nextPeriod];
 
                 if (!empty($from) && $tr['ts'] < $from) {

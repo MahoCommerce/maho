@@ -173,7 +173,7 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
         if (isset($row['special_to_date']) && $row['final_price'] <= $row['special_price']
             && $row['allowed_price_in_rss']
         ) {
-            $specialToDate = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_PHP_FORMAT, $row['special_to_date']);
+            $specialToDate = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $row['special_to_date']);
             if ($specialToDate && self::$_currentDate <= $specialToDate) {
                 $row['use_special'] = true;
             }

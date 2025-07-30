@@ -21,7 +21,7 @@ class Varien_Data_Form_Filter_Datetime extends Varien_Data_Form_Filter_Date
     public function __construct($format = null, $locale = null)
     {
         if (is_null($format)) {
-            $format = Mage_Core_Model_Locale::DATETIME_PHP_FORMAT;
+            $format = Mage_Core_Model_Locale::DATETIME_FORMAT;
         }
         parent::__construct($format, $locale);
     }
@@ -47,7 +47,7 @@ class Varien_Data_Form_Filter_Datetime extends Varien_Data_Form_Filter_Date
         // For backward compatibility, try to parse and reformat invalid datetimes
         try {
             $date = new DateTime($value);
-            return $date->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
+            return $date->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         } catch (Exception $e) {
             // Invalid datetime, return original value (will likely cause validation error downstream)
             return $value;
@@ -70,7 +70,7 @@ class Varien_Data_Form_Filter_Datetime extends Varien_Data_Form_Filter_Date
         // For HTML5 datetime-local inputs, output should be in ISO format
         try {
             $date = new DateTime($value);
-            return $date->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
+            return $date->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         } catch (Exception $e) {
             // Invalid datetime, return original value
             return $value;

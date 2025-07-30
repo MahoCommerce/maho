@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
 
         try {
             // Try specific format first
-            $dateObj = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, $lastUpdate);
+            $dateObj = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $lastUpdate);
             if ($dateObj === false) {
                 // Try generic parsing
                 $dateObj = new DateTime($lastUpdate);

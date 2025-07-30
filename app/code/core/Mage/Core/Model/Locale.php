@@ -22,8 +22,8 @@ class Mage_Core_Model_Locale
     /**
      * Date format constants
      */
-    public const DATETIME_PHP_FORMAT = 'Y-m-d H:i:s';
-    public const DATE_PHP_FORMAT = 'Y-m-d';
+    public const DATETIME_FORMAT = 'Y-m-d H:i:s';
+    public const DATE_FORMAT = 'Y-m-d';
 
     /**
      * Get current date and time in standard format
@@ -32,7 +32,7 @@ class Mage_Core_Model_Locale
      */
     public static function now(): string
     {
-        return date(self::DATETIME_PHP_FORMAT);
+        return date(self::DATETIME_FORMAT);
     }
 
     /**
@@ -42,7 +42,7 @@ class Mage_Core_Model_Locale
      */
     public static function today(): string
     {
-        return date(self::DATE_PHP_FORMAT);
+        return date(self::DATE_FORMAT);
     }
 
     /**
@@ -727,7 +727,7 @@ class Mage_Core_Model_Locale
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
         $currentTimezone = @date_default_timezone_get();
         @date_default_timezone_set($timezone);
-        $date = date(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
+        $date = date(Mage_Core_Model_Locale::DATETIME_FORMAT);
         @date_default_timezone_set($currentTimezone);
         return strtotime($date);
     }

@@ -762,7 +762,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
             $this->setLowStockDate(null);
             if ($this->verifyNotification()) {
                 $this->setLowStockDate(Mage::app()->getLocale()->date(null, null, null, false)
-                    ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
+                    ->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
             }
 
             $this->setStockStatusChangedAutomatically(0);

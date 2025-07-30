@@ -184,7 +184,7 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
             $productId = (int) $productId;
             if ($productId) {
                 $row['product_id'] = $productId;
-                $row['added_at']   = date(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, $addedAt);
+                $row['added_at']   = date(Mage_Core_Model_Locale::DATETIME_FORMAT, $addedAt);
                 $data[] = $row;
             }
             $addedAt -= ($addedAt > 0) ? 1 : 0;

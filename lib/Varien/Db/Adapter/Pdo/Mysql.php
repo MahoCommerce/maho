@@ -2946,10 +2946,10 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     public function formatDate($date, $includeTime = true)
     {
         if ($date === true) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
             $date = date($format);
         } elseif ($date instanceof DateTime) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
             $date = $date->format($format);
         } elseif (empty($date)) {
             return new Zend_Db_Expr('NULL');
@@ -2957,7 +2957,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
             if (!is_numeric($date)) {
                 $date = strtotime($date);
             }
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
             $date = date($format, $date);
         }
 

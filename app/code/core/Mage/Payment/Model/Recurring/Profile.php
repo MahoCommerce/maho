@@ -222,7 +222,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
                 Mage::throwException(Mage::helper('payment')->__('Recurring profile start date has invalid format.'));
             }
             $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, 'Y-m-d\TH:i')
-                ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
+                ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             $this->setStartDatetime($utcTime)->setImportedStartDatetime($startDate);
         }
         return $this->_filterValues();
@@ -251,7 +251,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
                 $options = unserialize($options->getValue(), ['allowed_classes' => false]);
                 if (is_array($options)) {
                     if (isset($options['start_datetime'])) {
-                        $startDatetime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, $options['start_datetime']);
+                        $startDatetime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $options['start_datetime']);
                         if ($startDatetime !== false) {
                             $this->setNearestStartDatetime($startDatetime);
                         }
@@ -299,7 +299,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         if (!$date || $date->getTimestamp() < time()) {
             $date = new DateTime();
         }
-        $this->setStartDatetime($date->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
+        $this->setStartDatetime($date->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         return $this;
     }
 
@@ -510,7 +510,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
 
         // automatically determine start date, if not set
         if ($this->getStartDatetime()) {
-            $date = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT, $this->getStartDatetime());
+            $date = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $this->getStartDatetime());
             if ($date !== false) {
                 $this->setNearestStartDatetime($date);
             }

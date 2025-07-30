@@ -33,7 +33,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
         if (!$object->getExpirationDate()) {
             $object->setExpirationDate(null);
         } elseif ($object->getExpirationDate() instanceof DateTime) {
-            $object->setExpirationDate($object->getExpirationDate()->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT));
+            $object->setExpirationDate($object->getExpirationDate()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         }
 
         // maintain single primary coupon per rule

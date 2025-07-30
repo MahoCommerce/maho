@@ -58,7 +58,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
             return $intervals;
         }
 
-        $start = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_PHP_FORMAT, $from) ?: new DateTime($from);
+        $start = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $from) ?: new DateTime($from);
 
         if ($period == self::REPORT_PERIOD_TYPE_DAY) {
             $dateStart = $start;
@@ -76,7 +76,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
             return $intervals;
         }
 
-        $dateEnd = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_PHP_FORMAT, $to) ?: new DateTime($to);
+        $dateEnd = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $to) ?: new DateTime($to);
 
         while ($dateStart <= $dateEnd) {
             $time = '';

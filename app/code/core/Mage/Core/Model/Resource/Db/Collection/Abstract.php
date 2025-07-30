@@ -699,12 +699,12 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     public function formatDate($date, $includeTime = true)
     {
         if ($date === true) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
             return date($format);
         }
 
         if ($date instanceof DateTime) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
             return $date->format($format);
         }
 
@@ -716,7 +716,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
             $date = strtotime($date);
         }
 
-        $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_PHP_FORMAT : Mage_Core_Model_Locale::DATE_PHP_FORMAT;
+        $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
         return date($format, $date);
     }
 }
