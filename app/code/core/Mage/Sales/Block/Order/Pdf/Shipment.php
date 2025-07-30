@@ -88,38 +88,28 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Core_Block_Template
 
     public function getLogoUrl(): ?string
     {
+        // First, try the PDF-specific logo
         $logoFile = Mage::getStoreConfig('sales/identity/logo', $this->getStore());
         if ($logoFile) {
             $logoPath = Mage::getBaseDir('media') . DS . 'sales' . DS . 'store' . DS . 'logo' . DS . $logoFile;
             if (file_exists($logoPath) && is_readable($logoPath)) {
-                try {
-                    // Check file size (limit to 2MB for PDF performance)
-                    $fileSize = filesize($logoPath);
-                    if ($fileSize > 2 * 1024 * 1024) {
-                        Mage::log('Logo file too large for PDF: ' . $logoPath . ' (' . $fileSize . ' bytes)', Zend_Log::WARN);
-                        return null;
-                    }
-
-                    $imageData = file_get_contents($logoPath);
-                    if ($imageData === false) {
-                        return null;
-                    }
-
-                    $mimeType = mime_content_type($logoPath);
-
-                    // Validate image type for PDF compatibility
-                    if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/gif'])) {
-                        Mage::log('Unsupported logo format for PDF: ' . $mimeType, Zend_Log::WARN);
-                        return null;
-                    }
-
-                    return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                    return null;
-                }
+                return 'file://' . $logoPath;
             }
         }
+
+        // Fallback to the main store logo
+        $storeLogo = Mage::getStoreConfig('design/header/logo_src', $this->getStore());
+        if ($storeLogo) {
+            // Get actual file path for skin logo
+            $designPackage = Mage::getDesign()->getPackageName();
+            $theme = Mage::getDesign()->getTheme('frontend');
+            $logoPath = Mage::getBaseDir() . DS . 'public' . DS . 'skin' . DS . 'frontend' . DS . $designPackage . DS . $theme . DS . $storeLogo;
+
+            if (file_exists($logoPath) && is_readable($logoPath)) {
+                return 'file://' . $logoPath;
+            }
+        }
+
         return null;
     }
 
