@@ -4321,12 +4321,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Controller/Sales/Creditmemo.php
 
 		-
-			message: '#^Parameter \#1 \$creditmemos of method Mage_Sales_Model_Order_Pdf_Creditmemo\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Creditmemo\>, Mage_Sales_Model_Resource_Order_Creditmemo_Collection given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Controller/Sales/Creditmemo.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Controller_Sales_Invoice\:\:emailAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4363,12 +4357,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Controller/Sales/Invoice.php
 
 		-
-			message: '#^Parameter \#1 \$invoices of method Mage_Sales_Model_Order_Pdf_Invoice\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Invoice\>, Mage_Sales_Model_Resource_Order_Invoice_Collection given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Controller/Sales/Invoice.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Controller_Sales_Shipment\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4389,12 +4377,6 @@ parameters:
 		-
 			message: '#^Method Mage_Adminhtml_Controller_Sales_Shipment\:\:viewAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Controller/Sales/Shipment.php
-
-		-
-			message: '#^Parameter \#1 \$shipments of method Mage_Sales_Model_Order_Pdf_Shipment\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Shipment\>, Mage_Sales_Model_Resource_Order_Shipment_Collection given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Controller/Sales/Shipment.php
 

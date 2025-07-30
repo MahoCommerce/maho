@@ -95,7 +95,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
                 ->addAttributeToSelect('*')
                 ->addAttributeToFilter('entity_id', ['in' => $creditmemosIds])
                 ->load();
-            $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($invoices);
+            $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($invoices->getItems());
 
             return $this->_prepareDownloadResponse('creditmemo' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') .
                 '.pdf', $pdf, 'application/pdf');
