@@ -66,7 +66,8 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                         } elseif (isset($conditionValue['from']) && isset($conditionValue['to'])) {
                             $invalidDateMessage = Mage::helper('catalogsearch')->__('Specified date is invalid.');
                             if ($conditionValue['from']) {
-                                if (!$this->_isValidDateString($conditionValue['from'])) {
+                                $dateFormat = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['from'], $dateFormat)) {
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['from'])) {
@@ -79,7 +80,8 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                                 $conditionData[] = ['gteq' => $conditionValue['from']];
                             }
                             if ($conditionValue['to']) {
-                                if (!$this->_isValidDateString($conditionValue['to'])) {
+                                $dateFormat = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['to'], $dateFormat)) {
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['to'])) {
@@ -114,35 +116,4 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
         return $this;
     }
 
-    /**
-     * Validate date string
-     *
-     * @param string $date
-     * @return bool
-     */
-    protected function _isValidDateString($date)
-    {
-        if (!$date) {
-            return false;
-        }
-
-        // Check various date formats
-        $formats = [
-            'Y-m-d H:i:s',
-            'Y-m-d',
-            'm/d/Y',
-            'd/m/Y',
-            'Y/m/d',
-        ];
-
-        foreach ($formats as $format) {
-            $dateTime = DateTime::createFromFormat($format, $date);
-            if ($dateTime !== false) {
-                return true;
-            }
-        }
-
-        // Try strtotime as last resort
-        return strtotime($date) !== false;
-    }
 }

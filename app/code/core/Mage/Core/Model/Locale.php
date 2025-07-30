@@ -1088,4 +1088,26 @@ class Mage_Core_Model_Locale
 
         return $result;
     }
+
+    /**
+     * Validate date string against a specific format
+     *
+     * @param string $date The date string to validate
+     * @param string $format The expected format (PHP DateTime format)
+     * @return bool
+     */
+    public static function isValidDate(string $date, string $format): bool
+    {
+        if (!$date || !$format) {
+            return false;
+        }
+
+        // Convert Zend/ICU format to PHP format if needed
+        if (str_contains($format, 'yyyy')) {
+            $format = str_replace(['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss'], ['Y', 'm', 'd', 'H', 'i', 's'], $format);
+        }
+
+        $dateTime = DateTime::createFromFormat($format, $date);
+        return $dateTime !== false && $dateTime->format($format) === $date;
+    }
 }

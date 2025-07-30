@@ -103,7 +103,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         // start date, order ref ID, schedule description
         if (!$this->getStartDatetime()) {
             $this->_errors['start_datetime'][] = Mage::helper('payment')->__('Start date is undefined.');
-        } elseif (!$this->_isValidDate($this->getStartDatetime(), Mage_Core_Model_Locale::DATETIME_PHP_FORMAT)) {
+        } elseif (!Mage_Core_Model_Locale::isValidDate($this->getStartDatetime(), Mage_Core_Model_Locale::DATETIME_PHP_FORMAT)) {
             $this->_errors['start_datetime'][] = Mage::helper('payment')->__('Start date has invalid format.');
         }
         if (!$this->getScheduleDescription()) {
@@ -219,7 +219,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
             $this->_ensureLocaleAndStore();
             $dateFormat = $this->_locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
             $localeCode = $this->_locale->getLocaleCode();
-            if (!$this->_isValidDate($startDate, $dateFormat)) {
+            if (!Mage_Core_Model_Locale::isValidDate($startDate, $dateFormat)) {
                 Mage::throwException(Mage::helper('payment')->__('Recurring profile start date has invalid format.'));
             }
             $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, $dateFormat)
@@ -623,25 +623,4 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         return $result;
     }
 
-    /**
-     * Validate date format
-     *
-     * @param string $date
-     * @param string $format
-     * @return bool
-     */
-    protected function _isValidDate($date, $format)
-    {
-        if (!$date || !$format) {
-            return false;
-        }
-
-        // Convert Zend format to PHP format if needed
-        if (str_contains($format, 'yyyy')) {
-            $format = str_replace(['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss'], ['Y', 'm', 'd', 'H', 'i', 's'], $format);
-        }
-
-        $dateTime = DateTime::createFromFormat($format, $date);
-        return $dateTime !== false && $dateTime->format($format) === $date;
-    }
 }
