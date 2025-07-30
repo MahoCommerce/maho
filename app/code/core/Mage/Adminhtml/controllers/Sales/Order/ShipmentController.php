@@ -471,7 +471,9 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 $trackingNumbers[] = $inf['tracking_number'];
             }
         }
-        $outputPdf = $this->_combineLabelsPdf($labelsContent);
+
+        // For single shipment label creation, use first available label
+        $outputPdf = !empty($labelsContent) ? $labelsContent[0] : '';
         $shipment->setShippingLabel($outputPdf);
         $carrierCode = $carrier->getCarrierCode();
         $carrierTitle = Mage::getStoreConfig('carriers/' . $carrierCode . '/title', $shipment->getStoreId());
@@ -609,8 +611,14 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         }
 
         if (!empty($labelsContent)) {
-            $outputPdf = $this->_combineLabelsPdf($labelsContent);
-            $this->_prepareDownloadResponse('ShippingLabels.pdf', $outputPdf, 'application/pdf');
+            if (count($labelsContent) === 1) {
+                // Single label - direct PDF download
+                $this->_prepareDownloadResponse('ShippingLabel.pdf', $labelsContent[0], 'application/pdf');
+            } else {
+                // Multiple labels - create ZIP archive
+                $zipFile = $this->_createLabelsZip($labelsContent, $shipments);
+                $this->_prepareDownloadResponse('ShippingLabels.zip', $zipFile, 'application/zip');
+            }
             return;
         }
 
@@ -626,37 +634,65 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     }
 
     /**
-     * Combine array of labels as PDF string using dompdf
+     * Create ZIP archive containing multiple shipping labels
      *
-     * @return string
+     * @param array $labelsContent Array of label content (PDF binary data)
+     * @param Mage_Sales_Model_Resource_Order_Shipment_Collection $shipments Shipment collection
+     * @return string ZIP file binary content
+     * @throws Mage_Core_Exception
      */
-    protected function _combineLabelsPdf(array $labelsContent)
+    protected function _createLabelsZip(array $labelsContent, $shipments): string
     {
-        $allHtml = '';
-        $pageBreak = '<div style="page-break-after: always;"></div>';
+        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', 'shipping_labels_');
+        if ($tempFile === false) {
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Cannot create temporary file for shipping labels archive.'),
+            );
+        }
 
-        foreach ($labelsContent as $index => $content) {
-            if (stripos($content, '%PDF-') !== false) {
-                // For existing PDF content, we can't easily merge with dompdf
-                // This is a limitation - would need a PDF merger library
-                // For now, return the first PDF found
-                return $content;
-            } else {
-                $imageHtml = $this->_createHtmlFromImageString($content);
-                if ($imageHtml) {
-                    $allHtml .= $imageHtml;
-                    if ($index < count($labelsContent) - 1) {
-                        $allHtml .= $pageBreak;
-                    }
+        $zip = new ZipArchive();
+        $result = $zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        if ($result !== true) {
+            @unlink($tempFile);
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Cannot create ZIP archive for shipping labels. Error code: %s', $result),
+            );
+        }
+
+        try {
+            $labelIndex = 0;
+            foreach ($shipments as $shipment) {
+                if (isset($labelsContent[$labelIndex])) {
+                    $content = $labelsContent[$labelIndex];
+                    $filename = sprintf('label_%s.pdf', $shipment->getIncrementId());
+
+                    $zip->addFromString($filename, $content);
+                    $labelIndex++;
                 }
             }
-        }
 
-        if (empty($allHtml)) {
-            return '';
-        }
+            $zip->close();
 
-        return $this->_generatePdfFromHtml($allHtml);
+            // Read the ZIP file content
+            $zipContent = file_get_contents($tempFile);
+            @unlink($tempFile);
+
+            if ($zipContent === false) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('sales')->__('Cannot read created ZIP archive.'),
+                );
+            }
+
+            return $zipContent;
+
+        } catch (Exception $e) {
+            $zip->close();
+            @unlink($tempFile);
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Error creating shipping labels archive: %s', $e->getMessage()),
+            );
+        }
     }
 
     /**
