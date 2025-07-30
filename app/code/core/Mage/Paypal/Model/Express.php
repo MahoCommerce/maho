@@ -654,7 +654,12 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
 
             $orderValidPeriod = abs((int) $this->getConfigData('order_valid_period'));
 
-            $dateCompass = new DateTime($orderTransaction->getCreatedAt());
+            $createdAt = $orderTransaction->getCreatedAt();
+            if (!$createdAt) {
+                return false;
+            }
+
+            $dateCompass = new DateTime($createdAt);
             $dateCompass->modify('+' . $orderValidPeriod . ' days');
             $currentDate = new DateTime();
 
@@ -711,7 +716,11 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
             return true;
         }
 
-        $transactionClosingDate = new DateTime($transaction->getCreatedAt(), new DateTimeZone('GMT'));
+        $createdAt = $transaction->getCreatedAt();
+        if (!$createdAt) {
+            return true; // Treat missing date as expired
+        }
+        $transactionClosingDate = new DateTime($createdAt, new DateTimeZone('GMT'));
         $transactionClosingDate->setTimezone(new DateTimeZone('US/Pacific'));
         /**
          * 11:49:00 PayPal transactions closing time
