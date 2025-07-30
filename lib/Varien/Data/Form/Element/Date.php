@@ -82,7 +82,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
         }
         // last check, if input format was set
         if (null === $format) {
-            $format = Mage_Core_Model_Locale::DATETIME_INTERNAL_FORMAT;
+            $format = Mage_Core_Model_Locale::DATETIME_PHP_FORMAT;
             if ($this->getInputFormat()) {
                 $format = $this->getInputFormat();
             }
@@ -94,8 +94,9 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             }
         }
         try {
-            if ($format && $format !== Mage_Core_Model_Locale::DATETIME_INTERNAL_FORMAT) {
-                // Convert Zend format to PHP format if needed
+            // Try to parse using the specified format first
+            if ($format && $format !== Mage_Core_Model_Locale::DATETIME_PHP_FORMAT) {
+                // Convert ICU format to PHP format if needed (backward compatibility)
                 $phpFormat = str_replace(['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss'], ['Y', 'm', 'd', 'H', 'i', 's'], $format);
                 $this->_value = DateTime::createFromFormat($phpFormat, $value) ?: new DateTime($value);
             } else {

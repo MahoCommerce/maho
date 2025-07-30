@@ -60,7 +60,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser_Daterange extends Mage_Adminhtml
         ) {
             $id = "{$key}_{$idSuffix}";
             $element = new Varien_Data_Form_Element_Date([
-                'format'   => Mage_Core_Model_Locale::DATE_INTERNAL_FORMAT, // hardcode because hardcoded values delimiter
+                'format'   => Mage_Core_Model_Locale::DATE_PHP_FORMAT, // hardcode because hardcoded values delimiter
                 'label'    => $label,
                 'onchange' => "dateTimeChoose_{$idSuffix}()", // won't work through Event.observe()
                 'value'    => $this->_rangeValues[$key],

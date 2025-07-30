@@ -323,7 +323,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
                 if (in_array($key, ['from_date', 'to_date']) && $value) {
                     $value = Mage::app()->getLocale()->date(
                         $value,
-                        Mage_Core_Model_Locale::DATE_INTERNAL_FORMAT,
+                        Mage_Core_Model_Locale::DATE_PHP_FORMAT,
                         null,
                         false,
                     );

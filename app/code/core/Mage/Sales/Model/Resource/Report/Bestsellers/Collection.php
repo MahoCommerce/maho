@@ -166,7 +166,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
             $selectUnions = [];
 
             // apply date boundaries (before calling $this->_applyDateRangeFilter())
-            $dtFormat   = Mage_Core_Model_Locale::DATE_INTERNAL_FORMAT;
+            $dtFormat   = Mage_Core_Model_Locale::DATE_PHP_FORMAT;
             $periodFrom = (!is_null($this->_from) ? DateTime::createFromFormat('Y-m-d', $this->_from) ?: new DateTime($this->_from) : null);
             $periodTo   = (!is_null($this->_to) ? DateTime::createFromFormat('Y-m-d', $this->_to) ?: new DateTime($this->_to) : null);
             if ($this->_period == 'year') {

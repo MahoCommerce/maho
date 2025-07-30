@@ -83,7 +83,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
 
         if ($queue->getQueueStartAt()) {
             $form->getElement('date')->setValue(
-                Mage::app()->getLocale()->date($queue->getQueueStartAt(), Mage_Core_Model_Locale::DATETIME_INTERNAL_FORMAT),
+                Mage::app()->getLocale()->date($queue->getQueueStartAt(), Mage_Core_Model_Locale::DATETIME_PHP_FORMAT),
             );
         }
 
