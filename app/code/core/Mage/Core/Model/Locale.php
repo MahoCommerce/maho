@@ -632,7 +632,7 @@ class Mage_Core_Model_Locale
                 if ($includeTime) {
                     return $dateObj->format('Y-m-d\TH:i');
                 } else {
-                    return $dateObj->format('Y-m-d');
+                    return $dateObj->format(self::DATE_FORMAT);
                 }
             } catch (Exception $e) {
                 return null;
@@ -687,8 +687,8 @@ class Mage_Core_Model_Locale
                 }
             } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 // date format - validate the date
-                $dateTime = DateTime::createFromFormat('Y-m-d', $date);
-                if ($dateTime === false || $dateTime->format('Y-m-d') !== $date) {
+                $dateTime = DateTime::createFromFormat(self::DATE_FORMAT, $date);
+                if ($dateTime === false || $dateTime->format(self::DATE_FORMAT) !== $date) {
                     return null;
                 }
                 if (!$includeTime) {

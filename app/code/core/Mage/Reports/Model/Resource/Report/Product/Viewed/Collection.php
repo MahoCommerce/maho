@@ -166,8 +166,8 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
 
             // apply date boundaries (before calling $this->_applyDateRangeFilter())
             $dtFormat   = Mage_Core_Model_Locale::DATE_FORMAT;
-            $periodFrom = (!is_null($this->_from) ? DateTime::createFromFormat('Y-m-d', $this->_from) ?: new DateTime($this->_from) : null);
-            $periodTo   = (!is_null($this->_to) ? DateTime::createFromFormat('Y-m-d', $this->_to) ?: new DateTime($this->_to) : null);
+            $periodFrom = (!is_null($this->_from) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_from) ?: new DateTime($this->_from) : null);
+            $periodTo   = (!is_null($this->_to) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_to) ?: new DateTime($this->_to) : null);
             if ($this->_period == 'year') {
                 if ($periodFrom) {
                     // not the first day of the year

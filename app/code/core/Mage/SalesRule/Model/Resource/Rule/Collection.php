@@ -124,7 +124,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
     {
         if (!$this->getFlag('website_group_date_filter')) {
             if (is_null($now)) {
-                $now = Mage::getModel('core/date')->date('Y-m-d');
+                $now = Mage::getModel('core/date')->date(Mage_Core_Model_Locale::DATE_FORMAT);
             }
 
             $this->addWebsiteFilter($websiteId);

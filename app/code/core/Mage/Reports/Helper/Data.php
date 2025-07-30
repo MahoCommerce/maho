@@ -82,7 +82,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
             $time = '';
             switch ($period) {
                 case self::REPORT_PERIOD_TYPE_DAY:
-                    $time = $dateStart->format('Y-m-d');
+                    $time = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
                     $dateStart->modify('+1 day');
                     break;
                 case self::REPORT_PERIOD_TYPE_MONTH:

@@ -161,7 +161,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             if ($this->getTime()) {
                 $isoValue = $this->_value->format('Y-m-d\TH:i');
             } else {
-                $isoValue = $this->_value->format('Y-m-d');
+                $isoValue = $this->_value->format(Mage_Core_Model_Locale::DATE_FORMAT);
             }
         }
 

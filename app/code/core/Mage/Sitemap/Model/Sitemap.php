@@ -131,7 +131,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $io->streamWrite('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
 
         $storeId = $this->getStoreId();
-        $date    = Mage::getSingleton('core/date')->gmtDate('Y-m-d');
+        $date    = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
         $baseUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
 
         /**

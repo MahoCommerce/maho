@@ -133,8 +133,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
     {
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             // Validate that the date is actually valid (not just format)
-            $dateTime = DateTime::createFromFormat('Y-m-d', $date);
-            if ($dateTime && $dateTime->format('Y-m-d') === $date) {
+            $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $date);
+            if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT) === $date) {
                 return Mage::app()->getLocale()->utcDate(null, $date, false, 'html5');
             }
         }

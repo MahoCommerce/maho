@@ -44,7 +44,7 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
                 if ($this->getTime()) {
                     $isoValue = $dateTime->format('Y-m-d\\TH:i');
                 } else {
-                    $isoValue = $dateTime->format('Y-m-d');
+                    $isoValue = $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT);
                 }
             } catch (Exception $e) {
                 // If parsing fails, use the original value

@@ -37,7 +37,7 @@ class Mage_Sales_Model_Observer
             /** @var Mage_Sales_Model_Resource_Quote_Collection $quotes */
             $quotes = Mage::getResourceModel('sales/quote_collection');
             $quotes->addFieldToFilter('store_id', $storeId);
-            $quotes->addFieldToFilter('updated_at', ['to' => date('Y-m-d', time() - $lifetime)]);
+            $quotes->addFieldToFilter('updated_at', ['to' => date(Mage_Core_Model_Locale::DATE_FORMAT, time() - $lifetime)]);
             if ($day == 0) {
                 $quotes->addFieldToFilter('is_active', 0);
             }

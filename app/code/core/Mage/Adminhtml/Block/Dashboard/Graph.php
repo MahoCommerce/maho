@@ -159,12 +159,12 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                     break;
                 case '7d':
                 case '1m':
-                    $d = $dateStart->format('Y-m-d');
+                    $d = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
                     $dateStart = $dateStart->modify('+1 day');
                     break;
                 case '3m':
                 case '6m':
-                    $date = $dateStart->format('Y-m-d');
+                    $date = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
                     $dateStart = $dateStart->modify('+1 week');
                     break;
                 case '1y':
@@ -285,7 +285,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                                 case '7d':
                                 case '1m':
                                     $this->_axisLabels[$idx][$_index] = $this->formatDate(
-                                        DateTime::createFromFormat('Y-m-d', $_label) ?: new DateTime($_label),
+                                        DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $_label) ?: new DateTime($_label),
                                     );
                                     break;
                                 case '1y':

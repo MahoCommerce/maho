@@ -40,7 +40,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             }
             // Check for native date input format (ISO 8601)
             elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value['date'])) {
-                $dateTime = DateTime::createFromFormat('Y-m-d', $value['date']);
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $value['date']);
                 $dateValid = $dateTime !== false;
             }
             // Handle case where datetime value might be passed as 'date' field

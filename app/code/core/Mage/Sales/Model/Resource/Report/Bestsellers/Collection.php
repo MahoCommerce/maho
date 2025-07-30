@@ -167,8 +167,8 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
 
             // apply date boundaries (before calling $this->_applyDateRangeFilter())
             $dtFormat   = Mage_Core_Model_Locale::DATE_FORMAT;
-            $periodFrom = (!is_null($this->_from) ? DateTime::createFromFormat('Y-m-d', $this->_from) ?: new DateTime($this->_from) : null);
-            $periodTo   = (!is_null($this->_to) ? DateTime::createFromFormat('Y-m-d', $this->_to) ?: new DateTime($this->_to) : null);
+            $periodFrom = (!is_null($this->_from) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_from) ?: new DateTime($this->_from) : null);
+            $periodTo   = (!is_null($this->_to) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_to) ?: new DateTime($this->_to) : null);
             if ($this->_period == 'year') {
                 if ($periodFrom) {
                     // not the first day of the year
@@ -179,15 +179,15 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                             ->setDate((int) $periodFrom->format('Y'), 12, 31);
                         if (!$periodTo || $dtTo < $periodTo) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->format('Y-m-d'),
-                                $dtTo->format('Y-m-d'),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // first day of the next year
                             $this->_from = DateTimeImmutable::createFromMutable($periodFrom)
                                 ->modify('+1 year')
                                 ->setDate($periodFrom->format('Y') + 1, 1, 1)
-                                ->format('Y-m-d');
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
@@ -200,15 +200,15 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                         $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         if (!$periodFrom || $dtFrom > $periodFrom) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->format('Y-m-d'),
-                                $dtTo->format('Y-m-d'),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // last day of the previous year
                             $this->_to = DateTimeImmutable::createFromMutable($periodTo)
                                 ->modify('-1 year')
                                 ->setDate($periodTo->format('Y') - 1, 12, 31)
-                                ->format('Y-m-d');
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
@@ -219,8 +219,8 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                         $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
                         $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         $selectUnions[] = $this->_makeBoundarySelect(
-                            $dtFrom->format('Y-m-d'),
-                            $dtTo->format('Y-m-d'),
+                            $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                            $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                         );
 
                         $this->getSelect()->where('1<>1');
@@ -238,15 +238,15 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                             ->modify('-1 day');
                         if (!$periodTo || $dtTo < $periodTo) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->format('Y-m-d'),
-                                $dtTo->format('Y-m-d'),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // first day of the next month
                             $this->_from = DateTimeImmutable::createFromMutable($periodFrom)
                                 ->modify('+1 month')
                                 ->setDate((int) $periodFrom->format('Y'), (int) $periodFrom->format('n') + 1, 1)
-                                ->format('Y-m-d');
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
@@ -259,15 +259,15 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                         $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         if (!$periodFrom || $dtFrom > $periodFrom) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->format('Y-m-d'),
-                                $dtTo->format('Y-m-d'),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // last day of the previous month
                             $this->_to = DateTimeImmutable::createFromMutable($periodTo)
                                 ->setDate((int) $periodTo->format('Y'), (int) $periodTo->format('n'), 1)
                                 ->modify('-1 day')
-                                ->format('Y-m-d');
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
@@ -280,8 +280,8 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                         $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
                         $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         $selectUnions[] = $this->_makeBoundarySelect(
-                            $dtFrom->format('Y-m-d'),
-                            $dtTo->format('Y-m-d'),
+                            $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                            $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                         );
 
                         $this->getSelect()->where('1<>1');
