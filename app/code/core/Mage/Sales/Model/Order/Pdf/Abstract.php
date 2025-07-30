@@ -26,13 +26,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     protected $_renderers = [];
 
     /**
-     * Predefined constants
-     */
-    public const XML_PATH_SALES_PDF_INVOICE_PUT_ORDER_ID       = 'sales_pdf/invoice/put_order_id';
-    public const XML_PATH_SALES_PDF_SHIPMENT_PUT_ORDER_ID      = 'sales_pdf/shipment/put_order_id';
-    public const XML_PATH_SALES_PDF_CREDITMEMO_PUT_ORDER_ID    = 'sales_pdf/creditmemo/put_order_id';
-
-    /**
      * Default total model
      *
      * @var string

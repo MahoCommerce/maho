@@ -57,7 +57,7 @@ class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Core_Block_Template
 
     public function getOrderNumber(): string
     {
-        if ($this->_order && Mage::getStoreConfigFlag(Mage_Sales_Model_Order_Pdf_Abstract::XML_PATH_SALES_PDF_INVOICE_PUT_ORDER_ID, $this->_order->getStoreId())) {
+        if ($this->_order) {
             return $this->_order->getRealOrderId();
         }
         return '';
