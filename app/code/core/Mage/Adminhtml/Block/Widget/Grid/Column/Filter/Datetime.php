@@ -43,7 +43,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                 $dateTime->setTimezone(new DateTimeZone('UTC'));
 
                 // Update the value with the processed date string
-                $value['to'] = $dateTime->format('Y-m-d H:i:s');
+                $value['to'] = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             } catch (Exception $e) {
             }
         }

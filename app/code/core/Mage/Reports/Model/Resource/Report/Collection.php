@@ -102,8 +102,8 @@ class Mage_Reports_Model_Resource_Report_Collection
             if (!$this->_from && !$this->_to) {
                 return $this->_intervals;
             }
-            $dateStart  = new DateTime($this->_from->format('Y-m-d H:i:s'));
-            $dateEnd    = new DateTime($this->_to->format('Y-m-d H:i:s'));
+            $dateStart  = new DateTime($this->_from->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $dateEnd    = new DateTime($this->_to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
 
             $time = [];
             $firstInterval = true;
@@ -111,7 +111,7 @@ class Mage_Reports_Model_Resource_Report_Collection
                 switch ($this->_period) {
                     case Mage_Reports_Helper_Data::REPORT_PERIOD_TYPE_DAY:
                         $time['title'] = $dateStart->format(Mage::app()->getLocale()->getDateFormat());
-                        $time['start'] = $dateStart->format('Y-m-d H:i:s');
+                        $time['start'] = $dateStart->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                         $time['end'] = $dateStart->format('Y-m-d 23:59:59');
                         $dateStart->modify('+1 day');
                         break;

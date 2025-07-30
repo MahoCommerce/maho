@@ -125,7 +125,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 if (isset($value['datetime']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['datetime'])) {
                     // Parse ISO datetime-local format directly
                     $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['datetime'], 0, 16));
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if time-only format from native input
                 elseif (isset($value['time']) && preg_match('/^\d{2}:\d{2}/', $value['time'])) {
@@ -133,19 +133,19 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     $dateTime = new DateTime('today');
                     $timeParts = explode(':', $value['time']);
                     $dateTime->setTime((int) $timeParts[0], (int) $timeParts[1]);
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if datetime-local format is passed in the 'date' field
                 elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
                     // Parse ISO datetime-local format directly
                     $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['date'], 0, 16));
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if date is in ISO format from native input
                 elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
                     // Parse ISO date format (date-only option)
                     $dateTime = new DateTime($value['date']);
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 } else {
                     // Invalid format - return null
                     return null;

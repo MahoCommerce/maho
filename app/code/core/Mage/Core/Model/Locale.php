@@ -705,7 +705,7 @@ class Mage_Core_Model_Locale
             // Convert to UTC
             $dateTime->setTimezone(new DateTimeZone('UTC'));
 
-            return $dateTime->format('Y-m-d H:i:s');
+            return $dateTime->format(self::DATETIME_FORMAT);
         }
 
         // Native DateTime handling
