@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,29 +35,47 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
     #[\Override]
     protected function _toHtml()
     {
-        $displayFormat = Varien_Date::convertZendToStrftime($this->getFormat(), true, (bool) $this->getTime());
-
-        $html  = '<input type="text" name="' . $this->getName() . '" id="' . $this->getId() . '" ';
-        $html .= 'value="' . $this->escapeHtml($this->getValue()) . '" class="' . $this->getClass() . '" ' . $this->getExtraParams() . '/> ';
-
-        $html .=
-        '<script type="text/javascript">
-            var calendarSetupObject = {
-                inputField  : "' . $this->getId() . '",
-                ifFormat    : "' . $displayFormat . '",
-                showsTime   : ' . ($this->getTime() ? 'true' : 'false') . '
-            }';
-
-        $calendarYearsRange = $this->getYearsRange();
-        if ($calendarYearsRange) {
-            $html .= '
-                calendarSetupObject.range = ' . $calendarYearsRange . '
-                ';
+        // Convert value to ISO format for native date input
+        $isoValue = '';
+        if ($this->getValue()) {
+            try {
+                // Parse the existing value and convert to ISO format
+                $dateTime = new DateTime($this->getValue());
+                if ($this->getTime()) {
+                    $isoValue = $dateTime->format('Y-m-d\\TH:i');
+                } else {
+                    $isoValue = $dateTime->format('Y-m-d');
+                }
+            } catch (Exception $e) {
+                // If parsing fails, use the original value
+                $isoValue = $this->getValue();
+            }
         }
 
-        $html .= '
-            Calendar.setup(calendarSetupObject);
-        </script>';
+        // Determine input type based on whether time is needed
+        $inputType = $this->getTime() ? 'datetime-local' : 'date';
+
+        $html = '<input type="' . $inputType . '" name="' . $this->getName() . '" id="' . $this->getId() . '" ';
+        $html .= 'value="' . $this->escapeHtml($isoValue) . '" class="' . $this->getClass() . '" ';
+
+        // Add min/max attributes if year range is specified
+        $calendarYearsRange = $this->getYearsRange();
+        if ($calendarYearsRange) {
+            // Parse range like [2020, 2030]
+            if (preg_match('/\[(\d{4}),\s*(\d{4})\]/', $calendarYearsRange, $matches)) {
+                $yearStart = $matches[1];
+                $yearEnd = $matches[2];
+                if (!$this->getTime()) {
+                    $html .= 'min="' . $yearStart . '-01-01" ';
+                    $html .= 'max="' . $yearEnd . '-12-31" ';
+                } else {
+                    $html .= 'min="' . $yearStart . '-01-01T00:00" ';
+                    $html .= 'max="' . $yearEnd . '-12-31T23:59" ';
+                }
+            }
+        }
+
+        $html .= $this->getExtraParams() . '/>';
 
         return $html;
     }
