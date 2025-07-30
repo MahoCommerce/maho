@@ -112,18 +112,18 @@ class Mage_Reports_Model_Resource_Report_Collection
                     case Mage_Reports_Helper_Data::REPORT_PERIOD_TYPE_DAY:
                         $time['title'] = $dateStart->format(Mage::app()->getLocale()->getDateFormat());
                         $time['start'] = $dateStart->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
-                        $time['end'] = $dateStart->format('Y-m-d 23:59:59');
+                        $time['end'] = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT . ' 23:59:59');
                         $dateStart->modify('+1 day');
                         break;
                     case Mage_Reports_Helper_Data::REPORT_PERIOD_TYPE_MONTH:
                         $time['title'] = $dateStart->format('m/Y');
-                        $time['start'] = ($firstInterval) ? $dateStart->format('Y-m-d 00:00:00')
+                        $time['start'] = ($firstInterval) ? $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT . ' 00:00:00')
                             : $dateStart->format('Y-m-01 00:00:00');
 
                         $lastInterval = ($dateStart->format('n') == $dateEnd->format('n') && $dateStart->format('Y') == $dateEnd->format('Y'));
 
                         $time['end'] = ($lastInterval) ? $dateStart->setDate((int) $dateStart->format('Y'), (int) $dateStart->format('n'), (int) $dateEnd->format('j'))
-                            ->format('Y-m-d 23:59:59')
+                            ->format(Mage_Core_Model_Locale::DATE_FORMAT . ' 23:59:59')
                             : $dateStart->format('Y-m-' . date('t', $dateStart->getTimestamp()) . ' 23:59:59');
 
                         $dateStart->modify('+1 month');
@@ -136,13 +136,13 @@ class Mage_Reports_Model_Resource_Report_Collection
                         break;
                     case Mage_Reports_Helper_Data::REPORT_PERIOD_TYPE_YEAR:
                         $time['title'] = $dateStart->format('Y');
-                        $time['start'] = ($firstInterval) ? $dateStart->format('Y-m-d 00:00:00')
+                        $time['start'] = ($firstInterval) ? $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT . ' 00:00:00')
                             : $dateStart->format('Y-01-01 00:00:00');
 
                         $lastInterval = ($dateStart->format('Y') == $dateEnd->format('Y'));
 
                         $time['end'] = ($lastInterval) ? $dateStart->setDate((int) $dateStart->format('Y'), (int) $dateEnd->format('n'), (int) $dateEnd->format('j'))
-                            ->format('Y-m-d 23:59:59')
+                            ->format(Mage_Core_Model_Locale::DATE_FORMAT . ' 23:59:59')
                             : $dateStart->format('Y-12-31 23:59:59');
                         $dateStart->modify('+1 year');
 
