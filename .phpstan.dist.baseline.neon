@@ -25150,12 +25150,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
 
 		-
-			message: '#^Property DOMNode\:\:\$nodeValue \(string\|null\) does not accept int\<min, \-1\>\|int\<1, max\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Test.php
-
-		-
 			message: '#^Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
