@@ -295,20 +295,16 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
     {
-        $dateEnd   = Mage::app()->getLocale()->date();
-        $dateStart = clone $dateEnd;
-
-        // go to the end of a day
-        $dateEnd->setTime(23, 59, 59);
-
+        $baseDate = Mage::app()->getLocale()->dateImmutable();
+        $dateStart = DateTime::createFromImmutable($baseDate);
         $dateStart->setTime(0, 0, 0);
+        $dateEnd = DateTime::createFromImmutable($baseDate);
+        $dateEnd->setTime(23, 59, 59);
 
         switch ($range) {
             case '24h':
-                $dateEnd = Mage::app()->getLocale()->date();
-                $dateEnd->modify('+1 hour');
-                $dateStart = clone $dateEnd;
-                $dateStart->modify('-1 day');
+                $dateEnd = DateTime::createFromImmutable($baseDate->modify('+1 hour'));
+                $dateStart = DateTime::createFromImmutable($baseDate->modify('-1 day'));
                 break;
 
             case '7d':

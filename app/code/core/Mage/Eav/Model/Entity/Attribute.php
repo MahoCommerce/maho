@@ -170,7 +170,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             if ($hasDefaultValue) {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
                 try {
-                    $defaultValue = Mage::app()->getLocale()->date($defaultValue, $format, null, false)->getTimestamp();
+                    $defaultValue = Mage::app()->getLocale()->dateMutable($defaultValue, $format, null, false)->getTimestamp();
                     $this->setDefaultValue($defaultValue);
                 } catch (Exception $e) {
                     throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default date'));

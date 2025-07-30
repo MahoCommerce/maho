@@ -28,9 +28,9 @@ class Mage_Eav_Model_Entity_Attribute_Frontend_Datetime extends Mage_Eav_Model_E
 
         if ($value) {
             try {
-                $data = Mage::app()->getLocale()->date($value, DateTime::ATOM, null, false)->format($format);
+                $data = Mage::app()->getLocale()->dateImmutable($value, DateTime::ATOM, null, false)->format($format);
             } catch (Exception $e) {
-                $data = Mage::app()->getLocale()->date($value, null, null, false)->format($format);
+                $data = Mage::app()->getLocale()->dateImmutable($value, null, null, false)->format($format);
             }
         }
 

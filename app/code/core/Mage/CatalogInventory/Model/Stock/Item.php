@@ -761,7 +761,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
             // if qty is below notify qty, update the low stock date to today date otherwise set null
             $this->setLowStockDate(null);
             if ($this->verifyNotification()) {
-                $this->setLowStockDate(Mage::app()->getLocale()->date(null, null, null, false)
+                $this->setLowStockDate(Mage::app()->getLocale()->dateMutable(null, null, null, false)
                     ->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
             }
 

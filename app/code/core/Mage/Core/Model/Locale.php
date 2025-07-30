@@ -540,7 +540,7 @@ class Mage_Core_Model_Locale
 
 
     /**
-     * Create DateTime object for current locale
+     * Use dateMutable() or dateImmutable() instead of this one.
      *
      * @param mixed              $date
      * @param string             $part

@@ -50,7 +50,7 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
      */
     public function getCreatedAtDate()
     {
-        return Mage::app()->getLocale()->date(
+        return Mage::app()->getLocale()->dateMutable(
             strtotime($this->getCreatedAt()),
             null,
             null,

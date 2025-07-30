@@ -58,15 +58,15 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
 
             try {
                 $dateObj = ($column->getGmtoffset())
-                    ? Mage::app()->getLocale()->date($data, $dateFormat)
-                    : Mage::app()->getLocale()->date($data, $dateFormat, null, false);
+                    ? Mage::app()->getLocale()->dateImmutable($data, $dateFormat)
+                    : Mage::app()->getLocale()->dateImmutable($data, $dateFormat, null, false);
 
                 return $this->_getFormatter()->format($dateObj);
             } catch (Exception $e) {
                 try {
                     $dateObj = ($column->getTimezone())
-                        ? Mage::app()->getLocale()->date($data, $dateFormat)
-                        : Mage::app()->getLocale()->date($data, $dateFormat, null, false);
+                        ? Mage::app()->getLocale()->dateImmutable($data, $dateFormat)
+                        : Mage::app()->getLocale()->dateImmutable($data, $dateFormat, null, false);
 
                     return $this->_getFormatter()->format($dateObj);
                 } catch (Exception $e2) {

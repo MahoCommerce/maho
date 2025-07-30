@@ -203,7 +203,7 @@ class Mage_Tax_Model_Observer
     public function aggregateSalesReportTaxData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
+        $currentDate = Mage::app()->getLocale()->dateMutable();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('tax/report_tax')->aggregate($date);
         Mage::app()->getLocale()->revert();
