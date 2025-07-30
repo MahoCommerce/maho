@@ -27,26 +27,6 @@ class Mage_Core_Model_Locale
     public const HTML5_DATETIME_FORMAT = 'Y-m-d\TH:i';
 
     /**
-     * Get current date and time in standard format
-     *
-     * @return string Current datetime as 'Y-m-d H:i:s'
-     */
-    public static function now(): string
-    {
-        return date(self::DATETIME_FORMAT);
-    }
-
-    /**
-     * Get current date in standard format (without time)
-     *
-     * @return string Current date as 'Y-m-d'
-     */
-    public static function today(): string
-    {
-        return date(self::DATE_FORMAT);
-    }
-
-    /**
      * XML path constants
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
@@ -713,6 +693,26 @@ class Mage_Core_Model_Locale
         $dateObj = $this->storeDate($store, $date, $includeTime, $format);
         $dateObj->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
         return $dateObj;
+    }
+
+    /**
+     * Get current date and time in standard format
+     *
+     * @return string Current datetime as 'Y-m-d H:i:s'
+     */
+    public static function now(): string
+    {
+        return date(self::DATETIME_FORMAT);
+    }
+
+    /**
+     * Get current date in standard format (without time)
+     *
+     * @return string Current date as 'Y-m-d'
+     */
+    public static function today(): string
+    {
+        return date(self::DATE_FORMAT);
     }
 
     /**
