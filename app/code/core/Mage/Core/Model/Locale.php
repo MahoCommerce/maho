@@ -454,28 +454,38 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Retrieve ISO date format ensuring 4-digit year format
+     * Retrieve date format pattern for display purposes (ICU pattern)
+     * Use this for frontend forms, user interfaces, display formatting
      */
     public function getDateFormat(?string $type = null): string
     {
-        $formatter = $this->createDateFormatter($type);
-        $pattern = $formatter->getPattern();
+        $dateStyle = match ($type) {
+            self::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            self::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            self::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            self::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
 
-        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
-        return $this->ensureFourDigitYear($pattern);
+        $formatter = new IntlDateFormatter(
+            $this->getLocaleCode(),
+            $dateStyle,
+            IntlDateFormatter::NONE,
+        );
+
+        return $formatter->getPattern();
     }
+
 
     /**
      * Retrieve short date format with 4-digit year
      */
     public function getDateFormatWithLongYear(): string
     {
-        $formatter = $this->createDateFormatter(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-        $pattern = $formatter->getPattern();
-
-        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
-        return $this->ensureFourDigitYear($pattern);
+        // Always returns 4-digit year format (same as short format)
+        return $this->getDateFormat(self::FORMAT_TYPE_SHORT);
     }
+
 
     /**
      * Retrieve date format by period type
@@ -483,55 +493,40 @@ class Mage_Core_Model_Locale
      */
     public function getDateFormatByPeriodType(?string $period = null): string
     {
-        $generator = new IntlDatePatternGenerator($this->getLocaleCode());
         return match ($period) {
-            'month' => $generator->getBestPattern('yM'),
-            'year' => $generator->getBestPattern('y'),
-            default => $this->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM),
+            'month' => 'Y-m',     // Simple year-month format
+            'year' => 'Y',        // Just year
+            default => $this->getDateFormat(self::FORMAT_TYPE_MEDIUM),
         };
     }
 
-    /**
-     * Create IntlDateFormatter for the current locale
-     */
-    private function createDateFormatter(?string $type = null): IntlDateFormatter
-    {
-        $dateStyle = match ($type) {
-            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
-            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
-            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
-            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
-            default => IntlDateFormatter::MEDIUM,
-        };
-
-        return new IntlDateFormatter(
-            $this->getLocaleCode(),
-            $dateStyle,
-            IntlDateFormatter::NONE, // No time formatting
-            null, // Default timezone
-            IntlDateFormatter::GREGORIAN,
-        );
-    }
 
     /**
-     * Convert 2-digit year patterns (yy) to 4-digit year patterns (yyyy)
-     */
-    private function ensureFourDigitYear(string $pattern): string
-    {
-        // This regex is more precise for ICU date patterns
-        return preg_replace('/(?<!y)yy(?!y)/', 'yyyy', $pattern);
-    }
-
-    /**
-     * Retrieve ISO time format
+     * Retrieve time format pattern for display purposes (ICU pattern)
+     * Use this for frontend forms, user interfaces, display formatting
      *
      * @param   string $type
      * @return  string
      */
     public function getTimeFormat($type = null)
     {
-        return $this->getTranslation($type, 'time');
+        $timeStyle = match ($type) {
+            self::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            self::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            self::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            self::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
+
+        $formatter = new IntlDateFormatter(
+            $this->getLocaleCode(),
+            IntlDateFormatter::NONE,
+            $timeStyle,
+        );
+
+        return $formatter->getPattern();
     }
+
 
     /**
      * Retrieve ISO datetime format
@@ -1090,24 +1085,33 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Validate date string against a specific format
+     * Validate date string with auto-detection of HTML5/ISO format
      *
      * @param string $date The date string to validate
-     * @param string $format The expected format (PHP DateTime format)
-     * @return bool
      */
-    public static function isValidDate(string $date, string $format): bool
+    public static function isValidDate(string $date): bool
     {
-        if (!$date || !$format) {
+        if (!$date) {
             return false;
         }
 
-        // Convert Zend/ICU format to PHP format if needed
-        if (str_contains($format, 'yyyy')) {
-            $format = str_replace(['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss'], ['Y', 'm', 'd', 'H', 'i', 's'], $format);
+        // Auto-detect HTML5 input formats by pattern
+        $formats = [
+            'Y-m-d\TH:i:s',       // 2025-12-31T23:59:59 (datetime with seconds)
+            'Y-m-d\TH:i',         // 2025-12-31T23:59 (datetime-local)
+            'Y-m-d',              // 2025-12-31 (date)
+            'H:i:s',              // 23:59:59 (time with seconds)
+            'H:i',                // 23:59 (time)
+        ];
+
+        foreach ($formats as $format) {
+            $dateTime = DateTime::createFromFormat($format, $date);
+            if ($dateTime !== false && $dateTime->format($format) === $date) {
+                return true;
+            }
         }
 
-        $dateTime = DateTime::createFromFormat($format, $date);
-        return $dateTime !== false && $dateTime->format($format) === $date;
+        return false;
     }
+
 }

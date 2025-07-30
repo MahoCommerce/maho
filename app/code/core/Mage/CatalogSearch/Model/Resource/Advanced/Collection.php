@@ -66,8 +66,7 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                         } elseif (isset($conditionValue['from']) && isset($conditionValue['to'])) {
                             $invalidDateMessage = Mage::helper('catalogsearch')->__('Specified date is invalid.');
                             if ($conditionValue['from']) {
-                                $dateFormat = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['from'], $dateFormat)) {
+                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['from'])) {
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['from'])) {
@@ -80,8 +79,7 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                                 $conditionData[] = ['gteq' => $conditionValue['from']];
                             }
                             if ($conditionValue['to']) {
-                                $dateFormat = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['to'], $dateFormat)) {
+                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['to'])) {
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['to'])) {

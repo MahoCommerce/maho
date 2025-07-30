@@ -103,7 +103,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         // start date, order ref ID, schedule description
         if (!$this->getStartDatetime()) {
             $this->_errors['start_datetime'][] = Mage::helper('payment')->__('Start date is undefined.');
-        } elseif (!Mage_Core_Model_Locale::isValidDate($this->getStartDatetime(), Mage_Core_Model_Locale::DATETIME_PHP_FORMAT)) {
+        } elseif (!Mage_Core_Model_Locale::isValidDate($this->getStartDatetime())) {
             $this->_errors['start_datetime'][] = Mage::helper('payment')->__('Start date has invalid format.');
         }
         if (!$this->getScheduleDescription()) {
@@ -217,12 +217,11 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         $startDate = $buyRequest->getData(self::BUY_REQUEST_START_DATETIME);
         if ($startDate) {
             $this->_ensureLocaleAndStore();
-            $dateFormat = $this->_locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
             $localeCode = $this->_locale->getLocaleCode();
-            if (!Mage_Core_Model_Locale::isValidDate($startDate, $dateFormat)) {
+            if (!Mage_Core_Model_Locale::isValidDate($startDate)) {
                 Mage::throwException(Mage::helper('payment')->__('Recurring profile start date has invalid format.'));
             }
-            $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, $dateFormat)
+            $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, 'Y-m-d\TH:i')
                 ->format(Mage_Core_Model_Locale::DATETIME_PHP_FORMAT);
             $this->setStartDatetime($utcTime)->setImportedStartDatetime($startDate);
         }
