@@ -58,7 +58,7 @@ jobs:
 
             # Only check files with specific extensions
             extension="${file##*.}"
-            if ! [[ "${extension,,}" =~ ^(css|js|php|phtml)$ ]]; then
+            if ! [[ "${extension,,}" =~ ^(js|php|phtml)$ ]]; then
               continue
             fi
 
