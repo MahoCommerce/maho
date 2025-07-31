@@ -41,7 +41,7 @@
     margin-bottom: 30pt;
     background-color: #f5f5f5;
     padding: 10pt;
-    border: 1pt solid #ddd;
+    border: 1pt solid #808080;
 }
 
 .pdf-document-header h1 {
@@ -125,7 +125,7 @@
 
 .pdf-tracking th,
 .pdf-tracking td {
-    border: 1pt solid #ddd;
+    border: 1pt solid #808080;
     padding: 5pt;
     text-align: left;
 }
@@ -151,7 +151,7 @@
 .pdf-items-table td {
     padding: 5pt;
     vertical-align: top;
-    border: 0.5pt solid #ccc;
+    border: 0.5pt solid #808080;
     font-size: 9pt;
 }
 
@@ -232,14 +232,14 @@
 
 .pdf-totals td {
     padding: 5pt 10pt;
-    border-bottom: 1pt solid #ddd;
+    border-bottom: 1pt solid #808080;
 }
 
 .pdf-totals .pdf-grand-total td {
     font-weight: bold;
     font-size: 12pt;
     background-color: #f5f5f5;
-    border: 2pt solid #333;
+    border: 2pt solid #808080;
 }
 
 /* Text Alignment */
