@@ -108,7 +108,7 @@ trait Mage_Core_Model_Pdf_Trait
         Mage::getDesign()->setArea('adminhtml');
 
         try {
-            $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/styles/pdf.css', [
+            $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/pdf.css', [
                 '_type' => 'template',
                 '_package' => Mage::getDesign()->getPackageName(),
                 '_theme' => Mage::getDesign()->getTheme('template'),
