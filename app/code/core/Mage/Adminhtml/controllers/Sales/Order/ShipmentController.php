@@ -480,7 +480,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             } else {
                 // Multiple labels - combine into ZIP archive
                 try {
-                    $zipContent = $this->_createLabelsZipForSingleShipment($labelsContent, $shipment);
+                    $zipContent = $this->createLabelsZipForSingleShipment($labelsContent, $shipment);
                     $shipment->setShippingLabel($zipContent);
                 } catch (Exception $e) {
                     Mage::logException($e);
@@ -557,7 +557,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                     );
                 } else {
                     // Image content - convert to PDF
-                    $pdfContent = $this->_createPdfFromImageString($labelContent, $shipment->getIncrementId());
+                    $pdfContent = $this->createPdfFromImageString($labelContent, $shipment->getIncrementId());
                     if (!$pdfContent) {
                         $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
                     } else {
@@ -645,7 +645,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 $this->_prepareDownloadResponse('ShippingLabel.pdf', $labelsContent[0], 'application/pdf');
             } else {
                 // Multiple labels - create ZIP archive
-                $zipFile = $this->_createLabelsZip($labelsContent, $shipments);
+                $zipFile = $this->createLabelsZip($labelsContent, $shipments);
                 $this->_prepareDownloadResponse('ShippingLabels.zip', $zipFile, 'application/zip');
             }
             return;
@@ -663,72 +663,16 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     }
 
     /**
-     * Create ZIP archive containing multiple shipping labels for a single shipment
+     * Create ZIP archive with shipping labels
      *
-     * @param array $labelsContent Array of label content (PDF binary data)
-     * @param Mage_Sales_Model_Order_Shipment $shipment Single shipment
+     * @param array $files Array of ['filename' => 'content'] pairs
+     * @param string $tempFilePrefix Prefix for temporary file
      * @return string ZIP file binary content
      * @throws Mage_Core_Exception
      */
-    protected function _createLabelsZipForSingleShipment(array $labelsContent, Mage_Sales_Model_Order_Shipment $shipment): string
+    protected function createZipArchive(array $files, string $tempFilePrefix = 'shipping_labels_'): string
     {
-        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', 'shipping_label_');
-        if ($tempFile === false) {
-            throw new Mage_Core_Exception(
-                Mage::helper('sales')->__('Cannot create temporary file for shipping label archive.'),
-            );
-        }
-
-        $zip = new ZipArchive();
-        $result = $zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-
-        if ($result !== true) {
-            @unlink($tempFile);
-            throw new Mage_Core_Exception(
-                Mage::helper('sales')->__('Cannot create ZIP archive for shipping labels. Error code: %s', $result),
-            );
-        }
-
-        try {
-            foreach ($labelsContent as $index => $content) {
-                $filename = sprintf('label_%s_package_%d.pdf', $shipment->getIncrementId(), $index + 1);
-                $zip->addFromString($filename, $content);
-            }
-
-            $zip->close();
-
-            // Read the ZIP file content
-            $zipContent = file_get_contents($tempFile);
-            @unlink($tempFile);
-
-            if ($zipContent === false) {
-                throw new Mage_Core_Exception(
-                    Mage::helper('sales')->__('Cannot read created ZIP archive.'),
-                );
-            }
-
-            return $zipContent;
-
-        } catch (Exception $e) {
-            $zip->close();
-            @unlink($tempFile);
-            throw new Mage_Core_Exception(
-                Mage::helper('sales')->__('Error creating shipping label archive: %s', $e->getMessage()),
-            );
-        }
-    }
-
-    /**
-     * Create ZIP archive containing multiple shipping labels
-     *
-     * @param array $labelsContent Array of label content (PDF binary data)
-     * @param Mage_Sales_Model_Resource_Order_Shipment_Collection $shipments Shipment collection
-     * @return string ZIP file binary content
-     * @throws Mage_Core_Exception
-     */
-    protected function _createLabelsZip(array $labelsContent, $shipments): string
-    {
-        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', 'shipping_labels_');
+        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', $tempFilePrefix);
         if ($tempFile === false) {
             throw new Mage_Core_Exception(
                 Mage::helper('sales')->__('Cannot create temporary file for shipping labels archive.'),
@@ -746,15 +690,8 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         }
 
         try {
-            $labelIndex = 0;
-            foreach ($shipments as $shipment) {
-                if (isset($labelsContent[$labelIndex])) {
-                    $content = $labelsContent[$labelIndex];
-                    $filename = sprintf('label_%s.pdf', $shipment->getIncrementId());
-
-                    $zip->addFromString($filename, $content);
-                    $labelIndex++;
-                }
+            foreach ($files as $filename => $content) {
+                $zip->addFromString($filename, $content);
             }
 
             $zip->close();
@@ -781,15 +718,57 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     }
 
     /**
+     * Create ZIP archive containing multiple shipping labels for a single shipment
+     *
+     * @param array $labelsContent Array of label content (PDF binary data)
+     * @param Mage_Sales_Model_Order_Shipment $shipment Single shipment
+     * @return string ZIP file binary content
+     * @throws Mage_Core_Exception
+     */
+    protected function createLabelsZipForSingleShipment(array $labelsContent, Mage_Sales_Model_Order_Shipment $shipment): string
+    {
+        $files = [];
+        foreach ($labelsContent as $index => $content) {
+            $filename = sprintf('label_%s_package_%d.pdf', $shipment->getIncrementId(), $index + 1);
+            $files[$filename] = $content;
+        }
+
+        return $this->createZipArchive($files, 'shipping_label_');
+    }
+
+    /**
+     * Create ZIP archive containing multiple shipping labels
+     *
+     * @param array $labelsContent Array of label content (PDF binary data)
+     * @param Mage_Sales_Model_Resource_Order_Shipment_Collection $shipments Shipment collection
+     * @return string ZIP file binary content
+     * @throws Mage_Core_Exception
+     */
+    protected function createLabelsZip(array $labelsContent, $shipments): string
+    {
+        $files = [];
+        $labelIndex = 0;
+        foreach ($shipments as $shipment) {
+            if (isset($labelsContent[$labelIndex])) {
+                $filename = sprintf('label_%s.pdf', $shipment->getIncrementId());
+                $files[$filename] = $labelsContent[$labelIndex];
+                $labelIndex++;
+            }
+        }
+
+        return $this->createZipArchive($files);
+    }
+
+    /**
      * Create PDF from image string using HTML/CSS approach
      *
      * @param string $imageString
      * @param string $filename
      * @return string|false
      */
-    protected function _createPdfFromImageString($imageString, $filename = 'label')
+    protected function createPdfFromImageString($imageString, $filename = 'label')
     {
-        $html = $this->_createHtmlFromImageString($imageString);
+        $html = $this->createHtmlFromImageString($imageString);
         if (!$html) {
             return false;
         }
@@ -803,7 +782,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * @param string $imageString
      * @return string|false
      */
-    protected function _createHtmlFromImageString($imageString)
+    protected function createHtmlFromImageString($imageString)
     {
         $image = imagecreatefromstring($imageString);
         if (!$image) {
