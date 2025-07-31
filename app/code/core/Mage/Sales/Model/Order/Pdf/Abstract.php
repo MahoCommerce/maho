@@ -10,11 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Dompdf\Dompdf;
-use Dompdf\Options;
-
 abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 {
+    use Mage_Core_Model_Pdf_Trait;
     /**
      * Item renderers with render type key
      *
@@ -36,16 +34,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      * Layout instance
      */
     protected ?Mage_Core_Model_Layout $_layout = null;
-
-    /**
-     * dompdf instance
-     */
-    protected ?Dompdf $_dompdf = null;
-
-    /**
-     * dompdf options
-     */
-    protected ?Options $_dompdfOptions = null;
 
     /**
      * Retrieve PDF
@@ -88,50 +76,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         return $this->_layout;
     }
 
-    /**
-     * Initialize dompdf
-     *
-     * @return void
-     */
-    protected function _initDompdf()
-    {
-        if (!$this->_dompdf) {
-            $this->_dompdfOptions = new Options();
-
-            // Configure dompdf options from config with improved defaults
-            $config = Mage::getStoreConfig('sales_pdf/dompdf') ?: [];
-
-            // Performance optimizations
-            $this->_dompdfOptions->set('enable_font_subsetting', $config['enable_font_subsetting'] ?? true);
-            $this->_dompdfOptions->set('enable_remote', $config['enable_remote'] ?? true);
-            $this->_dompdfOptions->set('enable_css_float', $config['enable_css_float'] ?? true);
-            $this->_dompdfOptions->set('enable_html5_parser', $config['enable_html5_parser'] ?? true);
-
-            // PDF quality settings
-            $this->_dompdfOptions->set('pdf_backend', $config['pdf_backend'] ?? 'CPDF');
-            $this->_dompdfOptions->set('default_media_type', $config['default_media_type'] ?? 'print'); // Changed to 'print' for better PDF output
-            $this->_dompdfOptions->set('default_paper_size', $config['default_paper_size'] ?? 'a4');
-            $this->_dompdfOptions->set('default_paper_orientation', $config['default_paper_orientation'] ?? 'portrait');
-            $this->_dompdfOptions->set('default_font', $config['default_font'] ?? 'DejaVu Sans');
-            $this->_dompdfOptions->set('dpi', (int) ($config['dpi'] ?? 96));
-            $this->_dompdfOptions->set('font_height_ratio', (float) ($config['font_height_ratio'] ?? 1.1));
-
-            // Security settings
-            $this->_dompdfOptions->set('is_php_enabled', $config['is_php_enabled'] ?? false);
-            $this->_dompdfOptions->set('is_javascript_enabled', $config['is_javascript_enabled'] ?? false);
-            $this->_dompdfOptions->set('is_html5_parser_enabled', $config['is_html5_parser_enabled'] ?? true);
-            $this->_dompdfOptions->set('is_font_subsetting_enabled', $config['is_font_subsetting_enabled'] ?? true);
-
-            // Set paths
-            $this->_dompdfOptions->set('temp_dir', Mage::getBaseDir('var') . DS . 'tmp');
-            $this->_dompdfOptions->set('font_dir', Mage::getBaseDir('lib') . DS . 'dompdf' . DS . 'fonts');
-            $this->_dompdfOptions->set('font_cache', Mage::getBaseDir('var') . DS . 'cache' . DS . 'dompdf');
-            $this->_dompdfOptions->set('chroot', Mage::getBaseDir());
-            $this->_dompdfOptions->set('log_output_file', Mage::getBaseDir('var') . DS . 'log' . DS . 'dompdf.log');
-
-            $this->_dompdf = new Dompdf($this->_dompdfOptions);
-        }
-    }
 
     /**
      * Generate PDF from HTML (public wrapper for external use)
@@ -141,42 +85,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      */
     public function generatePdfFromHtml($html)
     {
-        return $this->_generatePdfFromHtml($html);
-    }
-
-    /**
-     * Generate PDF from HTML
-     *
-     * @param string $html
-     * @return string
-     */
-    protected function _generatePdfFromHtml($html)
-    {
-        try {
-            $this->_initDompdf();
-
-            if (empty($html)) {
-                throw new Exception('Empty HTML content provided for PDF generation');
-            }
-
-            $this->_dompdf->loadHtml($html);
-            $this->_dompdf->setPaper($this->_dompdfOptions->get('default_paper_size'), 'portrait');
-            $this->_dompdf->render();
-
-            $output = $this->_dompdf->output();
-
-            if (empty($output)) {
-                throw new Exception('PDF generation failed - empty output');
-            }
-
-            return $output;
-
-        } catch (Exception $e) {
-            Mage::logException($e);
-            throw new Mage_Core_Exception(
-                Mage::helper('sales')->__('Error generating PDF: %s', $e->getMessage()),
-            );
-        }
+        return $this->generatePdf($html);
     }
 
     /**
@@ -232,7 +141,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
             }
         }
 
-        return $this->_wrapHtmlDocument($html);
+        return $this->wrapHtmlDocument($html);
     }
 
     /**
@@ -242,147 +151,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     {
         // Default implementation - subclasses should override
         return 'Mage_Core_Block_Template';
-    }
-
-    /**
-     * Wrap HTML content with document structure
-     */
-    protected function _wrapHtmlDocument(string $html): string
-    {
-        $css = $this->_getCssContent();
-
-        return '<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>' . $css . '</style>
-</head>
-<body class="pdf-document">
-' . $html . '
-</body>
-</html>';
-    }
-
-    /**
-     * Get CSS content for PDF
-     */
-    protected function _getCssContent(): string
-    {
-        // Ensure we're in adminhtml design area for CSS loading
-        $originalArea = Mage::getDesign()->getArea();
-        Mage::getDesign()->setArea('adminhtml');
-
-        $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/styles/pdf.css', [
-            '_type' => 'template',
-            '_package' => Mage::getDesign()->getPackageName(),
-            '_theme' => Mage::getDesign()->getTheme('template'),
-        ]);
-
-        // Restore original area
-        if ($originalArea !== 'adminhtml') {
-            Mage::getDesign()->setArea($originalArea);
-        }
-
-        if (file_exists($cssPath)) {
-            return file_get_contents($cssPath);
-        }
-
-        return $this->_getDefaultCss();
-    }
-
-    /**
-     * Get default CSS
-     */
-    protected function _getDefaultCss(): string
-    {
-        return '
-@page {
-    size: A4;
-    margin: 15mm;
-    font-family: "DejaVu Sans", sans-serif;
-}
-
-.pdf-document {
-    width: 100%;
-    font-size: 10pt;
-    color: #000;
-    font-family: "DejaVu Sans", sans-serif;
-}
-
-.pdf-table-header {
-    background-color: #EDECEC;
-    border: 0.5pt solid #808080;
-    padding: 5pt;
-    font-weight: bold;
-}
-
-.pdf-items-table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-    margin-bottom: 20pt;
-}
-
-.pdf-items-table th,
-.pdf-items-table td {
-    padding: 2pt 5pt;
-    vertical-align: top;
-    border-bottom: 0.5pt solid #ccc;
-}
-
-.col-products { width: 45%; text-align: left; }
-.col-sku { width: 12%; text-align: right; }
-.col-price { width: 13%; text-align: right; }
-.col-qty { width: 10%; text-align: right; }
-.col-tax { width: 12%; text-align: right; }
-.col-subtotal { width: 8%; text-align: right; }
-
-.pdf-font-regular { font-size: 10pt; font-weight: normal; }
-.pdf-font-bold { font-size: 10pt; font-weight: bold; }
-.pdf-font-small { font-size: 7pt; }
-
-.text-primary { color: #000000; }
-.text-secondary { color: #808080; }
-.bg-header { background-color: #EDECEC; }
-.border-standard { border-color: #808080; }
-
-.pdf-logo {
-    text-align: left;
-    margin-bottom: 20pt;
-}
-
-.pdf-addresses {
-    display: table;
-    width: 100%;
-    margin-bottom: 20pt;
-}
-
-.pdf-address-billing,
-.pdf-address-shipping {
-    display: table-cell;
-    width: 50%;
-    vertical-align: top;
-    padding-right: 10pt;
-}
-
-.pdf-totals {
-    margin-top: 20pt;
-    float: right;
-    width: 40%;
-}
-
-.pdf-totals table {
-    width: 100%;
-}
-
-.text-right { text-align: right; }
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-
-.page-break {
-    page-break-after: always;
-}
-        ';
     }
 
     /**

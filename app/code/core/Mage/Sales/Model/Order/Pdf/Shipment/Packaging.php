@@ -59,7 +59,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
         }
 
         $html = $this->_renderDocumentsHtml([$shipment]);
-        $pdf = $this->_generatePdfFromHtml($html);
+        $pdf = $this->generatePdf($html);
 
         $this->_afterGetPdf();
         return $pdf;

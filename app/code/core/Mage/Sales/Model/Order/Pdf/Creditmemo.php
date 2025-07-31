@@ -59,7 +59,7 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
         }
 
         $html = $this->_renderDocumentsHtml($creditmemos);
-        $pdf = $this->_generatePdfFromHtml($html);
+        $pdf = $this->generatePdf($html);
 
         $this->_afterGetPdf();
         return $pdf;
