@@ -472,9 +472,25 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             }
         }
 
-        // For single shipment label creation, use first available label
-        $outputPdf = !empty($labelsContent) ? $labelsContent[0] : '';
-        $shipment->setShippingLabel($outputPdf);
+        // Handle single or multiple labels appropriately
+        if (!empty($labelsContent)) {
+            if (count($labelsContent) === 1) {
+                // Single label - store directly
+                $shipment->setShippingLabel($labelsContent[0]);
+            } else {
+                // Multiple labels - combine into ZIP archive
+                try {
+                    $zipContent = $this->_createLabelsZipForSingleShipment($labelsContent, $shipment);
+                    $shipment->setShippingLabel($zipContent);
+                } catch (Exception $e) {
+                    Mage::logException($e);
+                    return false;
+                }
+            }
+        } else {
+            // No labels generated
+            return false;
+        }
         $carrierCode = $carrier->getCarrierCode();
         $carrierTitle = Mage::getStoreConfig('carriers/' . $carrierCode . '/title', $shipment->getStoreId());
         if ($trackingNumbers) {
@@ -524,21 +540,34 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             $shipment = $this->_initShipment();
             $labelContent = $shipment->getShippingLabel();
             if ($labelContent) {
-                $pdfContent = null;
-                if (stripos($labelContent, '%PDF-') !== false) {
-                    $pdfContent = $labelContent;
+                // Check if content is ZIP file (multiple labels)
+                if (str_starts_with($labelContent, 'PK')) {
+                    // ZIP file signature detected - return as ZIP
+                    return $this->_prepareDownloadResponse(
+                        'ShippingLabels(' . $shipment->getIncrementId() . ').zip',
+                        $labelContent,
+                        'application/zip',
+                    );
+                } elseif (stripos($labelContent, '%PDF-') !== false) {
+                    // Single PDF file
+                    return $this->_prepareDownloadResponse(
+                        'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
+                        $labelContent,
+                        'application/pdf',
+                    );
                 } else {
+                    // Image content - convert to PDF
                     $pdfContent = $this->_createPdfFromImageString($labelContent, $shipment->getIncrementId());
                     if (!$pdfContent) {
                         $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
+                    } else {
+                        return $this->_prepareDownloadResponse(
+                            'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
+                            $pdfContent,
+                            'application/pdf',
+                        );
                     }
                 }
-
-                return $this->_prepareDownloadResponse(
-                    'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
-                    $pdfContent,
-                    'application/pdf',
-                );
             }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
@@ -630,6 +659,62 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             $this->_getSession()
                 ->addError(Mage::helper('sales')->__('There are no shipping labels related to selected shipments.'));
             $this->_redirect('*/sales_order_shipment/index');
+        }
+    }
+
+    /**
+     * Create ZIP archive containing multiple shipping labels for a single shipment
+     *
+     * @param array $labelsContent Array of label content (PDF binary data)
+     * @param Mage_Sales_Model_Order_Shipment $shipment Single shipment
+     * @return string ZIP file binary content
+     * @throws Mage_Core_Exception
+     */
+    protected function _createLabelsZipForSingleShipment(array $labelsContent, Mage_Sales_Model_Order_Shipment $shipment): string
+    {
+        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', 'shipping_label_');
+        if ($tempFile === false) {
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Cannot create temporary file for shipping label archive.'),
+            );
+        }
+
+        $zip = new ZipArchive();
+        $result = $zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        if ($result !== true) {
+            @unlink($tempFile);
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Cannot create ZIP archive for shipping labels. Error code: %s', $result),
+            );
+        }
+
+        try {
+            foreach ($labelsContent as $index => $content) {
+                $filename = sprintf('label_%s_package_%d.pdf', $shipment->getIncrementId(), $index + 1);
+                $zip->addFromString($filename, $content);
+            }
+
+            $zip->close();
+
+            // Read the ZIP file content
+            $zipContent = file_get_contents($tempFile);
+            @unlink($tempFile);
+
+            if ($zipContent === false) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('sales')->__('Cannot read created ZIP archive.'),
+                );
+            }
+
+            return $zipContent;
+
+        } catch (Exception $e) {
+            $zip->close();
+            @unlink($tempFile);
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Error creating shipping label archive: %s', $e->getMessage()),
+            );
         }
     }
 

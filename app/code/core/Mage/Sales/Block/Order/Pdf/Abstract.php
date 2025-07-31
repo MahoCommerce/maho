@@ -46,7 +46,7 @@ abstract class Mage_Sales_Block_Order_Pdf_Abstract extends Mage_Core_Block_Templ
             // Use Magento's design fallback to find the logo file
             $logoPath = Mage::getDesign()->getFilename($storeLogo, [
                 '_type' => 'skin',
-                '_default' => false
+                '_default' => false,
             ]);
 
             if ($logoPath && file_exists($logoPath) && is_readable($logoPath)) {
@@ -94,7 +94,7 @@ abstract class Mage_Sales_Block_Order_Pdf_Abstract extends Mage_Core_Block_Templ
         }
 
         // Return base64 encoded image if we got a valid MIME type
-        if ($mimeType && strpos($mimeType, 'image/') === 0) {
+        if ($mimeType && str_starts_with($mimeType, 'image/')) {
             return 'data:' . $mimeType . ';base64,' . base64_encode($content);
         }
 
