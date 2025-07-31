@@ -679,17 +679,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Check if request was secure
-     *
-     * @deprecated
-     * @return bool
-     */
-    public function isCurrentlySecure()
-    {
-        return Mage::app()->isCurrentlySecure();
-    }
-
-    /**
      * Retrieve store base currency code
      *
      * @return string
@@ -1024,7 +1013,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             ltrim(Mage::app()->getRequest()->getRequestString(), '/'),
         );
 
-        $storeUrl = Mage::app()->getStore()->isCurrentlySecure()
+        $storeUrl = Mage::app()->isCurrentlySecure()
             ? $this->getUrl('', ['_secure' => true])
             : $this->getUrl('');
         $storeParsedUrl = parse_url($storeUrl);

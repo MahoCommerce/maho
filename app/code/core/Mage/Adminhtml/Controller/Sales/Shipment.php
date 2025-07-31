@@ -75,7 +75,7 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
                 ->load();
             $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
 
-            return $this->_prepareDownloadResponse('packingslip' . Mage::getSingleton('core/date')->date() . '.pdf', $pdf->render(), 'application/pdf');
+            return $this->_prepareDownloadResponse('packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf', $pdf, 'application/pdf');
         }
         $this->_redirect('*/*/');
     }
@@ -86,7 +86,7 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
         if ($shipmentId = $this->getRequest()->getParam('invoice_id')) { // invoice_id o_0
             if ($shipment = Mage::getModel('sales/order_shipment')->load($shipmentId)) {
                 $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf([$shipment]);
-                $this->_prepareDownloadResponse('packingslip' . Mage::getSingleton('core/date')->date() . '.pdf', $pdf->render(), 'application/pdf');
+                $this->_prepareDownloadResponse('packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf', $pdf, 'application/pdf');
             }
         } else {
             $this->_forward('noRoute');

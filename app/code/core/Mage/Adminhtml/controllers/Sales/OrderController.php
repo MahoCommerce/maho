@@ -446,23 +446,23 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
         if (!empty($orderIds)) {
+            $allInvoices = [];
             foreach ($orderIds as $orderId) {
                 $invoices = Mage::getResourceModel('sales/order_invoice_collection')
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($invoices->getSize() > 0) {
-                    if (!isset($pdf)) {
-                        $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices);
-                    } else {
-                        $pages = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices);
-                        $pdf->pages = array_merge($pdf->pages, $pages->pages);
+                    foreach ($invoices as $invoice) {
+                        $allInvoices[] = $invoice;
                     }
                 }
             }
-            if (isset($pdf) && $pdf instanceof Zend_Pdf) {
+
+            if (!empty($allInvoices)) {
+                $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf($allInvoices);
                 return $this->_prepareDownloadResponse(
-                    'invoice' . Mage::getSingleton('core/date')->date() . '.pdf',
-                    $pdf->render(),
+                    'invoice' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    $pdf,
                     'application/pdf',
                 );
             } else {
@@ -482,23 +482,23 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
         if (!empty($orderIds)) {
+            $allShipments = [];
             foreach ($orderIds as $orderId) {
                 $shipments = Mage::getResourceModel('sales/order_shipment_collection')
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($shipments->getSize()) {
-                    if (!isset($pdf)) {
-                        $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
-                    } else {
-                        $pages = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
-                        $pdf->pages = array_merge($pdf->pages, $pages->pages);
+                    foreach ($shipments as $shipment) {
+                        $allShipments[] = $shipment;
                     }
                 }
             }
-            if (isset($pdf) && $pdf instanceof Zend_Pdf) {
+
+            if (!empty($allShipments)) {
+                $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($allShipments);
                 return $this->_prepareDownloadResponse(
-                    'packingslip' . Mage::getSingleton('core/date')->date() . '.pdf',
-                    $pdf->render(),
+                    'packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    $pdf,
                     'application/pdf',
                 );
             } else {
@@ -518,23 +518,23 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
         if (!empty($orderIds)) {
+            $allCreditmemos = [];
             foreach ($orderIds as $orderId) {
                 $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($creditmemos->getSize()) {
-                    if (!isset($pdf)) {
-                        $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($creditmemos);
-                    } else {
-                        $pages = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($creditmemos);
-                        $pdf->pages = array_merge($pdf->pages, $pages->pages);
+                    foreach ($creditmemos as $creditmemo) {
+                        $allCreditmemos[] = $creditmemo;
                     }
                 }
             }
-            if (isset($pdf) && $pdf instanceof Zend_Pdf) {
+
+            if (!empty($allCreditmemos)) {
+                $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($allCreditmemos);
                 return $this->_prepareDownloadResponse(
-                    'creditmemo' . Mage::getSingleton('core/date')->date() . '.pdf',
-                    $pdf->render(),
+                    'creditmemo' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    $pdf,
                     'application/pdf',
                 );
             } else {
@@ -554,16 +554,17 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
         if (!empty($orderIds)) {
+            $allInvoices = [];
+            $allShipments = [];
+            $allCreditmemos = [];
+
             foreach ($orderIds as $orderId) {
                 $invoices = Mage::getResourceModel('sales/order_invoice_collection')
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($invoices->getSize()) {
-                    if (!isset($pdf)) {
-                        $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices);
-                    } else {
-                        $pages = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices);
-                        $pdf->pages = array_merge($pdf->pages, $pages->pages);
+                    foreach ($invoices as $invoice) {
+                        $allInvoices[] = $invoice;
                     }
                 }
 
@@ -571,11 +572,8 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($shipments->getSize()) {
-                    if (!isset($pdf)) {
-                        $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
-                    } else {
-                        $pages = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
-                        $pdf->pages = array_merge($pdf->pages, $pages->pages);
+                    foreach ($shipments as $shipment) {
+                        $allShipments[] = $shipment;
                     }
                 }
 
@@ -583,18 +581,26 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     ->setOrderFilter($orderId)
                     ->load();
                 if ($creditmemos->getSize()) {
-                    if (!isset($pdf)) {
-                        $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($creditmemos);
-                    } else {
-                        $pages = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($creditmemos);
-                        $pdf->pages = array_merge($pdf->pages, $pages->pages);
+                    foreach ($creditmemos as $creditmemo) {
+                        $allCreditmemos[] = $creditmemo;
                     }
                 }
             }
-            if (isset($pdf) && $pdf instanceof Zend_Pdf) {
+
+            // Generate PDF for the first available document type
+            $pdfContent = '';
+            if (!empty($allInvoices)) {
+                $pdfContent = Mage::getModel('sales/order_pdf_invoice')->getPdf($allInvoices);
+            } elseif (!empty($allShipments)) {
+                $pdfContent = Mage::getModel('sales/order_pdf_shipment')->getPdf($allShipments);
+            } elseif (!empty($allCreditmemos)) {
+                $pdfContent = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($allCreditmemos);
+            }
+
+            if (!empty($pdfContent)) {
                 return $this->_prepareDownloadResponse(
-                    'docs' . Mage::getSingleton('core/date')->date() . '.pdf',
-                    $pdf->render(),
+                    'docs' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    $pdfContent,
                     'application/pdf',
                 );
             } else {
