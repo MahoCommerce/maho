@@ -1,0 +1,285 @@
+@page {
+    size: A4;
+    margin: 15mm;
+    font-family: sans-serif;
+}
+
+.pdf-document {
+    width: 100%;
+    font-size: 10pt;
+    color: #000;
+    font-family: sans-serif;
+    line-height: 1.4;
+}
+
+/* Page Layout */
+.pdf-page {
+    width: 100%;
+}
+
+/* Logo */
+.pdf-logo {
+    text-align: left;
+    margin-bottom: 20pt;
+}
+
+.pdf-logo img {
+    max-height: 50pt;
+    width: auto;
+}
+
+/* Document Header */
+.pdf-document-header {
+    display: table;
+    width: 100%;
+    margin-bottom: 30pt;
+    padding: 10pt;
+    page-break-inside: avoid;
+}
+
+.pdf-document-info {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding-right: 15pt;
+}
+
+/* Store Address */
+.pdf-store-address {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    text-align: right;
+    padding-left: 15pt;
+}
+
+.pdf-document-header h1 {
+    margin: 0 0 10pt 0;
+    font-size: 16pt;
+    font-weight: bold;
+}
+
+.pdf-document-header p {
+    margin: 5pt 0;
+    font-size: 10pt;
+}
+
+/* Addresses */
+.pdf-addresses {
+    display: table;
+    width: 100%;
+    margin-bottom: 20pt;
+    page-break-inside: avoid;
+}
+
+.pdf-address-billing,
+.pdf-address-shipping {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding-right: 15pt;
+}
+
+.pdf-address-shipping {
+    padding-right: 0;
+    padding-left: 15pt;
+}
+
+.pdf-addresses h3 {
+    margin: 0 0 10pt 0;
+    font-size: 12pt;
+    font-weight: bold;
+    background-color: #EDECEC;
+    padding: 5pt;
+    border: 0.5pt solid #808080;
+}
+
+.pdf-addresses address {
+    font-style: normal;
+    line-height: 1.3;
+    margin: 0;
+}
+
+/* Payment Info */
+.pdf-payment-info,
+.pdf-shipping-method {
+    margin-bottom: 20pt;
+}
+
+.pdf-payment-info h3,
+.pdf-shipping-method h3 {
+    margin: 0 0 10pt 0;
+    font-size: 12pt;
+    font-weight: bold;
+    background-color: #EDECEC;
+    padding: 5pt;
+    border: 0.5pt solid #808080;
+}
+
+/* Tracking Information */
+.pdf-tracking {
+    margin-bottom: 20pt;
+}
+
+.pdf-tracking h3 {
+    margin: 0 0 10pt 0;
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+.pdf-tracking table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pdf-tracking th,
+.pdf-tracking td {
+    border: 1pt solid #808080;
+    padding: 5pt;
+    text-align: left;
+}
+
+.pdf-tracking th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+/* Items Table */
+.pdf-items {
+    margin-bottom: 20pt;
+}
+
+.pdf-items-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border: 1pt solid #808080;
+}
+
+.pdf-items-table th,
+.pdf-items-table td {
+    padding: 5pt;
+    vertical-align: top;
+    border: 0.5pt solid #808080;
+    font-size: 9pt;
+}
+
+.pdf-table-header th {
+    background-color: #EDECEC;
+    border: 0.5pt solid #808080;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Column Widths - Invoice & Shipment */
+.pdf-items-table .col-products { width: 35%; text-align: left; }
+.pdf-items-table .col-sku { width: 15%; text-align: right; }
+.pdf-items-table .col-price { width: 15%; text-align: right; }
+.pdf-items-table .col-qty { width: 10%; text-align: right; }
+.pdf-items-table .col-tax { width: 12%; text-align: right; }
+.pdf-items-table .col-subtotal { width: 13%; text-align: right; }
+
+/* Column Widths - Creditmemo (adjusted for extra discount column) */
+.pdf-items-table .col-discount { width: 10%; text-align: right; }
+
+/* Grouped Children Styling */
+.grouped-children {
+    margin-top: 5pt;
+    font-size: 8pt;
+    color: #666;
+    padding-left: 10pt;
+}
+
+.child-item {
+    margin-bottom: 2pt;
+}
+
+/* Item Options */
+.item-options {
+    margin-top: 5pt;
+    font-size: 8pt;
+    color: #666;
+}
+
+.item-options .option {
+    margin-bottom: 2pt;
+}
+
+.item-options .option-label {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.item-options .option-value {
+    margin-left: 5pt;
+}
+
+/* Price Display */
+.price-label,
+.subtotal-label {
+    font-size: 8pt;
+    color: #666;
+}
+
+.price-value,
+.subtotal-value {
+    font-weight: bold;
+}
+
+/* Totals */
+.pdf-totals {
+    margin-top: 20pt;
+    float: right;
+    width: 50%;
+    clear: both;
+}
+
+.pdf-totals table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pdf-totals td {
+    padding: 5pt 10pt;
+    border-bottom: 1pt solid #808080;
+}
+
+.pdf-totals .pdf-grand-total td {
+    font-weight: bold;
+    font-size: 12pt;
+    background-color: #f5f5f5;
+    border: 2pt solid #808080;
+}
+
+/* Text Alignment */
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+
+/* Font Styles */
+.pdf-font-regular { font-size: 10pt; font-weight: normal; }
+.pdf-font-bold { font-size: 10pt; font-weight: bold; }
+.pdf-font-small { font-size: 8pt; }
+
+/* Colors */
+.text-primary { color: #000000; }
+.text-secondary { color: #666666; }
+.bg-header { background-color: #EDECEC; }
+.border-standard { border-color: #808080; }
+
+/* Page Breaks */
+.page-break {
+    page-break-after: always;
+}
+
+.page-break-inside-avoid {
+    page-break-inside: avoid;
+}
+
+/* Responsive adjustments for different paper sizes */
+@media print {
+    .pdf-document {
+        margin: 0;
+        padding: 0;
+    }
+}
