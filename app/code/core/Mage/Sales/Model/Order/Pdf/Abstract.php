@@ -103,13 +103,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
             // Performance optimizations
             $this->_dompdfOptions->set('enable_font_subsetting', $config['enable_font_subsetting'] ?? true);
-            $this->_dompdfOptions->set('enable_remote', $config['enable_remote'] ?? false); // Security: disabled by default
+            $this->_dompdfOptions->set('enable_remote', $config['enable_remote'] ?? true);
             $this->_dompdfOptions->set('enable_css_float', $config['enable_css_float'] ?? true);
             $this->_dompdfOptions->set('enable_html5_parser', $config['enable_html5_parser'] ?? true);
-
-            // Debug options (disabled in production)
-            $this->_dompdfOptions->set('debug_png', $config['debug_png'] ?? false);
-            $this->_dompdfOptions->set('debug_keep_temp', $config['debug_keep_temp'] ?? false);
 
             // PDF quality settings
             $this->_dompdfOptions->set('pdf_backend', $config['pdf_backend'] ?? 'CPDF');
