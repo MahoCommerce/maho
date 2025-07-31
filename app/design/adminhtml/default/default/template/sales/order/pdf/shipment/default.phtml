@@ -16,26 +16,26 @@ $order = $this->getOrder();
     <!-- Logo -->
     <?php if ($logoUrl = $this->getLogoUrl()): ?>
     <div class="pdf-logo">
-        <img src="<?php echo $logoUrl ?>" />
+        <img src="<?= $logoUrl ?>" />
     </div>
     <?php endif; ?>
 
     <!-- Document Header -->
     <div class="pdf-document-header">
         <div class="pdf-document-info">
-            <h1><?php echo $this->__('Shipment # %s', $this->getShipmentNumber()) ?></h1>
+            <h1><?= $this->__('Shipment # %s', $this->getShipmentNumber()) ?></h1>
             <?php if ($orderNumber = $this->getOrderNumber()): ?>
-                <?php echo $this->__('Order # %s', $orderNumber) ?><br />
+                <?= $this->__('Order # %s', $orderNumber) ?><br />
             <?php endif; ?>
-            <p><?php echo $this->__('Shipment Date: %s', $this->getShipmentDate()) ?><br />
+            <?= $this->__('Shipment Date: %s', $this->getShipmentDate()) ?><br />
             <?php if ($orderDate = $this->getOrderDate()): ?>
-                <?php echo $this->__('Order Date: %s', $orderDate) ?>
+                <?= $this->__('Order Date: %s', $orderDate) ?>
             <?php endif; ?>
         </div>
 
         <?php if ($storeAddress = $this->getStoreAddress()): ?>
         <div class="pdf-store-address">
-            <?php echo nl2br($this->escapeHtml($storeAddress)) ?>
+            <?= nl2br($this->escapeHtml($storeAddress)) ?>
         </div>
         <?php endif; ?>
     </div>
@@ -43,19 +43,19 @@ $order = $this->getOrder();
     <!-- Addresses -->
     <div class="pdf-addresses">
         <div class="pdf-address-billing">
-            <h3><?php echo $this->__('Sold to:') ?></h3>
+            <h3><?= $this->__('Sold to:') ?></h3>
             <?php if ($billing = $this->getBillingAddress()): ?>
             <address>
-                <?php echo $billing->format('html') ?>
+                <?= $billing->format('html') ?>
             </address>
             <?php endif; ?>
         </div>
 
         <div class="pdf-address-shipping">
-            <h3><?php echo $this->__('Ship to:') ?></h3>
+            <h3><?= $this->__('Ship to:') ?></h3>
             <?php if ($shipping = $this->getShippingAddress()): ?>
             <address>
-                <?php echo $shipping->format('html') ?>
+                <?= $shipping->format('html') ?>
             </address>
             <?php endif; ?>
         </div>
@@ -64,27 +64,27 @@ $order = $this->getOrder();
     <!-- Shipping Method -->
     <?php if ($shippingMethod = $this->getShippingMethod()): ?>
     <div class="pdf-shipping-method">
-        <h3><?php echo $this->__('Shipping Method:') ?></h3>
-        <div><?php echo $this->escapeHtml($shippingMethod) ?></div>
+        <h3><?= $this->__('Shipping Method:') ?></h3>
+        <div><?= $this->escapeHtml($shippingMethod) ?></div>
     </div>
     <?php endif; ?>
 
     <!-- Tracking Information -->
     <?php if ($this->hasTracking()): ?>
     <div class="pdf-tracking">
-        <h3><?php echo $this->__('Tracking Information:') ?></h3>
+        <h3><?= $this->__('Tracking Information:') ?></h3>
         <table>
             <thead>
                 <tr>
-                    <th><?php echo $this->__('Title') ?></th>
-                    <th><?php echo $this->__('Number') ?></th>
+                    <th><?= $this->__('Title') ?></th>
+                    <th><?= $this->__('Number') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($this->getTrackingNumbers() as $track): ?>
                 <tr>
-                    <td><?php echo $this->escapeHtml($track['carrier']) ?></td>
-                    <td><?php echo $this->escapeHtml($track['number']) ?></td>
+                    <td><?= $this->escapeHtml($track['carrier']) ?></td>
+                    <td><?= $this->escapeHtml($track['number']) ?></td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -97,15 +97,15 @@ $order = $this->getOrder();
         <table class="pdf-items-table">
             <thead>
                 <tr class="pdf-table-header">
-                    <th class="col-qty"><?php echo $this->__('Qty') ?></th>
-                    <th class="col-products"><?php echo $this->__('Products') ?></th>
-                    <th class="col-sku"><?php echo $this->__('SKU') ?></th>
+                    <th class="col-qty"><?= $this->__('Qty') ?></th>
+                    <th class="col-products"><?= $this->__('Products') ?></th>
+                    <th class="col-sku"><?= $this->__('SKU') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($this->getItems() as $item): ?>
                 <tr class="pdf-item-row">
-                    <?php echo $this->getItemHtml($item) ?>
+                    <?= $this->getItemHtml($item) ?>
                 </tr>
                 <?php endforeach; ?>
             </tbody>

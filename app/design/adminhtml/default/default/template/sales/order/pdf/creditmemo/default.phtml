@@ -16,29 +16,29 @@ $order = $this->getOrder();
     <!-- Logo -->
     <?php if ($logoUrl = $this->getLogoUrl()): ?>
     <div class="pdf-logo">
-        <img src="<?php echo $logoUrl ?>" />
+        <img src="<?= $logoUrl ?>" />
     </div>
     <?php endif; ?>
 
     <!-- Document Header -->
     <div class="pdf-document-header">
         <div class="pdf-document-info">
-            <h1><?php echo $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
+            <h1><?= $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
             <?php if ($orderNumber = $this->getOrderNumber()): ?>
-                <?php echo $this->__('Order # %s', $orderNumber) ?><br />
+                <?= $this->__('Order # %s', $orderNumber) ?><br />
             <?php endif; ?>
             <?php if ($invoiceNumber = $this->getInvoiceNumber()): ?>
-                <?php echo $this->__('Invoice # %s', $invoiceNumber) ?><br />
+                <?= $this->__('Invoice # %s', $invoiceNumber) ?><br />
             <?php endif; ?>
-            <?php echo $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?><br />
+            <?= $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?><br />
             <?php if ($orderDate = $this->getOrderDate()): ?>
-                <?php echo $this->__('Order Date: %s', $orderDate) ?>
+                <?= $this->__('Order Date: %s', $orderDate) ?>
             <?php endif; ?>
         </div>
 
         <?php if ($storeAddress = $this->getStoreAddress()): ?>
         <div class="pdf-store-address">
-            <?php echo nl2br($this->escapeHtml($storeAddress)) ?>
+            <?= nl2br($this->escapeHtml($storeAddress)) ?>
         </div>
         <?php endif; ?>
     </div>
@@ -46,20 +46,20 @@ $order = $this->getOrder();
     <!-- Addresses -->
     <div class="pdf-addresses">
         <div class="pdf-address-billing">
-            <h3><?php echo $this->__('Sold to:') ?></h3>
+            <h3><?= $this->__('Sold to:') ?></h3>
             <?php if ($billing = $this->getBillingAddress()): ?>
             <address>
-                <?php echo $billing->format('html') ?>
+                <?= $billing->format('html') ?>
             </address>
             <?php endif; ?>
         </div>
 
         <?php if (!$order->getIsVirtual()): ?>
         <div class="pdf-address-shipping">
-            <h3><?php echo $this->__('Ship to:') ?></h3>
+            <h3><?= $this->__('Ship to:') ?></h3>
             <?php if ($shipping = $this->getShippingAddress()): ?>
             <address>
-                <?php echo $shipping->format('html') ?>
+                <?= $shipping->format('html') ?>
             </address>
             <?php endif; ?>
         </div>
@@ -69,8 +69,8 @@ $order = $this->getOrder();
     <!-- Payment Method -->
     <?php if ($paymentInfo = $this->getPaymentInfo()): ?>
     <div class="pdf-payment-info">
-        <h3><?php echo $this->__('Payment Method') ?></h3>
-        <div><?php echo $paymentInfo ?></div>
+        <h3><?= $this->__('Payment Method') ?></h3>
+        <div><?= $paymentInfo ?></div>
     </div>
     <?php endif; ?>
 
@@ -79,19 +79,19 @@ $order = $this->getOrder();
         <table class="pdf-items-table">
             <thead>
                 <tr class="pdf-table-header">
-                    <th class="col-products"><?php echo $this->__('Products') ?></th>
-                    <th class="col-sku"><?php echo $this->__('SKU') ?></th>
-                    <th class="col-price"><?php echo $this->__('Total (ex)') ?></th>
-                    <th class="col-discount"><?php echo $this->__('Discount') ?></th>
-                    <th class="col-qty"><?php echo $this->__('Qty') ?></th>
-                    <th class="col-tax"><?php echo $this->__('Tax') ?></th>
-                    <th class="col-subtotal"><?php echo $this->__('Total (inc)') ?></th>
+                    <th class="col-products"><?= $this->__('Products') ?></th>
+                    <th class="col-sku"><?= $this->__('SKU') ?></th>
+                    <th class="col-price"><?= $this->__('Total (ex)') ?></th>
+                    <th class="col-discount"><?= $this->__('Discount') ?></th>
+                    <th class="col-qty"><?= $this->__('Qty') ?></th>
+                    <th class="col-tax"><?= $this->__('Tax') ?></th>
+                    <th class="col-subtotal"><?= $this->__('Total (inc)') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($this->getItems() as $item): ?>
                 <tr class="pdf-item-row">
-                    <?php echo $this->getItemHtml($item) ?>
+                    <?= $this->getItemHtml($item) ?>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -103,8 +103,8 @@ $order = $this->getOrder();
         <table>
             <?php foreach ($this->getTotals() as $total): ?>
             <tr<?php if (isset($total['strong']) && $total['strong']): ?> class="pdf-grand-total"<?php endif; ?>>
-                <td><?php echo $this->escapeHtml($total['label']) ?></td>
-                <td class="text-right"><?php echo $total['value'] ?></td>
+                <td><?= $this->escapeHtml($total['label']) ?></td>
+                <td class="text-right"><?= $total['value'] ?></td>
             </tr>
             <?php endforeach; ?>
         </table>
