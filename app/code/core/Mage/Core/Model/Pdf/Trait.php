@@ -19,9 +19,6 @@ trait Mage_Core_Model_Pdf_Trait
     protected ?Dompdf $dompdf = null;
     protected ?Options $dompdfOptions = null;
 
-    /**
-     * Initialize dompdf with common configuration
-     */
     protected function initDompdf(): void
     {
         if (!$this->dompdf) {
@@ -66,18 +63,12 @@ trait Mage_Core_Model_Pdf_Trait
         }
     }
 
-    /**
-     * Get dompdf instance
-     */
     public function getDompdf(): Dompdf
     {
         $this->initDompdf();
         return $this->dompdf;
     }
 
-    /**
-     * Generate PDF from HTML content
-     */
     public function generatePdf(string $html, string $filename = 'document.pdf'): string
     {
         try {
@@ -110,9 +101,6 @@ trait Mage_Core_Model_Pdf_Trait
         }
     }
 
-    /**
-     * Get CSS content for PDF
-     */
     protected function getCssContent(): string
     {
         // Ensure we're in adminhtml design area for CSS loading
@@ -140,10 +128,6 @@ trait Mage_Core_Model_Pdf_Trait
         }
     }
 
-
-    /**
-     * Wrap HTML content with document structure
-     */
     protected function wrapHtmlDocument(string $html): string
     {
         $css = $this->getCssContent();
