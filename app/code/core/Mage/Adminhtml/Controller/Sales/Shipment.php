@@ -73,7 +73,7 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
                 ->addAttributeToSelect('*')
                 ->addAttributeToFilter('entity_id', ['in' => $shipmentIds])
                 ->load();
-            $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments->getItems());
+            $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($shipments);
 
             return $this->_prepareDownloadResponse('packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf', $pdf, 'application/pdf');
         }

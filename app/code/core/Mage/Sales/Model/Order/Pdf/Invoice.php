@@ -46,13 +46,18 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
     /**
      * Return PDF document
      *
-     * @param  Mage_Sales_Model_Order_Invoice[] $invoices
+     * @param array|Varien_Data_Collection $invoices Array or collection of invoices
      */
     #[\Override]
-    public function getPdf(array $invoices = []): string
+    public function getPdf(array|Varien_Data_Collection $invoices = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('invoice');
+
+        // Handle collections
+        if ($invoices instanceof Varien_Data_Collection) {
+            $invoices = $invoices->getItems();
+        }
 
         if (empty($invoices)) {
             return '';

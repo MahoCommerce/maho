@@ -120,7 +120,7 @@ class Mage_Adminhtml_Controller_Sales_Invoice extends Mage_Adminhtml_Controller_
                 ->addAttributeToSelect('*')
                 ->addAttributeToFilter('entity_id', ['in' => $invoicesIds])
                 ->load();
-            $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices->getItems());
+            $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf($invoices);
 
             return $this->_prepareDownloadResponse('invoice' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') .
                 '.pdf', $pdf, 'application/pdf');

@@ -46,13 +46,18 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
     /**
      * Return PDF document
      *
-     * @param  Mage_Sales_Model_Order_Shipment[] $shipments
+     * @param array|Varien_Data_Collection $shipments Array or collection of shipments
      */
     #[\Override]
-    public function getPdf(array $shipments = []): string
+    public function getPdf(array|Varien_Data_Collection $shipments = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('shipment');
+
+        // Handle collections
+        if ($shipments instanceof Varien_Data_Collection) {
+            $shipments = $shipments->getItems();
+        }
 
         if (empty($shipments)) {
             return '';

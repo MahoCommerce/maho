@@ -13,6 +13,7 @@
 abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 {
     use Mage_Core_Model_Pdf_Trait;
+
     /**
      * Item renderers with render type key
      *
@@ -37,10 +38,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 
     /**
      * Retrieve PDF
-     *
-     * @return string
      */
-    abstract public function getPdf();
+    abstract public function getPdf(array|Varien_Data_Collection $documents = []): string;
 
     /**
      * Get layout handle for this PDF type
@@ -253,5 +252,4 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
         /** @var Mage_Core_Model_Translate $translate */
         $translate->setTranslateInline(true);
     }
-
 }

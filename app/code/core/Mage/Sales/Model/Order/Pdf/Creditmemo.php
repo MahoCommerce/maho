@@ -46,13 +46,18 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
     /**
      * Return PDF document
      *
-     * @param  Mage_Sales_Model_Order_Creditmemo[] $creditmemos
+     * @param array|Varien_Data_Collection $creditmemos Array or collection of creditmemos
      */
     #[\Override]
-    public function getPdf(array $creditmemos = []): string
+    public function getPdf(array|Varien_Data_Collection $creditmemos = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('creditmemo');
+
+        // Handle collections
+        if ($creditmemos instanceof Varien_Data_Collection) {
+            $creditmemos = $creditmemos->getItems();
+        }
 
         if (empty($creditmemos)) {
             return '';
