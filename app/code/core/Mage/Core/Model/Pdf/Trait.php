@@ -29,7 +29,7 @@ trait Mage_Core_Model_Pdf_Trait
 
             // Performance optimizations
             $this->dompdfOptions->set('enable_font_subsetting', $config['enable_font_subsetting'] ?? true);
-            $this->dompdfOptions->set('enable_remote', $config['enable_remote'] ?? true);
+            $this->dompdfOptions->set('enable_remote', $config['enable_remote'] ?? false);
             $this->dompdfOptions->set('enable_css_float', $config['enable_css_float'] ?? true);
             $this->dompdfOptions->set('enable_html5_parser', $config['enable_html5_parser'] ?? true);
 
