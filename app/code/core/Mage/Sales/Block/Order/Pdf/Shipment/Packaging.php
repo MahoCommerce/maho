@@ -8,10 +8,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Template
+class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Sales_Block_Order_Pdf_Abstract
 {
     protected ?Mage_Sales_Model_Order_Shipment $_shipment = null;
-    protected ?Mage_Sales_Model_Order $_order = null;
 
     public function __construct()
     {
@@ -81,43 +80,6 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Core_Block_Temp
     public function getShippingMethod(): string
     {
         return $this->_order ? $this->_order->getShippingDescription() : '';
-    }
-
-    public function getLogoUrl(): ?string
-    {
-        // First, try the PDF-specific logo
-        $logoFile = Mage::getStoreConfig('sales/identity/logo', $this->getStore());
-        if ($logoFile) {
-            $logoPath = Mage::getBaseDir('media') . DS . 'sales' . DS . 'store' . DS . 'logo' . DS . $logoFile;
-            if (file_exists($logoPath) && is_readable($logoPath)) {
-                return 'file://' . $logoPath;
-            }
-        }
-
-        // Fallback to the main store logo
-        $storeLogo = Mage::getStoreConfig('design/header/logo_src', $this->getStore());
-        if ($storeLogo) {
-            // Get actual file path for skin logo
-            $designPackage = Mage::getDesign()->getPackageName();
-            $theme = Mage::getDesign()->getTheme('frontend');
-            $logoPath = Mage::getBaseDir() . DS . 'public' . DS . 'skin' . DS . 'frontend' . DS . $designPackage . DS . $theme . DS . $storeLogo;
-
-            if (file_exists($logoPath) && is_readable($logoPath)) {
-                return 'file://' . $logoPath;
-            }
-        }
-
-        return null;
-    }
-
-    public function getStore(): Mage_Core_Model_Store
-    {
-        return $this->_order ? $this->_order->getStore() : Mage::app()->getStore();
-    }
-
-    public function getStoreAddress(): string
-    {
-        return Mage::getStoreConfig('sales/identity/address', $this->getStore());
     }
 
     public function getPackages(): array

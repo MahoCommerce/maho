@@ -12,10 +12,10 @@ $invoice = $this->getInvoice();
 $order = $this->getOrder();
 ?>
 
-<div class="pdf-page">
+<div class="pdf-page"><?php echo $this->getLogoUrl() ?>
     <!-- Logo -->
     <?php if ($logoUrl = $this->getLogoUrl()): ?>
-    <div class="pdf-logo">
+    <div class="pdf-logo" style="border: 2px solid red">
         <img src="<?php echo $logoUrl ?>" alt="<?php echo $this->escapeHtml($this->getStore()->getName()) ?>" style="max-height: 50pt;" />
     </div>
     <?php endif; ?>
