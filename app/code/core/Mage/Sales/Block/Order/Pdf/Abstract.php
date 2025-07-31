@@ -40,16 +40,16 @@ abstract class Mage_Sales_Block_Order_Pdf_Abstract extends Mage_Core_Block_Templ
             }
         }
 
-        // Fallback to the main store logo using the same logic as frontend
+        // Fallback to the main store logo using Magento's fallback mechanism
         $storeLogo = Mage::getStoreConfig('design/header/logo_src', $this->getStore());
         if (is_string($storeLogo) && $storeLogo !== '') {
-            // Build direct file path to frontend skin file
-            $packageName = Mage::getDesign()->getPackageName();
-            $themeName = Mage::getDesign()->getTheme('skin');
+            // Use Magento's design fallback to find the logo file
+            $logoPath = Mage::getDesign()->getFilename($storeLogo, [
+                '_type' => 'skin',
+                '_default' => false
+            ]);
 
-            $logoPath = Mage::getBaseDir('skin') . DS . 'frontend' . DS . $packageName . DS . $themeName . DS . $storeLogo;
-
-            if (file_exists($logoPath) && is_readable($logoPath)) {
+            if ($logoPath && file_exists($logoPath) && is_readable($logoPath)) {
                 return $this->processLogoFile($logoPath);
             }
         }
