@@ -428,7 +428,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
         if (isset($params['store'])) {
             $store = Mage::app()->getSafeStore($params['store']);
         }
-        $isSecure = Mage::app()->getStore($store)->isCurrentlySecure();
+        $isSecure = Mage::app()->isCurrentlySecure();
         $protocol = $isSecure ? 'https' : 'http';
         if (isset($params['url'])) {
             return $protocol . '://' . $params['url'];
