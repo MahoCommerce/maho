@@ -168,8 +168,10 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                     break;
                 case '3m':
                 case '6m':
-                    $d = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
-                    $dateStart = $dateStart->modify('+1 week');
+                    // For 3m/6m, the database groups by month (Y-m format)
+                    // We need to match that format and skip to next month
+                    $d = $dateStart->format('Y-m');
+                    $dateStart = $dateStart->modify('+1 month');
                     break;
                 case '1y':
                 case '2y':
