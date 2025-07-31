@@ -18,43 +18,6 @@ class Mage_Sales_Model_Order_Pdf_Items_Invoice_Default extends Mage_Sales_Model_
         $this->setTemplate('sales/order/pdf/invoice/items/default.phtml');
     }
 
-    /**
-     * Get item prices for display
-     *
-     * @return array
-     */
-    public function getItemPricesForDisplay()
-    {
-        $order = $this->getOrder();
-        $item = $this->getItem();
-
-        if (!$order || !$item) {
-            return [];
-        }
-
-        $prices = [];
-
-        if ($order->formatPriceTxt($item->getPrice()) != $order->formatPriceTxt($item->getPriceInclTax())) {
-            $prices[] = [
-                'label' => $this->__('Excl. Tax:'),
-                'price' => $order->formatPriceTxt($item->getPrice()),
-                'subtotal' => $order->formatPriceTxt($item->getRowTotal()),
-            ];
-            $prices[] = [
-                'label' => $this->__('Incl. Tax:'),
-                'price' => $order->formatPriceTxt($item->getPriceInclTax()),
-                'subtotal' => $order->formatPriceTxt($item->getRowTotalInclTax()),
-            ];
-        } else {
-            $prices[] = [
-                'price' => $order->formatPriceTxt($item->getPrice()),
-                'subtotal' => $order->formatPriceTxt($item->getRowTotal()),
-            ];
-        }
-
-        return $prices;
-    }
-
     public function getSku(): string
     {
         $item = $this->getItem();

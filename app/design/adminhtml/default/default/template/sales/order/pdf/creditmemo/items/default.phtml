@@ -12,14 +12,14 @@ $item = $this->getItem();
 ?>
 
 <td class="col-products">
-    <div class="item-name"><?php echo $this->escapeHtml($this->getItemName()) ?></div>
+    <div class="item-name"><?= $this->escapeHtml($this->getItemName()) ?></div>
 
     <?php if ($options = $this->getItemOptions()): ?>
     <div class="item-options">
         <?php foreach ($options as $option): ?>
         <div class="option">
-            <span class="option-label"><?php echo $this->escapeHtml($option['label']) ?>:</span>
-            <span class="option-value"><?php echo $this->escapeHtml($option['value']) ?></span>
+            <span class="option-label"><?= $this->escapeHtml($option['label']) ?>:</span>
+            <span class="option-value"><?= $this->escapeHtml($option['value']) ?></span>
         </div>
         <?php endforeach; ?>
     </div>
@@ -27,25 +27,31 @@ $item = $this->getItem();
 </td>
 
 <td class="col-sku text-right">
-    <?php echo $this->escapeHtml($this->getSku()) ?>
+    <?= $this->escapeHtml($this->getSku()) ?>
 </td>
 
 <td class="col-price text-right">
-    <?php echo $this->formatPrice($this->getItemSubtotal()) ?>
+    <?php $prices = $this->getItemPricesForDisplay() ?>
+    <?php foreach ($prices as $priceData): ?>
+        <?php if (isset($priceData['label'])): ?>
+            <div class="price-label"><?= $this->escapeHtml($priceData['label']) ?></div>
+        <?php endif; ?>
+        <div class="price-value"><?= $priceData['subtotal'] ?></div>
+    <?php endforeach; ?>
 </td>
 
 <td class="col-discount text-right">
-    <?php echo $this->formatPrice(-$item->getDiscountAmount()) ?>
+    <?= $this->formatPrice(-$item->getDiscountAmount()) ?>
 </td>
 
 <td class="col-qty text-right">
-    <?php echo $this->getItemQty() * 1 ?>
+    <?= $this->getItemQty() * 1 ?>
 </td>
 
 <td class="col-tax text-right">
-    <?php echo $this->formatPrice($this->getItemTax()) ?>
+    <?= $this->formatPrice($this->getItemTax()) ?>
 </td>
 
 <td class="col-subtotal text-right">
-    <?php echo $this->formatPrice($this->getItemTotalInclTax()) ?>
+    <?= $this->formatPrice($this->getItemTotalInclTax()) ?>
 </td>

@@ -232,6 +232,46 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
     }
 
     /**
+     * Get item prices for display based on tax configuration
+     */
+    public function getItemPricesForDisplay(): array
+    {
+        $order = $this->getOrder();
+        $item = $this->getItem();
+
+        if (!$order || !$item) {
+            return [];
+        }
+
+        $prices = [];
+
+        if (Mage::helper('tax')->displaySalesBothPrices()) {
+            $prices[] = [
+                'label' => Mage::helper('tax')->__('Excl. Tax') . ':',
+                'price' => $order->formatPriceTxt($item->getPrice()),
+                'subtotal' => $order->formatPriceTxt($item->getRowTotal()),
+            ];
+            $prices[] = [
+                'label' => Mage::helper('tax')->__('Incl. Tax') . ':',
+                'price' => $order->formatPriceTxt($item->getPriceInclTax()),
+                'subtotal' => $order->formatPriceTxt($item->getRowTotalInclTax()),
+            ];
+        } elseif (Mage::helper('tax')->displaySalesPriceInclTax()) {
+            $prices[] = [
+                'price' => $order->formatPriceTxt($item->getPriceInclTax()),
+                'subtotal' => $order->formatPriceTxt($item->getRowTotalInclTax()),
+            ];
+        } else {
+            $prices[] = [
+                'price' => $order->formatPriceTxt($item->getPrice()),
+                'subtotal' => $order->formatPriceTxt($item->getRowTotal()),
+            ];
+        }
+
+        return $prices;
+    }
+
+    /**
      * Get item options
      *
      * @return array
