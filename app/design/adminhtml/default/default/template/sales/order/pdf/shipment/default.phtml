@@ -20,22 +20,23 @@ $order = $this->getOrder();
     </div>
     <?php endif; ?>
 
-    <!-- Store Address -->
-    <?php if ($storeAddress = $this->getStoreAddress()): ?>
-    <div class="pdf-store-address">
-        <?php echo nl2br($this->escapeHtml($storeAddress)) ?>
-    </div>
-    <?php endif; ?>
-
     <!-- Document Header -->
     <div class="pdf-document-header">
-        <h1><?php echo $this->__('Shipment # %s', $this->getShipmentNumber()) ?></h1>
-        <?php if ($orderNumber = $this->getOrderNumber()): ?>
-        <p><?php echo $this->__('Order # %s', $orderNumber) ?></p>
-        <?php endif; ?>
-        <p><?php echo $this->__('Shipment Date: %s', $this->getShipmentDate()) ?></p>
-        <?php if ($orderDate = $this->getOrderDate()): ?>
-        <p><?php echo $this->__('Order Date: %s', $orderDate) ?></p>
+        <div class="pdf-document-info">
+            <h1><?php echo $this->__('Shipment # %s', $this->getShipmentNumber()) ?></h1>
+            <?php if ($orderNumber = $this->getOrderNumber()): ?>
+                <?php echo $this->__('Order # %s', $orderNumber) ?><br />
+            <?php endif; ?>
+            <p><?php echo $this->__('Shipment Date: %s', $this->getShipmentDate()) ?><br />
+            <?php if ($orderDate = $this->getOrderDate()): ?>
+                <?php echo $this->__('Order Date: %s', $orderDate) ?>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($storeAddress = $this->getStoreAddress()): ?>
+        <div class="pdf-store-address">
+            <?php echo nl2br($this->escapeHtml($storeAddress)) ?>
+        </div>
         <?php endif; ?>
     </div>
 

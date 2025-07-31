@@ -28,20 +28,29 @@
     width: auto;
 }
 
-/* Store Address */
-.pdf-store-address {
-    text-align: right;
-    margin-bottom: 20pt;
-    font-size: 9pt;
-    color: #666;
-}
-
 /* Document Header */
 .pdf-document-header {
+    display: table;
+    width: 100%;
     margin-bottom: 30pt;
-    background-color: #f5f5f5;
     padding: 10pt;
-    border: 1pt solid #808080;
+    page-break-inside: avoid;
+}
+
+.pdf-document-info {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding-right: 15pt;
+}
+
+/* Store Address */
+.pdf-store-address {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    text-align: right;
+    padding-left: 15pt;
 }
 
 .pdf-document-header h1 {

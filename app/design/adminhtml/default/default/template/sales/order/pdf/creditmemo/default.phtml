@@ -20,25 +20,26 @@ $order = $this->getOrder();
     </div>
     <?php endif; ?>
 
-    <!-- Store Address -->
-    <?php if ($storeAddress = $this->getStoreAddress()): ?>
-    <div class="pdf-store-address">
-        <?php echo nl2br($this->escapeHtml($storeAddress)) ?>
-    </div>
-    <?php endif; ?>
-
     <!-- Document Header -->
     <div class="pdf-document-header">
-        <h1><?php echo $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
-        <?php if ($orderNumber = $this->getOrderNumber()): ?>
-        <p><?php echo $this->__('Order # %s', $orderNumber) ?></p>
-        <?php endif; ?>
-        <?php if ($invoiceNumber = $this->getInvoiceNumber()): ?>
-        <p><?php echo $this->__('Invoice # %s', $invoiceNumber) ?></p>
-        <?php endif; ?>
-        <p><?php echo $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?></p>
-        <?php if ($orderDate = $this->getOrderDate()): ?>
-        <p><?php echo $this->__('Order Date: %s', $orderDate) ?></p>
+        <div class="pdf-document-info">
+            <h1><?php echo $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
+            <?php if ($orderNumber = $this->getOrderNumber()): ?>
+                <?php echo $this->__('Order # %s', $orderNumber) ?><br />
+            <?php endif; ?>
+            <?php if ($invoiceNumber = $this->getInvoiceNumber()): ?>
+                <?php echo $this->__('Invoice # %s', $invoiceNumber) ?><br />
+            <?php endif; ?>
+            <?php echo $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?><br />
+            <?php if ($orderDate = $this->getOrderDate()): ?>
+                <?php echo $this->__('Order Date: %s', $orderDate) ?>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($storeAddress = $this->getStoreAddress()): ?>
+        <div class="pdf-store-address">
+            <?php echo nl2br($this->escapeHtml($storeAddress)) ?>
+        </div>
         <?php endif; ?>
     </div>
 
