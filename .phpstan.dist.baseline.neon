@@ -16243,12 +16243,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template/Abstract.php
 
 		-
-			message: '#^Parameter \#1 \$id of method Mage_Core_Model_App\:\:getStore\(\) expects bool\|int\|Mage_Core_Model_Store\|string\|null, Varien_Object\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
-
-		-
 			message: '#^Parameter \#2 \$name of method Mage_Core_Model_Layout\:\:createBlock\(\) expects string, null given\.$#'
 			identifier: argument.type
 			count: 1
