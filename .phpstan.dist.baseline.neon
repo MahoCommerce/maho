@@ -403,18 +403,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Userroles.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Cache_Additional\:\:getCleanImagesUrl\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Additional.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Cache_Additional\:\:getCleanSwatchesUrl\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Additional.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Cache_Grid\:\:decorateStatus\(\) has parameter \$column with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
