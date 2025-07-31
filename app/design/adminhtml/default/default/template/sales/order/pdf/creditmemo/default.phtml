@@ -16,7 +16,7 @@ $order = $this->getOrder();
     <!-- Logo -->
     <?php if ($logoUrl = $this->getLogoUrl()): ?>
     <div class="pdf-logo">
-        <img src="<?php echo $logoUrl ?>" alt="<?php echo $this->escapeHtml($this->getStore()->getName()) ?>" style="max-height: 50pt;" />
+        <img src="<?php echo $logoUrl ?>" />
     </div>
     <?php endif; ?>
 

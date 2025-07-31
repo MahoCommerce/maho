@@ -42,27 +42,7 @@ abstract class Mage_Sales_Block_Order_Pdf_Abstract extends Mage_Core_Block_Templ
         // Fallback to the main store logo using the same logic as frontend
         $storeLogo = Mage::getStoreConfig('design/header/logo_src', $this->getStore());
         if (is_string($storeLogo) && $storeLogo !== '') {
-            // Use getSkinUrl to get the correct path, same as frontend
-            /** @var string $logoUrl */
-            $logoUrl = Mage::getDesign()->getSkinUrl($storeLogo, ['_store' => $this->getStore()]);
-
-            // Convert URL to file path for dompdf
-            // Try both secure and unsecure base URLs to find the correct path
-            $baseUrls = [
-                Mage::getStoreConfig('web/secure/base_url', $this->getStore()),
-                Mage::getStoreConfig('web/unsecure/base_url', $this->getStore()),
-            ];
-
-            foreach ($baseUrls as $baseUrl) {
-                if (is_string($baseUrl) && str_starts_with($logoUrl, $baseUrl)) {
-                    $logoPath = str_replace($baseUrl, Mage::getBaseDir() . DS, $logoUrl);
-                    $logoPath = str_replace('/', DS, $logoPath);
-
-                    if (file_exists($logoPath) && is_readable($logoPath)) {
-                        return 'file://' . $logoPath;
-                    }
-                }
-            }
+            return Mage::getDesign()->getSkinUrl($storeLogo, ['_store' => $this->getStore()]);
         }
 
         return null;
