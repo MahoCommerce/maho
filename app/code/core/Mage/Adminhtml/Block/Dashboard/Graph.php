@@ -144,8 +144,12 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
         [$dateStart, $dateEnd] = $dateRange;
 
         // Convert to DateTimeImmutable to prevent mutation of original objects
-        $dateStart = DateTimeImmutable::createFromMutable($dateStart)->setTimezone($timezoneLocal);
-        $dateEnd = DateTimeImmutable::createFromMutable($dateEnd)->setTimezone($timezoneLocal);
+        $dateStart = $dateStart instanceof DateTimeImmutable
+            ? $dateStart->setTimezone($timezoneLocal)
+            : DateTimeImmutable::createFromMutable($dateStart)->setTimezone($timezoneLocal);
+        $dateEnd = $dateEnd instanceof DateTimeImmutable
+            ? $dateEnd->setTimezone($timezoneLocal)
+            : DateTimeImmutable::createFromMutable($dateEnd)->setTimezone($timezoneLocal);
 
         $d = '';
         $dates = [];
@@ -164,7 +168,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                     break;
                 case '3m':
                 case '6m':
-                    $date = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                    $d = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
                     $dateStart = $dateStart->modify('+1 week');
                     break;
                 case '1y':

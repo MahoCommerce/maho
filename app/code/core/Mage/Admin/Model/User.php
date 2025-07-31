@@ -894,7 +894,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this;
     }
 
-
     /**
      * Send notification to general Contact and additional emails when new admin user created.
      * You can declare additional emails in Mage_Core general/additional_notification_emails/admin_user_create node.
