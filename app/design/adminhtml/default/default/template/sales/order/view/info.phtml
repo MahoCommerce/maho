@@ -40,7 +40,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
             </tr>
             <?php if ($orderAdminDate != $orderStoreDate):?>
             <tr>
-                <td class="label"><label><?= Mage::helper('sales')->__('Order Date (%s)', $_order->getCreatedAtStoreDate()->getTimezone()) ?></label></td>
+                <td class="label"><label><?= Mage::helper('sales')->__('Order Date (%s)', $_order->getCreatedAtStoreDate()->getTimezone()->getName()) ?></label></td>
                 <td class="value"><strong><?= $orderStoreDate ?></strong></td>
             </tr>
             <?php endif ?>

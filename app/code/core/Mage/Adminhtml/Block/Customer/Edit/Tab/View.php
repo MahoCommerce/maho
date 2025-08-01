@@ -64,7 +64,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     public function getCreateDate()
     {
         return ($date = $this->getCustomer()->getCreatedAt())
-            ? $this->formatTimezoneDate($date, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true, false)
+            ? $this->formatTimezoneDate($date, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)
             : null;
     }
 
@@ -73,17 +73,15 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
      */
     public function getStoreCreateDate()
     {
-        $date = $this->getCustomer()->getCreatedAtTimestamp();
-        if (!$date) {
-            return null;
+        if ($date = $this->getCustomer()->getCreatedAtTimestamp()) {
+            $date = Mage::app()->getLocale()->storeDate(
+                $this->getCustomer()->getStoreId(),
+                $date,
+                true,
+            );
+            return $this->formatDate($date, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true);
         }
-
-        return $this->formatTimezoneDate(
-            $date,
-            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
-            true,
-            false,
-        );
+        return null;
     }
 
     public function getStoreCreateDateTimezone()
@@ -100,7 +98,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     public function getLastLoginDate()
     {
         return ($date = $this->getCustomerLog()->getLoginAtTimestamp())
-            ? $this->formatTimezoneDate($date, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true, false)
+            ? $this->formatTimezoneDate($date, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)
             : Mage::helper('customer')->__('Never');
     }
 

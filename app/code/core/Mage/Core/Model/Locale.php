@@ -540,6 +540,8 @@ class Mage_Core_Model_Locale
         }
         if ($part === null && is_numeric($date)) {
             $date = new DateTime('@' . $date);
+            // DateTime created from timestamp always has +00:00 timezone, convert to UTC
+            $date->setTimezone(new DateTimeZone('UTC'));
         } elseif ($part !== null) {
             $date = DateTime::createFromFormat($part, $date) ?: new DateTime($date ?: 'now');
         } else {
@@ -629,6 +631,8 @@ class Mage_Core_Model_Locale
             $date = DateTime::createFromFormat($format, $date) ?: new DateTime($date ?: 'now');
         } elseif (is_numeric($date)) {
             $date = new DateTime('@' . $date);
+            // DateTime created from timestamp always has +00:00 timezone, convert to UTC
+            $date->setTimezone(new DateTimeZone('UTC'));
         } else {
             $date = new DateTime($date ?: 'now');
         }
