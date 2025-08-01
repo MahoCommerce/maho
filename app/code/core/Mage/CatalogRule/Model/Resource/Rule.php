@@ -179,9 +179,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         }
 
         $timestamp = time();
-        if ($fromTime > $timestamp
-            || ($toTime && $toTime < $timestamp)
-        ) {
+        if ($fromTime > $timestamp || ($toTime && $toTime < $timestamp)) {
             return;
         }
         $sortOrder = (int) $rule->getSortOrder();
