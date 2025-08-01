@@ -1,0 +1,112 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Mage_Sales_Block_Order_Pdf_Creditmemo $this */
+$creditmemo = $this->getCreditmemo();
+$order = $this->getOrder();
+?>
+
+<div class="pdf-page">
+    <!-- Logo -->
+    <?php if ($logoUrl = $this->getLogoUrl()): ?>
+    <div class="pdf-logo">
+        <img src="<?= $logoUrl ?>" />
+    </div>
+    <?php endif; ?>
+
+    <!-- Document Header -->
+    <div class="pdf-document-header">
+        <div class="pdf-document-info">
+            <h1><?= $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
+            <?php if ($orderNumber = $this->getOrderNumber()): ?>
+                <?= $this->__('Order # %s', $orderNumber) ?><br />
+            <?php endif; ?>
+            <?php if ($invoiceNumber = $this->getInvoiceNumber()): ?>
+                <?= $this->__('Invoice # %s', $invoiceNumber) ?><br />
+            <?php endif; ?>
+            <?= $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?><br />
+            <?php if ($orderDate = $this->getOrderDate()): ?>
+                <?= $this->__('Order Date: %s', $orderDate) ?>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($storeAddress = $this->getStoreAddress()): ?>
+        <div class="pdf-store-address">
+            <?= nl2br($this->escapeHtml($storeAddress)) ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Addresses -->
+    <div class="pdf-addresses">
+        <div class="pdf-address-billing">
+            <h3><?= $this->__('Sold to:') ?></h3>
+            <?php if ($billing = $this->getBillingAddress()): ?>
+            <address>
+                <?= $billing->format('html') ?>
+            </address>
+            <?php endif; ?>
+        </div>
+
+        <?php if (!$order->getIsVirtual()): ?>
+        <div class="pdf-address-shipping">
+            <h3><?= $this->__('Ship to:') ?></h3>
+            <?php if ($shipping = $this->getShippingAddress()): ?>
+            <address>
+                <?= $shipping->format('html') ?>
+            </address>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Payment Method -->
+    <?php if ($paymentInfo = $this->getPaymentInfo()): ?>
+    <div class="pdf-payment-info">
+        <h3><?= $this->__('Payment Method') ?></h3>
+        <div><?= $paymentInfo ?></div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Items Table -->
+    <div class="pdf-items">
+        <table class="pdf-items-table">
+            <thead>
+                <tr class="pdf-table-header">
+                    <th class="col-products"><?= $this->__('Products') ?></th>
+                    <th class="col-sku"><?= $this->__('SKU') ?></th>
+                    <th class="col-price"><?= $this->__('Total (ex)') ?></th>
+                    <th class="col-discount"><?= $this->__('Discount') ?></th>
+                    <th class="col-qty"><?= $this->__('Qty') ?></th>
+                    <th class="col-tax"><?= $this->__('Tax') ?></th>
+                    <th class="col-subtotal"><?= $this->__('Total (inc)') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($this->getItems() as $item): ?>
+                <tr class="pdf-item-row">
+                    <?= $this->getItemHtml($item) ?>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="pdf-totals">
+        <table>
+            <?php foreach ($this->getTotals() as $total): ?>
+            <tr<?php if (isset($total['strong']) && $total['strong']): ?> class="pdf-grand-total"<?php endif; ?>>
+                <td><?= $this->escapeHtml($total['label']) ?></td>
+                <td class="text-right"><?= $total['value'] ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+</div>

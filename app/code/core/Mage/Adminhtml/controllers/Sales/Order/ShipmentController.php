@@ -471,8 +471,26 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 $trackingNumbers[] = $inf['tracking_number'];
             }
         }
-        $outputPdf = $this->_combineLabelsPdf($labelsContent);
-        $shipment->setShippingLabel($outputPdf->render());
+
+        // Handle single or multiple labels appropriately
+        if (!empty($labelsContent)) {
+            if (count($labelsContent) === 1) {
+                // Single label - store directly
+                $shipment->setShippingLabel($labelsContent[0]);
+            } else {
+                // Multiple labels - combine into ZIP archive
+                try {
+                    $zipContent = $this->createLabelsZipForSingleShipment($labelsContent, $shipment);
+                    $shipment->setShippingLabel($zipContent);
+                } catch (Exception $e) {
+                    Mage::logException($e);
+                    return false;
+                }
+            }
+        } else {
+            // No labels generated
+            return false;
+        }
         $carrierCode = $carrier->getCarrierCode();
         $carrierTitle = Mage::getStoreConfig('carriers/' . $carrierCode . '/title', $shipment->getStoreId());
         if ($trackingNumbers) {
@@ -522,24 +540,34 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             $shipment = $this->_initShipment();
             $labelContent = $shipment->getShippingLabel();
             if ($labelContent) {
-                $pdfContent = null;
-                if (stripos($labelContent, '%PDF-') !== false) {
-                    $pdfContent = $labelContent;
+                // Check if content is ZIP file (multiple labels)
+                if (str_starts_with($labelContent, 'PK')) {
+                    // ZIP file signature detected - return as ZIP
+                    return $this->_prepareDownloadResponse(
+                        'ShippingLabels(' . $shipment->getIncrementId() . ').zip',
+                        $labelContent,
+                        'application/zip',
+                    );
+                } elseif (stripos($labelContent, '%PDF-') !== false) {
+                    // Single PDF file
+                    return $this->_prepareDownloadResponse(
+                        'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
+                        $labelContent,
+                        'application/pdf',
+                    );
                 } else {
-                    $pdf = new Zend_Pdf();
-                    $page = $this->_createPdfPageFromImageString($labelContent);
-                    if (!$page) {
+                    // Image content - convert to PDF
+                    $pdfContent = $this->createPdfFromImageString($labelContent, $shipment->getIncrementId());
+                    if (!$pdfContent) {
                         $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
+                    } else {
+                        return $this->_prepareDownloadResponse(
+                            'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
+                            $pdfContent,
+                            'application/pdf',
+                        );
                     }
-                    $pdf->pages[] = $page;
-                    $pdfContent = $pdf->render();
                 }
-
-                return $this->_prepareDownloadResponse(
-                    'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
-                    $pdfContent,
-                    'application/pdf',
-                );
             }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
@@ -561,10 +589,10 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         $shipment = $this->_initShipment();
 
         if ($shipment) {
-            $pdf = Mage::getModel('sales/order_pdf_shipment_packaging')->getPdf($shipment);
+            $pdf = Mage::getModel('sales/order_pdf_shipment_packaging')->getPdf([$shipment]);
             $this->_prepareDownloadResponse(
                 'packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
-                $pdf->render(),
+                $pdf,
                 'application/pdf',
             );
         } else {
@@ -612,8 +640,14 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         }
 
         if (!empty($labelsContent)) {
-            $outputPdf = $this->_combineLabelsPdf($labelsContent);
-            $this->_prepareDownloadResponse('ShippingLabels.pdf', $outputPdf->render(), 'application/pdf');
+            if (count($labelsContent) === 1) {
+                // Single label - direct PDF download
+                $this->_prepareDownloadResponse('ShippingLabel.pdf', $labelsContent[0], 'application/pdf');
+            } else {
+                // Multiple labels - create ZIP archive
+                $zipFile = $this->createLabelsZip($labelsContent, $shipments);
+                $this->_prepareDownloadResponse('ShippingLabels.zip', $zipFile, 'application/zip');
+            }
             return;
         }
 
@@ -629,54 +663,175 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     }
 
     /**
-     * Combine array of labels as instance PDF
+     * Create ZIP archive with shipping labels
      *
-     * @return Zend_Pdf
+     * @param array $files Array of ['filename' => 'content'] pairs
+     * @param string $tempFilePrefix Prefix for temporary file
+     * @return string ZIP file binary content
+     * @throws Mage_Core_Exception
      */
-    protected function _combineLabelsPdf(array $labelsContent)
+    protected function createZipArchive(array $files, string $tempFilePrefix = 'shipping_labels_'): string
     {
-        $outputPdf = new Zend_Pdf();
-        foreach ($labelsContent as $content) {
-            if (stripos($content, '%PDF-') !== false) {
-                $pdfLabel = Zend_Pdf::parse($content);
-                foreach ($pdfLabel->pages as $page) {
-                    $outputPdf->pages[] = clone $page;
-                }
-            } else {
-                $page = $this->_createPdfPageFromImageString($content);
-                if ($page) {
-                    $outputPdf->pages[] = $page;
-                }
-            }
+        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', $tempFilePrefix);
+        if ($tempFile === false) {
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Cannot create temporary file for shipping labels archive.'),
+            );
         }
-        return $outputPdf;
+
+        $zip = new ZipArchive();
+        $result = $zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        if ($result !== true) {
+            @unlink($tempFile);
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Cannot create ZIP archive for shipping labels. Error code: %s', $result),
+            );
+        }
+
+        try {
+            foreach ($files as $filename => $content) {
+                $zip->addFromString($filename, $content);
+            }
+
+            $zip->close();
+
+            // Read the ZIP file content
+            $zipContent = file_get_contents($tempFile);
+            @unlink($tempFile);
+
+            if ($zipContent === false) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('sales')->__('Cannot read created ZIP archive.'),
+                );
+            }
+
+            return $zipContent;
+
+        } catch (Exception $e) {
+            $zip->close();
+            @unlink($tempFile);
+            throw new Mage_Core_Exception(
+                Mage::helper('sales')->__('Error creating shipping labels archive: %s', $e->getMessage()),
+            );
+        }
     }
 
     /**
-     * Create Zend_Pdf_Page instance with image from $imageString. Supports JPEG, PNG, GIF, WBMP, and GD2 formats.
+     * Create ZIP archive containing multiple shipping labels for a single shipment
+     *
+     * @param array $labelsContent Array of label content (PDF binary data)
+     * @param Mage_Sales_Model_Order_Shipment $shipment Single shipment
+     * @return string ZIP file binary content
+     * @throws Mage_Core_Exception
+     */
+    protected function createLabelsZipForSingleShipment(array $labelsContent, Mage_Sales_Model_Order_Shipment $shipment): string
+    {
+        $files = [];
+        foreach ($labelsContent as $index => $content) {
+            $filename = sprintf('label_%s_package_%d.pdf', $shipment->getIncrementId(), $index + 1);
+            $files[$filename] = $content;
+        }
+
+        return $this->createZipArchive($files, 'shipping_label_');
+    }
+
+    /**
+     * Create ZIP archive containing multiple shipping labels
+     *
+     * @param array $labelsContent Array of label content (PDF binary data)
+     * @param Mage_Sales_Model_Resource_Order_Shipment_Collection $shipments Shipment collection
+     * @return string ZIP file binary content
+     * @throws Mage_Core_Exception
+     */
+    protected function createLabelsZip(array $labelsContent, $shipments): string
+    {
+        $files = [];
+        $labelIndex = 0;
+        foreach ($shipments as $shipment) {
+            if (isset($labelsContent[$labelIndex])) {
+                $filename = sprintf('label_%s.pdf', $shipment->getIncrementId());
+                $files[$filename] = $labelsContent[$labelIndex];
+                $labelIndex++;
+            }
+        }
+
+        return $this->createZipArchive($files);
+    }
+
+    /**
+     * Create PDF from image string using HTML/CSS approach
      *
      * @param string $imageString
-     * @return Zend_Pdf_Page|bool
+     * @param string $filename
+     * @return string|false
      */
-    protected function _createPdfPageFromImageString($imageString)
+    protected function createPdfFromImageString($imageString, $filename = 'label')
+    {
+        $html = $this->createHtmlFromImageString($imageString);
+        if (!$html) {
+            return false;
+        }
+
+        return $this->_generatePdfFromHtml($html);
+    }
+
+    /**
+     * Create HTML from image string
+     *
+     * @param string $imageString
+     * @return string|false
+     */
+    protected function createHtmlFromImageString($imageString)
     {
         $image = imagecreatefromstring($imageString);
         if (!$image) {
             return false;
         }
 
-        $xSize = imagesx($image);
-        $ySize = imagesy($image);
-        $page = new Zend_Pdf_Page($xSize, $ySize);
+        // Convert image to base64 for embedding in HTML
+        ob_start();
+        imagepng($image);
+        $imageData = ob_get_contents();
+        ob_end_clean();
+        imagedestroy($image);
 
-        imageinterlace($image, 0);
-        $tmpFileName = sys_get_temp_dir() . DS . 'shipping_labels_'
-                     . uniqid(mt_rand()) . time() . '.png';
-        imagepng($image, $tmpFileName);
-        $pdfImage = Zend_Pdf_Image::imageWithPath($tmpFileName);
-        $page->drawImage($pdfImage, 0, 0, $xSize, $ySize);
-        unlink($tmpFileName);
-        return $page;
+        $base64 = base64_encode($imageData);
+        $dataUri = 'data:image/png;base64,' . $base64;
+
+        $html = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { margin: 0; }
+        body { margin: 0; padding: 0; }
+        .shipping-label { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <img src="' . $dataUri . '" class="shipping-label" alt="Shipping Label" />
+</body>
+</html>';
+
+        return $html;
+    }
+
+    /**
+     * Generate PDF from HTML using dompdf
+     *
+     * @param string $html
+     * @return string
+     */
+    protected function _generatePdfFromHtml($html)
+    {
+        $pdfModel = Mage::getModel('sales/order_pdf_invoice');
+        return $pdfModel->generatePdfFromHtml($html);
     }
 
     /**

@@ -10,22 +10,14 @@ Maho is an open-source ecommerce platform forked from OpenMage, designed for med
 
 ### Code Quality & Standards
 ```bash
-# Code style (PER-CS2.0 standard)
-PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --dry-run --diff    # Check code style
-PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix                     # Fix code style
-
-# Static Analysis (PHPStan level 6)
-vendor/bin/phpstan analyze    # Run static analysis
-
-# Generate PHPStorm metadata
-./maho phpstorm:metadata:generate
+vendor/bin/php-cs-fixer fix        # Fix code style (lint)
+vendor/bin/phpstan analyze         # Run static analysis
+vendor/bin/rector -c .rector.php
 ```
 
 ### Cache Management
 ```bash
 ./maho cache:flush        # Flush all caches
-./maho cache:enable       # Enable caching
-./maho cache:disable      # Disable caching
 ```
 
 ### Database & Indexing
@@ -36,6 +28,15 @@ vendor/bin/phpstan analyze    # Run static analysis
 ```
 
 ## Architecture Overview
+
+### Bootstrapping Maho
+To bootstrap Maho in any PHP script, simply require the Composer autoloader:
+```php
+require 'vendor/autoload.php';
+Mage::app();
+// That's it! Maho is now bootstrapped and ready to use
+```
+No need for complex initialization - the autoloader handles everything.
 
 ### MVC Pattern
 Maho follows a traditional MVC architecture:
@@ -100,9 +101,19 @@ Observers are configured in module's `config.xml`.
 ## Development Guidelines
 
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
-- When you write Javascript, never use prototypejs or jquery, only vanilla's
+- When you write Javascript, never use prototypejs or jquery, only the most modern vanillajs
 - If you're integrating new tools/libraries, always use their latest available version
 - Update headers of the PHP files, adding the current year for the copyright Maho line
+- For new PHP files, only include Maho copyright with the current year - no other entities:
+```php
+/**
+ * Maho
+ *
+ * @package    Mage_Module
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+```
 - Before committing, ensure all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in the corresponding CSV files in `app/locale/en_US/`
 
 ### Adding New Features
@@ -110,6 +121,10 @@ Observers are configured in module's `config.xml`.
 - Declare module in `app/etc/modules/`
 - Follow existing module patterns for consistency
 - Add strict typing to all new code and use modern PHP8.3+ features
+- New Maho modules now include:
+  - `Maho_AdminActivityLog`: Tracks admin actions and logins
+  - `Maho_Captcha`: CAPTCHA functionality
+- When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
 
 ### Modifying Existing Features
 - Do not increment module's version number in module's `config.xml`
@@ -137,6 +152,34 @@ While there's no dedicated test suite, ensure code quality through:
 - PHP-CS-Fixer for code standards
 - Manual testing of features
 - GitHub Actions CI for automated checks
+
+## Modern PHP Patterns
+
+### Type Declarations
+- Use `declare(strict_types=1);` at the top of new PHP files
+- Add type hints for all new method parameters and return types
+- Use PHP 8.3+ features like `#[\Override]` attribute for overridden methods
+
+### Security Patterns
+- Use `getUserParam()` instead of `getParam()` for user-supplied parameters in controllers
+- Define `public const ADMIN_RESOURCE` in admin controllers for ACL permissions
+- Example:
+```php
+declare(strict_types=1);
+
+class Mage_Module_Adminhtml_SomeController extends Mage_Adminhtml_Controller_Action
+{
+    public const ADMIN_RESOURCE = 'system/module/resource';
+    
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions('delete');
+        return parent::preDispatch();
+    }
+}
+```
+
 
 ## Git Commit Rules
 - **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits

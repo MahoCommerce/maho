@@ -12,19 +12,19 @@
 /** @var Mage_Customer_Block_Account_Navigation $this */
 ?>
 <div class="block block-account">
-    <div class="block-title">
-        <strong><span><?= $this->__('My Account') ?></span></strong>
-    </div>
+    <button class="block-title offcanvas-trigger" data-offcanvas-target="ul.nav-account" data-offcanvas-title="<?= $this->__('My Account') ?>">
+        <?= $this->__('My Account') ?>
+    </button>
     <div class="block-content">
-        <ul>
+        <ul class="nav-account">
             <?php $links = $this->getLinks(); ?>
             <?php foreach ($links as $link): ?>
-                <li <?= $this->isActive($link) ? 'class="current"' : '' ?>>
-                    <a href="<?= $link->getUrl() ?>"><?= $link->getLabel() ?></a>
+                <li <?= $this->isActive($link) ? 'class="current level0"' : 'class="level0"' ?>>
+                    <a href="<?= $link->getUrl() ?>" class="level0"><?= $link->getLabel() ?></a>
                 </li>
             <?php endforeach ?>
-            <li>
-                <a href="<?= Mage::helper('customer')->getLogoutUrl() ?>"><?= $this->__('Logout') ?></a>
+            <li class="level0">
+                <a href="<?= Mage::helper('customer')->getLogoutUrl() ?>" class="level0"><?= $this->__('Logout') ?></a>
             </li>
         </ul>
     </div>

@@ -9,7 +9,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/** @var Mage_Uploader_Block_Multiple $this|Mage_Uploader_Block_Single */
+/** @var Mage_Uploader_Block_Multiple|Mage_Uploader_Block_Single $this */
 ?>
 <div id="<?= $this->getHtmlId() ?>" class="uploader">
     <div class="buttons a-right">
@@ -25,24 +25,8 @@
         <div class="clear"></div>
     </div>
 </div>
-<script type="text/javascript">
-    (function() {
-        var uploader = new Uploader(<?= $this->getJsonConfig() ?>);
-        
-        // Hook into uploader events to refresh Media Library content after upload
-        if (uploader && uploader.addEventListener) {
-            uploader.addEventListener('success', function(files) {
-                if (window.MediabrowserInstance && window.MediabrowserInstance.updateContent) {
-                    setTimeout(() => {
-                        window.MediabrowserInstance.updateContent();
-                    }, 200);
-                }
-            });
-        }
-
-        if (varienGlobalEvents) {
-            varienGlobalEvents.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
-        }
-    })();
+<script type="module">
+    const uploader = new Uploader(<?= $this->getJsonConfig() ?>);
+    varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
 </script>
 <?= $this->getChildHtml('additional_scripts') ?>

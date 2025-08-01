@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -428,7 +428,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
         if (isset($params['store'])) {
             $store = Mage::app()->getSafeStore($params['store']);
         }
-        $isSecure = Mage::app()->getStore($store)->isCurrentlySecure();
+        $isSecure = Mage::app()->isCurrentlySecure();
         $protocol = $isSecure ? 'https' : 'http';
         if (isset($params['url'])) {
             return $protocol . '://' . $params['url'];

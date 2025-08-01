@@ -403,18 +403,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Userroles.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Cache_Additional\:\:getCleanImagesUrl\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Additional.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Cache_Additional\:\:getCleanSwatchesUrl\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Additional.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Cache_Grid\:\:decorateStatus\(\) has parameter \$column with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -3487,60 +3475,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Container.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setElement\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setElement\(\) has parameter \$element with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setForm\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setForm\(\) has parameter \$form with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setFormBlock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element\:\:setFormBlock\(\) has parameter \$formBlock with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Form_Element\:\:\$_element has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Form_Element\:\:\$_form has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Form_Element\:\:\$_formBlock has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Element.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Widget_Form_Element_Dependence\:\:addConfigOption\(\) has parameter \$value with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -4315,12 +4249,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Controller/Sales/Creditmemo.php
 
 		-
-			message: '#^Parameter \#1 \$creditmemos of method Mage_Sales_Model_Order_Pdf_Creditmemo\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Creditmemo\>, Mage_Sales_Model_Resource_Order_Creditmemo_Collection given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Controller/Sales/Creditmemo.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Controller_Sales_Invoice\:\:emailAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4357,12 +4285,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Controller/Sales/Invoice.php
 
 		-
-			message: '#^Parameter \#1 \$invoices of method Mage_Sales_Model_Order_Pdf_Invoice\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Invoice\>, Mage_Sales_Model_Resource_Order_Invoice_Collection given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Controller/Sales/Invoice.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Controller_Sales_Shipment\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4383,12 +4305,6 @@ parameters:
 		-
 			message: '#^Method Mage_Adminhtml_Controller_Sales_Shipment\:\:viewAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Controller/Sales/Shipment.php
-
-		-
-			message: '#^Parameter \#1 \$shipments of method Mage_Sales_Model_Order_Pdf_Shipment\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Shipment\>, Mage_Sales_Model_Resource_Order_Shipment_Collection given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Controller/Sales/Shipment.php
 
@@ -5285,12 +5201,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Wysiwyg/Enabled.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Cms_Wysiwyg_Skin\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Wysiwyg/Skin.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Country\:\:toOptionArray\(\) has no return type specified\.$#'
@@ -8677,12 +8587,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
-			message: '#^Parameter \#1 \$prefix of function uniqid expects string, int\<0, max\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Order\:\:setCustomerNoteNotify\(\) expects int, bool given\.$#'
 			identifier: argument.type
 			count: 1
@@ -8698,12 +8602,6 @@ parameters:
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, ''\\\\intval'' given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
-			message: '#^Parameter \#2 \$enable of function imageinterlace expects bool\|null, int given\.$#'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
@@ -8902,24 +8800,6 @@ parameters:
 			message: '#^Method Mage_Adminhtml_Sales_OrderController\:\:voidPaymentAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
-
-		-
-			message: '#^Parameter \#1 \$creditmemos of method Mage_Sales_Model_Order_Pdf_Creditmemo\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Creditmemo\>, Mage_Sales_Model_Resource_Order_Creditmemo_Collection given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
-
-		-
-			message: '#^Parameter \#1 \$invoices of method Mage_Sales_Model_Order_Pdf_Invoice\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Invoice\>, Mage_Sales_Model_Resource_Order_Invoice_Collection given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
-
-		-
-			message: '#^Parameter \#1 \$shipments of method Mage_Sales_Model_Order_Pdf_Shipment\:\:getPdf\(\) expects array\<Mage_Sales_Model_Order_Shipment\>, Mage_Sales_Model_Resource_Order_Shipment_Collection given\.$#'
-			identifier: argument.type
-			count: 4
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
 
 		-
@@ -10843,30 +10723,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Resource/Selection/Collection.php
 
 		-
-			message: '#^Method Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Creditmemo.php
-
-		-
-			message: '#^Method Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Invoice.php
-
-		-
-			message: '#^Method Mage_Bundle_Model_Sales_Order_Pdf_Items_Shipment\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Shipment.php
-
-		-
-			message: '#^Method Mage_Bundle_Adminhtml_Bundle_Product_EditController\:\:formAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/controllers/Adminhtml/Bundle/Product/EditController.php
-
-		-
 			message: '#^Call to an undefined method Mage_Core_Model_Abstract\:\:apply\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -11027,12 +10883,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Options.php
-
-		-
-			message: '#^Method Mage_Core_Block_Html_Select\:\:setExtraParams\(\) invoked with 0 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Date.php
 
 		-
 			message: '#^Parameter \#1 \$value of method Mage_Core_Block_Html_Select\:\:addOption\(\) expects string, int\|null given\.$#'
@@ -12845,6 +12695,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Decimal.php
+
+		-
+			message: '#^Argument of an invalid type hasOffsetValue\(string, mixed\) supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
 
 		-
 			message: '#^Binary operation "\-" between int and non\-falsy\-string results in an error\.$#'
@@ -16315,12 +16171,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template/Abstract.php
 
 		-
-			message: '#^Parameter \#1 \$id of method Mage_Core_Model_App\:\:getStore\(\) expects bool\|int\|Mage_Core_Model_Store\|string\|null, Varien_Object\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
-
-		-
 			message: '#^Parameter \#2 \$name of method Mage_Core_Model_Layout\:\:createBlock\(\) expects string, null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -16399,7 +16249,7 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '#^Cannot unset offset ''@attributes'' on \(array\{\}\|array\{\000\*\000_parent\: Varien_Simplexml_Element\}\)\.$#'
+			message: '#^Cannot unset offset ''@attributes'' on \(array\{\}\|array\{''\000\*\000_parent''\: Varien_Simplexml_Element\}\)\.$#'
 			identifier: unset.offset
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
@@ -19555,18 +19405,6 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Currency/Filter.php
 
 		-
-			message: '#^Method Mage_Directory_Model_Currency_Import_Webservicex\:\:_convert\(\) should return float\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Import/Webservicex.php
-
-		-
-			message: '#^Property Mage_Directory_Model_Currency_Import_Webservicex\:\:\$_url has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Import/Webservicex.php
-
-		-
 			message: '#^Method Mage_Directory_Model_Observer\:\:scheduledUpdateCurrencyRates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19811,36 +19649,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Resource/Sample.php
-
-		-
-			message: '#^Method Mage_Downloadable_Model_Sales_Order_Pdf_Items_Creditmemo\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Creditmemo.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:getSku\(\) expects Mage_Sales_Model_Order_Creditmemo_Item\|Mage_Sales_Model_Order_Invoice_Item, Varien_Object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Creditmemo.php
-
-		-
-			message: '#^Method Mage_Downloadable_Model_Sales_Order_Pdf_Items_Invoice\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Invoice.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:getSku\(\) expects Mage_Sales_Model_Order_Creditmemo_Item\|Mage_Sales_Model_Order_Invoice_Item, Varien_Object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Sales/Order/Pdf/Items/Invoice.php
-
-		-
-			message: '#^Method Mage_Downloadable_Adminhtml_Downloadable_FileController\:\:uploadAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/FileController.php
 
 		-
 			message: '#^Method Mage_Downloadable_Adminhtml_Downloadable_Product_EditController\:\:_processDownload\(\) has no return type specified\.$#'
@@ -21052,7 +20860,7 @@ parameters:
 			path: app/code/core/Mage/Install/Block/Locale.php
 
 		-
-			message: '#^Offset ''path'' does not exist on array\{\000\*\000_parent\: Varien_Simplexml_Element\}\|array\{false\}\.$#'
+			message: '#^Offset ''path'' does not exist on array\{''\000\*\000_parent''\: Varien_Simplexml_Element\}\|array\{false\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
 			path: app/code/core/Mage/Install/Model/Config.php
@@ -23848,12 +23656,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Ipn.php
 
 		-
-			message: '#^Parameter \#2 \$url of method Zend_Http_Client_Adapter_Interface\:\:write\(\) expects Zend_Uri_Http, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
 			message: '#^Call to an undefined method Mage_Paypal_Model_Api_Abstract\:\:callDoReferenceTransaction\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -26578,180 +26380,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Payment/Transaction.php
 
 		-
-			message: '#^Call to an undefined method Mage_Core_Block_Abstract\:\:toPdf\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:_afterGetPdf\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:_beforeGetPdf\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:_initRenderer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:getAlignCenter\(\) should return int but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:getAlignRight\(\) should return int but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:insertAddress\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:insertDocumentNumber\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:insertLogo\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:insertOrder\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Variable \$order might not be defined\.$#'
-			identifier: variable.undefined
-			count: 12
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Variable \$shipment might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Creditmemo\:\:_drawHeader\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Creditmemo.php
-
-		-
-			message: '#^Parameter \#1 \$object of method Mage_Sales_Model_Order_Pdf_Abstract\:\:_setFontBold\(\) expects Zend_Pdf_Page, Zend_Pdf_Style given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Creditmemo.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Invoice\:\:_drawHeader\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Invoice.php
-
-		-
-			message: '#^Parameter \#1 \$object of method Mage_Sales_Model_Order_Pdf_Abstract\:\:_setFontBold\(\) expects Zend_Pdf_Page, Zend_Pdf_Style given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Invoice.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Abstract.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Default\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Creditmemo/Default.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:getSku\(\) expects Mage_Sales_Model_Order_Creditmemo_Item\|Mage_Sales_Model_Order_Invoice_Item, Varien_Object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Creditmemo/Default.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Grouped\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Creditmemo/Grouped.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Items_Invoice_Default\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Invoice/Default.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:getSku\(\) expects Mage_Sales_Model_Order_Creditmemo_Item\|Mage_Sales_Model_Order_Invoice_Item, Varien_Object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Invoice/Default.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Items_Invoice_Grouped\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Invoice/Grouped.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Items_Shipment_Default\:\:draw\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Shipment/Default.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Mage_Sales_Model_Order_Pdf_Items_Abstract\:\:getSku\(\) expects Mage_Sales_Model_Order_Creditmemo_Item\|Mage_Sales_Model_Order_Invoice_Item, Varien_Object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Items/Shipment/Default.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Pdf_Shipment\:\:_drawHeader\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment.php
-
-		-
-			message: '#^Parameter \#1 \$object of method Mage_Sales_Model_Order_Pdf_Abstract\:\:_setFontBold\(\) expects Zend_Pdf_Page, Zend_Pdf_Style given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment.php
-
-		-
-			message: '#^Parameter \#2 \$obj of method Mage_Sales_Model_Order_Pdf_Abstract\:\:insertOrder\(\) expects Mage_Sales_Model_Order, Mage_Sales_Model_Order_Shipment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment.php
-
-		-
-			message: '#^Parameter \#1 \$text of method Zend_Pdf_Canvas_Abstract\:\:drawText\(\) expects string, \(float\|int\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Pdf/Shipment/Packaging.php
-
-		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Order_Shipment_Comment\:\:setIsCustomerNotified\(\) expects int, bool given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29071,42 +28699,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page\:\:drawText\(\) has parameter \$align with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/Page.php
-
-		-
-			message: '#^Call to an undefined method Zend_Pdf_Page\:\:drawLines\(\)\.$#'
-			identifier: method.notFound
-			count: 5
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
-			message: '#^Call to an undefined method Zend_Pdf_Page\:\:getTextWidth\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder\:\:addReferenceData\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
-			message: '#^Method Zend_Pdf_Canvas_Abstract\:\:drawText\(\) invoked with 5 parameters, 3\-4 required\.$#'
-			identifier: arguments.count
-			count: 3
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, bool given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/PageBuilder.php
-
-		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Source_Dutypaymenttype\:\:toOptionArray\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -30298,20 +29890,8 @@ parameters:
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/design/adminhtml/default/default/template/system/config/switcher.phtml
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
-			count: 2
-			path: app/design/adminhtml/default/default/template/system/store/tree.phtml
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 2
 			path: app/design/adminhtml/default/default/template/system/store/tree.phtml
 
@@ -30386,18 +29966,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
-
-		-
-			message: '#^Variable \$element might not be defined\.$#'
-			identifier: variable.undefined
-			count: 62
-			path: app/design/adminhtml/default/default/template/widget/form/element.phtml
-
-		-
-			message: '#^Variable \$formBlock might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/form/element.phtml
 
 		-
 			message: '''
@@ -30977,108 +30545,6 @@ parameters:
 			identifier: method.notFound
 			count: 2
 			path: lib/Varien/Convert/Action/Abstract.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Db_Table\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Db/Table.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Db_Table\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Db/Table.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Http\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Http.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Http\:\:loadFile\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Http.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Http\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Http.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Http_Curl\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Http/Curl.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Http_Curl\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Http/Curl.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Interface\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Interface.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Interface\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Interface.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Io\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Io.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Io\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Io.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Soap\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Soap.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Soap\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Soap.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Std\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Std.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Std\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Std.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Zend_Db\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Zend/Db.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Zend_Db\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Zend/Db.php
 
 		-
 			message: '#^Method Varien_Convert_Container_Abstract\:\:addException\(\) has no return type specified\.$#'
@@ -32407,174 +31873,6 @@ parameters:
 			path: lib/Varien/Db/Statement/Pdo/Mysql.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:getDirsName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesObj\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesPaths\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:parseDir\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setFilesFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setPath\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setRecursion\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setRecursionLevel\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:toXml\(\) has parameter \$recursionLevel with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:useFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getDirsName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getDirsName\(\) has parameter \$dirs with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getFilesName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getFilesName\(\) has parameter \$files with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getFilesObj\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getFilesObj\(\) has parameter \$objs with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getFilesPaths\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:getFilesPaths\(\) has parameter \$paths with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:toArray\(\) has parameter \$arr with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$addOpenTag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$recursionLevel with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$rootName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$xml with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:useFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
-			message: '#^Method Varien_Directory_IFactory\:\:useFilter\(\) has parameter \$useFilter with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/IFactory.php
-
-		-
 			message: '#^Method Varien_Event\:\:getBlock\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -32657,66 +31955,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Varien/File/Csv.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:addFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getDirsName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesObj\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesPaths\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:renderFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:setFilesFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:toXml\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:useFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Object.php
 
 		-
 			message: '#^Method Varien_File_Uploader\:\:__construct\(\) has parameter \$fileId with no type specified\.$#'
@@ -32987,12 +32225,6 @@ parameters:
 			identifier: booleanOr.leftAlwaysFalse
 			count: 1
 			path: lib/Varien/Filter/Template/Tokenizer/Variable.php
-
-		-
-			message: '#^Method Varien_Http_Client\:\:_trySetCurlAdapter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Http/Client.php
 
 		-
 			message: '#^Method Varien_Io_Abstract\:\:allowedPath\(\) has no return type specified\.$#'
@@ -33797,12 +33029,6 @@ parameters:
 			identifier: identical.alwaysFalse
 			count: 1
 			path: lib/Varien/Simplexml/Config.php
-
-		-
-			message: '#^Method Varien_Simplexml_Config_Cache_Abstract\:\:getComponentsHash\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Simplexml/Config/Cache/Abstract.php
 
 		-
 			message: '#^Method Varien_Simplexml_Element\:\:getAttribute\(\) has parameter \$name with no type specified\.$#'

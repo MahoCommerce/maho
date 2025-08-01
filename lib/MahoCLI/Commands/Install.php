@@ -18,6 +18,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'install',
@@ -64,11 +65,21 @@ class Install extends BaseMahoCommand
 
         // Sample data
         $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data');
+
+        // Force option
+        $this->addOption('force', null, InputOption::VALUE_NONE, 'Force reinstallation - drops database and removes local.xml');
     }
 
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Handle force option
+        if ($input->getOption('force')) {
+            if (!$this->handleForceInstall($input, $output)) {
+                return Command::SUCCESS;
+            }
+        }
+
         // Reset some options in case we're installing sample data
         if ($input->getOption('sample_data')) {
             $options = $input->getOptions();
@@ -201,5 +212,89 @@ class Install extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    private function handleForceInstall(InputInterface $input, OutputInterface $output): bool
+    {
+        $output->writeln('<comment>Force installation requested - clearing existing installation...</comment>');
+
+        // Check if we're not in interactive mode or user has confirmed
+        if ($input->isInteractive()) {
+            /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+            $helper = $this->getHelper('question');
+            $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
+                "\n<question>WARNING: This will clear all tables in the database and remove configuration. Continue? [y/N]</question> ",
+                false,
+            );
+
+            if (!$helper->ask($input, $output, $question)) {
+                $output->writeln('<comment>Operation cancelled.</comment>');
+                return false;
+            }
+        }
+
+        // Remove local.xml if it exists (use hardcoded path since Mage isn't initialized yet)
+        $localXmlPath = getcwd() . '/app/etc/local.xml';
+        if (file_exists($localXmlPath)) {
+            if (is_writable($localXmlPath)) {
+                unlink($localXmlPath);
+                $output->writeln('<info>Removed existing local.xml</info>');
+            } else {
+                $output->writeln('<error>Cannot remove local.xml - file is not writable</error>');
+                throw new \RuntimeException('Cannot remove local.xml - insufficient permissions');
+            }
+        }
+
+        // Clear all tables in the database
+        $dbHost = $input->getOption('db_host');
+        $dbName = $input->getOption('db_name');
+        $dbUser = $input->getOption('db_user');
+        $dbPass = $input->getOption('db_pass');
+
+        if ($dbHost && $dbName && $dbUser !== null) {
+            try {
+                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+                // Disable foreign key checks
+                $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+
+                // Get all tables
+                $stmt = $pdo->query('SHOW TABLES');
+                $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+                if (count($tables) > 0) {
+                    $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
+
+                    // Drop all tables
+                    foreach ($tables as $table) {
+                        $pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+                    }
+
+                    $output->writeln('<info>Cleared all tables from the database</info>');
+                } else {
+                    $output->writeln('<info>Database is already empty</info>');
+                }
+
+                // Re-enable foreign key checks
+                $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+
+            } catch (\PDOException $e) {
+                $output->writeln("<error>Failed to clear database: {$e->getMessage()}</error>");
+
+                // If it's a connection error, provide more helpful message
+                if (str_contains($e->getMessage(), 'Unknown database')) {
+                    $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
+                } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                    $output->writeln('<error>Access denied. Please check your database credentials.</error>');
+                }
+
+                throw $e;
+            }
+        }
+
+        $output->writeln('<info>Force preparation completed</info>');
+        return true;
     }
 }

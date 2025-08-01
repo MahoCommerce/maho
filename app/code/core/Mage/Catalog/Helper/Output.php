@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -115,7 +116,10 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
                 $attributeHtml = $this->escapeHtml($attributeHtml);
             }
             if ($attribute->getFrontendInput() == 'textarea') {
-                $attributeHtml = nl2br($attributeHtml);
+                // Only add <br> if we don't already have HTML
+                if ($attributeHtml === strip_tags($attributeHtml)) {
+                    $attributeHtml = nl2br($attributeHtml);
+                }
             }
         }
         if ($attribute->getIsHtmlAllowedOnFront() && $attribute->getIsWysiwygEnabled()) {
