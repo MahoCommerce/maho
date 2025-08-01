@@ -1,0 +1,278 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Mage_Sales_Block_Order_Pdf_Shipment_Packaging $this */
+$order = $this->getOrder();
+$shipment = $this->getShipment();
+$packages = $this->getPackages();
+?>
+<div class="pdf-packaging">
+    <!-- Header -->
+    <div class="pdf-header">
+        <?php if ($this->getLogoUrl()): ?>
+            <img src="<?= $this->getLogoUrl() ?>" class="pdf-logo" />
+        <?php endif; ?>
+
+        <div class="document-info">
+            <h1><?= $this->__('Packing Slip') ?></h1>
+            <div class="document-numbers">
+                <div><strong><?= $this->__('Shipment #') ?></strong> <?= $this->escapeHtml($this->getShipmentNumber()) ?></div>
+                <div><strong><?= $this->__('Order #') ?></strong> <?= $this->escapeHtml($this->getOrderNumber()) ?></div>
+                <div><strong><?= $this->__('Shipment Date:') ?></strong> <?= $this->getShipmentDate() ?></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Store Address -->
+    <?php if ($this->getStoreAddress()): ?>
+    <div class="store-address">
+        <h3><?= $this->__('Ship From:') ?></h3>
+        <?= nl2br($this->escapeHtml($this->getStoreAddress())) ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Addresses -->
+    <div class="pdf-addresses">
+        <div class="pdf-address-billing">
+            <h3><?= $this->__('Bill To:') ?></h3>
+            <?php if ($this->getBillingAddress()): ?>
+                <?= $this->getBillingAddress()->format('html') ?>
+            <?php endif; ?>
+        </div>
+
+        <div class="pdf-address-shipping">
+            <h3><?= $this->__('Ship To:') ?></h3>
+            <?php if ($this->getShippingAddress()): ?>
+                <?= $this->getShippingAddress()->format('html') ?>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Shipping Method -->
+    <?php if ($this->getShippingMethod()): ?>
+    <div class="shipping-method">
+        <h3><?= $this->__('Shipping Method:') ?></h3>
+        <p><?= $this->escapeHtml($this->getShippingMethod()) ?></p>
+    </div>
+    <?php endif; ?>
+
+    <!-- Packages -->
+    <div class="packages-section">
+        <h2><?= $this->__('Packages') ?></h2>
+
+        <?php if (!empty($packages)): ?>
+            <div class="packages-grid">
+                <?php $packageNum = 1; ?>
+                <?php foreach ($packages as $packageId => $package): ?>
+                    <div class="package-item">
+                        <div class="package-header">
+                            <h3><?= $this->__('Package') ?> <?= $packageNum ?></h3>
+                        </div>
+
+                        <div class="package-content">
+                            <?= $this->getPackageHtml($package) ?>
+                        </div>
+
+                        <?php if (isset($package['items']) && is_array($package['items'])): ?>
+                            <div class="package-items">
+                                <h4><?= $this->__('Package Contents:') ?></h4>
+                                <ul>
+                                    <?php foreach ($package['items'] as $item): ?>
+                                        <li><?= $this->escapeHtml($item['name'] ?? 'Unknown Item') ?>
+                                            <?php if (isset($item['qty'])): ?>
+                                                (<?= $this->__('Qty: %s', $item['qty']) ?>)
+                                            <?php endif; ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php $packageNum++; ?>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="no-packages">
+                <p><?= $this->__('No package information available.') ?></p>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Footer -->
+    <div class="pdf-footer">
+        <p><?= $this->__('Thank you for your business!') ?></p>
+    </div>
+</div>
+
+<style>
+.pdf-packaging {
+    font-family: 'DejaVu Sans', sans-serif;
+    font-size: 10pt;
+    line-height: 1.4;
+}
+
+.pdf-header {
+    display: table;
+    width: 100%;
+    margin-bottom: 20pt;
+    border-bottom: 1pt solid #ccc;
+    padding-bottom: 10pt;
+}
+
+.pdf-logo {
+    max-height: 60pt;
+    max-width: 200pt;
+    display: table-cell;
+    vertical-align: top;
+}
+
+.document-info {
+    display: table-cell;
+    vertical-align: top;
+    text-align: right;
+    padding-left: 20pt;
+}
+
+.document-info h1 {
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 0 0 10pt 0;
+}
+
+.document-numbers div {
+    margin-bottom: 3pt;
+}
+
+.store-address {
+    margin-bottom: 15pt;
+    padding: 10pt;
+    background-color: #f5f5f5;
+    border: 1pt solid #ddd;
+}
+
+.store-address h3 {
+    margin: 0 0 5pt 0;
+    font-size: 12pt;
+}
+
+.pdf-addresses {
+    display: table;
+    width: 100%;
+    margin-bottom: 20pt;
+}
+
+.pdf-address-billing,
+.pdf-address-shipping {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding-right: 10pt;
+}
+
+.pdf-address-billing h3,
+.pdf-address-shipping h3 {
+    margin: 0 0 8pt 0;
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+.shipping-method {
+    margin-bottom: 20pt;
+    padding: 8pt;
+    background-color: #f9f9f9;
+    border: 1pt solid #ddd;
+}
+
+.shipping-method h3 {
+    margin: 0 0 5pt 0;
+    font-size: 12pt;
+}
+
+.packages-section {
+    margin-bottom: 20pt;
+}
+
+.packages-section h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 0 0 15pt 0;
+    padding-bottom: 5pt;
+    border-bottom: 1pt solid #808080;
+    background-color: #EDECEC;
+    padding: 8pt;
+}
+
+.packages-grid {
+    display: block;
+}
+
+.package-item {
+    border: 1pt solid #808080;
+    margin-bottom: 15pt;
+    page-break-inside: avoid;
+}
+
+.package-header {
+    background-color: #EDECEC;
+    padding: 8pt;
+    border-bottom: 1pt solid #808080;
+}
+
+.package-header h3 {
+    margin: 0;
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+.package-content {
+    padding: 10pt;
+}
+
+.package-details div {
+    margin-bottom: 5pt;
+}
+
+.package-items {
+    padding: 10pt;
+    border-top: 1pt solid #ddd;
+    background-color: #fafafa;
+}
+
+.package-items h4 {
+    margin: 0 0 8pt 0;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+.package-items ul {
+    margin: 0;
+    padding-left: 15pt;
+}
+
+.package-items li {
+    margin-bottom: 3pt;
+}
+
+.no-packages {
+    padding: 20pt;
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+.pdf-footer {
+    margin-top: 30pt;
+    text-align: center;
+    font-style: italic;
+    color: #666;
+    border-top: 1pt solid #ccc;
+    padding-top: 10pt;
+}
+</style>

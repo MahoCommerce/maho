@@ -6,7 +6,7 @@
  * @package    Mage_Log
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -133,7 +133,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         $this->addData([
             'server_addr'           => $this->_httpHelper->getServerAddr(true),
             'remote_addr'           => $this->_httpHelper->getRemoteAddr(true),
-            'http_secure'           => Mage::app()->getStore()->isCurrentlySecure(),
+            'http_secure'           => Mage::app()->isCurrentlySecure(),
             'http_host'             => $this->_httpHelper->getHttpHost(true),
             'http_user_agent'       => $this->_httpHelper->getHttpUserAgent(true),
             'http_accept_language'  => $this->_httpHelper->getHttpAcceptLanguage(true),
