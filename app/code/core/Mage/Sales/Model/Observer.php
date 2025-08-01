@@ -46,7 +46,9 @@ class Mage_Sales_Model_Observer
                 $quotes->addFieldToFilter($field, $condition);
             }
 
-            $quotes->walk('delete');
+            foreach ($quotes as $quote) {
+                $quote->delete();
+            }
         }
 
         return $this;
