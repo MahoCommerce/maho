@@ -2925,7 +2925,7 @@ ul.item-options {
     --indent: 1.25rem;
     --spacing: 0.25rem;
     --line-style: 1px dotted #aaa;
-    --outline-style: 2px solid #0090FF;
+    --outline-style: 2px solid var(--maho-color-accent);
     --marker-size: 10px;
     --icon-size: 16px;
     --label-gap: 0.25rem;
