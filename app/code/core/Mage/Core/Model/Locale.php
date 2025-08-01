@@ -1073,7 +1073,8 @@ class Mage_Core_Model_Locale
         $toTimeStamp    = strtotime((string) $dateTo);
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59
-            $toTimeStamp += 86400;
+            $endDate = new DateTime((string) $dateTo . ' 23:59:59');
+            $toTimeStamp = $endDate->getTimestamp();
         }
 
         $result = false;

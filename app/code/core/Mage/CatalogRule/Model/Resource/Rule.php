@@ -13,11 +13,6 @@
 class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstract
 {
     /**
-     * Store number of seconds in a day
-     */
-    public const SECONDS_IN_DAY = 86400;
-
-    /**
      * Number of products in range for insert
      */
     public const RANGE_PRODUCT_STEP = 1000000;
@@ -175,8 +170,13 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         $customerGroupIds = $rule->getCustomerGroupIds();
 
         $fromTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime((string) $rule->getFromDate()));
-        $toTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime((string) $rule->getToDate()));
-        $toTime = $toTime ? ($toTime + self::SECONDS_IN_DAY - 1) : 0;
+        $toTime = 0;
+        if ($rule->getToDate()) {
+            // Create a DateTime object for the end date and set it to end of day (23:59:59)
+            // This properly handles daylight saving time transitions instead of adding fixed seconds
+            $endDate = new DateTime((string) $rule->getToDate() . ' 23:59:59');
+            $toTime = (int) Mage::getModel('core/date')->gmtTimestamp($endDate->getTimestamp());
+        }
 
         $timestamp = time();
         if ($fromTime > $timestamp

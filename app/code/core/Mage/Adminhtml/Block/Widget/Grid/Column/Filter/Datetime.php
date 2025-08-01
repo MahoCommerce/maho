@@ -12,9 +12,6 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date
 {
-    //full day is 86400, we need 23 hours:59 minutes:59 seconds = 86399
-    public const END_OF_DAY_IN_SECONDS = 86399;
-
     #[\Override]
     public function getValue($index = null)
     {
