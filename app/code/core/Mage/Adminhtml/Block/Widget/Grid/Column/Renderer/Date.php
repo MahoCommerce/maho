@@ -18,10 +18,12 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
     protected function _getFormatter(): IntlDateFormatter
     {
         if (is_null(self::$_formatter)) {
+            $timezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
             self::$_formatter = new IntlDateFormatter(
                 Mage::app()->getLocale()->getLocaleCode(),
                 IntlDateFormatter::MEDIUM,
                 IntlDateFormatter::NONE,
+                $timezone,
             );
         }
         return self::$_formatter;
@@ -42,7 +44,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                         ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
                 } else {
                     $dateObj = Mage::app()->getLocale()
-                        ->date($data, DateTime::ATOM, null, false);
+                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false);
                 }
 
                 return $this->_getFormatter()->format($dateObj);
@@ -53,7 +55,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                         $dateObj = Mage::app()->getLocale()
                             ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
                     } else {
-                        $dateObj = Mage::app()->getLocale()->dateImmutable($data, null, null, false);
+                        $dateObj = Mage::app()->getLocale()
+                            ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false);
                     }
                     return $dateObj->format('M j, Y');
                 } catch (Exception $e2) {

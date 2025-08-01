@@ -20,14 +20,17 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
 
         // Simple caching - could be enhanced to cache per locale if needed
         if (is_null(self::$_formatter)) {
+            $timezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
             self::$_formatter = new IntlDateFormatter(
                 $localeCode,
                 IntlDateFormatter::MEDIUM,
                 IntlDateFormatter::MEDIUM,
+                $timezone,
             );
         }
         return self::$_formatter;
     }
+
     /**
      * Renders grid column
      *
