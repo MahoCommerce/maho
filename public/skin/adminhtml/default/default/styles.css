@@ -1253,7 +1253,7 @@ button, .form-button {
 .grid-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 
     .actions {
         display: flex;
@@ -1457,7 +1457,6 @@ ul.tabs, ul.tabs-horiz {
     display: flex;
 
     a {
-
         display: flex;
         padding: 8px 16px;
         align-items: center;
@@ -1465,6 +1464,7 @@ ul.tabs, ul.tabs-horiz {
         gap: 8px;
         color: var(--maho-box-text-color);
         border-radius: var(--maho-box-border-radius);
+        border-left: 4px solid transparent;
 
         &:hover, &:focus {
             color: var(--maho-box-hover-text-color, --maho-box-text-color);
@@ -1474,8 +1474,9 @@ ul.tabs, ul.tabs-horiz {
 
         &.active {
             color: var(--maho-box-active-text-color, --maho-box-text-color);
-            outline: 1px solid var(--maho-box-active-background);
+            outline: 1px solid var(--maho-color-accent);
             background-color: var(--maho-box-background);
+            border-left-color: var(--maho-color-accent);
             font-weight: 600;
         }
 
@@ -1578,7 +1579,6 @@ ul.tabs, ul.tabs-horiz {
     color: #444;
     font-weight: bold;
 }
-
 
 .notification-global {
     display: flex;
