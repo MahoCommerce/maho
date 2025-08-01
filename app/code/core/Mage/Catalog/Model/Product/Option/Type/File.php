@@ -159,6 +159,39 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
          */
         $upload   = new Zend_File_Transfer_Adapter_Http();
         $file = $processingParams->getFilesPrefix() . 'options_' . $option->getId() . '_file';
+
+        // Check for PHP file upload errors
+        if (isset($_FILES[$file]) && $_FILES[$file]['error'] !== UPLOAD_ERR_OK) {
+            $this->setIsValid(false);
+
+            match ($_FILES[$file]['error']) {
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => Mage::throwException(
+                    Mage::helper('catalog')->__('The file you uploaded is larger than %s Megabytes allowed by server', $this->_bytesToMbytes($this->_getUploadMaxFilesize())),
+                ),
+                UPLOAD_ERR_PARTIAL => Mage::throwException(
+                    Mage::helper('catalog')->__('The file was only partially uploaded. Please try again.'),
+                ),
+                UPLOAD_ERR_NO_FILE => $option->getIsRequire() ? Mage::throwException(
+                    Mage::helper('catalog')->__('Please select a file for the required option "%s".', $option->getTitle()),
+                ) : null,
+                UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE => Mage::throwException(
+                    Mage::helper('catalog')->__('File upload failed. Please contact the store administrator.'),
+                ),
+                default => Mage::throwException(
+                    Mage::helper('catalog')->__('File upload failed with error code: %s', $_FILES[$file]['error']),
+                ),
+            };
+        }
+
+        // Also check if the form was submitted but no file info exists (happens with very large files)
+        if ($option->getIsRequire() && !isset($_FILES[$file]) && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > $this->_getUploadMaxFilesize()) {
+            $this->setIsValid(false);
+            $value = $this->_bytesToMbytes($this->_getUploadMaxFilesize());
+            Mage::throwException(
+                Mage::helper('catalog')->__('The file you uploaded is larger than %s Megabytes allowed by server', $value),
+            );
+        }
+
         try {
             $runValidation = $option->getIsRequire() || $upload->isUploaded($file);
             if (!$runValidation) {
