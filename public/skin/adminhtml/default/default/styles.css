@@ -554,7 +554,7 @@ td.divider {
         }
 
         .nav-bar {
-            padding: 4px 64px;
+            padding: 4px 42px;
         }
     }
 
@@ -725,12 +725,13 @@ td.divider {
     li.level0 li {
         & > a {
             color: var(--maho-box-text-color);
+            border-left: 4px solid transparent;
             padding: 8px 12px;
             li:hover > &:not(.active) {
                 background: var(--maho-box-shade-1);
             }
             &.active {
-                background: var(--maho-box-active-background);
+                border-left: 4px solid var(--maho-color-brand);
                 font-weight: 500;
             }
         }
@@ -1208,23 +1209,13 @@ button, .form-button {
             gap: 8px;
             white-space: nowrap;
 
-            &:after {
-                content: "";
-                flex-shrink: 0;
-                width: 16px;
-                height: 16px;
-                padding: 6px 2px 2px 2px;
-            }
-
             .sort-arrow-asc &::after {
-                background: var(--maho-layout-body-text-color);
-                clip-path: fill-box polygon(0% 100%, 100% 100%, 50% 0%);
+                content: "↑";
                 opacity: 0.5;
             }
 
             .sort-arrow-desc &::after {
-                background: var(--maho-layout-body-text-color);
-                clip-path: fill-box polygon(0% 0%, 100% 0%, 50% 100%);
+                content: "↓";
                 opacity: 0.5;
             }
         }
