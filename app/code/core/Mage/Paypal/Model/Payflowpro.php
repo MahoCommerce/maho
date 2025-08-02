@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -362,13 +362,12 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
     {
         $debugData = ['request' => $request->getData()];
 
-        $client = new Varien_Http_Client();
         $result = new Varien_Object();
 
         $_config = [
-            'maxredirects' => 5,
+            'max_redirects' => 5,
             'timeout'    => 30,
-            'verifypeer' => $this->getConfigData('verify_peer'),
+            'verify_peer' => $this->getConfigData('verify_peer'),
         ];
 
         //checking proxy
@@ -376,25 +375,30 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
         if ($_isProxy) {
             $_config['proxy'] = $this->getConfigData('proxy_host')
                 . ':'
-                . $this->getConfigData('proxy_port');//http://proxy.shr.secureserver.net:3128',
-            $_config['httpproxytunnel'] = true;
-            $_config['proxytype'] = CURLPROXY_HTTP;
+                . $this->getConfigData('proxy_port');
         }
 
-        $client->setUri($this->_getTransactionUrl())
-            ->setConfig($_config)
-            ->setMethod(Zend_Http_Client::POST)
-            ->setParameterPost($request->getData())
-            ->setHeaders('X-VPS-VIT-CLIENT-CERTIFICATION-ID: 33baf5893fc2123d8b191d2d011b7fdc')
-            ->setHeaders('X-VPS-Request-ID: ' . $request->getRequestId())
-            ->setHeaders('X-VPS-CLIENT-TIMEOUT: ' . $this->_clientTimeout);
+        $client = \Symfony\Component\HttpClient\HttpClient::create($_config);
+
+        $headers = [
+            'X-VPS-VIT-CLIENT-CERTIFICATION-ID' => '33baf5893fc2123d8b191d2d011b7fdc',
+            'X-VPS-Request-ID' => $request->getRequestId(),
+            'X-VPS-CLIENT-TIMEOUT' => $this->_clientTimeout,
+        ];
 
         try {
             /**
              * we are sending request to payflow pro without url encoding
-             * so we set up _urlEncodeBody flag to false
+             * so we build the query string manually
              */
-            $response = $client->setUrlEncodeBody(false)->request();
+            $requestData = $request->getData();
+            $queryString = http_build_query($requestData, '', '&', PHP_QUERY_RFC3986);
+            $queryString = urldecode($queryString);
+
+            $response = $client->request('POST', $this->_getTransactionUrl(), [
+                'headers' => $headers,
+                'body' => $queryString,
+            ]);
         } catch (Exception $e) {
             $result->setResponseCode(-1)
                 ->setResponseReasonCode($e->getCode())
@@ -405,7 +409,8 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
             throw $e;
         }
 
-        $response = strstr($response->getBody(), 'RESULT');
+        $responseBody = $response->getContent();
+        $response = strstr($responseBody, 'RESULT');
         $valArray = explode('&', $response);
 
         foreach ($valArray as $val) {

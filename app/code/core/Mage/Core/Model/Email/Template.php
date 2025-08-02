@@ -81,32 +81,16 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
     protected $_templateFilter;
     protected $_preprocessFlag = false;
-    protected $_mail;
     protected $_bccEmails = [];
+    protected ?string $_replyToEmail = null;
+    protected ?string $_returnPathEmail = null;
 
     protected static $_defaultTemplates;
 
-    /**
-     * Initialize email template model
-     *
-     */
     #[\Override]
     protected function _construct()
     {
         $this->_init('core/email_template');
-    }
-
-    /**
-     * Retrieve mail object instance
-     *
-     * @return Zend_Mail
-     */
-    public function getMail()
-    {
-        if (is_null($this->_mail)) {
-            $this->_mail = new Zend_Mail('utf-8');
-        }
-        return $this->_mail;
     }
 
     /**
@@ -412,8 +396,8 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 'is_plain'          => $this->isPlain(),
                 'from_email'        => $this->getSenderEmail(),
                 'from_name'         => $this->getSenderName(),
-                'reply_to'          => $this->getMail()->getReplyTo(),
-                'return_to'         => $this->getMail()->getReturnPath(),
+                'reply_to'          => $this->_replyToEmail,
+                'return_to'         => $this->_returnPathEmail,
             ])
                 ->addRecipients($emails, $names, Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO)
                 ->addRecipients($this->_bccEmails, [], Mage_Core_Model_Email_Queue::EMAIL_TYPE_BCC);
@@ -428,6 +412,12 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             $email->from(new Address($this->getSenderEmail(), $this->getSenderName()));
             if ($returnPathEmail !== null) {
                 $email->returnPath($returnPathEmail);
+            }
+            if ($this->_returnPathEmail !== null) {
+                $email->returnPath($this->_returnPathEmail);
+            }
+            if ($this->_replyToEmail !== null) {
+                $email->replyTo($this->_replyToEmail);
             }
             foreach ($emails as $key => $recipient) {
                 $email->addTo(new Address($recipient, $names[$key]));
@@ -561,11 +551,9 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         if (is_array($bcc)) {
             foreach ($bcc as $email) {
                 $this->_bccEmails[] = $email;
-                $this->getMail()->addBcc($email);
             }
         } elseif ($bcc) {
             $this->_bccEmails[] = $bcc;
-            $this->getMail()->addBcc($bcc);
         }
         return $this;
     }
@@ -578,7 +566,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public function setReturnPath(#[\SensitiveParameter] $email)
     {
-        $this->getMail()->setReturnPath($email);
+        $this->_returnPathEmail = $email;
         return $this;
     }
 
@@ -590,7 +578,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public function setReplyTo(#[\SensitiveParameter] $email)
     {
-        $this->getMail()->setReplyTo($email);
+        $this->_replyToEmail = $email;
         return $this;
     }
 
@@ -605,7 +593,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $variables = [];
         if ($variablesString && is_string($variablesString)) {
             $variablesString = str_replace("\n", '', $variablesString);
-            $variables = Zend_Json::decode($variablesString);
+            $variables = Mage::helper('core')->jsonDecode($variablesString);
         }
         return $variables;
     }

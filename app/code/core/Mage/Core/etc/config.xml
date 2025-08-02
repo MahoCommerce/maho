@@ -308,6 +308,9 @@
                 <file>system.log</file>
                 <exception_file>exception.log</exception_file>
             </log>
+            <js>
+                <defer_mode>0</defer_mode>
+            </js>
         </dev>
         <system>
             <rate_limit>
@@ -372,6 +375,7 @@
             <url>
                 <use_store>0</use_store>
                 <redirect_to_base>1</redirect_to_base>
+                <trailing_slash_behavior>add</trailing_slash_behavior>
             </url>
             <seo>
                 <use_rewrites>1</use_rewrites>
@@ -433,6 +437,11 @@
                 <use_form_key>1</use_form_key>
                 <domain_policy_backend>2</domain_policy_backend>
                 <domain_policy_frontend>2</domain_policy_frontend>
+                <hsts_enabled>0</hsts_enabled>
+                <hsts_max_age>31536000</hsts_max_age>
+                <content_type_options_enabled>1</content_type_options_enabled>
+                <xss_protection_enabled>1</xss_protection_enabled>
+                <referrer_policy>strict-origin-when-cross-origin</referrer_policy>
                 <session_cookie_lifetime>10800</session_cookie_lifetime>
                 <secure_system_configuration_save_disabled>0</secure_system_configuration_save_disabled>
             </security>
@@ -535,6 +544,14 @@
                 <schedule><cron_expr>0 0 * * *</cron_expr></schedule>
                 <run><model>core/email_queue::cleanQueue</model></run>
             </core_email_queue_clean_up>
+            <core_session_clean>
+                <schedule><cron_expr>30 3 * * *</cron_expr></schedule>
+                <run><model>core/session::cleanExpiredSessions</model></run>
+            </core_session_clean>
+            <core_minify_cleanup>
+                <schedule><cron_expr>0 4 * * *</cron_expr></schedule>
+                <run><model>core/observer::cleanOldMinifiedFiles</model></run>
+            </core_minify_cleanup>
         </jobs>
     </crontab>
 </config>

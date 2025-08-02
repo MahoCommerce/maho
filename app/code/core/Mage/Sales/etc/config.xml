@@ -1462,6 +1462,23 @@
                 </grand_total>
             </totals>
         </pdf>
+        <layout>
+            <sales_pdf_invoice>
+                <reference name="sales.pdf.invoice">
+                    <block type="sales/order_pdf_invoice" name="sales.pdf.invoice" template="sales/order/pdf/invoice/default.phtml" />
+                </reference>
+            </sales_pdf_invoice>
+            <sales_pdf_shipment>
+                <reference name="sales.pdf.shipment">
+                    <block type="sales/order_pdf_shipment" name="sales.pdf.shipment" template="sales/order/pdf/shipment/default.phtml" />
+                </reference>
+            </sales_pdf_shipment>
+            <sales_pdf_creditmemo>
+                <reference name="sales.pdf.creditmemo">
+                    <block type="sales/order_pdf_creditmemo" name="sales.pdf.creditmemo" template="sales/order/pdf/creditmemo/default.phtml" />
+                </reference>
+            </sales_pdf_creditmemo>
+        </layout>
         <events>
             <sales_order_place_after>
                 <observers>
@@ -1683,17 +1700,6 @@
                 <copy_method>bcc</copy_method>
             </creditmemo_comment>
         </sales_email>
-        <sales_pdf>
-            <invoice>
-                <put_order_id>1</put_order_id>
-            </invoice>
-            <shipment>
-                <put_order_id>1</put_order_id>
-            </shipment>
-            <creditmemo>
-                <put_order_id>1</put_order_id>
-            </creditmemo>
-        </sales_pdf>
         <dashboard>
             <use_aggregated_data>0</use_aggregated_data>
         </dashboard>

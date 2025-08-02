@@ -54,51 +54,6 @@ class Mage_Shipping_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param string $order
-     * @return string
-     * @deprecated after 1.4.0.0-alpha3
-     * Retrieve tracking pop up url by order id or object
-     *
-     */
-    public function getTrackingPopUpUrlByOrderId($order = '')
-    {
-        if ($order && !is_object($order)) {
-            $order = Mage::getModel('sales/order')->load($order);
-        }
-        return $this->_getTrackingUrl('order_id', $order);
-    }
-
-    /**
-     * @param string $track
-     * @return string
-     * @deprecated after 1.4.0.0-alpha3
-     * Retrieve tracking pop up url by track id or object
-     *
-     */
-    public function getTrackingPopUpUrlByTrackId($track = '')
-    {
-        if ($track && !is_object($track)) {
-            $track = Mage::getModel('sales/order_shipment_track')->load($track);
-        }
-        return $this->_getTrackingUrl('track_id', $track, 'getEntityId');
-    }
-
-    /**
-     * @param string $ship
-     * @return string
-     * @deprecated after 1.4.0.0-alpha3
-     * Retrieve tracking pop up url by ship id or object
-     *
-     */
-    public function getTrackingPopUpUrlByShipId($ship = '')
-    {
-        if ($ship && !is_object($ship)) {
-            $ship = Mage::getModel('sales/order_shipment')->load($ship);
-        }
-        return $this->_getTrackingUrl('ship_id', $ship);
-    }
-
-    /**
      * Shipping tracking popup URL getter
      *
      * @param Mage_Sales_Model_Abstract $model

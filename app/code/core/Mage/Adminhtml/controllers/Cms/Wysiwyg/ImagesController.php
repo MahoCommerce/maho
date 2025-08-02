@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -31,6 +33,10 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
 
     public function indexAction()
     {
+        if ($this->getRequest()->isAjax()) {
+            return $this->_forward('popup');
+        }
+
         $storeId = (int) $this->getRequest()->getParam('store');
 
         try {
@@ -38,11 +44,41 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         } catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         }
-        $this->_initAction()->loadLayout('overlay_popup');
+
+        $this->_initAction()
+            ->_title($this->__('CMS'))
+            ->_title($this->__('Media Library'));
+
+        $this->loadLayout();
+
         $block = $this->getLayout()->getBlock('wysiwyg_images.js');
         if ($block) {
-            $block->setStoreId($storeId);
+            $block->setStoreId($storeId)
+                ->setCanInsertImage(false);
         }
+
+        $this->renderLayout();
+    }
+
+    public function popupAction(): void
+    {
+        $storeId = (int) $this->getRequest()->getParam('store');
+
+        try {
+            Mage::helper('cms/wysiwyg_images')->getCurrentPath();
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        }
+
+        $this->_initAction();
+        $this->loadLayout('overlay_popup');
+
+        $block = $this->getLayout()->getBlock('wysiwyg_images.js');
+        if ($block) {
+            $block->setStoreId($storeId)
+                ->setCanInsertImage(true);
+        }
+
         $this->renderLayout();
     }
 
@@ -50,9 +86,9 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     {
         try {
             $this->_initAction();
-            $this->getResponse()->setBodyJson(
-                $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree')->getTreeJson(),
-            );
+            $path = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
+            $block = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree');
+            $this->getResponse()->setBodyJson($block->getTreeJson($path));
         } catch (Exception $e) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
@@ -61,7 +97,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     public function contentsAction()
     {
         try {
-            $this->_initAction()->_saveSessionCurrentPath();
+            $this->_initAction();
             $this->loadLayout('empty');
             $this->renderLayout();
         } catch (Exception $e) {
@@ -74,7 +110,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         try {
             $this->_initAction();
             $name = $this->getRequest()->getPost('name');
-            $path = $this->getStorage()->getSession()->getCurrentPath();
+            $path = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
             $result = $this->getStorage()->createDirectory($name, $path);
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
@@ -85,7 +121,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     public function deleteFolderAction()
     {
         try {
-            $path = $this->getStorage()->getSession()->getCurrentPath();
+            $path = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
             $this->getStorage()->deleteDirectory($path);
             $this->getResponse()->setBodyJson([]);
         } catch (Exception $e) {
@@ -106,7 +142,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
 
             /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
             $helper = Mage::helper('cms/wysiwyg_images');
-            $path = $this->getStorage()->getSession()->getCurrentPath();
+            $path = $helper->getCurrentPath();
             foreach ($files as $file) {
                 $file = $helper->idDecode($file);
                 $filePath = realpath($path . DS . $file);
@@ -129,7 +165,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     {
         try {
             $this->_initAction();
-            $targetPath = $this->getStorage()->getSession()->getCurrentPath();
+            $targetPath = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
             $result = $this->getStorage()->uploadFile($targetPath, $this->getRequest()->getParam('type'));
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
@@ -147,12 +183,13 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
 
         $filename = $this->getRequest()->getParam('filename');
         $filename = $helper->idDecode($filename);
-        $asIs = $this->getRequest()->getParam('as_is');
+
+        $alt = $this->getRequest()->getParam('alt');
 
         Mage::helper('catalog')->setStoreId($storeId);
         $helper->setStoreId($storeId);
 
-        $image = $helper->getImageHtmlDeclaration($filename, $asIs);
+        $image = $helper->getImageHtmlDeclaration($filename, $alt);
         $this->getResponse()->setBody($image);
     }
 
@@ -161,19 +198,216 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
      */
     public function thumbnailAction()
     {
-        $file = $this->getRequest()->getParam('file');
-        $file = Mage::helper('cms/wysiwyg_images')->idDecode($file);
-        $thumb = $this->getStorage()->resizeOnTheFly($file);
-        if ($thumb !== false) {
-            $image = Maho::getImageManager()->read($thumb);
-            $imageInfo = @getimagesize($thumb);
-        } else {
-            $image = Maho::getImageManager()->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
-            $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+        try {
+            $file = $this->getRequest()->getParam('file');
+            $file = Mage::helper('cms/wysiwyg_images')->idDecode($file);
+
+            $thumb = $this->getStorage()->resizeOnTheFly($file);
+            if ($thumb === false) {
+                Mage::throwException('Thumbnail image could not be generated');
+            }
+
+            $image = Maho::getImageManager()->read($thumb)->encode();
+
+            $this->getResponse()
+                ->setHttpResponseCode(200)
+                ->setHeader('Content-type', $image->mediaType(), true);
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()
+                ->setHttpResponseCode(500);
         }
 
-        $this->getResponse()->setHeader('Content-type', $imageInfo['mime']);
-        $this->getResponse()->setBody($image->encode());
+        $this->getResponse()->clearBody();
+        $this->getResponse()->sendHeaders();
+
+        if (isset($image)) {
+            print $image;
+        }
+        exit(0);
+    }
+
+    /**
+     * Get image URL for editing
+     */
+    public function getImageUrlAction(): void
+    {
+        try {
+            // Validate CSRF token for POST requests
+            if ($this->getRequest()->isPost() && !$this->_validateFormKey()) {
+                throw new Exception('Invalid form key. Please refresh the page and try again.');
+            }
+
+            $fileId = $this->getRequest()->getParam('file_id');
+            $fileId = Mage::helper('cms/wysiwyg_images')->idDecode($fileId);
+
+            if (!$fileId) {
+                throw new Exception('File ID is required.');
+            }
+
+            /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
+            $helper = Mage::helper('cms/wysiwyg_images');
+            $currentPath = $helper->getCurrentPath();
+
+            // Get file path
+            $filePath = $currentPath . DS . $fileId;
+
+            // Validate file exists and is within allowed path
+            if (!file_exists($filePath)) {
+                throw new Exception('File not found.');
+            }
+
+            if (!str_starts_with(realpath($filePath), realpath($helper->getStorageRoot()))) {
+                throw new Exception('Invalid file path.');
+            }
+
+            // Construct URL
+            $mediaUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
+            $relativePath = str_replace($helper->getStorageRoot(), '', $filePath);
+            $imageUrl = $mediaUrl . 'wysiwyg' . str_replace(DS, '/', $relativePath);
+
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'url' => $imageUrl,
+            ]);
+
+        } catch (Exception $e) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Save edited image from image editor
+     */
+    public function editImageAction(): void
+    {
+        try {
+            if (!$this->getRequest()->isPost()) {
+                throw new Exception('Wrong request method.');
+            }
+
+            // Validate CSRF token
+            if (!$this->_validateFormKey()) {
+                throw new Exception('Invalid form key. Please refresh the page and try again.');
+            }
+
+            $fileId = $this->getRequest()->getParam('file_id');
+            $fileId = Mage::helper('cms/wysiwyg_images')->idDecode($fileId);
+
+            if (!$fileId) {
+                throw new Exception('File ID is required.');
+            }
+
+            // Check if edited image file was uploaded
+            if (!isset($_FILES['edited_image']) || $_FILES['edited_image']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('No edited image provided.');
+            }
+
+            /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
+            $helper = Mage::helper('cms/wysiwyg_images');
+            $currentPath = $helper->getCurrentPath();
+
+            // Get original file path
+            $originalFilePath = $currentPath . DS . $fileId;
+
+            // Validate file exists and is within allowed path
+            if (!file_exists($originalFilePath)) {
+                throw new Exception('Original file not found.');
+            }
+
+            if (!str_starts_with(realpath($originalFilePath), realpath($helper->getStorageRoot()))) {
+                throw new Exception('Invalid file path.');
+            }
+
+            // Get new filename from request or use original
+            $newFilename = $this->getRequest()->getParam('new_filename');
+            $originalPathInfo = pathinfo($originalFilePath);
+
+            // Get configured image file type and extension
+            $configuredType = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
+            $configuredExtension = match ($configuredType) {
+                IMAGETYPE_AVIF => 'avif',
+                IMAGETYPE_GIF  => 'gif',
+                IMAGETYPE_JPEG => 'jpg',
+                IMAGETYPE_PNG  => 'png',
+                default        => 'webp',
+            };
+
+            if ($newFilename) {
+                // Always replace extension with configured type
+                // Handle cases where user typed filename with extension and editor added another extension
+
+                // Extract base filename without any extensions
+                $baseFilename = pathinfo($newFilename, PATHINFO_FILENAME);
+
+                $newFilename = $baseFilename . '.' . $configuredExtension;
+
+                // Clean filename
+                $newFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($newFilename);
+
+                // Determine if it's the same as original (ignoring extension)
+                $originalBasename = $originalPathInfo['filename'];
+
+                if ($baseFilename === $originalBasename) {
+                    // Same base name - replace with new extension if different
+                    if ($configuredExtension !== $originalPathInfo['extension']) {
+                        // Different extension - create new file with new extension
+                        $targetPath = $currentPath . DS . $newFilename;
+                    } else {
+                        // Same extension - replace original
+                        $targetPath = $originalFilePath;
+                    }
+                } else {
+                    // Different base name - save as new file
+                    $targetPath = $currentPath . DS . $newFilename;
+
+                    // Check if new filename already exists
+                    if (file_exists($targetPath)) {
+                        throw new Exception('A file with this name already exists.');
+                    }
+                }
+            } else {
+                // No filename provided - use original name with configured extension
+                if ($configuredExtension !== $originalPathInfo['extension']) {
+                    // Different extension - create new file with new extension
+                    $newFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
+                    $targetPath = $currentPath . DS . $newFilename;
+                } else {
+                    // Same extension - replace original
+                    $targetPath = $originalFilePath;
+                }
+            }
+
+            // Move uploaded edited image
+            $uploadedFile = $_FILES['edited_image']['tmp_name'];
+
+            // Validate uploaded file is an image
+            if (!getimagesize($uploadedFile)) {
+                throw new Exception('Uploaded file is not a valid image.');
+            }
+
+            if (!move_uploaded_file($uploadedFile, $targetPath)) {
+                throw new Exception('Failed to save edited image.');
+            }
+
+            // Clear any cached thumbnails by regenerating
+            $this->getStorage()->resizeOnTheFly($fileId);
+
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'message' => 'Image edited successfully',
+            ]);
+
+        } catch (Exception $e) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -194,14 +428,10 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
      * Save current path in session
      *
      * @return $this
+     * @deprecated since 25.7.0 current path is no longer stored in session
      */
     protected function _saveSessionCurrentPath()
     {
-        if ($this->getRequest()->isPost()) {
-            $this->getStorage()
-                ->getSession()
-                ->setCurrentPath(Mage::helper('cms/wysiwyg_images')->getCurrentPath());
-        }
         return $this;
     }
 }

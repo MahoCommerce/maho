@@ -573,11 +573,43 @@ class Mage_Core_Model_Locale
      * @param   null|string|bool|int|Mage_Core_Model_Store $store Information about store
      * @param   string|int|Zend_Date|array|null $date date in UTC
      * @param   bool $includeTime flag for including time to date
-     * @param   string|null $format
-     * @return  Zend_Date
+     * @param   string|null $format Format for date parsing/output:
+     *                              - null: Use locale default format (returns Zend_Date)
+     *                              - 'html5': Return HTML5 native input format (returns string):
+     *                                * type="date": YYYY-MM-DD (e.g., "2024-12-25")
+     *                                * type="datetime-local": YYYY-MM-DDTHH:mm (e.g., "2024-12-25T14:30")
+     *                              - Zend format strings: 'yyyy-MM-dd HH:mm:ss', etc. (returns Zend_Date)
+     * @return  Zend_Date|string|null
      */
     public function storeDate($store = null, $date = null, $includeTime = false, $format = null)
     {
+        // Special handling for HTML5 format output when format is 'html5'
+        if ($format === 'html5') {
+            if (empty($date)) {
+                return null;
+            }
+
+            try {
+                $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
+                $dateObj = new Zend_Date($date, null, $this->getLocale());
+                $dateObj->setTimezone($timezone);
+                if (!$includeTime) {
+                    $dateObj->setHour(0)
+                        ->setMinute(0)
+                        ->setSecond(0);
+                }
+
+                if ($includeTime) {
+                    return $dateObj->toString('yyyy-MM-dd\'T\'HH:mm');
+                } else {
+                    return $dateObj->toString('yyyy-MM-dd');
+                }
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+
+        // Legacy Zend_Date handling
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
         $date = new Zend_Date($date, $format, $this->getLocale());
         $date->setTimezone($timezone);
@@ -597,11 +629,49 @@ class Mage_Core_Model_Locale
      * @param mixed $store Information about store
      * @param string|int|Zend_Date|array|null $date date in store's timezone
      * @param bool $includeTime flag for including time to date
-     * @param null|string $format
-     * @return Zend_Date
+     * @param null|string $format Format for date parsing/output:
+     *                             - null: Use locale default format (returns Zend_Date)
+     *                             - 'html5': Parse HTML5 native input format (returns string):
+     *                               * Accepts: YYYY-MM-DD (from type="date") or YYYY-MM-DDTHH:mm (from type="datetime-local")
+     *                               * Returns: YYYY-MM-DD HH:mm:ss (MySQL datetime format)
+     *                             - Zend format strings: 'yyyy-MM-dd HH:mm:ss', etc. (returns Zend_Date)
+     *                             - Varien_Date::DATETIME_INTERNAL_FORMAT constant (returns Zend_Date)
+     * @return Zend_Date|string|null
      */
     public function utcDate($store, $date, $includeTime = false, $format = null)
     {
+        // Special handling for HTML5 native input formats
+        if ($format === 'html5' && is_string($date)) {
+            if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
+                // datetime-local format - validate the datetime
+                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($date, 0, 16));
+                if ($dateTime === false || $dateTime->format('Y-m-d\TH:i') !== substr($date, 0, 16)) {
+                    return null;
+                }
+            } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                // date format - validate the date
+                $dateTime = DateTime::createFromFormat('Y-m-d', $date);
+                if ($dateTime === false || $dateTime->format('Y-m-d') !== $date) {
+                    return null;
+                }
+                if (!$includeTime) {
+                    $dateTime->setTime(0, 0, 0);
+                }
+            } else {
+                return null;
+            }
+
+            // Set to store timezone first
+            $storeTimezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
+            $dateTime->setTimezone(new DateTimeZone($storeTimezone));
+
+            // Convert to UTC
+            $dateTime->setTimezone(new DateTimeZone('UTC'));
+
+            return $dateTime->format('Y-m-d H:i:s');
+        }
+
+        // Legacy Zend_Date handling
         $dateObj = $this->storeDate($store, $date, $includeTime);
         $dateObj->set($date, $format);
         $dateObj->setTimezone(self::DEFAULT_TIMEZONE);
@@ -848,6 +918,11 @@ class Mage_Core_Model_Locale
      */
     public function getCountryTranslation($countryId, $locale = null)
     {
+        if (!Mage::isInstalled()) {
+            // During installation, use native PHP Intl extension for country translation
+            return $this->getNativeCountryName($countryId, $locale);
+        }
+
         $country = Mage::getModel('directory/country')->load($countryId);
         if ($country->getId()) {
             if ($locale) {
@@ -858,17 +933,84 @@ class Mage_Core_Model_Locale
             }
             return $country->getName();
         }
+
         return false;
     }
 
     /**
      * Returns an array with the name of all countries translated to the given language
      *
-     * @return array
+     * @return array<string, string>
      */
-    public function getCountryTranslationList()
+    public function getCountryTranslationList(): array
     {
+        if (!Mage::isInstalled()) {
+            // During installation, use native PHP Intl extension for country translations
+            return $this->getNativeCountryList();
+        }
+
         return Mage::getResourceModel('directory/country_collection')->toOptionHash();
+    }
+
+    /**
+     * Get native country list using PHP Intl extension (dynamically from ICU data)
+     *
+     * @return array<string, string>
+     */
+    protected function getNativeCountryList(): array
+    {
+        $locale = $this->getLocaleCode();
+        $countries = [];
+        $countryCodes = [];
+
+        // Dynamically extract country codes from available locales
+        $locales = ResourceBundle::getLocales('');
+        foreach ($locales as $localeCode) {
+            $parsed = Locale::parseLocale($localeCode);
+            if (isset($parsed['region']) && strlen($parsed['region']) === 2) {
+                $countryCodes[$parsed['region']] = true;
+            }
+        }
+
+        // Get display names for all discovered country codes
+        foreach (array_keys($countryCodes) as $code) {
+            try {
+                $countryName = Locale::getDisplayRegion('-' . $code, $locale);
+                if ($countryName && $countryName !== $code) {
+                    $countries[$code] = $countryName;
+                } else {
+                    // Use country code itself as fallback when translation fails
+                    $countries[$code] = $code;
+                }
+            } catch (IntlException $e) {
+                // Use country code itself as fallback for exceptions
+                $countries[$code] = $code;
+            }
+        }
+
+        asort($countries);
+        return $countries;
+    }
+
+    /**
+     * Get native country name using PHP Intl extension
+     */
+    protected function getNativeCountryName(string $countryId, ?string $locale = null): string
+    {
+        $displayLocale = $locale ?: $this->getLocaleCode();
+
+        try {
+            $countryName = Locale::getDisplayRegion('-' . $countryId, $displayLocale);
+            if ($countryName && $countryName !== $countryId) {
+                return $countryName;
+            } else {
+                // Use country code itself as fallback when translation fails
+                return $countryId;
+            }
+        } catch (IntlException $e) {
+            // Use country code itself as fallback for exceptions
+            return $countryId;
+        }
     }
 
     /**

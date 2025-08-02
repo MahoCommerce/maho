@@ -84,7 +84,71 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Add request parameter into url
+     * Build a URL from the result of PHP's parse_url()
+     */
+    public function buildUrl(array $parts): string
+    {
+        return
+            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '') .
+            ($parts['user'] ?? '') .
+            (isset($parts['pass']) ? ':' . $parts['pass'] : '') .
+            ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '') .
+            ($parts['host'] ?? '') .
+            (isset($parts['port']) ? ':' . $parts['port'] : '') .
+            ($parts['path'] ?? '/') .
+            (isset($parts['query']) ? '?' . $parts['query'] : '') .
+            (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
+    }
+
+    /**
+     * Add, update, or remove multiple varien route params in URL
+     */
+    public function setRouteParams(string $url, array $params = []): string
+    {
+        $parts = parse_url($url);
+        $parts['path'] ??= '/';
+
+        $noTrailingSlash = !str_ends_with($parts['path'], '/');
+        if ($noTrailingSlash) {
+            $parts['path'] .= '/';
+        }
+
+        foreach ($params as $key => $val) {
+            $regex = "/\/{$key}\/(.*?)\//";
+            if ($val === null || $val === false) {
+                $parts['path'] = preg_replace($regex, '/', $parts['path']);
+            } elseif (preg_match($regex, $parts['path'])) {
+                $parts['path'] = preg_replace($regex, "/{$key}/{$val}/", $parts['path']);
+            } else {
+                $parts['path'] .= "{$key}/{$val}/";
+            }
+        }
+
+        if ($noTrailingSlash && $parts['path'] !== '/') {
+            $parts['path'] = rtrim($parts['path'], '/');
+        }
+
+        return $this->buildUrl($parts);
+    }
+
+    /**
+     * Add or update varien route param in URL
+     */
+    public function addRouteParam(string $url, string $paramKey, mixed $value): string
+    {
+        return $this->setRouteParams($url, [$paramKey => $value]);
+    }
+
+    /**
+     * Remove varien route param from URL
+     */
+    public function removeRouteParam(string $url, string $paramKey): string
+    {
+        return $this->setRouteParams($url, [$paramKey => null]);
+    }
+
+    /**
+     * Add query parameter into url
      *
      * @param string $url
      * @param array $param ( 'key' => value )
@@ -114,7 +178,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Remove request parameter from url
+     * Remove query parameter from url
      *
      * @param string $url
      * @param string $paramKey
@@ -144,6 +208,64 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
         }
 
         return $baseUrl . ($params === [] ? '' : '?' . http_build_query($params));
+    }
+
+    /**
+     * Add trailing slash to URL
+     */
+    public function addTrailingSlash(string $url): string
+    {
+        // Parse URL and remove all trailing slashes from path
+        $parts = parse_url($url);
+        $parts['path'] = rtrim($parts['path'] ?? '', '/');
+
+        // Only add trailing slashes for pages without an extension
+        if (pathinfo($parts['path'], PATHINFO_EXTENSION) === '') {
+            $parts['path'] .= '/';
+        }
+
+        return $this->buildUrl($parts);
+    }
+
+    /**
+     * Remove trailing slash from URL
+     */
+    public function removeTrailingSlash(string $url): string
+    {
+        // Parse URL and remove all trailing slashes from path
+        $parts = parse_url($url);
+        $parts['path'] = rtrim($parts['path'] ?? '', '/');
+
+        // Add a trailing slash to the root domain
+        if ($parts['path'] === '') {
+            $parts['path'] .= '/';
+        }
+
+        return $this->buildUrl($parts);
+    }
+
+    /**
+     * Add or remove trailing slash from URL based on store config
+     */
+    public function addOrRemoveTrailingSlash(string $url): string
+    {
+        if (!Mage::isInstalled()) {
+            return $url;
+        }
+
+        if (Mage::helper('adminhtml')->isAdminFrontNameMatched($url)) {
+            return $url;
+        }
+
+        $mode = Mage::getStoreConfig('web/url/trailing_slash_behavior');
+
+        if ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH) {
+            return $this->removeTrailingSlash($url);
+        } elseif ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH) {
+            return $this->addTrailingSlash($url);
+        } else {
+            return $url;
+        }
     }
 
     /**

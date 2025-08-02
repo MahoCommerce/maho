@@ -36,7 +36,7 @@ class Mage_CatalogRule_Model_Resource_Rule_Product_Price extends Mage_Core_Model
         $customerGroupId,
         $websiteId,
         $updateFields,
-        $websiteDate
+        $websiteDate,
     ) {
         if (empty($updateFields)) {
             return $this;

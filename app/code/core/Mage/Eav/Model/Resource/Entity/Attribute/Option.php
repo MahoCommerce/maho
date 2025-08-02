@@ -69,7 +69,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Option extends Mage_Core_Model_Re
     public function getFlatUpdateSelect(
         Mage_Eav_Model_Entity_Attribute_Abstract $attribute,
         $store,
-        $hasValueField = true
+        $hasValueField = true,
     ) {
         $adapter        = $this->_getReadAdapter();
         $attributeTable = $attribute->getBackend()->getTable();

@@ -6,7 +6,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -146,36 +146,26 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
     {
         $this->addClass('input-text');
 
+        // Convert the value to ISO format for native date input
+        $isoValue = '';
+        if ($this->_value instanceof Zend_Date) {
+            if ($this->getTime()) {
+                $isoValue = $this->_value->toString('yyyy-MM-dd\'T\'HH:mm');
+            } else {
+                $isoValue = $this->_value->toString('yyyy-MM-dd');
+            }
+        }
+
+        // Determine input type based on whether time is needed
+        $inputType = $this->getTime() ? 'datetime-local' : 'date';
+
         $html = sprintf(
-            '<input name="%s" id="%s" value="%s" %s style="width:110px !important;" />'
-            . ' <img src="%s" alt="" class="v-middle" id="%s_trig" title="%s" style="%s" />',
+            '<input type="%s" name="%s" id="%s" value="%s" %s style="width:auto !important;" />',
+            $inputType,
             $this->getName(),
             $this->getHtmlId(),
-            $this->_escape($this->getValue()),
+            $this->_escape($isoValue),
             $this->serialize($this->getHtmlAttributes()),
-            $this->getImage(),
-            $this->getHtmlId(),
-            'Select Date',
-            ($this->getDisabled() ? 'display:none;' : ''),
-        );
-        $outputFormat = $this->getFormat();
-        if (empty($outputFormat)) {
-            throw new Exception('Output format is not specified. Please, specify "format" key in constructor, or set it using setFormat().');
-        }
-        $displayFormat = Varien_Date::convertZendToStrftime($outputFormat, true, (bool) $this->getTime());
-
-        $html .= sprintf(
-            '
-            <script type="text/javascript">
-                Calendar.setup({
-                    inputField: "%s",
-                    ifFormat: "%s",
-                    showsTime: %s
-                });
-            </script>',
-            $this->getHtmlId(),
-            $displayFormat,
-            $this->getTime() ? 'true' : 'false',
         );
 
         $html .= $this->getAfterElementHtml();

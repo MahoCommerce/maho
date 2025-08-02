@@ -35,7 +35,7 @@ class Mage_Admin_Helper_Rules_Fallback extends Mage_Core_Helper_Abstract
     public function fallbackResourcePermissions(
         &$resources,
         $resourceId,
-        $defaultValue = Mage_Admin_Model_Rules::RULE_PERMISSION_DENIED
+        $defaultValue = Mage_Admin_Model_Rules::RULE_PERMISSION_DENIED,
     ) {
         if (empty($resourceId)) {
             return $defaultValue;

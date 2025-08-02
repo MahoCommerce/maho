@@ -41,7 +41,7 @@ class Mage_Core_Model_File_Storage extends Mage_Core_Model_Abstract
      */
     protected function _synchronizeHasErrors(
         Mage_Core_Model_Abstract $sourceModel,
-        Mage_Core_Model_Abstract $destinationModel
+        Mage_Core_Model_Abstract $destinationModel,
     ) {
         if (!$sourceModel || !$destinationModel) {
             return true;

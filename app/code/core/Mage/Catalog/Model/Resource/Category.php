@@ -205,6 +205,12 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         }
 
         $this->_saveCategoryProducts($object);
+
+        // Save dynamic rule data if present
+        if ($object->getDynamicRuleData()) {
+            $this->_saveDynamicRule($object);
+        }
+
         return parent::_afterSave($object);
     }
 
@@ -819,7 +825,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     public function changeParent(
         Mage_Catalog_Model_Category $category,
         Mage_Catalog_Model_Category $newParent,
-        $afterCategoryId = null
+        $afterCategoryId = null,
     ) {
         $childrenCount  = (int) $this->getChildrenCount($category->getId()) + 1;
         $table          = $this->getEntityTable();
@@ -940,5 +946,40 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         ++$position;
 
         return $position;
+    }
+
+    protected function _saveDynamicRule(Mage_Catalog_Model_Category $category): self
+    {
+        if (!$category->getId()) {
+            return $this;
+        }
+
+        $ruleData = $category->getDynamicRuleData();
+
+        // Get existing rules for this category
+        $collection = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
+            ->addCategoryFilter($category->getId());
+
+        // Clear existing rules
+        foreach ($collection as $rule) {
+            $rule->delete();
+        }
+
+        // Always save rule if we have rule data, regardless of is_dynamic setting
+        $rule = Mage::getModel('catalog/category_dynamic_rule');
+        $rule->setCategoryId($category->getId());
+        $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
+
+        // Process the conditions if present
+        if (isset($ruleData['conditions']) && !empty($ruleData['conditions'])) {
+            $rule->loadPost($ruleData);
+        } else {
+            // Set empty conditions
+            $rule->getConditions()->setConditions([]);
+        }
+
+        $rule->save();
+
+        return $this;
     }
 }

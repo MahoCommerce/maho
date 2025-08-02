@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -36,12 +36,12 @@ $numColumns = count($this->getColumns());
         <?php if($this->getDateFilterVisibility()): ?>
             <td class="a-left filter">
                 <div class="f-left">
-                    <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="text" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:5em" />&nbsp;&nbsp;</div>
+                    <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="date" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:auto" />&nbsp;&nbsp;</div>
                     <div id="period_date_from_advaice"></div>
                 </div>
 
                 <div class="f-left">
-                    <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="text" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:5em" />&nbsp;&nbsp;</div>
+                    <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="date" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:auto" />&nbsp;&nbsp;</div>
                     <div id="period_date_to_advaice"></div>
                 </div>
 
@@ -54,16 +54,6 @@ $numColumns = count($this->getColumns());
                     </select>
                     <?= $this->getRefreshButtonHtml() ?>
                 </div>
-                <script type="text/javascript">
-                    Calendar.setup({
-                        inputField : 'period_date_from',
-                        ifFormat : '<?= $this->getDateFormat() ?>'
-                    });
-                    Calendar.setup({
-                        inputField : 'period_date_to',
-                        ifFormat : '<?= $this->getDateFormat() ?>'
-                    });
-                </script>
             </td>
         <?php endif ?>
         <?php if($this->getExportVisibility()): ?>

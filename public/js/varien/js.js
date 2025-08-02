@@ -81,6 +81,14 @@ async function mahoFetch(url, options) {
     }
 }
 
+function mahoOnReady(callback) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', callback);
+    } else {
+        callback();
+    }
+}
+
 function popWin(url,win,para) {
     var win = window.open(url,win,para);
     win.focus();
@@ -123,6 +131,53 @@ function generateRandomString(length) {
 }
 
 /**
+ * Set Varien type route params, i.e. /id/1/
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setRouteParams(url, params = {}) {
+    url = new URL(url);
+
+    const noTrailingSlash = !url.pathname.endsWith('/');
+    if (noTrailingSlash) {
+        url.pathname += '/';
+    }
+    for (const [ key, val ] of Object.entries(params)) {
+        const regex = new RegExp(String.raw`\/${key}\/(.*?)\/`);
+        if (val === null || val === false) {
+            url.pathname = url.pathname.replace(regex, '/');
+        } else if (url.pathname.match(regex)) {
+            url.pathname = url.pathname.replace(regex, `/${key}/${val}/`);
+        } else {
+            url.pathname += `${key}/${val}/`;
+        }
+    }
+    if (noTrailingSlash) {
+        url.pathname = url.pathname.slice(0, -1);
+    }
+    return url.toString();
+}
+
+/**
+ * Set query params, i.e. ?id=1
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setQueryParams(url, params = {}) {
+    url = new URL(url);
+    for (const [ key, val ] of Object.entries(params)) {
+        if (val === null || val === false) {
+            url.searchParams.delete(key);
+        } else {
+            url.searchParams.set(key, val);
+        }
+    }
+    return url.toString();
+}
+
+/**
  * Alternative to PrototypeJS's string.escapeHTML() method
  */
 function escapeHtml(str, escapeQuotes = false) {
@@ -137,6 +192,7 @@ function escapeHtml(str, escapeQuotes = false) {
  * Alternative to PrototypeJS's string.unescapeHTML() method
  */
 function unescapeHtml(str) {
+    if (!str) return '';
     const doc = new DOMParser().parseFromString(str, 'text/html');
     return doc.documentElement.textContent;
 }
@@ -144,26 +200,13 @@ function unescapeHtml(str) {
 /**
  * Alternative to PrototypeJS's string.stripTags() method
  */
-function stripTags(str) {
-    const div = document.createElement('div');
-    div.innerHTML = str;
-    return div.textContent;
-}
-
-/**
- * Alternative to PrototypeJS's string.stripScripts() method that also removes event attributes
- */
-function xssFilter(str) {
+function stripTags(str, removeScriptAndStyleContent = false) {
     const doc = new DOMParser().parseFromString(str, 'text/html');
-    doc.querySelectorAll('script').forEach(script => script.remove());
-    doc.querySelectorAll('*').forEach((el) => {
-        for (const attr of el.attributes) {
-            if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
-                el.attributes.removeNamedItem(attr.name);
-            }
-        }
-    });
-    return doc.body.innerHTML;
+    if (removeScriptAndStyleContent) {
+        doc.querySelectorAll('script').forEach(script => script.remove());
+        doc.querySelectorAll('style').forEach(style => style.remove());
+    }
+    return doc.body.textContent;
 }
 
 /**
@@ -714,96 +757,6 @@ function buttonDisabler() {
     buttons.forEach(function(button) {
         button.disabled = true;
     });
-}
-
-const Calendar = {};
-Calendar.setup = function(config) {
-    const { inputField = '' } = config;
-
-    // Store config on the input element itself
-    const input = document.getElementById(inputField);
-    if (input) {
-        input.dataset.calendarConfig = JSON.stringify(config);
-        const initHandler = (event) => Calendar.initialize(event);
-        input.addEventListener('focus', initHandler);
-        input.addEventListener('click', initHandler);
-    }
-};
-
-Calendar.initialize = async function(event) {
-    if (!event?.target) return;
-
-    try {
-        // Get config from the input element
-        const config = JSON.parse(event.target.dataset.calendarConfig || '{}');
-
-        if (typeof flatpickr === 'undefined') {
-            // Load flatpickr CSS
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = '/js/flatpickr/flatpickr.min.css';
-            document.head.appendChild(link);
-            await new Promise(resolve => link.onload = resolve);
-
-            // Load flatpickr JS
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = '/js/flatpickr/flatpickr.min.js';
-                script.onload = resolve;
-                script.onerror = reject;
-                document.body.appendChild(script);
-            });
-        }
-
-        const {
-            inputField = '',
-            ifFormat = '',
-            showsTime = '',
-            range = ''
-        } = config;
-
-        const strftimeToDateConvertionMap = {
-            '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
-            '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'A',
-            '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
-        };
-
-        const dateFormat = ifFormat.replace(/%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g,
-            match => strftimeToDateConvertionMap[match] || match
-        );
-
-        let flatpickrOptions = {
-            allowInput: true,
-            dateFormat: dateFormat,
-            enableTime: showsTime
-        };
-
-        if (Array.isArray(range)) {
-            const [yearStart, yearEnd] = range;
-            if (yearStart) {
-                const minDate = new Date(yearStart, 0, 1);
-                flatpickrOptions.minDate = flatpickr.formatDate(minDate, dateFormat, {});
-            }
-            if (yearEnd) {
-                const maxDate = new Date(yearEnd, 11, 31);
-                flatpickrOptions.maxDate = flatpickr.formatDate(maxDate, dateFormat, {});
-            }
-        }
-
-        // Initialize flatpickr and trigger it
-        flatpickr('#' + inputField, flatpickrOptions);
-        document.getElementById(inputField).click();
-
-        // remove our event handlers
-        const input = event.target;
-        const initHandler = (event) => Calendar.initialize(event);
-        input.removeEventListener('focus', initHandler);
-        input.removeEventListener('click', initHandler);
-        input.removeEventListener('touchstart', initHandler);
-
-        // Clean up the stored config
-        delete input.dataset.calendarConfig;
-    } catch (error) {}
 }
 
 class Template

@@ -17,7 +17,7 @@
 
     <default translate="label" module="page">
         <label>All Pages</label>
-        <block type="page/html" name="root" output="toHtml" template="page/3columns.phtml">
+        <block type="page/html" name="root" output="toHtml" template="page/2columns-left.phtml">
 
             <block type="page/html_head" name="head" as="head">
                 <action method="addJs"><script>validation.js</script></action>
@@ -115,6 +115,7 @@
             <block type="core/text_list" name="before_body_end" as="before_body_end" translate="label">
                 <label>Page Bottom</label>
                 <block type="page/html_cookieNotice" name="global_cookie_notice" as ="global_cookie_notice" template="page/html/cookienotice.phtml" before="-" />
+                <block type="core/template" name="offcanvas" template="page/html/offcanvas.phtml" />
             </block>
         </block>
 
