@@ -39,13 +39,6 @@ class Mage_SalesRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condit
             ['label' => Mage::helper('salesrule')->__('Cart Attribute'), 'value' => $attributes],
         ]);
 
-        // Add Customer Segment condition if module is enabled
-        if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
-            $conditions = array_merge_recursive($conditions, [
-                ['value' => 'salesrule/rule_condition_customer_segment', 'label' => Mage::helper('salesrule')->__('Customer Segment')],
-            ]);
-        }
-
         $additional = new Varien_Object();
         Mage::dispatchEvent('salesrule_rule_condition_combine', ['additional' => $additional]);
         if ($additionalConditions = $additional->getConditions()) {

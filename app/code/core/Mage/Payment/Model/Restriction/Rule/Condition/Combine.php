@@ -79,13 +79,6 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
             ],
         ]);
 
-        // Add Customer Segment condition if module is enabled
-        if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
-            $conditions = array_merge_recursive($conditions, [
-                ['value' => 'payment/restriction_rule_condition_customer_segment', 'label' => Mage::helper('payment')->__('Customer Segment')],
-            ]);
-        }
-
         $additional = new Varien_Object();
         Mage::dispatchEvent('payment_restriction_rule_condition_combine', ['additional' => $additional]);
         if ($additionalConditions = $additional->getConditions()) {
