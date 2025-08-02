@@ -11,6 +11,7 @@
 
 class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected function _construct(): void
     {
         $this->_init('customersegmentation/segment');
@@ -59,11 +60,13 @@ class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_C
         return $this;
     }
 
+    #[\Override]
     public function toOptionArray(): array
     {
         return $this->_toOptionArray('segment_id', 'name');
     }
 
+    #[\Override]
     public function toOptionHash(): array
     {
         return $this->_toOptionHash('segment_id', 'name');

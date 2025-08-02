@@ -18,6 +18,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         $this->setValue(null);
     }
 
+    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         return [
@@ -26,6 +27,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         ];
     }
 
+    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -37,41 +39,39 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         return $this;
     }
 
+    #[\Override]
     public function getAttributeElement(): Varien_Data_Form_Element_Abstract
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();
         }
-        
+
         $element = parent::getAttributeElement();
         $element->setShowAsText(true);
         return $element;
     }
 
+    #[\Override]
     public function getInputType(): string
     {
-        switch ($this->getAttribute()) {
-            case 'subscriber_status':
-                return 'select';
-            case 'change_status_at':
-                return 'date';
-            default:
-                return 'string';
-        }
+        return match ($this->getAttribute()) {
+            'subscriber_status' => 'select',
+            'change_status_at' => 'date',
+            default => 'string',
+        };
     }
 
+    #[\Override]
     public function getValueElementType(): string
     {
-        switch ($this->getAttribute()) {
-            case 'subscriber_status':
-                return 'select';
-            case 'change_status_at':
-                return 'date';
-            default:
-                return 'text';
-        }
+        return match ($this->getAttribute()) {
+            'subscriber_status' => 'select',
+            'change_status_at' => 'date',
+            default => 'text',
+        };
     }
 
+    #[\Override]
     public function getValueSelectOptions(): array
     {
         $options = [];
@@ -89,20 +89,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         return $options;
     }
 
+    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
-
-        switch ($attribute) {
-            case 'subscriber_status':
-                return $this->_buildSubscriberStatusCondition($adapter, $operator, $value);
-            case 'change_status_at':
-                return $this->_buildStatusChangeDateCondition($adapter, $operator, $value);
-        }
-
-        return false;
+        return match ($attribute) {
+            'subscriber_status' => $this->_buildSubscriberStatusCondition($adapter, $operator, $value),
+            'change_status_at' => $this->_buildStatusChangeDateCondition($adapter, $operator, $value),
+            default => false,
+        };
     }
 
     protected function _buildSubscriberStatusCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
@@ -130,12 +127,18 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         return Mage::getSingleton('core/resource')->getTableName('newsletter/subscriber');
     }
 
+    #[\Override]
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
+        $attributeLabel = (string) ($attributeOptions[$attribute] ?? $attribute);
 
-        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        
+        return $attributeLabel . ' ' . 
+               (is_array($operatorName) ? implode(', ', $operatorName) : (string) $operatorName) . ' ' . 
+               (is_array($valueName) ? implode(', ', $valueName) : (string) $valueName);
     }
 }

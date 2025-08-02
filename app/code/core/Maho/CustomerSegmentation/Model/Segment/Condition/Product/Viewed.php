@@ -18,6 +18,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         $this->setValue(null);
     }
 
+    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         return [
@@ -26,6 +27,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         ];
     }
 
+    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -42,43 +44,38 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return $this;
     }
 
+    #[\Override]
     public function getAttributeElement(): Varien_Data_Form_Element_Abstract
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();
         }
-        
+
         $element = parent::getAttributeElement();
         return $element;
     }
 
+    #[\Override]
     public function getInputType(): string
     {
-        switch ($this->getAttribute()) {
-            case 'product_id':
-            case 'category_id':
-            case 'view_count':
-            case 'days_since_last_view':
-                return 'numeric';
-            case 'last_viewed_at':
-                return 'date';
-            default:
-                return 'string';
-        }
+        return match ($this->getAttribute()) {
+            'product_id', 'category_id', 'view_count', 'days_since_last_view' => 'numeric',
+            'last_viewed_at' => 'date',
+            default => 'string',
+        };
     }
 
+    #[\Override]
     public function getValueElementType(): string
     {
-        switch ($this->getAttribute()) {
-            case 'last_viewed_at':
-                return 'date';
-            case 'category_id':
-                return 'select'; // Could be enhanced with category chooser
-            default:
-                return 'text';
-        }
+        return match ($this->getAttribute()) {
+            'last_viewed_at' => 'date',
+            'category_id' => 'select',
+            default => 'text',
+        };
     }
 
+    #[\Override]
     public function getValueSelectOptions(): array
     {
         $options = [];
@@ -90,12 +87,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
                     ->addAttributeToFilter('level', ['gt' => 1])
                     ->addAttributeToFilter('is_active', 1)
                     ->setOrder('name', 'ASC');
-                
+
                 $options = [['value' => '', 'label' => Mage::helper('customersegmentation')->__('Please select...')]];
                 foreach ($categories as $category) {
                     $options[] = [
                         'value' => $category->getId(),
-                        'label' => $category->getName()
+                        'label' => $category->getName(),
                     ];
                 }
                 break;
@@ -103,30 +100,22 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return $options;
     }
 
+    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
-
-        switch ($attribute) {
-            case 'product_id':
-                return $this->_buildProductViewCondition($adapter, $operator, $value);
-            case 'product_name':
-                return $this->_buildProductNameViewCondition($adapter, $operator, $value);
-            case 'product_sku':
-                return $this->_buildProductSkuViewCondition($adapter, $operator, $value);
-            case 'category_id':
-                return $this->_buildCategoryViewCondition($adapter, $operator, $value);
-            case 'view_count':
-                return $this->_buildViewCountCondition($adapter, $operator, $value);
-            case 'last_viewed_at':
-                return $this->_buildLastViewedCondition($adapter, $operator, $value);
-            case 'days_since_last_view':
-                return $this->_buildDaysSinceViewCondition($adapter, $operator, $value);
-        }
-
-        return false;
+        return match ($attribute) {
+            'product_id' => $this->_buildProductViewCondition($adapter, $operator, $value),
+            'product_name' => $this->_buildProductNameViewCondition($adapter, $operator, $value),
+            'product_sku' => $this->_buildProductSkuViewCondition($adapter, $operator, $value),
+            'category_id' => $this->_buildCategoryViewCondition($adapter, $operator, $value),
+            'view_count' => $this->_buildViewCountCondition($adapter, $operator, $value),
+            'last_viewed_at' => $this->_buildLastViewedCondition($adapter, $operator, $value),
+            'days_since_last_view' => $this->_buildDaysSinceViewCondition($adapter, $operator, $value),
+            default => false,
+        };
     }
 
     protected function _buildProductViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
@@ -232,12 +221,18 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
             ->getIdByCode('catalog_product', 'name');
     }
 
+    #[\Override]
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
+        $attributeLabel = (string) ($attributeOptions[$attribute] ?? $attribute);
 
-        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        
+        return $attributeLabel . ' ' . 
+               (is_array($operatorName) ? implode(', ', $operatorName) : (string) $operatorName) . ' ' . 
+               (is_array($valueName) ? implode(', ', $valueName) : (string) $valueName);
     }
 }

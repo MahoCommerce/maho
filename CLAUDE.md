@@ -103,6 +103,9 @@ Observers are configured in module's `config.xml`.
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
 - When you write Javascript, never use prototypejs or jquery, only the most modern vanillajs
 - If you're integrating new tools/libraries, always use their latest available version
+- Don't use _ prefix for new properties/methods
+- Always use strong typing for new properties/constants/methods
+- For new PHP files, always use declare(strict_types=1)
 - Update headers of the PHP files, adding the current year for the copyright Maho line
 - For new PHP files, only include Maho copyright with the current year - no other entities:
 ```php
