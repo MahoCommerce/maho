@@ -36,6 +36,7 @@ $application->add(new \MahoCLI\Commands\CustomerDelete());
 $application->add(new \MahoCLI\Commands\CustomerList());
 
 $application->add(new \MahoCLI\Commands\DBConnect());
+$application->add(new \MahoCLI\Commands\DBQuery());
 
 $application->add(new \MahoCLI\Commands\EmailConfigShow());
 $application->add(new \MahoCLI\Commands\EmailQueueClear());
