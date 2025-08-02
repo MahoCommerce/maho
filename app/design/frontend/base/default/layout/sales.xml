@@ -64,7 +64,6 @@ Customer account home dashboard layout
                     <label>Order History Info</label>
                 </block>
             </block>
-            <block type="customer/account_dashboard" name="customer.account.link.back" template="customer/account/link/back.phtml"/>
         </reference>
     </sales_order_history>
 
