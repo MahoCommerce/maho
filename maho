@@ -69,6 +69,10 @@ $application->add(new \MahoCLI\Commands\SysEncryptionKeyRegenerate());
 $application->add(new \MahoCLI\Commands\SysLocales());
 $application->add(new \MahoCLI\Commands\SysTimezones());
 
+$application->add(new \MahoCLI\Commands\ConfigGet());
+$application->add(new \MahoCLI\Commands\ConfigSet());
+$application->add(new \MahoCLI\Commands\ConfigDelete());
+
 $application->add(new \MahoCLI\Commands\TranslationsMissing());
 $application->add(new \MahoCLI\Commands\TranslationsUnused());
 
