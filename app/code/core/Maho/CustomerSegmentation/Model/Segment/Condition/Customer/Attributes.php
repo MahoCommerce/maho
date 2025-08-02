@@ -21,7 +21,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         $this->setValue(null);
     }
 
-    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         return [
@@ -30,7 +29,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         ];
     }
 
-    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -54,51 +52,77 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         return $this;
     }
 
-    #[\Override]
     public function getInputType(): string
     {
-        return match ($this->getAttribute()) {
-            'gender' => 'select',
-            'group_id', 'store_id', 'website_id' => 'multiselect',
-            'dob', 'created_at' => 'date',
-            'days_since_registration', 'days_until_birthday', 'lifetime_sales', 'number_of_orders', 'average_order_value' => 'numeric',
-            default => 'string',
-        };
+        switch ($this->getAttribute()) {
+            case 'gender':
+                return 'select';
+            case 'group_id':
+            case 'store_id':
+            case 'website_id':
+                return 'multiselect';
+            case 'dob':
+            case 'created_at':
+                return 'date';
+            case 'days_since_registration':
+            case 'days_until_birthday':
+            case 'lifetime_sales':
+            case 'number_of_orders':
+            case 'average_order_value':
+                return 'numeric';
+        }
+        return 'string';
     }
 
-    #[\Override]
     public function getValueElementType(): string
     {
-        return match ($this->getAttribute()) {
-            'gender', 'group_id', 'store_id', 'website_id' => 'select',
-            'dob', 'created_at' => 'date',
-            default => 'text',
-        };
+        switch ($this->getAttribute()) {
+            case 'gender':
+            case 'group_id':
+            case 'store_id':
+            case 'website_id':
+                return 'select';
+            case 'dob':
+            case 'created_at':
+                return 'date';
+        }
+        return 'text';
     }
 
-    #[\Override]
     public function getValueSelectOptions(): array
     {
         if (!$this->hasData('value_select_options')) {
-            $options = match ($this->getAttribute()) {
-                'gender' => Mage::getResourceSingleton('customer/customer')
-                    ->getAttribute('gender')
-                    ->getSource()
-                    ->getAllOptions(),
-                'group_id' => Mage::getResourceModel('customer/group_collection')
-                    ->toOptionArray(),
-                'store_id' => Mage::getSingleton('adminhtml/system_store')
-                    ->getStoreValuesForForm(),
-                'website_id' => Mage::getSingleton('adminhtml/system_store')
-                    ->getWebsiteValuesForForm(),
-                default => [],
-            };
+            switch ($this->getAttribute()) {
+                case 'gender':
+                    $options = Mage::getResourceSingleton('customer/customer')
+                        ->getAttribute('gender')
+                        ->getSource()
+                        ->getAllOptions();
+                    break;
+
+                case 'group_id':
+                    $options = Mage::getResourceModel('customer/group_collection')
+                        ->toOptionArray();
+                    break;
+
+                case 'store_id':
+                    $options = Mage::getSingleton('adminhtml/system_store')
+                        ->getStoreValuesForForm();
+                    break;
+
+                case 'website_id':
+                    $options = Mage::getSingleton('adminhtml/system_store')
+                        ->getWebsiteValuesForForm();
+                    break;
+
+                default:
+                    $options = [];
+            }
             $this->setData('value_select_options', $options);
         }
         return $this->getData('value_select_options');
     }
 
-    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();

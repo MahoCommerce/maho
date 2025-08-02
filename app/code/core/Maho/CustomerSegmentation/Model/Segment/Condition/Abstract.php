@@ -18,19 +18,30 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         $operator = $this->getOperator();
         $value = $this->getValue();
 
-        return match ($operator) {
-            '==' => $this->_getEqualityOperator($value),
-            '!=' => $this->_getInequalityOperator($value),
-            '>=' => '>=',
-            '<=' => '<=',
-            '>' => '>',
-            '<' => '<',
-            '{}' => 'LIKE',
-            '!{}' => 'NOT LIKE',
-            '()' => 'IN',
-            '!()' => 'NOT IN',
-            default => $operator,
-        };
+        switch ($operator) {
+            case '==':
+                return $this->_getEqualityOperator($value);
+            case '!=':
+                return $this->_getInequalityOperator($value);
+            case '>=':
+                return '>=';
+            case '<=':
+                return '<=';
+            case '>':
+                return '>';
+            case '<':
+                return '<';
+            case '{}':
+                return 'LIKE';
+            case '!{}':
+                return 'NOT LIKE';
+            case '()':
+                return 'IN';
+            case '!()':
+                return 'NOT IN';
+            default:
+                return $operator;
+        }
     }
 
     protected function _getEqualityOperator(mixed $value): string
@@ -70,12 +81,19 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     {
         $value = $this->prepareValueForSql($value, $operator);
 
-        return match ($operator) {
-            'IN', 'NOT IN' => $adapter->quoteInto("{$field} {$operator} (?)", $value),
-            'LIKE', 'NOT LIKE' => $adapter->quoteInto("{$field} {$operator} ?", $value),
-            'IS', 'IS NOT' => "{$field} {$operator} {$value}",
-            default => $adapter->quoteInto("{$field} {$operator} ?", $value),
-        };
+        switch ($operator) {
+            case 'IN':
+            case 'NOT IN':
+                return $adapter->quoteInto("{$field} {$operator} (?)", $value);
+            case 'LIKE':
+            case 'NOT LIKE':
+                return $adapter->quoteInto("{$field} {$operator} ?", $value);
+            case 'IS':
+            case 'IS NOT':
+                return "{$field} {$operator} {$value}";
+            default:
+                return $adapter->quoteInto("{$field} {$operator} ?", $value);
+        }
     }
 
     protected function _getCustomerTable(): string
@@ -120,7 +138,6 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return $select;
     }
 
-    #[\Override]
     public function asHtml(): string
     {
         $html = $this->getTypeElement()->getHtml() .
@@ -138,9 +155,10 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return $html;
     }
 
-    #[\Override]
-    public function loadArray($arr): self
+    public function loadArray($arr, $key = 'conditions')
     {
-        return parent::loadArray($arr);
+        $this->setData($key, $arr);
+
+        return parent::loadArray($arr, $key);
     }
 }

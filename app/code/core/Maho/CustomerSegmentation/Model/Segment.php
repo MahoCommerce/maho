@@ -59,7 +59,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      */
     protected $_eventObject = 'segment';
 
-    #[\Override]
     protected function _construct(): void
     {
         parent::_construct();
@@ -67,13 +66,11 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         $this->setIdFieldName('segment_id');
     }
 
-    #[\Override]
     public function getConditionsInstance(): Maho_CustomerSegmentation_Model_Segment_Condition_Combine
     {
         return Mage::getModel('customersegmentation/segment_condition_combine');
     }
 
-    #[\Override]
     public function getActionsInstance(): Mage_Rule_Model_Action_Collection
     {
         return Mage::getModel('rule/action_collection');
@@ -118,7 +115,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             return [];
         }
 
-        /** @var Maho_CustomerSegmentation_Model_Resource_Segment $resource */
         $resource = $this->getResource();
         return $resource->getMatchingCustomerIds($this, $websiteId);
     }
@@ -141,12 +137,10 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
         try {
             $matchedCustomers = $this->getMatchingCustomerIds();
-            /** @var Maho_CustomerSegmentation_Model_Resource_Segment $resource */
-            $resource = $this->getResource();
-            $resource->updateCustomerMembership($this, $matchedCustomers);
+            $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
             $this->setMatchedCustomersCount(count($matchedCustomers))
-                ->setLastRefreshAt(Mage::getSingleton('core/date')->gmtDate())
+                ->setLastRefreshAt(now())
                 ->setRefreshStatus(self::STATUS_COMPLETED)
                 ->save();
 
@@ -182,7 +176,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         }
 
         // Check database
-        /** @var Maho_CustomerSegmentation_Model_Resource_Segment $resource */
         $resource = $this->getResource();
         $isInSegment = $resource->isCustomerInSegment($this->getId(), $customerId, $websiteId);
 
@@ -211,7 +204,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         $collection = Mage::getResourceModel('customer/customer_collection');
 
         if ($this->getId()) {
-            /** @var Maho_CustomerSegmentation_Model_Resource_Segment $resource */
             $resource = $this->getResource();
             $resource->applySegmentToCollection($this, $collection);
         }
@@ -224,7 +216,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      *
      * @throws Mage_Core_Exception
      */
-    #[\Override]
     public function validate(?Varien_Object $object = null): bool
     {
         $errors = [];
@@ -244,7 +235,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return true;
     }
 
-    #[\Override]
     protected function _beforeSave(): self
     {
         parent::_beforeSave();
@@ -268,7 +258,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this;
     }
 
-    #[\Override]
     protected function _afterSave(): self
     {
         parent::_afterSave();
@@ -276,7 +265,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this;
     }
 
-    #[\Override]
     protected function _afterDelete(): self
     {
         parent::_afterDelete();

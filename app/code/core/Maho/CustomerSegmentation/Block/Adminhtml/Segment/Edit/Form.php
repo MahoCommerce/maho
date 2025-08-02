@@ -11,7 +11,6 @@
 
 class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
-    #[\Override]
     protected function _prepareForm(): self
     {
         $form = new Varien_Data_Form([

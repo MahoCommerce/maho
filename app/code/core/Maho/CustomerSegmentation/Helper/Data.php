@@ -110,34 +110,30 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
                         'label' => $this->__('Newsletter Subscription'),
                         'value' => 'customersegmentation/segment_condition_customer_newsletter',
                     ],
-                    [
-                        'label' => $this->__('Customer Activity'),
-                        'value' => 'customersegmentation/segment_condition_customer_activity',
-                    ],
-                    [
-                        'label' => $this->__('RFM Analysis'),
-                        'value' => 'customersegmentation/segment_condition_customer_rfm',
-                    ],
-                    [
-                        'label' => $this->__('Review Activity'),
-                        'value' => 'customersegmentation/segment_condition_customer_reviews',
-                    ],
                 ],
             ],
             'order' => [
                 'label' => $this->__('Order History'),
                 'value' => [
                     [
-                        'label' => $this->__('Order Attributes'),
-                        'value' => 'customersegmentation/segment_condition_order_attributes',
+                        'label' => $this->__('Payment Method'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|payment_method',
                     ],
                     [
-                        'label' => $this->__('Coupon Usage'),
-                        'value' => 'customersegmentation/segment_condition_order_coupons',
+                        'label' => $this->__('Shipping Method'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|shipping_method',
                     ],
                     [
-                        'label' => $this->__('Return/Refund History'),
-                        'value' => 'customersegmentation/segment_condition_order_returns',
+                        'label' => $this->__('Order Status'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|status',
+                    ],
+                    [
+                        'label' => $this->__('Store'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|store_id',
+                    ],
+                    [
+                        'label' => $this->__('Grand Total'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|grand_total',
                     ],
                 ],
             ],
@@ -164,10 +160,6 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
                     [
                         'label' => $this->__('Wishlist Items'),
                         'value' => 'customersegmentation/segment_condition_product_wishlist',
-                    ],
-                    [
-                        'label' => $this->__('Product Categories Purchased'),
-                        'value' => 'customersegmentation/segment_condition_product_categories',
                     ],
                 ],
             ],

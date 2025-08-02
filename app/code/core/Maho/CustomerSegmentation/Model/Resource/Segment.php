@@ -11,7 +11,6 @@
 
 class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_Resource_Db_Abstract
 {
-    #[\Override]
     protected function _construct(): void
     {
         $this->_init('customersegmentation/segment', 'segment_id');
@@ -36,7 +35,7 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
 
         // Apply segment conditions
         $conditions = $segment->getConditions();
-        if ($conditions instanceof Maho_CustomerSegmentation_Model_Segment_Condition_Combine) {
+        if ($conditions) {
             $conditionsSql = $conditions->getConditionsSql($this->_getReadAdapter(), $websiteId);
             if ($conditionsSql) {
                 $select->where($conditionsSql);
@@ -89,8 +88,8 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
                     'segment_id'  => $segmentId,
                     'customer_id' => $customerId,
                     'website_id'  => $websiteId,
-                    'added_at'    => Mage::getSingleton('core/date')->gmtDate(),
-                    'updated_at'  => Mage::getSingleton('core/date')->gmtDate(),
+                    'added_at'    => now(),
+                    'updated_at'  => now(),
                 ];
             }
             $adapter->insertMultiple($segmentCustomerTable, $insertData);
@@ -147,7 +146,6 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return $this->_getReadAdapter()->fetchCol($select);
     }
 
-    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object): self
     {
         // Serialize conditions
@@ -158,7 +156,6 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return parent::_beforeSave($object);
     }
 
-    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object): self
     {
         // Unserialize conditions

@@ -11,7 +11,6 @@
 
 class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    #[\Override]
     protected function _prepareForm(): self
     {
         $model = Mage::registry('current_customer_segment');
@@ -40,25 +39,21 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions exte
         return parent::_prepareForm();
     }
 
-    #[\Override]
     public function getTabLabel(): string
     {
         return Mage::helper('customersegmentation')->__('Conditions');
     }
 
-    #[\Override]
     public function getTabTitle(): string
     {
         return Mage::helper('customersegmentation')->__('Conditions');
     }
 
-    #[\Override]
     public function canShowTab(): bool
     {
         return true;
     }
 
-    #[\Override]
     public function isHidden(): bool
     {
         return false;

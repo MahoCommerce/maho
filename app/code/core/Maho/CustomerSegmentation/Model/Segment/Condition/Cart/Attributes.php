@@ -18,7 +18,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         $this->setValue(null);
     }
 
-    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         return [
@@ -27,7 +26,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         ];
     }
 
-    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -47,39 +45,49 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         return $this;
     }
 
-    #[\Override]
     public function getAttributeElement(): Varien_Data_Form_Element_Abstract
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();
         }
-
+        
         $element = parent::getAttributeElement();
         return $element;
     }
 
-    #[\Override]
     public function getInputType(): string
     {
-        return match ($this->getAttribute()) {
-            'items_count', 'items_qty', 'base_subtotal', 'base_grand_total' => 'numeric',
-            'created_at', 'updated_at' => 'date',
-            'is_active', 'store_id' => 'select',
-            default => 'string',
-        };
+        switch ($this->getAttribute()) {
+            case 'items_count':
+            case 'items_qty':
+            case 'base_subtotal':
+            case 'base_grand_total':
+                return 'numeric';
+            case 'created_at':
+            case 'updated_at':
+                return 'date';
+            case 'is_active':
+            case 'store_id':
+                return 'select';
+            default:
+                return 'string';
+        }
     }
 
-    #[\Override]
     public function getValueElementType(): string
     {
-        return match ($this->getAttribute()) {
-            'created_at', 'updated_at' => 'date',
-            'is_active', 'store_id' => 'select',
-            default => 'text',
-        };
+        switch ($this->getAttribute()) {
+            case 'created_at':
+            case 'updated_at':
+                return 'date';
+            case 'is_active':
+            case 'store_id':
+                return 'select';
+            default:
+                return 'text';
+        }
     }
 
-    #[\Override]
     public function getValueSelectOptions(): array
     {
         $options = [];
@@ -101,17 +109,28 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         return $options;
     }
 
-    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
-        return match ($attribute) {
-            'items_count', 'items_qty', 'base_subtotal', 'base_grand_total', 'created_at', 'updated_at', 'is_active', 'store_id', 'coupon_code' => $this->_buildCartFieldCondition($adapter, $attribute, $operator, $value),
-            'applied_rule_ids' => $this->_buildAppliedRulesCondition($adapter, $operator, $value),
-            default => false,
-        };
+
+        switch ($attribute) {
+            case 'items_count':
+            case 'items_qty':
+            case 'base_subtotal':
+            case 'base_grand_total':
+            case 'created_at':
+            case 'updated_at':
+            case 'is_active':
+            case 'store_id':
+            case 'coupon_code':
+                return $this->_buildCartFieldCondition($adapter, $attribute, $operator, $value);
+            case 'applied_rule_ids':
+                return $this->_buildAppliedRulesCondition($adapter, $operator, $value);
+        }
+
+        return false;
     }
 
     protected function _buildCartFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
@@ -134,26 +153,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    #[\Override]
     protected function _getQuoteTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/quote');
     }
 
-    #[\Override]
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) 
-            ? (string) $attributeOptions[$attribute] 
-            : (string) $attribute;
+        $attributeLabel = isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
-        $operatorName = $this->getOperatorName();
-        $valueName = $this->getValueName();
-        
-        return $attributeLabel . ' ' . 
-               (is_array($operatorName) ? implode(', ', $operatorName) : (string) $operatorName) . ' ' . 
-               (is_array($valueName) ? implode(', ', $valueName) : (string) $valueName);
+        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
     }
 }

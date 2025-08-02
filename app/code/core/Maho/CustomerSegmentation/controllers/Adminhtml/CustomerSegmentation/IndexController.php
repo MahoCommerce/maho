@@ -255,7 +255,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             ->setPrefix('conditions');
 
         if (!empty($typeArr[1])) {
-            $model->setData('attribute', $typeArr[1]);
+            $model->setAttribute($typeArr[1]);
         }
 
         if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
@@ -264,7 +264,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         } else {
             $html = '';
         }
-
+        
         $this->getResponse()->setBody($html);
     }
 
@@ -296,16 +296,21 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->getResponse()->setBody($html);
     }
 
-    #[\Override]
     protected function _isAllowed(): bool
     {
         $action = strtolower($this->getRequest()->getActionName());
-        return match ($action) {
-            'save' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
-            'delete', 'massdelete' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete'),
-            'massstatus' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
-            'refresh' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/refresh'),
-            default => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/manage'),
-        };
+        switch ($action) {
+            case 'save':
+                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save');
+            case 'delete':
+            case 'massdelete':
+                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete');
+            case 'massstatus':
+                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save');
+            case 'refresh':
+                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/refresh');
+            default:
+                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/manage');
+        }
     }
 }

@@ -19,7 +19,6 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tabs extends Mage_A
         $this->setTitle(Mage::helper('customersegmentation')->__('Segment Information'));
     }
 
-    #[\Override]
     protected function _beforeToHtml(): self
     {
         $this->addTab('general', [

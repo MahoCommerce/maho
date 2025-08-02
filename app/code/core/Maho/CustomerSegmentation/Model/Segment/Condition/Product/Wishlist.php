@@ -18,7 +18,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         $this->setValue(null);
     }
 
-    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         return [
@@ -27,7 +26,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         ];
     }
 
-    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -45,39 +43,46 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return $this;
     }
 
-    #[\Override]
     public function getAttributeElement(): Varien_Data_Form_Element_Abstract
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();
         }
-
+        
         $element = parent::getAttributeElement();
         return $element;
     }
 
-    #[\Override]
     public function getInputType(): string
     {
-        return match ($this->getAttribute()) {
-            'product_id', 'category_id', 'wishlist_items_count', 'days_since_added' => 'numeric',
-            'added_at' => 'date',
-            'wishlist_shared' => 'select',
-            default => 'string',
-        };
+        switch ($this->getAttribute()) {
+            case 'product_id':
+            case 'category_id':
+            case 'wishlist_items_count':
+            case 'days_since_added':
+                return 'numeric';
+            case 'added_at':
+                return 'date';
+            case 'wishlist_shared':
+                return 'select';
+            default:
+                return 'string';
+        }
     }
 
-    #[\Override]
     public function getValueElementType(): string
     {
-        return match ($this->getAttribute()) {
-            'added_at' => 'date',
-            'wishlist_shared', 'category_id' => 'select',
-            default => 'text',
-        };
+        switch ($this->getAttribute()) {
+            case 'added_at':
+                return 'date';
+            case 'wishlist_shared':
+            case 'category_id':
+                return 'select';
+            default:
+                return 'text';
+        }
     }
 
-    #[\Override]
     public function getValueSelectOptions(): array
     {
         $options = [];
@@ -96,12 +101,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
                     ->addAttributeToFilter('level', ['gt' => 1])
                     ->addAttributeToFilter('is_active', 1)
                     ->setOrder('name', 'ASC');
-
+                
                 $options = [['value' => '', 'label' => Mage::helper('customersegmentation')->__('Please select...')]];
                 foreach ($categories as $category) {
                     $options[] = [
                         'value' => $category->getId(),
-                        'label' => $category->getName(),
+                        'label' => $category->getName()
                     ];
                 }
                 break;
@@ -109,23 +114,32 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return $options;
     }
 
-    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
-        return match ($attribute) {
-            'product_id' => $this->_buildProductWishlistCondition($adapter, $operator, $value),
-            'product_name' => $this->_buildProductNameWishlistCondition($adapter, $operator, $value),
-            'product_sku' => $this->_buildProductSkuWishlistCondition($adapter, $operator, $value),
-            'category_id' => $this->_buildCategoryWishlistCondition($adapter, $operator, $value),
-            'wishlist_items_count' => $this->_buildWishlistItemsCountCondition($adapter, $operator, $value),
-            'added_at' => $this->_buildAddedAtCondition($adapter, $operator, $value),
-            'days_since_added' => $this->_buildDaysSinceAddedCondition($adapter, $operator, $value),
-            'wishlist_shared' => $this->_buildWishlistSharedCondition($adapter, $operator, $value),
-            default => false,
-        };
+
+        switch ($attribute) {
+            case 'product_id':
+                return $this->_buildProductWishlistCondition($adapter, $operator, $value);
+            case 'product_name':
+                return $this->_buildProductNameWishlistCondition($adapter, $operator, $value);
+            case 'product_sku':
+                return $this->_buildProductSkuWishlistCondition($adapter, $operator, $value);
+            case 'category_id':
+                return $this->_buildCategoryWishlistCondition($adapter, $operator, $value);
+            case 'wishlist_items_count':
+                return $this->_buildWishlistItemsCountCondition($adapter, $operator, $value);
+            case 'added_at':
+                return $this->_buildAddedAtCondition($adapter, $operator, $value);
+            case 'days_since_added':
+                return $this->_buildDaysSinceAddedCondition($adapter, $operator, $value);
+            case 'wishlist_shared':
+                return $this->_buildWishlistSharedCondition($adapter, $operator, $value);
+        }
+
+        return false;
     }
 
     protected function _buildProductWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
@@ -252,18 +266,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
             ->getIdByCode('catalog_product', 'name');
     }
 
-    #[\Override]
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = (string) ($attributeOptions[$attribute] ?? $attribute);
+        $attributeLabel = isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
-        $operatorName = $this->getOperatorName();
-        $valueName = $this->getValueName();
-        
-        return $attributeLabel . ' ' . 
-               (is_array($operatorName) ? implode(', ', $operatorName) : (string) $operatorName) . ' ' . 
-               (is_array($valueName) ? implode(', ', $valueName) : (string) $valueName);
+        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
     }
 }
