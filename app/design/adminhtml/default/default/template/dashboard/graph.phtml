@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -15,67 +15,17 @@
 ?>
 
 <?php $chartRandomId = rand(100,999) ?>
-<div style="margin:20px;">
-    <p class="switcher a-right" style="padding:5px 10px;"><?= $this->__('Select Range') ?>:
-    <select name="period" id="order_<?= $this->getHtmlId() ?>_period" onchange="changeDiagramsPeriod(this);">
-        <?php foreach ($this->helper('adminhtml/dashboard_data')->getDatePeriods() as $_value=>$_label): ?>
-            <?php if(in_array($_value, ['custom'])) continue; ?>
-            <option value="<?= $_value ?>" <?php if($this->getRequest()->getParam('period')==$_value): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
-        <?php endforeach ?>
-    </select></p><br/>
-    <?php
-    $_containerStyle = "width:{$this->getWidth()}px;height:{$this->getHeight()}px; margin:0 auto;";
-    ?>
-    <?php if($this->getCount()): ?>
-        <?php $this->processData() ?>
-        <div class="a-center" style="<?= $_containerStyle?>"><canvas id="chart<?= $chartRandomId ?>"></canvas></div>
 
-        <script type="text/javascript">
-            window.chartsLoaded = window.chartsLoaded || false;
-            function loadCharts(callback) {
-                if (window.chartsLoaded && window.Chart) {
-                    callback();
-                    return;
-                }
-
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
-                script.async = true;
-                script.onload = () => {
-                    window.chartsLoaded = true;
-                    callback();
-                };
-                document.head.appendChild(script);
-            }
-
-            function initializeChart() {
-                <?php $allSeries = $this->getAllSeries() ?>
-                const config = {
-                    type: 'line',
-                    data: {
-                        labels: <?= json_encode($this->getAxisLabels('x')) ?>,
-                        datasets: [{
-                            data: <?= json_encode($allSeries[array_key_first($allSeries)]) ?>,
-                            borderColor: '#adb41a',
-                            tension: 0.2
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                };
-
-                if (window.chart<?= $chartRandomId ?> && window.chart<?= $chartRandomId ?>.destroy) window.chart<?= $chartRandomId ?>.destroy();
-                window.chart<?= $chartRandomId ?> = new Chart(document.getElementById('chart<?= $chartRandomId ?>'), config);
-            }
-
-            loadCharts(initializeChart);
-        </script>
-    <?php else: ?>
-    <p class="a-center" style="<?= $_containerStyle?>"><?= $this->__('No Data Found') ?></p>
-    <?php endif ?>
-</div>
+<?php if ($this->getCount()): ?>
+    <?php $this->processData() ?>
+    <canvas id="chart<?= $chartRandomId ?>"></canvas>
+    <script>
+        dashboard.drawChart(
+            <?= json_encode("chart{$chartRandomId}") ?>,
+            <?= json_encode($this->getAllSeries()) ?>,
+            <?= json_encode($this->getAxisLabels('x')) ?>,
+        );
+    </script>
+<?php else: ?>
+    <?= $this->__('No Data Found') ?>
+<?php endif ?>

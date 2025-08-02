@@ -16,11 +16,7 @@ $numColumns = count($this->getColumns());
     <?php if($this->canDisplayContainer()): ?>
         <?php if($this->getGridHeader()): ?>
         <div class="content-header">
-            <table cellspacing="0">
-                <tr>
-                    <td style="width:50%;"><h2><?= $this->getGridHeader() ?></h2></td>
-                </tr>
-            </table>
+            <h2><?= $this->getGridHeader() ?></h2>
         </div>
         <?php endif ?>
         <div id="<?= $this->getId() ?>">
