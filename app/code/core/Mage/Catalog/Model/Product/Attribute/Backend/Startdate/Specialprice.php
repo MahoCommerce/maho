@@ -6,16 +6,10 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- *
- * Speical Start Date attribute backend
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extends Mage_Catalog_Model_Product_Attribute_Backend_Startdate
 {
     /**
@@ -33,7 +27,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
             return false;
         }
         if ($startDate == '' && $object->getSpecialPrice()) {
-            $startDate = Mage::app()->getLocale()->date();
+            $startDate = Mage::app()->getLocale()->dateImmutable();
         }
 
         return $startDate;

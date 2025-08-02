@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,13 +51,16 @@ class Mage_Payment_Block_Info_Cc extends Mage_Payment_Block_Info
     /**
      * Retrieve CC expiration date
      *
-     * @return Zend_Date
+     * @return DateTime
      */
     public function getCcExpDate()
     {
-        $date = Mage::app()->getLocale()->date(0);
-        $date->setYear($this->getInfo()->getCcExpYear());
-        $date->setMonth($this->getInfo()->getCcExpMonth());
+        $date = Mage::app()->getLocale()->dateMutable(0);
+        $date->setDate(
+            (int) $this->getInfo()->getCcExpYear(),
+            (int) $this->getInfo()->getCcExpMonth(),
+            1,
+        );
         return $date;
     }
 

@@ -6,39 +6,27 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     protected $_defaultWidth = 160;
-    /**
-     * Date format string
-     */
-    protected static $_format = null;
+    protected static ?IntlDateFormatter $_formatter = null;
 
-    /**
-     * Retrieve date format
-     *
-     * @return string
-     */
-    protected function _getFormat()
+    protected function _getFormatter(): IntlDateFormatter
     {
-        $format = $this->getColumn()->getFormat();
-        if (!$format) {
-            if (is_null(self::$_format)) {
-                try {
-                    self::$_format = Mage::app()->getLocale()->getDateFormat(
-                        Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
-                    );
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                }
-            }
-            $format = self::$_format;
+        if (is_null(self::$_formatter)) {
+            $timezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+            self::$_formatter = new IntlDateFormatter(
+                Mage::app()->getLocale()->getLocaleCode(),
+                IntlDateFormatter::MEDIUM,
+                IntlDateFormatter::NONE,
+                $timezone,
+            );
         }
-        return $format;
+        return self::$_formatter;
     }
 
     /**
@@ -50,24 +38,31 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
     public function render(Varien_Object $row)
     {
         if ($data = $row->getData($this->getColumn()->getIndex())) {
-            $format = $this->_getFormat();
             try {
                 if ($this->getColumn()->getGmtoffset()) {
-                    $data = Mage::app()->getLocale()
-                        ->date($data, Varien_Date::DATETIME_INTERNAL_FORMAT)->toString($format);
+                    $dateObj = Mage::app()->getLocale()
+                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
                 } else {
-                    $data = Mage::getSingleton('core/locale')
-                        ->date($data, Zend_Date::ISO_8601, null, false)->toString($format);
+                    $dateObj = Mage::app()->getLocale()
+                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false);
                 }
+
+                return $this->_getFormatter()->format($dateObj);
             } catch (Exception $e) {
-                if ($this->getColumn()->getTimezone()) {
-                    $data = Mage::app()->getLocale()
-                        ->date($data, Varien_Date::DATETIME_INTERNAL_FORMAT)->toString($format);
-                } else {
-                    $data = Mage::getSingleton('core/locale')->date($data, null, null, false)->toString($format);
+                // Fallback to simple format
+                try {
+                    if ($this->getColumn()->getTimezone()) {
+                        $dateObj = Mage::app()->getLocale()
+                            ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    } else {
+                        $dateObj = Mage::app()->getLocale()
+                            ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false);
+                    }
+                    return $dateObj->format('M j, Y');
+                } catch (Exception $e2) {
+                    return $data;
                 }
             }
-            return $data;
         }
         return $this->getColumn()->getDefault();
     }

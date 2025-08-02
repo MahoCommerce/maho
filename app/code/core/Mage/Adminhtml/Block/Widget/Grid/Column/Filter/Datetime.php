@@ -12,9 +12,6 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date
 {
-    //full day is 86400, we need 23 hours:59 minutes:59 seconds = 86399
-    public const END_OF_DAY_IN_SECONDS = 86399;
-
     #[\Override]
     public function getValue($index = null)
     {
@@ -43,7 +40,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                 $dateTime->setTimezone(new DateTimeZone('UTC'));
 
                 // Update the value with the processed date string
-                $value['to'] = $dateTime->format('Y-m-d H:i:s');
+                $value['to'] = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             } catch (Exception $e) {
             }
         }
@@ -63,8 +60,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
         if ($this->getColumn()->getFilterTime()) {
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                 // Validate that the datetime is actually valid (not just format)
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($date, 0, 16));
-                if ($dateTime && $dateTime->format('Y-m-d\TH:i') === substr($date, 0, 16)) {
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
+                if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT) === substr($date, 0, 16)) {
                     return Mage::app()->getLocale()->utcDate(null, $date, true, 'html5');
                 }
             }

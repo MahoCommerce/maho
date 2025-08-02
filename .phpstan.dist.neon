@@ -27,8 +27,5 @@ parameters:
         - maho
         - public
 
-    typeAliases:
-        Cm_RedisSession_Model_Session: 'Mage_Core_Model_Resource_Session'
-
     ignoreErrors:
         - identifier: missingType.iterableValue

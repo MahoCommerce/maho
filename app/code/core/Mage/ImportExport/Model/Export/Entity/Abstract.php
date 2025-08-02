@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -276,11 +276,11 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
                         $to   = array_shift($exportFilter[$attrCode]);
 
                         if (is_scalar($from) && !empty($from)) {
-                            $date = Mage::app()->getLocale()->date($from, null, null, false)->toString('MM/dd/YYYY');
+                            $date = Mage::app()->getLocale()->dateImmutable($from, null, null, false)->format('MM/dd/YYYY');
                             $collection->addAttributeToFilter($attrCode, ['from' => $date, 'date' => true]);
                         }
                         if (is_scalar($to) && !empty($to)) {
-                            $date = Mage::app()->getLocale()->date($to, null, null, false)->toString('MM/dd/YYYY');
+                            $date = Mage::app()->getLocale()->dateImmutable($to, null, null, false)->format('MM/dd/YYYY');
                             $collection->addAttributeToFilter($attrCode, ['to' => $date, 'date' => true]);
                         }
                     }

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -88,13 +88,26 @@ abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_
     protected function _showLastExecutionTime($flagCode, $refreshCode)
     {
         $flag = Mage::getModel('reports/flag')->setReportFlagCode($flagCode)->loadSelf();
-        $updatedAt = ($flag->hasData())
-            ? Mage::app()->getLocale()->storeDate(
-                0,
-                new Zend_Date($flag->getLastUpdate(), Varien_Date::DATETIME_INTERNAL_FORMAT),
-                true,
-            )
-            : 'undefined';
+        $updatedAt = 'undefined';
+
+        if ($flag->hasData()) {
+            $lastUpdate = $flag->getLastUpdate();
+            if (!empty($lastUpdate)) {
+                try {
+                    // Try specific format first
+                    $dateObj = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $lastUpdate);
+                    if ($dateObj === false) {
+                        // Try generic parsing
+                        $dateObj = new DateTime($lastUpdate);
+                    }
+
+                    $updatedAt = Mage::app()->getLocale()->storeDate(0, $dateObj, true);
+                } catch (Exception $e) {
+                    // Graceful degradation - use raw value
+                    $updatedAt = $lastUpdate;
+                }
+            }
+        }
 
         $refreshStatsLink = $this->getUrl('*/report_statistics');
         $directRefreshLink = $this->getUrl('*/report_statistics/refreshRecent', ['code' => $refreshCode]);

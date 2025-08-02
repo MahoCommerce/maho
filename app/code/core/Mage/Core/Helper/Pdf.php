@@ -28,7 +28,7 @@ class Mage_Core_Helper_Pdf extends Mage_Core_Helper_Abstract
             $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
         }
 
-        return Mage::app()->getLocale()->date($date, null, $store->getLocaleCode())->toString($format);
+        return Mage::app()->getLocale()->date($date, null, $store->getLocaleCode())->format($format);
     }
 
     public function getLogoUrl(?Mage_Core_Model_Store $store = null): ?string

@@ -37,7 +37,7 @@ class Mage_Sales_Model_Observer
             /** @var Mage_Sales_Model_Resource_Quote_Collection $quotes */
             $quotes = Mage::getResourceModel('sales/quote_collection');
             $quotes->addFieldToFilter('store_id', $storeId);
-            $quotes->addFieldToFilter('updated_at', ['to' => date('Y-m-d', time() - $lifetime)]);
+            $quotes->addFieldToFilter('updated_at', ['to' => date(Mage_Core_Model_Locale::DATE_FORMAT, time() - $lifetime)]);
             if ($day == 0) {
                 $quotes->addFieldToFilter('is_active', 0);
             }
@@ -161,8 +161,8 @@ class Mage_Sales_Model_Observer
     public function aggregateSalesReportOrderData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
-        $date = $currentDate->subHour(25);
+        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_order')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;
@@ -172,13 +172,12 @@ class Mage_Sales_Model_Observer
      * Refresh sales shipment report statistics for last day
      *
      * @return $this
-     * @throws Zend_Date_Exception
      */
     public function aggregateSalesReportShipmentData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
-        $date = $currentDate->subHour(25);
+        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_shipping')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;
@@ -188,13 +187,12 @@ class Mage_Sales_Model_Observer
      * Refresh sales invoiced report statistics for last day
      *
      * @return $this
-     * @throws Zend_Date_Exception
      */
     public function aggregateSalesReportInvoicedData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
-        $date = $currentDate->subHour(25);
+        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_invoiced')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;
@@ -204,13 +202,12 @@ class Mage_Sales_Model_Observer
      * Refresh sales refunded report statistics for last day
      *
      * @return $this
-     * @throws Zend_Date_Exception
      */
     public function aggregateSalesReportRefundedData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
-        $date = $currentDate->subHour(25);
+        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_refunded')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;
@@ -220,13 +217,12 @@ class Mage_Sales_Model_Observer
      * Refresh bestsellers report statistics for last day
      *
      * @return $this
-     * @throws Zend_Date_Exception
      */
     public function aggregateSalesReportBestsellersData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
-        $date = $currentDate->subHour(25);
+        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_bestsellers')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;

@@ -47,7 +47,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         $adapter = $this->_getWriteAdapter();
 
         $data = [
-            'logdate' => Varien_Date::now(),
+            'logdate' => Mage_Core_Model_Locale::now(),
             'lognum'  => $user->getLognum() + 1,
         ];
 

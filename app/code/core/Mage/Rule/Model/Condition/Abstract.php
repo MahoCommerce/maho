@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -363,26 +363,26 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     public function getValue()
     {
         if (!$this->getIsValueParsed()) {
-            // date format intentionally hard-coded
+            // Use PHP format for consistency with HTML5 inputs
             $format = null;
             switch ($this->getInputType()) {
                 case 'date':
-                    $format = Varien_Date::DATE_INTERNAL_FORMAT;
+                    $format = Mage_Core_Model_Locale::DATE_FORMAT;
                     break;
 
                 case 'datetime':
-                    $format = Varien_Date::DATETIME_INTERNAL_FORMAT;
+                    $format = Mage_Core_Model_Locale::DATETIME_FORMAT;
                     break;
             }
 
             if ($format !== null) {
                 $this->setValue(
-                    Mage::app()->getLocale()->date(
+                    Mage::app()->getLocale()->dateMutable(
                         $this->getData('value'),
                         $format,
                         null,
                         false,
-                    )->toString($format),
+                    )->format($format),
                 );
                 $this->setIsValueParsed(true);
             }
@@ -604,13 +604,13 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
 
         switch ($this->getInputType()) {
             case 'date':
-                $elementParams['input_format'] = Varien_Date::DATE_INTERNAL_FORMAT;
-                $elementParams['format']       = Varien_Date::DATE_INTERNAL_FORMAT;
+                $elementParams['input_format'] = Mage_Core_Model_Locale::DATE_FORMAT;
+                $elementParams['format']       = Mage_Core_Model_Locale::DATE_FORMAT;
                 break;
 
             case 'datetime':
-                $elementParams['input_format'] = Varien_Date::DATETIME_INTERNAL_FORMAT;
-                $elementParams['format']       = Varien_Date::DATETIME_INTERNAL_FORMAT;
+                $elementParams['input_format'] = Mage_Core_Model_Locale::DATETIME_FORMAT;
+                $elementParams['format']       = Mage_Core_Model_Locale::DATETIME_FORMAT;
                 $elementParams['time']         = true;
                 break;
         }

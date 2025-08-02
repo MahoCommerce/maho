@@ -20,6 +20,13 @@ class Mage_Core_Model_Locale
     public const DEFAULT_CURRENCY  = 'USD';
 
     /**
+     * Date format constants
+     */
+    public const DATETIME_FORMAT = 'Y-m-d H:i:s';
+    public const DATE_FORMAT = 'Y-m-d';
+    public const HTML5_DATETIME_FORMAT = 'Y-m-d\TH:i';
+
+    /**
      * XML path constants
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
@@ -426,28 +433,38 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Retrieve ISO date format ensuring 4-digit year format
+     * Retrieve date format pattern for display purposes (ICU pattern)
+     * Use this for frontend forms, user interfaces, display formatting
      */
     public function getDateFormat(?string $type = null): string
     {
-        $formatter = $this->createDateFormatter($type);
-        $pattern = $formatter->getPattern();
+        $dateStyle = match ($type) {
+            self::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            self::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            self::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            self::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
 
-        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
-        return $this->ensureFourDigitYear($pattern);
+        $formatter = new IntlDateFormatter(
+            $this->getLocaleCode(),
+            $dateStyle,
+            IntlDateFormatter::NONE,
+        );
+
+        return $formatter->getPattern();
     }
+
 
     /**
      * Retrieve short date format with 4-digit year
      */
     public function getDateFormatWithLongYear(): string
     {
-        $formatter = $this->createDateFormatter(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-        $pattern = $formatter->getPattern();
-
-        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
-        return $this->ensureFourDigitYear($pattern);
+        // Always returns 4-digit year format (same as short format)
+        return $this->getDateFormat(self::FORMAT_TYPE_SHORT);
     }
+
 
     /**
      * Retrieve date format by period type
@@ -455,55 +472,40 @@ class Mage_Core_Model_Locale
      */
     public function getDateFormatByPeriodType(?string $period = null): string
     {
-        $generator = new IntlDatePatternGenerator($this->getLocaleCode());
         return match ($period) {
-            'month' => $generator->getBestPattern('yM'),
-            'year' => $generator->getBestPattern('y'),
-            default => $this->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM),
+            'month' => 'Y-m',     // Simple year-month format
+            'year' => 'Y',        // Just year
+            default => $this->getDateFormat(self::FORMAT_TYPE_MEDIUM),
         };
     }
 
-    /**
-     * Create IntlDateFormatter for the current locale
-     */
-    private function createDateFormatter(?string $type = null): IntlDateFormatter
-    {
-        $dateStyle = match ($type) {
-            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
-            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
-            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
-            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
-            default => IntlDateFormatter::MEDIUM,
-        };
-
-        return new IntlDateFormatter(
-            $this->getLocaleCode(),
-            $dateStyle,
-            IntlDateFormatter::NONE, // No time formatting
-            null, // Default timezone
-            IntlDateFormatter::GREGORIAN,
-        );
-    }
 
     /**
-     * Convert 2-digit year patterns (yy) to 4-digit year patterns (yyyy)
-     */
-    private function ensureFourDigitYear(string $pattern): string
-    {
-        // This regex is more precise for ICU date patterns
-        return preg_replace('/(?<!y)yy(?!y)/', 'yyyy', $pattern);
-    }
-
-    /**
-     * Retrieve ISO time format
+     * Retrieve time format pattern for display purposes (ICU pattern)
+     * Use this for frontend forms, user interfaces, display formatting
      *
      * @param   string $type
      * @return  string
      */
     public function getTimeFormat($type = null)
     {
-        return $this->getTranslation($type, 'time');
+        $timeStyle = match ($type) {
+            self::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            self::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            self::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            self::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
+
+        $formatter = new IntlDateFormatter(
+            $this->getLocaleCode(),
+            IntlDateFormatter::NONE,
+            $timeStyle,
+        );
+
+        return $formatter->getPattern();
     }
+
 
     /**
      * Retrieve ISO datetime format
@@ -516,36 +518,15 @@ class Mage_Core_Model_Locale
         return $this->getDateFormat($type) . ' ' . $this->getTimeFormat($type);
     }
 
-    /**
-     * Retrieve date format by strftime function
-     *
-     * @param   string $type
-     * @return  string
-     */
-    public function getDateStrFormat($type)
-    {
-        return Varien_Date::convertZendToStrftime($this->getDateFormat($type), true, false);
-    }
 
     /**
-     * Retrieve time format by strftime function
-     *
-     * @param   string $type
-     * @return  string
-     */
-    public function getTimeStrFormat($type)
-    {
-        return Varien_Date::convertZendToStrftime($this->getTimeFormat($type), false, true);
-    }
-
-    /**
-     * Create Zend_Date object for current locale
+     * Use dateMutable() or dateImmutable() instead of this one.
      *
      * @param mixed              $date
      * @param string             $part
      * @param string|Zend_Locale $locale
      * @param bool               $useTimezone
-     * @return Zend_Date
+     * @return DateTime
      */
     public function date($date = null, $part = null, $locale = null, $useTimezone = true)
     {
@@ -554,13 +535,21 @@ class Mage_Core_Model_Locale
         }
 
         if (!is_int($date) && empty($date)) {
-            // $date may be false, but Zend_Date uses strict compare
+            // $date may be false, but DateTime uses strict compare
             $date = null;
         }
-        $date = new Zend_Date($date, $part, $locale);
+        if ($part === null && is_numeric($date)) {
+            $date = new DateTime('@' . $date);
+            // DateTime created from timestamp always has +00:00 timezone, convert to UTC
+            $date->setTimezone(new DateTimeZone('UTC'));
+        } elseif ($part !== null) {
+            $date = DateTime::createFromFormat($part, $date) ?: new DateTime($date ?: 'now');
+        } else {
+            $date = new DateTime($date ?: 'now');
+        }
         if ($useTimezone) {
             if ($timezone = Mage::app()->getStore()->getConfig(self::XML_PATH_DEFAULT_TIMEZONE)) {
-                $date->setTimezone($timezone);
+                $date->setTimezone(new DateTimeZone($timezone));
             }
         }
 
@@ -568,18 +557,44 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Create Zend_Date object with date converted to store timezone and store Locale
+     * Create mutable DateTime object for current locale
+     * Alias for date() method with explicit name
+     */
+    public function dateMutable(
+        string|int|DateTime|null $date = null,
+        ?string $part = null,
+        string|Zend_Locale|null $locale = null,
+        bool $useTimezone = true,
+    ): DateTime {
+        return $this->date($date, $part, $locale, $useTimezone);
+    }
+
+    /**
+     * Create immutable DateTime object for current locale
+     */
+    public function dateImmutable(
+        string|int|DateTime|null $date = null,
+        ?string $part = null,
+        string|Zend_Locale|null $locale = null,
+        bool $useTimezone = true,
+    ): DateTimeImmutable {
+        $dateTime = $this->date($date, $part, $locale, $useTimezone);
+        return DateTimeImmutable::createFromMutable($dateTime);
+    }
+
+    /**
+     * Create DateTime object with date converted to store timezone and store Locale
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store Information about store
-     * @param   string|int|Zend_Date|array|null $date date in UTC
+     * @param   string|int|DateTime|array|null $date date in UTC
      * @param   bool $includeTime flag for including time to date
      * @param   string|null $format Format for date parsing/output:
-     *                              - null: Use locale default format (returns Zend_Date)
+     *                              - null: Use locale default format (returns DateTime)
      *                              - 'html5': Return HTML5 native input format (returns string):
      *                                * type="date": YYYY-MM-DD (e.g., "2024-12-25")
      *                                * type="datetime-local": YYYY-MM-DDTHH:mm (e.g., "2024-12-25T14:30")
-     *                              - Zend format strings: 'yyyy-MM-dd HH:mm:ss', etc. (returns Zend_Date)
-     * @return  Zend_Date|string|null
+     *                              - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
+     * @return  DateTime|string|null
      */
     public function storeDate($store = null, $date = null, $includeTime = false, $format = null)
     {
@@ -591,52 +606,59 @@ class Mage_Core_Model_Locale
 
             try {
                 $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-                $dateObj = new Zend_Date($date, null, $this->getLocale());
-                $dateObj->setTimezone($timezone);
+                $dateObj = new DateTime($date);
+                $dateObj->setTimezone(new DateTimeZone($timezone));
                 if (!$includeTime) {
-                    $dateObj->setHour(0)
-                        ->setMinute(0)
-                        ->setSecond(0);
+                    $dateObj->setTime(0, 0, 0);
                 }
 
                 if ($includeTime) {
-                    return $dateObj->toString('yyyy-MM-dd\'T\'HH:mm');
+                    return $dateObj->format(self::HTML5_DATETIME_FORMAT);
                 } else {
-                    return $dateObj->toString('yyyy-MM-dd');
+                    return $dateObj->format(self::DATE_FORMAT);
                 }
             } catch (Exception $e) {
                 return null;
             }
         }
 
-        // Legacy Zend_Date handling
+        // Native DateTime handling
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-        $date = new Zend_Date($date, $format, $this->getLocale());
-        $date->setTimezone($timezone);
+
+        if ($date instanceof DateTime) {
+            // Date is already a DateTime object, use as-is
+        } elseif ($format && !is_numeric($date)) {
+            $date = DateTime::createFromFormat($format, $date) ?: new DateTime($date ?: 'now');
+        } elseif (is_numeric($date)) {
+            $date = new DateTime('@' . $date);
+            // DateTime created from timestamp always has +00:00 timezone, convert to UTC
+            $date->setTimezone(new DateTimeZone('UTC'));
+        } else {
+            $date = new DateTime($date ?: 'now');
+        }
+
+        $date->setTimezone(new DateTimeZone($timezone));
         if (!$includeTime) {
-            $date->setHour(0)
-                ->setMinute(0)
-                ->setSecond(0);
+            $date->setTime(0, 0, 0);
         }
         return $date;
     }
 
     /**
-     * Create Zend_Date object with date converted from store's timezone
+     * Create DateTime object with date converted from store's timezone
      * to UTC time zone. Date can be passed in format of store's locale
      * or in format which was passed as parameter.
      *
      * @param mixed $store Information about store
-     * @param string|int|Zend_Date|array|null $date date in store's timezone
+     * @param string|int|DateTime|array|null $date date in store's timezone
      * @param bool $includeTime flag for including time to date
      * @param null|string $format Format for date parsing/output:
-     *                             - null: Use locale default format (returns Zend_Date)
+     *                             - null: Use locale default format (returns DateTime)
      *                             - 'html5': Parse HTML5 native input format (returns string):
      *                               * Accepts: YYYY-MM-DD (from type="date") or YYYY-MM-DDTHH:mm (from type="datetime-local")
      *                               * Returns: YYYY-MM-DD HH:mm:ss (MySQL datetime format)
-     *                             - Zend format strings: 'yyyy-MM-dd HH:mm:ss', etc. (returns Zend_Date)
-     *                             - Varien_Date::DATETIME_INTERNAL_FORMAT constant (returns Zend_Date)
-     * @return Zend_Date|string|null
+     *                             - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
+     * @return DateTime|string|null
      */
     public function utcDate($store, $date, $includeTime = false, $format = null)
     {
@@ -644,14 +666,14 @@ class Mage_Core_Model_Locale
         if ($format === 'html5' && is_string($date)) {
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                 // datetime-local format - validate the datetime
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($date, 0, 16));
-                if ($dateTime === false || $dateTime->format('Y-m-d\TH:i') !== substr($date, 0, 16)) {
+                $dateTime = DateTime::createFromFormat(self::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
+                if ($dateTime === false || $dateTime->format(self::HTML5_DATETIME_FORMAT) !== substr($date, 0, 16)) {
                     return null;
                 }
             } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 // date format - validate the date
-                $dateTime = DateTime::createFromFormat('Y-m-d', $date);
-                if ($dateTime === false || $dateTime->format('Y-m-d') !== $date) {
+                $dateTime = DateTime::createFromFormat(self::DATE_FORMAT, $date);
+                if ($dateTime === false || $dateTime->format(self::DATE_FORMAT) !== $date) {
                     return null;
                 }
                 if (!$includeTime) {
@@ -668,14 +690,33 @@ class Mage_Core_Model_Locale
             // Convert to UTC
             $dateTime->setTimezone(new DateTimeZone('UTC'));
 
-            return $dateTime->format('Y-m-d H:i:s');
+            return $dateTime->format(self::DATETIME_FORMAT);
         }
 
-        // Legacy Zend_Date handling
-        $dateObj = $this->storeDate($store, $date, $includeTime);
-        $dateObj->set($date, $format);
-        $dateObj->setTimezone(self::DEFAULT_TIMEZONE);
+        // Native DateTime handling
+        $dateObj = $this->storeDate($store, $date, $includeTime, $format);
+        $dateObj->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
         return $dateObj;
+    }
+
+    /**
+     * Get current date and time in standard format
+     *
+     * @return string Current datetime as 'Y-m-d H:i:s'
+     */
+    public static function now(): string
+    {
+        return date(self::DATETIME_FORMAT);
+    }
+
+    /**
+     * Get current date in standard format (without time)
+     *
+     * @return string Current date as 'Y-m-d'
+     */
+    public static function today(): string
+    {
+        return date(self::DATE_FORMAT);
     }
 
     /**
@@ -691,7 +732,7 @@ class Mage_Core_Model_Locale
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
         $currentTimezone = @date_default_timezone_get();
         @date_default_timezone_set($timezone);
-        $date = date(Varien_Date::DATETIME_PHP_FORMAT);
+        $date = date(Mage_Core_Model_Locale::DATETIME_FORMAT);
         @date_default_timezone_set($currentTimezone);
         return strtotime($date);
     }
@@ -1032,7 +1073,8 @@ class Mage_Core_Model_Locale
         $toTimeStamp    = strtotime((string) $dateTo);
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59
-            $toTimeStamp += 86400;
+            $endDate = new DateTime((string) $dateTo . ' 23:59:59');
+            $toTimeStamp = $endDate->getTimestamp();
         }
 
         $result = false;
@@ -1044,4 +1086,35 @@ class Mage_Core_Model_Locale
 
         return $result;
     }
+
+    /**
+     * Validate date string with auto-detection of HTML5/ISO format
+     *
+     * @param string $date The date string to validate
+     */
+    public static function isValidDate(string $date): bool
+    {
+        if (!$date) {
+            return false;
+        }
+
+        // Auto-detect HTML5 input formats by pattern
+        $formats = [
+            'Y-m-d\TH:i:s',       // 2025-12-31T23:59:59 (datetime with seconds)
+            'Y-m-d\TH:i',         // 2025-12-31T23:59 (datetime-local)
+            'Y-m-d',              // 2025-12-31 (date)
+            'H:i:s',              // 23:59:59 (time with seconds)
+            'H:i',                // 23:59 (time)
+        ];
+
+        foreach ($formats as $format) {
+            $dateTime = DateTime::createFromFormat($format, $date);
+            if ($dateTime !== false && $dateTime->format($format) === $date) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

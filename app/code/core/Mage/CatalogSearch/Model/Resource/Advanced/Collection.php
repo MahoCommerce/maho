@@ -6,6 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -65,7 +66,7 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                         } elseif (isset($conditionValue['from']) && isset($conditionValue['to'])) {
                             $invalidDateMessage = Mage::helper('catalogsearch')->__('Specified date is invalid.');
                             if ($conditionValue['from']) {
-                                if (!Zend_Date::isDate($conditionValue['from'])) {
+                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['from'])) {
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['from'])) {
@@ -78,7 +79,7 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                                 $conditionData[] = ['gteq' => $conditionValue['from']];
                             }
                             if ($conditionValue['to']) {
-                                if (!Zend_Date::isDate($conditionValue['to'])) {
+                                if (!Mage_Core_Model_Locale::isValidDate($conditionValue['to'])) {
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['to'])) {
@@ -112,4 +113,5 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
 
         return $this;
     }
+
 }

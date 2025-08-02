@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -55,9 +55,9 @@ class Mage_Paypal_Model_Resource_Report_Settlement extends Mage_Core_Model_Resou
                     /*
                      * Converting dates
                      */
-                    $completionDate = new Zend_Date($rows[$key]['transaction_completion_date']);
+                    $completionDate = new DateTime($rows[$key]['transaction_completion_date']);
                     $rows[$key]['transaction_completion_date'] = $date->date(null, $completionDate->getTimestamp());
-                    $initiationDate = new Zend_Date($rows[$key]['transaction_initiation_date']);
+                    $initiationDate = new DateTime($rows[$key]['transaction_initiation_date']);
                     $rows[$key]['transaction_initiation_date'] = $date->date(null, $initiationDate->getTimestamp());
                     /*
                      * Converting numeric

@@ -630,7 +630,7 @@ interface Varien_Db_Adapter_Interface
     /**
      * Format Date to internal database date format
      *
-     * @param int|string|Zend_Date $date
+     * @param int|string|DateTime $date
      * @param boolean $includeTime
      * @return Zend_Db_Expr
      */

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,7 +75,7 @@ class Mage_Core_Model_Date
     public function gmtDate($format = null, $input = null)
     {
         if (is_null($format)) {
-            $format = Varien_Date::DATETIME_PHP_FORMAT;
+            $format = Mage_Core_Model_Locale::DATETIME_FORMAT;
         }
 
         $date = $this->gmtTimestamp($input);
@@ -98,7 +98,7 @@ class Mage_Core_Model_Date
     public function date($format = null, $input = null)
     {
         if (is_null($format)) {
-            $format = Varien_Date::DATETIME_PHP_FORMAT;
+            $format = Mage_Core_Model_Locale::DATETIME_FORMAT;
         }
 
         return date($format, $this->timestamp($input));
@@ -125,8 +125,9 @@ class Mage_Core_Model_Date
             return false;
         }
 
-        $date      = Mage::app()->getLocale()->date($result);
-        $timestamp = $date->get(Zend_Date::TIMESTAMP) - $date->get(Zend_Date::TIMEZONE_SECS);
+        $date = new DateTime('@' . $result);
+        $date->setTimezone(new DateTimeZone(Mage::app()->getStore()->getConfig('general/locale/timezone')));
+        $timestamp = $date->getTimestamp() - $date->getOffset();
 
         unset($date);
         return $timestamp;
@@ -149,8 +150,9 @@ class Mage_Core_Model_Date
             $result = strtotime($input);
         }
 
-        $date      = Mage::app()->getLocale()->date($result);
-        $timestamp = $date->get(Zend_Date::TIMESTAMP) + $date->get(Zend_Date::TIMEZONE_SECS);
+        $date = new DateTime('@' . $result);
+        $date->setTimezone(new DateTimeZone(Mage::app()->getStore()->getConfig('general/locale/timezone')));
+        $timestamp = $date->getTimestamp() + $date->getOffset();
 
         unset($date);
         return $timestamp;

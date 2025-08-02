@@ -35,17 +35,17 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         if ($this->_dateExists()) {
             // Check for native datetime-local input format (for datetime options)
             if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME && isset($value['datetime'])) {
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['datetime'], 0, 16));
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['datetime'], 0, 16));
                 $dateValid = $dateTime !== false;
             }
             // Check for native date input format (ISO 8601)
             elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value['date'])) {
-                $dateTime = DateTime::createFromFormat('Y-m-d', $value['date']);
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $value['date']);
                 $dateValid = $dateTime !== false;
             }
             // Handle case where datetime value might be passed as 'date' field
             elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['date'], 0, 16));
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['date'], 0, 16));
                 $dateValid = $dateTime !== false;
             } else {
                 $dateValid = false;
@@ -124,8 +124,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 // Check if datetime-local format from native input (for datetime options)
                 if (isset($value['datetime']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['datetime'])) {
                     // Parse ISO datetime-local format directly
-                    $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['datetime'], 0, 16));
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['datetime'], 0, 16));
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if time-only format from native input
                 elseif (isset($value['time']) && preg_match('/^\d{2}:\d{2}/', $value['time'])) {
@@ -133,19 +133,19 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     $dateTime = new DateTime('today');
                     $timeParts = explode(':', $value['time']);
                     $dateTime->setTime((int) $timeParts[0], (int) $timeParts[1]);
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if datetime-local format is passed in the 'date' field
                 elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $value['date'])) {
                     // Parse ISO datetime-local format directly
-                    $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', substr($value['date'], 0, 16));
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($value['date'], 0, 16));
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 // Check if date is in ISO format from native input
                 elseif (isset($value['date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value['date'])) {
                     // Parse ISO date format (date-only option)
                     $dateTime = new DateTime($value['date']);
-                    $result = $dateTime->format('Y-m-d H:i:s');
+                    $result = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 } else {
                     // Invalid format - return null
                     return null;
@@ -176,15 +176,15 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $option = $this->getOption();
             if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-                $result = Mage::app()->getLocale()->date($optionValue, Zend_Date::ISO_8601, null, false)
-                    ->toString($format);
+                $result = Mage::app()->getLocale()->dateMutable($optionValue, DateTime::ATOM, null, false)
+                    ->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
                 $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
                 $result = Mage::app()->getLocale()
-                    ->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)->toString($format);
+                    ->date($optionValue, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false)->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
-                $date = new Zend_Date($optionValue);
-                $result = date('H:i', $date->getTimestamp());
+                $date = new DateTime($optionValue);
+                $result = $date->format('H:i');
             } else {
                 $result = $optionValue;
             }
@@ -232,8 +232,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             return null;
         }
 
-        $date = new Zend_Date($timestamp);
-        return $date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+        $date = new DateTime('@' . $timestamp);
+        return $date->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
 
     /**

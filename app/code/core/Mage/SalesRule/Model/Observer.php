@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -167,8 +167,7 @@ class Mage_SalesRule_Model_Observer
     public function aggregateSalesReportCouponsData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->date();
-        $date = $currentDate->subHour(25);
+        $date = Mage::app()->getLocale()->dateImmutable()->modify('-25 hours');
         Mage::getResourceModel('salesrule/report_rule')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;

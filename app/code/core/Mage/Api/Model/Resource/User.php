@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,7 +67,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
             ->from($this->getTable('api/session'), 'user_id')
             ->where('user_id = ?', $user->getId())
             ->where('sessid = ?', $user->getSessid());
-        $loginDate = Varien_Date::now();
+        $loginDate = Mage_Core_Model_Locale::now();
         if ($readAdapter->fetchRow($select)) {
             $writeAdapter->update(
                 $this->getTable('api/session'),
@@ -105,7 +105,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
             Varien_Db_Adapter_Interface::INTERVAL_SECOND,
         );
         $where = [
-            $readAdapter->quote(Varien_Date::now()) . ' > ' . $timeSubtract,
+            $readAdapter->quote(Mage_Core_Model_Locale::now()) . ' > ' . $timeSubtract,
         ];
         if ($user) {
             $where['user_id = ?'] = $user->getId();
@@ -204,7 +204,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
     {
-        $now = Varien_Date::now();
+        $now = Mage_Core_Model_Locale::now();
         if (!$user->getId()) {
             $user->setCreated($now);
         }

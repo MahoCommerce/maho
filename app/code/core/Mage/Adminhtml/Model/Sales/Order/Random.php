@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -135,7 +136,7 @@ class Mage_Adminhtml_Model_Sales_Order_Random
     protected function _getRandomDate()
     {
         $timestamp = mktime(random_int(0, 23), random_int(0, 59), 0, random_int(1, 11), random_int(1, 28), random_int(2006, 2007));
-        return date(Varien_Date::DATETIME_PHP_FORMAT, $timestamp);
+        return date(Mage_Core_Model_Locale::DATETIME_FORMAT, $timestamp);
     }
 
     public function save()

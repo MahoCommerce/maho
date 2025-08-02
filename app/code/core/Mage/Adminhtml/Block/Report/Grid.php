@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -122,14 +122,14 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 
             if (!isset($data['report_from'])) {
                 // getting all reports from 2001 year
-                $date = new Zend_Date(mktime(0, 0, 0, 1, 1, 2001));
-                $data['report_from'] = $date->toString($this->getLocale()->getDateFormat('short'));
+                $date = new DateTime('2001-01-01');
+                $data['report_from'] = $date->format($this->getLocale()->getDateFormat('short'));
             }
 
             if (!isset($data['report_to'])) {
                 // getting all reports from 2001 year
-                $date = new Zend_Date();
-                $data['report_to'] = $date->toString($this->getLocale()->getDateFormat('short'));
+                $date = new DateTime();
+                $data['report_to'] = $date->format($this->getLocale()->getDateFormat('short'));
             }
 
             $this->_setFilterValues($data);
@@ -148,8 +148,10 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
              * Validate from and to date
              */
             try {
-                $from = $this->getLocale()->date($this->getFilter('report_from'), Zend_Date::DATE_SHORT, null, false);
-                $to   = $this->getLocale()->date($this->getFilter('report_to'), Zend_Date::DATE_SHORT, null, false);
+                // Use the same format that was used to write the data (locale-specific short date format)
+                $shortDateFormat = $this->getLocale()->getDateFormat('short');
+                $from = $this->getLocale()->date($this->getFilter('report_from'), $shortDateFormat, null, false);
+                $to   = $this->getLocale()->date($this->getFilter('report_to'), $shortDateFormat, null, false);
 
                 $collection->setInterval($from, $to);
             } catch (Exception $e) {
@@ -306,7 +308,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 
     public function getDateFormat()
     {
-        return $this->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+        return $this->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
     }
 
     /**

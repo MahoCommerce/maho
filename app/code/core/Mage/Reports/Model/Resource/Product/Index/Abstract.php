@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -59,14 +59,14 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
                 $data  = [
                     'visitor_id'    => $object->getVisitorId(),
                     'store_id'      => $object->getStoreId(),
-                    'added_at'      => Varien_Date::now(),
+                    'added_at'      => Mage_Core_Model_Locale::now(),
                 ];
             } else {
                 $where = ['index_id = ?' => $row['index_id']];
                 $data  = [
                     'customer_id'   => $object->getCustomerId(),
                     'store_id'      => $object->getStoreId(),
-                    'added_at'      => Varien_Date::now(),
+                    'added_at'      => Mage_Core_Model_Locale::now(),
                 ];
             }
 
@@ -178,13 +178,13 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
             'customer_id'   => $object->getCustomerId(),
             'store_id'      => $object->getStoreId(),
         ];
-        $addedAt    = Varien_Date::toTimestamp(true);
+        $addedAt    = time();
         $data = [];
         foreach ($productIds as $productId) {
             $productId = (int) $productId;
             if ($productId) {
                 $row['product_id'] = $productId;
-                $row['added_at']   = Varien_Date::formatDate($addedAt);
+                $row['added_at']   = date(Mage_Core_Model_Locale::DATETIME_FORMAT, $addedAt);
                 $data[] = $row;
             }
             $addedAt -= ($addedAt > 0) ? 1 : 0;

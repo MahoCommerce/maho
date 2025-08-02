@@ -856,8 +856,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         } else {
             $value = $object->getData($attribute->getAttributeCode());
             if ($attribute->getBackend()->getType() === 'datetime') {
-                $date  = new Zend_Date($value, Varien_Date::DATE_INTERNAL_FORMAT);
-                $value = $date->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+                $date  = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $value) ?: new DateTime($value);
+                $value = $date->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             }
             $bind = [
                 'entity_type_id' => $this->getTypeId(),

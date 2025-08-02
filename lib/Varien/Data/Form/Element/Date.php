@@ -21,7 +21,7 @@
 class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
 {
     /**
-     * @var Zend_Date|string
+     * @var DateTime|string
      */
     protected $_value;
 
@@ -58,8 +58,8 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
 
     /**
      * Set date value
-     * If Zend_Date instance is provided instead of value, other params will be ignored.
-     * Format and locale must be compatible with Zend_Date
+     * If DateTime instance is provided instead of value, other params will be ignored.
+     * Format must be compatible with PHP DateTime
      *
      * @param mixed $value
      * @param string $format
@@ -72,18 +72,17 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             $this->_value = '';
             return $this;
         }
-        if ($value instanceof Zend_Date) {
+        if ($value instanceof DateTime) {
             $this->_value = $value;
             return $this;
         }
         if (preg_match('/^[0-9]+$/', $value)) {
-            $this->_value = new Zend_Date($this->_toTimestamp($value));
-            //$this->_value = new Zend_Date((int)value);
+            $this->_value = new DateTime('@' . $this->_toTimestamp($value));
             return $this;
         }
         // last check, if input format was set
         if (null === $format) {
-            $format = Varien_Date::DATETIME_INTERNAL_FORMAT;
+            $format = Mage_Core_Model_Locale::DATETIME_FORMAT;
             if ($this->getInputFormat()) {
                 $format = $this->getInputFormat();
             }
@@ -95,7 +94,14 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             }
         }
         try {
-            $this->_value = new Zend_Date($value, $format, $locale);
+            // Try to parse using the specified format first
+            if ($format && $format !== Mage_Core_Model_Locale::DATETIME_FORMAT) {
+                // Convert ICU format to PHP format if needed (backward compatibility)
+                $phpFormat = str_replace(['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss'], ['Y', 'm', 'd', 'H', 'i', 's'], $format);
+                $this->_value = DateTime::createFromFormat($phpFormat, $value) ?: new DateTime($value);
+            } else {
+                $this->_value = new DateTime($value);
+            }
         } catch (Exception $e) {
             $this->_value = '';
         }
@@ -106,7 +112,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
      * Get date value as string.
      * Format can be specified, or it will be taken from $this->getFormat()
      *
-     * @param string $format (compatible with Zend_Date)
+     * @param string $format (compatible with PHP DateTime)
      * @return string
      */
     public function getValue($format = null)
@@ -117,13 +123,16 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
         if (null === $format) {
             $format = $this->getFormat();
         }
-        return $this->_value->toString($format);
+        if ($this->_value instanceof DateTime) {
+            return $this->_value->format($format);
+        }
+        return (string) $this->_value;
     }
 
     /**
      * Get value instance, if any
      *
-     * @return Zend_Date|string|null
+     * @return DateTime|string|null
      */
     public function getValueInstance()
     {
@@ -136,8 +145,8 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
     /**
      * Output the input field and assign calendar instance to it.
      * In order to output the date:
-     * - the value must be instantiated (Zend_Date)
-     * - output format must be set (compatible with Zend_Date)
+     * - the value must be instantiated (DateTime)
+     * - output format must be set (compatible with PHP DateTime)
      *
      * @return string
      */
@@ -148,11 +157,11 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
 
         // Convert the value to ISO format for native date input
         $isoValue = '';
-        if ($this->_value instanceof Zend_Date) {
+        if ($this->_value instanceof DateTime) {
             if ($this->getTime()) {
-                $isoValue = $this->_value->toString('yyyy-MM-dd\'T\'HH:mm');
+                $isoValue = $this->_value->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
             } else {
-                $isoValue = $this->_value->toString('yyyy-MM-dd');
+                $isoValue = $this->_value->format(Mage_Core_Model_Locale::DATE_FORMAT);
             }
         }
 

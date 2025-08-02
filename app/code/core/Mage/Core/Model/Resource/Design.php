@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,7 +31,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
             if (!$validator->isValid($dateFrom) || !$validator->isValid($dateTo)) {
                 Mage::throwException(Mage::helper('core')->__('Invalid date'));
             }
-            if (Varien_Date::toTimestamp($dateFrom) > Varien_Date::toTimestamp($dateTo)) {
+            if (strtotime($dateFrom) > strtotime($dateTo)) {
                 Mage::throwException(Mage::helper('core')->__('Start date cannot be greater than end date.'));
             }
         }
@@ -133,7 +133,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     public function loadChange($storeId, $date = null)
     {
         if (is_null($date)) {
-            $date = Varien_Date::now();
+            $date = Mage_Core_Model_Locale::now();
         }
 
         $select = $this->_getReadAdapter()->select()
