@@ -37,10 +37,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
             'last_review_date' => Mage::helper('customersegmentation')->__('Last Review Date'),
             'days_since_last_review' => Mage::helper('customersegmentation')->__('Days Since Last Review'),
             'approved_review_count' => Mage::helper('customersegmentation')->__('Number of Approved Reviews'),
-            'helpful_votes_received' => Mage::helper('customersegmentation')->__('Helpful Votes Received'),
             'review_product_count' => Mage::helper('customersegmentation')->__('Number of Different Products Reviewed'),
-            'has_photos_in_reviews' => Mage::helper('customersegmentation')->__('Has Uploaded Photos in Reviews'),
-            'review_length_average' => Mage::helper('customersegmentation')->__('Average Review Length (words)'),
         ];
 
         $this->setAttributeOption($attributes);
@@ -51,8 +48,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
     public function getInputType(): string
     {
         return match ($this->getAttribute()) {
-            'has_reviewed', 'has_photos_in_reviews' => 'select',
-            'review_count', 'average_rating_given', 'days_since_last_review', 'approved_review_count', 'helpful_votes_received', 'review_product_count', 'review_length_average' => 'numeric',
+            'has_reviewed' => 'select',
+            'review_count', 'average_rating_given', 'days_since_last_review', 'approved_review_count', 'review_product_count' => 'numeric',
             'last_review_date' => 'date',
             default => 'string',
         };
@@ -62,7 +59,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
     public function getValueElementType(): string
     {
         return match ($this->getAttribute()) {
-            'has_reviewed', 'has_photos_in_reviews' => 'select',
+            'has_reviewed' => 'select',
             'last_review_date' => 'date',
             default => 'text',
         };
@@ -73,7 +70,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
     {
         $options = [];
         $options = match ($this->getAttribute()) {
-            'has_reviewed', 'has_photos_in_reviews' => [
+            'has_reviewed' => [
                 ['value' => '1', 'label' => Mage::helper('customersegmentation')->__('Yes')],
                 ['value' => '0', 'label' => Mage::helper('customersegmentation')->__('No')],
             ],
@@ -95,21 +92,18 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
             'last_review_date' => $this->buildLastReviewDateCondition($adapter, $operator, $value),
             'days_since_last_review' => $this->buildDaysSinceLastReviewCondition($adapter, $operator, $value),
             'approved_review_count' => $this->buildApprovedReviewCountCondition($adapter, $operator, $value),
-            'helpful_votes_received' => $this->buildHelpfulVotesCondition($adapter, $operator, $value),
             'review_product_count' => $this->buildReviewProductCountCondition($adapter, $operator, $value),
-            'has_photos_in_reviews' => $this->buildHasPhotosCondition($adapter, $operator, $value),
-            'review_length_average' => $this->buildReviewLengthCondition($adapter, $operator, $value),
             default => false,
         };
     }
 
     protected function buildHasReviewedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
-        $reviewTable = $this->getReviewTable();
-        $condition = 'e.entity_id IN (SELECT DISTINCT customer_id FROM ' . $reviewTable . ' WHERE customer_id IS NOT NULL)';
+        $detailTable = $this->getReviewDetailTable();
+        $condition = 'e.entity_id IN (SELECT DISTINCT customer_id FROM ' . $detailTable . ' WHERE customer_id IS NOT NULL)';
 
         if (($operator == '=' && $value == '0') || ($operator == '!=' && $value == '1')) {
-            $condition = 'e.entity_id NOT IN (SELECT DISTINCT customer_id FROM ' . $reviewTable . ' WHERE customer_id IS NOT NULL)';
+            $condition = 'e.entity_id NOT IN (SELECT DISTINCT customer_id FROM ' . $detailTable . ' WHERE customer_id IS NOT NULL)';
         }
 
         return $condition;
@@ -117,11 +111,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
 
     protected function buildReviewCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
-        $reviewTable = $this->getReviewTable();
+        $detailTable = $this->getReviewDetailTable();
         $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id', 'review_count' => 'COUNT(*)'])
-            ->where('r.customer_id IS NOT NULL')
-            ->group('r.customer_id')
+            ->from(['rd' => $detailTable], ['customer_id', 'review_count' => 'COUNT(*)'])
+            ->where('rd.customer_id IS NOT NULL')
+            ->group('rd.customer_id')
             ->having($this->_buildSqlCondition($adapter, 'review_count', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
@@ -130,15 +124,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
     protected function buildAverageRatingCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $reviewTable = $this->getReviewTable();
+        $detailTable = $this->getReviewDetailTable();
         $ratingTable = $this->getRatingVoteTable();
         $ratingOptionTable = $this->getRatingOptionTable();
 
         $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id'])
+            ->from(['rd' => $detailTable], ['customer_id'])
+            ->join(['r' => $reviewTable], 'rd.review_id = r.review_id', [])
             ->join(['rv' => $ratingTable], 'r.review_id = rv.review_id', [])
             ->join(['ro' => $ratingOptionTable], 'rv.option_id = ro.option_id', ['avg_rating' => 'AVG(ro.value)'])
-            ->where('r.customer_id IS NOT NULL')
-            ->group('r.customer_id')
+            ->where('rd.customer_id IS NOT NULL')
+            ->group('rd.customer_id')
             ->having($this->_buildSqlCondition($adapter, 'avg_rating', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
@@ -147,10 +143,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
     protected function buildLastReviewDateCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $reviewTable = $this->getReviewTable();
+        $detailTable = $this->getReviewDetailTable();
         $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id', 'last_review' => 'MAX(r.created_at)'])
-            ->where('r.customer_id IS NOT NULL')
-            ->group('r.customer_id')
+            ->from(['rd' => $detailTable], ['customer_id', 'last_review' => 'MAX(r.created_at)'])
+            ->join(['r' => $reviewTable], 'rd.review_id = r.review_id', [])
+            ->where('rd.customer_id IS NOT NULL')
+            ->group('rd.customer_id')
             ->having($this->_buildSqlCondition($adapter, 'last_review', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
@@ -159,10 +157,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
     protected function buildDaysSinceLastReviewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $reviewTable = $this->getReviewTable();
+        $detailTable = $this->getReviewDetailTable();
         $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id', 'last_review' => 'MAX(r.created_at)'])
-            ->where('r.customer_id IS NOT NULL')
-            ->group('r.customer_id')
+            ->from(['rd' => $detailTable], ['customer_id', 'last_review' => 'MAX(r.created_at)'])
+            ->join(['r' => $reviewTable], 'rd.review_id = r.review_id', [])
+            ->where('rd.customer_id IS NOT NULL')
+            ->group('rd.customer_id')
             ->having($this->_buildSqlCondition($adapter, 'DATEDIFF(NOW(), last_review)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
@@ -171,67 +171,34 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Reviews extends
     protected function buildApprovedReviewCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $reviewTable = $this->getReviewTable();
+        $detailTable = $this->getReviewDetailTable();
         $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id', 'approved_count' => 'COUNT(*)'])
-            ->where('r.customer_id IS NOT NULL')
+            ->from(['rd' => $detailTable], ['customer_id', 'approved_count' => 'COUNT(*)'])
+            ->join(['r' => $reviewTable], 'rd.review_id = r.review_id', [])
+            ->where('rd.customer_id IS NOT NULL')
             ->where('r.status_id = ?', Mage_Review_Model_Review::STATUS_APPROVED)
-            ->group('r.customer_id')
+            ->group('rd.customer_id')
             ->having($this->_buildSqlCondition($adapter, 'approved_count', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildHelpfulVotesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        // This would require a review voting/helpful system
-        // For now, we'll use review detail table if it has helpful votes
-        $reviewTable = $this->getReviewTable();
-        $detailTable = $this->getReviewDetailTable();
-
-        $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id'])
-            ->join(['rd' => $detailTable], 'r.review_id = rd.review_id', ['helpful_votes' => 'SUM(COALESCE(rd.helpful_count, 0))'])
-            ->where('r.customer_id IS NOT NULL')
-            ->group('r.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'helpful_votes', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
 
     protected function buildReviewProductCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $reviewTable = $this->getReviewTable();
+        $detailTable = $this->getReviewDetailTable();
         $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id', 'product_count' => 'COUNT(DISTINCT r.entity_pk_value)'])
-            ->where('r.customer_id IS NOT NULL')
+            ->from(['rd' => $detailTable], ['customer_id', 'product_count' => 'COUNT(DISTINCT r.entity_pk_value)'])
+            ->join(['r' => $reviewTable], 'rd.review_id = r.review_id', [])
+            ->where('rd.customer_id IS NOT NULL')
             ->where('r.entity_id = ?', Mage::getModel('review/review')->getEntityIdByCode(Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
-            ->group('r.customer_id')
+            ->group('rd.customer_id')
             ->having($this->_buildSqlCondition($adapter, 'product_count', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildHasPhotosCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        // This would require custom implementation for review photos
-        // For now, return a placeholder condition
-        return '1=1';
-    }
-
-    protected function buildReviewLengthCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        $reviewTable = $this->getReviewTable();
-        $detailTable = $this->getReviewDetailTable();
-
-        $subselect = $adapter->select()
-            ->from(['r' => $reviewTable], ['customer_id'])
-            ->join(['rd' => $detailTable], 'r.review_id = rd.review_id', ['avg_length' => 'AVG(LENGTH(rd.detail) - LENGTH(REPLACE(rd.detail, " ", "")) + 1)'])
-            ->where('r.customer_id IS NOT NULL')
-            ->group('r.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'avg_length', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
 
     protected function getReviewTable(): string
     {
