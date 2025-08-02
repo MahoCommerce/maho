@@ -72,7 +72,7 @@ class ConfigGet extends BaseMahoCommand
 
             // Build query to get all values for this path
             $select = $connection->select()
-                ->from($table)
+                ->from($table, ['config_id', 'scope', 'scope_id', 'path', 'value'])
                 ->where('path = ?', $path)
                 ->order(['scope', 'scope_id']);
 
@@ -101,6 +101,7 @@ class ConfigGet extends BaseMahoCommand
             // Add default value if exists and not filtered out
             if ($defaultValue !== null && (!$scopeFilter || $scopeFilter === 'default') && (!$scopeIdFilter || $scopeIdFilter == '0')) {
                 $tableData[] = [
+                    '-',
                     'default',
                     '0',
                     '<comment>[XML Default]</comment>',
@@ -122,6 +123,7 @@ class ConfigGet extends BaseMahoCommand
                 }
 
                 $tableData[] = [
+                    $row['config_id'],
                     $row['scope'],
                     $row['scope_id'],
                     $this->getScopeName($row['scope'], (int) $row['scope_id']),
@@ -134,7 +136,7 @@ class ConfigGet extends BaseMahoCommand
             $output->writeln('');
 
             $table = new Table($output);
-            $table->setHeaders(['Scope', 'Scope ID', 'Name', 'Value']);
+            $table->setHeaders(['Config ID', 'Scope', 'Scope ID', 'Name', 'Value']);
             $table->setRows($tableData);
             $table->render();
 
