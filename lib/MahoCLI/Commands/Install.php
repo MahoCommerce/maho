@@ -8,6 +8,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
 namespace MahoCLI\Commands;
 
 use Exception;
@@ -178,9 +180,6 @@ class Install extends BaseMahoCommand
                 $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
                 $pdo = new \PDO($dsn, $dbUser, $dbPass);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-                // Set PDO to allow multiple queries in a single call
-                $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, 0);
 
                 foreach ($sqlFiles as $sqlFile) {
                     $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
