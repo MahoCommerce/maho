@@ -396,43 +396,26 @@ class Mage_Core_Model_Locale
         $locale = $this->getLocaleCode();
         $currencies = [];
 
-        // Get all available currency codes
-        $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
-        $currencyCodes = ResourceBundle::create($locale, 'ICUDATA-curr')->get('Currencies');
+        // Get all available currencies from ICU data using ResourceBundle
+        $bundle = ResourceBundle::create($locale, 'ICUDATA');
+        $currencyData = $bundle->get('Currencies');
 
-        if ($currencyCodes !== null) {
-            foreach ($currencyCodes as $code => $data) {
-                if (strlen($code) === 3) { // Valid currency codes are 3 characters
-                    $name = $formatter->getTextAttribute(NumberFormatter::CURRENCY_CODE) === $code
-                        ? $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL)
-                        : $code;
+        if ($currencyData !== null) {
+            foreach ($currencyData as $code => $data) {
+                // Valid currency codes are exactly 3 characters
+                if (strlen($code) === 3 && ctype_alpha($code)) {
+                    // Use NumberFormatter to get localized currency information
+                    $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
+                    $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
 
-                    // Try to get the currency name
-                    if (is_array($data) && isset($data[1])) {
-                        $name = $data[1] . ' (' . $code . ')';
-                    } else {
-                        $name = $code;
-                    }
+                    // Get currency symbol
+                    $symbol = $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
 
-                    $currencies[$code] = $name;
+                    // Create display name: Symbol (Code) format
+                    $displayName = $symbol !== $code ? "$symbol ($code)" : $code;
+
+                    $currencies[$code] = $displayName;
                 }
-            }
-        }
-
-        // Add common currencies as fallback
-        $commonCurrencies = [
-            'USD' => 'US Dollar (USD)',
-            'EUR' => 'Euro (EUR)',
-            'GBP' => 'British Pound Sterling (GBP)',
-            'CAD' => 'Canadian Dollar (CAD)',
-            'AUD' => 'Australian Dollar (AUD)',
-            'JPY' => 'Japanese Yen (JPY)',
-            'CNY' => 'Chinese Yuan (CNY)',
-        ];
-
-        foreach ($commonCurrencies as $code => $name) {
-            if (!isset($currencies[$code])) {
-                $currencies[$code] = $name;
             }
         }
 
