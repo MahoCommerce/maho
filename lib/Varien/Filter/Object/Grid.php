@@ -13,19 +13,19 @@
 class Varien_Filter_Object_Grid extends Varien_Filter_Object
 {
     /**
-     * @param Varien_Object|array $grid
-     * @return array
-     * @throws Exception
+     * Filter grid of Varien_Objects
      */
     #[\Override]
-    public function filter($grid)
+    public function filter(Varien_Object|array $grid): Varien_Object|array
     {
-        $out = [];
         if (is_array($grid)) {
-            foreach ($grid as $i => $array) {
-                $out[$i] = parent::filter($array);
+            $out = [];
+            foreach ($grid as $i => $object) {
+                $out[$i] = parent::filter($object);
             }
+            return $out;
+        } else {
+            return parent::filter($grid);
         }
-        return $out;
     }
 }

@@ -32215,12 +32215,6 @@ parameters:
 			path: lib/Varien/File/Uploader.php
 
 		-
-			message: '#^Access to deprecated property \$allowWhiteSpace of class Zend_Filter_Alnum\.$#'
-			identifier: property.deprecated
-			count: 1
-			path: lib/Varien/Filter/FormElementName.php
-
-		-
 			message: '#^Method Varien_Filter_Sprintf\:\:__construct\(\) has parameter \$decPoint with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1

@@ -13,7 +13,7 @@
 class Varien_Filter_Array_Grid extends Varien_Filter_Array
 {
     #[\Override]
-    public function filter($grid)
+    public function filter(array $grid): array
     {
         $out = [];
         foreach ($grid as $i => $array) {

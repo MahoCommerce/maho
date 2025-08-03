@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Input_Filter_MaliciousCode implements Zend_Filter_Interface
+class Mage_Core_Model_Input_Filter_MaliciousCode
 {
     /**
      * Regular expressions for cutting malicious code
@@ -42,7 +42,6 @@ class Mage_Core_Model_Input_Filter_MaliciousCode implements Zend_Filter_Interfac
      * @param string|array|null $value
      * @return string|array
      */
-    #[\Override]
     public function filter($value)
     {
         if ($value === null) {

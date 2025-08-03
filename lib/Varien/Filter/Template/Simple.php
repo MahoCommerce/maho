@@ -13,7 +13,7 @@
 /**
  * Class Varien_Filter_Template_Simple
  */
-class Varien_Filter_Template_Simple extends Varien_Object implements Zend_Filter_Interface
+class Varien_Filter_Template_Simple extends Varien_Object
 {
     /**
      * Start tag for variable in template
@@ -60,7 +60,6 @@ class Varien_Filter_Template_Simple extends Varien_Object implements Zend_Filter
      * @param string $value
      * @return string
      */
-    #[\Override]
     public function filter($value)
     {
         return preg_replace_callback(
