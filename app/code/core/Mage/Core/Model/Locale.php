@@ -1206,7 +1206,8 @@ class Mage_Core_Model_Locale extends Varien_Object
     public function getTranslation(mixed $value = null, ?string $path = null, ?string $locale = null): string|false
     {
         if ($path === 'country' || $path === 'territory') {
-            return $this->getCountryTranslation($value, $locale);
+            // If no locale specified, use this locale model's locale
+            return $this->getCountryTranslation($value, $locale ?: $this->getLocaleCode());
         }
 
         $useLocale = $locale ?: $this->getLocaleCode();
@@ -1272,23 +1273,8 @@ class Mage_Core_Model_Locale extends Varien_Object
      */
     public function getCountryTranslation(string $countryId, ?string $locale = null): string|false
     {
-        if (!Mage::isInstalled()) {
-            // During installation, use native PHP Intl extension for country translation
-            return $this->getNativeCountryName($countryId, $locale);
-        }
-
-        $country = Mage::getModel('directory/country')->load($countryId);
-        if ($country->getId()) {
-            if ($locale) {
-                $translated = $country->getTranslation($locale);
-                if ($translated->getName()) {
-                    return $translated->getName();
-                }
-            }
-            return $country->getName();
-        }
-
-        return false;
+        // Always use native ICU data for country translations to ensure proper locale support
+        return $this->getNativeCountryName($countryId, $locale);
     }
 
     /**
@@ -1298,12 +1284,8 @@ class Mage_Core_Model_Locale extends Varien_Object
      */
     public function getCountryTranslationList(): array
     {
-        if (!Mage::isInstalled()) {
-            // During installation, use native PHP Intl extension for country translations
-            return $this->getNativeCountryList();
-        }
-
-        return Mage::getResourceModel('directory/country_collection')->toOptionHash();
+        // Always use native ICU data for country translations to ensure proper locale support
+        return $this->getNativeCountryList();
     }
 
     /**

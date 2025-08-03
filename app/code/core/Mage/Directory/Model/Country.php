@@ -155,9 +155,20 @@ T: {{telephone}}';
      */
     public function getName()
     {
+        // Always use ICU data for country names to ensure proper localization
+        $countryId = $this->getData('country_id');
+        if ($countryId) {
+            $locale = Mage::app()->getLocale();
+            $name = $locale->getTranslation($countryId, 'country');
+            if ($name && $name !== $countryId) {
+                return $name;
+            }
+        }
+        
+        // Fallback to database name or country_id
         $name = $this->getData('name');
         if (is_null($name)) {
-            $name = $this->getData('country_id');
+            $name = $countryId ?: '';
         }
         return $name;
     }
