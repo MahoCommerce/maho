@@ -397,24 +397,32 @@ class Mage_Core_Model_Locale
         $currencies = [];
 
         // Get all available currencies from ICU data using ResourceBundle
-        $bundle = ResourceBundle::create($locale, 'ICUDATA');
-        $currencyData = $bundle->get('Currencies');
+        $bundle = ResourceBundle::create($locale, 'ICUDATA-curr');
+        if ($bundle !== null) {
+            $currencyData = $bundle->get('Currencies');
 
-        if ($currencyData !== null) {
-            foreach ($currencyData as $code => $data) {
-                // Valid currency codes are exactly 3 characters
-                if (strlen($code) === 3 && ctype_alpha($code)) {
-                    // Use NumberFormatter to get localized currency information
-                    $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
-                    $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
+            if ($currencyData !== null) {
+                // Get list of all currency codes
+                $allCodes = [];
+                foreach ($currencyData as $code => $data) {
+                    if (strlen($code) === 3 && ctype_alpha($code)) {
+                        $allCodes[] = $code;
+                    }
+                }
 
-                    // Get currency symbol
-                    $symbol = $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
-
-                    // Create display name: Symbol (Code) format
-                    $displayName = $symbol !== $code ? "$symbol ($code)" : $code;
-
-                    $currencies[$code] = $displayName;
+                // Now get the data for each code
+                foreach ($allCodes as $code) {
+                    $currInfo = $currencyData->get($code);
+                    if ($currInfo !== null) {
+                        // Get the display name (at index 1)
+                        $displayName = $currInfo->get(1);
+                        if ($displayName !== null) {
+                            $currencies[$code] = $displayName;
+                        } else {
+                            // Fallback to code
+                            $currencies[$code] = $code;
+                        }
+                    }
                 }
             }
         }
@@ -1012,11 +1020,34 @@ class Mage_Core_Model_Locale
 
             case 'currencysymbol':
                 $symbols = [];
-                $currencies = $this->_getCurrencyList();
-                foreach (array_keys($currencies) as $code) {
-                    $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
-                    $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
-                    $symbols[$code] = $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+                $bundle = ResourceBundle::create($locale, 'ICUDATA-curr');
+                if ($bundle !== null) {
+                    $currencyData = $bundle->get('Currencies');
+
+                    if ($currencyData !== null) {
+                        // Get list of all currency codes
+                        $allCodes = [];
+                        foreach ($currencyData as $code => $data) {
+                            if (strlen($code) === 3 && ctype_alpha($code)) {
+                                $allCodes[] = $code;
+                            }
+                        }
+
+                        // Now get the symbol for each code
+                        foreach ($allCodes as $code) {
+                            $currInfo = $currencyData->get($code);
+                            if ($currInfo !== null) {
+                                // Get the symbol (at index 0)
+                                $symbol = $currInfo->get(0);
+                                if ($symbol !== null) {
+                                    $symbols[$code] = $symbol;
+                                } else {
+                                    // Fallback to code
+                                    $symbols[$code] = $code;
+                                }
+                            }
+                        }
+                    }
                 }
                 return $symbols;
 
@@ -1168,14 +1199,36 @@ class Mage_Core_Model_Locale
             'script' => Locale::getDisplayScript($value, $useLocale),
             'territory', 'country' => Locale::getDisplayRegion('-' . $value, $useLocale),
             'currency', 'currencytoname' => (function () use ($useLocale, $value) {
-                $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
-                $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
-                return $formatter->getTextAttribute(NumberFormatter::CURRENCY_CODE);
+                $bundle = ResourceBundle::create($useLocale, 'ICUDATA-curr');
+                if ($bundle !== null) {
+                    $currencyData = $bundle->get('Currencies');
+                    if ($currencyData !== null) {
+                        $currInfo = $currencyData->get($value);
+                        if ($currInfo !== null) {
+                            $displayName = $currInfo->get(1);
+                            if ($displayName !== null) {
+                                return $displayName;
+                            }
+                        }
+                    }
+                }
+                return $value; // Fallback
             })(),
             'currencysymbol' => (function () use ($useLocale, $value) {
-                $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
-                $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
-                return $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+                $bundle = ResourceBundle::create($useLocale, 'ICUDATA-curr');
+                if ($bundle !== null) {
+                    $currencyData = $bundle->get('Currencies');
+                    if ($currencyData !== null) {
+                        $currInfo = $currencyData->get($value);
+                        if ($currInfo !== null) {
+                            $symbol = $currInfo->get(0);
+                            if ($symbol !== null) {
+                                return $symbol;
+                            }
+                        }
+                    }
+                }
+                return $value; // Fallback
             })(),
             'timezone' => $value, // PHP doesn't have built-in timezone name translations
             'date', 'dateformat' => ($this->getTranslationList('dateformat'))[$value] ?? false,
