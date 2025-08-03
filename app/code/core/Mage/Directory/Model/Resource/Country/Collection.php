@@ -40,11 +40,10 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
     {
         parent::_initSelect();
 
-        $locale = Mage::app()->getLocale()->getLocaleCode();
-
+        // Try to get English names as fallback for grid display
         $this->getSelect()->joinLeft(
             ['cname' => $this->_countryNameTable],
-            $this->getConnection()->quoteInto('main_table.country_id = cname.country_id AND cname.locale = ?', $locale),
+            $this->getConnection()->quoteInto('main_table.country_id = cname.country_id AND cname.locale = ?', 'en_US'),
             ['name'],
         );
 
