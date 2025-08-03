@@ -27,8 +27,7 @@ class Mage_CurrencySymbol_Helper_Data extends Mage_Core_Helper_Data
             $customCurrencySymbol = $currencySymbol->getCurrencySymbol($baseCode);
 
             if ($customCurrencySymbol) {
-                $currencyOptions['symbol']  = $customCurrencySymbol;
-                $currencyOptions['display'] = Zend_Currency::USE_SYMBOL;
+                $currencyOptions['symbol'] = $customCurrencySymbol;
             }
         }
 

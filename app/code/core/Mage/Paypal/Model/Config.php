@@ -1178,7 +1178,9 @@ class Mage_Paypal_Model_Config
             if ($shouldEmulate) {
                 $locale->emulate($this->_storeId);
             }
-            $countryCode = $locale->getLocale()->getRegion();
+            $localeCode = $locale->getLocaleCode();
+            $parsed = Locale::parseLocale($localeCode);
+            $countryCode = $parsed['region'] ?? 'US';
             if ($shouldEmulate) {
                 $locale->revert();
             }

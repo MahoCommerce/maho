@@ -143,15 +143,18 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
         if ($this->getBackendType() == 'decimal' && $hasDefaultValue) {
             $locale = Mage::app()->getLocale()->getLocaleCode();
-            if (!Zend_Locale_Format::isNumber($defaultValue, ['locale' => $locale])) {
+
+            // Use NumberFormatter to validate and normalize the number
+            $formatter = new NumberFormatter($locale, NumberFormatter::DECIMAL);
+            $parsedValue = $formatter->parse($defaultValue);
+
+            if ($parsedValue === false) {
                 throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
             }
 
             try {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                );
-                $this->setDefaultValue($filter->filter($defaultValue));
+                // Set the normalized value (NumberFormatter::parse returns a float)
+                $this->setDefaultValue((int) $parsedValue);
             } catch (Exception $e) {
                 throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
             }

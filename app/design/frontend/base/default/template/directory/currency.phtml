@@ -17,7 +17,10 @@
     <select id="select-currency" name="currency" title="<?= $this->quoteEscape($this->__('Your Currency')) ?>" onchange="setLocation(this.value)">
         <?php foreach ($this->getCurrencies() as $_code => $_name): ?>
         <option value="<?= $this->getSwitchCurrencyUrl($_code) ?>"<?php if($_code==$this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?>>
-            <?= Mage::app()->getLocale()->currency($_code)->getSymbol() ?>
+            <?php 
+                $formatter = Mage::app()->getLocale()->currency($_code);
+                echo $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+            ?>
         </option>
     <?php endforeach ?>
     </select>

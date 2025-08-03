@@ -55,13 +55,6 @@ class Mage_Core_Model_Locale
     protected $_defaultLocale;
 
     /**
-     * Locale object
-     *
-     * @var Zend_Locale|null
-     */
-    protected $_locale;
-
-    /**
      * Locale code
      *
      * @var string
@@ -153,20 +146,13 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Retrieve locale object
+     * Retrieve locale object (compatibility method - returns locale code instead)
      *
-     * @return Zend_Locale
+     * @return string
      */
     public function getLocale()
     {
-        if (!$this->_locale) {
-            //Zend_Locale_Data::setCache(Mage::app()->getCache());
-            $this->_locale = new Zend_Locale($this->getLocaleCode());
-        } elseif ($this->_locale->__toString() != $this->_localeCode) {
-            $this->setLocale($this->_localeCode);
-        }
-
-        return $this->_locale;
+        return $this->getLocaleCode();
     }
 
     /**
@@ -191,7 +177,6 @@ class Mage_Core_Model_Locale
     public function setLocaleCode($code)
     {
         $this->_localeCode = $code;
-        $this->_locale = null;
         return $this;
     }
 
@@ -224,50 +209,64 @@ class Mage_Core_Model_Locale
     protected function _getOptionLocales($translatedName = false)
     {
         $options = [];
-        $zendLocales = $this->getLocale()->getLocaleList();
-        $languages = $this->getLocale()->getTranslationList('language', $this->getLocale());
-        $countries = $this->getCountryTranslationList();
+        $locales = ResourceBundle::getLocales('');
+        $currentLocale = $this->getLocaleCode();
 
-        //Zend locale codes for internal allowed locale codes
+        // Get allowed locales
         $allowed = $this->getAllowLocales();
+
+        // Map of locale aliases (if needed)
         $allowedAliases = [];
         foreach ($allowed as $code) {
-            $allowedAliases[Zend_Locale::getAlias($code)] = $code;
-        }
-
-        //Internal locale codes translated from Zend locale codes
-        $locales = [];
-        foreach ($zendLocales as $code => $active) {
-            if (array_key_exists($code, $allowedAliases)) {
-                $locales[$allowedAliases[$code]] = $active;
-            } else {
-                $locales[$code] = $active;
+            $canonicalized = Locale::canonicalize($code);
+            if ($canonicalized !== $code) {
+                $allowedAliases[$canonicalized] = $code;
             }
         }
 
-        foreach (array_keys($locales) as $code) {
-            if (strstr($code, '_')) {
-                if (!in_array($code, $allowed)) {
-                    continue;
-                }
-                $data = explode('_', $code);
-                if (!isset($languages[$data[0]]) || !isset($countries[$data[1]])) {
-                    continue;
-                }
-                [$language, $country] = $data;
-                if ($translatedName) {
-                    $translatedLanguage = ucwords($this->getLocale()->getTranslation($language, 'language', $code));
-                    $translatedCountry = $this->getCountryTranslation($country, $code);
-                    $label = "$translatedLanguage ($translatedCountry) / {$languages[$language]} ({$countries[$country]})";
+        foreach ($locales as $code) {
+            // Check if locale is allowed
+            if (!in_array($code, $allowed)) {
+                // Check if it's an alias
+                if (isset($allowedAliases[$code])) {
+                    $code = $allowedAliases[$code];
                 } else {
-                    $label = "{$languages[$language]} ({$countries[$country]})";
+                    continue;
                 }
-                $options[] = [
-                    'value' => $code,
-                    'label' => $label,
-                ];
             }
+
+            // Only process locales with country code
+            if (!strstr($code, '_')) {
+                continue;
+            }
+
+            $parsed = Locale::parseLocale($code);
+            if (!isset($parsed['language']) || !isset($parsed['region'])) {
+                continue;
+            }
+
+            $language = $parsed['language'];
+            $country = $parsed['region'];
+
+            // Get language and country names in English
+            $languageNameEn = Locale::getDisplayLanguage($code, 'en');
+            $countryNameEn = Locale::getDisplayRegion($code, 'en');
+
+            if ($translatedName) {
+                // Get translated names
+                $languageNameTranslated = Locale::getDisplayLanguage($code, $code);
+                $countryNameTranslated = Locale::getDisplayRegion($code, $code);
+                $label = "$languageNameTranslated ($countryNameTranslated) / $languageNameEn ($countryNameEn)";
+            } else {
+                $label = "$languageNameEn ($countryNameEn)";
+            }
+
+            $options[] = [
+                'value' => $code,
+                'label' => $label,
+            ];
         }
+
         return $this->_sortOptionArray($options);
     }
 
@@ -279,25 +278,15 @@ class Mage_Core_Model_Locale
     public function getOptionTimezones()
     {
         $options = [];
-        $zones  = $this->getTranslationList('windowstotimezone');
-        ksort($zones);
-        foreach ($zones as $code => $name) {
-            $name = trim($name);
-            $zonesList = explode(' ', $code);
-            if (count($zonesList) == 1) {
-                $options[] = [
-                    'label' => empty($name) ? $code : $name . ' (' . $code . ')',
-                    'value' => $code,
-                ];
-            } else {
-                foreach ($zonesList as $zoneCode) {
-                    $options[] = [
-                        'label' => empty($name) ? $zoneCode : $name . ' (' . $zoneCode . ')',
-                        'value' => $zoneCode,
-                    ];
-                }
-            }
+        $timezones = DateTimeZone::listIdentifiers();
+
+        foreach ($timezones as $timezone) {
+            $options[] = [
+                'label' => $timezone,
+                'value' => $timezone,
+            ];
         }
+
         return $this->_sortOptionArray($options);
     }
 
@@ -312,14 +301,40 @@ class Mage_Core_Model_Locale
     public function getOptionWeekdays($preserveCodes = false, $ucFirstCode = false)
     {
         $options = [];
-        $days = $this->getTranslationList('days');
-        $days = $preserveCodes ? $days['format']['wide'] : array_values($days['format']['wide']);
+        $locale = $this->getLocaleCode();
+
+        // Create a DateTime object for a known Sunday
+        $date = new DateTime('2024-01-07'); // Sunday
+        $formatter = new IntlDateFormatter(
+            $locale,
+            IntlDateFormatter::NONE,
+            IntlDateFormatter::NONE,
+            null,
+            IntlDateFormatter::GREGORIAN,
+            'EEEE', // Full weekday name
+        );
+
+        $days = [];
+        for ($i = 0; $i < 7; $i++) {
+            $dayName = $formatter->format($date);
+            $dayCode = strtolower($date->format('l')); // English day name lowercase
+
+            if ($preserveCodes) {
+                $days[$dayCode] = $dayName;
+            } else {
+                $days[] = $dayName;
+            }
+
+            $date->modify('+1 day');
+        }
+
         foreach ($days as $code => $name) {
             $options[] = [
                 'label' => $name,
-                'value' => $ucFirstCode ? ucfirst($code) : $code,
+                'value' => $preserveCodes ? ($ucFirstCode ? ucfirst($code) : $code) : $code,
             ];
         }
+
         return $options;
     }
 
@@ -349,11 +364,11 @@ class Mage_Core_Model_Locale
      */
     public function getOptionCurrencies()
     {
-        $currencies = $this->getTranslationList('currencytoname');
+        $currencies = $this->_getCurrencyList();
         $options = [];
         $allowed = $this->getAllowCurrencies();
 
-        foreach ($currencies as $name => $code) {
+        foreach ($currencies as $code => $name) {
             if (!in_array($code, $allowed)) {
                 continue;
             }
@@ -373,15 +388,68 @@ class Mage_Core_Model_Locale
      */
     public function getOptionAllCurrencies()
     {
-        $currencies = $this->getTranslationList('currencytoname');
+        $currencies = $this->_getCurrencyList();
         $options = [];
-        foreach ($currencies as $name => $code) {
+        foreach ($currencies as $code => $name) {
             $options[] = [
                 'label' => $name,
                 'value' => $code,
             ];
         }
         return $this->_sortOptionArray($options);
+    }
+
+    /**
+     * Get currency list
+     *
+     * @return array
+     */
+    protected function _getCurrencyList()
+    {
+        $locale = $this->getLocaleCode();
+        $currencies = [];
+
+        // Get all available currency codes
+        $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
+        $currencyCodes = ResourceBundle::create($locale, 'ICUDATA-curr')->get('Currencies');
+
+        if ($currencyCodes !== null) {
+            foreach ($currencyCodes as $code => $data) {
+                if (strlen($code) === 3) { // Valid currency codes are 3 characters
+                    $name = $formatter->getTextAttribute(NumberFormatter::CURRENCY_CODE) === $code
+                        ? $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL)
+                        : $code;
+
+                    // Try to get the currency name
+                    if (is_array($data) && isset($data[1])) {
+                        $name = $data[1] . ' (' . $code . ')';
+                    } else {
+                        $name = $code;
+                    }
+
+                    $currencies[$code] = $name;
+                }
+            }
+        }
+
+        // Add common currencies as fallback
+        $commonCurrencies = [
+            'USD' => 'US Dollar (USD)',
+            'EUR' => 'Euro (EUR)',
+            'GBP' => 'British Pound Sterling (GBP)',
+            'CAD' => 'Canadian Dollar (CAD)',
+            'AUD' => 'Australian Dollar (AUD)',
+            'JPY' => 'Japanese Yen (JPY)',
+            'CNY' => 'Chinese Yuan (CNY)',
+        ];
+
+        foreach ($commonCurrencies as $code => $name) {
+            if (!isset($currencies[$code])) {
+                $currencies[$code] = $name;
+            }
+        }
+
+        return $currencies;
     }
 
     /**
@@ -524,16 +592,12 @@ class Mage_Core_Model_Locale
      *
      * @param mixed              $date
      * @param string             $part
-     * @param string|Zend_Locale $locale
+     * @param string|null        $locale
      * @param bool               $useTimezone
      * @return DateTime
      */
     public function date($date = null, $part = null, $locale = null, $useTimezone = true)
     {
-        if (is_null($locale)) {
-            $locale = $this->getLocale();
-        }
-
         if (!is_int($date) && empty($date)) {
             // $date may be false, but DateTime uses strict compare
             $date = null;
@@ -563,7 +627,7 @@ class Mage_Core_Model_Locale
     public function dateMutable(
         string|int|DateTime|null $date = null,
         ?string $part = null,
-        string|Zend_Locale|null $locale = null,
+        string|null $locale = null,
         bool $useTimezone = true,
     ): DateTime {
         return $this->date($date, $part, $locale, $useTimezone);
@@ -575,7 +639,7 @@ class Mage_Core_Model_Locale
     public function dateImmutable(
         string|int|DateTime|null $date = null,
         ?string $part = null,
-        string|Zend_Locale|null $locale = null,
+        string|null $locale = null,
         bool $useTimezone = true,
     ): DateTimeImmutable {
         $dateTime = $this->date($date, $part, $locale, $useTimezone);
@@ -738,41 +802,35 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Create Zend_Currency object for current locale
+     * Create NumberFormatter object for current locale configured for currency
      *
      * @param   string $currency
-     * @return  Zend_Currency
+     * @return  NumberFormatter
      */
     public function currency($currency)
     {
         Varien_Profiler::start('locale/currency');
         if (!isset(self::$_currencyCache[$this->getLocaleCode()][$currency])) {
-            $options = [];
-            try {
-                $currencyObject = new Zend_Currency($currency, $this->getLocale());
-            } catch (Exception $e) {
-                /**
-                 * catch specific exceptions like "Currency 'USD' not found"
-                 * - back end falls with specific locals as Malaysia and etc.
-                 *
-                 * as we can see from Zend framework ticket
-                 * http://framework.zend.com/issues/browse/ZF-10038
-                 * zend team is not going to change it behaviour in the near time
-                 */
-                $currencyObject = new Zend_Currency($currency);
-                $options['name'] = $currency;
-                $options['currency'] = $currency;
-                $options['symbol'] = $currency;
-            }
+            $formatter = new NumberFormatter($this->getLocaleCode(), NumberFormatter::CURRENCY);
 
-            $options = new Varien_Object($options);
+            // Get custom options from event
+            $options = new Varien_Object();
             Mage::dispatchEvent('currency_display_options_forming', [
                 'currency_options' => $options,
                 'base_code' => $currency,
             ]);
 
-            $currencyObject->setFormat($options->toArray());
-            self::$_currencyCache[$this->getLocaleCode()][$currency] = $currencyObject;
+            // Apply custom options if any
+            if ($options->hasData()) {
+                if ($options->hasData('symbol')) {
+                    $formatter->setSymbol(NumberFormatter::CURRENCY_SYMBOL, $options->getData('symbol'));
+                }
+                if ($options->hasData('pattern')) {
+                    $formatter->setPattern($options->getData('pattern'));
+                }
+            }
+
+            self::$_currencyCache[$this->getLocaleCode()][$currency] = $formatter;
         }
         Varien_Profiler::stop('locale/currency');
         return self::$_currencyCache[$this->getLocaleCode()][$currency];
@@ -833,42 +891,51 @@ class Mage_Core_Model_Locale
      */
     public function getJsPriceFormat()
     {
-        $format = Zend_Locale_Data::getContent($this->getLocaleCode(), 'currencynumber');
-        $symbols = Zend_Locale_Data::getList($this->getLocaleCode(), 'symbols');
+        $formatter = new NumberFormatter($this->getLocaleCode(), NumberFormatter::DECIMAL);
+        $pattern = $formatter->getPattern();
 
-        $pos = strpos($format, ';');
+        // Extract decimal and grouping separators
+        $decimalSymbol = $formatter->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
+        $groupSymbol = $formatter->getSymbol(NumberFormatter::GROUPING_SEPARATOR_SYMBOL);
+
+        // Parse the pattern to determine precision
+        $pos = strpos($pattern, ';');
         if ($pos !== false) {
-            $format = substr($format, 0, $pos);
+            $pattern = substr($pattern, 0, $pos);
         }
-        $format = preg_replace("/[^0\#\.,]/", '', $format);
+
+        // Count decimal places
+        $decimalPos = strpos($pattern, '.');
         $totalPrecision = 0;
-        $decimalPoint = strpos($format, '.');
-        if ($decimalPoint !== false) {
-            $totalPrecision = (strlen($format) - (strrpos($format, '.') + 1));
-        } else {
-            $decimalPoint = strlen($format);
+        $requiredPrecision = 0;
+
+        if ($decimalPos !== false) {
+            $decimalPart = substr($pattern, $decimalPos + 1);
+            // Count all decimal pattern characters
+            $totalPrecision = strlen(preg_replace('/[^0#]/', '', $decimalPart));
+            // Count required decimal places (0s)
+            $requiredPrecision = strlen(preg_replace('/[^0]/', '', $decimalPart));
         }
-        $requiredPrecision = $totalPrecision;
-        $t = substr($format, $decimalPoint);
-        $pos = strpos($t, '#');
-        if ($pos !== false) {
-            $requiredPrecision = strlen($t) - $pos - $totalPrecision;
+
+        // Determine grouping length
+        $groupLength = 3; // Default
+        $integerPart = $decimalPos !== false ? substr($pattern, 0, $decimalPos) : $pattern;
+        $lastComma = strrpos($integerPart, ',');
+        if ($lastComma !== false) {
+            $afterComma = substr($integerPart, $lastComma + 1);
+            $groupLength = strlen(preg_replace('/[^0#]/', '', $afterComma));
         }
-        $group = 0;
-        if (strrpos($format, ',') !== false) {
-            $group = ($decimalPoint - strrpos($format, ',') - 1);
-        } else {
-            $group = strrpos($format, '.');
-        }
-        $integerRequired = (strpos($format, '.') - strpos($format, '0'));
+
+        // Count required integer digits
+        $integerRequired = substr_count($integerPart, '0');
 
         return [
             'pattern' => Mage::app()->getStore()->getCurrentCurrency()->getOutputFormat(),
             'precision' => $totalPrecision,
             'requiredPrecision' => $requiredPrecision,
-            'decimalSymbol' => $symbols['decimal'],
-            'groupSymbol' => $symbols['group'],
-            'groupLength' => $group,
+            'decimalSymbol' => $decimalSymbol,
+            'groupSymbol' => $groupSymbol,
+            'groupLength' => $groupLength,
             'integerRequired' => $integerRequired,
         ];
     }
@@ -882,11 +949,10 @@ class Mage_Core_Model_Locale
     public function emulate($storeId)
     {
         if ($storeId) {
-            $this->_emulatedLocales[] = clone $this->getLocale();
-            $this->_locale = new Zend_Locale(Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $storeId));
-            $this->_localeCode = $this->_locale->toString();
+            $this->_emulatedLocales[] = $this->getLocaleCode();
+            $this->_localeCode = Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $storeId);
             Mage::getSingleton('core/translate')
-                ->setLocale($this->_locale)
+                ->setLocale($this->_localeCode)
                 ->init(Mage_Core_Model_App_Area::AREA_FRONTEND, true);
         } else {
             $this->_emulatedLocales[] = false;
@@ -900,9 +966,8 @@ class Mage_Core_Model_Locale
     public function revert()
     {
         if ($locale = array_pop($this->_emulatedLocales)) {
-            $this->_locale = $locale;
-            $this->_localeCode = $this->_locale->toString();
-            Mage::getSingleton('core/translate')->setLocale($this->_locale)->init('adminhtml', true);
+            $this->_localeCode = $locale;
+            Mage::getSingleton('core/translate')->setLocale($this->_localeCode)->init('adminhtml', true);
         }
     }
 
@@ -920,7 +985,194 @@ class Mage_Core_Model_Locale
         if ($path === 'country' || $path === 'territory') {
             return $this->getCountryTranslationList();
         }
-        return $this->getLocale()->getTranslationList($path, $this->getLocale(), $value);
+
+        $locale = $this->getLocaleCode();
+
+        switch ($path) {
+            case 'language':
+                $languages = [];
+                $bundle = ResourceBundle::create($locale, 'ICUDATA-lang');
+                if ($bundle !== null) {
+                    $langs = $bundle->get('Languages');
+                    if ($langs !== null) {
+                        foreach ($langs as $code => $name) {
+                            $languages[$code] = $name;
+                        }
+                    }
+                }
+                return $languages;
+
+            case 'script':
+                $scripts = [];
+                $bundle = ResourceBundle::create($locale, 'ICUDATA-lang');
+                if ($bundle !== null) {
+                    $scriptData = $bundle->get('Scripts');
+                    if ($scriptData !== null) {
+                        foreach ($scriptData as $code => $name) {
+                            $scripts[$code] = $name;
+                        }
+                    }
+                }
+                return $scripts;
+
+            case 'territory':
+            case 'country':
+                return $this->getCountryTranslationList();
+
+            case 'timezone':
+                return DateTimeZone::listIdentifiers();
+
+            case 'currency':
+            case 'currencytoname':
+                return $this->_getCurrencyList();
+
+            case 'currencysymbol':
+                $symbols = [];
+                $currencies = $this->_getCurrencyList();
+                foreach (array_keys($currencies) as $code) {
+                    $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
+                    $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
+                    $symbols[$code] = $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+                }
+                return $symbols;
+
+            case 'monthdays':
+                return [
+                    'sun' => 0,
+                    'mon' => 1,
+                    'tue' => 2,
+                    'wed' => 3,
+                    'thu' => 4,
+                    'fri' => 5,
+                    'sat' => 6,
+                ];
+
+            case 'days':
+                // Return days in the format expected by getOptionWeekdays
+                $date = new DateTime('2024-01-07'); // Sunday
+                $formatter = new IntlDateFormatter(
+                    $locale,
+                    IntlDateFormatter::NONE,
+                    IntlDateFormatter::NONE,
+                    null,
+                    IntlDateFormatter::GREGORIAN,
+                    'EEEE', // Full weekday name
+                );
+
+                $days = [
+                    'format' => [
+                        'wide' => [],
+                        'abbreviated' => [],
+                        'narrow' => [],
+                    ],
+                ];
+
+                // Wide format (full names)
+                for ($i = 0; $i < 7; $i++) {
+                    $dayCode = strtolower($date->format('l'));
+                    $formatter->setPattern('EEEE');
+                    $days['format']['wide'][$dayCode] = $formatter->format($date);
+
+                    // Abbreviated format
+                    $formatter->setPattern('EEE');
+                    $days['format']['abbreviated'][$dayCode] = $formatter->format($date);
+
+                    // Narrow format
+                    $formatter->setPattern('EEEEE');
+                    $days['format']['narrow'][$dayCode] = $formatter->format($date);
+
+                    $date->modify('+1 day');
+                }
+
+                return $days;
+
+            case 'month':
+                $date = new DateTime('2024-01-01');
+                $formatter = new IntlDateFormatter(
+                    $locale,
+                    IntlDateFormatter::NONE,
+                    IntlDateFormatter::NONE,
+                    null,
+                    IntlDateFormatter::GREGORIAN,
+                    'MMMM', // Full month name
+                );
+
+                $months = [
+                    'format' => [
+                        'wide' => [],
+                        'abbreviated' => [],
+                        'narrow' => [],
+                    ],
+                ];
+
+                for ($i = 1; $i <= 12; $i++) {
+                    // Wide format
+                    $formatter->setPattern('MMMM');
+                    $months['format']['wide'][$i] = $formatter->format($date);
+
+                    // Abbreviated format
+                    $formatter->setPattern('MMM');
+                    $months['format']['abbreviated'][$i] = $formatter->format($date);
+
+                    // Narrow format
+                    $formatter->setPattern('MMMMM');
+                    $months['format']['narrow'][$i] = $formatter->format($date);
+
+                    $date->modify('+1 month');
+                }
+
+                return $months;
+
+            case 'dateinterval':
+                // Common date interval formats
+                return [
+                    'year' => 'yyyy',
+                    'month' => 'MM',
+                    'day' => 'dd',
+                    'hour' => 'HH',
+                    'minute' => 'mm',
+                    'second' => 'ss',
+                ];
+
+            case 'dateformat':
+            case 'date':
+                $formatter = new IntlDateFormatter(
+                    $locale,
+                    IntlDateFormatter::SHORT,
+                    IntlDateFormatter::NONE,
+                );
+
+                return [
+                    'full' => (new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE))->getPattern(),
+                    'long' => (new IntlDateFormatter($locale, IntlDateFormatter::LONG, IntlDateFormatter::NONE))->getPattern(),
+                    'medium' => (new IntlDateFormatter($locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE))->getPattern(),
+                    'short' => (new IntlDateFormatter($locale, IntlDateFormatter::SHORT, IntlDateFormatter::NONE))->getPattern(),
+                ];
+
+            case 'timeformat':
+            case 'time':
+                return [
+                    'full' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::FULL))->getPattern(),
+                    'long' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::LONG))->getPattern(),
+                    'medium' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::MEDIUM))->getPattern(),
+                    'short' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::SHORT))->getPattern(),
+                ];
+
+            case 'localeupgrade':
+                // Return empty array - no locale upgrades needed
+                return [];
+
+            case 'windowstotimezone':
+                // Return a simplified mapping of timezone identifiers
+                $zones = [];
+                foreach (DateTimeZone::listIdentifiers() as $tz) {
+                    $zones[$tz] = $tz;
+                }
+                return $zones;
+
+            default:
+                return [];
+        }
     }
 
     /**
@@ -931,12 +1183,57 @@ class Mage_Core_Model_Locale
      * @param  string             $path   (Optional) Type of information to return
      * @return string|false The wished information in the given language
      */
-    public function getTranslation($value = null, $path = null)
+    public function getTranslation($value = null, $path = null, ?string $locale = null)
     {
         if ($path === 'country' || $path === 'territory') {
-            return $this->getCountryTranslation($value);
+            return $this->getCountryTranslation($value, $locale);
         }
-        return $this->getLocale()->getTranslation($value, $path, $this->getLocale());
+
+        $useLocale = $locale ?: $this->getLocaleCode();
+
+        switch ($path) {
+            case 'language':
+                return Locale::getDisplayLanguage($value, $useLocale);
+
+            case 'script':
+                return Locale::getDisplayScript($value, $useLocale);
+
+            case 'territory':
+            case 'country':
+                return Locale::getDisplayRegion('-' . $value, $useLocale);
+
+            case 'currency':
+            case 'currencytoname':
+                $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
+                $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
+                return $formatter->getTextAttribute(NumberFormatter::CURRENCY_CODE);
+
+            case 'currencysymbol':
+                $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
+                $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
+                return $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+
+            case 'timezone':
+                // PHP doesn't have built-in timezone name translations
+                return $value;
+
+            case 'date':
+            case 'dateformat':
+                $list = $this->getTranslationList('dateformat');
+                return $list[$value] ?? false;
+
+            case 'time':
+            case 'timeformat':
+                $list = $this->getTranslationList('timeformat');
+                return $list[$value] ?? false;
+
+            case 'monthdays':
+                $list = $this->getTranslationList('monthdays');
+                return $list[$value] ?? false;
+
+            default:
+                return false;
+        }
     }
 
     /**

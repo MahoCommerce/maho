@@ -54,7 +54,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Locale extends Mage_Core_Model_
 
             if (preg_match('/(base|default)$/', $data->getPath(), $match)) {
                 if (!in_array($data->getValue(), $values)) {
-                    $currencyName = Mage::app()->getLocale()->currency($data->getValue())->getName();
+                    $currencyName = $data->getValue();
                     if ($match[1] == 'base') {
                         $fieldName = Mage::helper('adminhtml')->__('Base currency');
                     } else {

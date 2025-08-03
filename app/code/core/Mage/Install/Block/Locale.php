@@ -18,15 +18,15 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
     }
 
     /**
-     * Retrieve locale object
+     * Retrieve locale code
      *
-     * @return Zend_Locale
+     * @return string
      */
     public function getLocale()
     {
         $locale = $this->getData('locale');
         if (is_null($locale)) {
-            $locale = Mage::app()->getLocale()->getLocale();
+            $locale = Mage::app()->getLocale()->getLocaleCode();
             $this->setData('locale', $locale);
         }
         return $locale;
@@ -65,7 +65,7 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
             ->setId('locale')
             ->setTitle(Mage::helper('install')->__('Locale'))
             ->setClass('required-entry')
-            ->setValue($this->getLocale()->__toString())
+            ->setValue($this->getLocale())
             ->setOptions(Mage::app()->getLocale()->getTranslatedOptionLocales())
             ->getHtml();
     }

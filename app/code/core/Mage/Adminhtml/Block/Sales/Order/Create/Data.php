@@ -42,19 +42,22 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Data extends Mage_Adminhtml_Block_
      */
     public function getCurrencyName($code)
     {
-        return Mage::app()->getLocale()->currency($code)->getName();
+        $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::CURRENCY);
+        $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
+        return $code; // Return currency code as name since NumberFormatter doesn't provide currency names
     }
 
     /**
-     * Retrieve curency name by code
+     * Retrieve curency symbol by code
      *
      * @param   string $code
      * @return  string
      */
     public function getCurrencySymbol($code)
     {
-        $currency = Mage::app()->getLocale()->currency($code);
-        return $currency->getSymbol() ?: $currency->getShortName();
+        $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::CURRENCY);
+        $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
+        return $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL) ?: $code;
     }
 
     /**

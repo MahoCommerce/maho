@@ -15,7 +15,6 @@ class Mage_Paypal_Block_Adminhtml_Settlement_Details_Form extends Mage_Adminhtml
     /**
      * Prepare read-only data and group it by fieldsets
      * @return $this
-     * @throws Zend_Currency_Exception
      */
     #[\Override]
     protected function _prepareForm()
@@ -62,7 +61,7 @@ class Mage_Paypal_Block_Adminhtml_Settlement_Details_Form extends Mage_Adminhtml
                         'label' => $settlement->getFieldLabel('gross_transaction_amount'),
                         'value' => Mage::app()->getLocale()
                                        ->currency($model->getData('gross_transaction_currency'))
-                                       ->toCurrency($model->getData('gross_transaction_amount')),
+                                       ->format($model->getData('gross_transaction_amount')),
                     ],
                 ],
                 'legend' => Mage::helper('paypal')->__('Transaction Information'),
@@ -78,7 +77,7 @@ class Mage_Paypal_Block_Adminhtml_Settlement_Details_Form extends Mage_Adminhtml
                         'label' => $settlement->getFieldLabel('fee_amount'),
                         'value' => Mage::app()->getLocale()
                                        ->currency($model->getData('fee_currency'))
-                                       ->toCurrency($model->getData('fee_amount')),
+                                       ->format($model->getData('fee_amount')),
                     ],
                 ],
                 'legend' => Mage::helper('paypal')->__('PayPal Fee Information'),

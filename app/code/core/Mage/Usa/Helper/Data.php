@@ -24,8 +24,7 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
     public function convertMeasureWeight($value, $sourceWeightMeasure, $toWeightMeasure)
     {
         if ($value) {
-            $locale = Mage::app()->getLocale()->getLocale();
-            $unitWeight = new Zend_Measure_Weight($value, $sourceWeightMeasure, $locale);
+            $unitWeight = new Zend_Measure_Weight($value, $sourceWeightMeasure, null);
             $unitWeight->setType($toWeightMeasure);
             return $unitWeight->getValue();
         }
@@ -43,8 +42,7 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
     public function convertMeasureDimension($value, $sourceDimensionMeasure, $toDimensionMeasure)
     {
         if ($value) {
-            $locale = Mage::app()->getLocale()->getLocale();
-            $unitDimension = new Zend_Measure_Length($value, $sourceDimensionMeasure, $locale);
+            $unitDimension = new Zend_Measure_Length($value, $sourceDimensionMeasure, null);
             $unitDimension->setType($toDimensionMeasure);
             return $unitDimension->getValue();
         }

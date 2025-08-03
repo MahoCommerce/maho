@@ -22,7 +22,7 @@ class Mage_Core_Model_Resource_Translate extends Mage_Core_Model_Resource_Db_Abs
      * Retrieve translation array for store / locale code
      *
      * @param int $storeId
-     * @param string|Zend_Locale $locale
+     * @param string|null $locale
      * @return array
      */
     public function getTranslationArray($storeId = null, $locale = null)

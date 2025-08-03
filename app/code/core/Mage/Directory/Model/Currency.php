@@ -262,7 +262,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
         if ($price == -0) {
             $price = 0;
         }
-        return Mage::app()->getLocale()->currency($this->getCode())->toCurrency($price, $options);
+        return Mage::app()->getLocale()->currency($this->getCode())->format($price);
     }
 
     /**
@@ -272,8 +272,16 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      */
     public function getOutputFormat()
     {
-        $formated = $this->formatTxt(0);
-        $number = $this->formatTxt(0, ['display' => Zend_Currency::NO_SYMBOL]);
+        $formatter = Mage::app()->getLocale()->currency($this->getCode());
+        $formated = $formatter->format(0);
+
+        // Create a number formatter without currency symbol
+        $numberFormatter = new NumberFormatter(
+            Mage::app()->getLocale()->getLocaleCode(),
+            NumberFormatter::DECIMAL,
+        );
+        $number = $numberFormatter->format(0);
+
         return str_replace($number, '%s', $formated);
     }
 
