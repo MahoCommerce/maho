@@ -762,11 +762,25 @@ class Mage_Core_Model_Locale extends Varien_Object
             // Set the currency code on the formatter
             $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $currency);
 
+            // Check for custom currency symbol from CurrencySymbol model
+            $customSymbol = false;
+            try {
+                $currencySymbolModel = Mage::getSingleton('currencysymbol/system_currencysymbol');
+                $customSymbol = $currencySymbolModel->getCurrencySymbol($currency, $this->getLocaleCode());
+            } catch (Exception $e) {
+                // CurrencySymbol module may not be available, continue with default behavior
+            }
+
             // Get custom options from event
             $options = new Varien_Object();
+            if ($customSymbol) {
+                $options->setData('symbol', $customSymbol);
+            }
+
             Mage::dispatchEvent('currency_display_options_forming', [
                 'currency_options' => $options,
                 'base_code' => $currency,
+                'locale_code' => $this->getLocaleCode(),
             ]);
 
             // Apply custom options if any
