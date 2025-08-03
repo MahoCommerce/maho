@@ -1250,49 +1250,26 @@ class Mage_Core_Model_Locale
 
         $useLocale = $locale ?: $this->getLocaleCode();
 
-        switch ($path) {
-            case 'language':
-                return Locale::getDisplayLanguage($value, $useLocale);
-
-            case 'script':
-                return Locale::getDisplayScript($value, $useLocale);
-
-            case 'territory':
-            case 'country':
-                return Locale::getDisplayRegion('-' . $value, $useLocale);
-
-            case 'currency':
-            case 'currencytoname':
+        return match ($path) {
+            'language' => Locale::getDisplayLanguage($value, $useLocale),
+            'script' => Locale::getDisplayScript($value, $useLocale),
+            'territory', 'country' => Locale::getDisplayRegion('-' . $value, $useLocale),
+            'currency', 'currencytoname' => (function() use ($useLocale, $value) {
                 $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
                 $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
                 return $formatter->getTextAttribute(NumberFormatter::CURRENCY_CODE);
-
-            case 'currencysymbol':
+            })(),
+            'currencysymbol' => (function() use ($useLocale, $value) {
                 $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
                 $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
                 return $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
-
-            case 'timezone':
-                // PHP doesn't have built-in timezone name translations
-                return $value;
-
-            case 'date':
-            case 'dateformat':
-                $list = $this->getTranslationList('dateformat');
-                return $list[$value] ?? false;
-
-            case 'time':
-            case 'timeformat':
-                $list = $this->getTranslationList('timeformat');
-                return $list[$value] ?? false;
-
-            case 'monthdays':
-                $list = $this->getTranslationList('monthdays');
-                return $list[$value] ?? false;
-
-            default:
-                return false;
-        }
+            })(),
+            'timezone' => $value, // PHP doesn't have built-in timezone name translations
+            'date', 'dateformat' => ($this->getTranslationList('dateformat'))[$value] ?? false,
+            'time', 'timeformat' => ($this->getTranslationList('timeformat'))[$value] ?? false,
+            'monthdays' => ($this->getTranslationList('monthdays'))[$value] ?? false,
+            default => false,
+        };
     }
 
     /**
