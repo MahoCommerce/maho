@@ -63,7 +63,7 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
                 ->setTitle(Mage::helper('page')->__('Interface Language'))
                 ->setExtraParams('style="width:200px"')
                 ->setValue($locale->getLocaleCode())
-                ->setOptions($locale->getTranslatedOptionLocales())
+                ->setOptions($locale->getOptionLocales())
                 ->getHtml();
             Mage::app()->saveCache($html, $cacheId, [self::LOCALE_CACHE_TAG], self::LOCALE_CACHE_LIFETIME);
         }
