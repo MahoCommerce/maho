@@ -17,12 +17,7 @@
         <reference name="left">
             <block type="directory/adminhtml_country_edit_tabs" name="directory_country_edit_tabs">
                 <block type="directory/adminhtml_country_edit_tab_main" name="directory_country_edit_tab_main"/>
-                <block type="directory/adminhtml_country_edit_tab_translations" name="directory_country_edit_tab_translations">
-                    <block type="directory/adminhtml_country_edit_tab_translations_form" name="directory_country_edit_tab_translations_form"/>
-                    <block type="directory/adminhtml_country_edit_tab_translations_grid" name="directory_country_edit_tab_translations_grid"/>
-                </block>
                 <action method="addTab"><name>main</name><block>directory_country_edit_tab_main</block></action>
-                <action method="addTab"><name>translations</name><block>directory_country_edit_tab_translations</block></action>
             </block>
         </reference>
     </adminhtml_directory_country_edit>
@@ -37,11 +32,6 @@
         </block>
     </adminhtml_directory_country_grid>
 
-    <adminhtml_directory_country_translationgrid>
-        <block type="core/text_list" name="root" output="toHtml">
-            <block type="directory/adminhtml_country_edit_tab_translations_grid" name="directory_country_edit_tab_translations_grid"/>
-        </block>
-    </adminhtml_directory_country_translationgrid>
 
     <!-- Regions Management -->
     <adminhtml_directory_region_index>
