@@ -884,39 +884,49 @@ class Mage_Core_Model_Locale extends Varien_Object
         $decimalSymbol = $formatter->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
         $groupSymbol = $formatter->getSymbol(NumberFormatter::GROUPING_SEPARATOR_SYMBOL);
 
-        // Parse the pattern to determine precision
-        $pos = strpos($pattern, ';');
+        // Get currency pattern with actual symbol (not generic ¤)
+        $currency = Mage::app()->getStore()->getCurrentCurrency();
+        $currencyFormatter = $this->currency($currency->getCode());
+        $currencyPattern = $currencyFormatter->getPattern();
+        $currencySymbol = $currencyFormatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+
+        // Parse the CURRENCY pattern to determine precision (not decimal pattern)
+        $pos = strpos($currencyPattern, ';');
         if ($pos !== false) {
-            $pattern = substr($pattern, 0, $pos);
+            $currencyPattern = substr($currencyPattern, 0, $pos);
         }
 
-        // Count decimal places
-        $decimalPos = strpos($pattern, '.');
+        // Count decimal places from currency pattern
+        $decimalPos = strpos($currencyPattern, '.');
         $totalPrecision = 0;
         $requiredPrecision = 0;
 
         if ($decimalPos !== false) {
-            $decimalPart = substr($pattern, $decimalPos + 1);
+            $decimalPart = substr($currencyPattern, $decimalPos + 1);
             // Count all decimal pattern characters
             $totalPrecision = strlen(preg_replace('/[^0#]/', '', $decimalPart));
             // Count required decimal places (0s)
             $requiredPrecision = strlen(preg_replace('/[^0]/', '', $decimalPart));
         }
 
-        // Determine grouping length
+        // Determine grouping length from currency pattern
         $groupLength = 3; // Default
-        $integerPart = $decimalPos !== false ? substr($pattern, 0, $decimalPos) : $pattern;
+        $integerPart = $decimalPos !== false ? substr($currencyPattern, 0, $decimalPos) : $currencyPattern;
         $lastComma = strrpos($integerPart, ',');
         if ($lastComma !== false) {
             $afterComma = substr($integerPart, $lastComma + 1);
-            $groupLength = strlen(preg_replace('/[^0#]/', '', $afterComma));
+            $groupLength = strlen(preg_replace('/[^0#¤]/', '', $afterComma));
         }
 
-        // Count required integer digits
+        // Count required integer digits from currency pattern
         $integerRequired = substr_count($integerPart, '0');
 
+        // Replace generic currency symbol ¤ with actual currency symbol
+        $jsPattern = preg_replace('/[#0,\.]+/', '%s', $currencyPattern);
+        $jsPattern = str_replace('¤', $currencySymbol, $jsPattern);
+
         return [
-            'pattern' => Mage::app()->getStore()->getCurrentCurrency()->getOutputFormat(),
+            'pattern' => $jsPattern,
             'precision' => $totalPrecision,
             'requiredPrecision' => $requiredPrecision,
             'decimalSymbol' => $decimalSymbol,
