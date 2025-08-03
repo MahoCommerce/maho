@@ -813,6 +813,9 @@ class Mage_Core_Model_Locale
         if (!isset(self::$_currencyCache[$this->getLocaleCode()][$currency])) {
             $formatter = new NumberFormatter($this->getLocaleCode(), NumberFormatter::CURRENCY);
 
+            // Set the currency code on the formatter
+            $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $currency);
+
             // Get custom options from event
             $options = new Varien_Object();
             Mage::dispatchEvent('currency_display_options_forming', [
