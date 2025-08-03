@@ -40,12 +40,11 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Data extends Mage_Adminhtml_Block_
      *
      * @param   string $code
      * @return  string
+     * @deprecated since 25.9.0
      */
     public function getCurrencyName($code)
     {
-        $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::CURRENCY);
-        $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
-        return $code; // Return currency code as name since NumberFormatter doesn't provide currency names
+        return $code;
     }
 
     /**

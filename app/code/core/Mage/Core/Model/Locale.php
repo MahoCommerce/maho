@@ -69,6 +69,8 @@ class Mage_Core_Model_Locale
     protected $_emulatedLocales = [];
 
     protected static $_currencyCache = [];
+    /** @var NumberFormatter[] */
+    protected static $_numberFormatterCache = [];
 
     /**
      * Mage_Core_Model_Locale constructor.
@@ -874,6 +876,23 @@ class Mage_Core_Model_Locale
     public function getCurrencySymbol($currencyCode)
     {
         return $this->currency($currencyCode)->getSymbol(NumberFormatter::CURRENCY_SYMBOL) ?: $currencyCode;
+    }
+
+    /**
+     * Parse a number string to float using locale-specific formatting
+     *
+     * @param string $value
+     * @return float|false
+     */
+    public function parseNumber($value)
+    {
+        if (!isset(self::$_numberFormatterCache[$this->getLocaleCode()])) {
+            self::$_numberFormatterCache[$this->getLocaleCode()] = new NumberFormatter(
+                $this->getLocaleCode(),
+                NumberFormatter::DECIMAL,
+            );
+        }
+        return self::$_numberFormatterCache[$this->getLocaleCode()]->parse($value);
     }
 
     /**

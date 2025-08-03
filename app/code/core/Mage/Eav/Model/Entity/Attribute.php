@@ -145,8 +145,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             $locale = Mage::app()->getLocale()->getLocaleCode();
 
             // Use NumberFormatter to validate and normalize the number
-            $formatter = new NumberFormatter($locale, NumberFormatter::DECIMAL);
-            $parsedValue = $formatter->parse($defaultValue);
+            $parsedValue = Mage::app()->getLocale()->parseNumber($defaultValue);
 
             if ($parsedValue === false) {
                 throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));

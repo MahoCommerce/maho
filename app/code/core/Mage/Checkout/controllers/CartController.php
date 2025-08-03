@@ -194,8 +194,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $params = $this->getRequest()->getParams();
         try {
             if (isset($params['qty'])) {
-                $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::DECIMAL);
-                $params['qty'] = $formatter->parse($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->parseNumber($params['qty']);
             }
 
             $product = $this->_initProduct();
@@ -349,8 +348,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
         try {
             if (isset($params['qty'])) {
-                $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::DECIMAL);
-                $params['qty'] = $formatter->parse($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->parseNumber($params['qty']);
             }
 
             $quoteItem = $cart->getQuote()->getItemById($id);
@@ -439,10 +437,9 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         try {
             $cartData = $this->getRequest()->getParam('cart');
             if (is_array($cartData)) {
-                $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::DECIMAL);
                 foreach ($cartData as $index => $data) {
                     if (isset($data['qty'])) {
-                        $cartData[$index]['qty'] = $formatter->parse(trim($data['qty']));
+                        $cartData[$index]['qty'] = Mage::app()->getLocale()->parseNumber(trim($data['qty']));
                     }
                 }
                 $cart = $this->_getCart();
@@ -653,8 +650,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             try {
                 $cart = $this->_getCart();
                 if (isset($qty)) {
-                    $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::DECIMAL);
-                    $qty = $formatter->parse($qty);
+                    $qty = Mage::app()->getLocale()->parseNumber($qty);
                 }
 
                 $quoteItem = $cart->getQuote()->getItemById($id);
