@@ -56,9 +56,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Data extends Mage_Adminhtml_Block_
      */
     public function getCurrencySymbol($code)
     {
-        $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::CURRENCY);
-        $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $code);
-        return $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL) ?: $code;
+        return Mage::app()->getLocale()->getCurrencySymbol($code);
     }
 
     /**

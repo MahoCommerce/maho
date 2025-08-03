@@ -28,6 +28,6 @@ class Mage_Adminhtml_Block_Report_Grid_Column_Renderer_Currency extends Mage_Adm
         }
 
         $data = (float) $data * $this->_getRate($row);
-        return Mage::app()->getLocale()->currency($currencyCode)->format($data);
+        return Mage::app()->getLocale()->formatCurrency($data, $currencyCode);
     }
 }

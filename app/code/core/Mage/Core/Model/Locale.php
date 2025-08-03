@@ -840,6 +840,43 @@ class Mage_Core_Model_Locale
     }
 
     /**
+     * Format currency value using locale-specific formatting
+     *
+     * @param float|int|string $value
+     * @param string $currencyCode
+     * @return string
+     */
+    public function formatCurrency($value, $currencyCode)
+    {
+        return $this->currency($currencyCode)->format((float) $value);
+    }
+
+    /**
+     * Format price value using store's base currency
+     *
+     * @param float|int|string $value
+     * @param int|string|null $storeId
+     * @return string
+     */
+    public function formatPrice($value, $storeId = null)
+    {
+        $store = Mage::app()->getStore($storeId);
+        $currencyCode = $store->getBaseCurrencyCode();
+        return $this->formatCurrency($value, $currencyCode);
+    }
+
+    /**
+     * Get currency symbol for a given currency code
+     *
+     * @param string $currencyCode
+     * @return string
+     */
+    public function getCurrencySymbol($currencyCode)
+    {
+        return $this->currency($currencyCode)->getSymbol(NumberFormatter::CURRENCY_SYMBOL) ?: $currencyCode;
+    }
+
+    /**
      * Returns the first found number from an string
      * Parsing depends on given locale (grouping and decimal)
      *
