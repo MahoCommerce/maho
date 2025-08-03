@@ -16315,18 +16315,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout/Validator.php
 
 		-
-			message: '#^Method Mage_Core_Model_Locale\:\:emulate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
-
-		-
-			message: '#^Method Mage_Core_Model_Locale\:\:revert\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
-
-		-
 			message: '#^Property Mage_Core_Model_Locale\:\:\$_currencyCache has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
