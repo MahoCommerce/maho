@@ -864,24 +864,16 @@ class Mage_Core_Model_Locale
 
     /**
      * Format currency value using locale-specific formatting
-     *
-     * @param float|int|string $value
-     * @param string $currencyCode
-     * @return string
      */
-    public function formatCurrency($value, $currencyCode)
+    public function formatCurrency(float|int|string $value, string $currencyCode): string
     {
         return $this->currency($currencyCode)->format((float) $value);
     }
 
     /**
      * Format price value using store's base currency
-     *
-     * @param float|int|string $value
-     * @param int|string|null $storeId
-     * @return string
      */
-    public function formatPrice($value, $storeId = null)
+    public function formatPrice(float|int|string $value, int|string|null $storeId = null): string
     {
         $store = Mage::app()->getStore($storeId);
         $currencyCode = $store->getBaseCurrencyCode();
@@ -890,22 +882,16 @@ class Mage_Core_Model_Locale
 
     /**
      * Get currency symbol for a given currency code
-     *
-     * @param string $currencyCode
-     * @return string
      */
-    public function getCurrencySymbol($currencyCode)
+    public function getCurrencySymbol(string $currencyCode): string
     {
         return $this->currency($currencyCode)->getSymbol(NumberFormatter::CURRENCY_SYMBOL) ?: $currencyCode;
     }
 
     /**
      * Normalize a locale-formatted number string to float
-     *
-     * @param string $value
-     * @return float|false
      */
-    public function normalizeNumber($value)
+    public function normalizeNumber(string $value): float|false
     {
         if (!isset(self::$_numberFormatterCache[$this->getLocaleCode()])) {
             self::$_numberFormatterCache[$this->getLocaleCode()] = new NumberFormatter(
