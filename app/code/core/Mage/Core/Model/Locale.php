@@ -1142,18 +1142,6 @@ class Mage_Core_Model_Locale
                     'short' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::SHORT))->getPattern(),
                 ];
 
-            case 'localeupgrade':
-                // Return empty array - no locale upgrades needed
-                return [];
-
-            case 'windowstotimezone':
-                // Return a simplified mapping of timezone identifiers
-                $zones = [];
-                foreach (DateTimeZone::listIdentifiers() as $tz) {
-                    $zones[$tz] = $tz;
-                }
-                return $zones;
-
             default:
                 return [];
         }
