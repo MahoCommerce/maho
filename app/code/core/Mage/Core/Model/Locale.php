@@ -27,6 +27,27 @@ class Mage_Core_Model_Locale
     public const HTML5_DATETIME_FORMAT = 'Y-m-d\TH:i';
 
     /**
+     * Weight unit constants
+     */
+    public const WEIGHT_KILOGRAM = 'kg';
+    public const WEIGHT_POUND = 'lb';
+    public const WEIGHT_OUNCE = 'oz';
+    public const WEIGHT_GRAM = 'g';
+    public const WEIGHT_TON = 't';
+
+    /**
+     * Length unit constants
+     */
+    public const LENGTH_METER = 'm';
+    public const LENGTH_CENTIMETER = 'cm';
+    public const LENGTH_MILLIMETER = 'mm';
+    public const LENGTH_INCH = 'in';
+    public const LENGTH_FOOT = 'ft';
+    public const LENGTH_YARD = 'yd';
+    public const LENGTH_MILE = 'mi';
+    public const LENGTH_KILOMETER = 'km';
+
+    /**
      * XML path constants
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
@@ -1254,12 +1275,12 @@ class Mage_Core_Model_Locale
             'language' => Locale::getDisplayLanguage($value, $useLocale),
             'script' => Locale::getDisplayScript($value, $useLocale),
             'territory', 'country' => Locale::getDisplayRegion('-' . $value, $useLocale),
-            'currency', 'currencytoname' => (function() use ($useLocale, $value) {
+            'currency', 'currencytoname' => (function () use ($useLocale, $value) {
                 $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
                 $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
                 return $formatter->getTextAttribute(NumberFormatter::CURRENCY_CODE);
             })(),
-            'currencysymbol' => (function() use ($useLocale, $value) {
+            'currencysymbol' => (function () use ($useLocale, $value) {
                 $formatter = new NumberFormatter($useLocale, NumberFormatter::CURRENCY);
                 $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $value);
                 return $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);

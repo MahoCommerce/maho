@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use PhpUnitsOfMeasure\PhysicalQuantity\Mass;
+use PhpUnitsOfMeasure\PhysicalQuantity\Length;
+
 class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Usa';
@@ -20,14 +23,13 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
      * @param  mixed $value
      * @param  string $sourceWeightMeasure
      * @param  string $toWeightMeasure
-     * @return int|null|string
+     * @return float|null
      */
     public function convertMeasureWeight($value, $sourceWeightMeasure, $toWeightMeasure)
     {
         if ($value) {
-            $unitWeight = new Zend_Measure_Weight($value, $sourceWeightMeasure, null);
-            $unitWeight->setType($toWeightMeasure);
-            return $unitWeight->getValue();
+            $mass = new Mass($value, $sourceWeightMeasure);
+            return $mass->toUnit($toWeightMeasure);
         }
         return null;
     }
@@ -38,14 +40,13 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
      * @param  mixed $value
      * @param  string $sourceDimensionMeasure
      * @param  string $toDimensionMeasure
-     * @return int|null|string
+     * @return float|null
      */
     public function convertMeasureDimension($value, $sourceDimensionMeasure, $toDimensionMeasure)
     {
         if ($value) {
-            $unitDimension = new Zend_Measure_Length($value, $sourceDimensionMeasure, null);
-            $unitDimension->setType($toDimensionMeasure);
-            return $unitDimension->getValue();
+            $length = new Length($value, $sourceDimensionMeasure);
+            return $length->toUnit($toDimensionMeasure);
         }
         return null;
     }
@@ -58,10 +59,15 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMeasureWeightName($key)
     {
-        $weight = new Zend_Measure_Weight(0);
-        $conversionList = $weight->getConversionList();
-        if (!empty($conversionList[$key]) && !empty($conversionList[$key][1])) {
-            return $conversionList[$key][1];
+        $units = Mass::listAllUnits();
+        if (isset($units[$key])) {
+            return $key; // Return the unit name itself
+        }
+        // Check aliases
+        foreach ($units as $unit => $aliases) {
+            if (in_array($key, $aliases)) {
+                return $unit;
+            }
         }
         return '';
     }
@@ -74,10 +80,15 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMeasureDimensionName($key)
     {
-        $weight = new Zend_Measure_Length(0);
-        $conversionList = $weight->getConversionList();
-        if (!empty($conversionList[$key]) && !empty($conversionList[$key][1])) {
-            return $conversionList[$key][1];
+        $units = Length::listAllUnits();
+        if (isset($units[$key])) {
+            return $key; // Return the unit name itself
+        }
+        // Check aliases
+        foreach ($units as $unit => $aliases) {
+            if (in_array($key, $aliases)) {
+                return $unit;
+            }
         }
         return '';
     }

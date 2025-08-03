@@ -28447,18 +28447,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Helper/Data.php
 
 		-
-			message: '#^Parameter \#2 \$type of class Zend_Measure_Length constructor expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Helper/Data.php
-
-		-
-			message: '#^Parameter \#2 \$type of class Zend_Measure_Weight constructor expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Helper/Data.php
-
-		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Abstract\:\:_prepareShipmentRequest\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

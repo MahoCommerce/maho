@@ -35,8 +35,8 @@ class Mage_Usa_Block_Adminhtml_Dhl_Unitofmeasure extends Mage_Adminhtml_Block_Sy
         $weight = round(
             (float) Mage::helper('usa')->convertMeasureWeight(
                 $kgWeight,
-                Zend_Measure_Weight::KILOGRAM,
-                Zend_Measure_Weight::POUND,
+                Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
+                Mage_Core_Model_Locale::WEIGHT_POUND,
             ),
             3,
         );
