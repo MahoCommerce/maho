@@ -264,16 +264,12 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     public function getOutputFormat()
     {
         $formatter = Mage::app()->getLocale()->currency($this->getCode());
-        $formated = $formatter->format(0);
+        $pattern = $formatter->getPattern();
 
-        // Create a number formatter without currency symbol
-        $numberFormatter = new NumberFormatter(
-            Mage::app()->getLocale()->getLocaleCode(),
-            NumberFormatter::DECIMAL,
-        );
-        $number = $numberFormatter->format(0);
-
-        return str_replace($number, '%s', $formated);
+        // Convert ICU number pattern to simple %s placeholder
+        // Replace sequences of number format characters (#, 0, comma, period) with %s
+        // This preserves currency symbols and other formatting elements
+        return preg_replace('/[#0,\.]+/', '%s', $pattern);
     }
 
     /**
