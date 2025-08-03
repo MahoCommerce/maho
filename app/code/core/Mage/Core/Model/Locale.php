@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Locale
+class Mage_Core_Model_Locale extends Varien_Object
 {
     /**
      * Default locale name
@@ -92,14 +92,6 @@ class Mage_Core_Model_Locale
     protected static $_currencyCache = [];
     /** @var NumberFormatter[] */
     protected static $_numberFormatterCache = [];
-
-    /**
-     * Mage_Core_Model_Locale constructor.
-     */
-    public function __construct(?string $locale = null)
-    {
-        $this->setLocale($locale);
-    }
 
     /**
      * Set default locale code
@@ -796,7 +788,7 @@ class Mage_Core_Model_Locale
     /**
      * Format currency value using locale-specific formatting
      */
-    public function formatCurrency(float|int|string $value, string $currencyCode): string
+    public function formatCurrency(float|int|string|null $value, string $currencyCode): string
     {
         return $this->currency($currencyCode)->format((float) $value);
     }
@@ -804,7 +796,7 @@ class Mage_Core_Model_Locale
     /**
      * Format price value using store's base currency
      */
-    public function formatPrice(float|int|string $value, int|string|null $storeId = null): string
+    public function formatPrice(float|int|string|null $value, int|string|null $storeId = null): string
     {
         $store = Mage::app()->getStore($storeId);
         $currencyCode = $store->getBaseCurrencyCode();
@@ -938,10 +930,11 @@ class Mage_Core_Model_Locale
      * Push current locale to stack and replace with locale from specified store
      * Event is not dispatched.
      */
-    public function emulate(int $storeId): void
+    public function emulate(mixed $store): void
     {
-        if ($storeId) {
+        if ($store) {
             $this->_emulatedLocales[] = $this->getLocaleCode();
+            $storeId = $store instanceof Mage_Core_Model_Store ? $store->getId() : $store;
             $this->_localeCode = Mage::getStoreConfig(self::XML_PATH_DEFAULT_LOCALE, $storeId);
             Mage::getSingleton('core/translate')
                 ->setLocale($this->_localeCode)
