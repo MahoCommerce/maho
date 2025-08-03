@@ -42,9 +42,9 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
                 // Parse the existing value and convert to ISO format
                 $dateTime = new DateTime($this->getValue());
                 if ($this->getTime()) {
-                    $isoValue = $dateTime->format('Y-m-d\\TH:i');
+                    $isoValue = $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
                 } else {
-                    $isoValue = $dateTime->format('Y-m-d');
+                    $isoValue = $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT);
                 }
             } catch (Exception $e) {
                 // If parsing fails, use the original value

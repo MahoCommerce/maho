@@ -6,7 +6,7 @@
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -593,7 +593,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $requestHeader->addChild('AccountNumber', $r->getAccount());
         $requestHeader->addChild('MeterNumber', '0');
 
-        $xml->addChild('ShipDate', date('Y-m-d'));
+        $xml->addChild('ShipDate', date(Mage_Core_Model_Locale::DATE_FORMAT));
         $xml->addChild('DropoffType', $r->getDropoffType());
         if ($r->hasService()) {
             $xml->addChild('Service', $r->getService());
@@ -1043,7 +1043,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 $timestamp = $trackInfo->EstimatedDeliveryTimestamp ?? $trackInfo->ActualDeliveryTimestamp;
                 $timestamp = strtotime((string) $timestamp);
                 if ($timestamp) {
-                    $resultArray['deliverydate'] = date('Y-m-d', $timestamp);
+                    $resultArray['deliverydate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, $timestamp);
                     $resultArray['deliverytime'] = date('H:i:s', $timestamp);
                 }
 
@@ -1063,7 +1063,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 }
 
                 $resultArray['signedby'] = (string) $trackInfo->DeliverySignatureName;
-                $resultArray['shippeddate'] = date('Y-m-d', (int) $trackInfo->ShipTimestamp);
+                $resultArray['shippeddate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, (int) $trackInfo->ShipTimestamp);
                 if (isset($trackInfo->PackageWeight) && isset($trackInfo->Units)) {
                     $weight = (string) $trackInfo->PackageWeight;
                     $unit = (string) $trackInfo->Units;
@@ -1081,7 +1081,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                         $tempArray['activity'] = (string) $event->EventDescription;
                         $timestamp = strtotime((string) $event->Timestamp);
                         if ($timestamp) {
-                            $tempArray['deliverydate'] = date('Y-m-d', $timestamp);
+                            $tempArray['deliverydate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, $timestamp);
                             $tempArray['deliverytime'] = date('H:i:s', $timestamp);
                         }
                         if (isset($event->Address)) {

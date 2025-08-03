@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -112,13 +112,32 @@ abstract class Mage_Core_Model_Resource_Abstract
     /**
      * Format date to internal format
      *
-     * @param int|string|Zend_Date|bool|null $date
+     * @param int|string|DateTime|bool|null $date
      * @param bool $includeTime
      * @return string|null
      */
     public function formatDate($date, $includeTime = true)
     {
-        return Varien_Date::formatDate($date, $includeTime);
+        if ($date === true) {
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+            return date($format);
+        }
+
+        if ($date instanceof DateTime) {
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+            return $date->format($format);
+        }
+
+        if (empty($date)) {
+            return null;
+        }
+
+        if (!is_numeric($date)) {
+            $date = strtotime($date);
+        }
+
+        $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+        return date($format, $date);
     }
 
     /**
@@ -129,7 +148,7 @@ abstract class Mage_Core_Model_Resource_Abstract
      */
     public function mktime($str)
     {
-        return Varien_Date::toTimestamp($str);
+        return strtotime($str);
     }
 
     /**

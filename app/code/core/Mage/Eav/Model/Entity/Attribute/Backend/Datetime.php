@@ -65,25 +65,25 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
             if (preg_match('/^[0-9]+$/', $date)) {
                 $dateTime = new DateTime();
                 $dateTime->setTimestamp((int) $date);
-                return $dateTime->format('Y-m-d H:i:s');
+                return $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             }
 
             // ISO 8601 date format from native input (YYYY-MM-DD)
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                $dateTime = DateTime::createFromFormat('Y-m-d', $date);
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $date);
                 // Validate the date is actually valid (not just format)
-                if ($dateTime && $dateTime->format('Y-m-d') === $date) {
-                    return $dateTime->format('Y-m-d 00:00:00');
+                if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT) === $date) {
+                    return $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT . ' 00:00:00');
                 }
                 return null;
             }
 
             // ISO 8601 datetime-local format from native input (YYYY-MM-DDTHH:mm)
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
-                $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', substr($date, 0, 16));
+                $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
                 // Validate the datetime is actually valid (not just format)
-                if ($dateTime && $dateTime->format('Y-m-d\\TH:i') === substr($date, 0, 16)) {
-                    return $dateTime->format('Y-m-d H:i:s');
+                if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT) === substr($date, 0, 16)) {
+                    return $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 return null;
             }
@@ -103,7 +103,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
             );
 
             $dateTime = DateTime::createFromFormat($phpFormat, $date);
-            return $dateTime ? $dateTime->format('Y-m-d H:i:s') : null;
+            return $dateTime ? $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT) : null;
         } catch (Exception $e) {
             return null;
         }

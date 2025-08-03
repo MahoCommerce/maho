@@ -95,7 +95,7 @@ class EmailQueueClear extends BaseMahoCommand
         if ($olderThan) {
             $date = new \DateTime();
             $date->modify("-{$olderThan} days");
-            $collection->addFieldToFilter('created_at', ['lt' => $date->format('Y-m-d H:i:s')]);
+            $collection->addFieldToFilter('created_at', ['lt' => $date->format(\Mage_Core_Model_Locale::DATETIME_FORMAT)]);
             $statusLabel .= " (older than {$olderThan} days)";
         }
 

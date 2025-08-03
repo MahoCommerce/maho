@@ -4015,18 +4015,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Date.php
 
 		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date\:\:\$_format has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Date.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime\:\:\$_format has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Datetime.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Input\:\:\$_values has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -16099,18 +16087,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Cookie.php
 
 		-
-			message: '#^Binary operation "\+" between string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Core/Model/Date.php
-
-		-
-			message: '#^Binary operation "\-" between string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Core/Model/Date.php
-
-		-
 			message: '#^Call to an undefined method Mage_Core_Model_Resource_Design\:\:validate\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -16577,12 +16553,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Design.php
-
-		-
-			message: '#^Parameter \#1 \$date of method Mage_Core_Model_Resource_Db_Collection_Abstract\:\:formatDate\(\) expects int\|string\|Zend_Date, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Design/Collection.php
 
 		-
 			message: '#^Method Mage_Core_Model_Resource_Email_Queue\:\:_construct\(\) has no return type specified\.$#'
@@ -22510,12 +22480,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
 
 		-
-			message: '#^Method Mage_Payment_Model_Recurring_Profile\:\:exportStartDatetime\(\) should return string\|Zend_Date but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
-
-		-
 			message: '#^Parameter \#1 \$message of static method Mage\:\:throwException\(\) expects string, array given\.$#'
 			identifier: argument.type
 			count: 1
@@ -25066,12 +25030,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
 
 		-
-			message: '#^Property DOMNode\:\:\$nodeValue \(string\|null\) does not accept int\<min, \-1\>\|int\<1, max\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Test.php
-
-		-
 			message: '#^Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -27532,12 +27490,6 @@ parameters:
 			message: '#^Method Mage_SalesRule_Model_Rule\:\:setCouponCodeGenerator\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Rule.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Mage_SalesRule_Model_Coupon\:\:setExpirationDate\(\) expects Zend_Date, string given\.$#'
-			identifier: argument.type
-			count: 2
 			path: app/code/core/Mage/SalesRule/Model/Rule.php
 
 		-

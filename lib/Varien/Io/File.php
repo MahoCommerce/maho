@@ -6,7 +6,7 @@
  * @package    Varien_Io
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -768,7 +768,7 @@ class Varien_Io_File extends Varien_Io_Abstract
                 }
 
                 $list_item['text'] = $entry;
-                $list_item['mod_date'] = date(Varien_Date::DATETIME_PHP_FORMAT, filectime($fullpath));
+                $list_item['mod_date'] = date(Mage_Core_Model_Locale::DATETIME_FORMAT, filectime($fullpath));
                 $list_item['permissions'] = $this->_parsePermissions(fileperms($fullpath));
                 $list_item['owner'] = $this->_getFileOwner($fullpath);
 
