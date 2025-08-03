@@ -173,31 +173,41 @@ class Install extends BaseMahoCommand
             $dbUser = $input->getOption('db_user');
             $dbPass = $input->getOption('db_pass');
             $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
-
-            // Create a temporary MySQL configuration file
             $sampleDataDir = $targetDir . '/maho-sample-data-main';
-            $tmpMyCnf = $sampleDataDir . '/temp_my.cnf';
-            file_put_contents($tmpMyCnf, "[client]\nuser={$dbUser}\npassword={$dbPass}\nhost={$dbHost}\n");
-            chmod($tmpMyCnf, 0600);
 
-            foreach ($sqlFiles as $sqlFile) {
-                $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                $importCommand = 'mysql --defaults-extra-file=' . escapeshellarg($tmpMyCnf) . " {$dbName} < " . escapeshellarg($sqlFilePath);
-                exec($importCommand, $importOutput, $importReturnVar);
+            try {
+                // Create PDO connection
+                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                if ($importReturnVar !== 0) {
-                    $output->writeln("<error>Failed to import {$sqlFile}. mysql command returned: $importReturnVar</error>");
-                    $output->writeln('<error>Error output:</error>');
-                    foreach ($importOutput as $line) {
-                        $output->writeln($line);
-                    }
-                    unlink($tmpMyCnf);  // Remove the temporary configuration file
-                    return Command::FAILURE;
+                foreach ($sqlFiles as $sqlFile) {
+                    $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                    $output->writeln("<info>Importing {$sqlFile}...</info>");
+
+                    // Read SQL file content
+                    $sqlContent = file_get_contents($sqlFilePath);
+
+                    // Execute the entire file as a single operation
+                    $pdo->exec($sqlContent);
+                    $output->writeln("<info>Successfully imported {$sqlFile}</info>");
                 }
+
+            } catch (\PDOException $e) {
+                $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
+
+                // If it's a connection error, provide more helpful message
+                if (str_contains($e->getMessage(), 'Unknown database')) {
+                    $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
+                } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                    $output->writeln('<error>Access denied. Please check your database credentials.</error>');
+                }
+
+                return Command::FAILURE;
             }
 
             $output->writeln('<info>Sample data, media files, and database content installed successfully</info>');
-            $output->writeln('<info>Please run ./maho index:reindex:all and ./maho cache:flush</info>');
+            $output->writeln('<info>Please run ./maho index:reindex:all && ./maho cache:flush</info>');
 
             // Clean up
             unlink($tempFile);
