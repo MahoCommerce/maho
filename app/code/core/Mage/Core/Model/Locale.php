@@ -879,12 +879,12 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Parse a number string to float using locale-specific formatting
+     * Normalize a locale-formatted number string to float
      *
      * @param string $value
      * @return float|false
      */
-    public function parseNumber($value)
+    public function normalizeNumber($value)
     {
         if (!isset(self::$_numberFormatterCache[$this->getLocaleCode()])) {
             self::$_numberFormatterCache[$this->getLocaleCode()] = new NumberFormatter(

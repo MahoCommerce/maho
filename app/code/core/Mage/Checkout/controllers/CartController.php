@@ -194,7 +194,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $params = $this->getRequest()->getParams();
         try {
             if (isset($params['qty'])) {
-                $params['qty'] = Mage::app()->getLocale()->parseNumber($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->normalizeNumber($params['qty']);
             }
 
             $product = $this->_initProduct();
@@ -348,7 +348,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
         try {
             if (isset($params['qty'])) {
-                $params['qty'] = Mage::app()->getLocale()->parseNumber($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->normalizeNumber($params['qty']);
             }
 
             $quoteItem = $cart->getQuote()->getItemById($id);
@@ -439,7 +439,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             if (is_array($cartData)) {
                 foreach ($cartData as $index => $data) {
                     if (isset($data['qty'])) {
-                        $cartData[$index]['qty'] = Mage::app()->getLocale()->parseNumber(trim($data['qty']));
+                        $cartData[$index]['qty'] = Mage::app()->getLocale()->normalizeNumber(trim($data['qty']));
                     }
                 }
                 $cart = $this->_getCart();
@@ -650,7 +650,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             try {
                 $cart = $this->_getCart();
                 if (isset($qty)) {
-                    $qty = Mage::app()->getLocale()->parseNumber($qty);
+                    $qty = Mage::app()->getLocale()->normalizeNumber($qty);
                 }
 
                 $quoteItem = $cart->getQuote()->getItemById($id);
