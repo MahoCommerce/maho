@@ -93,8 +93,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form extends Mage_Adminhtml_Block_
         if (!is_null($this->getStoreId())) {
             $data['store_id'] = $this->getStoreId();
             $currencyCode = $this->getStore()->getCurrentCurrencyCode();
-            $symbol = Mage::app()->getLocale()->getCurrencySymbol($currencyCode);
-            $data['currency_symbol'] = $symbol;
+            $data['currency_symbol'] = Mage::app()->getLocale()->getCurrencySymbol($currencyCode);
             $data['shipping_method_reseted'] = !(bool) $this->getQuote()->getShippingAddress()->getShippingMethod();
             $data['payment_method'] = $this->getQuote()->getPayment()->getMethod();
         }
