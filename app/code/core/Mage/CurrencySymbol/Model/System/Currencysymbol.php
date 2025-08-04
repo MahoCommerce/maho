@@ -92,6 +92,7 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
 
     /**
      * Returns currency symbol properties array based on config values
+     * Now returns currency/locale pairs instead of just currencies
      *
      * @return array
      */
@@ -135,33 +136,62 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
                 }
             }
         }
-        ksort($allowedCurrencies);
+        $allowedCurrencies = array_unique($allowedCurrencies);
+        sort($allowedCurrencies);
+
+        // Get all used locales from stores
+        $usedLocales = [];
+        foreach ($storeModel->getStoreCollection() as $store) {
+            $localeCode = Mage::getStoreConfig('general/locale/code', $store);
+            if ($localeCode && !in_array($localeCode, $usedLocales)) {
+                $usedLocales[] = $localeCode;
+            }
+        }
+        sort($usedLocales);
 
         $currentSymbols = $this->_unserializeStoreConfig(self::XML_PATH_CUSTOM_CURRENCY_SYMBOL);
 
-        $locale = Mage::app()->getLocale();
-        foreach ($allowedCurrencies as $code) {
-            if (!$symbol = $locale->getTranslation($code, 'currencysymbol')) {
-                $symbol = $code;
+        // Generate currency/locale pairs
+        foreach ($allowedCurrencies as $currencyCode) {
+            if (empty($currencyCode)) {
+                continue;
             }
-            $name = $locale->getTranslation($code, 'nametocurrency');
-            if (!$name) {
-                $name = $code;
-            }
-            $this->_symbolsData[$code] = [
-                'parentSymbol'  => $symbol,
-                'displayName' => $name,
-            ];
 
-            if (isset($currentSymbols[$code]) && !empty($currentSymbols[$code])) {
-                $this->_symbolsData[$code]['displaySymbol'] = $currentSymbols[$code];
-            } else {
-                $this->_symbolsData[$code]['displaySymbol'] = $this->_symbolsData[$code]['parentSymbol'];
-            }
-            if ($this->_symbolsData[$code]['parentSymbol'] == $this->_symbolsData[$code]['displaySymbol']) {
-                $this->_symbolsData[$code]['inherited'] = true;
-            } else {
-                $this->_symbolsData[$code]['inherited'] = false;
+            foreach ($usedLocales as $localeCode) {
+                $locale = Mage::getModel('core/locale', $localeCode);
+
+                // Get the actual currency symbol as it appears in this locale using NumberFormatter
+                $formatter = new NumberFormatter($localeCode, NumberFormatter::CURRENCY);
+                $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $currencyCode);
+                $symbol = $formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+
+                if (!$symbol) {
+                    $symbol = $currencyCode;
+                }
+
+                $name = $locale->getTranslation($currencyCode, 'nametocurrency');
+                if (!$name) {
+                    $name = $currencyCode;
+                }
+
+                $key = $currencyCode . '_' . $localeCode;
+
+                $this->_symbolsData[$key] = [
+                    'currencyCode' => $currencyCode,
+                    'localeCode' => $localeCode,
+                    'parentSymbol' => $symbol,
+                    'displayName' => $name,
+                    'localeName' => $locale->getTranslation($localeCode, 'language'),
+                ];
+
+                // Check if there's a custom symbol for this currency/locale pair
+                if (isset($currentSymbols[$key]) && !empty($currentSymbols[$key])) {
+                    $this->_symbolsData[$key]['displaySymbol'] = $currentSymbols[$key];
+                    $this->_symbolsData[$key]['inherited'] = false;
+                } else {
+                    $this->_symbolsData[$key]['displaySymbol'] = $symbol;
+                    $this->_symbolsData[$key]['inherited'] = true;
+                }
             }
         }
 
@@ -176,10 +206,11 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
      */
     public function setCurrencySymbolsData($symbols = [])
     {
-        foreach ($this->getCurrencySymbolsData() as $code => $values) {
-            if (isset($symbols[$code])) {
-                if ($symbols[$code] == $values['parentSymbol'] || empty($symbols[$code])) {
-                    unset($symbols[$code]);
+        foreach ($this->getCurrencySymbolsData() as $key => $values) {
+            if (isset($symbols[$key])) {
+                // Only remove if empty, allow overriding even when matching parentSymbol
+                if (empty($symbols[$key])) {
+                    unset($symbols[$key]);
                 }
             }
         }
@@ -216,16 +247,29 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
     }
 
     /**
-     * Returns custom currency symbol by currency code
+     * Returns custom currency symbol by currency code and locale
      *
-     * @param  string $code
+     * @param  string $currencyCode
+     * @param  string $localeCode
      * @return false|string
      */
-    public function getCurrencySymbol($code)
+    public function getCurrencySymbol($currencyCode, $localeCode = null)
     {
         $customSymbols = $this->_unserializeStoreConfig(self::XML_PATH_CUSTOM_CURRENCY_SYMBOL);
-        if (array_key_exists($code, $customSymbols)) {
-            return $customSymbols[$code];
+
+        // If no locale provided, get current locale
+        if ($localeCode === null) {
+            $localeCode = Mage::app()->getLocale()->getLocaleCode();
+        }
+
+        $key = $currencyCode . '_' . $localeCode;
+        if (array_key_exists($key, $customSymbols)) {
+            return $customSymbols[$key];
+        }
+
+        // Fallback: check for old format (just currency code) for backwards compatibility
+        if (array_key_exists($currencyCode, $customSymbols)) {
+            return $customSymbols[$currencyCode];
         }
 
         return false;

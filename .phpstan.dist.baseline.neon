@@ -1699,12 +1699,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Column/Renderer/Currency.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Block_Report_Grid_Shopcart\:\:\$_currentCurrencyCode has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -3991,12 +3985,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Concat.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Currency.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency\:\:\$_currencies has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -4043,12 +4031,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Options.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Price.php
 
 		-
 			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price\:\:\$_currencies has no type specified\.$#'
@@ -14869,12 +14851,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-			message: '#^Parameter \#1 \$qty of method Mage_Sales_Model_Quote_Item\:\:setQty\(\) expects float, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/CartController.php
-
-		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Quote\:\:setCustomerId\(\) expects int, null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -16337,18 +16313,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout/Validator.php
-
-		-
-			message: '#^Method Mage_Core_Model_Locale\:\:emulate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
-
-		-
-			message: '#^Method Mage_Core_Model_Locale\:\:revert\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
 
 		-
 			message: '#^Property Mage_Core_Model_Locale\:\:\$_currencyCache has no type specified\.$#'
@@ -19429,12 +19393,6 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Currency/Filter.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Filter.php
-
-		-
 			message: '#^Method Mage_Directory_Model_Observer\:\:scheduledUpdateCurrencyRates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19985,12 +19943,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Mage_Eav_Model_Entity_Attribute\:\:setDefaultValue\(\) expects int, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute.php
 
 		-
 			message: '#^Call to an undefined method Mage_Core_Model_Resource_Db_Abstract\:\:getIdByCode\(\)\.$#'
@@ -28483,18 +28435,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Helper/Data.php
 
 		-
-			message: '#^Parameter \#2 \$type of class Zend_Measure_Length constructor expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Helper/Data.php
-
-		-
-			message: '#^Parameter \#2 \$type of class Zend_Measure_Weight constructor expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Helper/Data.php
-
-		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Abstract\:\:_prepareShipmentRequest\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -32261,12 +32201,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Varien/File/Uploader.php
-
-		-
-			message: '#^Access to deprecated property \$allowWhiteSpace of class Zend_Filter_Alnum\.$#'
-			identifier: property.deprecated
-			count: 1
-			path: lib/Varien/Filter/FormElementName.php
 
 		-
 			message: '#^Method Varien_Filter_Sprintf\:\:__construct\(\) has parameter \$decPoint with no type specified\.$#'

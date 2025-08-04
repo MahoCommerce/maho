@@ -973,6 +973,113 @@ XML;
         }
     }
 
+    /**
+     * Filter value using specified filter type
+     */
+    public function filter(mixed $value, string $filter, mixed ...$args): mixed
+    {
+        return match ($filter) {
+            'email' => $this->filterEmail($value),
+            'url' => $this->filterUrl($value),
+            'int' => $this->filterInt($value),
+            'float' => $this->filterFloat($value),
+            'alnum' => $this->filterAlnum($value, $args[0] ?? false),
+            'alpha' => $this->filterAlpha($value),
+            'digits' => $this->filterDigits($value),
+            'striptags' => $this->filterStripTags($value, $args[0] ?? null),
+            default => $value,
+        };
+    }
+
+    /**
+     * Sanitize email address by removing invalid characters
+     */
+    public function filterEmail(mixed $value): string
+    {
+        return filter_var($value, FILTER_SANITIZE_EMAIL) ?: '';
+    }
+
+    /**
+     * Sanitize URL by removing invalid characters
+     */
+    public function filterUrl(mixed $value): string
+    {
+        return filter_var($value, FILTER_SANITIZE_URL) ?: '';
+    }
+
+    /**
+     * Extract integer from value, removing all non-digit characters except +/-
+     */
+    public function filterInt(mixed $value): int
+    {
+        return (int) filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+    }
+
+    /**
+     * Extract float from value, keeping digits, +/-, and decimal point
+     */
+    public function filterFloat(mixed $value): float
+    {
+        return (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    }
+
+    /**
+     * Keep only alphanumeric characters (a-z, A-Z, 0-9)
+     */
+    public function filterAlnum(mixed $value, bool $allowWhitespace = false): string
+    {
+        $pattern = $allowWhitespace ? '/[^a-zA-Z0-9\s]/' : '/[^a-zA-Z0-9]/';
+        return preg_replace($pattern, '', (string) $value);
+    }
+
+    /**
+     * Keep only alphabetic characters (a-z, A-Z)
+     */
+    public function filterAlpha(mixed $value): string
+    {
+        return preg_replace('/[^a-zA-Z]/', '', (string) $value);
+    }
+
+    /**
+     * Keep only digits (0-9)
+     */
+    public function filterDigits(mixed $value): string
+    {
+        return preg_replace('/[^0-9]/', '', (string) $value);
+    }
+
+    /**
+     * Remove HTML and PHP tags, optionally allowing specific tags
+     */
+    public function filterStripTags(mixed $value, array|string|null $allowedTags = null): string
+    {
+        return strip_tags((string) $value, $allowedTags);
+    }
+
+    /**
+     * Check if value is a valid email address format
+     */
+    public function isValidEmail(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    /**
+     * Check if value is a valid URL format
+     */
+    public function isValidUrl(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_URL) !== false;
+    }
+
+    /**
+     * Check if value is a valid IP address (IPv4 or IPv6)
+     */
+    public function isValidIp(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_IP) !== false;
+    }
+
     public function getMailerDsn(): string
     {
         $coreHelper = Mage::helper('core');

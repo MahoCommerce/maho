@@ -155,9 +155,20 @@ T: {{telephone}}';
      */
     public function getName()
     {
+        // Always use ICU data for country names to ensure proper localization
+        $countryId = $this->getData('country_id');
+        if ($countryId) {
+            $locale = Mage::app()->getLocale();
+            $name = $locale->getTranslation($countryId, 'country');
+            if ($name && $name !== $countryId) {
+                return $name;
+            }
+        }
+
+        // Fallback to database name or country_id
         $name = $this->getData('name');
         if (is_null($name)) {
-            $name = $this->getData('country_id');
+            $name = $countryId ?: '';
         }
         return $name;
     }
@@ -207,70 +218,4 @@ T: {{telephone}}';
         return $errors;
     }
 
-    /**
-     * Return collection of translated country names
-     */
-    public function getTranslationCollection(): Varien_Data_Collection_Db
-    {
-        return $this->_getResource()->getTranslationCollection($this);
-    }
-
-    /**
-     * Get translation for locale
-     */
-    public function getTranslation(string $locale): Varien_Object
-    {
-        return $this->_getResource()->getTranslation($this, $locale);
-    }
-
-    /**
-     * Check if country has at least one translation
-     */
-    public function hasTranslation(): bool
-    {
-        return $this->_getResource()->hasTranslation($this);
-    }
-
-    public function validateTranslation(array $data): array|true
-    {
-        $errors = [];
-
-        // Validate locale
-        if (empty($data['locale'])) {
-            $errors[] = Mage::helper('directory')->__('Locale is required.');
-        }
-
-        // Validate name
-        if (empty($data['name'])) {
-            $errors[] = Mage::helper('directory')->__('Country name is required.');
-        } elseif (strlen($data['name']) > 255) {
-            $errors[] = Mage::helper('directory')->__('Country name cannot be longer than 255 characters.');
-        }
-
-        // Check for duplicate locale/country combination
-        if (!empty($data['locale'])) {
-            $existingCountry = $this->_getResource()->getTranslation($this, $data['locale']);
-            if ($existingCountry->getLocale()) {
-                $errors[] = Mage::helper('directory')->__('A country name for this locale and country combination already exists.');
-            }
-        }
-
-        if (empty($errors)) {
-            return true;
-        }
-        return $errors;
-    }
-
-    public function saveTranslation(array $data): bool
-    {
-        if (empty($data['locale']) || empty($data['name'])) {
-            Mage::throwException(Mage::helper('directory')->__('Locale and country name are required.'));
-        }
-        return $this->_getResource()->insertOrUpdateTranslation($this, $data);
-    }
-
-    public function deleteTranslation(string $locale): bool
-    {
-        return $this->_getResource()->deleteTranslation($this, $locale);
-    }
 }

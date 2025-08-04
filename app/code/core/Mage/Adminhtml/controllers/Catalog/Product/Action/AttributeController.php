@@ -76,13 +76,28 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
                     $attribute->getBackend()->validate($data);
                     if ($attribute->getBackendType() == 'datetime') {
                         if (!empty($value)) {
-                            $filterInput    = new Zend_Filter_LocalizedToNormalized([
-                                'date_format' => $dateFormat,
-                            ]);
-                            $filterInternal = new Zend_Filter_NormalizedToLocalized([
-                                'date_format' => Mage_Core_Model_Locale::DATE_FORMAT,
-                            ]);
-                            $value = $filterInternal->filter($filterInput->filter($value));
+                            try {
+                                // Parse date using IntlDateFormatter
+                                $formatter = new IntlDateFormatter(
+                                    Mage::app()->getLocale()->getLocaleCode(),
+                                    IntlDateFormatter::SHORT,
+                                    IntlDateFormatter::NONE,
+                                );
+                                $timestamp = $formatter->parse($value);
+                                if ($timestamp !== false) {
+                                    $value = date(Mage_Core_Model_Locale::DATE_FORMAT, $timestamp);
+                                } else {
+                                    throw new Exception('Invalid date format');
+                                }
+                            } catch (Exception $e) {
+                                // Fallback: try to parse as standard format
+                                $date = DateTime::createFromFormat($dateFormat, $value);
+                                if ($date !== false) {
+                                    $value = $date->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                                } else {
+                                    $value = null;
+                                }
+                            }
                         } else {
                             $value = null;
                         }

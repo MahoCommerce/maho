@@ -118,8 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </td>
                 <td>
                     <select name="container_girth_dimension_units" class="options-units-dimensions measures">
-                        <option value="<?= Zend_Measure_Length::INCH ?>" selected><?= Mage::helper('sales')->__('in') ?></option>
-                        <option value="<?= Zend_Measure_Length::CENTIMETER ?>" ><?= Mage::helper('sales')->__('cm') ?></option>
+                        <option value="<?= Mage_Core_Model_Locale::LENGTH_INCH ?>" selected><?= Mage::helper('sales')->__('in') ?></option>
+                        <option value="<?= Mage_Core_Model_Locale::LENGTH_CENTIMETER ?>" ><?= Mage::helper('sales')->__('cm') ?></option>
                     </select>
                 </td>
             <?php endif ?>
@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <input class="options-weight input-text required-entry validate-greater-than-zero" name="container_weight" />
                     <select name="container_weight_units" class="options-units-weight measures">
-                        <option value="<?= Zend_Measure_Weight::POUND ?>" selected><?= Mage::helper('sales')->__('lb') ?></option>
-                        <option value="<?= Zend_Measure_Weight::KILOGRAM ?>" ><?= Mage::helper('sales')->__('kg') ?></option>
+                        <option value="<?= Mage_Core_Model_Locale::WEIGHT_POUND ?>" selected><?= Mage::helper('sales')->__('lb') ?></option>
+                        <option value="<?= Mage_Core_Model_Locale::WEIGHT_KILOGRAM ?>" ><?= Mage::helper('sales')->__('kg') ?></option>
                     </select>
                 </td>
                 <td>
@@ -147,8 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </td>
                 <td>
                     <select name="container_dimension_units" class="options-units-dimensions measures">
-                        <option value="<?= Zend_Measure_Length::INCH ?>" selected><?= Mage::helper('sales')->__('in') ?></option>
-                        <option value="<?= Zend_Measure_Length::CENTIMETER ?>" ><?= Mage::helper('sales')->__('cm') ?></option>
+                        <option value="<?= Mage_Core_Model_Locale::LENGTH_INCH ?>" selected><?= Mage::helper('sales')->__('in') ?></option>
+                        <option value="<?= Mage_Core_Model_Locale::LENGTH_CENTIMETER ?>" ><?= Mage::helper('sales')->__('cm') ?></option>
                     </select>
                 </td>
                 <?php if ($this->getDeliveryConfirmationTypes()): ?>
