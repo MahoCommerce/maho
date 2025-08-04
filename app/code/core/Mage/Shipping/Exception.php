@@ -9,4 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Shipping_Exception extends Zend_Exception {}
+class Mage_Shipping_Exception extends Mage_Core_Exception {}

@@ -97,11 +97,11 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
         $isException = false;
         try {
             $server->checkAuthorizeRequest();
-        } catch (Mage_Core_Exception $e) {
-            $session->addError($e->getMessage());
         } catch (Mage_Oauth_Exception $e) {
             $isException = true;
             $session->addException($e, $this->__('An error occurred. Your authorization request is invalid.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         } catch (Exception $e) {
             $isException = true;
             $session->addException($e, $this->__('An error occurred.'));
