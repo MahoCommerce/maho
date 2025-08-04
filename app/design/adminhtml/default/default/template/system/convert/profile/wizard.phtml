@@ -502,19 +502,9 @@ Event.observe(window, 'load', function(){
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_created_at_from"><?= $this->__("Customer Since:") ?></label>
-                    <input class="input-text" style="width:5em" id="customer_filter_created_at_from" name="gui_data[customer][filter][created_at][from]" value="<?= $this->getValue('gui_data/customer/filter/created_at/from') ?>"/>
+                    <input class="input-text" type="date" style="width:auto" id="customer_filter_created_at_from" name="gui_data[customer][filter][created_at][from]" value="<?= $this->getValue('gui_data/customer/filter/created_at/from') ?>"/>
                      <?= $this->__('to') ?>
-                    <input class="input-text" style="width:5em" id="customer_filter_created_at_to" name="gui_data[customer][filter][created_at][to]" value="<?= $this->getValue('gui_data/customer/filter/created_at/to') ?>"/>
-<script type="text/javascript">
-    Calendar.setup({
-        inputField : "customer_filter_created_at_from",
-        ifFormat : "<?= $this->getShortDateFormat() ?>"
-    });
-    Calendar.setup({
-        inputField : "customer_filter_created_at_to",
-        ifFormat : "<?= $this->getShortDateFormat() ?>"
-    });
-</script>
+                    <input class="input-text" type="date" style="width:auto" id="customer_filter_created_at_to" name="gui_data[customer][filter][created_at][to]" value="<?= $this->getValue('gui_data/customer/filter/created_at/to') ?>"/>
                 </span>
             </div>
         </fieldset>

@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Varien_Filter_Template implements Zend_Filter_Interface
+class Varien_Filter_Template
 {
     /**
      * Cunstruction regular expression
@@ -104,7 +104,6 @@ class Varien_Filter_Template implements Zend_Filter_Interface
      * @param string $value
      * @return string
      */
-    #[\Override]
     public function filter($value)
     {
         if ($value === null) {

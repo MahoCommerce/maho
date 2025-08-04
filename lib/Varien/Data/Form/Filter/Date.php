@@ -6,7 +6,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,20 +22,20 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
     /**
      * Local
      *
-     * @var string|Zend_Locale
+     * @var string
      */
     protected $_locale;
 
     /**
      * Initialize filter
      *
-     * @param string $format    Zend_Date input/output format
-     * @param string|Zend_Locale $locale
+     * @param string $format    DateTime input/output format (now defaults to PHP format)
+     * @param string $locale
      */
     public function __construct($format = null, $locale = null)
     {
         if (is_null($format)) {
-            $format = Varien_Date::DATE_INTERNAL_FORMAT;
+            $format = Mage_Core_Model_Locale::DATE_FORMAT;
         }
         $this->_dateFormat  = $format;
         $this->_locale      = $locale;
@@ -54,18 +54,19 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
             return $value;
         }
 
-        $filterInput = new Zend_Filter_LocalizedToNormalized([
-            'date_format'   => $this->_dateFormat,
-            'locale'        => $this->_locale,
-        ]);
-        $filterInternal = new Zend_Filter_NormalizedToLocalized([
-            'date_format'   => Varien_Date::DATE_INTERNAL_FORMAT,
-            'locale'        => $this->_locale,
-        ]);
+        // HTML5 date inputs send ISO format (YYYY-MM-DD), validate and return as-is
+        if (Mage_Core_Model_Locale::isValidDate($value)) {
+            return $value;
+        }
 
-        $value = $filterInput->filter($value);
-        $value = $filterInternal->filter($value);
-        return $value;
+        // For backward compatibility, try to parse and reformat invalid dates
+        try {
+            $date = new DateTime($value);
+            return $date->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        } catch (Exception $e) {
+            // Invalid date, return original value (will likely cause validation error downstream)
+            return $value;
+        }
     }
 
     /**
@@ -81,17 +82,13 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
             return $value;
         }
 
-        $filterInput = new Zend_Filter_LocalizedToNormalized([
-            'date_format'   => Varien_Date::DATE_INTERNAL_FORMAT,
-            'locale'        => $this->_locale,
-        ]);
-        $filterInternal = new Zend_Filter_NormalizedToLocalized([
-            'date_format'   => $this->_dateFormat,
-            'locale'        => $this->_locale,
-        ]);
-
-        $value = $filterInput->filter($value);
-        $value = $filterInternal->filter($value);
-        return $value;
+        // For HTML5 date inputs, output should be in ISO format (YYYY-MM-DD)
+        try {
+            $date = new DateTime($value);
+            return $date->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        } catch (Exception $e) {
+            // Invalid date, return original value
+            return $value;
+        }
     }
 }

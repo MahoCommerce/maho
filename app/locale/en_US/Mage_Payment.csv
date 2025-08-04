@@ -100,6 +100,7 @@
 "New Restriction","New Restriction"
 "NOT FOUND","NOT FOUND"
 "Number of billing periods that make up one billing cycle.","Number of billing periods that make up one billing cycle."
+"Number of Complete Orders","Number of Complete Orders"
 "Order action is not available.","Order action is not available."
 "Overrides API URL that may be specified by a payment method.","Overrides API URL that may be specified by a payment method."
 "Password","Password"

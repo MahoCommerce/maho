@@ -6,6 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,6 +31,16 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfigFlag(self::XML_PATH_REPORTS_ENABLED);
     }
 
+    public function isRecentlyViewedEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('catalog/recently_products/enabled_recently_viewed');
+    }
+
+    public function isProductCompareEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('catalog/recently_products/enabled_product_compare');
+    }
+
     /**
      * Retrieve array of intervals
      *
@@ -37,7 +48,6 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $to
      * @param self::REPORT_PERIOD_TYPE_* $period
      * @return array
-     * @throws Zend_Date_Exception
      */
     public function getIntervals($from, $to, $period = self::REPORT_PERIOD_TYPE_DAY)
     {
@@ -48,40 +58,40 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
             return $intervals;
         }
 
-        $start = new Zend_Date($from, Varien_Date::DATE_INTERNAL_FORMAT);
+        $start = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $from) ?: new DateTime($from);
 
         if ($period == self::REPORT_PERIOD_TYPE_DAY) {
             $dateStart = $start;
         }
 
         if ($period == self::REPORT_PERIOD_TYPE_MONTH) {
-            $dateStart = new Zend_Date(date('Y-m', $start->getTimestamp()), Varien_Date::DATE_INTERNAL_FORMAT);
+            $dateStart = new DateTime($start->format('Y-m'));
         }
 
         if ($period == self::REPORT_PERIOD_TYPE_YEAR) {
-            $dateStart = new Zend_Date(date('Y', $start->getTimestamp()), Varien_Date::DATE_INTERNAL_FORMAT);
+            $dateStart = new DateTime($start->format('Y'));
         }
 
         if (!$period || !$dateStart) {
             return $intervals;
         }
 
-        $dateEnd = new Zend_Date($to, Varien_Date::DATE_INTERNAL_FORMAT);
+        $dateEnd = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $to) ?: new DateTime($to);
 
-        while ($dateStart->compare($dateEnd) <= 0) {
+        while ($dateStart <= $dateEnd) {
             $time = '';
             switch ($period) {
                 case self::REPORT_PERIOD_TYPE_DAY:
-                    $time = $dateStart->toString('yyyy-MM-dd');
-                    $dateStart->addDay(1);
+                    $time = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                    $dateStart->modify('+1 day');
                     break;
                 case self::REPORT_PERIOD_TYPE_MONTH:
-                    $time = $dateStart->toString('yyyy-MM');
-                    $dateStart->addMonth(1);
+                    $time = $dateStart->format('Y-m');
+                    $dateStart->modify('+1 month');
                     break;
                 case self::REPORT_PERIOD_TYPE_YEAR:
-                    $time = $dateStart->toString('yyyy');
-                    $dateStart->addYear(1);
+                    $time = $dateStart->format('Y');
+                    $dateStart->modify('+1 year');
                     break;
             }
             $intervals[] = $time;

@@ -6,16 +6,10 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Date grid column filter
- *
- * @package    Mage_Adminhtml
- * @todo       date format
- */
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
     protected $_locale;
@@ -39,42 +33,40 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         $fromLabel = Mage::helper('adminhtml')->__('From');
         $toLabel = Mage::helper('adminhtml')->__('To');
         $htmlId = $this->_getHtmlId() . time();
-        $format = $this->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+
+        // Convert values to ISO format for native date input
+        $fromValue = '';
+        $toValue = '';
+
+        if ($fromDate = $this->getValue('from')) {
+            $fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, false, 'html5') ?? '';
+        }
+
+        if ($toDate = $this->getValue('to')) {
+            $toValue = Mage::app()->getLocale()->storeDate(null, $toDate, false, 'html5') ?? '';
+        }
+
         $html = '<div class="range"><div class="range-line date">'
             . '<span class="label">' . $fromLabel . '</span>'
-            . '<input type="text" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
+            . '<input type="date" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
                 . ' placeholder="' . $fromLabel . '"'
-                . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"/>'
+                . ' value="' . $this->escapeHtml($fromValue) . '" class="input-text no-changes"/>'
             . '</div>';
         $html .= '<div class="range-line date">'
             . '<span class="label">' . $toLabel . '</span>'
-            . '<input type="text" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
-                . ' placeholder="' . $fromLabel . '"'
-                . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"/>'
+            . '<input type="date" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
+                . ' placeholder="' . $toLabel . '"'
+                . ' value="' . $this->escapeHtml($toValue) . '" class="input-text no-changes"/>'
             . '</div></div>';
         $html .= '<input type="hidden" name="' . $this->_getHtmlName() . '[locale]"'
             . 'value="' . $this->getLocale()->getLocaleCode() . '"/>';
-        $html .= '<script type="text/javascript">
-            Calendar.setup({
-                inputField : "' . $htmlId . '_from",
-                ifFormat : "' . $format . '"
-            });
-            Calendar.setup({
-                inputField : "' . $htmlId . '_to",
-                ifFormat : "' . $format . '"
-            });
-        </script>';
         return $html;
     }
 
     #[\Override]
     public function getEscapedValue($index = null)
     {
-        $value = $this->getValue($index);
-        if ($value instanceof Zend_Date) {
-            return $value->toString($this->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
-        }
-        return $value;
+        return $this->getValue($index);
     }
 
     public function getValue($index = null)
@@ -135,32 +127,18 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
      *
      * @param string $date
      * @param string $locale
-     * @return Zend_Date|null
+     * @return string|null
      */
     protected function _convertDate($date, $locale)
     {
-        try {
-            $dateObj = $this->getLocale()->date(null, null, $locale, false);
-
-            //set default timezone for store (admin)
-            $dateObj->setTimezone(
-                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE),
-            );
-
-            //set beginning of day
-            $dateObj->setHour(00);
-            $dateObj->setMinute(00);
-            $dateObj->setSecond(00);
-
-            //set date with applying timezone of store
-            $dateObj->set($date, Zend_Date::DATE_SHORT, $locale);
-
-            //convert store date to default date in UTC timezone without DST
-            $dateObj->setTimezone(Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
-
-            return $dateObj;
-        } catch (Exception $e) {
-            return null;
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            // Validate that the date is actually valid (not just format)
+            $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $date);
+            if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT) === $date) {
+                return Mage::app()->getLocale()->utcDate(null, $date, false, 'html5');
+            }
         }
+
+        return null;
     }
 }

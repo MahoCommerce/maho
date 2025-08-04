@@ -6,17 +6,12 @@
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstract
 {
-    /**
-     * Store number of seconds in a day
-     */
-    public const SECONDS_IN_DAY = 86400;
-
     /**
      * Number of products in range for insert
      */
@@ -175,13 +170,16 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         $customerGroupIds = $rule->getCustomerGroupIds();
 
         $fromTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime((string) $rule->getFromDate()));
-        $toTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime((string) $rule->getToDate()));
-        $toTime = $toTime ? ($toTime + self::SECONDS_IN_DAY - 1) : 0;
+        $toTime = 0;
+        if ($rule->getToDate()) {
+            // Create a DateTime object for the end date and set it to end of day (23:59:59)
+            // This properly handles daylight saving time transitions instead of adding fixed seconds
+            $endDate = new DateTime((string) $rule->getToDate() . ' 23:59:59');
+            $toTime = (int) Mage::getModel('core/date')->gmtTimestamp($endDate->getTimestamp());
+        }
 
         $timestamp = time();
-        if ($fromTime > $timestamp
-            || ($toTime && $toTime < $timestamp)
-        ) {
+        if ($fromTime > $timestamp || ($toTime && $toTime < $timestamp)) {
             return;
         }
         $sortOrder = (int) $rule->getSortOrder();

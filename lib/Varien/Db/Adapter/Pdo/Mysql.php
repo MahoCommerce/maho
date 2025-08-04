@@ -277,7 +277,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Convert date to DB format
      *
-     * @param   int|string|Zend_Date $date
+     * @param   int|string|DateTime $date
      * @return  Zend_Db_Expr
      */
     public function convertDate($date)
@@ -288,7 +288,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Convert date and time to DB format
      *
-     * @param   int|string|Zend_Date $datetime
+     * @param   int|string|DateTime $datetime
      * @return  Zend_Db_Expr
      */
     public function convertDateTime($datetime)
@@ -2938,14 +2938,28 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Format Date to internal database date format
      *
-     * @param int|string|Zend_Date $date
+     * @param int|string|DateTime $date
      * @param boolean $includeTime
      * @return Zend_Db_Expr
      */
     #[\Override]
     public function formatDate($date, $includeTime = true)
     {
-        $date = Varien_Date::formatDate($date, $includeTime);
+        if ($date === true) {
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+            $date = date($format);
+        } elseif ($date instanceof DateTime) {
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+            $date = $date->format($format);
+        } elseif (empty($date)) {
+            return new Zend_Db_Expr('NULL');
+        } else {
+            if (!is_numeric($date)) {
+                $date = strtotime($date);
+            }
+            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+            $date = date($format, $date);
+        }
 
         if ($date === null) {
             return new Zend_Db_Expr('NULL');

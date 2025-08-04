@@ -6,6 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -49,7 +50,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             $this->_getFlag()->setFlagData($value);
         }
 
-        $time = Varien_Date::toTimestamp(true);
+        $time = time();
         // touch last_update
         $this->_getFlag()->setLastUpdate($this->formatDate($time));
 
@@ -353,7 +354,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         }
 
         $periods = $this->_getTZOffsetTransitions(
-            Mage::app()->getLocale()->storeDate($store)->toString(Zend_Date::TIMEZONE_NAME),
+            Mage::app()->getLocale()->storeDate($store)->format('T'),
             $from,
             $to,
         );
@@ -393,26 +394,39 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $tzTransitions = [];
         try {
             if (!empty($from)) {
-                $from = new Zend_Date($from, Varien_Date::DATETIME_INTERNAL_FORMAT);
-                $from = $from->getTimestamp();
+                if ($from instanceof DateTime) {
+                    $from = $from->getTimestamp();
+                } else {
+                    $fromOriginal = $from;
+                    $from = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $from);
+                    $from = $from ? $from->getTimestamp() : strtotime($fromOriginal);
+                }
             }
 
-            $to = new Zend_Date($to, Varien_Date::DATETIME_INTERNAL_FORMAT);
-            $nextPeriod = $this->_getWriteAdapter()->formatDate($to->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
-            $to = $to->getTimestamp();
+            if ($to instanceof DateTime) {
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+                $to = $to->getTimestamp();
+            } else {
+                $to = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $to) ?: new DateTime($to);
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+                $to = $to->getTimestamp();
+            }
 
             $dtz = new DateTimeZone($timezone);
             $transitions = $dtz->getTransitions();
-            $dateTimeObject = new Zend_Date('c');
+            if ($transitions === false || !is_array($transitions)) {
+                return $tzTransitions;
+            }
+            $dateTimeObject = new DateTime();
             for ($i = count($transitions) - 1; $i >= 0; $i--) {
                 $tr = $transitions[$i];
                 if (!$this->_isValidTransition($tr, $to)) {
                     continue;
                 }
 
-                $dateTimeObject->set($tr['time']);
+                $dateTimeObject->setTimestamp($tr['ts']);
                 $tr['time'] = $this->_getWriteAdapter()
-                    ->formatDate($dateTimeObject->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+                    ->formatDate($dateTimeObject->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $tzTransitions[$tr['offset']][] = ['from' => $tr['time'], 'to' => $nextPeriod];
 
                 if (!empty($from) && $tr['ts'] < $from) {
@@ -467,22 +481,22 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      */
     protected function _getStoreTimezoneUtcOffset($store = null)
     {
-        return Mage::app()->getLocale()->storeDate($store)->toString(Zend_Date::GMT_DIFF_SEP);
+        return Mage::app()->getLocale()->storeDate($store)->format('P');
     }
 
     /**
      * Retrieve date in UTC timezone
      *
      * @param string|null $date
-     * @return Zend_Date|null
+     * @return DateTime|null
      */
     protected function _dateToUtc($date)
     {
         if ($date === null) {
             return null;
         }
-        $dateUtc = new Zend_Date($date);
-        $dateUtc->setTimezone('Etc/UTC');
+        $dateUtc = new DateTime($date);
+        $dateUtc->setTimezone(new DateTimeZone('Etc/UTC'));
         return $dateUtc;
     }
 }

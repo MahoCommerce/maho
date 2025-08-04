@@ -6,7 +6,7 @@
  * @package    Mage_AdminNotification
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -124,18 +124,14 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
      */
     public function getFeedData()
     {
-        $curl = new Varien_Http_Adapter_Curl();
-        $curl->setConfig([
-            'timeout'   => 2,
-        ]);
-        $curl->write(Zend_Http_Client::GET, $this->getFeedUrl(), '1.0');
-        $data = $curl->read();
-        if ($data === false) {
+        $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 2]);
+
+        try {
+            $response = $client->request('GET', $this->getFeedUrl());
+            $data = trim($response->getContent());
+        } catch (Exception $e) {
             return false;
         }
-        $data = preg_split('/^\r?$/m', $data, 2);
-        $data = trim($data[1]);
-        $curl->close();
 
         try {
             $xml  = new SimpleXMLElement($data);

@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -252,17 +252,8 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
         if (!is_numeric($price)) {
             $price = Mage::app()->getLocale()->getNumber($price);
         }
-        /**
-         * Fix problem with 12 000 000, 1 200 000
-         *
-         * %f - the argument is treated as a float, and presented as a floating-point number (locale aware).
-         * %F - the argument is treated as a float, and presented as a floating-point number (non-locale aware).
-         */
-        $price = sprintf('%F', $price);
-        if ($price == -0) {
-            $price = 0;
-        }
-        return Mage::app()->getLocale()->currency($this->getCode())->toCurrency($price, $options);
+
+        return Mage::app()->getLocale()->formatCurrency($price, $this->getCode());
     }
 
     /**
@@ -272,9 +263,13 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      */
     public function getOutputFormat()
     {
-        $formated = $this->formatTxt(0);
-        $number = $this->formatTxt(0, ['display' => Zend_Currency::NO_SYMBOL]);
-        return str_replace($number, '%s', $formated);
+        $formatter = Mage::app()->getLocale()->currency($this->getCode());
+        $pattern = $formatter->getPattern();
+
+        // Convert ICU number pattern to simple %s placeholder
+        // Replace sequences of number format characters (#, 0, comma, period) with %s
+        // This preserves currency symbols and other formatting elements
+        return preg_replace('/[#0,\.]+/', '%s', $pattern);
     }
 
     /**

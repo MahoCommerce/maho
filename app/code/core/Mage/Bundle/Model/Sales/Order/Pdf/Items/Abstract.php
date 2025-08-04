@@ -6,6 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,7 +18,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * @param Varien_Object $item
      * @return array
      */
-    public function getChilds($item)
+    public function getChilds($item): ?array
     {
         $orderItems = [];
         $itemsArray = [];
@@ -48,9 +49,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * Retrieve is Shipment Separately flag for Item
      *
      * @param Varien_Object $item
-     * @return bool
      */
-    public function isShipmentSeparately($item = null)
+    public function isShipmentSeparately($item = null): bool
     {
         if ($item) {
             if ($item->getOrderItem()) {
@@ -98,9 +98,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * Retrieve is Child Calculated
      *
      * @param Varien_Object $item
-     * @return bool
      */
-    public function isChildCalculated($item = null)
+    public function isChildCalculated($item = null): bool
     {
         if ($item) {
             if ($item->getOrderItem()) {
@@ -148,9 +147,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * Retrieve Bundle Options
      *
      * @param Varien_Object $item
-     * @return array
      */
-    public function getBundleOptions($item = null)
+    public function getBundleOptions($item = null): array
     {
         $options = $this->getOrderItem()->getProductOptions();
         if ($options) {
@@ -165,9 +163,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * Retrieve Selection attributes
      *
      * @param Varien_Object $item
-     * @return mixed
      */
-    public function getSelectionAttributes($item)
+    public function getSelectionAttributes($item): mixed
     {
         if ($item instanceof Mage_Sales_Model_Order_Item) {
             $options = $item->getProductOptions();
@@ -184,9 +181,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * Retrieve Order options
      *
      * @param Varien_Object $item
-     * @return array
      */
-    public function getOrderOptions($item = null)
+    public function getOrderOptions($item = null): array
     {
         $result = [];
 
@@ -211,6 +207,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * @return Mage_Sales_Model_Order_Item
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function getOrderItem()
     {
         return $this->getItem()->getOrderItem();
@@ -220,9 +217,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * Retrieve Value HTML
      *
      * @param Mage_Sales_Model_Order_Invoice_Item $item
-     * @return string
      */
-    public function getValueHtml($item)
+    public function getValueHtml($item): string
     {
         $result = strip_tags($item->getName());
         if (!$this->isShipmentSeparately($item)) {
@@ -244,9 +240,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
      * Can show price info for item
      *
      * @param Mage_Sales_Model_Order_Invoice_Item $item
-     * @return bool
      */
-    public function canShowPriceInfo($item)
+    public function canShowPriceInfo($item): bool
     {
         if (($item->getOrderItem()->getParentItem() && $this->isChildCalculated())
             || (!$item->getOrderItem()->getParentItem() && !$this->isChildCalculated())

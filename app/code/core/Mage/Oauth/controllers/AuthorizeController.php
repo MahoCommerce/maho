@@ -6,6 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,11 +35,11 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
         $isException = false;
         try {
             $server->checkAuthorizeRequest();
-        } catch (Mage_Core_Exception $e) {
-            $session->addError($e->getMessage());
         } catch (Mage_Oauth_Exception $e) {
             $isException = true;
             $session->addException($e, $this->__('An error occurred. Your authorization request is invalid.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         } catch (Exception $e) {
             $isException = true;
             $session->addException($e, $this->__('An error occurred.'));
@@ -109,10 +110,10 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
                 $block->setVerifier($token->getVerifier());
                 $session->addSuccess($this->__('Authorization confirmed.'));
             }
-        } catch (Mage_Core_Exception $e) {
-            $session->addError($e->getMessage());
         } catch (Mage_Oauth_Exception $e) {
             $session->addException($e, $this->__('An error occurred. Your authorization request is invalid.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         } catch (Exception $e) {
             $session->addException($e, $this->__('An error occurred on confirm authorize.'));
         }

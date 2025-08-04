@@ -28,15 +28,26 @@ $application->add(new \MahoCLI\Commands\AdminUserDisable());
 $application->add(new \MahoCLI\Commands\CacheEnable());
 $application->add(new \MahoCLI\Commands\CacheDisable());
 $application->add(new \MahoCLI\Commands\CacheFlush());
+$application->add(new \MahoCLI\Commands\CacheMinifyFlush());
 
 $application->add(new \MahoCLI\Commands\CustomerCreate());
 $application->add(new \MahoCLI\Commands\CustomerChangepassword());
 $application->add(new \MahoCLI\Commands\CustomerDelete());
 $application->add(new \MahoCLI\Commands\CustomerList());
 
+$application->add(new \MahoCLI\Commands\DBConnect());
+$application->add(new \MahoCLI\Commands\DBQuery());
+
+$application->add(new \MahoCLI\Commands\EmailConfigShow());
+$application->add(new \MahoCLI\Commands\EmailQueueClear());
+$application->add(new \MahoCLI\Commands\EmailQueueProcess());
+$application->add(new \MahoCLI\Commands\EmailTestQueue());
+$application->add(new \MahoCLI\Commands\EmailTestSend());
+
 $application->add(new \MahoCLI\Commands\IndexList());
 $application->add(new \MahoCLI\Commands\IndexReindex());
 $application->add(new \MahoCLI\Commands\IndexReindexAll());
+$application->add(new \MahoCLI\Commands\IndexReindexProduct());
 
 $application->add(new \MahoCLI\Commands\CronHistory());
 $application->add(new \MahoCLI\Commands\CronList());
@@ -47,12 +58,25 @@ $application->add(new \MahoCLI\Commands\LogStatus());
 
 $application->add(new \MahoCLI\Commands\HealthCheck());
 $application->add(new \MahoCLI\Commands\Install());
-$application->add(new \MahoCLI\Commands\Serve());
 $application->add(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
 
+$application->add(new \MahoCLI\Commands\PhpstormMetadataGenerate());
+
+$application->add(new \MahoCLI\Commands\Serve());
+
 $application->add(new \MahoCLI\Commands\SysCurrencies());
+$application->add(new \MahoCLI\Commands\SysEncryptionKeyRegenerate());
 $application->add(new \MahoCLI\Commands\SysLocales());
 $application->add(new \MahoCLI\Commands\SysTimezones());
+
+$application->add(new \MahoCLI\Commands\ConfigGet());
+$application->add(new \MahoCLI\Commands\ConfigSet());
+$application->add(new \MahoCLI\Commands\ConfigDelete());
+
+$application->add(new \MahoCLI\Commands\TranslationsMissing());
+$application->add(new \MahoCLI\Commands\TranslationsUnused());
+
+$application->add(new \MahoCLI\Commands\CreateCommand());
 
 $discoverer = new CommandDiscoverer();
 $commands = $discoverer->discover(__DIR__ . '/vendor/*/*') + $discoverer->discover(__DIR__);

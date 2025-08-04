@@ -6,125 +6,67 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abstract
 {
     /**
-     * Draw table header for product items
+     * Get layout handle for shipment PDF
+     *
+     * @return string
      */
-    protected function _drawHeader(Zend_Pdf_Page $page)
+    #[\Override]
+    protected function _getLayoutHandle()
     {
-        /* Add table head */
-        $this->_setFontRegular($page, 10);
-        $page->setFillColor(new Zend_Pdf_Color_Rgb(0.93, 0.92, 0.92));
-        $page->setLineColor(new Zend_Pdf_Color_GrayScale(0.5));
-        $page->setLineWidth(0.5);
-        $page->drawRectangle(25, $this->y, 570, $this->y - 15);
-        $this->y -= 10;
-        $page->setFillColor(new Zend_Pdf_Color_Rgb(0, 0, 0));
+        return 'sales_pdf_shipment';
+    }
 
-        //columns headers
-        $lines[0][] = [
-            'text' => Mage::helper('sales')->__('Products'),
-            'feed' => 100,
-        ];
+    /**
+     * Get block name in layout
+     *
+     * @return string
+     */
+    #[\Override]
+    protected function _getBlockName()
+    {
+        return 'sales.pdf.shipment';
+    }
 
-        $lines[0][] = [
-            'text'  => Mage::helper('sales')->__('Qty'),
-            'feed'  => 35,
-        ];
-
-        $lines[0][] = [
-            'text'  => Mage::helper('sales')->__('SKU'),
-            'feed'  => 565,
-            'align' => 'right',
-        ];
-
-        $lineBlock = [
-            'lines'  => $lines,
-            'height' => 10,
-        ];
-
-        $this->drawLineBlocks($page, [$lineBlock], ['table_header' => true]);
-        $page->setFillColor(new Zend_Pdf_Color_GrayScale(0));
-        $this->y -= 20;
+    /**
+     * Get block class name for direct instantiation
+     */
+    #[\Override]
+    protected function _getBlockClass(): string
+    {
+        return 'Mage_Sales_Block_Order_Pdf_Shipment';
     }
 
     /**
      * Return PDF document
      *
-     * @param  Mage_Sales_Model_Order_Shipment[] $shipments
-     * @return Zend_Pdf
+     * @param array|Varien_Data_Collection $shipments Array or collection of shipments
      */
     #[\Override]
-    public function getPdf($shipments = [])
+    public function getPdf(array|Varien_Data_Collection $shipments = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('shipment');
 
-        $pdf = new Zend_Pdf();
-        $this->_setPdf($pdf);
-        $style = new Zend_Pdf_Style();
-        $this->_setFontBold($style, 10);
-        foreach ($shipments as $shipment) {
-            if ($shipment->getStoreId()) {
-                Mage::app()->getLocale()->emulate($shipment->getStoreId());
-                Mage::app()->setCurrentStore($shipment->getStoreId());
-            }
-            $page  = $this->newPage();
-            $order = $shipment->getOrder();
-            /* Add image */
-            $this->insertLogo($page, $shipment->getStore());
-            /* Add address */
-            $this->insertAddress($page, $shipment->getStore());
-            /* Add head */
-            $this->insertOrder(
-                $page,
-                $shipment,
-                Mage::getStoreConfigFlag(self::XML_PATH_SALES_PDF_SHIPMENT_PUT_ORDER_ID, $order->getStoreId()),
-            );
-            /* Add document text and number */
-            $this->insertDocumentNumber(
-                $page,
-                Mage::helper('sales')->__('Packingslip # ') . $shipment->getIncrementId(),
-            );
-            /* Add table */
-            $this->_drawHeader($page);
-            /* Add body */
-            foreach ($shipment->getAllItems() as $item) {
-                if ($item->getOrderItem()->getParentItem()) {
-                    continue;
-                }
-                /* Draw item */
-                $this->_drawItem($item, $page, $order);
-                $page = end($pdf->pages);
-            }
+        // Handle collections
+        if ($shipments instanceof Varien_Data_Collection) {
+            $shipments = $shipments->getItems();
         }
-        $this->_afterGetPdf();
-        if (isset($shipment) && $shipment->getStoreId()) {
-            Mage::app()->getLocale()->revert();
-        }
-        return $pdf;
-    }
 
-    /**
-     * Create new page and assign to PDF object
-     *
-     * @return Zend_Pdf_Page
-     */
-    #[\Override]
-    public function newPage(array $settings = [])
-    {
-        /* Add new table head */
-        $page = $this->_getPdf()->newPage(Zend_Pdf_Page::SIZE_A4);
-        $this->_getPdf()->pages[] = $page;
-        $this->y = 800;
-        if (!empty($settings['table_header'])) {
-            $this->_drawHeader($page);
+        if (empty($shipments)) {
+            return '';
         }
-        return $page;
+
+        $html = $this->_renderDocumentsHtml($shipments);
+        $pdf = $this->generatePdf($html);
+
+        $this->_afterGetPdf();
+        return $pdf;
     }
 }

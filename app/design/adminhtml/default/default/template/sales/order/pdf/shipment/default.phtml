@@ -1,0 +1,114 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Mage_Sales_Block_Order_Pdf_Shipment $this */
+$shipment = $this->getShipment();
+$order = $this->getOrder();
+?>
+
+<div class="pdf-page">
+    <!-- Logo -->
+    <?php if ($logoUrl = $this->getLogoUrl()): ?>
+    <div class="pdf-logo">
+        <img src="<?= $logoUrl ?>" />
+    </div>
+    <?php endif; ?>
+
+    <!-- Document Header -->
+    <div class="pdf-document-header">
+        <div class="pdf-document-info">
+            <h1><?= $this->__('Shipment # %s', $this->getShipmentNumber()) ?></h1>
+            <?php if ($orderNumber = $this->getOrderNumber()): ?>
+                <?= $this->__('Order # %s', $orderNumber) ?><br />
+            <?php endif; ?>
+            <?= $this->__('Shipment Date: %s', $this->getShipmentDate()) ?><br />
+            <?php if ($orderDate = $this->getOrderDate()): ?>
+                <?= $this->__('Order Date: %s', $orderDate) ?>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($storeAddress = $this->getStoreAddress()): ?>
+        <div class="pdf-store-address">
+            <?= nl2br($this->escapeHtml($storeAddress)) ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Addresses -->
+    <div class="pdf-addresses">
+        <div class="pdf-address-billing">
+            <h3><?= $this->__('Sold to:') ?></h3>
+            <?php if ($billing = $this->getBillingAddress()): ?>
+            <address>
+                <?= $billing->format('html') ?>
+            </address>
+            <?php endif; ?>
+        </div>
+
+        <div class="pdf-address-shipping">
+            <h3><?= $this->__('Ship to:') ?></h3>
+            <?php if ($shipping = $this->getShippingAddress()): ?>
+            <address>
+                <?= $shipping->format('html') ?>
+            </address>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Shipping Method -->
+    <?php if ($shippingMethod = $this->getShippingMethod()): ?>
+    <div class="pdf-shipping-method">
+        <h3><?= $this->__('Shipping Method:') ?></h3>
+        <div><?= $this->escapeHtml($shippingMethod) ?></div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Tracking Information -->
+    <?php if ($this->hasTracking()): ?>
+    <div class="pdf-tracking">
+        <h3><?= $this->__('Tracking Information:') ?></h3>
+        <table>
+            <thead>
+                <tr>
+                    <th><?= $this->__('Title') ?></th>
+                    <th><?= $this->__('Number') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($this->getTrackingNumbers() as $track): ?>
+                <tr>
+                    <td><?= $this->escapeHtml($track['carrier']) ?></td>
+                    <td><?= $this->escapeHtml($track['number']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php endif; ?>
+
+    <!-- Items Table -->
+    <div class="pdf-items">
+        <table class="pdf-items-table">
+            <thead>
+                <tr class="pdf-table-header">
+                    <th class="col-qty"><?= $this->__('Qty') ?></th>
+                    <th class="col-products"><?= $this->__('Products') ?></th>
+                    <th class="col-sku"><?= $this->__('SKU') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($this->getItems() as $item): ?>
+                <tr class="pdf-item-row">
+                    <?= $this->getItemHtml($item) ?>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>

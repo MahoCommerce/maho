@@ -421,18 +421,18 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                 '1' => Mage::helper('usa')->__('Specific'),
             ],
             'dimensions_variables'  => [
-                'L'         => Zend_Measure_Weight::POUND,
-                'LB'        => Zend_Measure_Weight::POUND,
-                'POUND'     => Zend_Measure_Weight::POUND,
-                'K'         => Zend_Measure_Weight::KILOGRAM,
-                'KG'        => Zend_Measure_Weight::KILOGRAM,
-                'KILOGRAM'  => Zend_Measure_Weight::KILOGRAM,
-                'I'         => Zend_Measure_Length::INCH,
-                'IN'        => Zend_Measure_Length::INCH,
-                'INCH'      => Zend_Measure_Length::INCH,
-                'C'         => Zend_Measure_Length::CENTIMETER,
-                'CM'        => Zend_Measure_Length::CENTIMETER,
-                'CENTIMETER' => Zend_Measure_Length::CENTIMETER,
+                'L'         => Mage_Core_Model_Locale::WEIGHT_POUND,
+                'LB'        => Mage_Core_Model_Locale::WEIGHT_POUND,
+                'POUND'     => Mage_Core_Model_Locale::WEIGHT_POUND,
+                'K'         => Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
+                'KG'        => Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
+                'KILOGRAM'  => Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
+                'I'         => Mage_Core_Model_Locale::LENGTH_INCH,
+                'IN'        => Mage_Core_Model_Locale::LENGTH_INCH,
+                'INCH'      => Mage_Core_Model_Locale::LENGTH_INCH,
+                'C'         => Mage_Core_Model_Locale::LENGTH_CENTIMETER,
+                'CM'        => Mage_Core_Model_Locale::LENGTH_CENTIMETER,
+                'CENTIMETER' => Mage_Core_Model_Locale::LENGTH_CENTIMETER,
 
             ],
         ];
@@ -530,7 +530,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     protected function _getWeight($weight, $maxWeight = false, $configWeightUnit = false)
     {
         if ($maxWeight) {
-            $configWeightUnit = Zend_Measure_Weight::KILOGRAM;
+            $configWeightUnit = Mage_Core_Model_Locale::WEIGHT_KILOGRAM;
         } elseif ($configWeightUnit) {
             $configWeightUnit = $this->getCode('dimensions_variables', $configWeightUnit);
         } else {
@@ -718,10 +718,10 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $configWeightUnit = $this->getCode('dimensions_variables', $configWeightUnit);
         }
 
-        if ($configWeightUnit == Zend_Measure_Weight::POUND) {
-            $configDimensionUnit = Zend_Measure_Length::INCH;
+        if ($configWeightUnit == Mage_Core_Model_Locale::WEIGHT_POUND) {
+            $configDimensionUnit = Mage_Core_Model_Locale::LENGTH_INCH;
         } else {
-            $configDimensionUnit = Zend_Measure_Length::CENTIMETER;
+            $configDimensionUnit = Mage_Core_Model_Locale::LENGTH_CENTIMETER;
         }
 
         $countryDimensionUnit = $this->getCode('dimensions_variables', $this->_getDimensionUnit());
@@ -813,16 +813,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      */
     protected function _getQuotesFromServer($request)
     {
-        $client = new Varien_Http_Client();
-        $client->setUri((string) $this->getConfigData('gateway_url'));
-        $client->setConfig([
-            'maxredirects' => 0,
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'max_redirects' => 0,
             'timeout' => 30,
-            'verifypeer' => $this->getConfigFlag('verify_peer'),
-            'verifyhost' => 2,
+            'verify_peer' => $this->getConfigFlag('verify_peer'),
+            'verify_host' => true,
         ]);
-        $client->setRawData(mb_convert_encoding($request, 'UTF-8', 'ISO-8859-1'));
-        return $client->request(Varien_Http_Client::POST)->getBody();
+
+        $response = $client->request('POST', (string) $this->getConfigData('gateway_url'), [
+            'body' => mb_convert_encoding($request, 'UTF-8', 'ISO-8859-1'),
+        ]);
+        return $response->getContent();
     }
 
     /**
@@ -1382,16 +1383,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($responseBody === null) {
             $debugData = ['request' => $request];
             try {
-                $client = new Varien_Http_Client();
-                $client->setUri((string) $this->getConfigData('gateway_url'));
-                $client->setConfig([
-                    'maxredirects' => 0,
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
                     'timeout' => 30,
-                    'verifypeer' => $this->getConfigFlag('verify_peer'),
-                    'verifyhost' => 2,
+                    'verify_peer' => $this->getConfigFlag('verify_peer'),
+                    'verify_host' => true,
                 ]);
-                $client->setRawData($request);
-                $responseBody = $client->request(Varien_Http_Client::POST)->getBody();
+
+                $response = $client->request('POST', (string) $this->getConfigData('gateway_url'), [
+                    'body' => $request,
+                ]);
+                $responseBody = $response->getContent();
                 $debugData['result'] = $responseBody;
                 $this->_setCachedQuotes($request, $responseBody);
             } catch (Exception $e) {
@@ -1582,16 +1584,17 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($responseBody === null) {
             $debugData = ['request' => $request];
             try {
-                $client = new Varien_Http_Client();
-                $client->setUri((string) $this->getConfigData('gateway_url'));
-                $client->setConfig([
-                    'maxredirects' => 0,
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
                     'timeout' => 30,
-                    'verifypeer' => $this->getConfigFlag('verify_peer'),
-                    'verifyhost' => 2,
+                    'verify_peer' => $this->getConfigFlag('verify_peer'),
+                    'verify_host' => true,
                 ]);
-                $client->setRawData($request);
-                $responseBody = $client->request(Varien_Http_Client::POST)->getBody();
+
+                $response = $client->request('POST', (string) $this->getConfigData('gateway_url'), [
+                    'body' => $request,
+                ]);
+                $responseBody = $response->getContent();
                 $debugData['result'] = $responseBody;
                 $this->_setCachedQuotes($request, $responseBody);
             } catch (Exception $e) {

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,18 +21,15 @@
  * $filter->setFilters(array(
  *      'list_values' => array(
  *          'children_filters' => array( //filters will applied to all children
- *              array(
- *                  'zend' => 'StringToUpper',
- *                  'args' => array('encoding' => 'utf-8')),
- *              array('zend' => 'StripTags')
+ *              'striptags',  // Simple string filter using core helper
+ *              function($value) { return strtoupper($value); }  // Callable filter
  *          )
  *      ),
  *      'list_values_with_name' => array(
  *          'children_filters' => array(
  *              'item1' => array(
- *                  array(
- *                      'zend' => 'StringToUpper',
- *                      'args' => array('encoding' => 'utf-8'))),
+ *                  function($value) { return strtoupper($value); }
+ *              ),
  *              'item2' => array(
  *                  array('model' => 'core/input_filter_maliciousCode')
  *              ),
@@ -45,22 +42,18 @@
  *          )
  *      )
  *  ));
- *  $filter->addFilter('name2', new Zend_Filter_Alnum());
- *  $filter->addFilter('name1',
- *      array(
- *          'zend' => 'StringToUpper',
- *          'args' => array('encoding' => 'utf-8')));
- *  $filter->addFilter('name1', array('zend' => 'StripTags'), Zend_Filter::CHAIN_PREPEND);
- *  $filter->addFilters(protected $_filtersToAdd = array(
+ *  $filter->addFilter('name2', function($value) { return preg_replace('/[^a-zA-Z0-9]/', '', $value); });
+ *  $filter->addFilter('name1', 'striptags');
+ *  $filter->addFilter('name1', 'email');
+ *  $filter->addFilters(array(
  *      'list_values_with_name' => array(
  *          'children_filters' => array(
  *              'deep_list' => array(
  *                  'children_filters' => array(
  *                      'sub1' => array(
- *                          array(
- *                              'zend' => 'StringToLower',
- *                              'args' => array('encoding' => 'utf-8'))),
- *                      'sub2' => array(array('zend' => 'Int'))
+ *                          function($value) { return strtolower($value); }
+ *                      ),
+ *                      'sub2' => array('int')
  *                  )
  *              )
  *          )
@@ -86,7 +79,7 @@
  * </code>
  * @see Mage_Core_Model_Input_FilterTest See this class for manual
  */
-class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
+class Mage_Core_Model_Input_Filter
 {
     /**
      * Filters data collectors
@@ -98,14 +91,14 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
     /**
      * Add filter
      *
-     * @param string|Zend_Filter_Interface $name
-     * @param string|Zend_Filter_Interface $filter
+     * @param string $name
+     * @param callable|array $filter
      * @param string $placement
      * @return $this
      */
-    public function addFilter($name, $filter, $placement = Zend_Filter::CHAIN_APPEND)
+    public function addFilter($name, $filter, $placement = 'append')
     {
-        if ($placement == Zend_Filter::CHAIN_PREPEND) {
+        if ($placement == 'prepend') {
             array_unshift($this->_filters[$name], $filter);
         } else {
             $this->_filters[$name][] = $filter;
@@ -118,20 +111,19 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
      *
      * @return $this
      */
-    public function appendFilter(Zend_Filter_Interface $filter)
+    public function appendFilter(string $name, callable|array $filter): self
     {
-        return $this->addFilter($filter, Zend_Filter::CHAIN_APPEND);
+        return $this->addFilter($name, $filter, 'append');
     }
 
     /**
      * Add a filter to the start of the chain
      *
-     * @param  array|Zend_Filter_Interface $filter
      * @return $this
      */
-    public function prependFilter($filter)
+    public function prependFilter(string $name, callable|array $filter): self
     {
-        return $this->addFilter($filter, Zend_Filter::CHAIN_PREPEND);
+        return $this->addFilter($name, $filter, 'prepend');
     }
 
     /**
@@ -184,7 +176,6 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
      * @param array $data
      * @return array    Return filtered data
      */
-    #[\Override]
     public function filter($data)
     {
         return $this->_filter($data);
@@ -218,10 +209,17 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
                 $value = $this->_filter($value, $filters[$key]['children_filters'], $isChildrenFilterListSimple);
             } else {
                 foreach ($itemFilters as $filterData) {
-                    if ($zendFilter = $this->_getZendFilter($filterData)) {
-                        $value = $zendFilter->filter($value);
-                    } elseif ($filtrationHelper = $this->_getFiltrationHelper($filterData)) {
-                        $value = $this->_applyFiltrationWithHelper($value, $filtrationHelper, $filterData);
+                    if (is_callable($filterData)) {
+                        $value = $filterData($value);
+                    } elseif (is_string($filterData)) {
+                        // Simple string filter using core helper
+                        $value = Mage::helper('core')->filter($value, $filterData);
+                    } elseif (is_array($filterData)) {
+                        if (isset($filterData['helper'])) {
+                            $value = $this->_applyFiltrationWithHelper($value, Mage::helper($filterData['helper']), $filterData);
+                        } elseif (isset($filterData['filter'])) {
+                            $value = Mage::helper('core')->filter($value, $filterData['filter']);
+                        }
                     }
                 }
             }
@@ -254,7 +252,7 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
      * Try to create Maho helper for filtration based on $filterData. Return false on failure
      *
      * @param array $filterData
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
      * @throws Exception
      */
     protected function _getFiltrationHelper($filterData)
@@ -272,72 +270,4 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
         return $helper;
     }
 
-    /**
-     * Try to create Zend filter based on $filterData. Return false on failure
-     *
-     * @param Zend_Filter_Interface|array $filterData
-     * @return false|Zend_Filter_Interface
-     */
-    protected function _getZendFilter($filterData)
-    {
-        $zendFilter = false;
-        if (is_object($filterData) && $filterData instanceof Zend_Filter_Interface) {
-            $zendFilter = $filterData;
-        } elseif (isset($filterData['model'])) {
-            $zendFilter = $this->_createCustomZendFilter($filterData);
-        } elseif (isset($filterData['zend'])) {
-            $zendFilter = $this->_createNativeZendFilter($filterData);
-        }
-        return $zendFilter;
-    }
-
-    /**
-     * Get Maho filters
-     *
-     * @param array $filterData
-     * @return Zend_Filter_Interface
-     * @throws Exception
-     */
-    protected function _createCustomZendFilter($filterData)
-    {
-        $filter = $filterData['model'];
-        if (!isset($filterData['args'])) {
-            $filterData['args'] = null;
-        } else {
-            //use only first element because Mage factory cannot get more
-            $filterData['args'] = $filterData['args'][0];
-        }
-        if (is_string($filterData['model'])) {
-            $filter = Mage::getModel($filterData['model'], $filterData['args']);
-        }
-        if (!($filter instanceof Zend_Filter_Interface)) {
-            throw new Exception('Filter is not instance of Zend_Filter_Interface');
-        }
-        return $filter;
-    }
-
-    /**
-     * Get native Zend_Filter
-     *
-     * @param array $filterData
-     * @return Zend_Filter_Interface
-     * @throws Exception
-     */
-    protected function _createNativeZendFilter($filterData)
-    {
-        $filter = $filterData['zend'];
-        if (is_string($filter)) {
-            $class = new ReflectionClass('Zend_Filter_' . $filter);
-            if ($class->implementsInterface('Zend_Filter_Interface')) {
-                if (isset($filterData['args']) && $class->hasMethod('__construct')) {
-                    $filter = $class->newInstanceArgs($filterData['args']);
-                } else {
-                    $filter = $class->newInstance();
-                }
-            } else {
-                throw new Exception('Filter is not instance of Zend_Filter_Interface');
-            }
-        }
-        return $filter;
-    }
 }

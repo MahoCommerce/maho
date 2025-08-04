@@ -28,10 +28,6 @@
                         <name>Fixer API / Apilayer.com</name>
                         <model>directory/currency_import_fixerio</model>
                     </fixerio>
-                    <webservicex>
-                        <name>Webservicex</name>
-                        <model>directory/currency_import_webservicex</model>
-                    </webservicex>
                 </services>
             </import>
         </currency>
@@ -164,10 +160,6 @@
                 <api_key backend_model="adminhtml/system_config_backend_encrypted"/>
                 <active>0</active>
             </fixerio>
-            <webservicex>
-                <timeout>100</timeout>
-                <active>0</active>
-            </webservicex>
             <import>
                 <enabled>0</enabled>
                 <error_email/>

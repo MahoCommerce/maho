@@ -33,6 +33,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
             'is_active' => Mage::helper('payment')->__('Is Active'),
             'gender' => Mage::helper('payment')->__('Gender'),
             'dob' => Mage::helper('payment')->__('Date of Birth'),
+            'orders_complete_count' => Mage::helper('payment')->__('Number of Complete Orders'),
         ];
 
         // Add customer EAV attributes that are user-defined and visible
@@ -66,17 +67,16 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
             'group_id', 'gender', 'is_active' => 'select',
             'created_at', 'dob' => 'date',
             'email' => 'string',
+            'orders_complete_count' => 'numeric',
             default => $this->_getAttributeInputType(),
         };
     }
 
     /**
      * Get value element type
-     *
-     * @return string
      */
     #[\Override]
-    public function getValueElementType()
+    public function getValueElementType(): string
     {
         return match ($this->getAttribute()) {
             'group_id', 'gender', 'is_active' => 'select',
@@ -87,11 +87,9 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
 
     /**
      * Get value select options
-     *
-     * @return array
      */
     #[\Override]
-    public function getValueSelectOptions()
+    public function getValueSelectOptions(): array
     {
         if (!$this->hasData('value_select_options')) {
             $options = match ($this->getAttribute()) {
@@ -114,12 +112,10 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
 
     /**
      * Get input type for customer attribute
-     *
-     * @return string
      */
-    protected function _getAttributeInputType()
+    protected function _getAttributeInputType(): string
     {
-        $attribute = $this->_getCustomerAttribute();
+        $attribute = $this->getCustomerAttribute();
         if ($attribute) {
             return match ($attribute->getFrontendInput()) {
                 'select', 'multiselect' => 'select',
@@ -133,24 +129,17 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
 
     /**
      * Get select options for customer attribute
-     *
-     * @return array
      */
-    protected function _getAttributeSelectOptions()
+    protected function _getAttributeSelectOptions(): array
     {
-        $attribute = $this->_getCustomerAttribute();
+        $attribute = $this->getCustomerAttribute();
         if ($attribute && $attribute->usesSource()) {
             return $attribute->getSource()->getAllOptions();
         }
         return [];
     }
 
-    /**
-     * Get customer attribute model
-     *
-     * @return Mage_Customer_Model_Attribute|null
-     */
-    protected function _getCustomerAttribute()
+    protected function getCustomerAttribute(): ?Mage_Customer_Model_Attribute
     {
         $attribute = Mage::getSingleton('eav/config')
             ->getAttribute('customer', $this->getAttribute());
@@ -158,13 +147,21 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
         return ($attribute instanceof Mage_Customer_Model_Attribute) ? $attribute : null;
     }
 
-    /**
-     * Validate customer condition
-     *
-     * @return bool
-     */
+    protected function getCustomerCompleteOrderCount(int $customerId): int
+    {
+        if (!$customerId) {
+            return 0;
+        }
+
+        $collection = Mage::getResourceModel('sales/order_collection')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->addFieldToFilter('state', Mage_Sales_Model_Order::STATE_COMPLETE);
+
+        return $collection->getSize();
+    }
+
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(Varien_Object $object): bool
     {
         // Get customer from quote or use directly if passed
         if ($object instanceof Mage_Customer_Model_Customer) {
@@ -179,7 +176,12 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
                     return false; // Can't validate customer attributes for guests
                 }
             } else {
-                $value = $customer->getData($this->getAttribute());
+                // Handle special runtime attributes
+                if ($this->getAttribute() === 'orders_complete_count') {
+                    $value = $this->getCustomerCompleteOrderCount($customer->getId());
+                } else {
+                    $value = $customer->getData($this->getAttribute());
+                }
             }
         } else {
             // Try to get customer from the object
@@ -187,7 +189,12 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
             if (!$customer) {
                 return false;
             }
-            $value = $customer->getData($this->getAttribute());
+            // Handle special runtime attributes
+            if ($this->getAttribute() === 'orders_complete_count') {
+                $value = $this->getCustomerCompleteOrderCount($customer->getId());
+            } else {
+                $value = $customer->getData($this->getAttribute());
+            }
         }
 
         if (isset($value)) {
@@ -196,7 +203,12 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
 
         // If customer exists, get the value
         if (isset($customer) && $customer instanceof Mage_Customer_Model_Customer && $customer->getId()) {
-            $value = $customer->getData($this->getAttribute());
+            // Handle special runtime attributes
+            if ($this->getAttribute() === 'orders_complete_count') {
+                $value = $this->getCustomerCompleteOrderCount($customer->getId());
+            } else {
+                $value = $customer->getData($this->getAttribute());
+            }
             return $this->validateAttribute($value);
         }
 
