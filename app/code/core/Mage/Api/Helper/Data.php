@@ -343,16 +343,11 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string|null $routePath
      * @param array|null $routeParams
      * @param bool $htmlSpecialChars
-     * @return string
      */
-    public function getServiceUrl($routePath = null, $routeParams = null, $htmlSpecialChars = false)
+    public function getServiceUrl($routePath = null, $routeParams = null, $htmlSpecialChars = false): string
     {
         $request = Mage::app()->getRequest();
-
-        if (is_null($routeParams)) {
-            $routeParams = [];
-        }
-
+        $routeParams ??= [];
         $routeParams['_nosid'] = true;
 
         /** @var Mage_Core_Model_Url $urlModel */
@@ -360,21 +355,27 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
         $url = $urlModel->getUrl($routePath, $routeParams);
         $parsedUrl = parse_url($url);
 
-        // Build the modified URL
-        $scheme = $parsedUrl['scheme'] ?? 'http';
-        $host = $request->getHttpHost();
+        // Build URL with current request host and appropriate path
+        $components = [
+            'scheme' => $parsedUrl['scheme'] ?? $request->getScheme(),
+            'host' => $request->getHttpHost(),
+            'path' => $urlModel->getRouteFrontName()
+                ? $request->getBaseUrl() . $request->getPathInfo()
+                : '/' . trim($request->getBasePath() . '/' . basename(getenv('SCRIPT_FILENAME')), '/'),
+            'query' => $parsedUrl['query'] ?? null,
+            'fragment' => $parsedUrl['fragment'] ?? null,
+        ];
 
-        if (!$urlModel->getRouteFrontName()) {
-            $path = '/' . trim($request->getBasePath() . '/' . basename(getenv('SCRIPT_FILENAME')), '/');
-        } else {
-            $path = $request->getBaseUrl() . $request->getPathInfo();
+        $finalUrl = $components['scheme'] . '://' . $components['host'] . $components['path'];
+
+        if ($components['query']) {
+            $finalUrl .= '?' . $components['query'];
         }
 
-        $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
-        $fragment = isset($parsedUrl['fragment']) ? '#' . $parsedUrl['fragment'] : '';
+        if ($components['fragment']) {
+            $finalUrl .= '#' . $components['fragment'];
+        }
 
-        $finalUrl = $scheme . '://' . $host . $path . $query . $fragment;
-
-        return $htmlSpecialChars === true ? htmlspecialchars($finalUrl) : $finalUrl;
+        return $htmlSpecialChars ? htmlspecialchars($finalUrl) : $finalUrl;
     }
 }
