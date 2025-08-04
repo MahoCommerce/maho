@@ -593,7 +593,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $variables = [];
         if ($variablesString && is_string($variablesString)) {
             $variablesString = str_replace("\n", '', $variablesString);
-            $variables = Zend_Json::decode($variablesString);
+            $variables = Mage::helper('core')->jsonDecode($variablesString);
         }
         return $variables;
     }

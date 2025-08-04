@@ -6,7 +6,7 @@
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -398,13 +398,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 if (!$url) {
                     $url = $this->_defaultGatewayUrl;
                 }
-                $client = new Zend_Http_Client();
-                $client->setUri($url);
-                $client->setConfig(['maxredirects' => 0, 'timeout' => 30]);
-                $client->setParameterGet('API', $api);
-                $client->setParameterGet('XML', $request);
-                $response = $client->request();
-                $responseBody = $response->getBody();
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
+                    'timeout' => 30,
+                ]);
+                $response = $client->request('GET', $url, [
+                    'query' => [
+                        'API' => $api,
+                        'XML' => $request,
+                    ],
+                ]);
+                $responseBody = $response->getContent();
 
                 $debugData['result'] = $responseBody;
                 $this->_setCachedQuotes($request, $responseBody);
@@ -936,13 +940,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 if (!$url) {
                     $url = $this->_defaultGatewayUrl;
                 }
-                $client = new Zend_Http_Client();
-                $client->setUri($url);
-                $client->setConfig(['maxredirects' => 0, 'timeout' => 30]);
-                $client->setParameterGet('API', $api);
-                $client->setParameterGet('XML', $request);
-                $response = $client->request();
-                $responseBody = $response->getBody();
+                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                    'max_redirects' => 0,
+                    'timeout' => 30,
+                ]);
+                $response = $client->request('GET', $url, [
+                    'query' => [
+                        'API' => $api,
+                        'XML' => $request,
+                    ],
+                ]);
+                $responseBody = $response->getContent();
                 $debugData['result'] = $responseBody;
             } catch (Exception $e) {
                 $debugData['result'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
@@ -1320,11 +1328,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $packageParams = $request->getPackageParams();
 
         $packageWeight = $request->getPackageWeight();
-        if ($packageParams->getWeightUnits() != Zend_Measure_Weight::OUNCE) {
+        if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_OUNCE) {
             $packageWeight = round((float) Mage::helper('usa')->convertMeasureWeight(
                 $request->getPackageWeight(),
                 $packageParams->getWeightUnits(),
-                Zend_Measure_Weight::OUNCE,
+                Mage_Core_Model_Locale::WEIGHT_OUNCE,
             ));
         }
 
@@ -1393,11 +1401,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         };
         $packageParams = $request->getPackageParams();
         $packageWeight = $request->getPackageWeight();
-        if ($packageParams->getWeightUnits() != Zend_Measure_Weight::OUNCE) {
+        if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_OUNCE) {
             $packageWeight = round((float) Mage::helper('usa')->convertMeasureWeight(
                 $request->getPackageWeight(),
                 $packageParams->getWeightUnits(),
-                Zend_Measure_Weight::OUNCE,
+                Mage_Core_Model_Locale::WEIGHT_OUNCE,
             ));
         }
 
@@ -1471,35 +1479,35 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $length = $packageParams->getLength();
         $girth = $packageParams->getGirth();
         $packageWeight = $request->getPackageWeight();
-        if ($packageParams->getWeightUnits() != Zend_Measure_Weight::POUND) {
+        if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_POUND) {
             $packageWeight = Mage::helper('usa')->convertMeasureWeight(
                 $request->getPackageWeight(),
                 $packageParams->getWeightUnits(),
-                Zend_Measure_Weight::POUND,
+                Mage_Core_Model_Locale::WEIGHT_POUND,
             );
         }
-        if ($packageParams->getDimensionUnits() != Zend_Measure_Length::INCH) {
+        if ($packageParams->getDimensionUnits() != Mage_Core_Model_Locale::LENGTH_INCH) {
             $length = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getLength(),
                 $packageParams->getDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
             $width = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getWidth(),
                 $packageParams->getDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
             $height = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getHeight(),
                 $packageParams->getDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
         }
-        if ($packageParams->getGirthDimensionUnits() != Zend_Measure_Length::INCH) {
+        if ($packageParams->getGirthDimensionUnits() != Mage_Core_Model_Locale::LENGTH_INCH) {
             $girth = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getGirth(),
                 $packageParams->getGirthDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
         }
 
@@ -1612,11 +1620,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             $item->setData($itemShipment);
 
             $itemWeight = $item->getWeight() * $item->getQty();
-            if ($packageParams->getWeightUnits() != Zend_Measure_Weight::POUND) {
+            if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_POUND) {
                 $itemWeight = Mage::helper('usa')->convertMeasureWeight(
                     $itemWeight,
                     $packageParams->getWeightUnits(),
-                    Zend_Measure_Weight::POUND,
+                    Mage_Core_Model_Locale::WEIGHT_POUND,
                 );
             }
             if (!empty($countriesOfManufacture[$item->getProductId()])) {
@@ -1724,12 +1732,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         if (!$url) {
             $url = $this->_defaultGatewayUrl;
         }
-        $client = new Zend_Http_Client();
-        $client->setUri($url);
-        $client->setConfig(['maxredirects' => 0, 'timeout' => 30]);
-        $client->setParameterGet('API', $api);
-        $client->setParameterGet('XML', $requestXml);
-        $response = $client->request()->getBody();
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'max_redirects' => 0,
+            'timeout' => 30,
+        ]);
+        $httpResponse = $client->request('GET', $url, [
+            'query' => [
+                'API' => $api,
+                'XML' => $requestXml,
+            ],
+        ]);
+        $response = $httpResponse->getContent();
 
         $response = simplexml_load_string($response);
         if ($response === false || $response->getName() == 'Error') {

@@ -65,8 +65,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
     {
         $type = $this->getRequest()->getPost('widget_type');
         $params = $this->getRequest()->getPost('parameters', []);
-        $asIs = $this->getRequest()->getPost('as_is');
-        $html = Mage::getSingleton('widget/widget')->getWidgetDeclaration($type, $params, $asIs);
+        $html = Mage::getSingleton('widget/widget')->getWidgetDeclaration($type, $params);
         $this->getResponse()->setBody($html);
     }
 }

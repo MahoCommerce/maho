@@ -134,8 +134,8 @@ class TranslateInline {
             width: 650,
             height: 470,
             okLabel: 'Submit',
-            ok: this.formOk.bind(this),
-            cancel: this.formClose.bind(this),
+            onOk: this.formOk.bind(this),
+            onCancel: this.formClose.bind(this),
             onClose: this.formClose.bind(this)
         });
 

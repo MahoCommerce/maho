@@ -75,30 +75,30 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public function validate()
     {
-        $validators = [
-            'template_code'         => [Zend_Filter_Input::ALLOW_EMPTY => false],
-            'template_type'         => 'Int',
-            'template_sender_email' => 'EmailAddress',
-            'template_sender_name'  => [Zend_Filter_Input::ALLOW_EMPTY => false],
-        ];
-        $data = [];
-        foreach (array_keys($validators) as $validateField) {
-            $data[$validateField] = $this->getDataUsingMethod($validateField);
+        $errorMessages = [];
+        $helper = Mage::helper('core');
+
+        // Validate template code
+        if (empty(trim($this->getTemplateCode() ?? ''))) {
+            $errorMessages[] = Mage::helper('newsletter')->__('Template code is required');
         }
 
-        $validateInput = new Zend_Filter_Input([], $validators, $data);
-        if (!$validateInput->isValid()) {
-            $errorMessages = [];
-            foreach ($validateInput->getMessages() as $messages) {
-                if (is_array($messages)) {
-                    foreach ($messages as $message) {
-                        $errorMessages[] = $message;
-                    }
-                } else {
-                    $errorMessages[] = $messages;
-                }
-            }
+        // Validate template type
+        if (!is_numeric($this->getTemplateType())) {
+            $errorMessages[] = Mage::helper('newsletter')->__('Template type must be numeric');
+        }
 
+        // Validate sender email
+        if (!$helper->isValidEmail($this->getTemplateSenderEmail())) {
+            $errorMessages[] = Mage::helper('newsletter')->__('Invalid sender email address');
+        }
+
+        // Validate sender name
+        if (empty(trim($this->getTemplateSenderName() ?? ''))) {
+            $errorMessages[] = Mage::helper('newsletter')->__('Sender name is required');
+        }
+
+        if ($errorMessages) {
             Mage::throwException(implode("\n", $errorMessages));
         }
     }

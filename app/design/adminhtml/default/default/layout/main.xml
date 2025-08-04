@@ -63,12 +63,7 @@ Default layout, loads most of the pages
                 <action method="addItem"><type>skin_css</type><name>override.css</name></action>
                 <action method="addItem"><type>skin_css</type><name>form.css</name></action>
 
-                <action method="addItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name><params/></action>
-                <action method="addItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
-
                 <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name><params/><if/><condition>can_load_rules_js</condition></action>
-
-                <action method="addItem"><type>js</type><name>mage/adminhtml/wysiwyg/tinymce/setup.js</name><params/><if/><condition>can_load_tiny_mce</condition></action>
             </block>
 
             <block type="adminhtml/page_notices" name="global_notices" as="global_notices" template="page/notices.phtml" />
@@ -126,12 +121,15 @@ Layout for editor element
 -->
     <editor>
         <reference name="head">
+            <action method="addItem"><type>js</type><name>mage/adminhtml/wysiwyg/tiptap/setup.js</name><params>type="module"</params><if/><condition>can_load_wysiwyg</condition></action>
+            <action method="addItem"><type>js_css</type><name>mage/adminhtml/wysiwyg/tiptap/tiptap.css</name><params/><if/><condition>can_load_wysiwyg</condition></action>
             <action method="addJs"><script>mage/adminhtml/variables.js</script></action>
             <action method="addJs"><script>mage/adminhtml/wysiwyg/widget.js</script></action>
             <action method="addJs"><script>mage/adminhtml/uploader/instance.js</script></action>
             <action method="addJs"><script>mage/adminhtml/browser.js</script></action>
             <action method="addJs"><script>maho-dialog.js</script></action>
             <action method="addJs"><script>maho-tree.js</script></action>
+            <action method="addJs"><script>sortable.min.js</script></action>
         </reference>
     </editor>
 

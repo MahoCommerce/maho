@@ -184,7 +184,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function getNow()
     {
         if (!$this->_now) {
-            return Varien_Date::now();
+            return Mage_Core_Model_Locale::now();
         }
         return $this->_now;
     }
@@ -357,8 +357,8 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         } else {
             $customerGroupId = Mage::getSingleton('customer/session')->getCustomerGroupId();
         }
-        $dateTs     = Mage::app()->getLocale()->date()->getTimestamp();
-        $cacheKey   = date('Y-m-d', $dateTs) . "|$websiteId|$customerGroupId|$productId|$price";
+        $dateTs     = Mage::app()->getLocale()->dateImmutable()->getTimestamp();
+        $cacheKey   = date(Mage_Core_Model_Locale::DATE_FORMAT, $dateTs) . "|$websiteId|$customerGroupId|$productId|$price";
 
         if (!array_key_exists($cacheKey, self::$_priceRulesData)) {
             $rulesData = $this->_getResource()->getRulesFromProduct($dateTs, $websiteId, $customerGroupId, $productId);

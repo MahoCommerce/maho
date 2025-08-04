@@ -6,7 +6,7 @@
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,7 +19,6 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
      * @return string
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
-     * @throws Zend_Date_Exception
      */
     #[\Override]
     protected function _toHtml()
@@ -42,13 +41,13 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
 
         $product = Mage::getModel('catalog/product');
 
-        $todayStartOfDayDate  = Mage::app()->getLocale()->date()
-            ->setTime('00:00:00')
-            ->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+        $todayStartOfDayDate  = Mage::app()->getLocale()->dateImmutable()
+            ->setTime(0, 0, 0)
+            ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
-        $todayEndOfDayDate  = Mage::app()->getLocale()->date()
-            ->setTime('23:59:59')
-            ->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+        $todayEndOfDayDate  = Mage::app()->getLocale()->dateImmutable()
+            ->setTime(23, 59, 59)
+            ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
         $products = $product->getCollection()
             ->setStoreId($storeId)

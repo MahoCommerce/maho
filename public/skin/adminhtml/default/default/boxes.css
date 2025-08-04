@@ -826,7 +826,27 @@ ul.item-options li { padding-left:.7em; }
 .product-options dd.last { border-bottom:0; margin-bottom:0; padding-bottom:0; }
 .product-options dd .input-box { display:block; }
 .product-options dd input.input-text { width:98%; }
-.product-options dd input.datetime-picker { width:150px; }
+/* Native date/time inputs */
+.product-options dd input[type="date"],
+.product-options dd input[type="time"],
+.product-options dd input[type="datetime-local"],
+.product-options dd input.datetime-picker { 
+  width: auto;
+  min-width: 150px;
+  padding: 3px 6px;
+  border: 1px solid #b6b6b6;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.product-options dd input[type="date"]:focus,
+.product-options dd input[type="time"]:focus,
+.product-options dd input[type="datetime-local"]:focus {
+  border-color: #ea7601;
+  outline: none;
+  box-shadow: 0 0 2px rgba(234, 118, 1, 0.3);
+}
 .product-options dd .time-picker { display:-moz-inline-box; display:inline-block; padding:2px 0; vertical-align:middle; }
 .product-options dd .time-picker select { vertical-align:middle; }
 .product-options dd textarea { width:98%; height:8em; }
@@ -1468,14 +1488,16 @@ ul.super-product-attributes { padding-left:15px; }
 .options-box .option-header td { padding:5px 2px; }
 .options-box .option-header .tree { margin:5px 0 0; }
 
-dialog .uploader .file-row { margin:16px 0; width:auto; }
-dialog #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
-dialog #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
-dialog #contents { margin-left:-3px; overflow:auto; display: flex; flex-wrap: wrap; }
-dialog #contents .filecnt { border:1px solid #ccc; cursor:pointer; padding:3px; margin:0 0 15px 4px; overflow:hidden; width:100px; }
-dialog #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
-dialog #contents .nm { text-align:center; }
-dialog #contents .nm img { vertical-align:bottom; }
+.media-library-content .uploader .file-row { margin:16px 0; width:auto; }
+.media-library-content #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
+.media-library-content #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
+.media-library-content #contents-alt-text { float: left; }
+.media-library-content #contents { margin-left:-3px; overflow:auto; display: flex; flex-wrap: wrap; }
+.media-library-content #contents .filecnt { border:1px solid #ccc; cursor:pointer; padding:3px; margin:0 0 15px 4px; overflow:hidden; width:100px; }
+.media-library-content #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
+.media-library-content #contents .nm { text-align:center; }
+.media-library-content #contents .nm img { vertical-align:bottom; }
+.media-library-content { border: 1px solid #ccc; background: #fff; padding: 10px; }
 
 /* Widget Insert */
 #widget_window .magento_content { height:auto !important; min-height:450px; }
@@ -1490,12 +1512,13 @@ dialog #contents .nm img { vertical-align:bottom; }
 #widget-chooser .main-col { padding-right:4px; }
 
 /* CMS Variables Popup */
-#variables-chooser .magento_message { padding:10px 18px; }
+#variables-chooser .dialog-content { font-size: 14px; }
+#variables-chooser .dialog-content li + li { margin-top: 4px; }
+#variables-chooser .dialog-content ul + h3 { margin-top: 16px; }
 
 /* Product description WYSIWYG editor */
 #catalog-wysiwyg-editor .buttons-set { margin-top:10px; }
 #catalog-wysiwyg-editor .magento_content { height:auto !important; overflow:hidden; }
-#catalog-wysiwyg-editor .textarea { width:930px !important; }
 #catalog-wysiwyg-editor .magento_message { padding:0 7px; }
 #catalog-wysiwyg-editor .magento_buttons { padding-left:7px; padding-right:7px; }
 
@@ -1582,3 +1605,28 @@ div.actions:after,
 .files-wide .row:after,
 .grid tr.filter .range .range-line:after,
 .store-scope:after { display:block; clear:both; content:"."; font-size:0; line-height:0; height:0; overflow:hidden; }
+
+
+/* ============================================ *
+ * Native Date Input Styles
+ * ============================================ */
+/* General admin date input styles */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  font-family: "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  padding: 3px 6px;
+  border: 1px solid #b6b6b6;
+  border-radius: 2px;
+  background: #fff;
+}
+
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus {
+  border-color: #ea7601;
+  outline: none;
+  box-shadow: 0 0 2px rgba(234, 118, 1, 0.3);
+}
+EOF < /dev/null

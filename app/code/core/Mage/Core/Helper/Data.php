@@ -137,7 +137,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format date using current locale options and time zone.
      *
-     * @param   string|int|Zend_Date|null   $date If empty, return current datetime.
+     * @param   string|int|DateTime|null   $date If empty, return current datetime.
      * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
      * @param   bool                        $showTime Whether to include time
      * @return  string
@@ -150,13 +150,26 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format date using current locale options and time zone.
      *
-     * @param   string|int|Zend_Date|null   $date If empty, return current locale datetime.
-     * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
-     * @param   bool                        $showTime Whether to include time
-     * @param   bool                        $useTimezone Convert to local datetime?
+     * @param   string|int|DateTime|null   $date The date to format. Can be:
+     *                                            - null: Uses current time
+     *                                            - int: Unix timestamp (assumes UTC)
+     *                                            - string: Date string (e.g., "2025-08-01 09:24:18")
+     *                                            - DateTime: Existing DateTime object
+     * @param   string                      $format Display format constant:
+     *                                            - FORMAT_TYPE_SHORT: Brief format (e.g., "8/1/25")
+     *                                            - FORMAT_TYPE_MEDIUM: Standard format (e.g., "Aug 1, 2025")
+     *                                            - FORMAT_TYPE_LONG: Detailed format (e.g., "August 1, 2025")
+     *                                            - FORMAT_TYPE_FULL: Complete format (e.g., "Thursday, August 1, 2025")
+     * @param   bool                        $showTime Whether to include time in the output
+     *                                            - true: "Aug 1, 2025, 10:24:18 AM"
+     *                                            - false: "Aug 1, 2025"
+     * @param   bool                        $useTimezone Whether to convert the date to store timezone
+     *                                            - true: Converts from UTC to store timezone before formatting
+     *                                            - false: Formats the date in its current timezone (typically UTC)
+     * @return  string                      Formatted date string according to locale settings
      */
     public function formatTimezoneDate(
-        $date = null,
+        string|int|DateTime|null $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
         bool $showTime = false,
         bool $useTimezone = true,
@@ -170,7 +183,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             $date = $locale->date(Mage::getSingleton('core/date')->gmtTimestamp(), null, null, $useTimezone);
         } elseif (is_int($date)) {
             $date = $locale->date($date, null, null, $useTimezone);
-        } elseif (!$date instanceof Zend_Date) {
+        } elseif (!$date instanceof DateTime) {
             if (($time = strtotime($date)) !== false) {
                 $date = $locale->date($time, null, null, $useTimezone);
             } else {
@@ -178,14 +191,29 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
 
-        $format = $showTime ? $locale->getDateTimeFormat($format) : $locale->getDateFormat($format);
-        return $date->toString($format);
+        $dateStyle = match ($format) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
+        $timeStyle = $showTime ? $dateStyle : IntlDateFormatter::NONE;
+
+        $formatter = new IntlDateFormatter(
+            $locale->getLocaleCode(),
+            $dateStyle,
+            $timeStyle,
+            $date->getTimezone(),
+        );
+
+        return $formatter->format($date);
     }
 
     /**
      * Format time using current locale options
      *
-     * @param   string|Zend_Date|null $time
+     * @param   string|DateTime|null $time
      * @param   string              $format
      * @param   bool                $showDate
      * @return  string
@@ -199,19 +227,36 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $locale = Mage::app()->getLocale();
         if (is_null($time)) {
             $date = $locale->date(time());
-        } elseif ($time instanceof Zend_Date) {
+        } elseif ($time instanceof DateTime) {
             $date = $time;
         } else {
             $date = $locale->date(strtotime($time));
         }
 
-        if ($showDate) {
-            $format = $locale->getDateTimeFormat($format);
-        } else {
-            $format = $locale->getTimeFormat($format);
-        }
+        // Use IntlDateFormatter to format with locale-specific patterns
+        $dateStyle = $showDate ? match ($format) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        } : IntlDateFormatter::NONE;
+        $timeStyle = match ($format) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
 
-        return $date->toString($format);
+        $formatter = new IntlDateFormatter(
+            $locale->getLocaleCode(),
+            $dateStyle,
+            $timeStyle,
+            $date->getTimezone(),
+        );
+
+        return $formatter->format($date);
     }
 
     /**
@@ -674,10 +719,12 @@ XML;
      * @param bool $cycleCheck Optional; whether or not to check for object recursion; off by default
      * @param  array $options Additional options used during encoding
      * @return string
+     * @throws JsonException
      */
     public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
     {
-        $json = Zend_Json::encode($valueToEncode, $cycleCheck, $options);
+        $json = json_encode($valueToEncode, JSON_THROW_ON_ERROR);
+
         /** @var Mage_Core_Model_Translate_Inline $inline */
         $inline = Mage::getSingleton('core/translate_inline');
         if ($inline->isAllowed()) {
@@ -696,30 +743,21 @@ XML;
      * switch added to prevent exceptions in json_decode
      *
      * @param string $encodedValue
-     * @param int $objectDecodeType
+     * @param bool $associative When true, JSON objects will be returned as associative arrays
      * @return mixed
-     * @throws Zend_Json_Exception
+     * @throws JsonException
      */
-    public function jsonDecode($encodedValue, $objectDecodeType = Zend_Json::TYPE_ARRAY)
+    public function jsonDecode($encodedValue, $associative = true)
     {
-        switch (true) {
-            case ($encodedValue === null):
-                $encodedValue = 'null';
-                break;
-            case ($encodedValue === true):
-                $encodedValue = 'true';
-                break;
-            case ($encodedValue === false):
-                $encodedValue = 'false';
-                break;
-            case ($encodedValue === ''):
-                $encodedValue = '""';
-                break;
-            default:
-                // do nothing
-        }
+        $encodedValue = match ($encodedValue) {
+            null => 'null',
+            true => 'true',
+            false => 'false',
+            '' => '""',
+            default => $encodedValue,
+        };
 
-        return Zend_Json::decode($encodedValue, $objectDecodeType);
+        return json_decode($encodedValue, $associative, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -933,6 +971,113 @@ XML;
             $cacheTag = 'rate_limit_' . $remoteAddr;
             Mage::app()->saveCache(1, $cacheTag, ['brute_force'], Mage::getStoreConfig('system/rate_limit/timeframe'));
         }
+    }
+
+    /**
+     * Filter value using specified filter type
+     */
+    public function filter(mixed $value, string $filter, mixed ...$args): mixed
+    {
+        return match ($filter) {
+            'email' => $this->filterEmail($value),
+            'url' => $this->filterUrl($value),
+            'int' => $this->filterInt($value),
+            'float' => $this->filterFloat($value),
+            'alnum' => $this->filterAlnum($value, $args[0] ?? false),
+            'alpha' => $this->filterAlpha($value),
+            'digits' => $this->filterDigits($value),
+            'striptags' => $this->filterStripTags($value, $args[0] ?? null),
+            default => $value,
+        };
+    }
+
+    /**
+     * Sanitize email address by removing invalid characters
+     */
+    public function filterEmail(mixed $value): string
+    {
+        return filter_var($value, FILTER_SANITIZE_EMAIL) ?: '';
+    }
+
+    /**
+     * Sanitize URL by removing invalid characters
+     */
+    public function filterUrl(mixed $value): string
+    {
+        return filter_var($value, FILTER_SANITIZE_URL) ?: '';
+    }
+
+    /**
+     * Extract integer from value, removing all non-digit characters except +/-
+     */
+    public function filterInt(mixed $value): int
+    {
+        return (int) filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+    }
+
+    /**
+     * Extract float from value, keeping digits, +/-, and decimal point
+     */
+    public function filterFloat(mixed $value): float
+    {
+        return (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    }
+
+    /**
+     * Keep only alphanumeric characters (a-z, A-Z, 0-9)
+     */
+    public function filterAlnum(mixed $value, bool $allowWhitespace = false): string
+    {
+        $pattern = $allowWhitespace ? '/[^a-zA-Z0-9\s]/' : '/[^a-zA-Z0-9]/';
+        return preg_replace($pattern, '', (string) $value);
+    }
+
+    /**
+     * Keep only alphabetic characters (a-z, A-Z)
+     */
+    public function filterAlpha(mixed $value): string
+    {
+        return preg_replace('/[^a-zA-Z]/', '', (string) $value);
+    }
+
+    /**
+     * Keep only digits (0-9)
+     */
+    public function filterDigits(mixed $value): string
+    {
+        return preg_replace('/[^0-9]/', '', (string) $value);
+    }
+
+    /**
+     * Remove HTML and PHP tags, optionally allowing specific tags
+     */
+    public function filterStripTags(mixed $value, array|string|null $allowedTags = null): string
+    {
+        return strip_tags((string) $value, $allowedTags);
+    }
+
+    /**
+     * Check if value is a valid email address format
+     */
+    public function isValidEmail(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    /**
+     * Check if value is a valid URL format
+     */
+    public function isValidUrl(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_URL) !== false;
+    }
+
+    /**
+     * Check if value is a valid IP address (IPv4 or IPv6)
+     */
+    public function isValidIp(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_IP) !== false;
     }
 
     public function getMailerDsn(): string

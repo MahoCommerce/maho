@@ -144,7 +144,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             if (!$this->_getQuote()->validateMinimumAmount()) {
                 $minimumAmount = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())
-                    ->toCurrency(Mage::getStoreConfig('sales/minimum_order/amount'));
+                    ->format(Mage::getStoreConfig('sales/minimum_order/amount'));
 
                 $warning = Mage::getStoreConfig('sales/minimum_order/description') ?: Mage::helper('checkout')->__('Minimum order amount is %s', $minimumAmount);
 
@@ -194,10 +194,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $params = $this->getRequest()->getParams();
         try {
             if (isset($params['qty'])) {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                );
-                $params['qty'] = $filter->filter($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->normalizeNumber($params['qty']);
             }
 
             $product = $this->_initProduct();
@@ -351,10 +348,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
         try {
             if (isset($params['qty'])) {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                );
-                $params['qty'] = $filter->filter($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->normalizeNumber($params['qty']);
             }
 
             $quoteItem = $cart->getQuote()->getItemById($id);
@@ -443,12 +437,9 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         try {
             $cartData = $this->getRequest()->getParam('cart');
             if (is_array($cartData)) {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                );
                 foreach ($cartData as $index => $data) {
                     if (isset($data['qty'])) {
-                        $cartData[$index]['qty'] = $filter->filter(trim($data['qty']));
+                        $cartData[$index]['qty'] = Mage::app()->getLocale()->normalizeNumber(trim($data['qty']));
                     }
                 }
                 $cart = $this->_getCart();
@@ -659,10 +650,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             try {
                 $cart = $this->_getCart();
                 if (isset($qty)) {
-                    $filter = new Zend_Filter_LocalizedToNormalized(
-                        ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                    );
-                    $qty = $filter->filter($qty);
+                    $qty = Mage::app()->getLocale()->normalizeNumber($qty);
                 }
 
                 $quoteItem = $cart->getQuote()->getItemById($id);

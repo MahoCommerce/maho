@@ -1112,7 +1112,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Retrieve formatting date
      *
-     * @param string|int|Zend_Date|null $date
+     * @param string|int|DateTime|null $date
      * @param string $format
      * @param bool $showTime
      * @return string
@@ -1127,7 +1127,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Retrieve formatting timezone date
      *
-     * @param string|int|Zend_Date|null $date
+     * @param string|int|DateTime|null $date
      */
     public function formatTimezoneDate(
         $date = null,
@@ -1143,7 +1143,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Retrieve formatting time
      *
-     * @param   string $time
+     * @param   string|DateTime|null $time
      * @param   string $format
      * @param   bool $showDate
      * @return  string
@@ -1396,11 +1396,11 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * Decodes the given $encodedValue string which is encoded in the JSON format
      *
      * @see Mage_Core_Helper_Data::jsonDecode()
-     * @throws Zend_Json_Exception
+     * @throws JsonException
      */
-    public function jsonDecode(string $encodedValue, int $objectDecodeType = Zend_Json::TYPE_ARRAY): mixed
+    public function jsonDecode(string $encodedValue, bool $associative = true): mixed
     {
-        return Mage::helper('core')->jsonDecode($encodedValue, $objectDecodeType);
+        return Mage::helper('core')->jsonDecode($encodedValue, $associative);
     }
 
     /**

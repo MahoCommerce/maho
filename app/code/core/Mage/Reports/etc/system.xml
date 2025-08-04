@@ -30,6 +30,14 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </scope>
+                        <enabled_recently_viewed translate="label comment">
+                            <label>Enable Recently Viewed Products</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled_recently_viewed>
                         <viewed_count translate="label">
                             <label>Default Recently Viewed Products Count</label>
                             <sort_order>20</sort_order>
@@ -38,9 +46,17 @@
                             <show_in_store>1</show_in_store>
                             <frontend_class>validate-digits</frontend_class>
                         </viewed_count>
+                        <enabled_product_compare translate="label comment">
+                            <label>Enable Product Compare</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled_product_compare>
                         <compared_count translate="label">
                             <label>Default Recently Compared Products Count</label>
-                            <sort_order>30</sort_order>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

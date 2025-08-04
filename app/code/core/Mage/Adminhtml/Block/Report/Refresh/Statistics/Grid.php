@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,18 +25,32 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
     /**
      * @param string $reportCode
      * @return string
-     * @throws Zend_Date_Exception
      */
     protected function _getUpdatedAt($reportCode)
     {
         $flag = Mage::getModel('reports/flag')->setReportFlagCode($reportCode)->loadSelf();
-        return ($flag->hasData())
-            ? Mage::app()->getLocale()->storeDate(
-                0,
-                new Zend_Date($flag->getLastUpdate(), Varien_Date::DATETIME_INTERNAL_FORMAT),
-                true,
-            )
-            : '';
+        if (!$flag->hasData()) {
+            return '';
+        }
+
+        $lastUpdate = $flag->getLastUpdate();
+        if (empty($lastUpdate)) {
+            return '';
+        }
+
+        try {
+            // Try specific format first
+            $dateObj = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $lastUpdate);
+            if ($dateObj === false) {
+                // Try generic parsing
+                $dateObj = new DateTime($lastUpdate);
+            }
+
+            return Mage::app()->getLocale()->storeDate(0, $dateObj, true);
+        } catch (Exception $e) {
+            // Graceful degradation - return raw value
+            return $lastUpdate;
+        }
     }
 
     #[\Override]

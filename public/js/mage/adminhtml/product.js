@@ -605,40 +605,24 @@ Product.Configurable.prototype = {
             .each(
                 function (row) {
                     var attribute = row.attributeObject;
-                    for (var i = 0, length = attribute.values.length; i < length; i++) {
-                        if (uniqueAttributeValues.keys().indexOf(
-                                attribute.attribute_id) == -1
-                            || uniqueAttributeValues
-                                .get(attribute.attribute_id)
-                                .keys()
-                                .indexOf(
-                                    attribute.values[i].value_index) == -1) {
-                            row.attributeValues
-                                .childElements()
-                                .each(
-                                    function (elem) {
-                                        if (elem.valueObject.value_index == attribute.values[i].value_index) {
-                                            elem.remove();
-                                        }
-                                    });
-                            attribute.values[i] = undefined;
-
-                        } else {
-                            uniqueAttributeValues.get(
-                                attribute.attribute_id).unset(
-                                attribute.values[i].value_index);
-                        }
-                    }
-                    attribute.values = attribute.values.compact();
-                    if (uniqueAttributeValues
-                        .get(attribute.attribute_id)) {
-                        uniqueAttributeValues.get(
-                            attribute.attribute_id).each(
+                    // Instead of removing unused attribute values, only add new ones
+                    // that are used by associated products but not yet displayed
+                    if (uniqueAttributeValues.get(attribute.attribute_id)) {
+                        uniqueAttributeValues.get(attribute.attribute_id).each(
                             function (pair) {
-                                attribute.values.push(pair.value);
-                                this
-                                    .createValueRow(row,
-                                        pair.value);
+                                // Check if this value is already in the attribute values
+                                var valueExists = false;
+                                for (var i = 0; i < attribute.values.length; i++) {
+                                    if (attribute.values[i] && attribute.values[i].value_index == pair.value.value_index) {
+                                        valueExists = true;
+                                        break;
+                                    }
+                                }
+                                // Only add if it doesn't exist yet
+                                if (!valueExists) {
+                                    attribute.values.push(pair.value);
+                                    this.createValueRow(row, pair.value);
+                                }
                             }.bind(this));
                     }
                 }.bind(this));
@@ -752,7 +736,7 @@ Product.Configurable.prototype = {
         }
 
         $(this.idPrefix + 'simple_form').select('td.value').each(function (td) {
-            var adviceContainer = $(Builder.node('div'));
+            var adviceContainer = $(document.createElement('div'));
             td.appendChild(adviceContainer);
             td.select('input', 'select').each(function (element) {
                 element.advaiceContainer = adviceContainer;

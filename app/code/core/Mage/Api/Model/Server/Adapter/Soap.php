@@ -6,9 +6,12 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Laminas\Soap\Server as LaminasSoapServer;
+use Laminas\Soap\Exception\ExceptionInterface as LaminasSoapException;
 
 class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_Api_Model_Server_Adapter_Interface
 {
@@ -22,7 +25,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
     /**
      * Soap server
      *
-     * @var Zend_Soap_Server
+     * @var LaminasSoapServer
      */
     protected $_soap = null;
 
@@ -156,7 +159,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
                             $this->_soap->handle(),
                         ),
                     );
-            } catch (Zend_Soap_Server_Exception $e) {
+            } catch (LaminasSoapException $e) {
                 $this->fault($e->getCode(), $e->getMessage());
             } catch (Exception $e) {
                 $this->fault($e->getCode(), $e->getMessage());
@@ -236,10 +239,10 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
     }
 
     /**
-     * Try to instantiate Zend_Soap_Server
+     * Try to instantiate Laminas Soap Server
      * If schema import error is caught, it will retry in 1 second.
      *
-     * @throws Zend_Soap_Server_Exception
+     * @throws SoapFault
      */
     protected function _instantiateServer()
     {
@@ -252,24 +255,14 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
             ini_set('soap.wsdl_cache_enabled', '0');
         }
 
-        $tries = 0;
-        do {
-            $retry = false;
-            try {
-                $this->_soap = new Zend_Soap_Server(
-                    $this->getWsdlUrl(['wsdl' => 1]),
-                    ['encoding' => $apiConfigCharset],
-                );
-            } catch (SoapFault $e) {
-                if (str_contains($e->getMessage(), "can't import schema from 'http://schemas.xmlsoap.org/soap/encoding/'")) {
-                    $retry = true;
-                    sleep(1);
-                } else {
-                    throw $e;
-                }
-                $tries++;
-            }
-        } while ($retry && $tries < 5);
+        // Disable external schema imports to prevent requests to schemas.xmlsoap.org
+        ini_set('soap.wsdl_cache_import', '0');
+        libxml_use_internal_errors(true);
+
+        $this->_soap = new LaminasSoapServer(
+            $this->getWsdlUrl(['wsdl' => 1]),
+            ['encoding' => $apiConfigCharset],
+        );
         use_soap_error_handler(false);
         $this->_soap
             ->setReturnResponse(true)

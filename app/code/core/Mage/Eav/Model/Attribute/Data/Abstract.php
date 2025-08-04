@@ -299,7 +299,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
 
                     // Additional check for specific date format if needed
                     if ($isValid) {
-                        $dateFormat = Varien_Date::DATE_INTERNAL_FORMAT;
+                        $dateFormat = Mage_Core_Model_Locale::DATE_FORMAT;
                         $dateTime = DateTime::createFromFormat($dateFormat, $value);
                         if (!$dateTime || $dateTime->format($dateFormat) !== $value) {
                             return [Mage::helper('eav')->__('"%s" does not fit the entered date format.', $label)];

@@ -6,11 +6,11 @@
  * @package    Varien_Object
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Varien_Object implements ArrayAccess
+class Varien_Object implements ArrayAccess, JsonSerializable
 {
     /**
      * Object attributes
@@ -538,7 +538,7 @@ class Varien_Object implements ArrayAccess
     protected function __toJson(array $arrAttributes = [])
     {
         $arrData = $this->toArray($arrAttributes);
-        $json = Zend_Json::encode($arrData);
+        $json = json_encode($arrData);
         return $json;
     }
 
@@ -550,6 +550,45 @@ class Varien_Object implements ArrayAccess
     public function toJson(array $arrAttributes = [])
     {
         return $this->__toJson($arrAttributes);
+    }
+
+    /**
+     * Implementation of JsonSerializable::jsonSerialize()
+     *
+     * Prepares the object data for JSON serialization. Returns all object data as an array,
+     * with special handling for nested Varien_Object instances:
+     *
+     * - If a nested Varien_Object has a custom jsonSerialize() implementation, it's preserved as-is
+     * - If a nested Varien_Object has a custom toJson() method, it's converted to JSON string
+     * - If a nested Varien_Object uses only the base implementations, it's excluded from output
+     *
+     * This prevents infinite recursion and circular references when serializing object hierarchies.
+     */
+    #[\Override]
+    public function jsonSerialize(): array
+    {
+        $data = $this->__toArray();
+
+        foreach ($data as $key => $value) {
+            if ($value instanceof Varien_Object) {
+                $reflection = new ReflectionClass($value);
+
+                // If the object has a custom jsonSerialize implementation, keep it as-is
+                if ($reflection->getMethod('jsonSerialize')->getDeclaringClass()->getName() !== 'Varien_Object') {
+                    continue;
+                }
+
+                // If the object has a custom toJson method, use it to convert to JSON string
+                if ($reflection->getMethod('toJson')->getDeclaringClass()->getName() !== 'Varien_Object') {
+                    $data[$key] = $value->toJson();
+                } else {
+                    // Object uses base implementations only - exclude to prevent recursion
+                    unset($data[$key]);
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**

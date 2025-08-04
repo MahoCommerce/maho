@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -208,8 +208,8 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
 
                 // Set last modified date, this value will be overwritten during parsing
                 if (isset($attributes['mtime'])) {
-                    $lastModified = new Zend_Date($attributes['mtime']);
-                    $this->setReportLastModified($lastModified->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+                    $lastModified = new DateTime('@' . $attributes['mtime']);
+                    $this->setReportLastModified($lastModified->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 }
 
                 $this->setReportDate($this->_fileNameToDate($filename))
@@ -254,8 +254,8 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
             $lineType = $line[0];
             switch ($lineType) {
                 case 'RH': // Report header.
-                    $lastModified = new Zend_Date($line[1]);
-                    $this->setReportLastModified($lastModified->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+                    $lastModified = new DateTime($line[1]);
+                    $this->setReportLastModified($lastModified->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                     //$this->setAccountId($columns[2]); -- probably we'll just take that from the section header...
                     break;
                 case 'FH': // File header.

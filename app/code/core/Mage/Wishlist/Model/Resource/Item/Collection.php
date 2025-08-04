@@ -419,16 +419,16 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
         $now = Mage::getSingleton('core/date')->date();
         $gmtOffset = (int) Mage::getSingleton('core/date')->getGmtOffset();
         if (isset($constraints['from'])) {
-            $lastDay = new Zend_Date($now, Varien_Date::DATETIME_INTERNAL_FORMAT);
-            $lastDay->subSecond($gmtOffset)
-                ->subDay($constraints['from'] - 1);
+            $lastDay = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $now) ?: new DateTime($now);
+            $lastDay->modify('-' . $gmtOffset . ' seconds')
+                ->modify('-' . ($constraints['from'] - 1) . ' days');
             $filter['to'] = $lastDay;
         }
 
         if (isset($constraints['to'])) {
-            $firstDay = new Zend_Date($now, Varien_Date::DATETIME_INTERNAL_FORMAT);
-            $firstDay->subSecond($gmtOffset)
-                ->subDay($constraints['to']);
+            $firstDay = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $now) ?: new DateTime($now);
+            $firstDay->modify('-' . $gmtOffset . ' seconds')
+                ->modify('-' . $constraints['to'] . ' days');
             $filter['from'] = $firstDay;
         }
 

@@ -11,10 +11,6 @@
  */
 
 /**
- * Wishlist front controller
- *
- * @package    Mage_Wishlist
- *
  * @method float getQty()
  * @method int getProductId()
  */
@@ -595,6 +591,26 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $productId  = $item->getProductId();
             $buyRequest = $item->getBuyRequest();
 
+            // Check if product has file options and clean them from buy request
+            $product = $item->getProduct();
+            $hasFileOptions = false;
+            $options = $product->getOptions();
+            if ($options) {
+                foreach ($options as $option) {
+                    if ($option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
+                        $hasFileOptions = true;
+                        // Remove file option data from buy request
+                        if ($buyRequest->hasOptions()) {
+                            $requestOptions = $buyRequest->getOptions();
+                            if (isset($requestOptions[$option->getId()])) {
+                                unset($requestOptions[$option->getId()]);
+                                $buyRequest->setOptions($requestOptions);
+                            }
+                        }
+                    }
+                }
+            }
+
             $wishlist->addNewItem($productId, $buyRequest);
 
             $cart->getQuote()->removeItem($itemId);
@@ -602,9 +618,18 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             Mage::helper('wishlist')->calculate();
             $productName = Mage::helper('core')->escapeHtml($item->getProduct()->getName());
             $wishlistName = Mage::helper('core')->escapeHtml($wishlist->getName());
-            $session->addSuccess(
-                Mage::helper('wishlist')->__('%s has been moved to wishlist %s', $productName, $wishlistName),
-            );
+
+            // Add appropriate success message
+            if ($hasFileOptions) {
+                $session->addSuccess(
+                    Mage::helper('wishlist')->__('%s has been moved to wishlist %s. Please note that uploaded files will need to be re-uploaded when adding to cart.', $productName, $wishlistName),
+                );
+            } else {
+                $session->addSuccess(
+                    Mage::helper('wishlist')->__('%s has been moved to wishlist %s', $productName, $wishlistName),
+                );
+            }
+
             $wishlist->save();
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());

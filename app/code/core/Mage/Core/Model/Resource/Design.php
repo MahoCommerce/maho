@@ -30,7 +30,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
             if (!$this->_isValidDate($dateFrom) || !$this->_isValidDate($dateTo)) {
                 Mage::throwException(Mage::helper('core')->__('Invalid date'));
             }
-            if (Varien_Date::toTimestamp($dateFrom) > Varien_Date::toTimestamp($dateTo)) {
+            if (strtotime($dateFrom) > strtotime($dateTo)) {
                 Mage::throwException(Mage::helper('core')->__('Start date cannot be greater than end date.'));
             }
         }
@@ -144,7 +144,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     public function loadChange($storeId, $date = null)
     {
         if (is_null($date)) {
-            $date = Varien_Date::now();
+            $date = Mage_Core_Model_Locale::now();
         }
 
         $select = $this->_getReadAdapter()->select()

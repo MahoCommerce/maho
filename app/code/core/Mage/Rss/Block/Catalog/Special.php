@@ -6,16 +6,16 @@
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
 {
     /**
-     * Zend_Date object for date comparisons
+     * DateTime object for date comparisons
      *
-     * @var Zend_Date|null
+     * @var DateTime|null
      */
     protected static $_currentDate = null;
 
@@ -151,12 +151,11 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
      * Preparing data and adding to rss object
      *
      * @param array $args
-     * @throws Zend_Date_Exception
      */
     public function addSpecialXmlCallback($args)
     {
         if (!isset(self::$_currentDate)) {
-            self::$_currentDate = new Zend_Date();
+            self::$_currentDate = new DateTime();
         }
 
         // dispatch event to determine whether the product will eventually get to the result
@@ -174,8 +173,8 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
         if (isset($row['special_to_date']) && $row['final_price'] <= $row['special_price']
             && $row['allowed_price_in_rss']
         ) {
-            $compareDate = self::$_currentDate->compareDate($row['special_to_date'], Varien_Date::DATE_INTERNAL_FORMAT);
-            if ($compareDate === -1 || $compareDate === 0) {
+            $specialToDate = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $row['special_to_date']);
+            if ($specialToDate && self::$_currentDate <= $specialToDate) {
                 $row['use_special'] = true;
             }
         }

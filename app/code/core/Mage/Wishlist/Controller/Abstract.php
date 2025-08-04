@@ -13,12 +13,6 @@
 abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Front_Action
 {
     /**
-     * Filter to convert localized values to internal ones
-     * @var Zend_Filter_LocalizedToNormalized
-     */
-    protected $_localFilter = null;
-
-    /**
      * Is need check a Formkey
      * @var bool
      */

@@ -33,7 +33,7 @@ class Mage_Core_Helper_Translate extends Mage_Core_Helper_Abstract
                 ? Mage::helper('core')->jsonEncode(['success' => true])
                 : true;
         } catch (Exception $e) {
-            return $returnType === 'json'
+            return $returnType === 'json' // @phpstan-ignore identical.alwaysTrue
                 ? Mage::helper('core')->jsonEncode(['error' => true, 'message' => $e->getMessage()])
                 : false;
         }

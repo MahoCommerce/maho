@@ -9,6 +9,14 @@
  */
 
 const catalogWysiwygEditor = {
+    elementId: null,
+
+    getEditorInstance() {
+        if (this.elementId) {
+            return window[`wysiwyg${this.elementId}_editor`];
+        }
+    },
+
     async open(editorUrl, elementId) {
         if (!editorUrl || !elementId) {
             return;
@@ -28,46 +36,50 @@ const catalogWysiwygEditor = {
     },
 
     openDialogWindow(content, elementId) {
+        this.elementId = elementId;
+
         Dialog.confirm(content, {
             id: 'catalog-wysiwyg-editor',
             title: 'WYSIWYG Editor',
             className: 'magento',
             windowClassName: 'popup-window',
+            ok: true,
             okLabel: 'Submit',
-            ok: this.okDialogWindow.bind(this),
+            onOk: this.okDialogWindow.bind(this),
             onClose: this.closeDialogWindow.bind(this),
-            firedElementId: elementId,
         });
 
-        document.getElementById(`${elementId}_editor`).value = document.getElementById(elementId).value;
+        // Sync value from original textarea to wysiwyg textarea
+        const originalTextarea = document.getElementById(this.elementId);
+        const wysiwygTextarea = document.getElementById(`${this.elementId}_editor`);
+        if (originalTextarea && wysiwygTextarea) {
+            wysiwygTextarea.value = originalTextarea.value;
+        }
+
+        // Wait for wysiwyg to be initialized and then set content
+        mahoOnReady(() => {
+            this.getEditorInstance()?.syncPlainToWysiwyg();
+        });
     },
 
     okDialogWindow(dialogWindow) {
-        const elementId = dialogWindow.options.firedElementId;
-        if (!elementId) {
+        if (!this.elementId) {
             return;
         }
 
-        const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-        wysiwygObj.turnOff();
-
-        const content = tinymce.get(wysiwygObj.id)
-              ? tinymce.get(wysiwygObj.id).getContent()
-              : document.getElementById(`${elementId}_editor`)?.value;
-
-        if (content) {
-            document.getElementById(elementId).value = content;
+        // Sync value from wysiwyg textarea to original textarea
+        const originalTextarea = document.getElementById(this.elementId);
+        const wysiwygTextarea = document.getElementById(`${this.elementId}_editor`);
+        if (originalTextarea && wysiwygTextarea) {
+            originalTextarea.value = wysiwygTextarea.value;
         }
     },
 
     closeDialogWindow(dialogWindow) {
-        const elementId = dialogWindow.options.firedElementId;
-        if (!elementId) {
+        if (!this.elementId) {
             return;
         }
 
-        // destroy the instance of editor
-        const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-        wysiwygObj.destroy();
+        this.getEditorInstance()?.destroy();
     }
 };

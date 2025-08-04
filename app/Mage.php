@@ -83,7 +83,7 @@ final class Mage
      */
     public static function getVersion(): string
     {
-        return '25.7.0';
+        return '25.9.0';
     }
 
     /**

@@ -72,13 +72,9 @@
             <action method="removeItem"><type>js</type><name>mage/adminhtml/uploader.js</name></action>
             <action method="removeItem"><type>js</type><name>mage/adminhtml/product.js</name></action>
             <action method="removeItem"><type>js</type><name>mage/adminhtml/rules.js</name></action>
-            <action method="removeItem"><type>js</type><name>mage/adminhtml/wysiwyg/tinymce/setup.js</name></action>
 
             <action method="removeItem"><type>css</type><name>print.css</name></action>
-            <action method="removeItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name></action>
             <action method="removeItem"><type>skin_css</type><name>menu.css</name></action>
-
-            <action method="removeItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
         </reference>
     </oauth_root_handle>
 

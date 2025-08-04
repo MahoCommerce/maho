@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -126,7 +126,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
     /**
      * @throws Mage_Core_Model_Store_Exception
-     * @throws Zend_Date_Exception
      */
     public function processData(): array
     {
@@ -137,38 +136,47 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             $this->setAxisLabels($axis, $this->getRowsData($attr, true));
         }
 
-        $timezoneLocal = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+        $timezoneLocal = new DateTimeZone(Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE));
 
-        [$dateStart, $dateEnd] = Mage::getResourceModel('reports/order_collection')
+        /** @var array{0: DateTime, 1: DateTime} $dateRange */
+        $dateRange = Mage::getResourceModel('reports/order_collection')
             ->getDateRange($this->getDataHelper()->getParam('period'), '', '', true);
+        [$dateStart, $dateEnd] = $dateRange;
 
-        $dateStart->setTimezone($timezoneLocal);
-        $dateEnd->setTimezone($timezoneLocal);
+        // Convert to DateTimeImmutable to prevent mutation of original objects
+        $dateStart = $dateStart instanceof DateTimeImmutable
+            ? $dateStart->setTimezone($timezoneLocal)
+            : DateTimeImmutable::createFromMutable($dateStart)->setTimezone($timezoneLocal);
+        $dateEnd = $dateEnd instanceof DateTimeImmutable
+            ? $dateEnd->setTimezone($timezoneLocal)
+            : DateTimeImmutable::createFromMutable($dateEnd)->setTimezone($timezoneLocal);
 
         $d = '';
         $dates = [];
         $datas = [];
 
-        while ($dateStart->compare($dateEnd) < 0) {
+        while ($dateStart < $dateEnd) {
             switch ($this->getDataHelper()->getParam('period')) {
                 case '24h':
-                    $d = $dateStart->toString('yyyy-MM-dd HH:00');
-                    $dateStart->addHour(1);
+                    $d = $dateStart->format('Y-m-d H:00');
+                    $dateStart = $dateStart->modify('+1 hour');
                     break;
                 case '7d':
                 case '1m':
-                    $d = $dateStart->toString('yyyy-MM-dd');
-                    $dateStart->addDay(1);
+                    $d = $dateStart->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                    $dateStart = $dateStart->modify('+1 day');
                     break;
                 case '3m':
                 case '6m':
-                    $date = $dateStart->toString('yyyy-MM-dd');
-                    $dateStart->addWeek(1);
+                    // For 3m/6m, the database groups by month (Y-m format)
+                    // We need to match that format and skip to next month
+                    $d = $dateStart->format('Y-m');
+                    $dateStart = $dateStart->modify('+1 month');
                     break;
                 case '1y':
                 case '2y':
-                    $d = $dateStart->toString('yyyy-MM');
-                    $dateStart->addMonth(1);
+                    $d = $dateStart->format('Y-m');
+                    $dateStart = $dateStart->modify('+1 month');
                     break;
             }
             foreach (array_keys($this->getAllSeries()) as $index) {
@@ -274,15 +282,16 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                         if ($_label != '') {
                             switch ($this->getDataHelper()->getParam('period')) {
                                 case '24h':
+                                    $dateTime = DateTime::createFromFormat('Y-m-d H:00', $_label) ?: new DateTime($_label);
                                     $this->_axisLabels[$idx][$_index] = $this->formatTime(
-                                        new Zend_Date($_label, 'yyyy-MM-dd HH:00'),
+                                        $dateTime,
                                         'short',
                                     );
                                     break;
                                 case '7d':
                                 case '1m':
                                     $this->_axisLabels[$idx][$_index] = $this->formatDate(
-                                        new Zend_Date($_label, 'yyyy-MM-dd'),
+                                        DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $_label) ?: new DateTime($_label),
                                     );
                                     break;
                                 case '1y':

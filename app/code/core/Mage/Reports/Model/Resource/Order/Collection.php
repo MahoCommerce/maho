@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -274,7 +274,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     protected function _getTZRangeExpressionForAttribute($range, $attribute, $tzFrom = '+00:00', $tzTo = null)
     {
         if ($tzTo == null) {
-            $tzTo = Mage::app()->getLocale()->storeDate()->toString(Zend_Date::GMT_DIFF_SEP);
+            $tzTo = Mage::app()->getLocale()->storeDate()->format('P');
         }
         $adapter = $this->getConnection();
         $expression = $this->_getRangeExpression($range);
@@ -291,48 +291,40 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * @param string $customStart
      * @param string $customEnd
      * @param bool $returnObjects
-     * @return array
+     * @return ($returnObjects is true ? array{0: DateTime, 1: DateTime} : array{from: DateTime, to: DateTime, datetime: true})
      */
     public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
     {
-        $dateEnd   = Mage::app()->getLocale()->date();
-        $dateStart = clone $dateEnd;
-
-        // go to the end of a day
-        $dateEnd->setHour(23);
-        $dateEnd->setMinute(59);
-        $dateEnd->setSecond(59);
-
-        $dateStart->setHour(0);
-        $dateStart->setMinute(0);
-        $dateStart->setSecond(0);
+        $baseDate = Mage::app()->getLocale()->dateImmutable();
+        $dateStart = DateTime::createFromImmutable($baseDate);
+        $dateStart->setTime(0, 0, 0);
+        $dateEnd = DateTime::createFromImmutable($baseDate);
+        $dateEnd->setTime(23, 59, 59);
 
         switch ($range) {
             case '24h':
-                $dateEnd = Mage::app()->getLocale()->date();
-                $dateEnd->addHour(1);
-                $dateStart = clone $dateEnd;
-                $dateStart->subDay(1);
+                $dateEnd = DateTime::createFromImmutable($baseDate->modify('+1 hour'));
+                $dateStart = DateTime::createFromImmutable($baseDate->modify('-1 day'));
                 break;
 
             case '7d':
                 // subtract 6 days we need to include
                 // only today and not the last one from range
-                $dateStart->subDay(6);
+                $dateStart->modify('-6 days');
                 break;
 
             case '1m':
-                $dateStart->setDay(Mage::getStoreConfig('reports/dashboard/mtd_start'));
+                $dateStart->setDate((int) $dateStart->format('Y'), (int) $dateStart->format('n'), (int) Mage::getStoreConfig('reports/dashboard/mtd_start'));
                 break;
 
             case '3m':
-                $dateStart->setDay(Mage::getStoreConfig('reports/dashboard/mtd_start'));
-                $dateStart->subMonth(2);
+                $dateStart->setDate((int) $dateStart->format('Y'), (int) $dateStart->format('n'), (int) Mage::getStoreConfig('reports/dashboard/mtd_start'));
+                $dateStart->modify('-2 months');
                 break;
 
             case '6m':
-                $dateStart->setDay(Mage::getStoreConfig('reports/dashboard/mtd_start'));
-                $dateStart->subMonth(5);
+                $dateStart->setDate((int) $dateStart->format('Y'), (int) $dateStart->format('n'), (int) Mage::getStoreConfig('reports/dashboard/mtd_start'));
+                $dateStart->modify('-5 months');
                 break;
 
             case 'custom':
@@ -345,16 +337,15 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
                 $startMonthDay = explode(',', Mage::getStoreConfig('reports/dashboard/ytd_start'));
                 $startMonth = isset($startMonthDay[0]) ? (int) $startMonthDay[0] : 1;
                 $startDay = isset($startMonthDay[1]) ? (int) $startMonthDay[1] : 1;
-                $dateStart->setMonth($startMonth);
-                $dateStart->setDay($startDay);
+                $dateStart->setDate((int) $dateStart->format('Y'), $startMonth, $startDay);
                 if ($range == '2y') {
-                    $dateStart->subYear(1);
+                    $dateStart->modify('-1 year');
                 }
                 break;
         }
 
-        $dateStart->setTimezone('Etc/UTC');
-        $dateEnd->setTimezone('Etc/UTC');
+        $dateStart->setTimezone(new DateTimeZone('Etc/UTC'));
+        $dateEnd->setTimezone(new DateTimeZone('Etc/UTC'));
 
         if ($returnObjects) {
             return [$dateStart, $dateEnd];
@@ -802,8 +793,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         }
 
         $this->addFieldToFilter($fieldToFilter, [
-            'from'  => $from->toString(Varien_Date::DATETIME_INTERNAL_FORMAT),
-            'to'    => $to->toString(Varien_Date::DATETIME_INTERNAL_FORMAT),
+            'from'  => $from->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'to'    => $to->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
         ]);
 
         return $this;
