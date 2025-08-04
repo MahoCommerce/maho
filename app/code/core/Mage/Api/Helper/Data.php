@@ -6,6 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -343,7 +344,6 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
      * @param array|null $routeParams
      * @param bool $htmlSpecialChars
      * @return string
-     * @throws Zend_Uri_Exception
      */
     public function getServiceUrl($routePath = null, $routeParams = null, $htmlSpecialChars = false)
     {
@@ -358,14 +358,23 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
         /** @var Mage_Core_Model_Url $urlModel */
         $urlModel = Mage::getSingleton('core/url');
         $url = $urlModel->getUrl($routePath, $routeParams);
-        $uri = Zend_Uri_Http::fromString($url);
-        $uri->setHost($request->getHttpHost());
+        $parsedUrl = parse_url($url);
+
+        // Build the modified URL
+        $scheme = $parsedUrl['scheme'] ?? 'http';
+        $host = $request->getHttpHost();
+
         if (!$urlModel->getRouteFrontName()) {
-            $uri->setPath('/' . trim($request->getBasePath() . '/' . basename(getenv('SCRIPT_FILENAME')), '/'));
+            $path = '/' . trim($request->getBasePath() . '/' . basename(getenv('SCRIPT_FILENAME')), '/');
         } else {
-            $uri->setPath($request->getBaseUrl() . $request->getPathInfo());
+            $path = $request->getBaseUrl() . $request->getPathInfo();
         }
 
-        return $htmlSpecialChars === true ? htmlspecialchars($uri) : (string) $uri;
+        $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
+        $fragment = isset($parsedUrl['fragment']) ? '#' . $parsedUrl['fragment'] : '';
+
+        $finalUrl = $scheme . '://' . $host . $path . $query . $fragment;
+
+        return $htmlSpecialChars === true ? htmlspecialchars($finalUrl) : $finalUrl;
     }
 }

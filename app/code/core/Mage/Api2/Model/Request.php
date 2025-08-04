@@ -47,7 +47,7 @@ class Mage_Api2_Model_Request extends Zend_Controller_Request_Http
      * that information.
      * Override parent class to allow object instance get via Mage::getSingleton()
      *
-     * @param string|Zend_Uri $uri
+     * @param string $uri
      */
     public function __construct($uri = null)
     {
