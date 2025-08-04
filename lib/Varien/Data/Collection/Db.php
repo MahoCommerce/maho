@@ -162,7 +162,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     public function setConnection($conn)
     {
         if (!$conn instanceof Zend_Db_Adapter_Abstract) {
-            throw new Zend_Exception('dbModel read resource does not implement Zend_Db_Adapter_Abstract');
+            throw new Mage_Core_Exception('dbModel read resource does not implement Zend_Db_Adapter_Abstract');
         }
 
         $this->_conn = $conn;
