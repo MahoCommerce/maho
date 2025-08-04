@@ -328,7 +328,7 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                     // Remove if older than cutoff time
                     if ($fileMtime < $cutoffTime) {
                         unlink($file);
-                        Mage::log("Cleaned up old minified file: {$filename}", Zend_Log::INFO);
+                        Mage::log("Cleaned up old minified file: {$filename}", Mage::LOG_INFO);
                     }
                 }
             }
