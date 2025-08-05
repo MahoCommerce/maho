@@ -15,7 +15,6 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
-use SimpleXMLElement;
 
 class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 {
