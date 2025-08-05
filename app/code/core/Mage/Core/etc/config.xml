@@ -299,7 +299,7 @@
             </translate_inline>
             <log>
                 <active>0</active>
-                <max_level>100</max_level>
+                <min_level>100</min_level>
             </log>
             <js>
                 <defer_mode>0</defer_mode>

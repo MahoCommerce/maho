@@ -78,7 +78,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         // Check if XML log configuration exists - if so, bypass backend settings
         if (self::isLogConfigManagedByXml()) {
             $logActive = true;
-            $maxLogLevel = Mage::LOG_DEBUG; // XML handlers manage their own levels
+            $minLogLevel = Mage::LOG_DEBUG; // XML handlers manage their own levels
             if (empty($file)) {
                 $file = 'system.log'; // Default file when using XML config
             }
@@ -95,9 +95,9 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             }
 
             try {
-                $maxLogLevel = (int) Mage::getStoreConfig('dev/log/max_level');
+                $minLogLevel = (int) Mage::getStoreConfig('dev/log/min_level');
             } catch (Throwable $e) {
-                $maxLogLevel = Mage::LOG_DEBUG;
+                $minLogLevel = Mage::LOG_DEBUG;
             }
         }
 
@@ -110,8 +110,8 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         if (!Mage::getIsDeveloperMode() && !$forceLog) {
             // Convert levels for comparison
             $levelValue = self::convertLogLevel($level);
-            $maxLevelValue = self::convertLogLevel($maxLogLevel);
-            if ($levelValue->value > $maxLevelValue->value) {
+            $minLevelValue = self::convertLogLevel($minLogLevel);
+            if ($levelValue->value < $minLevelValue->value) {
                 return;
             }
         }
@@ -124,7 +124,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 
         // Get or create logger
         if (!isset(self::$_loggers[$file])) {
-            $this->createLogger($file, $maxLogLevel, $forceLog);
+            $this->createLogger($file, $minLogLevel, $forceLog);
         }
 
         if (is_array($message) || is_object($message)) {
@@ -139,7 +139,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         self::$_loggers[$file]->log($monologLevel, $message);
     }
 
-    protected function createLogger(string $file, Level|int $maxLogLevel, bool $forceLog): void
+    protected function createLogger(string $file, Level|int $minLogLevel, bool $forceLog): void
     {
         $logDir = Mage::getBaseDir('var') . DS . 'log';
         $logFile = $logDir . DS . $file;
@@ -151,7 +151,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         $logger = new Logger('Maho');
 
         // Convert old Zend_Log level to Monolog level for configuration
-        $configLevel = self::convertLogLevel($maxLogLevel);
+        $configLevel = self::convertLogLevel($minLogLevel);
         if ($forceLog || Mage::getIsDeveloperMode()) {
             $configLevel = Level::Debug;
         }
