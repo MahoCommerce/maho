@@ -18,6 +18,7 @@ Maho uses [Monolog](https://github.com/Seldaek/monolog) for comprehensive loggin
 Maho's logging system is built on Monolog 3.x and provides:
 
 - **Backward compatibility** with existing `Mage::log()` calls
+- **Automatic log rotation** with 14-day retention by default
 - **Multiple handlers** for different output destinations
 - **Configurable log levels** for fine-grained control
 - **Generic handler support** for any Monolog handler
@@ -94,11 +95,13 @@ Add logging configuration to your `app/etc/local.xml`:
     <global>
         <log>
             <handlers>
+                <!-- Rotating file handler (recommended) -->
                 <file>
-                    <class>Monolog\Handler\StreamHandler</class>
+                    <class>Monolog\Handler\RotatingFileHandler</class>
                     <enabled>1</enabled>
                     <params>
                         <level>DEBUG</level>
+                        <maxFiles>14</maxFiles>
                     </params>
                 </file>
             </handlers>
@@ -136,8 +139,22 @@ The system automatically maps XML parameters to constructor arguments:
 
 ### File Handlers
 
-#### StreamHandler (Default)
-Writes logs to a file stream.
+#### RotatingFileHandler (Default)
+Automatically rotates log files daily and keeps logs for 14 days by default.
+
+```xml
+<file>
+    <class>Monolog\Handler\RotatingFileHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <level>DEBUG</level>
+        <maxFiles>14</maxFiles>
+    </params>
+</file>
+```
+
+#### StreamHandler
+Writes logs to a single file (no rotation).
 
 ```xml
 <file>
@@ -149,19 +166,11 @@ Writes logs to a file stream.
 </file>
 ```
 
-#### RotatingFileHandler
-Automatically rotates log files daily.
-
-```xml
-<rotating>
-    <class>Monolog\Handler\RotatingFileHandler</class>
-    <enabled>1</enabled>
-    <params>
-        <level>DEBUG</level>
-        <maxFiles>30</maxFiles>
-    </params>
-</rotating>
-```
+**Default Behavior:**
+When no XML configuration is present or no handlers are configured, Maho automatically uses `RotatingFileHandler` with:
+- **Daily rotation**: New log file created each day
+- **14-day retention**: Automatically deletes logs older than 14 days
+- **Naming pattern**: `system.log` (current), `system-2025-01-04.log` (previous days)
 
 ### System Handlers
 
@@ -297,12 +306,13 @@ Stores logs in MongoDB.
 ```xml
 <log>
     <handlers>
-        <!-- File logging for all levels -->
+        <!-- Rotating file logging for all levels -->
         <file>
-            <class>Monolog\Handler\StreamHandler</class>
+            <class>Monolog\Handler\RotatingFileHandler</class>
             <enabled>1</enabled>
             <params>
                 <level>DEBUG</level>
+                <maxFiles>14</maxFiles>
             </params>
         </file>
         
@@ -338,12 +348,13 @@ You can configure multiple handlers of the same type for different purposes. For
 ```xml
 <log>
     <handlers>
-        <!-- File logging for all levels -->
+        <!-- Rotating file logging for all levels -->
         <file>
-            <class>Monolog\Handler\StreamHandler</class>
+            <class>Monolog\Handler\RotatingFileHandler</class>
             <enabled>1</enabled>
             <params>
                 <level>DEBUG</level>
+                <maxFiles>14</maxFiles>
             </params>
         </file>
         
@@ -471,14 +482,14 @@ You can use any Monolog handler by specifying its full class name:
 ### Environment-Specific Configuration
 
 ```xml
-<!-- Production: File + Slack for errors -->
+<!-- Production: Rotating file + Slack for errors -->
 <handlers>
     <file>
         <class>Monolog\Handler\RotatingFileHandler</class>
         <enabled>1</enabled>
         <params>
             <level>WARNING</level>
-            <maxFiles>30</maxFiles>
+            <maxFiles>14</maxFiles>
         </params>
     </file>
     <slack>
@@ -493,13 +504,14 @@ You can use any Monolog handler by specifying its full class name:
 ```
 
 ```xml
-<!-- Development: File + Browser console -->
+<!-- Development: Rotating file + Browser console -->
 <handlers>
     <file>
-        <class>Monolog\Handler\StreamHandler</class>
+        <class>Monolog\Handler\RotatingFileHandler</class>
         <enabled>1</enabled>
         <params>
             <level>DEBUG</level>
+            <maxFiles>7</maxFiles>
         </params>
     </file>
     <browser>
@@ -771,12 +783,13 @@ To use advanced features like Slack notifications or multiple handlers:
     <global>
         <log>
             <handlers>
-                <!-- Your existing file logging -->
+                <!-- Enhanced file logging with rotation -->
                 <file>
-                    <class>Monolog\Handler\StreamHandler</class>
+                    <class>Monolog\Handler\RotatingFileHandler</class>
                     <enabled>1</enabled>
                     <params>
                         <level>DEBUG</level>
+                        <maxFiles>14</maxFiles>
                     </params>
                 </file>
                 <!-- Add new handlers as needed -->

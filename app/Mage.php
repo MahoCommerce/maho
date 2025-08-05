@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Monolog\Handler\StreamHandler;
+use Monolog\Handler\RotatingFileHandler;
 use Monolog\Level;
 use Monolog\Logger;
 
@@ -1053,15 +1053,15 @@ final class Mage
     {
         $config = self::getConfig();
         if (!$config) {
-            // Fallback to basic StreamHandler if no config
-            $logger->pushHandler(new StreamHandler($logFile, $defaultLevel));
+            // Fallback to RotatingFileHandler if no config
+            $logger->pushHandler(new RotatingFileHandler($logFile, 14, $defaultLevel));
             return;
         }
 
         $handlers = $config->getNode('global/log/handlers');
         if (!$handlers) {
-            // Fallback to basic StreamHandler if no handlers configured
-            $logger->pushHandler(new StreamHandler($logFile, $defaultLevel));
+            // Fallback to RotatingFileHandler if no handlers configured
+            $logger->pushHandler(new RotatingFileHandler($logFile, 14, $defaultLevel));
             return;
         }
 
@@ -1078,7 +1078,7 @@ final class Mage
 
         // Always ensure at least one handler is active
         if (!$hasActiveHandler) {
-            $logger->pushHandler(new StreamHandler($logFile, $defaultLevel));
+            $logger->pushHandler(new RotatingFileHandler($logFile, 14, $defaultLevel));
         }
     }
 
