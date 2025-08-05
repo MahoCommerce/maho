@@ -88,10 +88,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         return $result;
     }
 
-    /**
-     * Handle logging with Monolog infrastructure
-     */
-    public function handleLogging(mixed $message, ?int $level, string $file, bool $forceLog): void
+    public function log(mixed $message, ?int $level = null, string $file = '', bool $forceLog = false): void
     {
         // Check if XML log configuration exists - if so, bypass backend settings
         if (Mage::isLogConfigManagedByXml()) {
@@ -158,10 +155,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         $this->flushBrowserConsoleHandlers($file);
     }
 
-    /**
-     * Create and configure a logger
-     */
-    private function createLogger(string $file, int $maxLogLevel, bool $forceLog): void
+    protected function createLogger(string $file, int $maxLogLevel, bool $forceLog): void
     {
         // Validate file extension before save - use existing allowedFileExtensions logic
         $_allowedFileExtensions = explode(
@@ -202,7 +196,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Add configured handlers from XML to logger
      */
-    public static function addConfiguredHandlers(Logger $logger, string $logFile, Level $defaultLevel): void
+    protected static function addConfiguredHandlers(Logger $logger, string $logFile, Level $defaultLevel): void
     {
         $config = Mage::getConfig();
         if (!$config) {
@@ -237,7 +231,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Create a handler based on configuration using reflection
      */
-    public static function createMonologHandler(string $name, object $config, string $logFile, Level $defaultLevel): object
+    protected static function createMonologHandler(string $name, object $config, string $logFile, Level $defaultLevel): object
     {
         $className = (string) $config->class;
 
@@ -291,7 +285,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Build constructor arguments for handler using reflection and configuration
      */
-    public static function buildHandlerConstructorArgs(ReflectionMethod $constructor, object $config, string $logFile, Level $defaultLevel): array
+    protected static function buildHandlerConstructorArgs(ReflectionMethod $constructor, object $config, string $logFile, Level $defaultLevel): array
     {
         $args = [];
         $params = $constructor->getParameters();
@@ -335,7 +329,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get configuration value with type conversion
      */
-    public static function getHandlerConfigValue(object $config, string $paramName, ReflectionParameter $param): mixed
+    protected static function getHandlerConfigValue(object $config, string $paramName, ReflectionParameter $param): mixed
     {
         $configValue = $config->params->{$paramName} ?? null;
 
@@ -362,7 +356,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Create a custom log formatter that matches the old Zend_Log format
      */
-    public static function createMonologFormatter(): LineFormatter
+    protected static function createMonologFormatter(): LineFormatter
     {
         // Format: timestamp level_name: message
         $format = "%datetime% %level_name%: %message%\n";
@@ -379,7 +373,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Create the default handler based on developer mode
      */
-    public static function createDefaultMonologHandler(string $logFile, Level $defaultLevel): object
+    protected static function createDefaultMonologHandler(string $logFile, Level $defaultLevel): object
     {
         $isDeveloperMode = Mage::getIsDeveloperMode();
 
@@ -398,7 +392,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Flush BrowserConsoleHandler to ensure immediate output
      */
-    public function flushBrowserConsoleHandlers(string $file): void
+    protected function flushBrowserConsoleHandlers(string $file): void
     {
         $loggers = Mage::getLoggers();
         if (!isset($loggers[$file])) {
@@ -415,7 +409,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Check if logger has a RotatingFileHandler
      */
-    public static function isRotatingFileHandler(Logger $logger): bool
+    protected static function isRotatingFileHandler(Logger $logger): bool
     {
         foreach ($logger->getHandlers() as $handler) {
             if ($handler instanceof \Monolog\Handler\RotatingFileHandler) {

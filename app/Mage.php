@@ -790,7 +790,7 @@ final class Mage
         }
 
         try {
-            self::helper('log')->handleLogging($message, $level, $file, $forceLog);
+            self::helper('log')->log($message, $level, $file, $forceLog);
         } catch (Exception $e) {
             // Silently fail to avoid logging loops
         }
