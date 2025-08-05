@@ -133,9 +133,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         // Convert log level and log the message
         $monologLevel = self::convertLogLevel($level);
         self::$_loggers[$file]->log($monologLevel, $message);
-
-        // Auto-flush BrowserConsoleHandler for immediate output
-        $this->flushBrowserConsoleHandlers($file);
     }
 
     protected function createLogger(string $file, Level|int $maxLogLevel, bool $forceLog): void
@@ -223,12 +220,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             );
         }
 
-        // Skip BrowserConsoleHandler for CLI commands
-        if ($className === \Monolog\Handler\BrowserConsoleHandler::class && php_sapi_name() === 'cli') {
-            // Return a NullHandler instead to avoid any output
-            return new \Monolog\Handler\NullHandler();
-        }
-
         try {
             $reflection = new ReflectionClass($className);
 
@@ -242,9 +233,8 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             /** @var \Monolog\Handler\HandlerInterface $handler */
             $handler = $reflection->newInstanceArgs($args);
 
-            // Apply custom formatter only to file-based handlers (not browser console)
-            if (method_exists($handler, 'setFormatter') &&
-                !($handler instanceof \Monolog\Handler\BrowserConsoleHandler)) {
+            // Apply custom formatter to all handlers that support it
+            if (method_exists($handler, 'setFormatter')) {
                 $handler->setFormatter(self::createMonologFormatter());
             }
 
@@ -368,27 +358,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 
         $handler->setFormatter(self::createMonologFormatter());
         return $handler;
-    }
-
-    /**
-     * Flush BrowserConsoleHandler to ensure immediate output
-     */
-    protected function flushBrowserConsoleHandlers(string $file): void
-    {
-        // Skip browser console operations in CLI
-        if (php_sapi_name() === 'cli') {
-            return;
-        }
-
-        if (!isset(self::$_loggers[$file])) {
-            return;
-        }
-
-        foreach (self::$_loggers[$file]->getHandlers() as $handler) {
-            if ($handler instanceof \Monolog\Handler\BrowserConsoleHandler) {
-                $handler->send();
-            }
-        }
     }
 
     /**
