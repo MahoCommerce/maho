@@ -863,11 +863,14 @@ final class Mage
 
                 self::$_loggers[$file] = $logger;
 
-                // Set file permissions
-                if (!file_exists($logFile)) {
-                    touch($logFile);
+                // Set file permissions (only for non-rotating handlers)
+                // RotatingFileHandler manages its own files
+                if (!self::isRotatingFileHandler($logger)) {
+                    if (!file_exists($logFile)) {
+                        touch($logFile);
+                    }
+                    chmod($logFile, 0640);
                 }
-                chmod($logFile, 0640);
             }
 
             if (is_array($message) || is_object($message)) {
@@ -1225,5 +1228,18 @@ final class Mage
         $formatter->includeStacktraces(false);
         
         return $formatter;
+    }
+
+    /**
+     * Check if logger has a RotatingFileHandler
+     */
+    private static function isRotatingFileHandler(Logger $logger): bool
+    {
+        foreach ($logger->getHandlers() as $handler) {
+            if ($handler instanceof \Monolog\Handler\RotatingFileHandler) {
+                return true;
+            }
+        }
+        return false;
     }
 }
