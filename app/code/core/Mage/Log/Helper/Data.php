@@ -15,6 +15,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
+use SimpleXMLElement;
 
 class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -323,9 +324,42 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             'int' => (int) $configValue,
             'float' => (float) $configValue,
             'bool' => (bool) $configValue,
-            'array' => is_array($configValue) ? $configValue : [(string) $configValue],
+            'array' => self::convertToArray($configValue),
             default => (string) $configValue,
         };
+    }
+
+    /**
+     * Convert XML configuration value to array
+     */
+    protected static function convertToArray(mixed $value): array
+    {
+        // Already an array
+        if (is_array($value)) {
+            return $value;
+        }
+
+        // SimpleXMLElement with children
+        if ($value instanceof SimpleXMLElement) {
+            $result = [];
+
+            // Check if it has child elements with the same name (like multiple <recipient> tags)
+            foreach ($value->children() as $childName => $child) {
+                // If there are multiple children with the same name, collect them all
+                if (isset($value->$childName)) {
+                    foreach ($value->$childName as $item) {
+                        $result[] = (string) $item;
+                    }
+                    return $result;
+                }
+            }
+
+            // Otherwise, treat it as a single value
+            return [(string) $value];
+        }
+
+        // Single value - convert to array
+        return [(string) $value];
     }
 
     /**
