@@ -153,7 +153,7 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
         if (!str_contains($dir, '..') && ($dir === Mage::getBaseDir('design') || str_starts_with(realpath($dir), realpath(Mage::getBaseDir('design'))))) {
             $this->_viewDir = $dir;
         } else {
-            Mage::log('Not valid script path:' . $dir, Mage::LOG_CRIT, null, true);
+            Mage::log('Not valid script path:' . $dir, Mage::LOG_CRITICAL, null, true);
         }
         return $this;
     }
@@ -270,7 +270,7 @@ HTML;
                 include $fileToInclude;
             } else {
                 $thisClass = static::class;
-                Mage::log('Not valid template file:' . $fileName . ' class: ' . $thisClass, Mage::LOG_CRIT, null, true);
+                Mage::log('Not valid template file:' . $fileName . ' class: ' . $thisClass, Mage::LOG_CRITICAL, null, true);
             }
         } catch (Throwable $e) {
             if (!$do) {

@@ -77,7 +77,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
         try {
             $this->_cleanFileSystemSessions();
         } catch (Exception $e) {
-            Mage::log('Session cleanup failed: ' . $e->getMessage(), Mage::LOG_ERR);
+            Mage::log('Session cleanup failed: ' . $e->getMessage(), Mage::LOG_ERROR);
             throw $e;
         }
     }
@@ -91,7 +91,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
 
         $sessionSavePath = (string) Mage::getConfig()->getNode('global/session_save_path') ?: Mage::getBaseDir('var') . DS . 'session';
         if (!is_dir($sessionSavePath) || !is_readable($sessionSavePath)) {
-            Mage::log("Session cleanup skipped: directory not accessible: {$sessionSavePath}", Mage::LOG_WARN);
+            Mage::log("Session cleanup skipped: directory not accessible: {$sessionSavePath}", Mage::LOG_WARNING);
             return;
         }
 

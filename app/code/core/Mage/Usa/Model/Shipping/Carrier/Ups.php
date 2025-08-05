@@ -971,7 +971,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             Mage::log(
                 'Unexpected response shape from UPS REST API /shipments endpoint for .ShipmentResults.PackageResults',
-                Mage::LOG_WARN,
+                Mage::LOG_WARNING,
             );
             $result->setErrors(Mage::helper('usa')->__('Error reading response from UPS'));
             $this->_debug($debugData);

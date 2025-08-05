@@ -31,21 +31,29 @@ Maho supports 8 log levels (from highest to lowest priority):
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `Mage::LOG_EMERG` | 0 | Emergency: system is unusable |
+| `Mage::LOG_EMERGENCY` | 0 | Emergency: system is unusable |
 | `Mage::LOG_ALERT` | 1 | Alert: action must be taken immediately |
-| `Mage::LOG_CRIT` | 2 | Critical: critical conditions |
-| `Mage::LOG_ERR` | 3 | Error: error conditions |
-| `Mage::LOG_WARN` | 4 | Warning: warning conditions |
+| `Mage::LOG_CRITICAL` | 2 | Critical: critical conditions |
+| `Mage::LOG_ERROR` | 3 | Error: error conditions |
+| `Mage::LOG_WARNING` | 4 | Warning: warning conditions |
 | `Mage::LOG_NOTICE` | 5 | Notice: normal but significant condition |
 | `Mage::LOG_INFO` | 6 | Informational: informational messages |
 | `Mage::LOG_DEBUG` | 7 | Debug: debug-level messages |
+
+**Legacy Constants (Deprecated):**
+| Legacy Constant | New Constant | 
+|----------------|--------------|
+| `Mage::LOG_EMERG` | `Mage::LOG_EMERGENCY` |
+| `Mage::LOG_CRIT` | `Mage::LOG_CRITICAL` |
+| `Mage::LOG_ERR` | `Mage::LOG_ERROR` |
+| `Mage::LOG_WARN` | `Mage::LOG_WARNING` |
 
 ### Simple Logging
 
 ```php
 // Basic logging
 Mage::log('This is a debug message');
-Mage::log('This is an error', Mage::LOG_ERR);
+Mage::log('This is an error', Mage::LOG_ERROR);
 Mage::log('Custom file message', Mage::LOG_INFO, 'custom.log');
 
 // Force logging (ignores level restrictions)
@@ -724,16 +732,16 @@ The system automatically handles the migration:
 
 ### Updated Constants
 
-| Old Zend_Log | New Mage | Value |
-|--------------|----------|-------|
-| `Zend_Log::EMERG` | `Mage::LOG_EMERG` | 0 |
-| `Zend_Log::ALERT` | `Mage::LOG_ALERT` | 1 |
-| `Zend_Log::CRIT` | `Mage::LOG_CRIT` | 2 |
-| `Zend_Log::ERR` | `Mage::LOG_ERR` | 3 |
-| `Zend_Log::WARN` | `Mage::LOG_WARN` | 4 |
-| `Zend_Log::NOTICE` | `Mage::LOG_NOTICE` | 5 |
-| `Zend_Log::INFO` | `Mage::LOG_INFO` | 6 |
-| `Zend_Log::DEBUG` | `Mage::LOG_DEBUG` | 7 |
+| Old Zend_Log | New Mage (Recommended) | Legacy Mage (Deprecated) | Value |
+|--------------|------------------------|--------------------------|-------|
+| `Zend_Log::EMERG` | `Mage::LOG_EMERGENCY` | `Mage::LOG_EMERG` | 0 |
+| `Zend_Log::ALERT` | `Mage::LOG_ALERT` | `Mage::LOG_ALERT` | 1 |
+| `Zend_Log::CRIT` | `Mage::LOG_CRITICAL` | `Mage::LOG_CRIT` | 2 |
+| `Zend_Log::ERR` | `Mage::LOG_ERROR` | `Mage::LOG_ERR` | 3 |
+| `Zend_Log::WARN` | `Mage::LOG_WARNING` | `Mage::LOG_WARN` | 4 |
+| `Zend_Log::NOTICE` | `Mage::LOG_NOTICE` | `Mage::LOG_NOTICE` | 5 |
+| `Zend_Log::INFO` | `Mage::LOG_INFO` | `Mage::LOG_INFO` | 6 |
+| `Zend_Log::DEBUG` | `Mage::LOG_DEBUG` | `Mage::LOG_DEBUG` | 7 |
 
 ### Upgrade Path
 
@@ -744,8 +752,11 @@ While the old `Zend_Log` constants still work, you can update them:
 // Old way (still works)
 Mage::log('Error message', Zend_Log::ERR);
 
-// New way (recommended)
+// Legacy way (deprecated but works)
 Mage::log('Error message', Mage::LOG_ERR);
+
+// New way (recommended)
+Mage::log('Error message', Mage::LOG_ERROR);
 ```
 
 #### Step 2: Keep Using Admin Configuration
@@ -782,9 +793,9 @@ To use advanced features like Slack notifications or multiple handlers:
 // Test different log levels
 Mage::log('Debug message', Mage::LOG_DEBUG);
 Mage::log('Info message', Mage::LOG_INFO);
-Mage::log('Warning message', Mage::LOG_WARN);
-Mage::log('Error message', Mage::LOG_ERR);
-Mage::log('Critical message', Mage::LOG_CRIT);
+Mage::log('Warning message', Mage::LOG_WARNING);
+Mage::log('Error message', Mage::LOG_ERROR);
+Mage::log('Critical message', Mage::LOG_CRITICAL);
 
 // Test exception logging
 try {

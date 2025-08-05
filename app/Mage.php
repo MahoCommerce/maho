@@ -20,16 +20,37 @@ use Monolog\Logger;
 final class Mage
 {
     /**
-     * Log level constants (kept for backward compatibility)
+     * Log level constants
      */
-    public const LOG_EMERG  = 0;
-    public const LOG_ALERT  = 1;
-    public const LOG_CRIT   = 2;
-    public const LOG_ERR    = 3;
-    public const LOG_WARN   = 4;
-    public const LOG_NOTICE = 5;
-    public const LOG_INFO   = 6;
-    public const LOG_DEBUG  = 7;
+    public const LOG_EMERGENCY = 0;
+    public const LOG_ALERT     = 1;
+    public const LOG_CRITICAL  = 2;
+    public const LOG_ERROR     = 3;
+    public const LOG_WARNING   = 4;
+    public const LOG_NOTICE    = 5;
+    public const LOG_INFO      = 6;
+    public const LOG_DEBUG     = 7;
+
+    /**
+     * @deprecated Use LOG_EMERGENCY instead
+     */
+    public const LOG_EMERG = self::LOG_EMERGENCY;
+
+    /**
+     * @deprecated Use LOG_CRITICAL instead
+     */
+    public const LOG_CRIT = self::LOG_CRITICAL;
+
+    /**
+     * @deprecated Use LOG_ERROR instead
+     */
+    public const LOG_ERR = self::LOG_ERROR;
+
+    /**
+     * @deprecated Use LOG_WARNING instead
+     */
+    public const LOG_WARN = self::LOG_WARNING;
+
     /**
      * Registry collection
      *
@@ -871,7 +892,7 @@ final class Mage
             return;
         }
         $file = self::getStoreConfig('dev/log/exception_file');
-        self::log("\n" . $e->__toString(), self::LOG_ERR, $file);
+        self::log("\n" . $e->__toString(), self::LOG_ERROR, $file);
     }
 
     /**
@@ -1008,16 +1029,16 @@ final class Mage
     }
 
     /**
-     * Convert old Zend_Log level constants to Monolog Level objects
+     * Convert log level constants to Monolog Level objects
      */
     private static function convertLogLevel(int $level): Level
     {
         return match ($level) {
-            self::LOG_EMERG => Level::Emergency,
+            self::LOG_EMERGENCY => Level::Emergency,
             self::LOG_ALERT => Level::Alert,
-            self::LOG_CRIT => Level::Critical,
-            self::LOG_ERR => Level::Error,
-            self::LOG_WARN => Level::Warning,
+            self::LOG_CRITICAL => Level::Critical,
+            self::LOG_ERROR => Level::Error,
+            self::LOG_WARNING => Level::Warning,
             self::LOG_NOTICE => Level::Notice,
             self::LOG_INFO => Level::Info,
             self::LOG_DEBUG => Level::Debug,

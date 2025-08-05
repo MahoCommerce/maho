@@ -109,7 +109,7 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
     if (Mage::getIsDeveloperMode()) {
         throw new Exception($errorMessage);
     } else {
-        Mage::log($errorMessage, Mage::LOG_ERR);
+        Mage::log($errorMessage, Mage::LOG_ERROR);
         return null;
     }
 }
