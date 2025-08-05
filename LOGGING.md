@@ -18,10 +18,11 @@ Maho uses [Monolog](https://github.com/Seldaek/monolog) for comprehensive loggin
 Maho's logging system is built on Monolog 3.x and provides:
 
 - **Backward compatibility** with existing `Mage::log()` calls
-- **Automatic log rotation** with 14-day retention by default
+- **Intelligent defaults** - StreamHandler in development, RotatingFileHandler in production
+- **Automatic log rotation** with 14-day retention in production mode
 - **Multiple handlers** for different output destinations
 - **Configurable log levels** for fine-grained control
-- **Generic handler support** for any Monolog handler
+- **Generic handler support** for any Monolog handler with primitive parameters
 - **Type-safe configuration** with automatic parameter conversion
 
 ## Basic Usage
@@ -85,6 +86,25 @@ Maho supports two configuration modes for logging:
 
 **Important**: When XML log configuration is present, the admin panel logging section is automatically hidden to prevent conflicts.
 
+### Controlling Default Handler Behavior
+
+The default logging behavior depends on developer mode:
+
+```php
+// Check current mode
+$isDeveloperMode = Mage::getIsDeveloperMode();
+
+// Enable developer mode (uses StreamHandler)
+Mage::setIsDeveloperMode(true);
+
+// Disable developer mode (uses RotatingFileHandler)  
+Mage::setIsDeveloperMode(false);
+```
+
+**When to use each mode:**
+- **Development**: Use StreamHandler (`system.log`) for immediate, simple logging during development
+- **Production**: Use RotatingFileHandler (`system-YYYY-MM-DD.log`) for organized, space-efficient logging
+
 ### Basic Configuration
 
 Add logging configuration to your `app/etc/local.xml`:
@@ -98,7 +118,6 @@ Add logging configuration to your `app/etc/local.xml`:
                 <!-- Rotating file handler (recommended) -->
                 <file>
                     <class>Monolog\Handler\RotatingFileHandler</class>
-                    <enabled>1</enabled>
                     <params>
                         <level>DEBUG</level>
                         <maxFiles>14</maxFiles>
@@ -117,7 +136,6 @@ Each handler follows this structure:
 ```xml
 <handler_name>
     <class>Full\Class\Name</class>
-    <enabled>1</enabled> <!-- 1 = enabled, 0 = disabled -->
     <params>
         <level>DEBUG</level>
         <param1>value1</param1>
@@ -126,6 +144,8 @@ Each handler follows this structure:
     </params>
 </handler_name>
 ```
+
+**Note**: All configured handlers are automatically enabled. To disable a handler, simply remove it from the configuration.
 
 ### Parameter Mapping
 
@@ -137,6 +157,28 @@ The system automatically maps XML parameters to constructor arguments:
 
 ## Available Handlers
 
+Maho's XML configuration system supports handlers that use **primitive parameters only** (strings, integers, booleans, arrays). Handlers requiring complex objects must be configured manually in custom code.
+
+### ✅ **Supported Handlers (XML Configuration)**
+
+These handlers work out-of-the-box with XML configuration because they only require primitive parameters (strings, integers, booleans, arrays):
+
+**File Handlers:**
+- `StreamHandler` - Write to single file
+- `RotatingFileHandler` - Daily rotation with automatic cleanup
+
+**System Handlers:**  
+- `SyslogHandler` - System syslog integration
+- `ErrorLogHandler` - PHP error log integration
+
+**Communication Handlers:**
+- `SlackWebhookHandler` - Slack notifications
+- `TelegramBotHandler` - Telegram notifications  
+- `NativeMailerHandler` - Email via PHP mail()
+
+**Development Handlers:**
+- `BrowserConsoleHandler` - Browser console output
+
 ### File Handlers
 
 #### RotatingFileHandler (Default)
@@ -145,7 +187,7 @@ Automatically rotates log files daily and keeps logs for 14 days by default.
 ```xml
 <file>
     <class>Monolog\Handler\RotatingFileHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <level>DEBUG</level>
         <maxFiles>14</maxFiles>
@@ -159,7 +201,7 @@ Writes logs to a single file (no rotation).
 ```xml
 <file>
     <class>Monolog\Handler\StreamHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <level>DEBUG</level>
     </params>
@@ -167,10 +209,19 @@ Writes logs to a single file (no rotation).
 ```
 
 **Default Behavior:**
-When no XML configuration is present or no handlers are configured, Maho automatically uses `RotatingFileHandler` with:
-- **Daily rotation**: New log file created each day
+When no XML configuration is present or no handlers are configured, Maho automatically selects the appropriate handler based on developer mode:
+
+**Development Mode (`Mage::getIsDeveloperMode() === true`):**
+- **StreamHandler**: Simple, immediate logging to a single file
+- **File**: `system.log` (no rotation)
+- **Benefits**: Immediate writes, easier debugging, simpler log management
+
+**Production Mode (default):**
+- **RotatingFileHandler**: Professional log management with rotation
+- **Daily rotation**: New log file created each day  
 - **14-day retention**: Automatically deletes logs older than 14 days
-- **Naming pattern**: `system.log` (current), `system-2025-01-04.log` (previous days)
+- **Naming pattern**: `system-2025-08-05.log` (dated files)
+- **Benefits**: Prevents disk space issues, organized by date
 
 ### System Handlers
 
@@ -180,7 +231,6 @@ Sends logs to system syslog.
 ```xml
 <syslog>
     <class>Monolog\Handler\SyslogHandler</class>
-    <enabled>1</enabled>
     <params>
         <level>WARNING</level>
         <ident>maho</ident>
@@ -195,7 +245,6 @@ Writes to PHP's error log.
 ```xml
 <errorlog>
     <class>Monolog\Handler\ErrorLogHandler</class>
-    <enabled>1</enabled>
     <params>
         <level>ERROR</level>
         <messageType>0</messageType>
@@ -211,7 +260,6 @@ Sends logs to Slack channels.
 ```xml
 <slack>
     <class>Monolog\Handler\SlackWebhookHandler</class>
-    <enabled>1</enabled>
     <params>
         <level>ERROR</level>
         <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -229,7 +277,6 @@ Sends logs to Telegram chats.
 ```xml
 <telegram>
     <class>Monolog\Handler\TelegramBotHandler</class>
-    <enabled>1</enabled>
     <params>
         <level>CRITICAL</level>
         <apiKey>YOUR_BOT_API_KEY</apiKey>
@@ -244,7 +291,6 @@ Sends logs via email.
 ```xml
 <email>
     <class>Monolog\Handler\NativeMailerHandler</class>
-    <enabled>1</enabled>
     <params>
         <level>CRITICAL</level>
         <to>admin@example.com</to>
@@ -257,46 +303,69 @@ Sends logs via email.
 ### Development Handlers
 
 #### BrowserConsoleHandler
-Outputs logs to browser console.
+Outputs logs to browser console (useful for development).
 
 ```xml
 <browser>
     <class>Monolog\Handler\BrowserConsoleHandler</class>
-    <enabled>1</enabled>
     <params>
         <level>DEBUG</level>
     </params>
 </browser>
 ```
 
-### Database Handlers
+### ❌ **Unsupported Handlers (Manual Setup Required)**
 
-#### RedisHandler
-Stores logs in Redis.
+These handlers require complex object dependencies (not primitive parameters) and cannot be configured via XML:
+
+- **RedisHandler** - Requires Redis client object (`Predis\Client` or `Redis`)
+- **SymfonyMailerHandler** - Requires Mailer and Email objects  
+- **MongoDBHandler** - Requires MongoDB client object
+- **ElasticsearchHandler** - Requires Elasticsearch client object
+- **AmqpHandler** - Requires AMQP connection object
+- **RabbitMqHandler** - Requires RabbitMQ connection object
+
+For these handlers, configure them manually in custom code. For email logging, use **NativeMailerHandler** instead (XML-configurable).
+
+## Multiple Handler Support
+
+Maho supports multiple handlers simultaneously. Each handler processes logs **at or above** its configured level, creating a cascading alert system.
+
+### Basic Multi-Handler Example
 
 ```xml
-<redis>
-    <class>Monolog\Handler\RedisHandler</class>
-    <enabled>1</enabled>
-    <params>
-        <level>INFO</level>
-        <!-- Additional Redis configuration needed -->
-    </params>
-</redis>
-```
-
-#### MongoDBHandler
-Stores logs in MongoDB.
-
-```xml
-<mongodb>
-    <class>Monolog\Handler\MongoDBHandler</class>
-    <enabled>1</enabled>
-    <params>
-        <level>INFO</level>
-        <!-- MongoDB configuration needed -->
-    </params>
-</mongodb>
+<log>
+    <handlers>
+        <!-- File logging for all levels -->
+        <file>
+            <class>Monolog\Handler\RotatingFileHandler</class>
+            <params>
+                <level>DEBUG</level>
+                <maxFiles>14</maxFiles>
+            </params>
+        </file>
+        
+        <!-- Slack alerts for errors -->
+        <slack>
+            <class>Monolog\Handler\SlackWebhookHandler</class>
+            <params>
+                <level>ERROR</level>
+                <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
+                <channel>#alerts</channel>
+            </params>
+        </slack>
+        
+        <!-- Email for critical issues -->
+        <email>
+            <class>Monolog\Handler\NativeMailerHandler</class>
+            <params>
+                <level>CRITICAL</level>
+                <to>admin@example.com</to>
+                <subject>CRITICAL: Maho System Alert</subject>
+            </params>
+        </email>
+    </handlers>
+</log>
 ```
 
 ## Advanced Examples
@@ -309,7 +378,7 @@ Stores logs in MongoDB.
         <!-- Rotating file logging for all levels -->
         <file>
             <class>Monolog\Handler\RotatingFileHandler</class>
-            <enabled>1</enabled>
+            
             <params>
                 <level>DEBUG</level>
                 <maxFiles>14</maxFiles>
@@ -319,7 +388,7 @@ Stores logs in MongoDB.
         <!-- Slack for errors -->
         <slack>
             <class>Monolog\Handler\SlackWebhookHandler</class>
-            <enabled>1</enabled>
+            
             <params>
                 <level>ERROR</level>
                 <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -330,7 +399,7 @@ Stores logs in MongoDB.
         <!-- Email for critical issues -->
         <email>
             <class>Monolog\Handler\NativeMailerHandler</class>
-            <enabled>1</enabled>
+            
             <params>
                 <level>CRITICAL</level>
                 <to>admin@example.com</to>
@@ -351,7 +420,7 @@ You can configure multiple handlers of the same type for different purposes. For
         <!-- Rotating file logging for all levels -->
         <file>
             <class>Monolog\Handler\RotatingFileHandler</class>
-            <enabled>1</enabled>
+            
             <params>
                 <level>DEBUG</level>
                 <maxFiles>14</maxFiles>
@@ -361,7 +430,7 @@ You can configure multiple handlers of the same type for different purposes. For
         <!-- Slack for general errors - #alerts channel -->
         <slack_errors>
             <class>Monolog\Handler\SlackWebhookHandler</class>
-            <enabled>1</enabled>
+            
             <params>
                 <level>ERROR</level>
                 <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -374,7 +443,7 @@ You can configure multiple handlers of the same type for different purposes. For
         <!-- Slack for critical issues - #critical channel -->
         <slack_critical>
             <class>Monolog\Handler\SlackWebhookHandler</class>
-            <enabled>1</enabled>
+            
             <params>
                 <level>CRITICAL</level>
                 <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -387,7 +456,7 @@ You can configure multiple handlers of the same type for different purposes. For
         <!-- Slack for warnings - #warnings channel -->
         <slack_warnings>
             <class>Monolog\Handler\SlackWebhookHandler</class>
-            <enabled>1</enabled>
+            
             <params>
                 <level>WARNING</level>
                 <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -415,7 +484,7 @@ You can also set up handlers for different types of alerts:
     <!-- Default file logging -->
     <file>
         <class>Monolog\Handler\StreamHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>DEBUG</level>
         </params>
@@ -424,7 +493,7 @@ You can also set up handlers for different types of alerts:
     <!-- Payment issues - dedicated channel -->
     <slack_payments>
         <class>Monolog\Handler\SlackWebhookHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>ERROR</level>
             <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -437,7 +506,7 @@ You can also set up handlers for different types of alerts:
     <!-- Security issues - high priority channel -->
     <slack_security>
         <class>Monolog\Handler\SlackWebhookHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>WARNING</level>
             <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -450,7 +519,7 @@ You can also set up handlers for different types of alerts:
     <!-- Emergency alerts -->
     <slack_emergency>
         <class>Monolog\Handler\SlackWebhookHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>EMERGENCY</level>
             <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
@@ -469,7 +538,7 @@ You can use any Monolog handler by specifying its full class name:
 ```xml
 <custom>
     <class>Your\Custom\MonologHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <level>INFO</level>
         <customParam>value</customParam>
@@ -486,7 +555,7 @@ You can use any Monolog handler by specifying its full class name:
 <handlers>
     <file>
         <class>Monolog\Handler\RotatingFileHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>WARNING</level>
             <maxFiles>14</maxFiles>
@@ -494,7 +563,7 @@ You can use any Monolog handler by specifying its full class name:
     </file>
     <slack>
         <class>Monolog\Handler\SlackWebhookHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>ERROR</level>
             <webhookUrl>https://hooks.slack.com/services/PROD/WEBHOOK/URL</webhookUrl>
@@ -508,7 +577,7 @@ You can use any Monolog handler by specifying its full class name:
 <handlers>
     <file>
         <class>Monolog\Handler\RotatingFileHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>DEBUG</level>
             <maxFiles>7</maxFiles>
@@ -516,7 +585,7 @@ You can use any Monolog handler by specifying its full class name:
     </file>
     <browser>
         <class>Monolog\Handler\BrowserConsoleHandler</class>
-        <enabled>1</enabled>
+        
         <params>
             <level>DEBUG</level>
         </params>
@@ -531,7 +600,7 @@ You can use any Monolog handler by specifying its full class name:
 ```xml
 <syslog_custom>
     <class>Monolog\Handler\SyslogHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <ident>maho-store-prod</ident>
         <facility>16</facility> <!-- LOG_LOCAL0 = 16 -->
@@ -546,7 +615,7 @@ You can use any Monolog handler by specifying its full class name:
 ```xml
 <slack_advanced>
     <class>Monolog\Handler\SlackWebhookHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
         <channel>#critical-alerts</channel>
@@ -568,7 +637,7 @@ You can use any Monolog handler by specifying its full class name:
 ```xml
 <email_alerts>
     <class>Monolog\Handler\NativeMailerHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <to>
             <recipient>admin@example.com</recipient>
@@ -588,7 +657,7 @@ You can use any Monolog handler by specifying its full class name:
 ```xml
 <rotating_custom>
     <class>Monolog\Handler\RotatingFileHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <filename>var/log/maho.log</filename>
         <maxFiles>7</maxFiles>
@@ -604,7 +673,7 @@ You can use any Monolog handler by specifying its full class name:
 ```xml
 <telegram_alerts>
     <class>Monolog\Handler\TelegramBotHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <apiKey>YOUR_BOT_TOKEN</apiKey>
         <channel>@your_channel_name</channel>
@@ -621,7 +690,7 @@ You can use any Monolog handler by specifying its full class name:
 ```xml
 <system_error_log>
     <class>Monolog\Handler\ErrorLogHandler</class>
-    <enabled>1</enabled>
+    
     <params>
         <messageType>3</messageType> <!-- 3 = append to file -->
         <level>ERROR</level>
@@ -639,7 +708,6 @@ For high-traffic sites, use buffered handlers to reduce I/O operations:
     <!-- Buffered file handler -->
     <file_buffered>
         <class>Monolog\Handler\BufferHandler</class>
-        <enabled>1</enabled>
         <params>
             <handler>
                 <class>Monolog\Handler\StreamHandler</class>
@@ -657,7 +725,6 @@ For high-traffic sites, use buffered handlers to reduce I/O operations:
     <!-- Group handler for critical alerts -->
     <critical_group>
         <class>Monolog\Handler\GroupHandler</class>
-        <enabled>1</enabled>
         <params>
             <handlers>
                 <slack>
@@ -723,7 +790,6 @@ Then use it in your configuration:
 ```xml
 <custom_api>
     <class>YourCompany\Log\Handler\CustomHandler</class>
-    <enabled>1</enabled>
     <params>
         <apiEndpoint>https://api.yourservice.com/logs</apiEndpoint>
         <level>ERROR</level>
@@ -786,7 +852,6 @@ To use advanced features like Slack notifications or multiple handlers:
                 <!-- Enhanced file logging with rotation -->
                 <file>
                     <class>Monolog\Handler\RotatingFileHandler</class>
-                    <enabled>1</enabled>
                     <params>
                         <level>DEBUG</level>
                         <maxFiles>14</maxFiles>
@@ -866,10 +931,11 @@ try {
 
 #### Handler Not Working
 
-1. **Check class exists**: Ensure the handler class is available
-2. **Check parameters**: Verify parameter names match constructor arguments
-3. **Check dependencies**: Some handlers require additional packages
-4. **Check permissions**: Ensure log directory is writable
+1. **Check handler is supported**: Only handlers with primitive parameters work via XML (see supported list above)
+2. **Check class exists**: Ensure the handler class is available in Monolog
+3. **Check parameters**: Verify parameter names match constructor arguments  
+4. **Check dependencies**: Some handlers require additional packages (e.g., Slack webhook)
+5. **Check permissions**: Ensure log directory is writable for file handlers
 
 #### Log Files Not Created
 

@@ -1074,10 +1074,6 @@ final class Mage
 
         $hasActiveHandler = false;
         foreach ($handlers->children() as $handlerName => $handlerConfig) {
-            if (!(bool) $handlerConfig->enabled) {
-                continue;
-            }
-
             $handler = self::createHandler($handlerName, $handlerConfig, $logFile, $defaultLevel);
             $logger->pushHandler($handler);
             $hasActiveHandler = true;
