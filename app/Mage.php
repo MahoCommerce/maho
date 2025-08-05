@@ -789,105 +789,10 @@ final class Mage
             return;
         }
 
-        // Check if XML log configuration exists - if so, bypass backend settings
-        if (self::isLogConfigManagedByXml()) {
-            $logActive = true;
-            $maxLogLevel = self::LOG_DEBUG; // XML handlers manage their own levels
-            if (empty($file)) {
-                $file = 'system.log'; // Default file when using XML config
-            }
-        } else {
-            // Use backend configuration when no XML config present
-            try {
-                $logActive = self::getStoreConfig('dev/log/active');
-                if (empty($file)) {
-                    $file = self::getStoreConfig('dev/log/file');
-                }
-            } catch (Exception $e) {
-                $logActive = true;
-            }
-
-            if (!self::$_isDeveloperMode && !$logActive && !$forceLog) {
-                return;
-            }
-
-            try {
-                $maxLogLevel = (int) self::getStoreConfig('dev/log/max_level');
-            } catch (Throwable $e) {
-                $maxLogLevel = self::LOG_DEBUG;
-            }
-        }
-
-        $level  = is_null($level) ? self::LOG_DEBUG : $level;
-
-        if (!self::$_isDeveloperMode && !self::isLogConfigManagedByXml() && $level > $maxLogLevel && !$forceLog) {
-            return;
-        }
-
-        if (empty($file)) {
-            $file = self::isLogConfigManagedByXml() ?
-                'system.log' :
-                (string) self::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE);
-        } else {
-            $file = basename($file);
-        }
-
         try {
-            if (!isset(self::$_loggers[$file])) {
-                // Validate file extension before save. Allowed file extensions: log, txt, html, csv
-                $_allowedFileExtensions = explode(
-                    ',',
-                    (string) self::getConfig()->getNode('dev/log/allowedFileExtensions', Mage_Core_Model_Store::DEFAULT_CODE),
-                );
-                if (! ($extension = pathinfo($file, PATHINFO_EXTENSION)) || ! in_array($extension, $_allowedFileExtensions)) {
-                    return;
-                }
-
-                $logDir = self::getBaseDir('var') . DS . 'log';
-                $logFile = $logDir . DS . $file;
-
-                if (!is_dir($logDir)) {
-                    mkdir($logDir);
-                    chmod($logDir, 0750);
-                }
-
-                $logger = new Logger(pathinfo($file, PATHINFO_FILENAME));
-
-                // Convert old Zend_Log level to Monolog level for configuration
-                $configLevel = self::convertLogLevel($maxLogLevel);
-                if ($forceLog || self::$_isDeveloperMode) {
-                    $configLevel = Level::Debug;
-                }
-
-                // Add configured handlers
-                self::addConfiguredHandlers($logger, $logFile, $configLevel);
-
-                self::$_loggers[$file] = $logger;
-
-                // Set file permissions (only for non-rotating handlers)
-                // RotatingFileHandler manages its own files
-                if (!self::isRotatingFileHandler($logger)) {
-                    if (!file_exists($logFile)) {
-                        touch($logFile);
-                    }
-                    chmod($logFile, 0640);
-                }
-            }
-
-            if (is_array($message) || is_object($message)) {
-                $message = print_r($message, true);
-            }
-
-            // Escape PHP tags for security
-            $message = str_replace('<?', '< ?', $message);
-
-            // Convert log level and log the message
-            $monologLevel = self::convertLogLevel($level);
-            self::$_loggers[$file]->log($monologLevel, $message);
-
-            // Auto-flush BrowserConsoleHandler for immediate output
-            self::flushBrowserConsoleHandlers($file);
+            self::helper('log')->handleLogging($message, $level, $file, $forceLog);
         } catch (Exception $e) {
+            // Silently fail to avoid logging loops
         }
     }
 
@@ -1037,9 +942,25 @@ final class Mage
     }
 
     /**
+     * Get logger instances array
+     */
+    public static function getLoggers(): array
+    {
+        return self::$_loggers;
+    }
+
+    /**
+     * Set logger instance
+     */
+    public static function setLogger(string $file, Logger $logger): void
+    {
+        self::$_loggers[$file] = $logger;
+    }
+
+    /**
      * Convert log level constants to Monolog Level objects
      */
-    private static function convertLogLevel(int $level): Level
+    public static function convertLogLevel(int $level): Level
     {
         return match ($level) {
             self::LOG_EMERGENCY => Level::Emergency,
@@ -1052,218 +973,5 @@ final class Mage
             self::LOG_DEBUG => Level::Debug,
             default => Level::Debug,
         };
-    }
-
-    /**
-     * Add configured handlers to logger
-     */
-    private static function addConfiguredHandlers(Logger $logger, string $logFile, Level $defaultLevel): void
-    {
-        $config = self::getConfig();
-        if (!$config) {
-            // Fallback handler based on developer mode
-            $handler = self::createDefaultHandler($logFile, $defaultLevel);
-            $logger->pushHandler($handler);
-            return;
-        }
-
-        $handlers = $config->getNode('global/log/handlers');
-        if (!$handlers) {
-            // Fallback handler based on developer mode
-            $handler = self::createDefaultHandler($logFile, $defaultLevel);
-            $logger->pushHandler($handler);
-            return;
-        }
-
-        $hasActiveHandler = false;
-        foreach ($handlers->children() as $handlerName => $handlerConfig) {
-            $handler = self::createHandler($handlerName, $handlerConfig, $logFile, $defaultLevel);
-            $logger->pushHandler($handler);
-            $hasActiveHandler = true;
-        }
-
-        // Always ensure at least one handler is active
-        if (!$hasActiveHandler) {
-            $handler = self::createDefaultHandler($logFile, $defaultLevel);
-            $logger->pushHandler($handler);
-        }
-    }
-
-    /**
-     * Create a handler based on configuration using reflection
-     */
-    private static function createHandler(string $name, object $config, string $logFile, Level $defaultLevel): object
-    {
-        $className = (string) $config->class;
-
-        // Validate class name
-        if (!class_exists($className)) {
-            throw new Mage_Core_Exception(
-                "Log handler '{$name}' class does not exist: {$className}. Please check if the required package is installed.",
-            );
-        }
-
-        // Validate it's a Monolog handler
-        if (!is_subclass_of($className, \Monolog\Handler\HandlerInterface::class)) {
-            throw new Mage_Core_Exception(
-                "Log handler '{$name}' class {$className} must implement Monolog\Handler\HandlerInterface",
-            );
-        }
-
-        try {
-            $reflection = new ReflectionClass($className);
-
-            // Get constructor parameters
-            $constructor = $reflection->getConstructor();
-            if (!$constructor) {
-                return new $className();
-            }
-
-            $args = self::buildConstructorArgs($constructor, $config, $logFile, $defaultLevel);
-            $handler = $reflection->newInstanceArgs($args);
-
-            // Apply custom formatter to file-based handlers
-            if ($handler instanceof \Monolog\Handler\StreamHandler ||
-                $handler instanceof \Monolog\Handler\RotatingFileHandler) {
-                $handler->setFormatter(self::createLogFormatter());
-            }
-
-            return $handler;
-        } catch (Exception $e) {
-            throw new Mage_Core_Exception(
-                sprintf(
-                    "Failed to create log handler '%s' of type %s. Error: %s. Check handler configuration parameters in XML.",
-                    $name,
-                    $className,
-                    $e->getMessage(),
-                ),
-                0,
-                $e,
-            );
-        }
-    }
-
-    /**
-     * Build constructor arguments for handler using reflection and configuration
-     */
-    private static function buildConstructorArgs(ReflectionMethod $constructor, object $config, string $logFile, Level $defaultLevel): array
-    {
-        $args = [];
-        $params = $constructor->getParameters();
-
-        foreach ($params as $param) {
-            $paramName = $param->getName();
-            $paramType = $param->getType();
-
-            // Handle common parameter patterns
-            try {
-                $value = match ($paramName) {
-                    'stream', 'filename', 'file', 'path' => $logFile,
-                    'level' => isset($config->params->level) ?
-                        Level::fromName((string) $config->params->level) : Level::Debug,
-                    'bubble' => isset($config->params->bubble) ?
-                        (bool) $config->params->bubble : true,
-                    default => self::getConfigValue($config, $paramName, $param),
-                };
-            } catch (Exception $e) {
-                // Handle invalid level names with a more descriptive error
-                if ($paramName === 'level' && isset($config->params->level)) {
-                    throw new Mage_Core_Exception(
-                        "Invalid log level '{$config->params->level}' for parameter '{$paramName}'. Valid levels are: DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL, ALERT, EMERGENCY",
-                        0,
-                        $e,
-                    );
-                }
-                throw $e;
-            }
-
-            $args[] = $value;
-        }
-
-        return $args;
-    }
-
-    /**
-     * Get configuration value with type conversion
-     */
-    private static function getConfigValue(object $config, string $paramName, ReflectionParameter $param): mixed
-    {
-        $configValue = $config->params->{$paramName} ?? null;
-
-        if ($configValue === null) {
-            return $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
-        }
-
-        $paramType = $param->getType();
-        if (!$paramType) {
-            return (string) $configValue;
-        }
-
-        // Type conversion based on parameter type
-        $typeName = $paramType instanceof ReflectionNamedType ? $paramType->getName() : 'mixed';
-        return match ($typeName) {
-            'int' => (int) $configValue,
-            'float' => (float) $configValue,
-            'bool' => (bool) $configValue,
-            'array' => is_array($configValue) ? $configValue : [(string) $configValue],
-            default => (string) $configValue,
-        };
-    }
-
-    private static function createLogFormatter(): LineFormatter
-    {
-        // Format: timestamp level_name: message
-        $format = "%datetime% %level_name%: %message%\n";
-        $dateFormat = 'Y-m-d H:i:s';
-
-        $formatter = new LineFormatter($format, $dateFormat);
-
-        // Don't include context and extra data (removes the empty [] [])
-        $formatter->includeStacktraces(false);
-
-        return $formatter;
-    }
-
-    /**
-     * Create the default handler based on developer mode
-     */
-    private static function createDefaultHandler(string $logFile, Level $defaultLevel): object
-    {
-        if (self::getIsDeveloperMode()) {
-            // Development: StreamHandler for immediate, simple logging
-            $handler = new StreamHandler($logFile, $defaultLevel);
-        } else {
-            // Production: RotatingFileHandler with 14-day retention
-            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
-        }
-
-        $handler->setFormatter(self::createLogFormatter());
-        return $handler;
-    }
-
-    /**
-     * Flush BrowserConsoleHandler to ensure immediate output
-     */
-    private static function flushBrowserConsoleHandlers(string $file): void
-    {
-        if (!isset(self::$_loggers[$file])) {
-            return;
-        }
-
-        foreach (self::$_loggers[$file]->getHandlers() as $handler) {
-            if ($handler instanceof \Monolog\Handler\BrowserConsoleHandler) {
-                $handler->send();
-            }
-        }
-    }
-
-    private static function isRotatingFileHandler(Logger $logger): bool
-    {
-        foreach ($logger->getHandlers() as $handler) {
-            if ($handler instanceof \Monolog\Handler\RotatingFileHandler) {
-                return true;
-            }
-        }
-        return false;
     }
 }
