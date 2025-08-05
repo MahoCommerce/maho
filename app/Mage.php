@@ -11,6 +11,7 @@
  */
 
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
@@ -1057,18 +1058,16 @@ final class Mage
     {
         $config = self::getConfig();
         if (!$config) {
-            // Fallback to RotatingFileHandler if no config
-            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
-            $handler->setFormatter(self::createLogFormatter());
+            // Fallback handler based on developer mode
+            $handler = self::createDefaultHandler($logFile, $defaultLevel);
             $logger->pushHandler($handler);
             return;
         }
 
         $handlers = $config->getNode('global/log/handlers');
         if (!$handlers) {
-            // Fallback to RotatingFileHandler if no handlers configured
-            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
-            $handler->setFormatter(self::createLogFormatter());
+            // Fallback handler based on developer mode
+            $handler = self::createDefaultHandler($logFile, $defaultLevel);
             $logger->pushHandler($handler);
             return;
         }
@@ -1086,8 +1085,7 @@ final class Mage
 
         // Always ensure at least one handler is active
         if (!$hasActiveHandler) {
-            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
-            $handler->setFormatter(self::createLogFormatter());
+            $handler = self::createDefaultHandler($logFile, $defaultLevel);
             $logger->pushHandler($handler);
         }
     }
@@ -1124,13 +1122,13 @@ final class Mage
 
             $args = self::buildConstructorArgs($constructor, $config, $logFile, $defaultLevel);
             $handler = $reflection->newInstanceArgs($args);
-            
+
             // Apply custom formatter to file-based handlers
-            if ($handler instanceof \Monolog\Handler\StreamHandler || 
+            if ($handler instanceof \Monolog\Handler\StreamHandler ||
                 $handler instanceof \Monolog\Handler\RotatingFileHandler) {
                 $handler->setFormatter(self::createLogFormatter());
             }
-            
+
             return $handler;
         } catch (Exception $e) {
             throw new Mage_Core_Exception(
@@ -1221,13 +1219,30 @@ final class Mage
         // Format: timestamp level_name: message
         $format = "%datetime% %level_name%: %message%\n";
         $dateFormat = 'Y-m-d H:i:s';
-        
+
         $formatter = new LineFormatter($format, $dateFormat);
-        
+
         // Don't include context and extra data (removes the empty [] [])
         $formatter->includeStacktraces(false);
-        
+
         return $formatter;
+    }
+
+    /**
+     * Create the default handler based on developer mode
+     */
+    private static function createDefaultHandler(string $logFile, Level $defaultLevel): object
+    {
+        if (self::getIsDeveloperMode()) {
+            // Development: StreamHandler for immediate, simple logging
+            $handler = new StreamHandler($logFile, $defaultLevel);
+        } else {
+            // Production: RotatingFileHandler with 14-day retention
+            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
+        }
+
+        $handler->setFormatter(self::createLogFormatter());
+        return $handler;
     }
 
     /**
