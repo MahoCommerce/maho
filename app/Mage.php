@@ -884,6 +884,9 @@ final class Mage
             // Convert log level and log the message
             $monologLevel = self::convertLogLevel($level);
             self::$_loggers[$file]->log($monologLevel, $message);
+
+            // Auto-flush BrowserConsoleHandler for immediate output
+            self::flushBrowserConsoleHandlers($file);
         } catch (Exception $e) {
         }
     }
@@ -1157,7 +1160,7 @@ final class Mage
                 $value = match ($paramName) {
                     'stream', 'filename', 'file', 'path' => $logFile,
                     'level' => isset($config->params->level) ?
-                        Level::fromName((string) $config->params->level) : $defaultLevel,
+                        Level::fromName((string) $config->params->level) : Level::Debug,
                     'bubble' => isset($config->params->bubble) ?
                         (bool) $config->params->bubble : true,
                     default => self::getConfigValue($config, $paramName, $param),
@@ -1207,9 +1210,6 @@ final class Mage
         };
     }
 
-    /**
-     * Create a custom log formatter that matches the old Zend_Log format
-     */
     private static function createLogFormatter(): LineFormatter
     {
         // Format: timestamp level_name: message
@@ -1242,8 +1242,21 @@ final class Mage
     }
 
     /**
-     * Check if logger has a RotatingFileHandler
+     * Flush BrowserConsoleHandler to ensure immediate output
      */
+    private static function flushBrowserConsoleHandlers(string $file): void
+    {
+        if (!isset(self::$_loggers[$file])) {
+            return;
+        }
+
+        foreach (self::$_loggers[$file]->getHandlers() as $handler) {
+            if ($handler instanceof \Monolog\Handler\BrowserConsoleHandler) {
+                $handler->send();
+            }
+        }
+    }
+
     private static function isRotatingFileHandler(Logger $logger): bool
     {
         foreach ($logger->getHandlers() as $handler) {

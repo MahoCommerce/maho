@@ -115,14 +115,19 @@ Add logging configuration to your `app/etc/local.xml`:
     <global>
         <log>
             <handlers>
-                <!-- Rotating file handler (recommended) -->
+                <!-- Simple: All log levels, 14-day rotation -->
                 <file>
                     <class>Monolog\Handler\RotatingFileHandler</class>
-                    <params>
-                        <level>DEBUG</level>
-                        <maxFiles>14</maxFiles>
-                    </params>
                 </file>
+                
+                <!-- Advanced: Custom level and retention -->
+                <file_custom>
+                    <class>Monolog\Handler\RotatingFileHandler</class>
+                    <params>
+                        <level>WARNING</level>
+                        <maxFiles>30</maxFiles>
+                    </params>
+                </file_custom>
             </handlers>
         </log>
     </global>
@@ -137,7 +142,7 @@ Each handler follows this structure:
 <handler_name>
     <class>Full\Class\Name</class>
     <params>
-        <level>DEBUG</level>
+        <level>WARNING</level>  <!-- Optional: defaults to DEBUG (all levels) -->
         <param1>value1</param1>
         <param2>value2</param2>
         <!-- Parameters map to constructor arguments -->
@@ -145,7 +150,17 @@ Each handler follows this structure:
 </handler_name>
 ```
 
-**Note**: All configured handlers are automatically enabled. To disable a handler, simply remove it from the configuration.
+**Simple Configuration (no parameters needed):**
+```xml
+<handler_name>
+    <class>Full\Class\Name</class>
+</handler_name>
+```
+
+**Important Notes:**
+- All configured handlers are automatically enabled. To disable a handler, simply remove it from the configuration.
+- **Default log level is DEBUG** - if no `<level>` is specified, the handler will capture all log messages
+- Empty `<params>` section can be omitted entirely for minimal configuration
 
 ### Parameter Mapping
 
@@ -162,6 +177,8 @@ Maho's XML configuration system supports handlers that use **primitive parameter
 ### ✅ **Supported Handlers (XML Configuration)**
 
 These handlers work out-of-the-box with XML configuration because they only require primitive parameters (strings, integers, booleans, arrays):
+
+**💡 Quick Start:** Most handlers work with just the class name - no parameters needed! Default level is **DEBUG** (captures all messages).
 
 **File Handlers:**
 - `StreamHandler` - Write to single file
@@ -185,12 +202,17 @@ These handlers work out-of-the-box with XML configuration because they only requ
 Automatically rotates log files daily and keeps logs for 14 days by default.
 
 ```xml
+<!-- Simple: All levels, default 14-day retention -->
 <file>
     <class>Monolog\Handler\RotatingFileHandler</class>
-    
+</file>
+
+<!-- Custom: Specific level and retention -->
+<file>
+    <class>Monolog\Handler\RotatingFileHandler</class>
     <params>
-        <level>DEBUG</level>
-        <maxFiles>14</maxFiles>
+        <level>WARNING</level>
+        <maxFiles>30</maxFiles>
     </params>
 </file>
 ```
@@ -199,11 +221,16 @@ Automatically rotates log files daily and keeps logs for 14 days by default.
 Writes logs to a single file (no rotation).
 
 ```xml
+<!-- Simple: All levels -->
 <file>
     <class>Monolog\Handler\StreamHandler</class>
-    
+</file>
+
+<!-- Custom: Specific level only -->
+<file>
+    <class>Monolog\Handler\StreamHandler</class>
     <params>
-        <level>DEBUG</level>
+        <level>ERROR</level>
     </params>
 </file>
 ```
@@ -306,10 +333,16 @@ Sends logs via email.
 Outputs logs to browser console (useful for development).
 
 ```xml
+<!-- Simple: All log levels -->
+<browser>
+    <class>Monolog\Handler\BrowserConsoleHandler</class>
+</browser>
+
+<!-- Custom: Specific level -->
 <browser>
     <class>Monolog\Handler\BrowserConsoleHandler</class>
     <params>
-        <level>DEBUG</level>
+        <level>ERROR</level>
     </params>
 </browser>
 ```
