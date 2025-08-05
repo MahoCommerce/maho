@@ -223,6 +223,12 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             );
         }
 
+        // Skip BrowserConsoleHandler for CLI commands
+        if ($className === \Monolog\Handler\BrowserConsoleHandler::class && php_sapi_name() === 'cli') {
+            // Return a NullHandler instead to avoid any output
+            return new \Monolog\Handler\NullHandler();
+        }
+
         try {
             $reflection = new ReflectionClass($className);
 
@@ -369,6 +375,11 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected function flushBrowserConsoleHandlers(string $file): void
     {
+        // Skip browser console operations in CLI
+        if (php_sapi_name() === 'cli') {
+            return;
+        }
+
         if (!isset(self::$_loggers[$file])) {
             return;
         }
