@@ -1051,10 +1051,8 @@ final class Mage
             }
 
             $handler = self::createHandler($handlerName, $handlerConfig, $logFile, $defaultLevel);
-            if ($handler) {
-                $logger->pushHandler($handler);
-                $hasActiveHandler = true;
-            }
+            $logger->pushHandler($handler);
+            $hasActiveHandler = true;
         }
 
         // Always ensure at least one handler is active
@@ -1066,14 +1064,22 @@ final class Mage
     /**
      * Create a handler based on configuration using reflection
      */
-    private static function createHandler(string $name, object $config, string $logFile, Level $defaultLevel): ?object
+    private static function createHandler(string $name, object $config, string $logFile, Level $defaultLevel): object
     {
         $className = (string) $config->class;
 
         // Validate class name
         if (!class_exists($className)) {
-            self::log("Handler class does not exist: {$className}", self::LOG_ERR);
-            return null;
+            throw new Mage_Core_Exception(
+                "Log handler '{$name}' class does not exist: {$className}. Please check if the required package is installed.",
+            );
+        }
+
+        // Validate it's a Monolog handler
+        if (!is_subclass_of($className, \Monolog\Handler\HandlerInterface::class)) {
+            throw new Mage_Core_Exception(
+                "Log handler '{$name}' class {$className} must implement Monolog\Handler\HandlerInterface",
+            );
         }
 
         try {
@@ -1087,10 +1093,17 @@ final class Mage
 
             $args = self::buildConstructorArgs($constructor, $config, $logFile, $defaultLevel);
             return $reflection->newInstanceArgs($args);
-
         } catch (Exception $e) {
-            self::log("Failed to create log handler {$className}: " . $e->getMessage(), self::LOG_ERR);
-            return null;
+            throw new Mage_Core_Exception(
+                sprintf(
+                    "Failed to create log handler '%s' of type %s. Error: %s. Check handler configuration parameters in XML.",
+                    $name,
+                    $className,
+                    $e->getMessage(),
+                ),
+                0,
+                $e,
+            );
         }
     }
 
@@ -1107,14 +1120,26 @@ final class Mage
             $paramType = $param->getType();
 
             // Handle common parameter patterns
-            $value = match ($paramName) {
-                'stream', 'filename', 'file', 'path' => $logFile,
-                'level' => isset($config->params->level) ?
-                    Level::fromName((string) $config->params->level) : $defaultLevel,
-                'bubble' => isset($config->params->bubble) ?
-                    (bool) $config->params->bubble : true,
-                default => self::getConfigValue($config, $paramName, $param),
-            };
+            try {
+                $value = match ($paramName) {
+                    'stream', 'filename', 'file', 'path' => $logFile,
+                    'level' => isset($config->params->level) ?
+                        Level::fromName((string) $config->params->level) : $defaultLevel,
+                    'bubble' => isset($config->params->bubble) ?
+                        (bool) $config->params->bubble : true,
+                    default => self::getConfigValue($config, $paramName, $param),
+                };
+            } catch (Exception $e) {
+                // Handle invalid level names with a more descriptive error
+                if ($paramName === 'level' && isset($config->params->level)) {
+                    throw new Mage_Core_Exception(
+                        "Invalid log level '{$config->params->level}' for parameter '{$paramName}'. Valid levels are: DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL, ALERT, EMERGENCY",
+                        0,
+                        $e,
+                    );
+                }
+                throw $e;
+            }
 
             $args[] = $value;
         }
