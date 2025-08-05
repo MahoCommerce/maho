@@ -181,7 +181,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             mkdir($logDir, 0750, true);
         }
 
-        $logger = new Logger(pathinfo($file, PATHINFO_FILENAME));
+        $logger = new Logger('Maho');
 
         // Convert old Zend_Log level to Monolog level for configuration
         $configLevel = self::convertLogLevel($maxLogLevel);
@@ -270,8 +270,9 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             /** @var \Monolog\Handler\HandlerInterface $handler */
             $handler = $reflection->newInstanceArgs($args);
 
-            // Apply custom formatter to file-based handlers that support it
-            if (method_exists($handler, 'setFormatter')) {
+            // Apply custom formatter only to file-based handlers (not browser console)
+            if (method_exists($handler, 'setFormatter') && 
+                !($handler instanceof \Monolog\Handler\BrowserConsoleHandler)) {
                 $handler->setFormatter(self::createMonologFormatter());
             }
 

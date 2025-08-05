@@ -31,16 +31,16 @@ Maho's logging system is built on Monolog 3.x and provides:
 
 Maho supports 8 log levels (from highest to lowest priority):
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| `Mage::LOG_EMERGENCY` | 0 | Emergency: system is unusable |
-| `Mage::LOG_ALERT` | 1 | Alert: action must be taken immediately |
-| `Mage::LOG_CRITICAL` | 2 | Critical: critical conditions |
-| `Mage::LOG_ERROR` | 3 | Error: error conditions |
-| `Mage::LOG_WARNING` | 4 | Warning: warning conditions |
-| `Mage::LOG_NOTICE` | 5 | Notice: normal but significant condition |
-| `Mage::LOG_INFO` | 6 | Informational: informational messages |
-| `Mage::LOG_DEBUG` | 7 | Debug: debug-level messages |
+| Constant | Monolog Level | Description |
+|----------|---------------|-------------|
+| `Mage::LOG_EMERGENCY` | `Level::Emergency` | Emergency: system is unusable |
+| `Mage::LOG_ALERT` | `Level::Alert` | Alert: action must be taken immediately |
+| `Mage::LOG_CRITICAL` | `Level::Critical` | Critical: critical conditions |
+| `Mage::LOG_ERROR` | `Level::Error` | Error: error conditions |
+| `Mage::LOG_WARNING` | `Level::Warning` | Warning: warning conditions |
+| `Mage::LOG_NOTICE` | `Level::Notice` | Notice: normal but significant condition |
+| `Mage::LOG_INFO` | `Level::Info` | Informational: informational messages |
+| `Mage::LOG_DEBUG` | `Level::Debug` | Debug: debug-level messages |
 
 **Legacy Constants (Deprecated):**
 | Legacy Constant | New Constant | 
@@ -49,6 +49,8 @@ Maho supports 8 log levels (from highest to lowest priority):
 | `Mage::LOG_CRIT` | `Mage::LOG_CRITICAL` |
 | `Mage::LOG_ERR` | `Mage::LOG_ERROR` |
 | `Mage::LOG_WARN` | `Mage::LOG_WARNING` |
+
+**Note:** Maho constants now use Monolog Level enums instead of integers for better type safety. Legacy integer values (0-7) are still supported for backwards compatibility. All logs are created with channel name "Maho" for proper branding in browser console output.
 
 ### Simple Logging
 
