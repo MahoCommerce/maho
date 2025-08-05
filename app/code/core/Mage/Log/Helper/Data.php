@@ -103,7 +103,11 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 
         $level ??= Mage::LOG_DEBUG;
 
-        if (!Mage::getIsDeveloperMode() && !self::isLogConfigManagedByXml() && !$forceLog) {
+        if (!$logActive && !$forceLog) {
+            return;
+        }
+
+        if (!Mage::getIsDeveloperMode() && !$forceLog) {
             // Convert levels for comparison
             $levelValue = self::convertLogLevel($level);
             $maxLevelValue = self::convertLogLevel($maxLogLevel);
