@@ -793,8 +793,7 @@ final class Mage
         if (!self::getConfig()) {
             return;
         }
-        $file = self::getStoreConfig('dev/log/exception_file');
-        self::log("\n" . $e->__toString(), self::LOG_ERROR, $file);
+        self::log("\n" . $e->__toString(), self::LOG_ERROR, 'exception.log');
     }
 
     /**

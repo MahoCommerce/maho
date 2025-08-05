@@ -636,26 +636,6 @@
                             <comment>Messages with a priority lower than the selected one will not be logged. Log Levels are ordered from highest to lowest priority.</comment>
                             <depends><active>1</active></depends>
                         </max_level>
-                        <file translate="label comment">
-                            <label>System Log File Name</label>
-                            <backend_model>adminhtml/system_config_backend_filename</backend_model>
-                            <sort_order>3</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <comment>Logging from Mage::log(). File is located in {{base_dir}}/var/log. Allowed file extensions: log, txt, html, csv</comment>
-                            <depends><active>1</active></depends>
-                        </file>
-                        <exception_file translate="label comment">
-                            <label>Exceptions Log File Name</label>
-                            <backend_model>adminhtml/system_config_backend_filename</backend_model>
-                            <sort_order>4</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <comment>Logging from Mage::logException(). File is located in {{base_dir}}/var/log. Allowed file extensions: log, txt, html, csv</comment>
-                            <depends><active>1</active></depends>
-                        </exception_file>
                     </fields>
                 </log>
                 <css translate="label">

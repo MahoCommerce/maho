@@ -300,8 +300,6 @@
             <log>
                 <active>0</active>
                 <max_level>7</max_level>
-                <file>system.log</file>
-                <exception_file>exception.log</exception_file>
             </log>
             <js>
                 <defer_mode>0</defer_mode>

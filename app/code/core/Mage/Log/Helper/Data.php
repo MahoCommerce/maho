@@ -27,10 +27,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_logLevel;
 
-    /**
-     * Allowed extensions that can be used to create a log file
-     */
-    private $_allowedFileExtensions = ['log', 'txt', 'html', 'csv'];
 
     /**
      * Logger instances
@@ -76,22 +72,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_NONE;
     }
 
-    /**
-     * Checking if file extensions is allowed. If passed then return true.
-     *
-     * @param string $file
-     * @return bool
-     */
-    public function isLogFileExtensionValid($file)
-    {
-        $result = false;
-        $validatedFileExtension = pathinfo($file, PATHINFO_EXTENSION);
-        if ($validatedFileExtension && in_array($validatedFileExtension, $this->_allowedFileExtensions)) {
-            $result = true;
-        }
-
-        return $result;
-    }
 
     public function log(mixed $message, Level|int|null $level = null, string $file = '', bool $forceLog = false): void
     {
@@ -106,9 +86,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             // Use backend configuration when no XML config present
             try {
                 $logActive = Mage::getStoreConfig('dev/log/active');
-                if (empty($file)) {
-                    $file = Mage::getStoreConfig('dev/log/file');
-                }
             } catch (Exception $e) {
                 $logActive = true;
             }
@@ -136,9 +113,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         if (empty($file)) {
-            $file = self::isLogConfigManagedByXml() ?
-                'system.log' :
-                (string) Mage::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE);
+            $file = 'system.log';
         } else {
             $file = basename($file);
         }
@@ -165,15 +140,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 
     protected function createLogger(string $file, Level|int $maxLogLevel, bool $forceLog): void
     {
-        // Validate file extension before save - use existing allowedFileExtensions logic
-        $_allowedFileExtensions = explode(
-            ',',
-            (string) Mage::getConfig()->getNode('dev/log/allowedFileExtensions', Mage_Core_Model_Store::DEFAULT_CODE),
-        );
-        if (!($extension = pathinfo($file, PATHINFO_EXTENSION)) || !in_array($extension, $_allowedFileExtensions)) {
-            return;
-        }
-
         $logDir = Mage::getBaseDir('var') . DS . 'log';
         $logFile = $logDir . DS . $file;
 
@@ -271,7 +237,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             $handler = $reflection->newInstanceArgs($args);
 
             // Apply custom formatter only to file-based handlers (not browser console)
-            if (method_exists($handler, 'setFormatter') && 
+            if (method_exists($handler, 'setFormatter') &&
                 !($handler instanceof \Monolog\Handler\BrowserConsoleHandler)) {
                 $handler->setFormatter(self::createMonologFormatter());
             }
