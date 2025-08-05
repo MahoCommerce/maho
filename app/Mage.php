@@ -20,14 +20,14 @@ final class Mage
     /**
      * Log level constants
      */
-    public const LOG_EMERGENCY = 0;
-    public const LOG_ALERT     = 1;
-    public const LOG_CRITICAL  = 2;
-    public const LOG_ERROR     = 3;
-    public const LOG_WARNING   = 4;
-    public const LOG_NOTICE    = 5;
-    public const LOG_INFO      = 6;
-    public const LOG_DEBUG     = 7;
+    public const LOG_EMERGENCY = Level::Emergency;
+    public const LOG_ALERT     = Level::Alert;
+    public const LOG_CRITICAL  = Level::Critical;
+    public const LOG_ERROR     = Level::Error;
+    public const LOG_WARNING   = Level::Warning;
+    public const LOG_NOTICE    = Level::Notice;
+    public const LOG_INFO      = Level::Info;
+    public const LOG_DEBUG     = Level::Debug;
 
     /**
      * @deprecated Use LOG_EMERGENCY instead
@@ -55,7 +55,6 @@ final class Mage
      * @var array
      */
     private static $_registry = [];
-
 
     /**
      * Application root absolute path
@@ -769,7 +768,7 @@ final class Mage
      * log facility (??)
      *
      * @param array|object|string $message
-     * @param int $level
+     * @param Level|int|null $level
      * @param string|null $file
      * @param bool $forceLog
      */
@@ -920,32 +919,4 @@ final class Mage
         return sodium_bin2hex(sodium_crypto_secretbox_keygen());
     }
 
-    public static function isLogConfigManagedByXml(): bool
-    {
-        $config = self::getConfig();
-        if (!$config) {
-            return false;
-        }
-
-        $handlers = $config->getNode('global/log/handlers');
-        return $handlers && $handlers->hasChildren();
-    }
-
-    /**
-     * Convert log level constants to Monolog Level objects
-     */
-    public static function convertLogLevel(int $level): Level
-    {
-        return match ($level) {
-            self::LOG_EMERGENCY => Level::Emergency,
-            self::LOG_ALERT => Level::Alert,
-            self::LOG_CRITICAL => Level::Critical,
-            self::LOG_ERROR => Level::Error,
-            self::LOG_WARNING => Level::Warning,
-            self::LOG_NOTICE => Level::Notice,
-            self::LOG_INFO => Level::Info,
-            self::LOG_DEBUG => Level::Debug,
-            default => Level::Debug,
-        };
-    }
 }

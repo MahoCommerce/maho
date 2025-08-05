@@ -93,10 +93,10 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         return $result;
     }
 
-    public function log(mixed $message, ?int $level = null, string $file = '', bool $forceLog = false): void
+    public function log(mixed $message, Level|int|null $level = null, string $file = '', bool $forceLog = false): void
     {
         // Check if XML log configuration exists - if so, bypass backend settings
-        if (Mage::isLogConfigManagedByXml()) {
+        if (self::isLogConfigManagedByXml()) {
             $logActive = true;
             $maxLogLevel = Mage::LOG_DEBUG; // XML handlers manage their own levels
             if (empty($file)) {
@@ -126,12 +126,17 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 
         $level ??= Mage::LOG_DEBUG;
 
-        if (!Mage::getIsDeveloperMode() && !Mage::isLogConfigManagedByXml() && $level > $maxLogLevel && !$forceLog) {
-            return;
+        if (!Mage::getIsDeveloperMode() && !self::isLogConfigManagedByXml() && !$forceLog) {
+            // Convert levels for comparison
+            $levelValue = self::convertLogLevel($level);
+            $maxLevelValue = self::convertLogLevel($maxLogLevel);
+            if ($levelValue->value > $maxLevelValue->value) {
+                return;
+            }
         }
 
         if (empty($file)) {
-            $file = Mage::isLogConfigManagedByXml() ?
+            $file = self::isLogConfigManagedByXml() ?
                 'system.log' :
                 (string) Mage::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE);
         } else {
@@ -151,14 +156,14 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         $message = str_replace('<?', '< ?', $message);
 
         // Convert log level and log the message
-        $monologLevel = Mage::convertLogLevel($level);
+        $monologLevel = self::convertLogLevel($level);
         self::$_loggers[$file]->log($monologLevel, $message);
 
         // Auto-flush BrowserConsoleHandler for immediate output
         $this->flushBrowserConsoleHandlers($file);
     }
 
-    protected function createLogger(string $file, int $maxLogLevel, bool $forceLog): void
+    protected function createLogger(string $file, Level|int $maxLogLevel, bool $forceLog): void
     {
         // Validate file extension before save - use existing allowedFileExtensions logic
         $_allowedFileExtensions = explode(
@@ -179,7 +184,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         $logger = new Logger(pathinfo($file, PATHINFO_FILENAME));
 
         // Convert old Zend_Log level to Monolog level for configuration
-        $configLevel = Mage::convertLogLevel($maxLogLevel);
+        $configLevel = self::convertLogLevel($maxLogLevel);
         if ($forceLog || Mage::getIsDeveloperMode()) {
             $configLevel = Level::Debug;
         }
@@ -419,5 +424,49 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
         return false;
+    }
+
+
+    /**
+     * Check if XML log configuration is managed by XML
+     */
+    public static function isLogConfigManagedByXml(): bool
+    {
+        $config = Mage::getConfig();
+        if (!$config) {
+            return false;
+        }
+
+        $handlers = $config->getNode('global/log/handlers');
+        return $handlers && $handlers->hasChildren();
+    }
+
+    /**
+     * Convert log level constants to Monolog Level objects
+     */
+    protected static function convertLogLevel(Level|int|null $level): Level
+    {
+        // If it's already a Level enum, return it
+        if ($level instanceof Level) {
+            return $level;
+        }
+
+        // Handle legacy integer values and null
+        if (is_int($level)) {
+            return match ($level) {
+                0 => Level::Emergency,
+                1 => Level::Alert,
+                2 => Level::Critical,
+                3 => Level::Error,
+                4 => Level::Warning,
+                5 => Level::Notice,
+                6 => Level::Info,
+                7 => Level::Debug,
+                default => Level::Debug,
+            };
+        }
+
+        // At this point, $level must be null (since we handled Level and int)
+        return Level::Debug;
     }
 }
