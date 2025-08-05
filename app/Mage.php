@@ -13,6 +13,7 @@
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Level;
 use Monolog\Logger;
+use Monolog\Formatter\LineFormatter;
 
 /**
  * Main Mage hub class
@@ -1054,14 +1055,18 @@ final class Mage
         $config = self::getConfig();
         if (!$config) {
             // Fallback to RotatingFileHandler if no config
-            $logger->pushHandler(new RotatingFileHandler($logFile, 14, $defaultLevel));
+            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
+            $handler->setFormatter(self::createLogFormatter());
+            $logger->pushHandler($handler);
             return;
         }
 
         $handlers = $config->getNode('global/log/handlers');
         if (!$handlers) {
             // Fallback to RotatingFileHandler if no handlers configured
-            $logger->pushHandler(new RotatingFileHandler($logFile, 14, $defaultLevel));
+            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
+            $handler->setFormatter(self::createLogFormatter());
+            $logger->pushHandler($handler);
             return;
         }
 
@@ -1078,7 +1083,9 @@ final class Mage
 
         // Always ensure at least one handler is active
         if (!$hasActiveHandler) {
-            $logger->pushHandler(new RotatingFileHandler($logFile, 14, $defaultLevel));
+            $handler = new RotatingFileHandler($logFile, 14, $defaultLevel);
+            $handler->setFormatter(self::createLogFormatter());
+            $logger->pushHandler($handler);
         }
     }
 
@@ -1113,7 +1120,15 @@ final class Mage
             }
 
             $args = self::buildConstructorArgs($constructor, $config, $logFile, $defaultLevel);
-            return $reflection->newInstanceArgs($args);
+            $handler = $reflection->newInstanceArgs($args);
+            
+            // Apply custom formatter to file-based handlers
+            if ($handler instanceof \Monolog\Handler\StreamHandler || 
+                $handler instanceof \Monolog\Handler\RotatingFileHandler) {
+                $handler->setFormatter(self::createLogFormatter());
+            }
+            
+            return $handler;
         } catch (Exception $e) {
             throw new Mage_Core_Exception(
                 sprintf(
@@ -1193,5 +1208,22 @@ final class Mage
             'array' => is_array($configValue) ? $configValue : [(string) $configValue],
             default => (string) $configValue,
         };
+    }
+
+    /**
+     * Create a custom log formatter that matches the old Zend_Log format
+     */
+    private static function createLogFormatter(): LineFormatter
+    {
+        // Format: timestamp level_name: message
+        $format = "%datetime% %level_name%: %message%\n";
+        $dateFormat = 'Y-m-d H:i:s';
+        
+        $formatter = new LineFormatter($format, $dateFormat);
+        
+        // Don't include context and extra data (removes the empty [] [])
+        $formatter->includeStacktraces(false);
+        
+        return $formatter;
     }
 }
