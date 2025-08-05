@@ -12727,12 +12727,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Decimal.php
 
 		-
-			message: '#^Argument of an invalid type hasOffsetValue\(string, mixed\) supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
-
-		-
 			message: '#^Binary operation "\-" between int and non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 2
