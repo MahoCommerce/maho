@@ -504,6 +504,213 @@ You can use any Monolog handler by specifying its full class name:
 </handlers>
 ```
 
+### Complex Handler Configurations
+
+#### Syslog with Custom Facility and Ident
+
+```xml
+<syslog_custom>
+    <class>Monolog\Handler\SyslogHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <ident>maho-store-prod</ident>
+        <facility>16</facility> <!-- LOG_LOCAL0 = 16 -->
+        <level>WARNING</level>
+        <logopts>3</logopts> <!-- LOG_CONS | LOG_PID = 3 -->
+    </params>
+</syslog_custom>
+```
+
+#### Slack with Advanced Configuration
+
+```xml
+<slack_advanced>
+    <class>Monolog\Handler\SlackWebhookHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
+        <channel>#critical-alerts</channel>
+        <username>Maho Production</username>
+        <useAttachment>true</useAttachment>
+        <iconEmoji>:rotating_light:</iconEmoji>
+        <level>CRITICAL</level>
+        <includeContextAndExtra>true</includeContextAndExtra>
+        <excludeFields>
+            <field>password</field>
+            <field>cc_number</field>
+        </excludeFields>
+    </params>
+</slack_advanced>
+```
+
+#### Email Handler with Multiple Recipients
+
+```xml
+<email_alerts>
+    <class>Monolog\Handler\NativeMailerHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <to>
+            <recipient>admin@example.com</recipient>
+            <recipient>ops-team@example.com</recipient>
+        </to>
+        <subject>[URGENT] Maho Store Critical Error</subject>
+        <from>noreply@example.com</from>
+        <level>CRITICAL</level>
+        <maxColumnWidth>80</maxColumnWidth>
+        <contentType>text/html</contentType>
+    </params>
+</email_alerts>
+```
+
+#### Rotating File Handler with Custom Filename Format
+
+```xml
+<rotating_custom>
+    <class>Monolog\Handler\RotatingFileHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <filename>var/log/maho.log</filename>
+        <maxFiles>7</maxFiles>
+        <level>INFO</level>
+        <filenameFormat>{filename}-{date}</filenameFormat>
+        <dateFormat>Y-m-d</dateFormat>
+    </params>
+</rotating_custom>
+```
+
+#### Telegram Bot Handler
+
+```xml
+<telegram_alerts>
+    <class>Monolog\Handler\TelegramBotHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <apiKey>YOUR_BOT_TOKEN</apiKey>
+        <channel>@your_channel_name</channel>
+        <level>ERROR</level>
+        <parseMode>HTML</parseMode>
+        <disableWebPagePreview>true</disableWebPagePreview>
+        <disableNotification>false</disableNotification>
+    </params>
+</telegram_alerts>
+```
+
+#### Error Log Handler with Custom Message Type
+
+```xml
+<system_error_log>
+    <class>Monolog\Handler\ErrorLogHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <messageType>3</messageType> <!-- 3 = append to file -->
+        <level>ERROR</level>
+        <expandNewlines>true</expandNewlines>
+    </params>
+</system_error_log>
+```
+
+### Performance-Optimized Configuration
+
+For high-traffic sites, use buffered handlers to reduce I/O operations:
+
+```xml
+<handlers>
+    <!-- Buffered file handler -->
+    <file_buffered>
+        <class>Monolog\Handler\BufferHandler</class>
+        <enabled>1</enabled>
+        <params>
+            <handler>
+                <class>Monolog\Handler\StreamHandler</class>
+                <params>
+                    <stream>var/log/system.log</stream>
+                    <level>INFO</level>
+                </params>
+            </handler>
+            <bufferLimit>100</bufferLimit>
+            <flushOnOverflow>true</flushOnOverflow>
+            <level>INFO</level>
+        </params>
+    </file_buffered>
+    
+    <!-- Group handler for critical alerts -->
+    <critical_group>
+        <class>Monolog\Handler\GroupHandler</class>
+        <enabled>1</enabled>
+        <params>
+            <handlers>
+                <slack>
+                    <class>Monolog\Handler\SlackWebhookHandler</class>
+                    <params>
+                        <webhookUrl>https://hooks.slack.com/services/YOUR/WEBHOOK/URL</webhookUrl>
+                        <channel>#critical</channel>
+                        <level>CRITICAL</level>
+                    </params>
+                </slack>
+                <email>
+                    <class>Monolog\Handler\NativeMailerHandler</class>
+                    <params>
+                        <to>oncall@example.com</to>
+                        <subject>CRITICAL ERROR</subject>
+                        <from>alerts@example.com</from>
+                        <level>CRITICAL</level>
+                    </params>
+                </email>
+            </handlers>
+            <bubble>true</bubble>
+        </params>
+    </critical_group>
+</handlers>
+```
+
+### Creating Custom Handlers
+
+You can create your own Monolog handler and use it in the configuration:
+
+```php
+// app/code/local/YourCompany/Log/Handler/CustomHandler.php
+namespace YourCompany\Log\Handler;
+
+use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Level;
+
+class CustomHandler extends AbstractProcessingHandler
+{
+    private string $apiEndpoint;
+    
+    public function __construct(string $apiEndpoint, $level = Level::Debug, bool $bubble = true)
+    {
+        $this->apiEndpoint = $apiEndpoint;
+        parent::__construct($level, $bubble);
+    }
+    
+    protected function write(array $record): void
+    {
+        // Send log to your custom API
+        $ch = curl_init($this->apiEndpoint);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($record));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_exec($ch);
+        curl_close($ch);
+    }
+}
+```
+
+Then use it in your configuration:
+
+```xml
+<custom_api>
+    <class>YourCompany\Log\Handler\CustomHandler</class>
+    <enabled>1</enabled>
+    <params>
+        <apiEndpoint>https://api.yourservice.com/logs</apiEndpoint>
+        <level>ERROR</level>
+    </params>
+</custom_api>
+```
+
 ## Migration from Zend_Log
 
 ### Automatic Migration
@@ -527,6 +734,65 @@ The system automatically handles the migration:
 | `Zend_Log::NOTICE` | `Mage::LOG_NOTICE` | 5 |
 | `Zend_Log::INFO` | `Mage::LOG_INFO` | 6 |
 | `Zend_Log::DEBUG` | `Mage::LOG_DEBUG` | 7 |
+
+### Upgrade Path
+
+#### Step 1: Update Your Code (Optional)
+While the old `Zend_Log` constants still work, you can update them:
+
+```php
+// Old way (still works)
+Mage::log('Error message', Zend_Log::ERR);
+
+// New way (recommended)
+Mage::log('Error message', Mage::LOG_ERR);
+```
+
+#### Step 2: Keep Using Admin Configuration
+If you're happy with simple file logging, no changes are needed. Your existing configuration in Admin Panel → System → Configuration → Advanced → Developer → Log Settings continues to work.
+
+#### Step 3: Migrate to Advanced XML Configuration (Optional)
+To use advanced features like Slack notifications or multiple handlers:
+
+1. Add log configuration to `app/etc/local.xml`:
+```xml
+<config>
+    <global>
+        <log>
+            <handlers>
+                <!-- Your existing file logging -->
+                <file>
+                    <class>Monolog\Handler\StreamHandler</class>
+                    <enabled>1</enabled>
+                    <params>
+                        <level>DEBUG</level>
+                    </params>
+                </file>
+                <!-- Add new handlers as needed -->
+            </handlers>
+        </log>
+    </global>
+</config>
+```
+
+2. Once XML configuration is added, the admin panel logging section will be hidden automatically.
+
+#### Step 4: Test Your Configuration
+```php
+// Test different log levels
+Mage::log('Debug message', Mage::LOG_DEBUG);
+Mage::log('Info message', Mage::LOG_INFO);
+Mage::log('Warning message', Mage::LOG_WARN);
+Mage::log('Error message', Mage::LOG_ERR);
+Mage::log('Critical message', Mage::LOG_CRIT);
+
+// Test exception logging
+try {
+    throw new Exception('Test exception');
+} catch (Exception $e) {
+    Mage::logException($e);
+}
+```
 
 ## Best Practices
 
