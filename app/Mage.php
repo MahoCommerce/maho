@@ -10,11 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Monolog\Handler\RotatingFileHandler;
-use Monolog\Handler\StreamHandler;
 use Monolog\Level;
-use Monolog\Logger;
-use Monolog\Formatter\LineFormatter;
 
 /**
  * Main Mage hub class
@@ -60,12 +56,6 @@ final class Mage
      */
     private static $_registry = [];
 
-    /**
-     * Logger instances
-     *
-     * @var array<string, Logger>
-     */
-    private static $_loggers = [];
 
     /**
      * Application root absolute path
@@ -939,22 +929,6 @@ final class Mage
 
         $handlers = $config->getNode('global/log/handlers');
         return $handlers && $handlers->hasChildren();
-    }
-
-    /**
-     * Get logger instances array
-     */
-    public static function getLoggers(): array
-    {
-        return self::$_loggers;
-    }
-
-    /**
-     * Set logger instance
-     */
-    public static function setLogger(string $file, Logger $logger): void
-    {
-        self::$_loggers[$file] = $logger;
     }
 
     /**

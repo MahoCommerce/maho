@@ -33,6 +33,11 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     private $_allowedFileExtensions = ['log', 'txt', 'html', 'csv'];
 
     /**
+     * Logger instances
+     */
+    private static array $_loggers = [];
+
+    /**
      * Mage_Log_Helper_Data constructor.
      */
     public function __construct(array $data = [])
@@ -134,8 +139,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         // Get or create logger
-        $loggers = Mage::getLoggers();
-        if (!isset($loggers[$file])) {
+        if (!isset(self::$_loggers[$file])) {
             $this->createLogger($file, $maxLogLevel, $forceLog);
         }
 
@@ -148,8 +152,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 
         // Convert log level and log the message
         $monologLevel = Mage::convertLogLevel($level);
-        $loggers = Mage::getLoggers(); // Get fresh reference
-        $loggers[$file]->log($monologLevel, $message);
+        self::$_loggers[$file]->log($monologLevel, $message);
 
         // Auto-flush BrowserConsoleHandler for immediate output
         $this->flushBrowserConsoleHandlers($file);
@@ -184,7 +187,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
         // Add configured handlers
         static::addConfiguredHandlers($logger, $logFile, $configLevel);
 
-        Mage::setLogger($file, $logger);
+        self::$_loggers[$file] = $logger;
 
         // Set file permissions (only for non-rotating handlers)
         if (!static::isRotatingFileHandler($logger) && !file_exists($logFile)) {
@@ -394,12 +397,11 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected function flushBrowserConsoleHandlers(string $file): void
     {
-        $loggers = Mage::getLoggers();
-        if (!isset($loggers[$file])) {
+        if (!isset(self::$_loggers[$file])) {
             return;
         }
 
-        foreach ($loggers[$file]->getHandlers() as $handler) {
+        foreach (self::$_loggers[$file]->getHandlers() as $handler) {
             if ($handler instanceof \Monolog\Handler\BrowserConsoleHandler) {
                 $handler->send();
             }
