@@ -10,9 +10,9 @@
 
 /** @var Maho_SpeculationRules_Block_Script $this */
 $speculationRulesJson = $this->getSpeculationRulesJson();
-
-if (!empty($speculationRulesJson)): ?>
+?>
+<?php if ($speculationRulesJson): ?>
 <script type="speculationrules">
-<?php echo $speculationRulesJson; ?>
+    <?= $speculationRulesJson ?>
 </script>
 <?php endif; ?>
