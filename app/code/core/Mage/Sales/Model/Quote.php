@@ -398,8 +398,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                             $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
                             if (file_exists($filePath) && is_file($filePath)) {
                                 @unlink($filePath);
-                                // Log successful deletion for audit trail
-                                Mage::log('Deleted custom option file: ' . $optionValue['quote_path'], Zend_Log::INFO, 'custom_options_cleanup.log', true);
                             }
                         }
                     } catch (Exception $e) {

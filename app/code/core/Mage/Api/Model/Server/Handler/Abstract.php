@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,7 +28,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
      */
     public function handlePhpError($errorCode, $errorMessage, $errorFile, $errLine)
     {
-        Mage::log($errorMessage . ' in ' . $errorFile . ' on line ' . $errLine, Zend_Log::ERR);
+        Mage::log($errorMessage . ' in ' . $errorFile . ' on line ' . $errLine, Mage::LOG_ERROR);
         if (in_array($errorCode, [E_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR])) {
             $this->_fault('internal');
         }
