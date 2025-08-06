@@ -30,10 +30,6 @@
  */
 class Mage_Core_Model_File_Validator_AvailablePath
 {
-    public string $protectedPathMessage = 'Path "{{ value }}" is protected and cannot be used.';
-    public string $notAvailablePathMessage = 'Path "{{ value }}" is not available and cannot be used.';
-    public string $protectedLfiMessage = 'Path "{{ value }}" may not include parent directory traversal ("../", "..\").';
-
     public array $protectedPaths = [];
     public array $availablePaths = [];
 
@@ -45,20 +41,14 @@ class Mage_Core_Model_File_Validator_AvailablePath
         mixed $payload = null,
         ?array $protectedPaths = null,
         ?array $availablePaths = null,
-        ?string $protectedPathMessage = null,
-        ?string $notAvailablePathMessage = null,
-        ?string $protectedLfiMessage = null,
     ) {
         // Symfony constraint compatibility parameters (unused but kept for backward compatibility)
         unset($options, $groups, $payload);
         $this->protectedPaths = $protectedPaths ?? $this->protectedPaths;
         $this->availablePaths = $availablePaths ?? $this->availablePaths;
-        $this->protectedPathMessage = $protectedPathMessage ?? $this->protectedPathMessage;
-        $this->notAvailablePathMessage = $notAvailablePathMessage ?? $this->notAvailablePathMessage;
-        $this->protectedLfiMessage = $protectedLfiMessage ?? $this->protectedLfiMessage;
     }
 
-    public function validate(mixed $value): bool
+    public function isValid(mixed $value): bool
     {
         $this->_messages = [];
 
@@ -67,19 +57,19 @@ class Mage_Core_Model_File_Validator_AvailablePath
         }
 
         if (!is_string($value)) {
-            $this->_messages[] = 'Value must be a string';
+            $this->_messages[] = Mage::helper('core')->__('Value must be a string.');
             return false;
         }
 
         $value = trim($value);
 
         if (!$this->availablePaths && !$this->protectedPaths) {
-            $this->_messages[] = 'Please set available and/or protected paths list(s) before validation.';
+            $this->_messages[] = Mage::helper('core')->__('Please set available and/or protected paths list(s) before validation.');
             return false;
         }
 
         if (preg_match('#\\..[\\\\/]#', $value)) {
-            $this->_messages[] = str_replace('{{ value }}', $value, $this->protectedLfiMessage);
+            $this->_messages[] = Mage::helper('core')->__('Path "%s" may not include parent directory traversal ("../", "..\").', $value);
             return false;
         }
 
@@ -90,7 +80,7 @@ class Mage_Core_Model_File_Validator_AvailablePath
         $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
 
         if (in_array($fileNameExtension, $protectedExtensions)) {
-            $this->_messages[] = str_replace('{{ value }}', $value, $this->notAvailablePathMessage);
+            $this->_messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 
@@ -99,12 +89,12 @@ class Mage_Core_Model_File_Validator_AvailablePath
         }
 
         if ($this->protectedPaths && !$this->_isValidByPaths($valuePathInfo, $this->protectedPaths, true)) {
-            $this->_messages[] = str_replace('{{ value }}', $value, $this->protectedPathMessage);
+            $this->_messages[] = Mage::helper('core')->__('Path "%s" is protected and cannot be used.', $value);
             return false;
         }
 
         if ($this->availablePaths && !$this->_isValidByPaths($valuePathInfo, $this->availablePaths, false)) {
-            $this->_messages[] = str_replace('{{ value }}', $value, $this->notAvailablePathMessage);
+            $this->_messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 
@@ -119,11 +109,6 @@ class Mage_Core_Model_File_Validator_AvailablePath
     public function getMessage(): string
     {
         return !empty($this->_messages) ? $this->_messages[0] : '';
-    }
-
-    public function isValid(mixed $value): bool
-    {
-        return $this->validate($value);
     }
 
     public function setProtectedPaths(array $protectedPaths): self
