@@ -12,11 +12,11 @@
 
 class Mage_Core_Model_Layout_Validator
 {
-    public string $invalidXmlMessage = 'XML data is invalid.';
-    public string $invalidTemplatePathMessage = 'Invalid template path used in layout update.';
-    public string $invalidBlockNameMessage = 'Disallowed block name for frontend.';
-    public string $protectedHelperMessage = 'Helper attributes should not be used in custom layout updates.';
-    public string $invalidXmlObjectMessage = 'XML object is not instance of "Varien_Simplexml_Element".';
+    public string $invalidXmlMessage;
+    public string $invalidTemplatePathMessage;
+    public string $invalidBlockNameMessage;
+    public string $protectedHelperMessage;
+    public string $invalidXmlObjectMessage;
 
     public array $disallowedBlocks = [];
     public array $protectedExpressions = [];
@@ -25,9 +25,6 @@ class Mage_Core_Model_Layout_Validator
     private array $_messages = [];
 
     public function __construct(
-        mixed $options = null,
-        ?array $groups = null,
-        mixed $payload = null,
         ?array $disallowedBlocks = null,
         ?array $protectedExpressions = null,
         ?array $disallowedXPathExpressions = null,
@@ -37,19 +34,17 @@ class Mage_Core_Model_Layout_Validator
         ?string $protectedHelperMessage = null,
         ?string $invalidXmlObjectMessage = null,
     ) {
-        // Symfony constraint compatibility parameters (unused but kept for backward compatibility)
-        unset($options, $groups, $payload);
         $this->disallowedBlocks = $disallowedBlocks ?? $this->_getDefaultDisallowedBlocks();
         $this->protectedExpressions = $protectedExpressions ?? $this->_getDefaultProtectedExpressions();
         $this->disallowedXPathExpressions = $disallowedXPathExpressions ?? $this->_getDefaultDisallowedXPathExpressions();
-        $this->invalidXmlMessage = $invalidXmlMessage ?? $this->invalidXmlMessage;
-        $this->invalidTemplatePathMessage = $invalidTemplatePathMessage ?? $this->invalidTemplatePathMessage;
-        $this->invalidBlockNameMessage = $invalidBlockNameMessage ?? $this->invalidBlockNameMessage;
-        $this->protectedHelperMessage = $protectedHelperMessage ?? $this->protectedHelperMessage;
-        $this->invalidXmlObjectMessage = $invalidXmlObjectMessage ?? $this->invalidXmlObjectMessage;
+        $this->invalidXmlMessage = $invalidXmlMessage ?? Mage::helper('core')->__('XML data is invalid.');
+        $this->invalidTemplatePathMessage = $invalidTemplatePathMessage ?? Mage::helper('core')->__('Invalid template path used in layout update.');
+        $this->invalidBlockNameMessage = $invalidBlockNameMessage ?? Mage::helper('core')->__('Disallowed block name for frontend.');
+        $this->protectedHelperMessage = $protectedHelperMessage ?? Mage::helper('core')->__('Helper attributes should not be used in custom layout updates.');
+        $this->invalidXmlObjectMessage = $invalidXmlObjectMessage ?? Mage::helper('core')->__('XML object is not instance of "Varien_Simplexml_Element".');
     }
 
-    public function validate(mixed $value): bool
+    public function isValid(mixed $value): bool
     {
         $this->_messages = [];
 
@@ -95,30 +90,6 @@ class Mage_Core_Model_Layout_Validator
                 $this->_messages[] = $this->protectedHelperMessage;
                 return false;
             }
-        }
-
-        return true;
-    }
-
-    public function isValid(mixed $value): bool
-    {
-        $this->_messages = [];
-
-        // Basic XML validation
-        if (empty($value)) {
-            $this->_messages[] = $this->invalidXmlMessage;
-            return false;
-        }
-
-        // Check if it's valid XML
-        libxml_use_internal_errors(true);
-        $doc = simplexml_load_string($value);
-        $errors = libxml_get_errors();
-        libxml_clear_errors();
-
-        if ($doc === false || !empty($errors)) {
-            $this->_messages[] = $this->invalidXmlMessage;
-            return false;
         }
 
         return true;

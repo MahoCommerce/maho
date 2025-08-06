@@ -27,7 +27,9 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         $dateFrom = $object->getDateFrom();
         $dateTo = $object->getDateTo();
         if (!empty($dateFrom) && !empty($dateTo)) {
-            if (!$this->_isValidDate($dateFrom) || !$this->_isValidDate($dateTo)) {
+            $helper = Mage::helper('core');
+            if ((!$helper->isValidDate($dateFrom) && !$helper->isValidDateTime($dateFrom)) ||
+                (!$helper->isValidDate($dateTo) && !$helper->isValidDateTime($dateTo))) {
                 Mage::throwException(Mage::helper('core')->__('Invalid date'));
             }
             if (strtotime($dateFrom) > strtotime($dateTo)) {
@@ -49,18 +51,6 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         }
 
         return parent::_beforeSave($object);
-    }
-
-    /**
-     * Validate date string
-     *
-     * @param string $date
-     * @return bool
-     */
-    protected function _isValidDate($date)
-    {
-        return DateTime::createFromFormat('Y-m-d', $date) !== false ||
-               DateTime::createFromFormat('Y-m-d H:i:s', $date) !== false;
     }
 
     /**

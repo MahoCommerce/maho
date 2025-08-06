@@ -1223,6 +1223,15 @@ XML;
     }
 
     /**
+     * Check if datetime format is valid using Symfony DateTime constraint
+     */
+    public function isValidDateTime(string $datetime): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($datetime, new Assert\DateTime());
+        return count($violations) === 0;
+    }
+
+    /**
      * Generic validation method that returns boolean result using Symfony constraints
      */
     public function isValid(mixed $value, mixed $constraint): bool
