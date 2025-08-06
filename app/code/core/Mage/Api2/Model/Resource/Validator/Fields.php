@@ -39,13 +39,17 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
      */
     protected $_requiredFields = [];
 
-    public function __construct()
+    public function __construct($options)
     {
-        // Get validation config from resource if it exists
-        $validationConfig = [];
-        if ($this->_resource && method_exists($this->_resource, 'getValidationConfig')) {
-            $validationConfig = $this->_resource->getValidationConfig(self::CONFIG_NODE_KEY);
+        if (!isset($options['resource']) || !$options['resource'] instanceof Mage_Api2_Model_Resource) {
+            throw new Exception("Passed parameter 'resource' is wrong.");
         }
+        $this->_resource = $options['resource'];
+
+        $validationConfig = $this->_resource->getConfig()->getValidationConfig(
+            $this->_resource->getResourceType(),
+            self::CONFIG_NODE_KEY,
+        );
         if (!is_array($validationConfig)) {
             $validationConfig = [];
         }
