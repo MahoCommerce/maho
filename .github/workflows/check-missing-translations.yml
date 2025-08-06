@@ -30,12 +30,9 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
-    - name: Fetch base branch
-      run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
-
     - name: Check for missing translations
       run: |
-        output=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | ./maho translations:missing)
+        output=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | ./maho translations:missing)
 
         if [ -n "$output" ]; then
           echo "❌ Found missing translations in changed files:"
