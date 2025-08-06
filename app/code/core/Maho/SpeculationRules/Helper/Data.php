@@ -23,10 +23,8 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Check if speculation rules are enabled
-     *
-     * @param int|string|null $store
      */
-    public function isEnabled($store = null): bool
+    public function isEnabled(int|string|null $store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_ENABLED, $store);
     }
@@ -34,10 +32,9 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get speculation rules configuration
      *
-     * @param int|string|null $store
      * @return array<string, array<int, array{where: array{selector_matches: string}, eagerness: string}>>
      */
-    public function getSpeculationRules($store = null): array
+    public function getSpeculationRules(int|string|null $store = null): array
     {
         if (!$this->isEnabled($store)) {
             return [];
@@ -89,10 +86,8 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Generate speculation rules JSON
-     *
-     * @param int|string|null $store
      */
-    public function generateSpeculationRulesJson($store = null): string
+    public function generateSpeculationRulesJson(int|string|null $store = null): string
     {
         $rules = $this->getSpeculationRules($store);
 
