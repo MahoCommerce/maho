@@ -39,6 +39,15 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
      */
     protected $_requiredFields = [];
 
+    /**
+     * Construct. Set all depends.
+     *
+     * Required parameteres for options:
+     * - resource
+     *
+     * @param array $options
+     * @throws Exception If passed parameter 'resource' is wrong
+     */
     public function __construct($options)
     {
         if (!isset($options['resource']) || !$options['resource'] instanceof Mage_Api2_Model_Resource) {
@@ -91,8 +100,8 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     }
 
     /**
-     * Validate a value using Maho_Validator
-     * Converts validation types to Maho_Validator calls
+     * Validate a value
+     * Converts validation types to Core Helper validation calls
      *
      * @param mixed $value
      * @param string $type
