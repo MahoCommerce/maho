@@ -442,40 +442,40 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     protected function _basicCheck()
     {
         // Validate first name
-        if (!Mage::helper('core')->validateNotBlank($this->getFirstname())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getFirstname())) {
             $this->addError(Mage::helper('customer')->__('Please enter the first name.'));
         }
 
         // Validate last name
-        if (!Mage::helper('core')->validateNotBlank($this->getLastname())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getLastname())) {
             $this->addError(Mage::helper('customer')->__('Please enter the last name.'));
         }
 
         // Validate street
-        if (!Mage::helper('core')->validateNotBlank($this->getStreet(1))) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getStreet(1))) {
             $this->addError(Mage::helper('customer')->__('Please enter the street.'));
         }
 
         // Validate city
-        if (!Mage::helper('core')->validateNotBlank($this->getCity())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getCity())) {
             $this->addError(Mage::helper('customer')->__('Please enter the city.'));
         }
 
         // Validate telephone
-        if (!Mage::helper('core')->validateNotBlank($this->getTelephone())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getTelephone())) {
             $this->addError(Mage::helper('customer')->__('Please enter the telephone number.'));
         }
 
         // Validate postcode
         $havingOptionalZip = Mage::helper('directory')->getCountriesWithOptionalZip();
         if (!in_array($this->getCountryId(), $havingOptionalZip)) {
-            if (!Mage::helper('core')->validateNotBlank($this->getPostcode())) {
+            if (!Mage::helper('core')->isValidNotBlank($this->getPostcode())) {
                 $this->addError(Mage::helper('customer')->__('Please enter the zip/postal code.'));
             }
         }
 
         // Validate country
-        if (!Mage::helper('core')->validateNotBlank($this->getCountryId())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getCountryId())) {
             $this->addError(Mage::helper('customer')->__('Please enter the country.'));
         }
 
@@ -483,7 +483,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         if ($this->getCountryModel()->getRegionCollection()->getSize()
             && Mage::helper('directory')->isRegionRequired($this->getCountryId())
         ) {
-            if (!Mage::helper('core')->validateNotBlank($this->getRegionId())) {
+            if (!Mage::helper('core')->isValidNotBlank($this->getRegionId())) {
                 $this->addError(Mage::helper('customer')->__('Please enter the state/province.'));
             }
         }

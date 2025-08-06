@@ -40,7 +40,7 @@ class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
         $errors = [];
 
         // Validate block name not empty
-        if (!Mage::helper('core')->validateNotBlank($this->getBlockName())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getBlockName())) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is required field.');
         }
 
@@ -50,7 +50,7 @@ class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
         }
 
         // Validate block name format
-        if (!Mage::helper('core')->validateRegex($this->getBlockName(), '/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/')) {
+        if (!Mage::helper('core')->isValidRegex($this->getBlockName(), '/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/')) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is incorrect.');
         }
 

@@ -735,7 +735,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            if (!Mage::helper('core')->validateEmail($email)) {
+            if (!Mage::helper('core')->isValidEmail($email)) {
                 $this->_getSession()->setForgottenEmail($email);
                 $this->_getSession()->addError($this->__('Invalid email address.'));
                 $this->_redirect('*/*/forgotpassword');

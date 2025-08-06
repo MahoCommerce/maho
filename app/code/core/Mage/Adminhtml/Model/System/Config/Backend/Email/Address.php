@@ -16,7 +16,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Email_Address extends Mage_Core
     protected function _beforeSave()
     {
         $value = $this->getValue();
-        if (!Mage::helper('core')->validateEmail($value)) {
+        if (!Mage::helper('core')->isValidEmail($value)) {
             Mage::throwException(Mage::helper('adminhtml')->__('Invalid email address "%s".', $value));
         }
         return $this;

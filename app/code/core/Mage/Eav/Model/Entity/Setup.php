@@ -638,7 +638,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
         $attributeCodeMaxLength = Mage_Eav_Model_Entity_Attribute::ATTRIBUTE_CODE_MAX_LENGTH;
 
         if (isset($data['attribute_code'])) {
-            if (!Mage::helper('core')->validateLength($data['attribute_code'], null, $attributeCodeMaxLength)) {
+            if (!Mage::helper('core')->isValidLength($data['attribute_code'], null, $attributeCodeMaxLength)) {
                 throw Mage::exception(
                     'Mage_Eav',
                     Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', $attributeCodeMaxLength),

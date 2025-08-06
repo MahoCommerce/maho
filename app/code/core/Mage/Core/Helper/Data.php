@@ -1060,21 +1060,6 @@ XML;
         return strip_tags((string) $value, $allowedTags);
     }
 
-    /**
-     * Check if value is a valid email address format
-     */
-    public function isValidEmail(mixed $value): bool
-    {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
-    }
-
-    /**
-     * Check if value is a valid URL format
-     */
-    public function isValidUrl(mixed $value): bool
-    {
-        return filter_var($value, FILTER_VALIDATE_URL) !== false;
-    }
 
     /**
      * Check if value is a valid IP address (IPv4 or IPv6)
@@ -1158,36 +1143,36 @@ XML;
     }
 
     /**
-     * Validate email address using Symfony Email constraint
+     * Check if email address is valid using Symfony Email constraint
      */
-    public function validateEmail(#[\SensitiveParameter] string $email): bool
+    public function isValidEmail(#[\SensitiveParameter] mixed $value): bool
     {
-        $violations = $this->getSymfonyValidator()->validate($email, new Assert\Email());
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Email());
         return count($violations) === 0;
     }
 
     /**
-     * Validate that value is not blank using Symfony NotBlank constraint
+     * Check if value is not blank using Symfony NotBlank constraint
      */
-    public function validateNotBlank(mixed $value): bool
+    public function isValidNotBlank(mixed $value): bool
     {
         $violations = $this->getSymfonyValidator()->validate($value, new Assert\NotBlank());
         return count($violations) === 0;
     }
 
     /**
-     * Validate string against regex pattern using Symfony Regex constraint
+     * Check if string matches regex pattern using Symfony Regex constraint
      */
-    public function validateRegex(string $value, string $pattern): bool
+    public function isValidRegex(string $value, string $pattern): bool
     {
         $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(['pattern' => $pattern]));
         return count($violations) === 0;
     }
 
     /**
-     * Validate string length using Symfony Length constraint
+     * Check if string length is valid using Symfony Length constraint
      */
-    public function validateLength(string $value, ?int $min = null, ?int $max = null): bool
+    public function isValidLength(string $value, ?int $min = null, ?int $max = null): bool
     {
         $options = [];
         if ($min !== null) {
@@ -1202,9 +1187,9 @@ XML;
     }
 
     /**
-     * Validate numeric range using Symfony Range constraint
+     * Check if numeric value is in valid range using Symfony Range constraint
      */
-    public function validateRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
+    public function isValidRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
     {
         $options = [];
         if ($min !== null) {
@@ -1219,27 +1204,37 @@ XML;
     }
 
     /**
-     * Validate URL format using Symfony Url constraint
+     * Check if URL format is valid using Symfony Url constraint
      */
-    public function validateUrl(string $url): bool
+    public function isValidUrl(mixed $value): bool
     {
-        $violations = $this->getSymfonyValidator()->validate($url, new Assert\Url());
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
         return count($violations) === 0;
     }
 
+
     /**
-     * Validate date format using Symfony Date constraint
+     * Check if date format is valid using Symfony Date constraint
      */
-    public function validateDate(string $date): bool
+    public function isValidDate(string $date): bool
     {
         $violations = $this->getSymfonyValidator()->validate($date, new Assert\Date());
         return count($violations) === 0;
     }
 
     /**
-     * Generic validation method that returns validation messages
+     * Generic validation method that returns boolean result using Symfony constraints
      */
-    public function validate(mixed $value, mixed $constraint): array
+    public function isValid(mixed $value, mixed $constraint): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
+        return count($violations) === 0;
+    }
+
+    /**
+     * Generic validation method that returns validation messages using Symfony constraints
+     */
+    public function getValidationMessages(mixed $value, mixed $constraint): array
     {
         $violations = $this->getSymfonyValidator()->validate($value, $constraint);
         $messages = [];
@@ -1249,14 +1244,5 @@ XML;
         }
 
         return $messages;
-    }
-
-    /**
-     * Generic validation method that returns boolean result
-     */
-    public function isValid(mixed $value, mixed $constraint): bool
-    {
-        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
-        return count($violations) === 0;
     }
 }

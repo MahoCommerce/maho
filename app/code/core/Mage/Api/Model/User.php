@@ -365,19 +365,19 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
     {
         $errors = new ArrayObject();
 
-        if (!Mage::helper('core')->validateNotBlank($this->getUsername())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getUsername())) {
             $errors->append(Mage::helper('api')->__('User Name is required field.'));
         }
 
-        if (!Mage::helper('core')->validateNotBlank($this->getFirstname())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getFirstname())) {
             $errors->append(Mage::helper('api')->__('First Name is required field.'));
         }
 
-        if (!Mage::helper('core')->validateNotBlank($this->getLastname())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getLastname())) {
             $errors->append(Mage::helper('api')->__('Last Name is required field.'));
         }
 
-        if (!Mage::helper('core')->validateEmail($this->getEmail())) {
+        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
             $errors->append(Mage::helper('api')->__('Please enter a valid email.'));
         }
 

@@ -100,24 +100,24 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     {
         $coreHelper = Mage::helper('core');
         return match ($type) {
-            'NotEmpty', 'NotBlank' => $coreHelper->validateNotBlank($value),
-            'Email', 'EmailAddress' => $coreHelper->validateEmail($value),
-            'Regex' => $coreHelper->validateRegex($value, $options['pattern'] ?? '/.*/'),
-            'Length', 'StringLength' => $coreHelper->validateLength(
+            'NotEmpty', 'NotBlank' => $coreHelper->isValidNotBlank($value),
+            'Email', 'EmailAddress' => $coreHelper->isValidEmail($value),
+            'Regex' => $coreHelper->isValidRegex($value, $options['pattern'] ?? '/.*/'),
+            'Length', 'StringLength' => $coreHelper->isValidLength(
                 $value,
                 $options['min'] ?? 0,
                 $options['max'] ?? PHP_INT_MAX,
             ),
-            'Range', 'Between' => $coreHelper->validateRange(
+            'Range', 'Between' => $coreHelper->isValidRange(
                 $value,
                 $options['min'] ?? PHP_INT_MIN,
                 $options['max'] ?? PHP_INT_MAX,
             ),
-            'Url' => $coreHelper->validateUrl($value),
-            'Date' => $coreHelper->validateDate($value),
-            'Digits' => $coreHelper->validateRegex($value, '/^\d+$/'),
-            'Alnum' => $coreHelper->validateRegex($value, '/^[a-zA-Z0-9]+$/'),
-            'Alpha' => $coreHelper->validateRegex($value, '/^[a-zA-Z]+$/'),
+            'Url' => $coreHelper->isValidUrl($value),
+            'Date' => $coreHelper->isValidDate($value),
+            'Digits' => $coreHelper->isValidRegex($value, '/^\d+$/'),
+            'Alnum' => $coreHelper->isValidRegex($value, '/^[a-zA-Z0-9]+$/'),
+            'Alpha' => $coreHelper->isValidRegex($value, '/^[a-zA-Z]+$/'),
             default => throw new Exception("Unsupported validator type: {$type}"),
         };
     }
@@ -139,7 +139,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
         if (!$isPartial && count($this->_requiredFields) > 0) {
             foreach ($this->_requiredFields as $requiredField) {
                 $value = $data[$requiredField] ?? null;
-                if (!Mage::helper('core')->validateNotBlank($value)) {
+                if (!Mage::helper('core')->isValidNotBlank($value)) {
                     $isValid = false;
                     $this->_addError(sprintf('%s: This value should not be blank.', $requiredField));
                 }
