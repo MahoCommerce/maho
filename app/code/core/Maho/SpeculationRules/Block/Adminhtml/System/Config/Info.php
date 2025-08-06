@@ -70,16 +70,6 @@ class Maho_SpeculationRules_Block_Adminhtml_System_Config_Info extends Mage_Admi
             </tr>
         </table>
     </div>
-
-    <div style="background:#e7f3ff; border-left:4px solid #0066cc; padding:10px; margin-top:15px;">
-        <strong>💡 Pro Tips:</strong>
-        <ul style="margin:5px 0 0 0; padding-left:20px;list-style: disc;">
-            <li>Start with Conservative mode and monitor performance</li>
-            <li>Use browser DevTools Network tab to see prefetch requests</li>
-            <li>Avoid using Prerender for user-specific pages (cart, account)</li>
-            <li>Test on actual devices - mobile may have different behavior</li>
-        </ul>
-    </div>
 </div>';
     }
 }
