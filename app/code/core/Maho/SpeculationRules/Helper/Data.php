@@ -14,12 +14,12 @@ declare(strict_types=1);
 class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ENABLED = 'dev/speculation_rules/enabled';
-    public const XML_PATH_EAGER_MODE = 'dev/speculation_rules/eager_mode';
-    public const XML_PATH_EAGER_SELECTORS = 'dev/speculation_rules/eager_selectors';
-    public const XML_PATH_MODERATE_MODE = 'dev/speculation_rules/moderate_mode';
-    public const XML_PATH_MODERATE_SELECTORS = 'dev/speculation_rules/moderate_selectors';
-    public const XML_PATH_CONSERVATIVE_MODE = 'dev/speculation_rules/conservative_mode';
-    public const XML_PATH_CONSERVATIVE_SELECTORS = 'dev/speculation_rules/conservative_selectors';
+    public const XML_PATH_EAGER_PREFETCH_SELECTORS = 'dev/speculation_rules/eager_prefetch_selectors';
+    public const XML_PATH_EAGER_PRERENDER_SELECTORS = 'dev/speculation_rules/eager_prerender_selectors';
+    public const XML_PATH_MODERATE_PREFETCH_SELECTORS = 'dev/speculation_rules/moderate_prefetch_selectors';
+    public const XML_PATH_MODERATE_PRERENDER_SELECTORS = 'dev/speculation_rules/moderate_prerender_selectors';
+    public const XML_PATH_CONSERVATIVE_PREFETCH_SELECTORS = 'dev/speculation_rules/conservative_prefetch_selectors';
+    public const XML_PATH_CONSERVATIVE_PRERENDER_SELECTORS = 'dev/speculation_rules/conservative_prerender_selectors';
 
     /**
      * Check if speculation rules are enabled
@@ -45,13 +45,19 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
             'prerender' => [],
         ];
 
-        // Process each eagerness level
-        /** @var array<int, string> $eagernessLevels */
-        $eagernessLevels = ['eager', 'moderate', 'conservative'];
+        // Process each eagerness level and mode combination
+        /** @var array<int, array{eagerness: string, mode: string, path: string}> $configurations */
+        $configurations = [
+            ['eagerness' => 'eager', 'mode' => 'prefetch', 'path' => self::XML_PATH_EAGER_PREFETCH_SELECTORS],
+            ['eagerness' => 'eager', 'mode' => 'prerender', 'path' => self::XML_PATH_EAGER_PRERENDER_SELECTORS],
+            ['eagerness' => 'moderate', 'mode' => 'prefetch', 'path' => self::XML_PATH_MODERATE_PREFETCH_SELECTORS],
+            ['eagerness' => 'moderate', 'mode' => 'prerender', 'path' => self::XML_PATH_MODERATE_PRERENDER_SELECTORS],
+            ['eagerness' => 'conservative', 'mode' => 'prefetch', 'path' => self::XML_PATH_CONSERVATIVE_PREFETCH_SELECTORS],
+            ['eagerness' => 'conservative', 'mode' => 'prerender', 'path' => self::XML_PATH_CONSERVATIVE_PRERENDER_SELECTORS],
+        ];
 
-        foreach ($eagernessLevels as $eagerness) {
-            $mode = (string) Mage::getStoreConfig("dev/speculation_rules/{$eagerness}_mode", $store);
-            $selectorsConfig = (string) Mage::getStoreConfig("dev/speculation_rules/{$eagerness}_selectors", $store);
+        foreach ($configurations as $config) {
+            $selectorsConfig = (string) Mage::getStoreConfig($config['path'], $store);
 
             if (empty($selectorsConfig)) {
                 continue;
@@ -68,11 +74,11 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
             // Create rule for each selector
             foreach ($selectors as $selector) {
                 if (!empty($selector)) {
-                    $rules[$mode][] = [
+                    $rules[$config['mode']][] = [
                         'where' => [
                             'selector_matches' => $selector,
                         ],
-                        'eagerness' => $eagerness,
+                        'eagerness' => $config['eagerness'],
                     ];
                 }
             }

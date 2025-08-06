@@ -44,12 +44,12 @@
         <dev>
             <speculation_rules>
                 <enabled>0</enabled>
-                <eager_mode>prefetch</eager_mode>
-                <eager_selectors></eager_selectors>
-                <moderate_mode>prefetch</moderate_mode>
-                <moderate_selectors></moderate_selectors>
-                <conservative_mode>prefetch</conservative_mode>
-                <conservative_selectors></conservative_selectors>
+                <eager_prefetch_selectors></eager_prefetch_selectors>
+                <eager_prerender_selectors></eager_prerender_selectors>
+                <moderate_prefetch_selectors></moderate_prefetch_selectors>
+                <moderate_prerender_selectors></moderate_prerender_selectors>
+                <conservative_prefetch_selectors></conservative_prefetch_selectors>
+                <conservative_prerender_selectors></conservative_prerender_selectors>
             </speculation_rules>
         </dev>
     </default>
