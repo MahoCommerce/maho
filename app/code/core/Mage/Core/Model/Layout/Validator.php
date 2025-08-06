@@ -106,7 +106,7 @@ class Mage_Core_Model_Layout_Validator
 
         // Basic XML validation
         if (empty($value)) {
-            $this->_messages[] = 'Layout XML cannot be empty';
+            $this->_messages[] = $this->invalidXmlMessage;
             return false;
         }
 
@@ -117,7 +117,7 @@ class Mage_Core_Model_Layout_Validator
         libxml_clear_errors();
 
         if ($doc === false || !empty($errors)) {
-            $this->_messages[] = 'Invalid XML format';
+            $this->_messages[] = $this->invalidXmlMessage;
             return false;
         }
 
@@ -171,7 +171,22 @@ class Mage_Core_Model_Layout_Validator
 
     public function setMessages(array $messages): self
     {
-        // Legacy method for setting message templates - not used in Symfony constraints
+        // Map message constants to properties
+        if (isset($messages['invalidXml'])) {
+            $this->invalidXmlMessage = $messages['invalidXml'];
+        }
+        if (isset($messages['invalidTemplatePath'])) {
+            $this->invalidTemplatePathMessage = $messages['invalidTemplatePath'];
+        }
+        if (isset($messages['invalidBlockName'])) {
+            $this->invalidBlockNameMessage = $messages['invalidBlockName'];
+        }
+        if (isset($messages['protectedAttrHelperInActionVar'])) {
+            $this->protectedHelperMessage = $messages['protectedAttrHelperInActionVar'];
+        }
+        if (isset($messages[self::INVALID_XML_OBJECT_EXCEPTION])) {
+            $this->invalidXmlObjectMessage = $messages[self::INVALID_XML_OBJECT_EXCEPTION];
+        }
         return $this;
     }
 
