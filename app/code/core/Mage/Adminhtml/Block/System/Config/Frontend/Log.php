@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_System_Config_Frontend_Log extends Mage_Adminhtml_Blo
     #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element): string
     {
-        if (Mage::helper('log')::isLogConfigManagedByXml()) {
+        if (Mage::getModel('core/logger')::isLogConfigManagedByXml()) {
             $html = $this->_getHeaderHtml($element);
 
             $html .= '<ul>';

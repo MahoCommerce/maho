@@ -779,9 +779,9 @@ final class Mage
         }
 
         try {
-            $logHelper = self::helper('log');
-            if ($logHelper !== false) {
-                $logHelper->log($message, $level, $file, $forceLog);
+            $logger = self::getModel('core/logger');
+            if ($logger !== false) {
+                $logger->log($message, $level, $file, $forceLog);
             }
         } catch (Exception $e) {
             // Silently fail to avoid logging loops
