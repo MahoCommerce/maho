@@ -10,11 +10,45 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Monolog\Level;
+
 /**
  * Main Mage hub class
  */
 final class Mage
 {
+    /**
+     * Log level constants
+     */
+    public const LOG_EMERGENCY = Level::Emergency;
+    public const LOG_ALERT     = Level::Alert;
+    public const LOG_CRITICAL  = Level::Critical;
+    public const LOG_ERROR     = Level::Error;
+    public const LOG_WARNING   = Level::Warning;
+    public const LOG_NOTICE    = Level::Notice;
+    public const LOG_INFO      = Level::Info;
+    public const LOG_DEBUG     = Level::Debug;
+
+    /**
+     * @deprecated Use LOG_EMERGENCY instead
+     */
+    public const LOG_EMERG = self::LOG_EMERGENCY;
+
+    /**
+     * @deprecated Use LOG_CRITICAL instead
+     */
+    public const LOG_CRIT = self::LOG_CRITICAL;
+
+    /**
+     * @deprecated Use LOG_ERROR instead
+     */
+    public const LOG_ERR = self::LOG_ERROR;
+
+    /**
+     * @deprecated Use LOG_WARNING instead
+     */
+    public const LOG_WARN = self::LOG_WARNING;
+
     /**
      * Registry collection
      *
@@ -734,7 +768,7 @@ final class Mage
      * log facility (??)
      *
      * @param array|object|string $message
-     * @param int $level
+     * @param Level|int|null $level
      * @param string|null $file
      * @param bool $forceLog
      */
@@ -745,78 +779,12 @@ final class Mage
         }
 
         try {
-            $logActive = self::getStoreConfig('dev/log/active');
-            if (empty($file)) {
-                $file = self::getStoreConfig('dev/log/file');
+            $logger = self::getModel('core/logger');
+            if ($logger !== false) {
+                $logger->log($message, $level, $file, $forceLog);
             }
         } catch (Exception $e) {
-            $logActive = true;
-        }
-
-        if (!self::$_isDeveloperMode && !$logActive && !$forceLog) {
-            return;
-        }
-
-        static $loggers = [];
-
-        try {
-            $maxLogLevel = (int) self::getStoreConfig('dev/log/max_level');
-        } catch (Throwable $e) {
-            $maxLogLevel = Zend_Log::DEBUG;
-        }
-
-        $level  = is_null($level) ? Zend_Log::DEBUG : $level;
-
-        if (!self::$_isDeveloperMode && $level > $maxLogLevel && !$forceLog) {
-            return;
-        }
-
-        $file = empty($file) ?
-            (string) self::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE) : basename($file);
-
-        try {
-            if (!isset($loggers[$file])) {
-                // Validate file extension before save. Allowed file extensions: log, txt, html, csv
-                $_allowedFileExtensions = explode(
-                    ',',
-                    (string) self::getConfig()->getNode('dev/log/allowedFileExtensions', Mage_Core_Model_Store::DEFAULT_CODE),
-                );
-                if (! ($extension = pathinfo($file, PATHINFO_EXTENSION)) || ! in_array($extension, $_allowedFileExtensions)) {
-                    return;
-                }
-
-                $logDir = self::getBaseDir('var') . DS . 'log';
-                $logFile = $logDir . DS . $file;
-
-                if (!is_dir($logDir)) {
-                    mkdir($logDir);
-                    chmod($logDir, 0750);
-                }
-
-                if (!file_exists($logFile)) {
-                    file_put_contents($logFile, '');
-                    chmod($logFile, 0640);
-                }
-
-                $format = '%timestamp% %priorityName% (%priority%): %message%' . PHP_EOL;
-                $formatter = new Zend_Log_Formatter_Simple($format);
-                $writerModel = (string) self::getConfig()->getNode('global/log/core/writer_model');
-                if (!self::$_app || !$writerModel) {
-                    $writer = new Zend_Log_Writer_Stream($logFile);
-                } else {
-                    $writer = new $writerModel($logFile);
-                }
-                $writer->setFormatter($formatter);
-                $loggers[$file] = new Zend_Log($writer);
-            }
-
-            if (is_array($message) || is_object($message)) {
-                $message = print_r($message, true);
-            }
-
-            $message = addcslashes($message, '<?');
-            $loggers[$file]->log($message, $level);
-        } catch (Exception $e) {
+            // Silently fail to avoid logging loops
         }
     }
 
@@ -828,8 +796,7 @@ final class Mage
         if (!self::getConfig()) {
             return;
         }
-        $file = self::getStoreConfig('dev/log/exception_file');
-        self::log("\n" . $e->__toString(), Zend_Log::ERR, $file);
+        self::log("\n" . $e->__toString(), self::LOG_ERROR, 'exception.log');
     }
 
     /**
@@ -953,4 +920,5 @@ final class Mage
     {
         return sodium_bin2hex(sodium_crypto_secretbox_keygen());
     }
+
 }

@@ -154,7 +154,7 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     public function log($message = null)
     {
         $filename = sprintf('google%s.log', Mage::getStoreConfig(self::XML_PATH_TYPE));
-        Mage::log($message, Zend_Log::DEBUG, $filename, true);
+        Mage::log($message, Mage::LOG_DEBUG, $filename, true);
     }
 
     /**

@@ -12727,12 +12727,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Decimal.php
 
 		-
-			message: '#^Argument of an invalid type hasOffsetValue\(string, mixed\) supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
-
-		-
 			message: '#^Binary operation "\-" between int and non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 2
@@ -21110,12 +21104,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Install/controllers/WizardController.php
-
-		-
-			message: '#^Property Mage_Log_Helper_Data\:\:\$_allowedFileExtensions has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Log/Helper/Data.php
 
 		-
 			message: '#^Method Mage_Log_Model_Aggregation\:\:_insert\(\) has no return type specified\.$#'

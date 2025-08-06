@@ -1,0 +1,45 @@
+name: Check Missing Translations
+
+on:
+  pull_request:
+
+jobs:
+  check-missing-translations:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+
+    - name: Get composer cache directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+    - name: Check for missing translations
+      run: |
+        output=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | ./maho translations:missing)
+
+        if [ -n "$output" ]; then
+          echo "❌ Found missing translations in changed files:"
+          echo "$output"
+          exit 1
+        else
+          echo "✅ No missing translations found in changed files"
+        fi
