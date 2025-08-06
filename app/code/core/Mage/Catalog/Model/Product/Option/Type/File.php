@@ -415,10 +415,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return is_readable($fileFullPath)
                 && isset($optionValue['secret_key'])
                 && substr(md5(file_get_contents($fileFullPath)), 0, 20) == $optionValue['secret_key'];
-        } else {
-            $this->setIsValid(false);
-            Mage::throwException(implode("\n", $errors));
         }
+
+        $this->setIsValid(false);
+        Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option(s)'));
     }
 
     /**
