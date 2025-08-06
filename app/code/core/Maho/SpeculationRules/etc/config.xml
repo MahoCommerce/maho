@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_SpeculationRules
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_SpeculationRules>
+            <version>1.0.0</version>
+        </Maho_SpeculationRules>
+    </modules>
+    <global>
+        <blocks>
+            <speculationrules>
+                <class>Maho_SpeculationRules_Block</class>
+            </speculationrules>
+        </blocks>
+        <helpers>
+            <speculationrules>
+                <class>Maho_SpeculationRules_Helper</class>
+            </speculationrules>
+        </helpers>
+        <models>
+            <speculationrules>
+                <class>Maho_SpeculationRules_Model</class>
+            </speculationrules>
+        </models>
+    </global>
+    <frontend>
+        <layout>
+            <updates>
+                <speculationrules>
+                    <file>speculationrules.xml</file>
+                </speculationrules>
+            </updates>
+        </layout>
+        <events>
+            <controller_action_layout_generate_blocks_after>
+                <observers>
+                    <speculationrules>
+                        <class>speculationrules/observer</class>
+                        <method>addSpeculationRulesBlock</method>
+                    </speculationrules>
+                </observers>
+            </controller_action_layout_generate_blocks_after>
+        </events>
+    </frontend>
+    <default>
+        <dev>
+            <speculation_rules>
+                <enabled>0</enabled>
+                <eager_mode>prefetch</eager_mode>
+                <eager_selectors></eager_selectors>
+                <moderate_mode>prefetch</moderate_mode>
+                <moderate_selectors></moderate_selectors>
+                <conservative_mode>prefetch</conservative_mode>
+                <conservative_selectors></conservative_selectors>
+            </speculation_rules>
+        </dev>
+    </default>
+</config>

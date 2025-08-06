@@ -1,0 +1,18 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_SpeculationRules
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_SpeculationRules_Block_Script $this */
+$speculationRulesJson = $this->getSpeculationRulesJson();
+
+if (!empty($speculationRulesJson)): ?>
+<script type="speculationrules">
+<?php echo $speculationRulesJson; ?>
+</script>
+<?php endif; ?>
