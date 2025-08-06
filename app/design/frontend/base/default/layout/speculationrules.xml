@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
-    <!-- This file is here for the layout update to be loaded, but the block is added via observer -->
+    <default>
+        <reference name="before_body_end">
+            <block type="speculationrules/script" name="speculation_rules_script" template="speculationrules/script.phtml" />
+        </reference>
+    </default>
 </layout>

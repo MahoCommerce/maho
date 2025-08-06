@@ -30,16 +30,6 @@
                 </speculationrules>
             </updates>
         </layout>
-        <events>
-            <controller_action_layout_generate_blocks_after>
-                <observers>
-                    <speculationrules>
-                        <class>speculationrules/observer</class>
-                        <method>addSpeculationRulesBlock</method>
-                    </speculationrules>
-                </observers>
-            </controller_action_layout_generate_blocks_after>
-        </events>
     </frontend>
     <default>
         <dev>

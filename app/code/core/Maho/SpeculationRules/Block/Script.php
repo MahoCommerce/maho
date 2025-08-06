@@ -43,11 +43,6 @@ class Maho_SpeculationRules_Block_Script extends Mage_Core_Block_Template
             return '';
         }
 
-        $json = $this->getSpeculationRulesJson();
-        if (empty($json)) {
-            return '';
-        }
-
         return parent::_toHtml();
     }
 }
