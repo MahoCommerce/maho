@@ -86,7 +86,7 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
 
             $groupedSelectors[$key]['selectors'] = array_merge(
                 $groupedSelectors[$key]['selectors'],
-                $selectors
+                $selectors,
             );
         }
 
