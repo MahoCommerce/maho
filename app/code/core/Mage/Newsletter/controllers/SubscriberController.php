@@ -28,7 +28,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
             $email              = (string) $this->getRequest()->getPost('email');
 
             try {
-                if (!Maho_Validator::validateEmail($email)) {
+                if (!Mage::helper('core')->validateEmail($email)) {
                     Mage::throwException($this->__('Please enter a valid email address.'));
                 }
 

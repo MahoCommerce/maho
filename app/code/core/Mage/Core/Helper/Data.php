@@ -10,6 +10,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
 class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
@@ -1135,5 +1139,124 @@ XML;
         }
 
         return $dsn;
+    }
+
+    /**
+     * Symfony validator instance
+     */
+    private static ?ValidatorInterface $symfonyValidator = null;
+
+    /**
+     * Get Symfony validator instance
+     */
+    private function getSymfonyValidator(): ValidatorInterface
+    {
+        if (self::$symfonyValidator === null) {
+            self::$symfonyValidator = Validation::createValidator();
+        }
+        return self::$symfonyValidator;
+    }
+
+    /**
+     * Validate email address using Symfony Email constraint
+     */
+    public function validateEmail(#[\SensitiveParameter] string $email): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($email, new Assert\Email());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Validate that value is not blank using Symfony NotBlank constraint
+     */
+    public function validateNotBlank(mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\NotBlank());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Validate string against regex pattern using Symfony Regex constraint
+     */
+    public function validateRegex(string $value, string $pattern): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(['pattern' => $pattern]));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Validate string length using Symfony Length constraint
+     */
+    public function validateLength(string $value, ?int $min = null, ?int $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Validate numeric range using Symfony Range constraint
+     */
+    public function validateRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Validate URL format using Symfony Url constraint
+     */
+    public function validateUrl(string $url): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($url, new Assert\Url());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Validate date format using Symfony Date constraint
+     */
+    public function validateDate(string $date): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($date, new Assert\Date());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Generic validation method that returns validation messages
+     */
+    public function validate(mixed $value, mixed $constraint): array
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
+        $messages = [];
+
+        foreach ($violations as $violation) {
+            $messages[] = $violation->getMessage();
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Generic validation method that returns boolean result
+     */
+    public function isValid(mixed $value, mixed $constraint): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
+        return count($violations) === 0;
     }
 }

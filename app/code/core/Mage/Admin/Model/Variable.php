@@ -39,11 +39,11 @@ class Mage_Admin_Model_Variable extends Mage_Core_Model_Abstract
     {
         $errors = [];
 
-        if (!Maho_Validator::validateNotBlank($this->getVariableName())) {
+        if (!Mage::helper('core')->validateNotBlank($this->getVariableName())) {
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is required field.');
         }
 
-        if (!Maho_Validator::validateRegex($this->getVariableName(), '/^[-_a-zA-Z0-9\/]*$/')) {
+        if (!Mage::helper('core')->validateRegex($this->getVariableName(), '/^[-_a-zA-Z0-9\/]*$/')) {
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is incorrect.');
         }
 

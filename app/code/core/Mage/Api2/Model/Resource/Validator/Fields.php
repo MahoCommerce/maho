@@ -98,25 +98,26 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
      */
     protected function _validateValue($value, $type, $options)
     {
+        $coreHelper = Mage::helper('core');
         return match ($type) {
-            'NotEmpty', 'NotBlank' => Maho_Validator::validateNotBlank($value),
-            'Email', 'EmailAddress' => Maho_Validator::validateEmail($value),
-            'Regex' => Maho_Validator::validateRegex($value, $options['pattern'] ?? '/.*/'),
-            'Length', 'StringLength' => Maho_Validator::validateLength(
+            'NotEmpty', 'NotBlank' => $coreHelper->validateNotBlank($value),
+            'Email', 'EmailAddress' => $coreHelper->validateEmail($value),
+            'Regex' => $coreHelper->validateRegex($value, $options['pattern'] ?? '/.*/'),
+            'Length', 'StringLength' => $coreHelper->validateLength(
                 $value,
                 $options['min'] ?? 0,
                 $options['max'] ?? PHP_INT_MAX,
             ),
-            'Range', 'Between' => Maho_Validator::validateRange(
+            'Range', 'Between' => $coreHelper->validateRange(
                 $value,
                 $options['min'] ?? PHP_INT_MIN,
                 $options['max'] ?? PHP_INT_MAX,
             ),
-            'Url' => Maho_Validator::validateUrl($value),
-            'Date' => Maho_Validator::validateDate($value),
-            'Digits' => Maho_Validator::validateRegex($value, '/^\d+$/'),
-            'Alnum' => Maho_Validator::validateRegex($value, '/^[a-zA-Z0-9]+$/'),
-            'Alpha' => Maho_Validator::validateRegex($value, '/^[a-zA-Z]+$/'),
+            'Url' => $coreHelper->validateUrl($value),
+            'Date' => $coreHelper->validateDate($value),
+            'Digits' => $coreHelper->validateRegex($value, '/^\d+$/'),
+            'Alnum' => $coreHelper->validateRegex($value, '/^[a-zA-Z0-9]+$/'),
+            'Alpha' => $coreHelper->validateRegex($value, '/^[a-zA-Z]+$/'),
             default => throw new Exception("Unsupported validator type: {$type}"),
         };
     }
@@ -138,7 +139,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
         if (!$isPartial && count($this->_requiredFields) > 0) {
             foreach ($this->_requiredFields as $requiredField) {
                 $value = $data[$requiredField] ?? null;
-                if (!Maho_Validator::validateNotBlank($value)) {
+                if (!Mage::helper('core')->validateNotBlank($value)) {
                     $isValid = false;
                     $this->_addError(sprintf('%s: This value should not be blank.', $requiredField));
                 }

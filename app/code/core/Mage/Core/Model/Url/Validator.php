@@ -34,7 +34,7 @@ class Mage_Core_Model_Url_Validator
             return true;
         }
 
-        if (!Maho_Validator::validateUrl($value)) {
+        if (!Mage::helper('core')->validateUrl($value)) {
             $this->_messages[] = str_replace('{{ value }}', (string) $value, $this->message);
             return false;
         }

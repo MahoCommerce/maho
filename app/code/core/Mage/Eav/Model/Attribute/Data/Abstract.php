@@ -263,22 +263,22 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
 
             switch ($validateRules['input_validation']) {
                 case 'alphanumeric':
-                    $isValid = Maho_Validator::validateRegex($value, '/^[a-zA-Z0-9\s]+$/');
+                    $isValid = Mage::helper('core')->validateRegex($value, '/^[a-zA-Z0-9\s]+$/');
                     $errorMessage = Mage::helper('eav')->__('"%s" has not only alphabetic and digit characters.', $label);
                     break;
 
                 case 'numeric':
-                    $isValid = Maho_Validator::validateRegex($value, '/^\d+$/');
+                    $isValid = Mage::helper('core')->validateRegex($value, '/^\d+$/');
                     $errorMessage = Mage::helper('eav')->__('"%s" contains not only digit characters.', $label);
                     break;
 
                 case 'alpha':
-                    $isValid = Maho_Validator::validateRegex($value, '/^[a-zA-Z\s]+$/');
+                    $isValid = Mage::helper('core')->validateRegex($value, '/^[a-zA-Z\s]+$/');
                     $errorMessage = Mage::helper('eav')->__('"%s" has not only alphabetic characters.', $label);
                     break;
 
                 case 'email':
-                    $isValid = Maho_Validator::validateEmail($value);
+                    $isValid = Mage::helper('core')->validateEmail($value);
                     $errorMessage = Mage::helper('eav')->__('"%s" is not a valid email address.', $label);
                     break;
 
@@ -289,12 +289,12 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
                         return [Mage::helper('eav')->__('"%s" is not a valid URL.', $label)];
                     }
 
-                    $isValid = Maho_Validator::validateUrl($value);
+                    $isValid = Mage::helper('core')->validateUrl($value);
                     $errorMessage = Mage::helper('eav')->__('"%s" is not a valid URL.', $label);
                     break;
 
                 case 'date':
-                    $isValid = Maho_Validator::validateDate($value);
+                    $isValid = Mage::helper('core')->validateDate($value);
                     $errorMessage = Mage::helper('eav')->__('"%s" is not a valid date.', $label);
 
                     // Additional check for specific date format if needed

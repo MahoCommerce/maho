@@ -750,19 +750,19 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     {
         $errors = new ArrayObject();
 
-        if (!Maho_Validator::validateNotBlank($this->getUsername())) {
+        if (!Mage::helper('core')->validateNotBlank($this->getUsername())) {
             $errors->append(Mage::helper('adminhtml')->__('User Name is required field.'));
         }
 
-        if (!Maho_Validator::validateNotBlank($this->getFirstname())) {
+        if (!Mage::helper('core')->validateNotBlank($this->getFirstname())) {
             $errors->append(Mage::helper('adminhtml')->__('First Name is required field.'));
         }
 
-        if (!Maho_Validator::validateNotBlank($this->getLastname())) {
+        if (!Mage::helper('core')->validateNotBlank($this->getLastname())) {
             $errors->append(Mage::helper('adminhtml')->__('Last Name is required field.'));
         }
 
-        if (!Maho_Validator::validateEmail($this->getEmail())) {
+        if (!Mage::helper('core')->validateEmail($this->getEmail())) {
             $errors->append(Mage::helper('adminhtml')->__('Please enter a valid email.'));
         }
 
@@ -816,7 +816,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     {
         $result = [];
 
-        if (!Maho_Validator::validateNotBlank($password)) {
+        if (!Mage::helper('core')->validateNotBlank($password)) {
             $result[] = Mage::helper('adminhtml')->__('Current password field cannot be empty.');
         } elseif (is_null($this->getId()) || !Mage::helper('core')->validateHash($password, $this->getPassword())) {
             $result[] = Mage::helper('adminhtml')->__('Invalid current password.');

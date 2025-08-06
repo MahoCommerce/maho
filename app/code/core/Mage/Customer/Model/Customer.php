@@ -1044,24 +1044,24 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $errors = [];
 
         // Validate first name
-        if (!Maho_Validator::validateNotBlank(trim($this->getFirstname()))) {
+        if (!Mage::helper('core')->validateNotBlank(trim($this->getFirstname()))) {
             $errors[] = Mage::helper('customer')->__('The first name cannot be empty.');
         }
 
         // Validate last name
-        if (!Maho_Validator::validateNotBlank(trim($this->getLastname()))) {
+        if (!Mage::helper('core')->validateNotBlank(trim($this->getLastname()))) {
             $errors[] = Mage::helper('customer')->__('The last name cannot be empty.');
         }
 
         // Validate email
-        if (!Maho_Validator::validateEmail($this->getEmail())) {
+        if (!Mage::helper('core')->validateEmail($this->getEmail())) {
             $errors[] = Mage::helper('customer')->__('Invalid email address "%s".', $this->getEmail());
         }
 
         $password = $this->getPassword();
         // Validate password not empty for new customers
         if (!$this->getId()) {
-            if (!Maho_Validator::validateNotBlank($password)) {
+            if (!Mage::helper('core')->validateNotBlank($password)) {
                 $errors[] = Mage::helper('customer')->__('The password cannot be empty.');
             }
         }
@@ -1069,7 +1069,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $minPasswordLength = $this->getMinPasswordLength();
         // Validate minimum password length
         if (strlen($password)) {
-            if (!Maho_Validator::validateLength($password, $minPasswordLength)) {
+            if (!Mage::helper('core')->validateLength($password, $minPasswordLength)) {
                 $errors[] = Mage::helper('customer')
                     ->__('The minimum password length is %s', $minPasswordLength);
             }
@@ -1077,7 +1077,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         // Validate maximum password length
         if (strlen($password)) {
-            if (!Maho_Validator::validateLength($password, null, self::MAXIMUM_PASSWORD_LENGTH)) {
+            if (!Mage::helper('core')->validateLength($password, null, self::MAXIMUM_PASSWORD_LENGTH)) {
                 $errors[] = Mage::helper('customer')
                     ->__('Please enter a password with at most %s characters.', self::MAXIMUM_PASSWORD_LENGTH);
             }
@@ -1118,19 +1118,19 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $password = $this->getPassword();
 
         // Validate password not empty
-        if (!Maho_Validator::validateNotBlank($password)) {
+        if (!Mage::helper('core')->validateNotBlank($password)) {
             $errors[] = Mage::helper('customer')->__('The password cannot be empty.');
         }
 
         $minPasswordLength = $this->getMinPasswordLength();
         // Validate minimum password length
-        if (!Maho_Validator::validateLength($password, $minPasswordLength)) {
+        if (!Mage::helper('core')->validateLength($password, $minPasswordLength)) {
             $errors[] = Mage::helper('customer')
                 ->__('The minimum password length is %s', $minPasswordLength);
         }
 
         // Validate maximum password length
-        if (!Maho_Validator::validateLength($password, null, self::MAXIMUM_PASSWORD_LENGTH)) {
+        if (!Mage::helper('core')->validateLength($password, null, self::MAXIMUM_PASSWORD_LENGTH)) {
             $errors[] = Mage::helper('customer')
                 ->__('Please enter a password with at most %s characters.', self::MAXIMUM_PASSWORD_LENGTH);
         }

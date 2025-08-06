@@ -137,17 +137,17 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
         $errors = [];
 
         // Validate title
-        if (!Maho_Validator::validateNotBlank($this->getTitle())) {
+        if (!Mage::helper('core')->validateNotBlank($this->getTitle())) {
             $errors[] = Mage::helper('review')->__('Review summary can\'t be empty');
         }
 
         // Validate nickname
-        if (!Maho_Validator::validateNotBlank($this->getNickname())) {
+        if (!Mage::helper('core')->validateNotBlank($this->getNickname())) {
             $errors[] = Mage::helper('review')->__('Nickname can\'t be empty');
         }
 
         // Validate detail
-        if (!Maho_Validator::validateNotBlank($this->getDetail())) {
+        if (!Mage::helper('core')->validateNotBlank($this->getDetail())) {
             $errors[] = Mage::helper('review')->__('Review can\'t be empty');
         }
 

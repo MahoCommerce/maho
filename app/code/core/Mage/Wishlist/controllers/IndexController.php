@@ -679,7 +679,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         } else {
             foreach ($emails as $index => $email) {
                 $email = trim($email);
-                if (!Maho_Validator::validateEmail($email)) {
+                if (!Mage::helper('core')->validateEmail($email)) {
                     $error = $this->__('Please input a valid email address.');
                     break;
                 }

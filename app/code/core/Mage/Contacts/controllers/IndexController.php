@@ -63,15 +63,15 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                 $error = false;
 
                 // Validate name
-                if (!Maho_Validator::validateNotBlank(trim($post['name']))) {
+                if (!Mage::helper('core')->validateNotBlank(trim($post['name']))) {
                     $error = true;
                 }
                 // Validate comment
-                elseif (!Maho_Validator::validateNotBlank(trim($post['comment']))) {
+                elseif (!Mage::helper('core')->validateNotBlank(trim($post['comment']))) {
                     $error = true;
                 }
                 // Validate email
-                elseif (!Maho_Validator::validateEmail(trim($post['email']))) {
+                elseif (!Mage::helper('core')->validateEmail(trim($post['email']))) {
                     $error = true;
                 }
 
