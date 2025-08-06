@@ -59,12 +59,4 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_NONE;
     }
-
-    /**
-     * Check if XML log configuration is managed by XML
-     */
-    public static function isLogConfigManagedByXml(): bool
-    {
-        return Mage_Core_Model_Logger::isLogConfigManagedByXml();
-    }
 }
