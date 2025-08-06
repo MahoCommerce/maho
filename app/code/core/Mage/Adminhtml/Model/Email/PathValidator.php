@@ -12,22 +12,14 @@
 
 class Mage_Adminhtml_Model_Email_PathValidator
 {
-    public string $invalidPathMessage = 'The configuration path is not valid for email templates.';
-    private array $_messages = [];
-
-    public function validate(mixed $value): bool
+    public function isValid(mixed $value): bool
     {
-        $this->_messages = [];
-
         if (null === $value || '' === $value) {
-            $this->_messages[] = $this->invalidPathMessage;
             return false;
         }
 
         $pathNode = is_array($value) ? array_shift($value) : $value;
-
         if (!$this->isEncryptedNodePath($pathNode)) {
-            $this->_messages[] = $this->invalidPathMessage;
             return false;
         }
 
@@ -36,17 +28,12 @@ class Mage_Adminhtml_Model_Email_PathValidator
 
     public function getMessages(): array
     {
-        return $this->_messages;
+        return [Mage::helper('adminhtml')->__('The configuration path is not valid for email templates.')];
     }
 
     public function getMessage(): string
     {
-        return !empty($this->_messages) ? $this->_messages[0] : '';
-    }
-
-    public function isValid(mixed $value): bool
-    {
-        return $this->validate($value);
+        return Mage::helper('adminhtml')->__('The configuration path is not valid for email templates.');
     }
 
     public function isEncryptedNodePath(string $path): bool
