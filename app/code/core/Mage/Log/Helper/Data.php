@@ -37,26 +37,40 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     public function isVisitorLogEnabled()
     {
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_VISITORS
-        || $this->isLogEnabled();
+        || $this->isAllVisitorLoggingEnabled();
     }
 
     /**
-     * Are all events should be logged
-     *
-     * @return bool
+     * Are all visitor events and activities should be logged
      */
-    public function isLogEnabled()
+    public function isAllVisitorLoggingEnabled(): bool
     {
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_ALL;
     }
 
     /**
-     * Are all events should be disabled
-     *
+     * Are all visitor events and activities should be disabled
+     */
+    public function isVisitorLoggingDisabled(): bool
+    {
+        return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_NONE;
+    }
+
+    /**
+     * @deprecated Use isAllVisitorLoggingEnabled() instead
+     * @return bool
+     */
+    public function isLogEnabled()
+    {
+        return $this->isAllVisitorLoggingEnabled();
+    }
+
+    /**
+     * @deprecated Use isVisitorLoggingDisabled() instead
      * @return bool
      */
     public function isLogDisabled()
     {
-        return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_NONE;
+        return $this->isVisitorLoggingDisabled();
     }
 }

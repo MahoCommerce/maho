@@ -81,7 +81,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $visitor)
     {
-        if (!$this->_urlLoggingCondition->isLogEnabled()) {
+        if (!$this->_urlLoggingCondition->isAllVisitorLoggingEnabled()) {
             return $this;
         }
         if (!$visitor->getIsNewVisitor()) {
@@ -98,7 +98,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $visitor)
     {
-        if ($this->_urlLoggingCondition->isLogDisabled()) {
+        if ($this->_urlLoggingCondition->isVisitorLoggingDisabled()) {
             return $this;
         }
         if ($visitor->getIsNewVisitor()) {
@@ -107,7 +107,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
                 $visitor->setIsNewVisitor(false);
             }
         } else {
-            if ($this->_urlLoggingCondition->isLogEnabled()) {
+            if ($this->_urlLoggingCondition->isAllVisitorLoggingEnabled()) {
                 $this->_saveVisitorUrl($visitor);
                 if ($visitor->getDoCustomerLogin() || $visitor->getDoCustomerLogout()) {
                     $this->_saveCustomerInfo($visitor);
@@ -131,7 +131,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         parent::_afterLoad($object);
-        if ($this->_urlLoggingCondition->isLogDisabled()) {
+        if ($this->_urlLoggingCondition->isVisitorLoggingDisabled()) {
             return $this;
         }
         // Add information about quote to visitor
