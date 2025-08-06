@@ -12,14 +12,6 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                        <info>
-                            <label></label>
-                            <frontend_model>speculationrules/adminhtml_system_config_info</frontend_model>
-                            <sort_order>5</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </info>
                         <enabled translate="label comment">
                             <label>Enable Speculation Rules</label>
                             <comment>Enable the Speculation Rules API to improve page load performance. Only works in supported browsers (Chrome 109+, Edge 109+).</comment>
