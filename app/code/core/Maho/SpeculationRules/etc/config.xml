@@ -21,6 +21,15 @@
                 <class>Maho_SpeculationRules_Model</class>
             </speculationrules>
         </models>
+        <translate>
+            <modules>
+                <Maho_SpeculationRules>
+                    <files>
+                        <default>Maho_SpeculationRules.csv</default>
+                    </files>
+                </Maho_SpeculationRules>
+            </modules>
+        </translate>
     </global>
     <frontend>
         <layout>
