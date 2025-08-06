@@ -44,12 +44,12 @@
         <dev>
             <speculation_rules>
                 <enabled>0</enabled>
-                <eager_prefetch_selectors></eager_prefetch_selectors>
-                <eager_prerender_selectors></eager_prerender_selectors>
-                <moderate_prefetch_selectors></moderate_prefetch_selectors>
-                <moderate_prerender_selectors></moderate_prerender_selectors>
-                <conservative_prefetch_selectors></conservative_prefetch_selectors>
-                <conservative_prerender_selectors></conservative_prerender_selectors>
+                <moderate_prefetch_selectors>a.logo
+.nav-primary a
+.product-name a
+.product-image a
+.toolbar .pager a
+.footer a</moderate_prefetch_selectors>
             </speculation_rules>
         </dev>
     </default>

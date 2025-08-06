@@ -32,7 +32,7 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get speculation rules configuration
      *
-     * @return array<string, array<int, array{where: array{selector_matches: string}, eagerness: string}>>
+     * @return array<string, array<int, array{where: array{selector_matches: string|string[]}, eagerness: string}>>
      */
     public function getSpeculationRules(int|string|null $store = null): array
     {
@@ -56,6 +56,9 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
             ['eagerness' => 'conservative', 'mode' => 'prerender', 'path' => self::XML_PATH_CONSERVATIVE_PRERENDER_SELECTORS],
         ];
 
+        // Group selectors by mode and eagerness
+        $groupedSelectors = [];
+
         foreach ($configurations as $config) {
             $selectorsConfig = (string) Mage::getStoreConfig($config['path'], $store);
 
@@ -71,16 +74,40 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
                 continue;
             }
 
-            // Create rule for each selector
-            foreach ($selectors as $selector) {
-                if (!empty($selector)) {
-                    $rules[$config['mode']][] = [
-                        'where' => [
-                            'selector_matches' => $selector,
-                        ],
-                        'eagerness' => $config['eagerness'],
-                    ];
-                }
+            // Group selectors by mode and eagerness
+            $key = $config['mode'] . '_' . $config['eagerness'];
+            if (!isset($groupedSelectors[$key])) {
+                $groupedSelectors[$key] = [
+                    'mode' => $config['mode'],
+                    'eagerness' => $config['eagerness'],
+                    'selectors' => [],
+                ];
+            }
+
+            $groupedSelectors[$key]['selectors'] = array_merge(
+                $groupedSelectors[$key]['selectors'],
+                $selectors
+            );
+        }
+
+        // Create rules from grouped selectors
+        foreach ($groupedSelectors as $group) {
+            if (count($group['selectors']) === 1) {
+                // Single selector
+                $rules[$group['mode']][] = [
+                    'where' => [
+                        'selector_matches' => $group['selectors'][0],
+                    ],
+                    'eagerness' => $group['eagerness'],
+                ];
+            } else {
+                // Multiple selectors - use array
+                $rules[$group['mode']][] = [
+                    'where' => [
+                        'selector_matches' => $group['selectors'],
+                    ],
+                    'eagerness' => $group['eagerness'],
+                ];
             }
         }
 
