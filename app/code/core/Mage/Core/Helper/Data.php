@@ -1230,19 +1230,4 @@ XML;
         $violations = $this->getSymfonyValidator()->validate($value, $constraint);
         return count($violations) === 0;
     }
-
-    /**
-     * Generic validation method that returns validation messages using Symfony constraints
-     */
-    public function getValidationMessages(mixed $value, mixed $constraint): array
-    {
-        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
-        $messages = [];
-
-        foreach ($violations as $violation) {
-            $messages[] = $violation->getMessage();
-        }
-
-        return $messages;
-    }
 }
