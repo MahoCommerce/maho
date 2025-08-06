@@ -26,7 +26,7 @@ class Mage_Adminhtml_Model_Email_PathValidator
         return true;
     }
 
-    public function isEncryptedNodePath(string $path): bool
+    private function isEncryptedNodePath(string $path): bool
     {
         $configModel = Mage::getSingleton('adminhtml/config');
 
