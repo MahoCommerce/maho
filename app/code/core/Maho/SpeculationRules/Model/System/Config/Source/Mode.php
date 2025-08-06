@@ -14,8 +14,6 @@ declare(strict_types=1);
 class Maho_SpeculationRules_Model_System_Config_Source_Mode
 {
     /**
-     * Options getter
-     *
      * @return array<int, array{value: string, label: string}>
      */
     public function toOptionArray(): array
