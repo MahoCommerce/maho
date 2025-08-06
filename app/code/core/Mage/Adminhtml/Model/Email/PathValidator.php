@@ -26,16 +26,6 @@ class Mage_Adminhtml_Model_Email_PathValidator
         return true;
     }
 
-    public function getMessages(): array
-    {
-        return [Mage::helper('adminhtml')->__('The configuration path is not valid for email templates.')];
-    }
-
-    public function getMessage(): string
-    {
-        return Mage::helper('adminhtml')->__('The configuration path is not valid for email templates.');
-    }
-
     public function isEncryptedNodePath(string $path): bool
     {
         $configModel = Mage::getSingleton('adminhtml/config');
