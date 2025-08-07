@@ -68,4 +68,54 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     {
         $this->_forward('noRoute');
     }
+
+    /**
+     * Associate guest orders with current customer
+     */
+    public function associateAction(): void
+    {
+        $session = Mage::getSingleton('customer/session');
+        $customer = $session->getCustomer();
+        $salesHelper = Mage::helper('sales');
+
+        if (!$customer || !$customer->getId()) {
+            $session->addError($this->__('Please log in to associate orders.'));
+            $this->_redirect('customer/account/login');
+            return;
+        }
+
+        // Use helper to check eligibility
+        if (!$salesHelper->isCustomerEligibleForGuestOrderAssociation($customer)) {
+            $session->addError($this->__('Please confirm your email address before associating guest orders.'));
+            $this->_redirect('sales/order/history');
+            return;
+        }
+
+        try {
+            // Use helper to get guest orders
+            $guestOrders = $salesHelper->getGuestOrdersForEmail($customer->getEmail());
+
+            $associatedCount = 0;
+            foreach ($guestOrders as $order) {
+                // Associate the order with the customer
+                $order->setCustomerId($customer->getId())
+                      ->setCustomerIsGuest(0)
+                      ->setCustomerGroupId($customer->getGroupId())
+                      ->save();
+                $associatedCount++;
+            }
+
+            if ($associatedCount > 0) {
+                $session->addSuccess($this->__('Successfully associated %d guest order(s) with your account.', $associatedCount));
+            } else {
+                $session->addNotice($this->__('No guest orders found for your email address.'));
+            }
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $session->addError($this->__('An error occurred while associating orders. Please try again.'));
+        }
+
+        $this->_redirect('sales/order/history');
+    }
 }

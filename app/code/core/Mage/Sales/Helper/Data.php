@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -153,5 +153,50 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
             return [];
         }
         return (array) $node;
+    }
+
+    /**
+     * Check if customer is eligible for guest order association
+     */
+    public function isCustomerEligibleForGuestOrderAssociation(?Mage_Customer_Model_Customer $customer = null, ?int $storeId = null): bool
+    {
+        if (!$customer) {
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+        }
+
+        if (!$customer || !$customer->getId()) {
+            return false;
+        }
+
+        if ($storeId === null) {
+            $storeId = Mage::app()->getStore()->getId();
+        }
+
+        // Check if email confirmation is required for this store
+        $requireEmailConfirmation = Mage::getStoreConfigFlag('customer/create_account/confirm', $storeId);
+
+        // If confirmation is not required, customer is eligible
+        if (!$requireEmailConfirmation) {
+            return true;
+        }
+
+        // If confirmation is required, check if customer is confirmed
+        // Customer is confirmed when confirmation field is null
+        return !$customer->getConfirmation();
+    }
+
+    /**
+     * Get guest orders collection for customer email and store
+     */
+    public function getGuestOrdersForEmail(string $customerEmail, ?int $storeId = null): Mage_Sales_Model_Resource_Order_Collection
+    {
+        if ($storeId === null) {
+            $storeId = Mage::app()->getStore()->getId();
+        }
+
+        return Mage::getResourceModel('sales/order_collection')
+            ->addFieldToFilter('customer_id', ['null' => true])
+            ->addFieldToFilter('customer_email', $customerEmail)
+            ->addFieldToFilter('store_id', $storeId);
     }
 }
