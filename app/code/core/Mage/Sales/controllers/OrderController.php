@@ -76,6 +76,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     {
         $session = Mage::getSingleton('customer/session');
         $customer = $session->getCustomer();
+        $customerHelper = Mage::helper('customer');
         $salesHelper = Mage::helper('sales');
 
         if (!$customer || !$customer->getId()) {
@@ -84,15 +85,13 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
             return;
         }
 
-        // Use helper to check eligibility
-        if (!$salesHelper->isCustomerEligibleForGuestOrderAssociation($customer)) {
+        if (!$customerHelper->isCustomerEligibleForGuestOrderAssociation($customer)) {
             $session->addError($this->__('Please confirm your email address before associating guest orders.'));
             $this->_redirect('sales/order/history');
             return;
         }
 
         try {
-            // Use helper to get guest orders
             $guestOrders = $salesHelper->getGuestOrdersForEmail($customer->getEmail());
 
             $associatedCount = 0;
