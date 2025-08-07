@@ -15,7 +15,7 @@ parameters:
 
     phpVersion:
         min: 80300
-        max: 80499
+        max: 80599
 
     fileExtensions:
         - php
