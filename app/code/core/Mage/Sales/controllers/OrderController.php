@@ -72,7 +72,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Associate guest orders with current customer
      */
-    public function associateAction(): void
+    public function associateGuestOrdersAction(): void
     {
         $session = Mage::getSingleton('customer/session');
         $customer = $session->getCustomer();

@@ -29,6 +29,6 @@ class Mage_Sales_Block_Order_Missing extends Mage_Core_Block_Template
      */
     public function getAssociateUrl(): string
     {
-        return $this->getUrl('sales/order/associate');
+        return $this->getUrl('sales/order/associateGuestOrders');
     }
 }
