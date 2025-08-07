@@ -20,15 +20,7 @@ class Mage_Sales_Block_Order_Missing extends Mage_Core_Block_Template
      */
     public function shouldShowMissingOrdersLink(): bool
     {
-        return $this->_getCustomerHelper()->isCustomerEligibleForGuestOrderAssociation();
-    }
-
-    /**
-     * Get customer helper instance
-     */
-    protected function _getCustomerHelper(): Mage_Customer_Helper_Data
-    {
-        return Mage::helper('customer');
+        return Mage::helper('customer')->isCustomerEligibleForGuestOrderAssociation();
     }
 
 
