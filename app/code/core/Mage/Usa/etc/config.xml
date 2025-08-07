@@ -40,9 +40,6 @@
                     <fedex>
                         <class>Mage_Usa_Model_Shipping_Carrier_Fedex</class>
                     </fedex>
-                    <dhl>
-                        <class>Mage_Usa_Model_Shipping_Carrier_Dhl</class>
-                    </dhl>
                     <dhlint>
                         <class>Mage_Usa_Model_Shipping_Carrier_Dhl_International</class>
                     </dhlint>
@@ -83,39 +80,10 @@
         <system>
             <media_storage_configuration>
                 <allowed_resources>
-                    <dhl_folder>dhl</dhl_folder>
                 </allowed_resources>
             </media_storage_configuration>
         </system>
         <carriers>
-            <dhl>
-                <account/>
-                <active>0</active>
-                <sallowspecific>0</sallowspecific>
-                <allowed_methods>IE,E SAT,E 10:30AM,E,N,S,G</allowed_methods>
-                <contentdesc>Big Box</contentdesc>
-                <cutoff_cost/>
-                <dutypaymenttype>R</dutypaymenttype>
-                <free_method>G</free_method>
-                <gateway_url>https://eCommerce.airborne.com/ApiLandingTest.asp</gateway_url>
-                <verify_peer>0</verify_peer>
-                <id backend_model="adminhtml/system_config_backend_encrypted"/>
-                <model>usa/shipping_carrier_dhl</model>
-                <password backend_model="adminhtml/system_config_backend_encrypted"/>
-                <shipment_requesttype>0</shipment_requesttype>
-                <shipment_type>P</shipment_type>
-                <shipping_key backend_model="adminhtml/system_config_backend_encrypted"/>
-                <shipping_intlkey backend_model="adminhtml/system_config_backend_encrypted"/>
-                <title>DHL (Deprecated)</title>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
-                <unit_of_measure>LB</unit_of_measure>
-                <max_package_weight>150</max_package_weight>
-                <handling_type>F</handling_type>
-                <handling_action>O</handling_action>
-                <shipment_days>Mon,Tue,Wed,Thu,Fri,Sat</shipment_days>
-                <intl_shipment_days>Mon,Tue,Wed,Thu,Fri</intl_shipment_days>
-                <additional_protection_rounding>0</additional_protection_rounding>
-            </dhl>
             <fedex>
                 <account backend_model="adminhtml/system_config_backend_encrypted"/>
                 <meter_number backend_model="adminhtml/system_config_backend_encrypted"/>

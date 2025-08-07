@@ -2,6 +2,8 @@ name: PHP Syntax
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_call:
   workflow_dispatch:
@@ -14,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.3', '8.4']
+        php-versions: ['8.3', '8.4', '8.5']
 
     steps:
       - name: Checkout code
