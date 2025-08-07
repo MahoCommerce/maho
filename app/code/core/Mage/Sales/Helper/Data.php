@@ -154,20 +154,4 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
         }
         return (array) $node;
     }
-
-
-    /**
-     * Get guest orders collection for customer email and store
-     */
-    public function getGuestOrdersForEmail(string $customerEmail, ?int $storeId = null): Mage_Sales_Model_Resource_Order_Collection
-    {
-        if ($storeId === null) {
-            $storeId = Mage::app()->getStore()->getId();
-        }
-
-        return Mage::getResourceModel('sales/order_collection')
-            ->addFieldToFilter('customer_id', ['null' => true])
-            ->addFieldToFilter('customer_email', $customerEmail)
-            ->addFieldToFilter('store_id', $storeId);
-    }
 }

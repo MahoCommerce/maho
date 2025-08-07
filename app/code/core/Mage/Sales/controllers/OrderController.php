@@ -77,7 +77,6 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
         $session = Mage::getSingleton('customer/session');
         $customer = $session->getCustomer();
         $customerHelper = Mage::helper('customer');
-        $salesHelper = Mage::helper('sales');
 
         if (!$customer || !$customer->getId()) {
             $session->addError($this->__('Please log in to associate orders.'));
@@ -92,7 +91,11 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
         }
 
         try {
-            $guestOrders = $salesHelper->getGuestOrdersForEmail($customer->getEmail());
+            // Find all guest orders with the same email and store
+            $guestOrders = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', ['null' => true])
+                ->addFieldToFilter('customer_email', $customer->getEmail())
+                ->addFieldToFilter('store_id', Mage::app()->getStore()->getId());
 
             $associatedCount = 0;
             foreach ($guestOrders as $order) {
