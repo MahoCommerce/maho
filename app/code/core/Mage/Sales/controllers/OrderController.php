@@ -87,7 +87,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
 
         if (!$customerHelper->isCustomerEligibleForGuestOrderAssociation($customer)) {
             $session->addError($this->__('Please confirm your email address before associating guest orders.'));
-            $this->_redirect('sales/order/history');
+            $this->_redirect('customer/account');
             return;
         }
 
