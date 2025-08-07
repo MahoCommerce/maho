@@ -51,6 +51,7 @@ Customer account home dashboard layout
         <!--remove name="customer_account_dashboard_top"/-->
         <reference name="customer_account_dashboard">
             <block type="sales/order_recent" name="customer_account_dashboard_top" as="top" template="sales/order/recent.phtml"/>
+            <block type="sales/order_missing" name="customer_account_dashboard_missing_orders" as="missing_orders_after_recent" template="sales/order/missing.phtml"/>
         </reference>
 
     </customer_account_index>

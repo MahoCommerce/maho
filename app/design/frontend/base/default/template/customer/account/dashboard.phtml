@@ -18,6 +18,7 @@
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?= $this->getChildHtml('hello') ?>
     <?= $this->getChildHtml('top') ?>
+    <?= $this->getChildHtml('missing_orders_after_recent') ?>
     <div class="box-account box-info">
         <div class="box-head">
             <h2><?= $this->__('Account Information') ?></h2>
@@ -29,5 +30,4 @@
     <?= $this->getChildHtml('address') ?>
     <?= $this->getChildHtml('info1') ?>
     <?= $this->getChildHtml('info2') ?>
-    <?= $this->getChildHtml('missing_orders') ?>
 </div>
