@@ -7,17 +7,17 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/** @var Mage_Sales_Block_Order_Missing $this */
+/** @var Mage_Core_Block_Template $this */
 
-if ($this->shouldShowMissingOrdersLink()): ?>
+if (Mage::helper('customer')->isCustomerEligibleForGuestOrderAssociation()): ?>
 <ul class="messages">
     <li class="notice-msg">
         <ul>
             <li>
                 <strong><?= $this->__('Missing an order?') ?></strong><br />
                 <?= $this->__('If you placed an order as a guest using this email address, you can add it to your account.') ?>
-                <a href="<?= $this->getAssociateUrl() ?>" onclick="return confirm('<?= $this->escapeHtml($this->__('This will permanently associate all guest orders placed with your email address to your account. Continue?')) ?>');">
-                    <?= $this->__('Click here to check for guest orders') ?>.
+                <a href="<?= $this->getUrl('sales/order/associateGuestOrders') ?>" onclick="return confirm('<?= $this->escapeHtml($this->__('This will permanently associate all guest orders placed with your email address to your account. Continue?')) ?>');">
+                    <?= $this->__('Click here to check for guest orders') ?>
                 </a>
             </li>
         </ul>

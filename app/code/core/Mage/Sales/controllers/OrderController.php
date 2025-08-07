@@ -115,6 +115,6 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
             $session->addError($this->__('An error occurred while associating orders. Please try again.'));
         }
 
-        $this->_redirect('sales/order/history');
+        $this->_redirect('customer/account/');
     }
 }
