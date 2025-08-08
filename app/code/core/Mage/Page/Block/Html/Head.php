@@ -489,7 +489,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                     return $this->_data['robots'];
                 }
             }
-            
+
             // Check for category page
             if ($category = Mage::registry('current_category')) {
                 $robots = $category->getMetaRobots();
@@ -498,7 +498,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                     return $this->_data['robots'];
                 }
             }
-            
+
             // Check for CMS page
             if ($page = Mage::getSingleton('cms/page')) {
                 $robots = $page->getMetaRobots();
@@ -507,7 +507,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                     return $this->_data['robots'];
                 }
             }
-            
+
             // Fall back to default
             $this->_data['robots'] = Mage::getStoreConfig('design/head/default_robots');
         }

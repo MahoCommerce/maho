@@ -24,8 +24,8 @@ $connection->addColumn(
         'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
         'length'    => 50,
         'nullable'  => true,
-        'comment'   => 'Meta Robots'
-    ]
+        'comment'   => 'Meta Robots',
+    ],
 );
 
 $installer->endSetup();

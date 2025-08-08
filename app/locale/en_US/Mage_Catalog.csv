@@ -8,6 +8,7 @@
 "(Copy data from: %s)","(Copy data from: %s)"
 "* Required Fields","* Required Fields"
 "-- Please Select --","-- Please Select --"
+"-- Use Default --","-- Use Default --"
 "86400 by default, if not set. To refresh instantly, Clear the Blocks HTML Output Cache.","86400 by default, if not set. To refresh instantly, Clear the Blocks HTML Output Cache."
 "<strong style=""color:red"">Warning!</strong> Applying MAP by default will hide all product prices on the frontend.","<strong style=""color:red"">Warning!</strong> Applying MAP by default will hide all product prices on the frontend."
 "Action","Action"

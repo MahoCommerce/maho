@@ -68,7 +68,7 @@ foreach ($attributeSetCollection as $attributeSet) {
     $attributeGroupId = $installer->getAttributeGroupId(
         'catalog_product',
         $attributeSet->getId(),
-        'Meta Information'
+        'Meta Information',
     );
 
     if ($attributeGroupId) {
@@ -76,7 +76,7 @@ foreach ($attributeSetCollection as $attributeSet) {
             'catalog_product',
             $attributeSet->getId(),
             $attributeGroupId,
-            'meta_robots'
+            'meta_robots',
         );
     }
 }
