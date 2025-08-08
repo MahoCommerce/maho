@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Catalog_Model_Resource_Setup $installer */
+/** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 
 $installer->startSetup();
@@ -67,7 +67,7 @@ $attributeSetCollection = Mage::getResourceModel('eav/entity_attribute_set_colle
 foreach ($attributeSetCollection as $attributeSet) {
     $attributeGroupId = $installer->getAttributeGroupId(
         'catalog_product',
-        $attributeSet->getId(),
+        (int) $attributeSet->getId(),
         'Meta Information',
     );
 
