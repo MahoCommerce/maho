@@ -15,7 +15,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Design_Robots
     public function toOptionArray()
     {
         return [
-            ['value' => '', 'label' => '-- Use Default --'],
+            ['value' => '', 'label' => ''],
             ['value' => 'INDEX,FOLLOW', 'label' => 'INDEX, FOLLOW'],
             ['value' => 'NOINDEX,FOLLOW', 'label' => 'NOINDEX, FOLLOW'],
             ['value' => 'INDEX,NOFOLLOW', 'label' => 'INDEX, NOFOLLOW'],
