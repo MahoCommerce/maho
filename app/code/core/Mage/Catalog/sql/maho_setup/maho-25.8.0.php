@@ -66,11 +66,11 @@ $attributeSetCollection = Mage::getResourceModel('eav/entity_attribute_set_colle
 
 foreach ($attributeSetCollection as $attributeSet) {
     $attributeGroupId = $installer->getAttributeGroupId(
-        'catalog_product', 
-        $attributeSet->getId(), 
+        'catalog_product',
+        $attributeSet->getId(),
         'Meta Information'
     );
-    
+
     if ($attributeGroupId) {
         $installer->addAttributeToSet(
             'catalog_product',
