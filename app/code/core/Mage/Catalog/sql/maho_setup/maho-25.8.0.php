@@ -66,7 +66,7 @@ $attributeSetCollection = Mage::getResourceModel('eav/entity_attribute_set_colle
 
 foreach ($attributeSetCollection as $attributeSet) {
     $attributeGroupId = $installer->getAttributeGroupId(
-        'catalog_product',
+        $installer->getEntityTypeId('catalog_product'),
         (int) $attributeSet->getId(),
         'Meta Information',
     );
