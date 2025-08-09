@@ -46,6 +46,7 @@
                 <enabled>0</enabled>
                 <moderate_prefetch_selectors>a.logo
 .nav-primary a
+.breadcrumbs a
 .product-name a
 .product-image a
 .toolbar .pager a
