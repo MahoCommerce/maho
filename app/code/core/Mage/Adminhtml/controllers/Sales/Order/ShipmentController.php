@@ -107,7 +107,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Shipment information page
      */
     #[\Override]
-    public function viewAction()
+    public function viewAction(): void
     {
         $shipment = $this->_initShipment();
         if ($shipment) {
@@ -129,7 +129,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Start create shipment action
      */
-    public function startAction()
+    public function startAction(): void
     {
         /**
          * Clear old values for shipment qty's
@@ -140,7 +140,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Shipment create page
      */
-    public function newAction()
+    public function newAction(): void
     {
         if ($shipment = $this->_initShipment()) {
             $this->_title($this->__('New Shipment'));
@@ -162,7 +162,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Save shipment
      * We can save only new shipment. Existing shipments are not editable
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $data = $this->getRequest()->getPost('shipment');
         if (!empty($data['comment_text'])) {
@@ -242,7 +242,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Send email with shipment data to customer
      */
-    public function emailAction()
+    public function emailAction(): void
     {
         try {
             $shipment = $this->_initShipment();
@@ -271,7 +271,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Add new tracking number action
      */
-    public function addTrackAction()
+    public function addTrackAction(): void
     {
         try {
             $carrier = $this->getRequest()->getPost('carrier');
@@ -320,7 +320,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Remove tracking number from shipment
      */
-    public function removeTrackAction()
+    public function removeTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
         $shipmentId = $this->getRequest()->getParam('shipment_id');
@@ -359,7 +359,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * View shipment tracking information
      */
-    public function viewTrackAction()
+    public function viewTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
         $shipmentId = $this->getRequest()->getParam('shipment_id');
@@ -402,7 +402,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Add comment to shipment history
      */
-    public function addCommentAction()
+    public function addCommentAction(): void
     {
         try {
             $this->getRequest()->setParam(
@@ -509,7 +509,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Create shipping label action for specific shipment
      *
      */
-    public function createLabelAction()
+    public function createLabelAction(): void
     {
         $response = new Varien_Object();
         try {
@@ -584,7 +584,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Create pdf document with information about packages
      */
-    public function printPackageAction()
+    public function printPackageAction(): void
     {
         $shipment = $this->_initShipment();
 
@@ -604,7 +604,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Batch print shipping labels for whole shipments.
      * Push pdf document with shipping labels to user browser
      */
-    public function massPrintShippingLabelAction()
+    public function massPrintShippingLabelAction(): void
     {
         $request = $this->getRequest();
         $ids = $request->getParam('order_ids');

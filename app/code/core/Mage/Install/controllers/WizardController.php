@@ -79,7 +79,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Index action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_forward('begin');
     }
@@ -87,7 +87,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Begin installation action
      */
-    public function beginAction()
+    public function beginAction(): void
     {
         $this->_checkIfInstalled();
 
@@ -107,7 +107,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Process begin step POST data
      */
-    public function beginPostAction()
+    public function beginPostAction(): void
     {
         $this->_checkIfInstalled();
 
@@ -122,7 +122,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Localization settings
      */
-    public function localeAction()
+    public function localeAction(): void
     {
         $this->_checkIfInstalled();
         $this->setFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT, true);
@@ -140,7 +140,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Change current locale
      */
-    public function localeChangeAction()
+    public function localeChangeAction(): void
     {
         $this->_checkIfInstalled();
 
@@ -159,7 +159,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Saving localization settings
      */
-    public function localePostAction()
+    public function localePostAction(): void
     {
         $this->_checkIfInstalled();
         $step = $this->_getWizard()->getStepByName('locale');
@@ -174,7 +174,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Configuration data installation
      */
-    public function configAction()
+    public function configAction(): void
     {
         $this->_checkIfInstalled();
         $this->_getInstaller()->checkServer();
@@ -230,7 +230,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Install DB
      */
-    public function installDbAction()
+    public function installDbAction(): void
     {
         $this->_checkIfInstalled();
         $step = $this->_getWizard()->getStepByName('config');
@@ -253,7 +253,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Install administrator account
      */
-    public function administratorAction()
+    public function administratorAction(): void
     {
         $this->_checkIfInstalled();
 
@@ -308,7 +308,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * End installation
      */
-    public function endAction()
+    public function endAction(): void
     {
         $this->_checkIfInstalled();
 
@@ -333,7 +333,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Host validation response
      */
-    public function checkHostAction()
+    public function checkHostAction(): void
     {
         $this->getResponse()->setHeader('Transfer-encoding', '', true);
         $this->getResponse()->setBody(Mage_Install_Model_Installer::INSTALLER_HOST_RESPONSE);
@@ -342,7 +342,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Host validation response
      */
-    public function checkSecureHostAction()
+    public function checkSecureHostAction(): void
     {
         $this->getResponse()->setHeader('Transfer-encoding', '', true);
         $this->getResponse()->setBody(Mage_Install_Model_Installer::INSTALLER_HOST_RESPONSE);

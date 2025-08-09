@@ -20,7 +20,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * view grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
              ->_title($this->__('Tax'))
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * new class action
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -45,7 +45,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * edit class action
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Sales'))
              ->_title($this->__('Tax'))
@@ -89,7 +89,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * delete class action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $classId    = $this->getRequest()->getParam('id');
         $session    = Mage::getSingleton('adminhtml/session');

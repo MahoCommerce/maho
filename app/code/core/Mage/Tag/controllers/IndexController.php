@@ -15,7 +15,7 @@ class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
     /**
      * Saving tag and relation between tag, customer, product and store
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $helper = Mage::helper('tag');
         if ($helper->isAddingTagsEnabledOnFrontend() === false) {

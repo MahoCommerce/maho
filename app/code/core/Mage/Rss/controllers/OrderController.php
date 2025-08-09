@@ -12,7 +12,7 @@
 
 class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
 {
-    public function newAction()
+    public function newAction(): void
     {
         if ($this->checkFeedEnable('order/new')) {
             $this->loadLayout(false);
@@ -39,7 +39,7 @@ class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
     /**
      * Order status action
      */
-    public function statusAction()
+    public function statusAction(): void
     {
         if ($this->isFeedEnable('order/status_notified')) {
             $order = Mage::helper('rss/order')->getOrderByStatusUrlKey((string) $this->getRequest()->getParam('data'));

@@ -271,6 +271,7 @@
 "To obtain your Client ID/Secret you have to:<br />- Register to <a href='https://developer.ups.com' target=_blank>https://developer.ups.com</a><br />- Go to My Apps -> Add Apps and fill all data<br />- Add Rating, Authorization, Shipping, TimeInTransit, Tracking products to the app","To obtain your Client ID/Secret you have to:<br />- Register to <a href='https://developer.ups.com' target=_blank>https://developer.ups.com</a><br />- Go to My Apps -> Add Apps and fill all data<br />- Add Rating, Authorization, Shipping, TimeInTransit, Tracking products to the app"
 "Tracking REST URL","Tracking REST URL"
 "Unable to retrieve tracking","Unable to retrieve tracking"
+"United Parcel Service REST","United Parcel Service REST"
 "Unknown error","Unknown error"
 "UPS","UPS"
 "UPS Expedited","UPS Expedited"

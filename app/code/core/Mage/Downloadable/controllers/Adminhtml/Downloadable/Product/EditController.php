@@ -22,7 +22,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
      * Load downloadable tab fieldsets
      *
      */
-    public function formAction()
+    public function formAction(): void
     {
         $this->_initProduct();
         $this->getResponse()->setBody(
@@ -74,7 +74,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
     /**
      * Download link action
      */
-    public function linkAction()
+    public function linkAction(): void
     {
         $linkId = $this->getRequest()->getParam('id', 0);
         $linkType = $this->getRequest()->getParam('type', 'link');

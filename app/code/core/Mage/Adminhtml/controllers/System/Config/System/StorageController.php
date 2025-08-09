@@ -40,7 +40,7 @@ class Mage_Adminhtml_System_Config_System_StorageController extends Mage_Adminht
     /**
      * Synchronize action between storages
      */
-    public function synchronizeAction()
+    public function synchronizeAction(): void
     {
         session_write_close();
 
@@ -77,7 +77,7 @@ class Mage_Adminhtml_System_Config_System_StorageController extends Mage_Adminht
     /**
      * Retrieve synchronize process state and it's parameters in json format
      */
-    public function statusAction()
+    public function statusAction(): void
     {
         $result = [];
         $flag = $this->_getSyncFlag();

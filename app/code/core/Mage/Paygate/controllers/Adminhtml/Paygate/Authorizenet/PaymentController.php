@@ -20,7 +20,7 @@ class Mage_Paygate_Adminhtml_Paygate_Authorizenet_PaymentController extends Mage
     /**
      * Cancel active partail authorizations
      */
-    public function cancelAction()
+    public function cancelAction(): void
     {
         $result['success'] = false;
         try {

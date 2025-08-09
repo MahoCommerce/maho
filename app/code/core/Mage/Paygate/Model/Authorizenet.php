@@ -1509,7 +1509,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param  array $messages
      * @param  bool $isSuccessfulTransactions
      */
-    protected function _processFailureMultitransactionAction($payment, $messages, $isSuccessfulTransactions)
+    protected function _processFailureMultitransactionAction($payment, $messages, $isSuccessfulTransactions): void
     {
         if ($isSuccessfulTransactions) {
             $messages[] = Mage::helper('paygate')->__('Gateway actions are locked because the gateway cannot complete one or more of the transactions. Please log in to your Authorize.Net account to manually resolve the issue(s).');

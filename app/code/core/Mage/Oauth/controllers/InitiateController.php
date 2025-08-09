@@ -26,7 +26,7 @@ class Mage_Oauth_InitiateController extends Mage_Core_Controller_Front_Action
     /**
      * Index action. Receive initiate request and response OAuth token
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         /** @var Mage_Oauth_Model_Server $server */
         $server = Mage::getModel('oauth/server');

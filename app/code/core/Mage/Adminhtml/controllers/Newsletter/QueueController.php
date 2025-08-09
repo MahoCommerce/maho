@@ -22,7 +22,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     /**
      * Queue list action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Queue'));
 
@@ -47,7 +47,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     /**
      * Drop Newsletter queue template
      */
-    public function dropAction()
+    public function dropAction(): void
     {
         $request = $this->getRequest();
         if ($request->getParam('text') && !$request->getPost('text')) {
@@ -79,12 +79,12 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     /**
      * Queue list Ajax action
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/newsletter_queue_grid')->toHtml());
     }
 
-    public function startAction()
+    public function startAction(): void
     {
         $queue = Mage::getModel('newsletter/queue')
             ->load($this->getRequest()->getParam('id'));
@@ -102,7 +102,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
-    public function pauseAction()
+    public function pauseAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
             ->load($this->getRequest()->getParam('id'));
@@ -118,7 +118,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
-    public function resumeAction()
+    public function resumeAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
             ->load($this->getRequest()->getParam('id'));
@@ -134,7 +134,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
-    public function cancelAction()
+    public function cancelAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
             ->load($this->getRequest()->getParam('id'));
@@ -150,7 +150,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
-    public function sendingAction()
+    public function sendingAction(): void
     {
         // Todo: put it somewhere in config!
         $countOfQueue  = 3;
@@ -165,7 +165,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $collection->walk('sendPerSubscriber', [$countOfSubscritions]);
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Queue'));
 
@@ -197,7 +197,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         try {
             /** @var Queue $queue */

@@ -65,19 +65,19 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initAction()
             ->_addContent($this->getLayout()->createBlock('adminhtml/catalog_product_attribute'))
             ->renderLayout();
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $id = $this->getRequest()->getParam('attribute_id');
         $model = Mage::getModel('catalog/resource_eav_attribute')
@@ -126,7 +126,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         $this->renderLayout();
     }
 
-    public function validateAction()
+    public function validateAction(): void
     {
         $response = new Varien_Object();
         $response->setError(false);
@@ -181,7 +181,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         return $data;
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
         if ($data) {
@@ -329,7 +329,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         $this->_redirect('*/*/');
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('attribute_id')) {
             $model = Mage::getModel('catalog/resource_eav_attribute');

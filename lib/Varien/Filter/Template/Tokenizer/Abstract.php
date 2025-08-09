@@ -70,7 +70,7 @@ abstract class Varien_Filter_Template_Tokenizer_Abstract
     /**
      * Set string for tokenize
      */
-    public function setString($value)
+    public function setString($value): void
     {
         $this->_string = $value;
         $this->reset();
@@ -79,7 +79,7 @@ abstract class Varien_Filter_Template_Tokenizer_Abstract
     /**
      * Move char index to begin of string
      */
-    public function reset()
+    public function reset(): void
     {
         $this->_currentIndex = 0;
     }

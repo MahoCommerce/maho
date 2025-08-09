@@ -31,7 +31,7 @@ class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Ac
     /**
      * Display downloadable links bought by customer
      */
-    public function productsAction()
+    public function productsAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');

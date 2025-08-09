@@ -89,7 +89,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Default customer account page
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');
@@ -105,7 +105,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer login form page
      */
-    public function loginAction()
+    public function loginAction(): void
     {
         if ($this->_getSession()->isLoggedIn()) {
             $this->_redirect('*/*/');
@@ -122,7 +122,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Login post action
      */
-    public function loginPostAction()
+    public function loginPostAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
@@ -219,7 +219,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer logout action
      */
-    public function logoutAction()
+    public function logoutAction(): void
     {
         $session = $this->_getSession();
         $session->logout()->renewSession();
@@ -235,7 +235,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Logout success page
      */
-    public function logoutSuccessAction()
+    public function logoutSuccessAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -244,7 +244,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer register form page
      */
-    public function createAction()
+    public function createAction(): void
     {
         if ($this->_getSession()->isLoggedIn()) {
             $this->_redirect('*/*');
@@ -259,7 +259,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Create customer account action
      */
-    public function createPostAction()
+    public function createPostAction(): void
     {
         $errUrl = $this->_getUrl('*/*/create', ['_secure' => true]);
 
@@ -583,7 +583,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Confirm customer account by id and confirmation key
      */
-    public function confirmAction()
+    public function confirmAction(): void
     {
         $session = $this->_getSession();
         if ($session->isLoggedIn()) {
@@ -642,7 +642,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Send confirmation link to specified email
      */
-    public function confirmationAction()
+    public function confirmationAction(): void
     {
         $customer = Mage::getModel('customer/customer');
         if ($this->_getSession()->isLoggedIn()) {
@@ -698,7 +698,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Forgot customer password page
      */
-    public function forgotPasswordAction()
+    public function forgotPasswordAction(): void
     {
         $this->loadLayout();
 
@@ -715,7 +715,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Forgot customer password action
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function forgotPasswordPostAction()
+    public function forgotPasswordPostAction(): void
     {
         $email = (string) $this->getRequest()->getPost('email');
         if ($email) {
@@ -781,7 +781,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Display reset forgotten password form
      *
      */
-    public function changeForgottenAction()
+    public function changeForgottenAction(): void
     {
         try {
             [$customerId, $resetPasswordLinkToken] = $this->_getRestorePasswordParameters($this->_getSession());
@@ -800,7 +800,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * User is redirected on this action when he clicks on the corresponding link in password reset confirmation email.
      *
      */
-    public function resetPasswordAction()
+    public function resetPasswordAction(): void
     {
         try {
             $customerId = (int) $this->getCustomerId();
@@ -819,7 +819,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Reset forgotten password
      * Used to handle data received from reset forgotten password form
      */
-    public function resetPasswordPostAction()
+    public function resetPasswordPostAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
@@ -933,7 +933,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Forgot customer account information page
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');

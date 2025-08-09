@@ -246,10 +246,8 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
     /**
      * Action to reconfigure wishlist item
-     *
-     * @return void
      */
-    public function configureAction()
+    public function configureAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
         try {
@@ -295,7 +293,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     /**
      * Action to accept new configuration for a wishlist item
      */
-    public function updateItemOptionsAction()
+    public function updateItemOptionsAction(): void
     {
         $session = Mage::getSingleton('customer/session');
         $productId = (int) $this->getRequest()->getParam('product');
@@ -643,7 +641,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     /**
      * Prepare wishlist for share
      */
-    public function shareAction()
+    public function shareAction(): void
     {
         $this->_getWishlist();
         $this->loadLayout();
@@ -753,9 +751,8 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
     /**
      * Custom options download action
-     * @return void
      */
-    public function downloadCustomOptionAction()
+    public function downloadCustomOptionAction(): void
     {
         $option = Mage::getModel('wishlist/item_option')->load($this->getRequest()->getParam('id'));
 

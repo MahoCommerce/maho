@@ -41,7 +41,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * View recurring profile detales
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         try {
             $this->_title(Mage::helper('sales')->__('Sales'))->_title(Mage::helper('sales')->__('Recurring Profiles'));
@@ -63,7 +63,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profiles ajax grid
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         try {
             $this->loadLayout()->renderLayout();
@@ -79,7 +79,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profile orders ajax grid
      */
-    public function ordersAction()
+    public function ordersAction(): void
     {
         try {
             $this->_initProfile();
@@ -93,7 +93,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profile state updater action
      */
-    public function updateStateAction()
+    public function updateStateAction(): void
     {
         $profile = null;
         try {
@@ -127,7 +127,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profile information updater action
      */
-    public function updateProfileAction()
+    public function updateProfileAction(): void
     {
         $profile = null;
         try {
@@ -156,7 +156,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
      * Cutomer billing agreements ajax action
      *
      */
-    public function customerGridAction()
+    public function customerGridAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout(false)

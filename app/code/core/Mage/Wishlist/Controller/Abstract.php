@@ -44,7 +44,7 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
      * Add all items from wishlist to shopping cart
      *
      */
-    public function allcartAction()
+    public function allcartAction(): void
     {
         if ($this->_isCheckFormKey && !$this->_validateFormKey()) {
             $this->_forward('noRoute');

@@ -85,7 +85,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Widget Instances Grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Widgets'));
 
@@ -96,7 +96,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * New widget instance action (forward to edit action)
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -104,7 +104,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Edit widget instance action
      */
-    public function editAction()
+    public function editAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
         if (!$widgetInstance) {
@@ -132,7 +132,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Validate action
      */
-    public function validateAction()
+    public function validateAction(): void
     {
         $result = $this->_initWidgetInstance()->validate();
         if ($result !== true && is_string($result)) {
@@ -148,7 +148,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Save action
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
         if (!$widgetInstance || !$this->_validatePostData($widgetInstance, $this->getRequest()->getPost())) {
@@ -187,7 +187,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
      * Delete Action
      * @throws Mage_Core_Exception|Throwable
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
         if ($widgetInstance) {
@@ -207,7 +207,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
      * Categories chooser Action (Ajax request)
      *
      */
-    public function categoriesAction()
+    public function categoriesAction(): void
     {
         $selected = $this->getRequest()->getParam('selected', '');
         $isAnchorOnly = $this->getRequest()->getParam('is_anchor_only', 0);
@@ -223,7 +223,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Products chooser Action (Ajax request)
      */
-    public function productsAction()
+    public function productsAction(): void
     {
         $selected = $this->getRequest()->getParam('selected', '');
         $productTypeId = $this->getRequest()->getParam('product_type_id', '');
@@ -242,7 +242,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Blocks Action (Ajax request)
      */
-    public function blocksAction()
+    public function blocksAction(): void
     {
         /** @var Mage_Widget_Model_Widget_Instance $widgetInstance */
         $widgetInstance = $this->_initWidgetInstance();
@@ -262,7 +262,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Templates Chooser Action (Ajax request)
      */
-    public function templateAction()
+    public function templateAction(): void
     {
         /** @var Mage_Widget_Model_Widget_Instance $widgetInstance */
         $widgetInstance = $this->_initWidgetInstance();

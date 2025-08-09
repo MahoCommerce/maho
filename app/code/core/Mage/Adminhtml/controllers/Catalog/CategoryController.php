@@ -59,7 +59,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Catalog categories index action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
         $store = $storeId
@@ -73,7 +73,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Add new category form
      */
-    public function addAction()
+    public function addAction(): void
     {
         $this->_forward('edit');
     }
@@ -81,7 +81,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Edit category page
      */
-    public function editAction()
+    public function editAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
         $categoryId = (int) $this->getRequest()->getParam('id');
@@ -160,7 +160,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * WYSIWYG editor action for ajax request
      */
-    public function wysiwygAction()
+    public function wysiwygAction(): void
     {
         $elementId = $this->getRequest()->getParam('element_id', md5(microtime()));
         $storeId = $this->getRequest()->getParam('store_id', 0);
@@ -178,7 +178,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Get tree node (Ajax version)
      */
-    public function categoriesJsonAction()
+    public function categoriesJsonAction(): void
     {
         $recursionLevel = $this->getRequest()->getParam('expand_all') ? 0 : null;
         $categoryId = (int) $this->getRequest()->getPost('id');
@@ -199,7 +199,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Category save
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         try {
             $storeId = (int) $this->getRequest()->getParam('store');
@@ -327,7 +327,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Move category action (AJAX)
      */
-    public function moveAction()
+    public function moveAction(): void
     {
         try {
             $category = $this->_initCategory();
@@ -366,7 +366,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Delete category action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         try {
             $category = $this->_initCategory();
@@ -420,7 +420,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
      * Grid Action
      * Display list of products related to current category
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->_initCategory(true);
         $this->getResponse()->setBody(
@@ -432,7 +432,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
      * Tree Action
      * Retrieve category tree
      */
-    public function treeAction()
+    public function treeAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
         $categoryId = (int) $this->getRequest()->getParam('id');
@@ -455,7 +455,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
     * Build response for refresh input element 'path' in form (AJAX)
     */
-    public function refreshPathAction()
+    public function refreshPathAction(): void
     {
         try {
             $category = $this->_initCategory();
