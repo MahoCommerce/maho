@@ -322,7 +322,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      * @param string $host domain name
      * @return bool
      */
-    private function _isPunycode($host)
+    private function _isPunycode(string $host)
     {
         if (str_starts_with($host, 'xn--') || str_contains($host, '.xn--')
             || str_starts_with($host, 'XN--') || str_contains($host, '.XN--')

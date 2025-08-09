@@ -326,7 +326,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      *
      * @param string $attributeName '_collectedFiles' | '_collectedDirs'
      */
-    private function _generateAndFilterAndSort($attributeName): void
+    private function _generateAndFilterAndSort(string $attributeName): void
     {
         // generate custom data (as rows with columns) basing on the filenames
         foreach ($this->$attributeName as $key => $filename) {
