@@ -11,12 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Contenttype
 {
-    /**
-     * Returns array to be used in multiselect on back-end
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['label' => Mage::helper('usa')->__('Documents'),

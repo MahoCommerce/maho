@@ -29,13 +29,8 @@ class Mage_Review_Model_Resource_Review_Status_Collection extends Mage_Core_Mode
         $this->_init('review/review_status');
     }
 
-    /**
-     * Convert items array to array for select options
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return parent::_toOptionArray('status_id', 'status_code');
     }

@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Web_Redirect
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 0, 'label' => Mage::helper('adminhtml')->__('No')],

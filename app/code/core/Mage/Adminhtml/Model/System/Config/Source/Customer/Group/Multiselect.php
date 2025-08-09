@@ -18,12 +18,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Customer_Group_Multiselect
      */
     protected $_options;
 
-    /**
-     * Retrieve customer groups as array
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         if (!$this->_options) {
             $this->_options = Mage::getResourceModel('customer/group_collection')

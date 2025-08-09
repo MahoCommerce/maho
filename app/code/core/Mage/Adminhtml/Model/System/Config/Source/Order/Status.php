@@ -21,7 +21,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Order_Status
         Mage_Sales_Model_Order::STATE_HOLDED,
     ];
 
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         if ($this->_stateStatuses) {
             $statuses = Mage::getSingleton('sales/order_config')->getStateStatuses($this->_stateStatuses);

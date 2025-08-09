@@ -41,10 +41,7 @@ class Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel
         $this->_helper = !empty($data['helper']) ? $data['helper'] : Mage::helper('log');
     }
 
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

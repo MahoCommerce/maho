@@ -23,13 +23,8 @@ class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_
         $this->_map['fields']['store'] = 'store_table.store_id';
     }
 
-    /**
-     * Returns pairs block_id - title
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('block_id', 'title');
     }

@@ -31,11 +31,6 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
         $this->_map['fields']['store']   = 'store_table.store_id';
     }
 
-    /**
-     * @deprecated after 1.4.0.1, use toOptionIdArray()
-     *
-     * @return array
-     */
     #[\Override]
     public function toOptionArray()
     {

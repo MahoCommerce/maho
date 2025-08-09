@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Product_Thumbnail
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'itself', 'label' => Mage::helper('adminhtml')->__('Product Thumbnail Itself')],

@@ -11,10 +11,7 @@
 
 class Mage_Checkout_Model_Config_Source_Cart_Summary
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 0, 'label' => Mage::helper('checkout')->__('Display number of items in cart')],

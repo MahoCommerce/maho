@@ -31,10 +31,7 @@ class Mage_Tax_Model_System_Config_Source_Algorithm
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_options;
     }

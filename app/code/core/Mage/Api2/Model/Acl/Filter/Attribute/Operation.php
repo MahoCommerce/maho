@@ -11,12 +11,7 @@
 
 class Mage_Api2_Model_Acl_Filter_Attribute_Operation
 {
-    /**
-     * Get options paramets
-     *
-     * @return array
-     */
-    public static function toOptionArray()
+    public static function toOptionArray(): array
     {
         return [
             [

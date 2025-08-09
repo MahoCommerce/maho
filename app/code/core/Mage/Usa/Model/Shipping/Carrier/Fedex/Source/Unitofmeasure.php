@@ -11,12 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Unitofmeasure
 {
-    /**
-     * Return array of Measure units
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $measureUnits = Mage::getSingleton('usa/shipping_carrier_fedex')->getCode('unit_of_measure');
         $result = [];

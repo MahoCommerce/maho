@@ -11,10 +11,7 @@
 
 class Mage_Paypal_Model_System_Config_Source_YesnoShortcut
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 1, 'label' => Mage::helper('paypal')->__('Yes (PayPal recommends this option)')],

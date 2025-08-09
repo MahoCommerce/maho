@@ -114,13 +114,8 @@ class Mage_Tax_Model_Resource_Calculation_Rate_Collection extends Mage_Core_Mode
         return $this;
     }
 
-    /**
-     * Retrieve option array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('tax_calculation_rate_id', 'code');
     }

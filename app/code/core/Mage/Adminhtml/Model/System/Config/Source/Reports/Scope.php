@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Reports_Scope
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'website', 'label' => Mage::helper('adminhtml')->__('Website')],

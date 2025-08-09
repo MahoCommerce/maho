@@ -11,10 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Frequency
 {
-    /**
-     * @return array[]
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => '', 'label' => Mage::helper('sitemap')->__('Do not show in sitemap')],

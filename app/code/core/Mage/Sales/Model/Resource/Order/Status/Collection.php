@@ -25,13 +25,8 @@ class Mage_Sales_Model_Resource_Order_Status_Collection extends Mage_Core_Model_
         $this->_init('sales/order_status');
     }
 
-    /**
-     * Get collection data as options array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('status', 'label');
     }

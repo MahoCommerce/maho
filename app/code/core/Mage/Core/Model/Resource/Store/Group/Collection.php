@@ -87,13 +87,8 @@ class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Re
         return parent::_beforeLoad();
     }
 
-    /**
-     * Convert collection items to array for select options
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('group_id', 'name');
     }

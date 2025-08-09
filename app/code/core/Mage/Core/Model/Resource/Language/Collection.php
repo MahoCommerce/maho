@@ -22,13 +22,8 @@ class Mage_Core_Model_Resource_Language_Collection extends Mage_Core_Model_Resou
         $this->_init('core/language');
     }
 
-    /**
-     *  Convert collection items to array of select options
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('language_code', 'language_title', ['title' => 'language_title']);
     }

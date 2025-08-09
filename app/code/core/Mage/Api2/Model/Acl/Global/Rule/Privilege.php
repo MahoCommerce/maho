@@ -11,10 +11,7 @@
 
 class Mage_Api2_Model_Acl_Global_Rule_Privilege
 {
-    /**
-     * @return array
-     */
-    public static function toOptionArray()
+    public static function toOptionArray(): array
     {
         return [
             [

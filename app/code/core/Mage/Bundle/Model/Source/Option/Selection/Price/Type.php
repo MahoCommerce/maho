@@ -11,10 +11,7 @@
 
 class Mage_Bundle_Model_Source_Option_Selection_Price_Type
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => '0', 'label' => Mage::helper('bundle')->__('Fixed')],

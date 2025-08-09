@@ -55,12 +55,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
         return $_options;
     }
 
-    /**
-     * Retrieve option array
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->getOptionArray();
     }

@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Catalog_GridPerPage
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $result = [];
         $perPageValues = Mage::getConfig()->getNode('frontend/catalog/per_page_values/grid');

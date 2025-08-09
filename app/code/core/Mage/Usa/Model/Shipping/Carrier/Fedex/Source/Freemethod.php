@@ -13,7 +13,7 @@
 class Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Freemethod extends Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Method
 {
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $arr = parent::toOptionArray();
         array_unshift($arr, ['value' => '', 'label' => Mage::helper('shipping')->__('None')]);

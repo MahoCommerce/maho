@@ -72,13 +72,8 @@ class Mage_Customer_Model_Resource_Group_Collection extends Mage_Core_Model_Reso
         return $this;
     }
 
-    /**
-     * Retrieve option array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return parent::_toOptionArray('customer_group_id', 'customer_group_code');
     }

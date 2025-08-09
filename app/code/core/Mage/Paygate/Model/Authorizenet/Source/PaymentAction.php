@@ -11,7 +11,7 @@
 
 class Mage_Paygate_Model_Authorizenet_Source_PaymentAction
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

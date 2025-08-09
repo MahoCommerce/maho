@@ -83,12 +83,7 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
         ];
     }
 
-    /**
-     * Retrieve option array
-     *
-     * @return array
-     */
-    public static function toOptionArray()
+    public static function toOptionArray(): array
     {
         return self::getOptionArray();
     }

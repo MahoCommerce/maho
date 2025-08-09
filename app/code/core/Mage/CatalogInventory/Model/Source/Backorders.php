@@ -11,10 +11,7 @@
 
 class Mage_CatalogInventory_Model_Source_Backorders
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => Mage_CatalogInventory_Model_Stock::BACKORDERS_NO, 'label' => Mage::helper('cataloginventory')->__('No Backorders')],

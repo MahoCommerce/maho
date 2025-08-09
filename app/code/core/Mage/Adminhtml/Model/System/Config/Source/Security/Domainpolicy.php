@@ -24,10 +24,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Security_Domainpolicy
         $this->_helper = $options['helper'] ?? Mage::helper('adminhtml');
     }
 
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

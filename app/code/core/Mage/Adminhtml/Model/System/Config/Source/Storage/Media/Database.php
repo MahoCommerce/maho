@@ -42,12 +42,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Storage_Media_Database
         return $config;
     }
 
-    /**
-     * Options getter
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $mediaStorages = [];
 

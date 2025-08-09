@@ -54,12 +54,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type extends Mage_Eav_Mod
         return $this->_options;
     }
 
-    /**
-     * Get options as array
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->getAllOptions();
     }

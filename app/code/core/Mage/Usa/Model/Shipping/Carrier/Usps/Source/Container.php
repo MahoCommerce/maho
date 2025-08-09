@@ -11,7 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Usps_Source_Container
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $usps = Mage::getSingleton('usa/shipping_carrier_usps');
         $arr = [];

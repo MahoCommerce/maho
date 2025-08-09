@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Email_Method
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

@@ -11,7 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Packaging
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $fedex = Mage::getSingleton('usa/shipping_carrier_fedex');
         $arr = [];

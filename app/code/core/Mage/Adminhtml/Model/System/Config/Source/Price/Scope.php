@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Price_Scope
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => '0', 'label' => Mage::helper('core')->__('Global')],

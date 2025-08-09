@@ -45,12 +45,7 @@ class Mage_Customer_Model_Config_Share extends Mage_Core_Model_Config_Data
         return Mage::getStoreConfig(self::XML_PATH_CUSTOMER_ACCOUNT_SHARE) == self::SHARE_WEBSITE;
     }
 
-    /**
-     * Get possible sharing configuration options
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             self::SHARE_GLOBAL  => Mage::helper('customer')->__('Global'),

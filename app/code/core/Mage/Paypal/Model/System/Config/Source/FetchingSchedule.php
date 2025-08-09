@@ -11,7 +11,7 @@
 
 class Mage_Paypal_Model_System_Config_Source_FetchingSchedule
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             1 => Mage::helper('paypal')->__('Daily'),

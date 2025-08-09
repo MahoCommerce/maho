@@ -11,12 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Requesttype
 {
-    /**
-     * Returns array to be used in packages request type on back-end
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 0, 'label' => Mage::helper('shipping')->__('Divide to equal weight (one request)')],

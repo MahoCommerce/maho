@@ -11,10 +11,7 @@
 
 class Mage_Paypal_Model_System_Config_Source_UrlMethod
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'GET', 'label' => 'GET'],

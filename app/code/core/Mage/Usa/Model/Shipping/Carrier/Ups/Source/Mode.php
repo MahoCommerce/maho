@@ -14,7 +14,7 @@
  */
 class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Mode
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => '1', 'label' => Mage::helper('usa')->__('Live')],

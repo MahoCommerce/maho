@@ -11,7 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Method
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $ups = Mage::getSingleton('usa/shipping_carrier_ups');
         $arr = [];

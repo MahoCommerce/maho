@@ -17,12 +17,7 @@ class Mage_Api2_Model_Acl_Global_Rule_Permission
     public const TYPE_ALLOW = 1;
     public const TYPE_DENY  = 0;
 
-    /**
-     * Get options parameters
-     *
-     * @return array
-     */
-    public static function toOptionArray()
+    public static function toOptionArray(): array
     {
         return [
             [

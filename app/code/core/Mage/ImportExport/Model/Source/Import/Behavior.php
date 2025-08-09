@@ -11,12 +11,7 @@
 
 class Mage_ImportExport_Model_Source_Import_Behavior
 {
-    /**
-     * Prepare and return array of import behavior.
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

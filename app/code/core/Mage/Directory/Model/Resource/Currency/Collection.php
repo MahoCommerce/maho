@@ -95,13 +95,8 @@ class Mage_Directory_Model_Resource_Currency_Collection extends Mage_Core_Model_
         return $this;
     }
 
-    /**
-     * Convert collection items to select options array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('currency_code', 'currency_name');
     }

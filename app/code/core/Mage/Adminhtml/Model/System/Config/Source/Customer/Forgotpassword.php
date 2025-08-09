@@ -16,7 +16,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword
     public const FORGOTPASS_FLOW_IP        = 2;
     public const FORGOTPASS_FLOW_EMAIL     = 3;
 
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => self::FORGOTPASS_FLOW_DISABLED, 'label' => Mage::helper('adminhtml')->__('Disabled')],

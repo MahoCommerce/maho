@@ -53,12 +53,7 @@ class Mage_Tax_Model_Class_Source_Product extends Mage_Eav_Model_Entity_Attribut
         return false;
     }
 
-    /**
-     * Convert to options array
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->getAllOptions();
     }

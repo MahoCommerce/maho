@@ -32,13 +32,8 @@ class Mage_Tax_Model_Resource_Class_Collection extends Mage_Core_Model_Resource_
         return $this->addFieldToFilter('main_table.class_type', $classTypeId);
     }
 
-    /**
-     * Retrieve option array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('class_id', 'class_name');
     }

@@ -11,7 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Unitofmeasure
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $unitArr = Mage::getSingleton('usa/shipping_carrier_ups')->getCode('unit_of_measure');
         $returnArr = [];

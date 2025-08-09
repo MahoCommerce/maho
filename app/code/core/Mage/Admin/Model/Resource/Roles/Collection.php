@@ -31,13 +31,8 @@ class Mage_Admin_Model_Resource_Roles_Collection extends Mage_Core_Model_Resourc
         return $this;
     }
 
-    /**
-     * Convert to option array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('role_id', 'role_name');
     }

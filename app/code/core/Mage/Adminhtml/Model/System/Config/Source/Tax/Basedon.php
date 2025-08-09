@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Tax_Basedon
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'shipping', 'label' => Mage::helper('adminhtml')->__('Shipping Address')],

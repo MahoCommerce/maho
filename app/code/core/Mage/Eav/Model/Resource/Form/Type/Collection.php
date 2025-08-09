@@ -22,13 +22,8 @@ class Mage_Eav_Model_Resource_Form_Type_Collection extends Mage_Core_Model_Resou
         $this->_init('eav/form_type');
     }
 
-    /**
-     * Convert items array to array for select options
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('type_id', 'label');
     }

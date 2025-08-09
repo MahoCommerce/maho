@@ -31,7 +31,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
         'sweego' => 'symfony/sweego-mailer',
     ];
 
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $options = [
             ['value' => '0', 'label' => Mage::helper('adminhtml')->__('Disable All Email Communications')],

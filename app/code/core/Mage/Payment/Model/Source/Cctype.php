@@ -40,10 +40,7 @@ class Mage_Payment_Model_Source_Cctype
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         /**
          * making filter by allowed cards

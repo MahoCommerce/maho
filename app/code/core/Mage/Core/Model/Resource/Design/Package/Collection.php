@@ -27,12 +27,7 @@ class Mage_Core_Model_Resource_Design_Package_Collection extends Varien_Object
         return $this;
     }
 
-    /**
-     * Convert to option array
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $options = [];
         $packages = $this->getData('packages');

@@ -11,10 +11,7 @@
 
 class Mage_Paypal_Model_System_Config_Source_PaymentActions
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $configModel = Mage::getModel('paypal/config');
         return $configModel->getPaymentActions();

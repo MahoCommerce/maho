@@ -11,12 +11,7 @@
 
 class Mage_ImportExport_Model_Source_Import_Entity
 {
-    /**
-     * Prepare and return array of import entities ids and their names
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $options = [];
         $entities = Mage_ImportExport_Model_Import::CONFIG_KEY_ENTITIES;

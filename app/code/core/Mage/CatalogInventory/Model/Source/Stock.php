@@ -11,10 +11,7 @@
 
 class Mage_CatalogInventory_Model_Source_Stock
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

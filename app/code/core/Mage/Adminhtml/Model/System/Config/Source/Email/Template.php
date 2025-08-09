@@ -23,12 +23,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Template extends Varien_Ob
      */
     public const XML_PATH_TEMPLATE_EMAIL = 'global/template/email/';
 
-    /**
-     * Generate list of email templates
-     *
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         if (!$collection = Mage::registry('config_system_email_template')) {
             $collection = Mage::getResourceModel('core/email_template_collection')

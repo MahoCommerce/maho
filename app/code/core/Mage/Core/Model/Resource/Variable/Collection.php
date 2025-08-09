@@ -69,13 +69,8 @@ class Mage_Core_Model_Resource_Variable_Collection extends Mage_Core_Model_Resou
         return $this;
     }
 
-    /**
-     * Retrieve option array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('code', 'name');
     }

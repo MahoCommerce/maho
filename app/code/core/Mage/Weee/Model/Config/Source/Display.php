@@ -11,10 +11,7 @@
 
 class Mage_Weee_Model_Config_Source_Display
 {
-    /**
-     * @return array
-     */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         /**
          * VAT is not applicable to FPT separately (we can't have FPT incl/excl VAT)

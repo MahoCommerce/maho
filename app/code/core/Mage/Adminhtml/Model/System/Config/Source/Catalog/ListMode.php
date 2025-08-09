@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Catalog_ListMode
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             //array('value'=>'', 'label'=>''),

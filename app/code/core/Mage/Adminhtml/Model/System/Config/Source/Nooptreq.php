@@ -11,7 +11,7 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Nooptreq
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => '', 'label' => Mage::helper('adminhtml')->__('No')],

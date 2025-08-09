@@ -34,13 +34,8 @@ class Mage_Newsletter_Model_Resource_Template_Collection extends Mage_Core_Model
         return $this;
     }
 
-    /**
-     * Returns options array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('template_id', 'template_code');
     }

@@ -11,7 +11,7 @@
 
 class Mage_Usa_Model_Shipping_Carrier_Ups_Source_OriginShipment
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $orShipArr = Mage::getSingleton('usa/shipping_carrier_ups')->getCode('originShipment');
         $returnArr = [];
