@@ -50,7 +50,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Meta extends Mage_Adminhtml_Block_W
             'name' => 'meta_robots',
             'label' => Mage::helper('cms')->__('Robots'),
             'title' => Mage::helper('cms')->__('Meta Robots'),
-            'values' => Mage::getSingleton('adminhtml/system_config_source_design_robots')->toOptionArray(),
+            'values' => Mage::getSingleton('page/source_robots')->toOptionArray(),
             'disabled'  => $isElementDisabled,
         ]);
 

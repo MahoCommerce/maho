@@ -2,6 +2,7 @@
 "%s - Go to Home Page","%s - Go to Home Page"
 "%s Item(s)","%s Item(s)"
 "-- Please Select --","-- Please Select --"
+"-- Use Default --","-- Use Default --"
 "1 column","1 column"
 "2 columns with left bar","2 columns with left bar"
 "2 columns with right bar","2 columns with right bar"
