@@ -479,7 +479,7 @@ class Varien_File_Uploader
         return $this->_file['type'];
     }
 
-    private function _setUploadFileId($fileId)
+    private function _setUploadFileId($fileId): void
     {
         if (empty($_FILES)) {
             throw new Exception('$_FILES array is empty', UPLOAD_ERR_NO_FILE);

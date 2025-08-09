@@ -96,7 +96,7 @@ class Varien_Io_File extends Varien_Io_Abstract
     /**
      * stream close on shutdown
      */
-    public function destruct()
+    public function destruct(): void
     {
         if ($this->_streamHandler) {
             $this->streamClose();
