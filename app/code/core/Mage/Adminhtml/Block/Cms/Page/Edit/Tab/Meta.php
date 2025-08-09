@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -43,6 +43,14 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Meta extends Mage_Adminhtml_Block_W
             'name' => 'meta_description',
             'label' => Mage::helper('cms')->__('Description'),
             'title' => Mage::helper('cms')->__('Meta Description'),
+            'disabled'  => $isElementDisabled,
+        ]);
+
+        $fieldset->addField('meta_robots', 'select', [
+            'name' => 'meta_robots',
+            'label' => Mage::helper('cms')->__('Robots'),
+            'title' => Mage::helper('cms')->__('Meta Robots'),
+            'values' => Mage::getSingleton('page/source_robots')->toOptionArray(),
             'disabled'  => $isElementDisabled,
         ]);
 
