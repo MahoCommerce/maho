@@ -128,14 +128,10 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         /**
          * Check for maximum attribute_code length
          */
-        if (isset($this->_data['attribute_code']) &&
-            !Zend_Validate::is(
-                $this->_data['attribute_code'],
-                'StringLength',
-                ['max' => self::ATTRIBUTE_CODE_MAX_LENGTH],
-            )
-        ) {
-            throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
+        if (isset($this->_data['attribute_code'])) {
+            if (!Mage::helper('core')->isValidLength($this->_data['attribute_code'], null, self::ATTRIBUTE_CODE_MAX_LENGTH)) {
+                throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
+            }
         }
 
         $defaultValue   = $this->getDefaultValue();

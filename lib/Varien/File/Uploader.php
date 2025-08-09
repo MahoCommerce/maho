@@ -6,9 +6,12 @@
  * @package    Varien_File
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * File upload class
@@ -365,8 +368,10 @@ class Varien_File_Uploader
     {
         try {
             if (count($validTypes) > 0) {
-                $validator = new Zend_Validate_File_MimeType($validTypes);
-                return $validator->isValid($this->_file['tmp_name']);
+                $validator = Validation::createValidator();
+                $constraint = new Assert\File(['mimeTypes' => $validTypes]);
+                $violations = $validator->validate($this->_file['tmp_name'], $constraint);
+                return count($violations) === 0;
             }
             return true;
         } catch (Exception $e) {

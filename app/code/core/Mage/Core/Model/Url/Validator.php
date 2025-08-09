@@ -10,47 +10,50 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Url_Validator extends Zend_Validate_Abstract
+/**
+ * URL validation extending Symfony's built-in Url constraint
+ */
+class Mage_Core_Model_Url_Validator
 {
-    /**
-     * Error keys
-     */
-    public const INVALID_URL = 'invalidUrl';
+    private array $_messages = [];
 
-    /**
-     * Object constructor
-     */
-    public function __construct()
-    {
-        // set translated message template
-        $this->setMessage(Mage::helper('core')->__("Invalid URL '%value%'."), self::INVALID_URL);
+    public string $message = 'Invalid URL "{{ value }}".';
+
+    public function __construct(
+        ?string $message = null,
+    ) {
+        // Set default message if not provided
+        $this->message = $message ?? $this->message;
     }
 
-    /**
-     * Validation failure message template definitions
-     *
-     * @var array
-     */
-    protected $_messageTemplates = [
-        self::INVALID_URL => "Invalid URL '%value%'.",
-    ];
-
-    /**
-     * Validate value
-     *
-     * @param string $value
-     * @return bool
-     */
-    #[\Override]
-    public function isValid($value)
+    public function validate(mixed $value): bool
     {
-        $this->_setValue($value);
+        $this->_messages = [];
+
+        if (null === $value || '' === $value) {
+            return true;
+        }
 
         if (!Mage::helper('core')->isValidUrl($value)) {
-            $this->_error(self::INVALID_URL);
+            $this->_messages[] = str_replace('{{ value }}', (string) $value, $this->message);
             return false;
         }
 
         return true;
+    }
+
+    public function getMessages(): array
+    {
+        return $this->_messages;
+    }
+
+    public function getMessage(): string
+    {
+        return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    public function isValid(mixed $value): bool
+    {
+        return $this->validate($value);
     }
 }

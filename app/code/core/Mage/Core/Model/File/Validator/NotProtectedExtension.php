@@ -6,92 +6,64 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate_Abstract
+class Mage_Core_Model_File_Validator_NotProtectedExtension
 {
-    public const PROTECTED_EXTENSION = 'protectedExtension';
+    public array $protectedExtensions = [];
 
-    /**
-     * The file extension
-     *
-     * @var string
-     */
-    protected $_value;
+    private array $_messages = [];
 
-    /**
-     * Protected file types
-     *
-     * @var array
-     */
-    protected $_protectedFileExtensions = [];
-
-    public function __construct()
+    public function __construct(?array $protectedExtensions = null)
     {
-        $this->_initMessageTemplates();
-        $this->_initProtectedFileExtensions();
+        $this->protectedExtensions = $protectedExtensions ?? $this->_getDefaultProtectedExtensions();
     }
 
-    /**
-     * Initialize message templates with translating
-     *
-     * @return $this
-     */
-    protected function _initMessageTemplates()
+    public function isValid(mixed $value): bool
     {
-        if (!$this->_messageTemplates) {
-            $this->_messageTemplates = [
-                self::PROTECTED_EXTENSION => Mage::helper('core')->__('File with an extension "%value%" is protected and cannot be uploaded'),
-            ];
+        $this->_messages = [];
+
+        if (null === $value || '' === $value) {
+            return true;
         }
-        return $this;
-    }
 
-    /**
-     * Initialize protected file extensions
-     *
-     * @return $this
-     */
-    protected function _initProtectedFileExtensions()
-    {
-        if (!$this->_protectedFileExtensions) {
-            /** @var Mage_Core_Helper_Data $helper */
-            $helper = Mage::helper('core');
-            $extensions = $helper->getProtectedFileExtensions();
-            if (is_string($extensions)) {
-                $extensions = explode(',', $extensions);
-            }
-            foreach ($extensions as &$ext) {
-                $ext = strtolower(trim($ext));
-            }
-            $this->_protectedFileExtensions = (array) $extensions;
+        if (!is_string($value)) {
+            $this->_messages[] = Mage::helper('core')->__('Value must be a string.');
+            return false;
         }
-        return $this;
-    }
 
-    /**
-     * Returns true if and only if $value meets the validation requirements
-     *
-     * If $value fails validation, then this method returns false, and
-     * getMessages() will return an array of messages that explain why the
-     * validation failed.
-     *
-     * @param string $value         Extension of file
-     * @return bool
-     */
-    #[\Override]
-    public function isValid($value)
-    {
         $value = strtolower(trim($value));
-        $this->_setValue($value);
 
-        if (in_array($this->_value, $this->_protectedFileExtensions)) {
-            $this->_error(self::PROTECTED_EXTENSION, $this->_value);
+        if (in_array($value, $this->protectedExtensions)) {
+            $this->_messages[] = Mage::helper('core')->__('File with an extension "%s" is protected and cannot be uploaded.', $value);
             return false;
         }
 
         return true;
+    }
+
+    public function getMessages(): array
+    {
+        return $this->_messages;
+    }
+
+    public function getMessage(): string
+    {
+        return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    private function _getDefaultProtectedExtensions(): array
+    {
+        $helper = Mage::helper('core');
+        $extensions = $helper->getProtectedFileExtensions();
+        if (is_string($extensions)) {
+            $extensions = explode(',', $extensions);
+        }
+        foreach ($extensions as &$ext) {
+            $ext = strtolower(trim($ext));
+        }
+        return (array) $extensions;
     }
 }
