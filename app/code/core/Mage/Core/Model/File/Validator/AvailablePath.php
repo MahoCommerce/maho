@@ -69,7 +69,7 @@ class Mage_Core_Model_File_Validator_AvailablePath
         }
 
         if (preg_match('#\\..[\\\\/]#', $value)) {
-            $this->_messages[] = Mage::helper('core')->__('Path "%s" may not include parent directory traversal ("../", "..\").', $value);
+            $this->_messages[] = Mage::helper('core')->__('Path "%s" contains invalid parent directory references.', $value);
             return false;
         }
 
