@@ -30,7 +30,7 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
         return parent::preDispatch();
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this
             ->_title($this->__('System'))->_title($this->__('Design'))
@@ -40,17 +40,17 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
             ->renderLayout();
     }
 
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/system_design_grid')->toHtml());
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this
             ->_title($this->__('System'))
@@ -75,7 +75,7 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
         $this->renderLayout();
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
             if (!empty($data['design'])) {
@@ -109,7 +109,7 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             $design = Mage::getModel('core/design')->load($id);

@@ -25,7 +25,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
         return $this;
     }
 
-    public function customerAction()
+    public function customerAction(): void
     {
         $this->_title($this->__('Reports'))
              ->_title($this->__('Tags'))
@@ -41,7 +41,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export customer's tags report to CSV format
      */
-    public function exportCustomerCsvAction()
+    public function exportCustomerCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_customer_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('tag_customer.csv', -1));
@@ -50,13 +50,13 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export customer's tags report to Excel XML format
      */
-    public function exportCustomerExcelAction()
+    public function exportCustomerExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_customer_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tag_customer.xml', -1));
     }
 
-    public function productAction()
+    public function productAction(): void
     {
         $this->_title($this->__('Reports'))
              ->_title($this->__('Tags'))
@@ -72,7 +72,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export product's tags report to CSV format
      */
-    public function exportProductCsvAction()
+    public function exportProductCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_product_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('tag_product.csv', -1));
@@ -81,13 +81,13 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export product's tags report to Excel XML format
      */
-    public function exportProductExcelAction()
+    public function exportProductExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_product_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tag_product.xml', -1));
     }
 
-    public function popularAction()
+    public function popularAction(): void
     {
         $this->_title($this->__('Reports'))
              ->_title($this->__('Tags'))
@@ -103,7 +103,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export popular tags report to CSV format
      */
-    public function exportPopularCsvAction()
+    public function exportPopularCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_popular_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('tag_popular.csv', -1));
@@ -112,13 +112,13 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export popular tags report to Excel XML format
      */
-    public function exportPopularExcelAction()
+    public function exportPopularExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_popular_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tag_popular.xml', -1));
     }
 
-    public function customerDetailAction()
+    public function customerDetailAction(): void
     {
         $detailBlock = $this->getLayout()->createBlock('adminhtml/report_tag_customer_detail');
 
@@ -138,7 +138,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export customer's tags detail report to CSV format
      */
-    public function exportCustomerDetailCsvAction()
+    public function exportCustomerDetailCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_customer_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('tag_customer_detail.csv', -1));
@@ -147,13 +147,13 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export customer's tags detail report to Excel XML format
      */
-    public function exportCustomerDetailExcelAction()
+    public function exportCustomerDetailExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_customer_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tag_customer_detail.xml', -1));
     }
 
-    public function productDetailAction()
+    public function productDetailAction(): void
     {
         $detailBlock = $this->getLayout()->createBlock('adminhtml/report_tag_product_detail');
 
@@ -173,7 +173,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export product's tags detail report to CSV format
      */
-    public function exportProductDetailCsvAction()
+    public function exportProductDetailCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_product_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('tag_product_detail.csv', -1));
@@ -182,13 +182,13 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export product's tags detail report to Excel XML format
      */
-    public function exportProductDetailExcelAction()
+    public function exportProductDetailExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_product_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tag_product_detail.xml', -1));
     }
 
-    public function tagDetailAction()
+    public function tagDetailAction(): void
     {
         $detailBlock = $this->getLayout()->createBlock('adminhtml/report_tag_popular_detail');
 
@@ -208,7 +208,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export tag detail report to CSV format
      */
-    public function exportTagDetailCsvAction()
+    public function exportTagDetailCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_popular_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('tag_detail.csv', -1));
@@ -217,7 +217,7 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     /**
      * Export tag detail report to Excel XML format
      */
-    public function exportTagDetailExcelAction()
+    public function exportTagDetailExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_tag_popular_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tag_detail.xml', -1));

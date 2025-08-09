@@ -44,7 +44,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $items = $this->getRequest()->getParam('items');
 
@@ -68,7 +68,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Add item to compare list
      */
-    public function addAction()
+    public function addAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirectReferer();
@@ -100,7 +100,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Remove item from compare list
      */
-    public function removeAction()
+    public function removeAction(): void
     {
         $productId = (int) $this->getRequest()->getParam('product');
         if ($this->isProductAvailable($productId)) {
@@ -142,7 +142,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Remove all items from comparison list
      */
-    public function clearAction()
+    public function clearAction(): void
     {
         $items = Mage::getResourceModel('catalog/product_compare_item_collection');
 

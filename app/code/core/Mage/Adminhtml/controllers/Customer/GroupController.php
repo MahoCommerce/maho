@@ -44,7 +44,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Customer groups list.
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Customers'))->_title($this->__('Customer Groups'));
 
@@ -58,7 +58,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Edit or create customer group.
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_initGroup();
         $this->loadLayout();
@@ -86,7 +86,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Edit customer group action. Forward to new action.
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_forward('new');
     }
@@ -94,7 +94,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Create or save customer group.
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $customerGroup = Mage::getModel('customer/group');
         $id = $this->getRequest()->getParam('id');
@@ -130,7 +130,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Delete customer group action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $customerGroup = Mage::getModel('customer/group');
         if ($id = (int) $this->getRequest()->getParam('id')) {

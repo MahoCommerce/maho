@@ -18,7 +18,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
     /**
      * View billing agreements
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Billing Agreements'));
         $this->loadLayout();
@@ -50,7 +50,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      * View billing agreement
      *
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         $agreement = $this->_initAgreement();
         if (!$agreement) {
@@ -107,7 +107,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      * Wizard return action
      *
      */
-    public function returnWizardAction()
+    public function returnWizardAction(): void
     {
         $agreement = Mage::getModel('sales/billing_agreement');
         $paymentCode = $this->getRequest()->getParam('payment_method');
@@ -138,7 +138,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      * Wizard cancel action
      *
      */
-    public function cancelWizardAction()
+    public function cancelWizardAction(): void
     {
         $this->_redirect('*/*/index');
     }
@@ -148,7 +148,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      * Set billing agreement status to 'Canceled'
      *
      */
-    public function cancelAction()
+    public function cancelAction(): void
     {
         $agreement = $this->_initAgreement();
         if (!$agreement) {

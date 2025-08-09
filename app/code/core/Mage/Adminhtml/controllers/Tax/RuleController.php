@@ -38,7 +38,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Redirect to edit action
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -46,7 +46,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit action
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Sales'))
              ->_title($this->__('Tax'))
@@ -160,7 +160,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $ruleId = (int) $this->getRequest()->getParam('rule');
         $ruleModel = Mage::getSingleton('tax/calculation_rule')

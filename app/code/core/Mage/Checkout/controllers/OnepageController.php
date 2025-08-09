@@ -166,7 +166,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Checkout page
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         if (!Mage::helper('checkout')->canOnepageCheckout()) {
             Mage::getSingleton('checkout/session')->addError($this->__('The onepage checkout is disabled.'));
@@ -227,7 +227,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Shipping method action
      */
-    public function shippingMethodAction()
+    public function shippingMethodAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -239,7 +239,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Review page action
      */
-    public function reviewAction()
+    public function reviewAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -251,7 +251,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Order success action
      */
-    public function successAction()
+    public function successAction(): void
     {
         $session = $this->getOnepage()->getCheckout();
         if (!$session->getLastSuccessQuoteId()) {
@@ -277,7 +277,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Failure action
      */
-    public function failureAction()
+    public function failureAction(): void
     {
         $lastQuoteId = $this->getOnepage()->getCheckout()->getLastQuoteId();
         $lastOrderId = $this->getOnepage()->getCheckout()->getLastOrderId();
@@ -294,7 +294,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Get additional info action
      */
-    public function getAdditionalAction()
+    public function getAdditionalAction(): void
     {
         $this->getResponse()->setBody($this->_getAdditionalHtml());
     }
@@ -302,7 +302,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Address JSON
      */
-    public function getAddressAction()
+    public function getAddressAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -322,7 +322,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Save checkout method
      */
-    public function saveMethodAction()
+    public function saveMethodAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -338,7 +338,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Save checkout billing address
      */
-    public function saveBillingAction()
+    public function saveBillingAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -389,7 +389,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Shipping address save action
      */
-    public function saveShippingAction()
+    public function saveShippingAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -418,7 +418,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Shipping method save action
      */
-    public function saveShippingMethodAction()
+    public function saveShippingMethodAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -458,7 +458,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      *
      * Sets either redirect or a JSON response
      */
-    public function savePaymentAction()
+    public function savePaymentAction(): void
     {
         if ($this->_expireAjax()) {
             return;
@@ -545,7 +545,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Create order action
      */
-    public function saveOrderAction()
+    public function saveOrderAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*');

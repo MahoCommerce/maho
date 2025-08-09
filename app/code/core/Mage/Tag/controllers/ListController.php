@@ -11,7 +11,7 @@
 
 class Mage_Tag_ListController extends Mage_Core_Controller_Front_Action
 {
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();

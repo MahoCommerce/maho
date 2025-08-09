@@ -12,7 +12,7 @@
 
 class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
 {
-    public function newAction()
+    public function newAction(): void
     {
         if ($this->checkFeedEnable('catalog/new')) {
             $this->loadLayout(false);
@@ -20,7 +20,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
-    public function specialAction()
+    public function specialAction(): void
     {
         if ($this->checkFeedEnable('catalog/special')) {
             $this->loadLayout(false);
@@ -28,7 +28,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
-    public function salesruleAction()
+    public function salesruleAction(): void
     {
         if ($this->checkFeedEnable('catalog/salesrule')) {
             $this->loadLayout(false);
@@ -36,7 +36,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
-    public function tagAction()
+    public function tagAction(): void
     {
         if ($this->isFeedEnable('catalog/tag')) {
             $tagName = urldecode($this->getRequest()->getParam('tagName'));
@@ -53,7 +53,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         $this->_forward('nofeed', 'index', 'rss');
     }
 
-    public function notifystockAction()
+    public function notifystockAction(): void
     {
         if ($this->checkFeedEnable('catalog/notifystock')) {
             $this->loadLayout(false);
@@ -61,7 +61,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
-    public function reviewAction()
+    public function reviewAction(): void
     {
         if ($this->checkFeedEnable('catalog/review')) {
             $this->loadLayout(false);
@@ -69,7 +69,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
-    public function categoryAction()
+    public function categoryAction(): void
     {
         if ($this->checkFeedEnable('catalog/category')) {
             $this->loadLayout(false);

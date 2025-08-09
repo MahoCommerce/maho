@@ -57,7 +57,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Start Express Checkout by requesting initial token and dispatching customer to PayPal
      */
-    public function startAction()
+    public function startAction(): void
     {
         try {
             $this->_initCheckout();
@@ -128,7 +128,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Return shipping options items for shipping address from request
      */
-    public function shippingOptionsCallbackAction()
+    public function shippingOptionsCallbackAction(): void
     {
         try {
             $quoteId = $this->getRequest()->getParam('quote_id');
@@ -144,7 +144,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Cancel Express Checkout
      */
-    public function cancelAction()
+    public function cancelAction(): void
     {
         try {
             $this->_initToken(false);
@@ -177,7 +177,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Return from PayPal and dispatch customer to order review page
      */
-    public function returnAction()
+    public function returnAction(): void
     {
         if ($this->getRequest()->getParam('retry_authorization') == 'true'
             && is_array($this->_getCheckoutSession()->getPaypalTransactionData())
@@ -209,7 +209,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Review order after returning from PayPal
      */
-    public function reviewAction()
+    public function reviewAction(): void
     {
         try {
             $this->_initCheckout();
@@ -238,7 +238,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Dispatch customer back to PayPal for editing payment information
      */
-    public function editAction()
+    public function editAction(): void
     {
         try {
             $this->getResponse()->setRedirect($this->_config->getExpressCheckoutEditUrl($this->_initToken()));
@@ -251,7 +251,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Update shipping method (combined action for ajax and regular request)
      */
-    public function saveShippingMethodAction()
+    public function saveShippingMethodAction(): void
     {
         try {
             $isAjax = $this->getRequest()->getParam('isAjax');
@@ -281,7 +281,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Update Order (combined action for ajax and regular request)
      */
-    public function updateShippingMethodsAction()
+    public function updateShippingMethodsAction(): void
     {
         try {
             $this->_initCheckout();
@@ -305,7 +305,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Submit the order
      */
-    public function placeOrderAction()
+    public function placeOrderAction(): void
     {
         try {
             $requiredAgreements = Mage::helper('checkout')->getRequiredAgreementIds();

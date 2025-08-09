@@ -11,7 +11,7 @@
 
 class Mage_Tag_ProductController extends Mage_Core_Controller_Front_Action
 {
-    public function listAction()
+    public function listAction(): void
     {
         $tagId = $this->getRequest()->getParam('tagId');
         $tag = Mage::getModel('tag/tag')->load($tagId);

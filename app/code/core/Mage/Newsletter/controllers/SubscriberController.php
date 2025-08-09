@@ -14,7 +14,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
       * New subscription action
       */
-    public function newAction()
+    public function newAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirectReferer();
@@ -63,7 +63,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Subscription confirm action
      */
-    public function confirmAction()
+    public function confirmAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');
         $code  = (string) $this->getRequest()->getParam('code');
@@ -92,7 +92,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Unsubscribe newsletter
      */
-    public function unsubscribeAction()
+    public function unsubscribeAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');
         $code  = (string) $this->getRequest()->getParam('code');

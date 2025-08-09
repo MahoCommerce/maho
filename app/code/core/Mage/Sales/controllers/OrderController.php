@@ -33,7 +33,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Customer order history
      */
-    public function historyAction()
+    public function historyAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('catalog/session');
@@ -64,7 +64,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
      * @deprecated after 1.6.0.0
      *
      */
-    public function viewOldAction()
+    public function viewOldAction(): void
     {
         $this->_forward('noRoute');
     }

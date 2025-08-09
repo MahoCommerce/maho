@@ -29,7 +29,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         return false;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
             Mage::getSingleton('customer/session')->authenticate($this);
@@ -54,7 +54,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
-    public function viewAction()
+    public function viewAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
             Mage::getSingleton('customer/session')->authenticate($this);
@@ -80,7 +80,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    public function removeAction()
+    public function removeAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
             Mage::getSingleton('customer/session')->authenticate($this);

@@ -1025,7 +1025,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param Varien_Event_Observer $observer
      * @throws Exception
      */
-    public function reindexProductsMassAction($observer)
+    public function reindexProductsMassAction($observer): void
     {
         Mage::getSingleton('index/indexer')->indexEvents(
             Mage_Catalog_Model_Product::ENTITY,

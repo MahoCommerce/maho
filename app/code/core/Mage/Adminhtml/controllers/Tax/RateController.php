@@ -15,7 +15,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Show Main Grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
              ->_title($this->__('Tax'))
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Show Add Form
      */
-    public function addAction()
+    public function addAction(): void
     {
         $rateModel = Mage::getSingleton('tax/calculation_rate')->load(null);
 
@@ -108,7 +108,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Show Edit Form
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Sales'))
              ->_title($this->__('Tax'))
@@ -182,7 +182,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Export rates grid to CSV format
      */
-    public function exportCsvAction()
+    public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/tax_rate_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('rates.csv', -1));
@@ -191,7 +191,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Export rates grid to XML format
      */
-    public function exportXmlAction()
+    public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/tax_rate_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('rates.xml', -1));
@@ -214,7 +214,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Import and export Page
      */
-    public function importExportAction()
+    public function importExportAction(): void
     {
         $this->_title($this->__('Sales'))
              ->_title($this->__('Tax'))
@@ -231,7 +231,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Import action from import/export tax
      */
-    public function importPostAction()
+    public function importPostAction(): void
     {
         if ($this->getRequest()->isPost() && !empty($_FILES['import_rates_file']['tmp_name'])) {
             try {
@@ -368,7 +368,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * export action from import/export tax
      */
-    public function exportPostAction()
+    public function exportPostAction(): void
     {
         /** start csv content and set template */
         $headers = new Varien_Object([
