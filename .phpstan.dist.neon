@@ -15,7 +15,7 @@ parameters:
 
     phpVersion:
         min: 80300
-        max: 80499
+        max: 80599
 
     fileExtensions:
         - php
@@ -26,9 +26,6 @@ parameters:
         - lib
         - maho
         - public
-
-    typeAliases:
-        Cm_RedisSession_Model_Session: 'Mage_Core_Model_Resource_Session'
 
     ignoreErrors:
         - identifier: missingType.iterableValue

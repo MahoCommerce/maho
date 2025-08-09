@@ -16,7 +16,7 @@
 <label for="currency_switcher"><?= Mage::helper('sales')->__('Order Currency:') ?></label>
 <select id="currency_switcher" name="order[currency]" onchange="order.setCurrencyId(this.value); order.setCurrencySymbol(this.options[this.selectedIndex].getAttribute('symbol'));">
     <?php foreach ($this->getAvailableCurrencies() as $_code): ?>
-    <option value="<?= $_code ?>"<?php if($_code==$this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?> symbol="<?= $this->getCurrencySymbol($_code) ?>"><?= $this->getCurrencyName($_code) ?></option>
+    <option value="<?= $_code ?>"<?php if($_code==$this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?> symbol="<?= $this->getCurrencySymbol($_code) ?>"><?= $_code ?></option>
     <?php endforeach ?>
 </select>
 </p>

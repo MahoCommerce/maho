@@ -25,6 +25,7 @@ vendor/bin/rector -c .rector.php
 ./maho index:list         # List all indexes
 ./maho index:reindex      # Reindex specific index
 ./maho index:reindex:all  # Reindex all indexes
+./maho db:query "QUERY"   # Execute a one-shot SQL query
 ```
 
 ## Architecture Overview

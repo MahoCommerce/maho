@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <dev>
+            <groups>
+                <speculation_rules translate="label comment">
+                    <label>Speculation Rules API</label>
+                    <comment><![CDATA[<strong>What are Speculation Rules?</strong><br/>The Speculation Rules API allows browsers to prefetch or prerender pages before users click on them, significantly improving navigation speed.<br/><br/><strong>How it works:</strong><br/>• <strong>Prefetch:</strong> Downloads page resources in advance (lower resource usage)<br/>• <strong>Prerender:</strong> Fully renders the page in background (faster but uses more resources)<br/><br/><strong>Eagerness levels control when speculation triggers:</strong><br/>• <strong>Eager:</strong> Immediately when the page loads<br/>• <strong>Moderate:</strong> After 200ms hover over the link<br/>• <strong>Conservative:</strong> On mouse/touch down (just before click)]]></comment>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>950</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Speculation Rules</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <eager_prefetch_selectors translate="label comment">
+                            <label>Eager Prefetch - CSS Selectors</label>
+                            <comment><![CDATA[Links matching these selectors will be <strong>prefetched immediately when the page loads</strong>.<br/>Enter one CSS selector per line.<br/><br/><strong>⚠️ Use sparingly:</strong> Too many eager rules can slow down the current page.]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </eager_prefetch_selectors>
+                        <eager_prerender_selectors translate="label comment">
+                            <label>Eager Prerender - CSS Selectors</label>
+                            <comment><![CDATA[Links matching these selectors will be <strong>prerendered immediately when the page loads</strong>.<br/>Enter one CSS selector per line.<br/><br/><strong>Use very sparingly:</strong> High resource usage, only for critical pages<br/><br/><strong>⚠️ Caution:</strong> Can significantly impact performance. Use only for most critical pages.]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </eager_prerender_selectors>
+                        <moderate_prefetch_selectors translate="label comment">
+                            <label>Moderate Prefetch - CSS Selectors</label>
+                            <comment><![CDATA[Links matching these selectors will be <strong>prefetched after hovering for 200ms</strong>.<br/>Enter one CSS selector per line.]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </moderate_prefetch_selectors>
+                        <moderate_prerender_selectors translate="label comment">
+                            <label>Moderate Prerender - CSS Selectors</label>
+                            <comment><![CDATA[Links matching these selectors will be <strong>prerendered after hovering for 200ms</strong>.<br/>Enter one CSS selector per line.<br/><br/><strong>💡 Balanced approach:</strong> Good performance boost with moderate resource usage.]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </moderate_prerender_selectors>
+                        <conservative_prefetch_selectors translate="label comment">
+                            <label>Conservative Prefetch - CSS Selectors</label>
+                            <comment><![CDATA[Links matching these selectors will be <strong>prefetched on mouse/touch down</strong> (just before click).<br/>Enter one CSS selector per line.]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </conservative_prefetch_selectors>
+                        <conservative_prerender_selectors translate="label comment">
+                            <label>Conservative Prerender - CSS Selectors</label>
+                            <comment><![CDATA[Links matching these selectors will be <strong>prerendered on mouse/touch down</strong> (just before click).<br/>Enter one CSS selector per line.<br/><br/><strong>✅ Minimal risk:</strong> Very low performance impact, safe to use broadly.]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </conservative_prerender_selectors>
+                    </fields>
+                </speculation_rules>
+            </groups>
+        </dev>
+    </sections>
+</config>

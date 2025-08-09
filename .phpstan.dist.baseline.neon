@@ -1699,12 +1699,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Column/Renderer/Currency.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Block_Report_Grid_Shopcart\:\:\$_currentCurrencyCode has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -3991,12 +3985,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Concat.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Currency.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency\:\:\$_currencies has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -4013,18 +4001,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Date.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date\:\:\$_format has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Date.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime\:\:\$_format has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Datetime.php
 
 		-
 			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Input\:\:\$_values has no type specified\.$#'
@@ -4055,12 +4031,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Options.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Price.php
 
 		-
 			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price\:\:\$_currencies has no type specified\.$#'
@@ -5149,12 +5119,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Admin/Page.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Admin_Page\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Admin/Page.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Admin_Page\:\:\$_url has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -5203,36 +5167,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Allregion.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Catalog_GridPerPage\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Catalog/GridPerPage.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Catalog_ListMode\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Catalog/ListMode.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Catalog_ListPerPage\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Catalog/ListPerPage.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Catalog_Search_Type\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Catalog/Search/Type.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Catalog_TimeFormat\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Catalog/TimeFormat.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Category\:\:toOptionArray\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5245,22 +5179,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Category.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Cms_Page\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Page.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Cms_Page\:\:\$_options has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Page.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Cms_Wysiwyg_Enabled\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Wysiwyg/Enabled.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Country\:\:toOptionArray\(\) has no return type specified\.$#'
@@ -5291,12 +5213,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Country/Full.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Cron_Frequency\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cron/Frequency.php
 
 		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Cron_Frequency\:\:\$_options has no type specified\.$#'
@@ -5341,70 +5257,16 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Currency/Service.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Customer/Forgotpassword.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Customer_Group\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Customer/Group.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Customer_Group\:\:\$_options has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Customer/Group.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Package\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Design/Package.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Design_Robots\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Design/Robots.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Dev_Dbautoup\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Dev/Dbautoup.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Email_Identity\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Email/Identity.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Email_Identity\:\:\$_options has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Email/Identity.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Email_Method\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Email/Method.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Email_Transport\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Email/Transport.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Enabledisable\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Enabledisable.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Language\:\:toOptionArray\(\) has no return type specified\.$#'
@@ -5423,24 +5285,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Language.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Locale\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Locale.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Locale_Country\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Locale/Country.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Locale_Currency\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Locale/Currency.php
 
 		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Locale_Currency\:\:\$_option has no type specified\.$#'
@@ -5467,48 +5311,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Locale/Currency/All.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Locale_Timezone\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Locale/Timezone.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Locale_Weekdaycodes\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Locale/Weekdaycodes.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Locale_Weekdays\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Locale/Weekdays.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Log_Level\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Log/Level.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Nooptreq\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Nooptreq.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Notification_Frequency\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Notification/Frequency.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Order_Status\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Order/Status.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Order_Status\:\:\$_stateStatuses has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -5533,136 +5335,16 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Order/Status/Processing.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Payment_Allmethods\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Payment/Allmethods.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Payment_Allowedmethods\:\:_getPaymentMethods\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Payment/Allowedmethods.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Payment_Allspecificcountries\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Payment/Allspecificcountries.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Payment_Cctype\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Payment/Cctype.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Price_Scope\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Price/Scope.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Price_Step\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Price/Step.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Product_Options_Price\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Product/Options/Price.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Product_Options_Type\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Product/Options/Type.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Product_Thumbnail\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Product/Thumbnail.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Reports_Scope\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Reports/Scope.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Shipping_Allspecificcountries\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Shipping/Allspecificcountries.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Shipping_Flatrate\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Shipping/Flatrate.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Shipping_Tablerate\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Shipping/Tablerate.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Shipping_Taxclass\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Shipping/Taxclass.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Store\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Store.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Store\:\:\$_options has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Store.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Tax_Apply_On\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Tax/Apply/On.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Tax_Basedon\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Tax/Basedon.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Tax_Catalog\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Tax/Catalog.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Web_Protocol\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Web/Protocol.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Web_Redirect\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Web/Redirect.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Website\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Website.php
 
 		-
 			message: '#^Property Mage_Adminhtml_Model_System_Config_Source_Website\:\:\$_options has no type specified\.$#'
@@ -12757,12 +12439,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Decimal.php
 
 		-
-			message: '#^Argument of an invalid type hasOffsetValue\(string, mixed\) supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
-
-		-
 			message: '#^Binary operation "\-" between int and non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 2
@@ -14881,12 +14557,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-			message: '#^Parameter \#1 \$qty of method Mage_Sales_Model_Quote_Item\:\:setQty\(\) expects float, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/CartController.php
-
-		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Quote\:\:setCustomerId\(\) expects int, null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -16099,18 +15769,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Cookie.php
 
 		-
-			message: '#^Binary operation "\+" between string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Core/Model/Date.php
-
-		-
-			message: '#^Binary operation "\-" between string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Core/Model/Date.php
-
-		-
 			message: '#^Call to an undefined method Mage_Core_Model_Resource_Design\:\:validate\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -16363,18 +16021,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout/Validator.php
 
 		-
-			message: '#^Method Mage_Core_Model_Locale\:\:emulate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
-
-		-
-			message: '#^Method Mage_Core_Model_Locale\:\:revert\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Locale.php
-
-		-
 			message: '#^Property Mage_Core_Model_Locale\:\:\$_currencyCache has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -16577,12 +16223,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Design.php
-
-		-
-			message: '#^Parameter \#1 \$date of method Mage_Core_Model_Resource_Db_Collection_Abstract\:\:formatDate\(\) expects int\|string\|Zend_Date, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Design/Collection.php
 
 		-
 			message: '#^Method Mage_Core_Model_Resource_Email_Queue\:\:_construct\(\) has no return type specified\.$#'
@@ -19459,12 +19099,6 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Currency/Filter.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Zend_Currency\:\:toCurrency\(\) expects float\|int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Currency/Filter.php
-
-		-
 			message: '#^Method Mage_Directory_Model_Observer\:\:scheduledUpdateCurrencyRates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -20015,12 +19649,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Mage_Eav_Model_Entity_Attribute\:\:setDefaultValue\(\) expects int, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute.php
 
 		-
 			message: '#^Call to an undefined method Mage_Core_Model_Resource_Db_Abstract\:\:getIdByCode\(\)\.$#'
@@ -21190,12 +20818,6 @@ parameters:
 			path: app/code/core/Mage/Install/controllers/WizardController.php
 
 		-
-			message: '#^Property Mage_Log_Helper_Data\:\:\$_allowedFileExtensions has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Log/Helper/Data.php
-
-		-
 			message: '#^Method Mage_Log_Model_Aggregation\:\:_insert\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -22102,12 +21724,6 @@ parameters:
 			path: app/code/core/Mage/Paygate/Model/Authorizenet/Cards.php
 
 		-
-			message: '#^Method Mage_Paygate_Model_Authorizenet_Source_PaymentAction\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet/Source/PaymentAction.php
-
-		-
 			message: '#^Method Mage_Paygate_Model_Resource_Authorizenet_Debug\:\:_construct\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -22506,12 +22122,6 @@ parameters:
 		-
 			message: '#^Method Mage_Payment_Model_Recurring_Profile\:\:_validateBeforeSave\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
-
-		-
-			message: '#^Method Mage_Payment_Model_Recurring_Profile\:\:exportStartDatetime\(\) should return string\|Zend_Date but empty return statement found\.$#'
-			identifier: return.empty
 			count: 1
 			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
 
@@ -24289,18 +23899,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/System/Config/Source/BuyerCountry.php
 
 		-
-			message: '#^Method Mage_Paypal_Model_System_Config_Source_FetchingSchedule\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/FetchingSchedule.php
-
-		-
-			message: '#^Method Mage_Paypal_Model_System_Config_Source_Logo\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/Logo.php
-
-		-
 			message: '#^Method Mage_Paypal_Model_System_Config_Source_MerchantCountry\:\:toOptionArray\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -25064,12 +24662,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
-
-		-
-			message: '#^Property DOMNode\:\:\$nodeValue \(string\|null\) does not accept int\<min, \-1\>\|int\<1, max\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Test.php
 
 		-
 			message: '#^Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported\.$#'
@@ -27535,12 +27127,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/Model/Rule.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Mage_SalesRule_Model_Coupon\:\:setExpirationDate\(\) expects Zend_Date, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/SalesRule/Model/Rule.php
-
-		-
 			message: '#^Parameter \#1 \$value of method Mage_SalesRule_Model_Coupon\:\:setIsPrimary\(\) expects int, false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -28531,18 +28117,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Helper/Data.php
 
 		-
-			message: '#^Parameter \#2 \$type of class Zend_Measure_Length constructor expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Helper/Data.php
-
-		-
-			message: '#^Parameter \#2 \$type of class Zend_Measure_Weight constructor expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Helper/Data.php
-
-		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Abstract\:\:_prepareShipmentRequest\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -28583,84 +28157,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Abstract/Backend/Abstract.php
-
-		-
-			message: '#^Access to an undefined property Mage_Usa_Model_Shipping_Carrier_Dhl\:\:\$_rawTrackRequest\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_addRate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_createShipmentXml\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_createShipmentXml\(\) has parameter \$shipKey with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_createShipmentXml\(\) has parameter \$shipment with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_getXMLTracking\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_mapRequestToShipment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_parseXmlTrackingResponse\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_setFreeMethodRequest\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:_setFreeMethodRequest\(\) has parameter \$freeMethod with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\:\:setTrackingReqeust\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Property Mage_Usa_Model_Shipping_Carrier_Dhl\:\:\$_request \(Mage_Shipping_Model_Rate_Request\|null\) does not accept Varien_Object\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: '#^Property Mage_Usa_Model_Shipping_Carrier_Dhl\:\:\$_result \(Mage_Shipping_Model_Rate_Result\|null\) does not accept Mage_Shipping_Model_Tracking_Result\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
 
 		-
 			message: '#^Parameter \#1 \$shippingDays of method Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract\:\:_determineShippingDay\(\) expects array, string\|false given\.$#'
@@ -28759,42 +28255,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Source_Dutypaymenttype\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Source/Dutypaymenttype.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Source_Freemethod\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Source/Freemethod.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Source_Method\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Source/Method.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Source_Protection_Rounding\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Source/Protection/Rounding.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Source_Protection_Value\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Source/Protection/Value.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Source_Shipmenttype\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Source/Shipmenttype.php
-
-		-
 			message: '#^Access to an undefined property Mage_Usa_Model_Shipping_Carrier_Fedex\:\:\$_defaultGatewayUrl\.$#'
 			identifier: property.notFound
 			count: 1
@@ -28873,30 +28333,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Dropoff\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex/Source/Dropoff.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Freemethod\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex/Source/Freemethod.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Method\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex/Source/Method.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Packaging\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex/Source/Packaging.php
-
-		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups\:\:setTrackingResultData\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -28967,60 +28403,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Backend/Type.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_Container\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/Container.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_DestType\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/DestType.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_Freemethod\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/Freemethod.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_Method\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/Method.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_Mode\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/Mode.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_OriginShipment\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/OriginShipment.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_Pickup\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/Pickup.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_Type\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/Type.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Ups_Source_Unitofmeasure\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups/Source/Unitofmeasure.php
 
 		-
 			message: '#^Parameter \#1 \$error_code of function curl_strerror expects int, \(CurlHandle\|false\) given\.$#'
@@ -29117,36 +28499,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Usps_Source_Container\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps/Source/Container.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Usps_Source_Freemethod\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps/Source/Freemethod.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Usps_Source_Machinable\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps/Source/Machinable.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Usps_Source_Method\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps/Source/Method.php
-
-		-
-			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Usps_Source_Size\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps/Source/Size.php
 
 		-
 			message: '#^Method Mage_Weee_Block_Renderer_Weee_Tax\:\:_setAddButton\(\) has no return type specified\.$#'
@@ -32309,12 +31661,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Varien/File/Uploader.php
-
-		-
-			message: '#^Access to deprecated property \$allowWhiteSpace of class Zend_Filter_Alnum\.$#'
-			identifier: property.deprecated
-			count: 1
-			path: lib/Varien/Filter/FormElementName.php
 
 		-
 			message: '#^Method Varien_Filter_Sprintf\:\:__construct\(\) has parameter \$decPoint with no type specified\.$#'

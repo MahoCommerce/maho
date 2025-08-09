@@ -12,7 +12,9 @@
 
 class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date
 {
-    #[\Override]
+    protected static ?string $_format = null;
+    protected static ?IntlDateFormatter $_formatter = null;
+
     protected function _getFormat(): string
     {
         $column = $this->getColumn();
@@ -27,6 +29,23 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     }
 
     #[\Override]
+    protected function _getFormatter(): IntlDateFormatter
+    {
+        if (is_null(self::$_formatter)) {
+            $icuPattern = $this->_getFormat();
+            self::$_formatter = new IntlDateFormatter(
+                Mage::app()->getLocale()->getLocaleCode(),
+                IntlDateFormatter::NONE,
+                IntlDateFormatter::NONE,
+                null,
+                null,
+                $icuPattern,
+            );
+        }
+        return self::$_formatter;
+    }
+
+    #[\Override]
     public function render(Varien_Object $row): string
     {
         $column = $this->getColumn();
@@ -37,17 +56,24 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
                 default => 'yyyy-MM-dd',
             };
 
-            $format = $this->_getFormat();
             try {
-                $data = ($column->getGmtoffset())
-                    ? Mage::app()->getLocale()->date($data, $dateFormat)->toString($format)
-                    : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->toString($format);
+                $dateObj = ($column->getGmtoffset())
+                    ? Mage::app()->getLocale()->dateImmutable($data, $dateFormat)
+                    : Mage::app()->getLocale()->dateImmutable($data, $dateFormat, null, false);
+
+                return $this->_getFormatter()->format($dateObj);
             } catch (Exception $e) {
-                $data = ($column->getTimezone())
-                    ? Mage::app()->getLocale()->date($data, $dateFormat)->toString($format)
-                    : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->toString($format);
+                try {
+                    $dateObj = ($column->getTimezone())
+                        ? Mage::app()->getLocale()->dateImmutable($data, $dateFormat)
+                        : Mage::app()->getLocale()->dateImmutable($data, $dateFormat, null, false);
+
+                    return $this->_getFormatter()->format($dateObj);
+                } catch (Exception $e2) {
+                    // Final fallback: return raw data
+                    return (string) $data;
+                }
             }
-            return $data;
         }
         return $column->getDefault();
     }

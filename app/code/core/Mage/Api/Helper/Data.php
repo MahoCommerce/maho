@@ -6,6 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -342,30 +343,39 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string|null $routePath
      * @param array|null $routeParams
      * @param bool $htmlSpecialChars
-     * @return string
-     * @throws Zend_Uri_Exception
      */
-    public function getServiceUrl($routePath = null, $routeParams = null, $htmlSpecialChars = false)
+    public function getServiceUrl($routePath = null, $routeParams = null, $htmlSpecialChars = false): string
     {
         $request = Mage::app()->getRequest();
-
-        if (is_null($routeParams)) {
-            $routeParams = [];
-        }
-
+        $routeParams ??= [];
         $routeParams['_nosid'] = true;
 
         /** @var Mage_Core_Model_Url $urlModel */
         $urlModel = Mage::getSingleton('core/url');
         $url = $urlModel->getUrl($routePath, $routeParams);
-        $uri = Zend_Uri_Http::fromString($url);
-        $uri->setHost($request->getHttpHost());
-        if (!$urlModel->getRouteFrontName()) {
-            $uri->setPath('/' . trim($request->getBasePath() . '/' . basename(getenv('SCRIPT_FILENAME')), '/'));
-        } else {
-            $uri->setPath($request->getBaseUrl() . $request->getPathInfo());
+        $parsedUrl = parse_url($url);
+
+        // Build URL with current request host and appropriate path
+        $components = [
+            'scheme' => $parsedUrl['scheme'] ?? $request->getScheme(),
+            'host' => $request->getHttpHost(),
+            'path' => $urlModel->getRouteFrontName()
+                ? $request->getBaseUrl() . $request->getPathInfo()
+                : '/' . trim($request->getBasePath() . '/' . basename(getenv('SCRIPT_FILENAME')), '/'),
+            'query' => $parsedUrl['query'] ?? null,
+            'fragment' => $parsedUrl['fragment'] ?? null,
+        ];
+
+        $finalUrl = $components['scheme'] . '://' . $components['host'] . $components['path'];
+
+        if ($components['query']) {
+            $finalUrl .= '?' . $components['query'];
         }
 
-        return $htmlSpecialChars === true ? htmlspecialchars($uri) : (string) $uri;
+        if ($components['fragment']) {
+            $finalUrl .= '#' . $components['fragment'];
+        }
+
+        return $htmlSpecialChars ? htmlspecialchars($finalUrl) : $finalUrl;
     }
 }

@@ -381,6 +381,37 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Delete custom option files before deleting quote
+     */
+    #[\Override]
+    protected function _beforeDelete()
+    {
+        // Delete custom option files from all quote items
+        foreach ($this->getAllItems() as $item) {
+            $options = $item->getOptions();
+            foreach ($options as $option) {
+                // Check if this is a file option
+                if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
+                    try {
+                        $optionValue = @unserialize($option->getValue());
+                        if (is_array($optionValue) && isset($optionValue['quote_path'])) {
+                            $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                    } catch (Exception $e) {
+                        // Log but don't stop the deletion process
+                        Mage::logException($e);
+                    }
+                }
+            }
+        }
+
+        return parent::_beforeDelete();
+    }
+
+    /**
      * Loading quote data by customer
      *
      * @param int|Mage_Customer_Model_Customer $customer

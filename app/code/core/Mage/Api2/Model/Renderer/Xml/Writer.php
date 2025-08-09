@@ -6,11 +6,11 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api2_Model_Renderer_Xml_Writer extends Zend_Config_Writer_Xml
+class Mage_Api2_Model_Renderer_Xml_Writer
 {
     /**
      * Root node in XML output
@@ -18,41 +18,49 @@ class Mage_Api2_Model_Renderer_Xml_Writer extends Zend_Config_Writer_Xml
     public const XML_ROOT_NODE = 'magento_api';
 
     /**
-     * Render a Zend_Config into a XML config string.
-     * OVERRIDE to avoid using zend-config string in XML
-     *
-     * @return string
+     * Configuration data
      */
-    #[\Override]
-    public function render()
+    protected array $config;
+
+    /**
+     * Constructor
+     */
+    public function __construct(array $options = [])
     {
-        $xml         = new SimpleXMLElement('<' . self::XML_ROOT_NODE . '/>');
-        $extends     = $this->_config->getExtends();
-        $sectionName = $this->_config->getSectionName();
+        if (isset($options['config'])) {
+            $this->config = $options['config'];
+        }
+    }
 
-        if (is_string($sectionName)) {
-            $child = $xml->addChild($sectionName);
+    /**
+     * Render array data into XML config string
+     */
+    public function render(): string
+    {
+        $xml = new SimpleXMLElement('<' . self::XML_ROOT_NODE . '/>');
 
-            $this->_addBranch($this->_config, $child, $xml);
-        } else {
-            foreach ($this->_config as $sectionName => $data) {
-                if (!($data instanceof Zend_Config)) {
-                    $xml->addChild($sectionName, (string) $data);
-                } else {
-                    $child = $xml->addChild($sectionName);
-
-                    if (isset($extends[$sectionName])) {
-                        $child->addAttribute('zf:extends', $extends[$sectionName], Zend_Config_Xml::XML_NAMESPACE);
-                    }
-
-                    $this->_addBranch($data, $child, $xml);
-                }
-            }
+        if (isset($this->config)) {
+            $this->addBranch($this->config, $xml);
         }
 
         $dom = dom_import_simplexml($xml)->ownerDocument;
         $dom->formatOutput = true;
 
         return $dom->saveXML();
+    }
+
+    /**
+     * Add array data to XML element
+     */
+    protected function addBranch(array $data, SimpleXMLElement $parent): void
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $child = $parent->addChild($key);
+                $this->addBranch($value, $child);
+            } else {
+                $parent->addChild($key, htmlspecialchars((string) $value, ENT_XML1, 'UTF-8'));
+            }
+        }
     }
 }

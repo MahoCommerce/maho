@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,6 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
      *
      * @return $this
      * @throws Mage_Core_Exception
-     * @throws Zend_Date_Exception
      */
     #[\Override]
     public function validate()
@@ -191,13 +190,12 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
      * @param string $expYear
      * @param string $expMonth
      * @return bool
-     * @throws Zend_Date_Exception
      */
     protected function _validateExpDate($expYear, $expMonth)
     {
-        $date = Mage::app()->getLocale()->date();
-        if (!$expYear || !$expMonth || ($date->compareYear($expYear) == 1)
-            || ($date->compareYear($expYear) == 0 && ($date->compareMonth($expMonth) == 1))
+        $date = Mage::app()->getLocale()->dateImmutable();
+        if (!$expYear || !$expMonth || ((int) $date->format('Y') > $expYear)
+            || ((int) $date->format('Y') == $expYear && (int) $date->format('n') > $expMonth)
         ) {
             return false;
         }

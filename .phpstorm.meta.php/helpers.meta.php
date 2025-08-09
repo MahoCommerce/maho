@@ -51,6 +51,7 @@ namespace PHPSTORM_META {
         'productalert/data' => \Mage_ProductAlert_Helper_Data::class,
         'salesrule/coupon' => \Mage_SalesRule_Helper_Coupon::class,
         'salesrule/data' => \Mage_SalesRule_Helper_Data::class,
+        'speculationrules/data' => \Maho_SpeculationRules_Helper_Data::class,
         'uploader/data' => \Mage_Uploader_Helper_Data::class,
         'uploader/file' => \Mage_Uploader_Helper_File::class,
     ]));

@@ -6,11 +6,11 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Directory_Model_Currency_Filter implements Zend_Filter_Interface
+class Mage_Directory_Model_Currency_Filter
 {
     /**
      * Rate value
@@ -20,9 +20,9 @@ class Mage_Directory_Model_Currency_Filter implements Zend_Filter_Interface
     protected $_rate;
 
     /**
-     * Currency object
+     * Currency NumberFormatter object
      *
-     * @var Zend_Currency
+     * @var NumberFormatter
      */
     protected $_currency;
 
@@ -53,13 +53,11 @@ class Mage_Directory_Model_Currency_Filter implements Zend_Filter_Interface
      * @param   double $value
      * @return  string
      */
-    #[\Override]
     public function filter($value)
     {
         $value = Mage::app()->getLocale()->getNumber($value);
         $value = Mage::app()->getStore()->roundPrice($this->_rate * $value);
         //$value = round($value, 2);
-        $value = sprintf('%F', $value);
-        return $this->_currency->toCurrency($value);
+        return $this->_currency->format($value);
     }
 }
