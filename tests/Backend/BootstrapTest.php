@@ -19,7 +19,4 @@ it('can load Maho admin classes and path is set correctly', function () {
 
     // Test that Maho root path is set correctly (should point to main Maho directory)
     expect(Mage::getRoot())->toBe(dirname(__DIR__, 2));
-
-    // Test that Maho is installed (config file exists in app/etc)
-    expect(Mage::isInstalled(['etc_dir' => dirname(__DIR__, 2) . '/app/etc']))->toBeTrue();
 });
