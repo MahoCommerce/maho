@@ -486,10 +486,9 @@ class Mage_Core_Model_Translate_Inline
      *
      * @param string $body
      * @param string $tagName
-     * @param int $from
      * @return false|int return false if end of tag is not found
      */
-    private function findEndOfTag($body, $tagName, $from)
+    private function findEndOfTag($body, $tagName, int $from)
     {
         $openTag = '<' . $tagName;
         $closeTag =  ($this->getIsJson() ? '<\\/' : '</') . $tagName;

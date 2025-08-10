@@ -328,10 +328,9 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @param string $field
      * @param string $direction
-     * @param bool $unshift
      * @return $this
      */
-    private function _setOrder($field, $direction, $unshift = false)
+    private function _setOrder($field, $direction, bool $unshift = false)
     {
         $this->_isOrdersRendered = false;
         $field = (string) $this->_getMappedField($field);
