@@ -19,11 +19,9 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho
-          MYSQL_ALLOW_EMPTY_PASSWORD: false
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-        command: --default-authentication-plugin=mysql_native_password
 
     steps:
       - name: Setup PHP
