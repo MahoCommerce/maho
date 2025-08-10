@@ -25,6 +25,7 @@ return $config
                 'app/',
                 'lib/',
                 'public/',
+                'tests/'
             ])
             ->name(['*.php'])
             ->ignoreDotFiles(true)
