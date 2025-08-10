@@ -22,7 +22,7 @@ class Mage_Core_Model_Layout_Validator
     public array $protectedExpressions = [];
     public array $disallowedXPathExpressions = [];
 
-    private array $_messages = [];
+    protected array $messages = [];
 
     public function __construct(
         ?array $disallowedBlocks = null,
@@ -46,7 +46,7 @@ class Mage_Core_Model_Layout_Validator
 
     public function isValid(mixed $value): bool
     {
-        $this->_messages = [];
+        $this->messages = [];
 
         if (null === $value || '' === $value) {
             return true;
@@ -58,18 +58,18 @@ class Mage_Core_Model_Layout_Validator
             try {
                 $value = new Varien_Simplexml_Element('<config>' . $value . '</config>');
             } catch (Exception $e) {
-                $this->_messages[] = $this->invalidXmlMessage;
+                $this->messages[] = $this->invalidXmlMessage;
                 return false;
             }
         } elseif (!($value instanceof Varien_Simplexml_Element)) {
-            $this->_messages[] = $this->invalidXmlObjectMessage;
+            $this->messages[] = $this->invalidXmlObjectMessage;
             return false;
         }
 
         // Validate against disallowed blocks
         $xpathBlockValidation = $this->_getXpathBlockValidationExpression($this->disallowedBlocks);
         if ($xpathBlockValidation && $value->xpath($xpathBlockValidation)) {
-            $this->_messages[] = $this->invalidBlockNameMessage;
+            $this->messages[] = $this->invalidBlockNameMessage;
             return false;
         }
 
@@ -79,7 +79,7 @@ class Mage_Core_Model_Layout_Validator
             try {
                 $this->_validateTemplatePath($templatePaths);
             } catch (Exception $e) {
-                $this->_messages[] = $this->invalidTemplatePathMessage;
+                $this->messages[] = $this->invalidTemplatePathMessage;
                 return false;
             }
         }
@@ -87,7 +87,7 @@ class Mage_Core_Model_Layout_Validator
         // Validate protected expressions
         foreach ($this->protectedExpressions as $key => $xpr) {
             if ($value->xpath($xpr)) {
-                $this->_messages[] = $this->protectedHelperMessage;
+                $this->messages[] = $this->protectedHelperMessage;
                 return false;
             }
         }
@@ -97,12 +97,12 @@ class Mage_Core_Model_Layout_Validator
 
     public function getMessages(): array
     {
-        return $this->_messages;
+        return $this->messages;
     }
 
     public function getMessage(): string
     {
-        return !empty($this->_messages) ? $this->_messages[0] : '';
+        return !empty($this->messages) ? $this->messages[0] : '';
     }
 
     public function getDisallowedBlocks(): array

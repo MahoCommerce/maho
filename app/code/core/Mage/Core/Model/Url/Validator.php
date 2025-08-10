@@ -15,7 +15,7 @@
  */
 class Mage_Core_Model_Url_Validator
 {
-    private array $_messages = [];
+    protected array $messages = [];
 
     public string $message = 'Invalid URL "{{ value }}".';
 
@@ -28,14 +28,14 @@ class Mage_Core_Model_Url_Validator
 
     public function validate(mixed $value): bool
     {
-        $this->_messages = [];
+        $this->messages = [];
 
         if (null === $value || '' === $value) {
             return true;
         }
 
         if (!Mage::helper('core')->isValidUrl($value)) {
-            $this->_messages[] = str_replace('{{ value }}', (string) $value, $this->message);
+            $this->messages[] = str_replace('{{ value }}', (string) $value, $this->message);
             return false;
         }
 
@@ -44,12 +44,12 @@ class Mage_Core_Model_Url_Validator
 
     public function getMessages(): array
     {
-        return $this->_messages;
+        return $this->messages;
     }
 
     public function getMessage(): string
     {
-        return !empty($this->_messages) ? $this->_messages[0] : '';
+        return !empty($this->messages) ? $this->messages[0] : '';
     }
 
     public function isValid(mixed $value): bool

@@ -21,7 +21,7 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength
     public string $encoding = 'utf-8';
     public string $name = 'Key';
 
-    private array $_messages = [];
+    protected array $messages = [];
 
     public function __construct(
         mixed $options = null,
@@ -51,14 +51,14 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength
 
     public function validate(mixed $value): bool
     {
-        $this->_messages = [];
+        $this->messages = [];
 
         if (null === $value || '' === $value) {
             return true;
         }
 
         if (!is_string($value)) {
-            $this->_messages[] = 'Value must be a string';
+            $this->messages[] = 'Value must be a string';
             return false;
         }
 
@@ -66,13 +66,13 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength
 
         if (null !== $this->min && $length < $this->min) {
             $message = str_replace(['{{ value }}', '{{ min }}', '{{ name }}'], [$value, (string) $this->min, $this->name], $this->tooShortMessage);
-            $this->_messages[] = $message;
+            $this->messages[] = $message;
             return false;
         }
 
         if (null !== $this->max && $length > $this->max) {
             $message = str_replace(['{{ value }}', '{{ max }}', '{{ name }}'], [$value, (string) $this->max, $this->name], $this->tooLongMessage);
-            $this->_messages[] = $message;
+            $this->messages[] = $message;
             return false;
         }
 
@@ -81,12 +81,12 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength
 
     public function getMessages(): array
     {
-        return $this->_messages;
+        return $this->messages;
     }
 
     public function getMessage(): string
     {
-        return !empty($this->_messages) ? $this->_messages[0] : '';
+        return !empty($this->messages) ? $this->messages[0] : '';
     }
 
     public function isValid(mixed $value): bool

@@ -17,7 +17,7 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
     public array $haystack = [];
     public bool $strict = true;
 
-    private array $_messages = [];
+    protected array $messages = [];
 
     public function __construct(
         mixed $options = null,
@@ -36,14 +36,14 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
 
     public function validate(mixed $value): bool
     {
-        $this->_messages = [];
+        $this->messages = [];
 
         if (null === $value || '' === $value) {
             return true;
         }
 
         if (!in_array($value, $this->haystack, $this->strict)) {
-            $this->_messages[] = str_replace('{{ value }}', (string) $value, $this->notInArrayMessage);
+            $this->messages[] = str_replace('{{ value }}', (string) $value, $this->notInArrayMessage);
             return false;
         }
 
@@ -52,12 +52,12 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
 
     public function getMessages(): array
     {
-        return $this->_messages;
+        return $this->messages;
     }
 
     public function getMessage(): string
     {
-        return !empty($this->_messages) ? $this->_messages[0] : '';
+        return !empty($this->messages) ? $this->messages[0] : '';
     }
 
     public function isValid(mixed $value): bool

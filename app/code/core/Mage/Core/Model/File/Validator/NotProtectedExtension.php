@@ -14,7 +14,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
 {
     public array $protectedExtensions = [];
 
-    private array $_messages = [];
+    protected array $messages = [];
 
     public function __construct(?array $protectedExtensions = null)
     {
@@ -23,21 +23,21 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
 
     public function isValid(mixed $value): bool
     {
-        $this->_messages = [];
+        $this->messages = [];
 
         if (null === $value || '' === $value) {
             return true;
         }
 
         if (!is_string($value)) {
-            $this->_messages[] = Mage::helper('core')->__('Value must be a string.');
+            $this->messages[] = Mage::helper('core')->__('Value must be a string.');
             return false;
         }
 
         $value = strtolower(trim($value));
 
         if (in_array($value, $this->protectedExtensions)) {
-            $this->_messages[] = Mage::helper('core')->__('File with an extension "%s" is protected and cannot be uploaded.', $value);
+            $this->messages[] = Mage::helper('core')->__('File with an extension "%s" is protected and cannot be uploaded.', $value);
             return false;
         }
 
@@ -46,12 +46,12 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
 
     public function getMessages(): array
     {
-        return $this->_messages;
+        return $this->messages;
     }
 
     public function getMessage(): string
     {
-        return !empty($this->_messages) ? $this->_messages[0] : '';
+        return !empty($this->messages) ? $this->messages[0] : '';
     }
 
     private function _getDefaultProtectedExtensions(): array

@@ -33,7 +33,7 @@ class Mage_Core_Model_File_Validator_AvailablePath
     public array $protectedPaths = [];
     public array $availablePaths = [];
 
-    private array $_messages = [];
+    protected array $messages = [];
 
     public function __construct(
         mixed $options = null,
@@ -50,26 +50,26 @@ class Mage_Core_Model_File_Validator_AvailablePath
 
     public function isValid(mixed $value): bool
     {
-        $this->_messages = [];
+        $this->messages = [];
 
         if (null === $value || '' === $value) {
             return true;
         }
 
         if (!is_string($value)) {
-            $this->_messages[] = Mage::helper('core')->__('Value must be a string.');
+            $this->messages[] = Mage::helper('core')->__('Value must be a string.');
             return false;
         }
 
         $value = trim($value);
 
         if (!$this->availablePaths && !$this->protectedPaths) {
-            $this->_messages[] = Mage::helper('core')->__('Please set available and/or protected paths list(s) before validation.');
+            $this->messages[] = Mage::helper('core')->__('Please set available and/or protected paths list(s) before validation.');
             return false;
         }
 
         if (preg_match('#\\..[\\\\/]#', $value)) {
-            $this->_messages[] = Mage::helper('core')->__('Path "%s" contains invalid parent directory references.', $value);
+            $this->messages[] = Mage::helper('core')->__('Path "%s" contains invalid parent directory references.', $value);
             return false;
         }
 
@@ -80,7 +80,7 @@ class Mage_Core_Model_File_Validator_AvailablePath
         $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
 
         if (in_array($fileNameExtension, $protectedExtensions)) {
-            $this->_messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
+            $this->messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 
@@ -89,12 +89,12 @@ class Mage_Core_Model_File_Validator_AvailablePath
         }
 
         if ($this->protectedPaths && !$this->_isValidByPaths($valuePathInfo, $this->protectedPaths, true)) {
-            $this->_messages[] = Mage::helper('core')->__('Path "%s" is protected and cannot be used.', $value);
+            $this->messages[] = Mage::helper('core')->__('Path "%s" is protected and cannot be used.', $value);
             return false;
         }
 
         if ($this->availablePaths && !$this->_isValidByPaths($valuePathInfo, $this->availablePaths, false)) {
-            $this->_messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
+            $this->messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 
@@ -103,12 +103,12 @@ class Mage_Core_Model_File_Validator_AvailablePath
 
     public function getMessages(): array
     {
-        return $this->_messages;
+        return $this->messages;
     }
 
     public function getMessage(): string
     {
-        return !empty($this->_messages) ? $this->_messages[0] : '';
+        return !empty($this->messages) ? $this->messages[0] : '';
     }
 
     public function setProtectedPaths(array $protectedPaths): self
