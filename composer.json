@@ -81,7 +81,8 @@
         "mahocommerce/maho-phpstan-plugin": "^3",
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "rector/rector": "^2"
+        "rector/rector": "^2",
+        "pestphp/pest": "^3.8"
     },
     "suggest": {
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution",
@@ -100,6 +101,11 @@
             "MahoCLI\\": "lib/MahoCLI"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "extra": {
         "patches": {
             "shardj/zf1-future": {
@@ -114,7 +120,8 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true,
             "magento-hackathon/magento-composer-installer": false,
-            "mahocommerce/maho-composer-plugin": true
+            "mahocommerce/maho-composer-plugin": true,
+            "pestphp/pest-plugin": true
         },
         "platform": {
             "php": "8.3"
