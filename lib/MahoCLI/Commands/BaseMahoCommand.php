@@ -20,7 +20,7 @@ abstract class BaseMahoCommand extends Command
     protected function initMaho(): void
     {
         Mage::register('isSecureArea', true);
-        Mage::app();
+        Mage::app('admin');
     }
 
     public function humanReadableSize(int $bytes): string

@@ -60,15 +60,15 @@ class LogStatus extends BaseMahoCommand
                 continue;
             }
 
-            $totalRows += $tableStatus['Rows'];
-            $totalDataLength += $tableStatus['Data_length'];
-            $totalIndexLength += $tableStatus['Index_length'];
+            $totalRows += (int) $tableStatus['Rows'];
+            $totalDataLength += (int) $tableStatus['Data_length'];
+            $totalIndexLength += (int) $tableStatus['Index_length'];
 
             $table->addRow([
                 $tableStatus['Name'],
-                number_format($tableStatus['Rows']),
-                $this->humanReadableSize($tableStatus['Data_length']),
-                $this->humanReadableSize($tableStatus['Index_length']),
+                number_format((int) $tableStatus['Rows']),
+                $this->humanReadableSize((int) $tableStatus['Data_length']),
+                $this->humanReadableSize((int) $tableStatus['Index_length']),
             ]);
         }
 
