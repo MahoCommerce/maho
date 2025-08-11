@@ -63,6 +63,7 @@ $application->add(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
 $application->add(new \MahoCLI\Commands\PhpstormMetadataGenerate());
 
 $application->add(new \MahoCLI\Commands\Serve());
+$application->add(new \MahoCLI\Commands\Shell());
 
 $application->add(new \MahoCLI\Commands\SysCurrencies());
 $application->add(new \MahoCLI\Commands\SysEncryptionKeyRegenerate());

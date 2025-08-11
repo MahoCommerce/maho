@@ -81,7 +81,8 @@
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "rector/rector": "^2",
-        "pestphp/pest": "^3.8"
+        "pestphp/pest": "^3.8",
+        "psy/psysh": "^0.12.10"
     },
     "suggest": {
         "fballiano/openmage-cssjs-minify": "Minification support for CSS/JS",
