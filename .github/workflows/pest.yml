@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
-      - name: Test Maho Installation
+      - name: Install Maho
         run: |
           ./maho install --license_agreement_accepted yes --locale en_US --timezone Europe/London --default_currency EUR --db_host 127.0.0.1 --db_name maho --db_user root --db_pass root --url http://maho.test/ --secure_base_url http://maho.test/ --use_secure 0 --use_secure_admin 0 --admin_lastname admin --admin_firstname admin --admin_email admin@admin.com --admin_username admin --admin_password asdasdasd123123123 --sample_data=0
           ./maho index:reindex:all
