@@ -10,7 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-
 /**
  * @method Mage_Admin_Model_Resource_Block _getResource()
  * @method Mage_Admin_Model_Resource_Block getResource()
