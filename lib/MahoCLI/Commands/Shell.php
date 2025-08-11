@@ -35,6 +35,20 @@ class Shell extends BaseMahoCommand
 
         $this->initMaho();
 
+        // Ensure timezone is properly configured for shell
+        $store = Mage::app()->getStore();
+        $timezone = $store->getConfig('general/locale/timezone');
+
+        if (empty($timezone)) {
+            // Directly set the config value in the store's configuration cache
+            $store->setConfig('general/locale/timezone', 'UTC');
+        }
+
+        // Also ensure the config tree has a fallback
+        if (!Mage::getConfig()->getNode('default/general/locale/timezone')) {
+            Mage::getConfig()->setNode('default/general/locale/timezone', 'UTC');
+        }
+
         $io->success('Maho application initialized!');
         $io->text([
             'You can now interact with Maho using PHP code.',
@@ -42,8 +56,9 @@ class Shell extends BaseMahoCommand
             '',
             'Example commands:',
             '  $product = Mage::getModel("catalog/product")->load(1);',
-            '  $customer = $getModel("customer/customer")->load(1);',
-            '  $db()->fetchAll("SELECT * FROM core_store");',
+            '  var_dump($product->getId()); // Check if product loaded',
+            '  $product->debug(); // Debug product data',
+            '  echo "Test output\n"; // Simple output test',
             '',
         ]);
 
@@ -52,8 +67,23 @@ class Shell extends BaseMahoCommand
         }
 
         $io->warning('PsySH is not installed. Using basic REPL instead.');
-        $io->text('For a much better experience, install PsySH:');
-        $io->text('  composer require --dev psy/psysh');
+        $io->text([
+            'For a much better experience, install PsySH:',
+            '  composer require --dev psy/psysh',
+        ]);
+
+        if (!function_exists('readline')) {
+            $io->warning('Readline extension is also not available.');
+            $io->text([
+                'Without readline, you will not have:',
+                '  - Command history (up/down arrows)',
+                '  - Tab completion',
+                '  - Line editing capabilities',
+                '',
+                'Consider installing php-readline package for better experience.',
+            ]);
+        }
+
         $io->newLine();
 
         return $this->runBasicRepl($io);
@@ -148,7 +178,7 @@ class Shell extends BaseMahoCommand
         $io->newLine();
 
         $readline = function_exists('readline');
-        $prompt = 'maho> ';
+        $prompt = '> ';
 
         while (true) {
             if ($readline) {
@@ -161,6 +191,7 @@ class Shell extends BaseMahoCommand
                 }
             } else {
                 echo $prompt;
+                flush(); // Ensure prompt is displayed immediately
                 $input = fgets(STDIN);
                 if ($input === false) {
                     break;
@@ -177,58 +208,21 @@ class Shell extends BaseMahoCommand
                 continue;
             }
 
-            // Handle special commands
-            if ($input === 'help') {
-                $io->text([
-                    'Examples:',
-                    '  $product = Mage::getModel("catalog/product")->load(1);',
-                    '  $customers = Mage::getModel("customer/customer")->getCollection();',
-                    '  Mage::getConfig()->getNode("global/install/date");',
-                    '',
-                    'Type "exit" to quit.',
-                ]);
-                continue;
-            }
-
-            // Add semicolon if missing (unless it's a control structure)
-            if (!str_ends_with($input, ';') && !str_ends_with($input, '}') && !str_ends_with($input, '{')) {
+            // Add semicolon if missing
+            if (!str_ends_with($input, ';')) {
                 $input .= ';';
             }
 
-            // Replace dd() calls with var_dump() to prevent exit
-            $safeInput = preg_replace('/\bdd\s*\(/', 'var_dump(', $input);
-
             try {
                 ob_start();
-                $result = eval("return ($safeInput);");
+                eval($input);
                 $output = ob_get_clean();
-
                 if ($output !== '') {
                     echo $output;
                 }
-
-                if ($result !== null) {
-                    if (is_object($result) || is_array($result)) {
-                        print_r($result);
-                    } else {
-                        var_export($result);
-                        echo "\n";
-                    }
-                }
-            } catch (\ParseError $e) {
-                // Try without return for statements like echo, print, etc.
-                try {
-                    ob_start();
-                    eval($safeInput);
-                    $output = ob_get_clean();
-                    if ($output !== '') {
-                        echo $output;
-                    }
-                } catch (\Throwable $e) {
-                    $io->error('Error: ' . $e->getMessage());
-                }
             } catch (\Throwable $e) {
-                $io->error('Error: ' . $e->getMessage());
+                ob_end_clean();
+                echo 'Error: ' . $e->getMessage() . "\n";
             }
         }
 
