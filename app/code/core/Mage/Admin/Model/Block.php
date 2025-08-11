@@ -32,7 +32,6 @@ class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
 
     /**
      * @return array|true
-     * @throws Exception
      */
     public function validate()
     {

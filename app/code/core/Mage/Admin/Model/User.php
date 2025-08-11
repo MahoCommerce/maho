@@ -744,7 +744,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * Returns TRUE or array of errors.
      *
      * @return array|true
-     * @throws Exception
      */
     public function validate()
     {
@@ -810,7 +809,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      *
      * @param string $password
      * @return array|true
-     * @throws Exception
      */
     public function validateCurrentPassword(#[\SensitiveParameter] $password)
     {

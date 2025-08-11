@@ -545,7 +545,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @param string $password
      * @return bool
-     * @throws Exception
      */
     public function validatePassword(#[\SensitiveParameter] $password)
     {
@@ -1037,7 +1036,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @return array|true
      * @throws Mage_Core_Exception
-     * @throws Exception
      */
     public function validate()
     {
@@ -1110,7 +1108,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Validate customer password on reset
      * @return array|true
-     * @throws Exception
      */
     public function validateResetPassword()
     {
@@ -1388,7 +1385,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * @param null|string $error
      * @param string $line
      * @return false|void
-     * @throws Exception
      */
     public function printError($error, $line = null)
     {

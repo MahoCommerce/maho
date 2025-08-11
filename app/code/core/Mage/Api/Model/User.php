@@ -359,7 +359,6 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
      * Validate user attribute values.
      *
      * @return array|true
-     * @throws Exception
      */
     public function validate()
     {

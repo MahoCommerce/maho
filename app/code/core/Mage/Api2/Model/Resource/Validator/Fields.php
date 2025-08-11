@@ -51,7 +51,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     public function __construct($options)
     {
         if (!isset($options['resource']) || !$options['resource'] instanceof Mage_Api2_Model_Resource) {
-            throw new Exception("Passed parameter 'resource' is wrong.");
+            throw new Mage_Core_Exception("Passed parameter 'resource' is wrong.");
         }
         $this->_resource = $options['resource'];
 
@@ -84,7 +84,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
                     }
                     // store validation rule
                     if (!isset($validatorConfig['type'])) {
-                        throw new Exception("Validator type is not set for {$validatorName}");
+                        throw new Mage_Core_Exception("Validator type is not set for {$validatorName}");
                     }
                     $rule = [
                         'type' => $validatorConfig['type'],
@@ -107,7 +107,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
      * @param string $type
      * @param array $options
      * @return bool
-     * @throws Exception If validator type is not supported
+     * @throws Mage_Core_Exception If validator type is not supported
      */
     protected function _validateValue($value, $type, $options)
     {
@@ -131,7 +131,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
             'Digits' => $coreHelper->isValidRegex($value, '/^\d+$/'),
             'Alnum' => $coreHelper->isValidRegex($value, '/^[a-zA-Z0-9]+$/'),
             'Alpha' => $coreHelper->isValidRegex($value, '/^[a-zA-Z]+$/'),
-            default => throw new Exception("Unsupported validator type: {$type}"),
+            default => throw new Mage_Core_Exception("Unsupported validator type: {$type}"),
         };
     }
 

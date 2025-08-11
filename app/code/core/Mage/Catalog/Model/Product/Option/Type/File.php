@@ -325,7 +325,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param array $optionValue
      * @return bool
      * @throws Mage_Core_Exception
-     * @throws Mage_Core_Exception
      */
     protected function _validateFile($optionValue)
     {
@@ -563,7 +562,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      *
      * @param mixed $value
      * @return array
-     * @throws Exception
      */
     protected function _unserializeValue($value)
     {
