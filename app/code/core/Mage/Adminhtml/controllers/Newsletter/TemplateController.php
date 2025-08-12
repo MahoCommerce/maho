@@ -37,7 +37,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * View Templates list
      *
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_setTitle();
 
@@ -56,7 +56,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * JSON Grid Action
      *
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $grid = $this->getLayout()->createBlock('adminhtml/newsletter_template_grid')
@@ -68,7 +68,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * Create new Newsletter Template
      *
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -77,7 +77,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * Edit Newsletter Template
      *
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_setTitle();
 
@@ -119,7 +119,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * Drop Newsletter Template
      *
      */
-    public function dropAction()
+    public function dropAction(): void
     {
         $request = $this->getRequest();
         if ($request->getParam('text') && !$request->getPost('text')) {
@@ -133,7 +133,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * Save Newsletter Template
      *
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $request = $this->getRequest();
         if (!$request->isPost()) {
@@ -189,7 +189,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
      * Delete newsletter Template
      *
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $template = Mage::getModel('newsletter/template')
             ->load($this->getRequest()->getParam('id'));

@@ -52,7 +52,7 @@ class Mage_Oauth_Customer_TokenController extends Mage_Core_Controller_Front_Act
     /**
      * Render grid page
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages($this->_sessionName);
@@ -77,7 +77,7 @@ class Mage_Oauth_Customer_TokenController extends Mage_Core_Controller_Front_Act
     /**
      * Update revoke status action
      */
-    public function revokeAction()
+    public function revokeAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $status = $this->getRequest()->getParam('status');
@@ -133,7 +133,7 @@ class Mage_Oauth_Customer_TokenController extends Mage_Core_Controller_Front_Act
     /**
      * Delete action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $id = $this->getRequest()->getParam('id');
 

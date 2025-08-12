@@ -49,7 +49,7 @@ class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
         return $review;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('catalog/session');
@@ -66,7 +66,7 @@ class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
-    public function viewAction()
+    public function viewAction(): void
     {
         $review = $this->_loadReview((int) $this->getRequest()->getParam('id'));
         if (!$review) {

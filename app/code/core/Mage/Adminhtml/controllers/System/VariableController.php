@@ -56,7 +56,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     /**
      * Index Action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Custom Variables'));
 
@@ -68,7 +68,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     /**
      * New Action (forward to edit action)
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -77,7 +77,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Edit Action
      * @throws Mage_Core_Exception
      */
-    public function editAction()
+    public function editAction(): void
     {
         $variable = $this->_initVariable();
 
@@ -95,7 +95,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Validate Action
      * @throws Mage_Core_Exception
      */
-    public function validateAction()
+    public function validateAction(): void
     {
         $variable = $this->_initVariable();
         $variable->addData($this->getRequest()->getPost('variable'));
@@ -114,7 +114,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Save Action
      * @throws Mage_Core_Exception|Throwable
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $variable = $this->_initVariable();
         $data = $this->getRequest()->getPost('variable');
@@ -146,7 +146,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Delete Action
      * @throws Mage_Core_Exception|Throwable
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $variable = $this->_initVariable();
         if ($variable->getId()) {
@@ -168,7 +168,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * WYSIWYG Plugin Action
      *
      */
-    public function wysiwygPluginAction()
+    public function wysiwygPluginAction(): void
     {
         $customVariables = Mage::getModel('core/variable')->getVariablesOptionArray(true);
         $storeContactVariabls = Mage::getModel('core/source_email_variables')->toOptionArray(true);

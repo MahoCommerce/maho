@@ -10,6 +10,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
 class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
@@ -542,89 +546,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Decorate a plain array of arrays or objects
-     * The array actually can be an object with Iterator interface
-     *
-     * Keys with prefix_* will be set:
-     * *_is_first - if the element is first
-     * *_is_odd / *_is_even - for odd/even elements
-     * *_is_last - if the element is last
-     *
-     * The respective key/attribute will be set to element, depending on object it is or array.
-     * Varien_Object is supported.
-     *
-     * $forceSetAll true will cause to set all possible values for all elements.
-     * When false (default), only non-empty values will be set.
-     *
-     * @param Varien_Object[] $array
-     * @param string $prefix
-     * @param bool $forceSetAll
-     * @return mixed
-     * @deprecated since 25.3.0
-     */
-    public function decorateArray($array, $prefix = 'decorated_', $forceSetAll = false)
-    {
-        // check if array or an object to be iterated given
-        if (!(is_array($array) || is_object($array))) {
-            return $array;
-        }
-
-        $keyIsFirst = "{$prefix}is_first";
-        $keyIsOdd   = "{$prefix}is_odd";
-        $keyIsEven  = "{$prefix}is_even";
-        $keyIsLast  = "{$prefix}is_last";
-
-        $count  = count($array); // this will force Iterator to load
-        $i      = 0;
-        $isEven = false;
-        foreach ($array as $key => $element) {
-            if (is_object($element)) {
-                $this->_decorateArrayObject($element, $keyIsFirst, ($i === 0), $forceSetAll || ($i === 0));
-                $this->_decorateArrayObject($element, $keyIsOdd, !$isEven, $forceSetAll || !$isEven);
-                $this->_decorateArrayObject($element, $keyIsEven, $isEven, $forceSetAll || $isEven);
-                $isEven = !$isEven;
-                $i++;
-                $this->_decorateArrayObject($element, $keyIsLast, ($i === $count), $forceSetAll || ($i === $count));
-            } elseif (is_array($element)) {
-                if ($forceSetAll || ($i === 0)) {
-                    $array[$key][$keyIsFirst] = ($i === 0);
-                }
-                if ($forceSetAll || !$isEven) {
-                    $array[$key][$keyIsOdd] = !$isEven;
-                }
-                if ($forceSetAll || $isEven) {
-                    $array[$key][$keyIsEven] = $isEven;
-                }
-                $isEven = !$isEven;
-                $i++;
-                if ($forceSetAll || ($i === $count)) {
-                    $array[$key][$keyIsLast] = ($i === $count);
-                }
-            }
-        }
-
-        return $array;
-    }
-
-    /**
-     * @param Varien_Object $element
-     * @param string $key
-     * @param mixed $value
-     * @param bool $dontSkip
-     * @deprecated since 25.3.0
-     */
-    private function _decorateArrayObject($element, $key, $value, $dontSkip)
-    {
-        if ($dontSkip) {
-            if ($element instanceof Varien_Object) {
-                $element->setData($key, $value);
-            } else {
-                $element->$key = $value;
-            }
-        }
-    }
-
-    /**
      * Transform an assoc array to SimpleXMLElement object
      * Array has some limitations. Appropriate exceptions will be thrown
      *
@@ -812,7 +733,7 @@ XML;
     public function checkLfiProtection($name)
     {
         if (preg_match('#\.\.[\\\/]#', $name)) {
-            throw new Mage_Core_Exception($this->__('Requested file may not include parent directory traversal ("../", "..\\" notation)'));
+            throw new Mage_Core_Exception($this->__('Invalid template path: contains parent directory traversal'));
         }
         return true;
     }
@@ -1056,21 +977,6 @@ XML;
         return strip_tags((string) $value, $allowedTags);
     }
 
-    /**
-     * Check if value is a valid email address format
-     */
-    public function isValidEmail(mixed $value): bool
-    {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
-    }
-
-    /**
-     * Check if value is a valid URL format
-     */
-    public function isValidUrl(mixed $value): bool
-    {
-        return filter_var($value, FILTER_VALIDATE_URL) !== false;
-    }
 
     /**
      * Check if value is a valid IP address (IPv4 or IPv6)
@@ -1135,5 +1041,119 @@ XML;
         }
 
         return $dsn;
+    }
+
+    /**
+     * Symfony validator instance
+     */
+    private static ?ValidatorInterface $symfonyValidator = null;
+
+    /**
+     * Get Symfony validator instance
+     */
+    private function getSymfonyValidator(): ValidatorInterface
+    {
+        if (self::$symfonyValidator === null) {
+            self::$symfonyValidator = Validation::createValidator();
+        }
+        return self::$symfonyValidator;
+    }
+
+    /**
+     * Check if email address is valid using Symfony Email constraint
+     */
+    public function isValidEmail(#[\SensitiveParameter] mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Email());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if value is not blank using Symfony NotBlank constraint
+     */
+    public function isValidNotBlank(mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\NotBlank());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if string matches regex pattern using Symfony Regex constraint
+     */
+    public function isValidRegex(string $value, string $pattern): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(['pattern' => $pattern]));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if string length is valid using Symfony Length constraint
+     */
+    public function isValidLength(string $value, ?int $min = null, ?int $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if numeric value is in valid range using Symfony Range constraint
+     */
+    public function isValidRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if URL format is valid using Symfony Url constraint
+     */
+    public function isValidUrl(mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
+        return count($violations) === 0;
+    }
+
+
+    /**
+     * Check if date format is valid using Symfony Date constraint
+     */
+    public function isValidDate(string $date): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($date, new Assert\Date());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if datetime format is valid using Symfony DateTime constraint
+     */
+    public function isValidDateTime(string $datetime): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($datetime, new Assert\DateTime());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Generic validation method that returns boolean result using Symfony constraints
+     */
+    public function isValid(mixed $value, mixed $constraint): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
+        return count($violations) === 0;
     }
 }

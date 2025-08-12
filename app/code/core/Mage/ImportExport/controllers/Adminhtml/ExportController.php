@@ -79,7 +79,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     /**
      * Index action.
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initAction()
             ->_title($this->__('Export'))

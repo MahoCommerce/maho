@@ -359,25 +359,24 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
      * Validate user attribute values.
      *
      * @return array|true
-     * @throws Zend_Validate_Exception
      */
     public function validate()
     {
         $errors = new ArrayObject();
 
-        if (!Zend_Validate::is($this->getUsername(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getUsername())) {
             $errors->append(Mage::helper('api')->__('User Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getFirstname(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getFirstname())) {
             $errors->append(Mage::helper('api')->__('First Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getLastname(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getLastname())) {
             $errors->append(Mage::helper('api')->__('Last Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getEmail(), 'EmailAddress')) {
+        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
             $errors->append(Mage::helper('api')->__('Please enter a valid email.'));
         }
 

@@ -16,7 +16,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
      * Billing agreements
      *
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
             ->_title($this->__('Billing Agreements'));
@@ -30,7 +30,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
      * Ajax action for billing agreements
      *
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout(false)
             ->renderLayout();
@@ -40,7 +40,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
      * View billing agreement action
      *
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();
 
@@ -62,7 +62,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
      * Related orders ajax action
      *
      */
-    public function ordersGridAction()
+    public function ordersGridAction(): void
     {
         $this->_initBillingAgreement();
         $this->loadLayout(false)
@@ -73,7 +73,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
      * Cutomer billing agreements ajax action
      *
      */
-    public function customerGridAction()
+    public function customerGridAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout(false)
@@ -108,7 +108,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Delete billing agreement action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();
 

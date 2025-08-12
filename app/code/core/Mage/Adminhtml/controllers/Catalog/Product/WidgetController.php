@@ -22,7 +22,7 @@ class Mage_Adminhtml_Catalog_Product_WidgetController extends Mage_Adminhtml_Con
      *
      * @throws Mage_Core_Exception
      */
-    public function chooserAction()
+    public function chooserAction(): void
     {
         $uniqId = $this->getRequest()->getParam('uniq_id');
         $massAction = $this->getRequest()->getParam('use_massaction', false);

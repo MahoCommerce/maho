@@ -46,7 +46,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Index action.
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $maxUploadSize = Mage::helper('importexport')->getMaxUploadSize();
         $this->_getSession()->addNotice(
@@ -62,7 +62,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Start import process action.
      */
-    public function startAction()
+    public function startAction(): void
     {
         $data = $this->getRequest()->getPost();
         if ($data) {
@@ -94,7 +94,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Validate uploaded files action.
      */
-    public function validateAction()
+    public function validateAction(): void
     {
         $data = $this->getRequest()->getPost();
         if ($data) {

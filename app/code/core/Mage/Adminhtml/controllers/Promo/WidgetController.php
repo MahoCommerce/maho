@@ -20,10 +20,8 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
 
     /**
      * Prepare block for chooser
-     *
-     * @return void
      */
-    public function chooserAction()
+    public function chooserAction(): void
     {
         $request = $this->getRequest();
 
@@ -59,7 +57,7 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
     /**
      * Get tree node (Ajax version)
      */
-    public function categoriesJsonAction()
+    public function categoriesJsonAction(): void
     {
         try {
             $categoryId = (int) $this->getRequest()->getPost('id');

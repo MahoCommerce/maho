@@ -79,11 +79,10 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
     /**
      * Save log data
      *
-     * @param  array $data
      * @param  string $from
      * @param  string $to
      */
-    private function _save($data, $from, $to)
+    private function _save(array $data, $from, $to)
     {
         if ($logId = $this->_getResource()->getLogId($from, $to)) {
             $this->_update($logId, $data);

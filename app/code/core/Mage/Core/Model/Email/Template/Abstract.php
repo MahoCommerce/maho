@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -219,9 +219,9 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
                 '_theme' => $theme,
             ],
         );
-        $validator = new Zend_Validate_File_Extension('css');
-
-        if ($validator->isValid($filePath) && is_readable($filePath)) {
+        // Validate file extension and readability
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        if ($extension === 'css' && is_readable($filePath)) {
             return (string) file_get_contents($filePath);
         }
 

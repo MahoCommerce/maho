@@ -44,7 +44,7 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
     /**
      * Shipments grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Shipments'));
 
@@ -56,7 +56,7 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
     /**
      * Shipment information page
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         if ($shipmentId = $this->getRequest()->getParam('shipment_id')) {
             $this->_forward('view', 'sales_order_shipment', null, ['come_from' => 'shipment']);
@@ -80,7 +80,7 @@ class Mage_Adminhtml_Controller_Sales_Shipment extends Mage_Adminhtml_Controller
         $this->_redirect('*/*/');
     }
 
-    public function printAction()
+    public function printAction(): void
     {
         /** @see Mage_Adminhtml_Sales_Order_InvoiceController */
         if ($shipmentId = $this->getRequest()->getParam('invoice_id')) { // invoice_id o_0

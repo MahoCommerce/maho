@@ -14,7 +14,7 @@ class Mage_Paypal_HostedproController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer return to website from gateway.
      */
-    public function returnAction()
+    public function returnAction(): void
     {
         $session = $this->_getCheckout();
         //TODO: some actions with order
@@ -26,7 +26,7 @@ class Mage_Paypal_HostedproController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer cancel payment from gateway.
      */
-    public function cancelAction()
+    public function cancelAction(): void
     {
         $gotoSection = $this->_cancelPayment();
         $redirectBlock = $this->_getIframeBlock()

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,191 +30,59 @@
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
  */
-class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstract
+class Mage_Core_Model_File_Validator_AvailablePath
 {
-    public const PROTECTED_PATH     = 'protectedPath';
-    public const NOT_AVAILABLE_PATH = 'notAvailablePath';
-    public const PROTECTED_LFI      = 'protectedLfi';
+    public array $protectedPaths = [];
+    public array $availablePaths = [];
 
-    /**
-     * The path
-     *
-     * @var string
-     */
-    protected $_value;
+    protected array $messages = [];
 
-    /**
-     * Protected paths
-     *
-     * @var array
-     */
-    protected $_protectedPaths = [];
-
-    /**
-     * Available paths
-     *
-     * @var array
-     */
-    protected $_availablePaths = [];
-
-    /**
-     * Cache of made regular expressions from path masks
-     *
-     * @var array
-     */
-    protected $_pathsData;
-
-    public function __construct()
-    {
-        $this->_initMessageTemplates();
+    public function __construct(
+        mixed $options = null,
+        ?array $groups = null,
+        mixed $payload = null,
+        ?array $protectedPaths = null,
+        ?array $availablePaths = null,
+    ) {
+        // Symfony constraint compatibility parameters (unused but kept for backward compatibility)
+        unset($options, $groups, $payload);
+        $this->protectedPaths = $protectedPaths ?? $this->protectedPaths;
+        $this->availablePaths = $availablePaths ?? $this->availablePaths;
     }
 
-    /**
-     * Initialize message templates with translating
-     *
-     * @return $this
-     */
-    protected function _initMessageTemplates()
+    public function isValid(mixed $value): bool
     {
-        if (!$this->_messageTemplates) {
-            $this->_messageTemplates = [
-                self::PROTECTED_PATH =>
-                    Mage::helper('core')->__('Path "%value%" is protected and cannot be used.'),
-                self::NOT_AVAILABLE_PATH =>
-                    Mage::helper('core')->__('Path "%value%" is not available and cannot be used.'),
-                self::PROTECTED_LFI =>
-                    Mage::helper('core')->__('Path "%value%" may not include parent directory traversal ("../", "..\\").'),
-            ];
+        $this->messages = [];
+
+        if (null === $value || '' === $value) {
+            return true;
         }
-        return $this;
-    }
 
-    /**
-     * Set paths masks
-     *
-     * @param array $paths  All paths masks types.
-     *                      E.g.: array('available' => array(...), 'protected' => array(...))
-     * @return $this
-     */
-    public function setPaths(array $paths)
-    {
-        if (isset($paths['available']) && is_array($paths['available'])) {
-            $this->_availablePaths = $paths['available'];
+        if (!is_string($value)) {
+            $this->messages[] = Mage::helper('core')->__('Value must be a string.');
+            return false;
         }
-        if (isset($paths['protected']) && is_array($paths['protected'])) {
-            $this->_protectedPaths = $paths['protected'];
-        }
-        return $this;
-    }
 
-    /**
-     * Set protected paths masks
-     *
-     * @return $this
-     */
-    public function setProtectedPaths(array $paths)
-    {
-        $this->_protectedPaths = $paths;
-        return $this;
-    }
-
-    /**
-     * Add protected paths masks
-     *
-     * @param string|array $path
-     * @return $this
-     */
-    public function addProtectedPath($path)
-    {
-        if (is_array($path)) {
-            $this->_protectedPaths = array_merge($this->_protectedPaths, $path);
-        } else {
-            $this->_protectedPaths[] = $path;
-        }
-        return $this;
-    }
-
-    /**
-     * Get protected paths masks
-     *
-     * @return array
-     */
-    public function getProtectedPaths()
-    {
-        return $this->_protectedPaths;
-    }
-
-    /**
-     * Set available paths masks
-     *
-     * @return $this
-     */
-    public function setAvailablePaths(array $paths)
-    {
-        $this->_availablePaths = $paths;
-        return $this;
-    }
-
-    /**
-     * Add available paths mask
-     *
-     * @param string|array $path
-     * @return $this
-     */
-    public function addAvailablePath($path)
-    {
-        if (is_array($path)) {
-            $this->_availablePaths = array_merge($this->_availablePaths, $path);
-        } else {
-            $this->_availablePaths[] = $path;
-        }
-        return $this;
-    }
-
-    /**
-     * Get available paths masks
-     *
-     * @return array
-     */
-    public function getAvailablePaths()
-    {
-        return $this->_availablePaths;
-    }
-
-    /**
-     * Returns true if and only if $value meets the validation requirements
-     *
-     * If $value fails validation, then this method returns false, and
-     * getMessages() will return an array of messages that explain why the
-     * validation failed.
-     *
-     * @throws Exception        Throw exception on empty both paths masks types
-     * @param string $value     File/dir path
-     * @return bool
-     */
-    #[\Override]
-    public function isValid($value)
-    {
         $value = trim($value);
-        $this->_setValue($value);
 
-        if (!$this->_availablePaths && !$this->_protectedPaths) {
-            throw new Exception(Mage::helper('core')->__('Please set available and/or protected paths list(s) before validation.'));
+        if (!$this->availablePaths && !$this->protectedPaths) {
+            $this->messages[] = Mage::helper('core')->__('Please set available and/or protected paths list(s) before validation.');
+            return false;
         }
 
-        if (preg_match('#\.\.[\\\/]#', $this->_value)) {
-            $this->_error(self::PROTECTED_LFI, $this->_value);
+        if (preg_match('#\\..[\\\\/]#', $value)) {
+            $this->messages[] = Mage::helper('core')->__('Path "%s" contains invalid parent directory references.', $value);
             return false;
         }
 
         //validation
         $protectedExtensions = Mage::helper('core/data')->getProtectedFileExtensions();
-        $value = str_replace(['/', '\\'], DS, $this->_value);
-        $valuePathInfo = pathinfo(ltrim($value, '\\/'));
+        $normalizedValue = str_replace(['/', '\\\\'], DS, $value);
+        $valuePathInfo = pathinfo(ltrim($normalizedValue, '\\\\/'));
         $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
 
         if (in_array($fileNameExtension, $protectedExtensions)) {
-            $this->_error(self::NOT_AVAILABLE_PATH, $this->_value);
+            $this->messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 
@@ -220,31 +90,65 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
             $valuePathInfo['dirname'] = '';
         }
 
-        if ($this->_protectedPaths && !$this->_isValidByPaths($valuePathInfo, $this->_protectedPaths, true)) {
-            $this->_error(self::PROTECTED_PATH, $this->_value);
+        if ($this->protectedPaths && !$this->_isValidByPaths($valuePathInfo, $this->protectedPaths, true)) {
+            $this->messages[] = Mage::helper('core')->__('Path "%s" is protected and cannot be used.', $value);
             return false;
         }
-        if ($this->_availablePaths && !$this->_isValidByPaths($valuePathInfo, $this->_availablePaths, false)) {
-            $this->_error(self::NOT_AVAILABLE_PATH, $this->_value);
+
+        if ($this->availablePaths && !$this->_isValidByPaths($valuePathInfo, $this->availablePaths, false)) {
+            $this->messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Validate value by path masks
-     *
-     * @param array $valuePathInfo  Path info from value path
-     * @param array $paths          Protected/available paths masks
-     * @param bool $protected       Paths masks is protected?
-     * @return bool
-     */
-    protected function _isValidByPaths($valuePathInfo, $paths, $protected)
+    public function getMessages(): array
     {
+        return $this->messages;
+    }
+
+    public function getMessage(): string
+    {
+        return !empty($this->messages) ? $this->messages[0] : '';
+    }
+
+    public function setProtectedPaths(array $protectedPaths): self
+    {
+        $this->protectedPaths = $protectedPaths;
+        return $this;
+    }
+
+    public function setAvailablePaths(array $availablePaths): self
+    {
+        $this->availablePaths = $availablePaths;
+        return $this;
+    }
+
+    public function setPaths(array $paths): self
+    {
+        if (isset($paths['available']) && is_array($paths['available'])) {
+            $this->availablePaths = $paths['available'];
+        }
+        if (isset($paths['protected']) && is_array($paths['protected'])) {
+            $this->protectedPaths = $paths['protected'];
+        }
+        return $this;
+    }
+
+    public function addProtectedPath(string $path): self
+    {
+        $this->protectedPaths[] = $path;
+        return $this;
+    }
+
+    protected function _isValidByPaths(array $valuePathInfo, array $paths, bool $protected): bool
+    {
+        static $pathsData = [];
+
         foreach ($paths as $path) {
             $path = ltrim($path, '\\/');
-            if (!isset($this->_pathsData[$path]['regFilename'])) {
+            if (!isset($pathsData[$path]['regFilename'])) {
                 $pathInfo = pathinfo($path);
                 $options['file_mask'] = $pathInfo['basename'];
                 if ($pathInfo['dirname'] == '.' || $pathInfo['dirname'] == DS) {
@@ -253,21 +157,22 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
                     $pathInfo['dirname'] = str_replace(['/', '\\'], DS, $pathInfo['dirname']);
                 }
                 $options['dir_mask'] = $pathInfo['dirname'];
-                $this->_pathsData[$path]['options'] = $options;
+                $pathsData[$path]['options'] = $options;
             } else {
-                $options = $this->_pathsData[$path]['options'];
+                $options = $pathsData[$path]['options'];
             }
 
             //file mask
             if (str_contains($options['file_mask'], '*')) {
-                if (!isset($this->_pathsData[$path]['regFilename'])) {
+                if (!isset($pathsData[$path]['regFilename'])) {
                     //make regular
                     $reg = $options['file_mask'];
-                    $reg = str_replace('.', '\.', $reg);
+                    $reg = str_replace('.', '\\.', $reg);
                     $reg = str_replace('*', '.*?', $reg);
                     $reg = "/^($reg)$/";
+                    $pathsData[$path]['regFilename'] = $reg;
                 } else {
-                    $reg = $this->_pathsData[$path]['regFilename'];
+                    $reg = $pathsData[$path]['regFilename'];
                 }
                 $resultFile = preg_match($reg, $valuePathInfo['basename']);
             } else {
@@ -276,17 +181,18 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
 
             //directory mask
             $reg = $options['dir_mask'] . DS;
-            if (!isset($this->_pathsData[$path]['regDir'])) {
+            if (!isset($pathsData[$path]['regDir'])) {
                 //make regular
-                $reg = str_replace('.', '\.', $reg);
+                $reg = str_replace('.', '\\.', $reg);
                 $reg = str_replace('*\\', '||', $reg);
                 $reg = str_replace('*/', '||', $reg);
                 $reg = str_replace(DS, '[\\' . DS . ']', $reg);
                 $reg = str_replace('?', '([^\\' . DS . ']+)', $reg);
                 $reg = str_replace('||', '(.*[\\' . DS . '])?', $reg);
                 $reg = "/^$reg$/";
+                $pathsData[$path]['regDir'] = $reg;
             } else {
-                $reg = $this->_pathsData[$path]['regDir'];
+                $reg = $pathsData[$path]['regDir'];
             }
             $resultDir = preg_match($reg, $valuePathInfo['dirname'] . DS);
 

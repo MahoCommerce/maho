@@ -132,7 +132,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Index action of Multishipping checkout
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_getCheckoutSession()->setCartWasUpdated(false);
         $this->_redirect('*/*/addresses');
@@ -141,7 +141,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout login page
      */
-    public function loginAction()
+    public function loginAction(): void
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $this->_redirect('*/*/');
@@ -161,7 +161,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout login page
      */
-    public function registerAction()
+    public function registerAction(): void
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $this->_redirectUrl($this->_getHelper()->getMSCheckoutUrl());
@@ -184,7 +184,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout select address page
      */
-    public function addressesAction()
+    public function addressesAction(): void
     {
         // If customer do not have addresses
         if (!$this->_getCheckout()->getCustomerDefaultShippingAddress()) {
@@ -212,7 +212,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout process posted addresses
      */
-    public function addressesPostAction()
+    public function addressesPostAction(): void
     {
         if (!$this->_getCheckout()->getCustomerDefaultShippingAddress()) {
             $this->_redirect('*/multishipping_address/newShipping');
@@ -257,7 +257,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout action to go back to addresses page
      */
-    public function backToAddressesAction()
+    public function backToAddressesAction(): void
     {
         $this->_getState()->setActiveStep(
             Mage_Checkout_Model_Type_Multishipping_State::STEP_SELECT_ADDRESSES,
@@ -271,7 +271,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout remove item action
      */
-    public function removeItemAction()
+    public function removeItemAction(): void
     {
         $itemId     = $this->getRequest()->getParam('id');
         $addressId  = $this->getRequest()->getParam('address');
@@ -324,7 +324,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout action to go back to shipping
      */
-    public function backToShippingAction()
+    public function backToShippingAction(): void
     {
         $this->_getState()->setActiveStep(
             Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING,
@@ -338,7 +338,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout after the shipping page
      */
-    public function shippingPostAction()
+    public function shippingPostAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/shipping');
@@ -433,7 +433,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout action to go back to billing
      */
-    public function backToBillingAction()
+    public function backToBillingAction(): void
     {
         $this->_getState()->setActiveStep(
             Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING,
@@ -490,7 +490,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     /**
      * Multishipping checkout after the overview page
      */
-    public function overviewPostAction()
+    public function overviewPostAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_forward('backToAddresses');

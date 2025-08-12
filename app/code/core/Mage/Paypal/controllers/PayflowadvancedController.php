@@ -35,7 +35,7 @@ class Mage_Paypal_PayflowadvancedController extends Mage_Paypal_Controller_Expre
     /**
      * When a customer cancel payment from payflow gateway.
      */
-    public function cancelPaymentAction()
+    public function cancelPaymentAction(): void
     {
         $gotoSection = $this->_cancelPayment();
         $redirectBlock = $this->_getIframeBlock()
@@ -47,7 +47,7 @@ class Mage_Paypal_PayflowadvancedController extends Mage_Paypal_Controller_Expre
     /**
      * When a customer return to website from payflow gateway.
      */
-    public function returnUrlAction()
+    public function returnUrlAction(): void
     {
         $redirectBlock = $this->_getIframeBlock()
             ->setTemplate('paypal/payflowadvanced/redirect.phtml');
@@ -83,7 +83,7 @@ class Mage_Paypal_PayflowadvancedController extends Mage_Paypal_Controller_Expre
     /**
      * Submit transaction to Payflow getaway into iframe
      */
-    public function formAction()
+    public function formAction(): void
     {
         $this->getResponse()
             ->setBody($this->_getIframeBlock()->toHtml());
@@ -92,7 +92,7 @@ class Mage_Paypal_PayflowadvancedController extends Mage_Paypal_Controller_Expre
     /**
      * Get response from PayPal by silent post method
      */
-    public function silentPostAction()
+    public function silentPostAction(): void
     {
         $data = $this->getRequest()->getPost();
         if (isset($data['INVNUM'])) {

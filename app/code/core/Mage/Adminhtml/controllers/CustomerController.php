@@ -53,7 +53,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customers list action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Customers'))->_title($this->__('Manage Customers'));
 
@@ -84,7 +84,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -93,7 +93,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer edit action
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout();
@@ -155,7 +155,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Create new customer action
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -163,7 +163,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete customer action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $this->_initCustomer();
         $customer = Mage::registry('current_customer');
@@ -182,7 +182,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Save customer action
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
         if ($data) {
@@ -401,7 +401,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Export customer grid to CSV format
      */
-    public function exportCsvAction()
+    public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/customer_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('customers.csv', -1));
@@ -410,7 +410,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Export customer grid to XML format
      */
-    public function exportXmlAction()
+    public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/customer_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('customers.xml', -1));
@@ -419,7 +419,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer orders grid
      */
-    public function ordersAction()
+    public function ordersAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout();
@@ -429,7 +429,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer last orders grid for ajax
      */
-    public function lastOrdersAction()
+    public function lastOrdersAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout();
@@ -439,7 +439,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer newsletter grid
      */
-    public function newsletterAction()
+    public function newsletterAction(): void
     {
         $this->_initCustomer();
         $subscriber = Mage::getModel('newsletter/subscriber')
@@ -450,7 +450,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    public function wishlistAction()
+    public function wishlistAction(): void
     {
         $this->_initCustomer();
         $customer = Mage::registry('current_customer');
@@ -475,7 +475,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer last view wishlist for ajax
      */
-    public function viewWishlistAction()
+    public function viewWishlistAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout();
@@ -485,7 +485,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * [Handle and then] get a cart grid contents
      */
-    public function cartAction()
+    public function cartAction(): void
     {
         $this->_initCustomer();
         $websiteId = $this->getRequest()->getParam('website_id');
@@ -511,7 +511,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get shopping cart to view only
      */
-    public function viewCartAction()
+    public function viewCartAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout()
@@ -524,7 +524,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get shopping carts from all websites for specified client
      */
-    public function cartsAction()
+    public function cartsAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout();
@@ -534,7 +534,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get customer's product reviews list
      */
-    public function productReviewsAction()
+    public function productReviewsAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout()
@@ -548,7 +548,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get customer's tags list
      */
-    public function productTagsAction()
+    public function productTagsAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout()
@@ -559,7 +559,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    public function tagGridAction()
+    public function tagGridAction(): void
     {
         $this->_initCustomer();
         $this->loadLayout();
@@ -569,7 +569,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    public function validateAction()
+    public function validateAction(): void
     {
         $response       = new Varien_Object();
         $response->setError(0);
@@ -653,7 +653,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->getResponse()->setBody($response->toJson());
     }
 
-    public function massSubscribeAction()
+    public function massSubscribeAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
         if (!is_array($customersIds)) {
@@ -675,7 +675,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
-    public function massUnsubscribeAction()
+    public function massUnsubscribeAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
         if (!is_array($customersIds)) {
@@ -698,7 +698,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
-    public function massDeleteAction()
+    public function massDeleteAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
         if (!is_array($customersIds)) {
@@ -722,7 +722,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
-    public function massAssignGroupAction()
+    public function massAssignGroupAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
         if (!is_array($customersIds)) {
@@ -745,7 +745,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
-    public function viewfileAction()
+    public function viewfileAction(): void
     {
         $plain  = false;
         if ($this->getRequest()->getParam('file')) {

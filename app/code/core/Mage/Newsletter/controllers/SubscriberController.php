@@ -6,6 +6,7 @@
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,7 +15,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
       * New subscription action
       */
-    public function newAction()
+    public function newAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirectReferer();
@@ -27,7 +28,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
             $email              = (string) $this->getRequest()->getPost('email');
 
             try {
-                if (!Zend_Validate::is($email, 'EmailAddress')) {
+                if (!Mage::helper('core')->isValidEmail($email)) {
                     Mage::throwException($this->__('Please enter a valid email address.'));
                 }
 
@@ -63,7 +64,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Subscription confirm action
      */
-    public function confirmAction()
+    public function confirmAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');
         $code  = (string) $this->getRequest()->getParam('code');
@@ -92,7 +93,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Unsubscribe newsletter
      */
-    public function unsubscribeAction()
+    public function unsubscribeAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');
         $code  = (string) $this->getRequest()->getParam('code');

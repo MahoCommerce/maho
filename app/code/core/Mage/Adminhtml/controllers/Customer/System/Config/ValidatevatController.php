@@ -34,7 +34,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
     /**
      * Check whether vat is valid
      */
-    public function validateAction()
+    public function validateAction(): void
     {
         $result = $this->_validate();
         $this->getResponse()->setBody((int) $result->getIsValid());
@@ -43,7 +43,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
     /**
      * Retrieve validation result as JSON
      */
-    public function validateAdvancedAction()
+    public function validateAdvancedAction(): void
     {
         /** @var Mage_Core_Helper_Data $coreHelper */
         $coreHelper = Mage::helper('core');

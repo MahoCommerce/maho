@@ -33,7 +33,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Show user types grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this
             ->_title($this->__('System'))
@@ -50,7 +50,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Edit role
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->loadLayout()
             ->_setActiveMenu('system/api/rest_attributes');
@@ -78,7 +78,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Save role
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $request = $this->getRequest();
 

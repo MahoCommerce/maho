@@ -29,7 +29,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Index action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         /** @var Mage_Rss_Helper_Data $helper */
         $helper = Mage::helper('rss');
@@ -46,7 +46,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Display feed not found message
      */
-    public function nofeedAction()
+    public function nofeedAction(): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
         $this->getResponse()->setHeader('Status', '404 File not found');
@@ -57,10 +57,8 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Wishlist rss feed action
      * Show all public wishlists and private wishlists that belong to current user
-     *
-     * @return void
      */
-    public function wishlistAction()
+    public function wishlistAction(): void
     {
         if (!$this->isFeedEnable('wishlist/active')) {
             $this->_forward('nofeed', 'index', 'rss');

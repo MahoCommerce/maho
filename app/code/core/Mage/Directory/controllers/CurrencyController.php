@@ -11,7 +11,7 @@
 
 class Mage_Directory_CurrencyController extends Mage_Core_Controller_Front_Action
 {
-    public function switchAction()
+    public function switchAction(): void
     {
         if ($curency = (string) $this->getRequest()->getParam('currency')) {
             Mage::app()->getStore()->setCurrentCurrencyCode($curency);

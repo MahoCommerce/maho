@@ -41,7 +41,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('System'))
              ->_title($this->__('Web Services'))
@@ -52,12 +52,12 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
             ->renderLayout();
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('System'))
              ->_title($this->__('Web Services'))
@@ -102,7 +102,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
             $id = $this->getRequest()->getPost('user_id', false);
@@ -174,7 +174,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $id = $this->getRequest()->getParam('user_id');
 
@@ -208,7 +208,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
-    public function rolesGridAction()
+    public function rolesGridAction(): void
     {
         $id = $this->getRequest()->getParam('user_id');
         $model = Mage::getModel('api/user');
@@ -221,7 +221,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/api_user_edit_tab_roles')->toHtml());
     }
 
-    public function roleGridAction()
+    public function roleGridAction(): void
     {
         $this->getResponse()
             ->setBody($this->getLayout()

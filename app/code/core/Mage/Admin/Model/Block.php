@@ -6,7 +6,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,21 +31,21 @@ class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
 
     /**
      * @return array|true
-     * @throws Exception
-     * @throws Zend_Validate_Exception
      */
     public function validate()
     {
         $errors = [];
 
-        if (!Zend_Validate::is($this->getBlockName(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getBlockName())) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is required field.');
         }
+
         $disallowedBlockNames = Mage::helper('admin/block')->getDisallowedBlockNames();
         if (in_array($this->getBlockName(), $disallowedBlockNames)) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is disallowed.');
         }
-        if (!Zend_Validate::is($this->getBlockName(), 'Regex', ['/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/'])) {
+
+        if (!Mage::helper('core')->isValidRegex($this->getBlockName(), '/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/')) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is incorrect.');
         }
 

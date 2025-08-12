@@ -27,7 +27,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Show grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this
             ->_title($this->__('System'))
@@ -44,7 +44,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Updating grid by ajax
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -53,7 +53,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Updating users grid by ajax
      */
-    public function usersGridAction()
+    public function usersGridAction(): void
     {
         $id = $this->getRequest()->getParam('id', false);
 
@@ -68,7 +68,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Create new role
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this
             ->_title($this->__('System'))
@@ -87,7 +87,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Edit role
      */
-    public function editAction()
+    public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
         /** @var Mage_Api2_Model_Acl_Global_Role $role */
@@ -136,7 +136,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Save role
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $request = $this->getRequest();
 
@@ -242,7 +242,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Delete role
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $id = $this->getRequest()->getParam('id', false);
 
@@ -284,7 +284,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Get API2 roles ajax grid action
      */
-    public function rolesGridAction()
+    public function rolesGridAction(): void
     {
         /** @var Mage_Admin_Model_User $model */
         $model = Mage::getModel('admin/user');

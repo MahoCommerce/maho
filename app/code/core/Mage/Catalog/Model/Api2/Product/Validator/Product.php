@@ -123,7 +123,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         }
         // Validate weight
         if (isset($data['weight']) && !empty($data['weight']) && $data['weight'] > 0
-            && !Zend_Validate::is($data['weight'], 'Between', [0, self::MAX_DECIMAL_VALUE])
+            && ($data['weight'] < 0 || $data['weight'] > self::MAX_DECIMAL_VALUE)
         ) {
             $this->_addError('The "weight" value is not within the specified range.');
         }
@@ -268,7 +268,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         if ($this->_isUpdate() && !isset($data['sku'])) {
             return true;
         }
-        if (!Zend_Validate::is((string) $data['sku'], 'StringLength', ['min' => 0, 'max' => 64])) {
+        if (strlen((string) $data['sku']) > 64) {
             $this->_addError('SKU length should be 64 characters maximum.');
         }
     }

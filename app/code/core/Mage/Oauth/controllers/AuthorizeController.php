@@ -169,7 +169,7 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
     /**
      * Index action.
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initForm();
         $this->_initLayoutMessages($this->_sessionName);
@@ -179,7 +179,7 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
     /**
      * OAuth authorize or allow decline access simple page
      */
-    public function simpleAction()
+    public function simpleAction(): void
     {
         $this->_initForm(true);
         $this->_initLayoutMessages($this->_sessionName);
@@ -189,7 +189,7 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
     /**
      * Confirm token authorization action
      */
-    public function confirmAction()
+    public function confirmAction(): void
     {
         $this->_initConfirmPage();
     }
@@ -197,7 +197,7 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
     /**
      * Confirm token authorization simple page
      */
-    public function confirmSimpleAction()
+    public function confirmSimpleAction(): void
     {
         $this->_initConfirmPage(true);
     }
@@ -205,7 +205,7 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
     /**
      * Reject token authorization action
      */
-    public function rejectAction()
+    public function rejectAction(): void
     {
         $this->_initRejectPage();
     }
@@ -213,7 +213,7 @@ class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
     /**
      * Reject token authorization simple page
      */
-    public function rejectSimpleAction()
+    public function rejectSimpleAction(): void
     {
         $this->_initRejectPage(true);
     }

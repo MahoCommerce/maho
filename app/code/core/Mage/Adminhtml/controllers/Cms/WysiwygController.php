@@ -21,7 +21,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     /**
      * Template directives callback
      */
-    public function directiveAction()
+    public function directiveAction(): void
     {
         try {
             $directive = $this->getRequest()->getParam('___directive');

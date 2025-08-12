@@ -556,7 +556,7 @@ abstract class Mage_Core_Controller_Varien_Action
     /**
      * @param mixed|null $coreRoute
      */
-    public function norouteAction($coreRoute = null)
+    public function norouteAction($coreRoute = null): void
     {
         $status = $this->getRequest()->getParam('__status__') ?: new Varien_Object();
 
@@ -578,7 +578,7 @@ abstract class Mage_Core_Controller_Varien_Action
         }
     }
 
-    public function noCookiesAction()
+    public function noCookiesAction(): void
     {
         $redirect = new Varien_Object();
         Mage::dispatchEvent('controller_action_nocookies', [

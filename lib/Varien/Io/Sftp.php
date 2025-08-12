@@ -51,7 +51,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Close a connection
      */
     #[\Override]
-    public function close()
+    public function close(): void
     {
         $this->_connection->disconnect(); // @phpstan-ignore class.notFound
     }

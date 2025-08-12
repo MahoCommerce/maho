@@ -28,7 +28,7 @@ class Varien_Simplexml_Element extends SimpleXMLElement
      *
      * @param Varien_Simplexml_Element $element
      */
-    public function setParent($element)
+    public function setParent($element): void
     {
         #$this->_parent = $element;
     }

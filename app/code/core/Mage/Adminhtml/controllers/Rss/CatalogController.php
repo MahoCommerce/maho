@@ -25,7 +25,7 @@ class Mage_Adminhtml_Rss_CatalogController extends Mage_Adminhtml_Controller_Rss
         return Mage::getSingleton('admin/session')->isAllowed($path);
     }
 
-    public function notifystockAction()
+    public function notifystockAction(): void
     {
         if ($this->checkFeedEnable('admin_catalog/notifystock')) {
             $this->loadLayout(false);
@@ -33,7 +33,7 @@ class Mage_Adminhtml_Rss_CatalogController extends Mage_Adminhtml_Controller_Rss
         }
     }
 
-    public function reviewAction()
+    public function reviewAction(): void
     {
         if ($this->checkFeedEnable('admin_catalog/review')) {
             $this->loadLayout(false);

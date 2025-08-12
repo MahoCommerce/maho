@@ -34,7 +34,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * Used if default page don't configure or available
      *
      */
-    public function defaultIndexAction()
+    public function defaultIndexAction(): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
         $this->getResponse()->setHeader('Status', '404 File not found');
@@ -49,7 +49,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * @param string $coreRoute
      */
     #[\Override]
-    public function noRouteAction($coreRoute = null)
+    public function noRouteAction($coreRoute = null): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
         $this->getResponse()->setHeader('Status', '404 File not found');
@@ -65,7 +65,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * Used if no route page don't configure or available
      *
      */
-    public function defaultNoRouteAction()
+    public function defaultNoRouteAction(): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
         $this->getResponse()->setHeader('Status', '404 File not found');
@@ -79,7 +79,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      *
      */
     #[\Override]
-    public function noCookiesAction()
+    public function noCookiesAction(): void
     {
         $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_NO_COOKIES_PAGE);
         if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
@@ -92,7 +92,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * Used if no cookies page don't configure or available
      *
      */
-    public function defaultNoCookiesAction()
+    public function defaultNoCookiesAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();

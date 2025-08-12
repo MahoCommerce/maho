@@ -16,7 +16,7 @@ class Varien_Exception extends Exception
      *
      * @throws Varien_Exception
      */
-    public static function processPcreError()
+    public static function processPcreError(): void
     {
         if (preg_last_error() != PREG_NO_ERROR) {
             switch (preg_last_error()) {

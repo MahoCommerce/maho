@@ -3282,7 +3282,7 @@ p.product-name a:hover {
 .products-grid {
   display: grid;
   grid-auto-rows: 1fr;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   grid-gap: 0.5rem;
   grid-row-gap: 2rem;
   text-align: center;

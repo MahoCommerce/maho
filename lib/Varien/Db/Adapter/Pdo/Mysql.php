@@ -4132,10 +4132,9 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
      *
      * @param string $tableName
      * @param bool $temporary
-     * @return mixed
      */
     #[\Override]
-    public function createTableFromSelect($tableName, Zend_Db_Select $select, $temporary = false)
+    public function createTableFromSelect($tableName, Zend_Db_Select $select, $temporary = false): void
     {
         $query = sprintf(
             'CREATE' . ($temporary ? ' TEMPORARY' : '') . ' TABLE `%s` AS (%s)',

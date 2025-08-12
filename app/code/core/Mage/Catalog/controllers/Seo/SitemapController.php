@@ -32,7 +32,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
      * Display categories listing
      *
      */
-    public function categoryAction()
+    public function categoryAction(): void
     {
         $update = $this->getLayout()->getUpdate();
         $update->addHandle('default');
@@ -49,7 +49,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
      * Display products listing
      *
      */
-    public function productAction()
+    public function productAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();

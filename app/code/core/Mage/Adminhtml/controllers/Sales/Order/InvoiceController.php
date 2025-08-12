@@ -118,7 +118,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Invoice information page
      */
     #[\Override]
-    public function viewAction()
+    public function viewAction(): void
     {
         $invoice = $this->_initInvoice();
         if ($invoice) {
@@ -140,7 +140,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Start create invoice action
      */
-    public function startAction()
+    public function startAction(): void
     {
         /**
          * Clear old values for invoice qty's
@@ -152,7 +152,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Invoice create page
      */
-    public function newAction()
+    public function newAction(): void
     {
         $invoice = $this->_initInvoice();
         if ($invoice) {
@@ -173,7 +173,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Update items qty action
      */
-    public function updateQtyAction()
+    public function updateQtyAction(): void
     {
         try {
             $invoice = $this->_initInvoice(true);
@@ -204,7 +204,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Save invoice
      * We can save only new invoice. Existing invoices are not editable
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $data = $this->getRequest()->getPost('invoice');
         $orderId = $this->getRequest()->getParam('order_id');
@@ -295,7 +295,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Capture invoice action
      */
-    public function captureAction()
+    public function captureAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
             try {
@@ -316,7 +316,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Cancel invoice action
      */
-    public function cancelAction()
+    public function cancelAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
             try {
@@ -337,7 +337,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Void invoice action
      */
-    public function voidAction()
+    public function voidAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
             try {
@@ -355,7 +355,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
         }
     }
 
-    public function addCommentAction()
+    public function addCommentAction(): void
     {
         try {
             $this->getRequest()->setParam('invoice_id', $this->getRequest()->getParam('id'));
@@ -394,7 +394,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Create pdf for current invoice
      */
     #[\Override]
-    public function printAction()
+    public function printAction(): void
     {
         $this->_initInvoice();
         parent::printAction();

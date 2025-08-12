@@ -249,7 +249,7 @@ class Varien_Object_Cache
      *
      * @param string $class
      */
-    public function deleteByClass($class)
+    public function deleteByClass($class): void
     {
         foreach ($this->_objects as $idx => $object) {
             if ($object instanceof $class) {
@@ -358,7 +358,7 @@ class Varien_Object_Cache
         return $objects;
     }
 
-    public function debug($idx, $object = null)
+    public function debug($idx, $object = null): void
     {
         $bt = debug_backtrace();
         $debug = [];
