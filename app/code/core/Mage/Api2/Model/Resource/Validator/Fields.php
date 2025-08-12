@@ -46,7 +46,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
      * - resource
      *
      * @param array $options
-     * @throws Exception If passed parameter 'resource' is wrong
+     * @throws Mage_Core_Exception If passed parameter 'resource' is wrong
      */
     public function __construct($options)
     {
@@ -68,8 +68,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     /**
      * Build validator chain with config data
      *
-     * @throws Exception If validator type is not set
-     * @throws Exception If validator is not exist
+     * @throws Mage_Core_Exception If validator type is not supported
      */
     protected function _buildValidatorsChain(array $validationConfig)
     {

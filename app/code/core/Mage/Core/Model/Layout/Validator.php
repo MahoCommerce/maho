@@ -178,7 +178,7 @@ class Mage_Core_Model_Layout_Validator
     }
 
     /**
-     * @throws Exception
+     * @throws Mage_Core_Exception
      */
     protected function _validateTemplatePath(array $templatePaths): void
     {
@@ -188,7 +188,7 @@ class Mage_Core_Model_Layout_Validator
                 ? stripcslashes(trim((string) $path->children(), '"'))
                 : (string) $path;
             if (str_contains($path, '..' . DS)) {
-                throw new Exception();
+                throw new Mage_Core_Exception('Invalid template path: contains parent directory traversal');
             }
         }
     }
