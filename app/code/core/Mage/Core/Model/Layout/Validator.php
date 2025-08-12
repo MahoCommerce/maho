@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -25,9 +27,9 @@ class Mage_Core_Model_Layout_Validator
     /**
      * XPath expression for checking layout update
      *
-     * @var array
+     * @var array<string>
      */
-    protected $_disallowedXPathExpressions = [
+    protected array $_disallowedXPathExpressions = [
         '*//template',
         '*//@template',
         '//*[@method=\'setTemplate\']',
@@ -38,28 +40,28 @@ class Mage_Core_Model_Layout_Validator
     /**
      * Protected expressions
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $_protectedExpressions = [
+    protected array $_protectedExpressions = [
         self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR => '//action/*[@helper]',
     ];
 
     /**
      * Disallowed block names
      *
-     * @var array
+     * @var array<string>
      */
-    protected $_disallowedBlocks = [];
+    protected array $_disallowedBlocks = [];
 
     /**
-     * @var array
+     * @var array<string, string>
      */
-    protected $_messageTemplates = [];
+    protected array $_messageTemplates = [];
 
     /**
-     * @var array
+     * @var array<string>
      */
-    protected $messages = [];
+    protected array $messages = [];
 
     public function __construct()
     {
@@ -72,7 +74,7 @@ class Mage_Core_Model_Layout_Validator
      *
      * @return $this
      */
-    protected function _initMessageTemplates()
+    protected function _initMessageTemplates(): self
     {
         if (!$this->_messageTemplates) {
             $this->_messageTemplates = [
@@ -92,21 +94,16 @@ class Mage_Core_Model_Layout_Validator
 
     /**
      * Returns array of errors
-     *
-     * @return array
      */
-    public function getMessages()
+    public function getMessages(): array
     {
         return $this->messages;
     }
 
     /**
      * Returns true if and only if $value meets the validation requirements
-     *
-     * @param mixed $value
-     * @return bool
      */
-    public function isValid($value)
+    public function isValid(Varien_Simplexml_Element|string $value): bool
     {
         $this->messages = [];
 
@@ -118,10 +115,9 @@ class Mage_Core_Model_Layout_Validator
                 $this->_error(self::XML_INVALID);
                 return false;
             }
-        } elseif (!($value instanceof Varien_Simplexml_Element)) {
-            $this->_error(self::INVALID_XML_OBJECT_EXCEPTION);
-            return false;
         }
+        // If $value is not a string at this point, it must be a Varien_Simplexml_Element
+        // due to the type declaration, so no additional check is needed
 
         // if layout update declare custom templates then validate their paths
         if ($templatePaths = $value->xpath('//*[@template]')) {
@@ -158,10 +154,7 @@ class Mage_Core_Model_Layout_Validator
         return true;
     }
 
-    /**
-     * @return array
-     */
-    public function getDisallowedBlocks()
+    public function getDisallowedBlocks(): array
     {
         if (!count($this->_disallowedBlocks)) {
             $disallowedBlockConfig = Mage::getStoreConfig('validators/custom_layout/disallowed_block');
@@ -174,29 +167,20 @@ class Mage_Core_Model_Layout_Validator
         return $this->_disallowedBlocks;
     }
 
-    /**
-     * @return array
-     */
-    public function getProtectedExpressions()
+    public function getProtectedExpressions(): array
     {
         return $this->_protectedExpressions;
     }
 
-    /**
-     * @param array $templatePaths
-     * @return void
-     */
-    public function validateTemplatePath($templatePaths)
+    public function validateTemplatePath(array $templatePaths): void
     {
         $this->_validateTemplatePath($templatePaths);
     }
 
     /**
-     * @param array $templatePaths
-     * @return void
      * @throws Exception
      */
-    protected function _validateTemplatePath($templatePaths)
+    protected function _validateTemplatePath(array $templatePaths): void
     {
         /** @var Varien_Simplexml_Element $path */
         foreach ($templatePaths as $path) {
@@ -209,18 +193,12 @@ class Mage_Core_Model_Layout_Validator
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getDisallowedXpathValidationExpression()
+    public function getDisallowedXpathValidationExpression(): array
     {
         return $this->_disallowedXPathExpressions;
     }
 
-    /**
-     * @return string
-     */
-    protected function _getXpathValidationExpression()
+    protected function _getXpathValidationExpression(): string
     {
         return implode(' | ', $this->_disallowedXPathExpressions);
     }
@@ -228,42 +206,32 @@ class Mage_Core_Model_Layout_Validator
     /**
      * Set messages for validator
      *
-     * @param array $messages
      * @return $this
      */
-    public function setMessages($messages)
+    public function setMessages(array $messages): self
     {
         // Merge any custom messages with existing templates
-        if (is_array($messages)) {
-            $this->_messageTemplates = array_merge($this->_messageTemplates, $messages);
-        }
+        $this->_messageTemplates = array_merge($this->_messageTemplates, $messages);
         return $this;
     }
 
     /**
      * Get XPath validation expression
-     *
-     * @return string
      */
-    public function getXpathValidationExpression()
+    public function getXpathValidationExpression(): string
     {
         return $this->_getXpathValidationExpression();
     }
 
     /**
      * Get XPath block validation expression
-     *
-     * @return string
      */
-    public function getXpathBlockValidationExpression()
+    public function getXpathBlockValidationExpression(): string
     {
         return $this->_getXpathBlockValidationExpression();
     }
 
-    /**
-     * @return string
-     */
-    protected function _getXpathBlockValidationExpression()
+    protected function _getXpathBlockValidationExpression(): string
     {
         $disallowedBlocks = $this->getDisallowedBlocks();
         if (!count($disallowedBlocks)) {
@@ -283,11 +251,8 @@ class Mage_Core_Model_Layout_Validator
 
     /**
      * Add error message
-     *
-     * @param string $messageKey
-     * @return void
      */
-    protected function _error($messageKey)
+    protected function _error(string $messageKey): void
     {
         if (isset($this->_messageTemplates[$messageKey])) {
             $this->messages[] = $this->_messageTemplates[$messageKey];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -17,19 +19,19 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
     /**
      * Protected file types
      *
-     * @var array
+     * @var array<string>
      */
-    protected $_protectedFileExtensions = [];
+    protected array $_protectedFileExtensions = [];
 
     /**
-     * @var array
+     * @var array<string, string>
      */
-    protected $_messageTemplates = [];
+    protected array $_messageTemplates = [];
 
     /**
-     * @var array
+     * @var array<string>
      */
-    protected $messages = [];
+    protected array $messages = [];
 
     public function __construct()
     {
@@ -42,7 +44,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
      *
      * @return $this
      */
-    protected function _initMessageTemplates()
+    protected function _initMessageTemplates(): self
     {
         if (!$this->_messageTemplates) {
             $this->_messageTemplates = [
@@ -57,7 +59,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
      *
      * @return $this
      */
-    protected function _initProtectedFileExtensions()
+    protected function _initProtectedFileExtensions(): self
     {
         if (!$this->_protectedFileExtensions) {
             /** @var Mage_Core_Helper_Data $helper */
@@ -82,9 +84,8 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
      * validation failed.
      *
      * @param string $value         Extension of file
-     * @return bool
      */
-    public function isValid($value)
+    public function isValid(string $value): bool
     {
         $this->messages = [];
 
@@ -101,9 +102,9 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
     /**
      * Returns array of validation failure messages
      *
-     * @return array
+     * @return array<string>
      */
-    public function getMessages()
+    public function getMessages(): array
     {
         return $this->messages;
     }
