@@ -10,14 +10,8 @@ on:
 
 jobs:
   phpstan:
-    name: Analyze ${{ matrix.refs == 'pr-head' && github.head_ref || github.base_ref || github.ref_name }}
+    name: Analyze
     runs-on: [ubuntu-latest]
-    strategy:
-      fail-fast: false
-      matrix:
-        refs: ['target-branch', 'pr-head']
-        exclude:
-          - refs: ${{ github.event_name != 'pull_request' && 'pr-head' }}
 
     steps:
       - name: Setup PHP
@@ -26,8 +20,6 @@ jobs:
           php-version: latest
 
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ matrix.refs == 'pr-head' && github.event.pull_request.head.sha || '' }}
 
       - name: Get composer cache directory
         id: composer-cache
@@ -48,10 +40,10 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: var
-          key: phpstan-result-cache-${{ matrix.refs }}-${{ github.ref_name }}-${{ github.run_id }}
+          key: phpstan-result-cache-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
-            phpstan-result-cache-${{ matrix.refs }}-${{ github.ref_name }}
-            phpstan-result-cache-target-branch-main
+            phpstan-result-cache-${{ github.ref_name }}
+            phpstan-result-cache-main
 
       - name: PHPStan Static Analysis
         run: XDEBUG_MODE=off php vendor/bin/phpstan.phar analyze -vvv
