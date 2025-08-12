@@ -689,6 +689,7 @@
 "The category has been saved.","The category has been saved."
 "The comparison list was cleared.","The comparison list was cleared."
 "The file '%s' for '%s' has an invalid extension","The file '%s' for '%s' has an invalid extension"
+"The file '%s' for '%s' has invalid upload data.","The file '%s' for '%s' has invalid upload data."
 "The file '%s' you uploaded is larger than %s Megabytes allowed by server","The file '%s' you uploaded is larger than %s Megabytes allowed by server"
 "The file was only partially uploaded. Please try again.","The file was only partially uploaded. Please try again."
 "The file you uploaded is larger than %s Megabytes allowed by server","The file you uploaded is larger than %s Megabytes allowed by server"

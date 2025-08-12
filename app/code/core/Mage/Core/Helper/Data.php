@@ -10,6 +10,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
 class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
@@ -729,7 +733,7 @@ XML;
     public function checkLfiProtection($name)
     {
         if (preg_match('#\.\.[\\\/]#', $name)) {
-            throw new Mage_Core_Exception($this->__('Requested file may not include parent directory traversal ("../", "..\\" notation)'));
+            throw new Mage_Core_Exception($this->__('Invalid template path: contains parent directory traversal'));
         }
         return true;
     }
@@ -973,21 +977,6 @@ XML;
         return strip_tags((string) $value, $allowedTags);
     }
 
-    /**
-     * Check if value is a valid email address format
-     */
-    public function isValidEmail(mixed $value): bool
-    {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
-    }
-
-    /**
-     * Check if value is a valid URL format
-     */
-    public function isValidUrl(mixed $value): bool
-    {
-        return filter_var($value, FILTER_VALIDATE_URL) !== false;
-    }
 
     /**
      * Check if value is a valid IP address (IPv4 or IPv6)
@@ -1052,5 +1041,119 @@ XML;
         }
 
         return $dsn;
+    }
+
+    /**
+     * Symfony validator instance
+     */
+    private static ?ValidatorInterface $symfonyValidator = null;
+
+    /**
+     * Get Symfony validator instance
+     */
+    private function getSymfonyValidator(): ValidatorInterface
+    {
+        if (self::$symfonyValidator === null) {
+            self::$symfonyValidator = Validation::createValidator();
+        }
+        return self::$symfonyValidator;
+    }
+
+    /**
+     * Check if email address is valid using Symfony Email constraint
+     */
+    public function isValidEmail(#[\SensitiveParameter] mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Email());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if value is not blank using Symfony NotBlank constraint
+     */
+    public function isValidNotBlank(mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\NotBlank());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if string matches regex pattern using Symfony Regex constraint
+     */
+    public function isValidRegex(string $value, string $pattern): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(['pattern' => $pattern]));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if string length is valid using Symfony Length constraint
+     */
+    public function isValidLength(string $value, ?int $min = null, ?int $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if numeric value is in valid range using Symfony Range constraint
+     */
+    public function isValidRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if URL format is valid using Symfony Url constraint
+     */
+    public function isValidUrl(mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
+        return count($violations) === 0;
+    }
+
+
+    /**
+     * Check if date format is valid using Symfony Date constraint
+     */
+    public function isValidDate(string $date): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($date, new Assert\Date());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if datetime format is valid using Symfony DateTime constraint
+     */
+    public function isValidDateTime(string $datetime): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($datetime, new Assert\DateTime());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Generic validation method that returns boolean result using Symfony constraints
+     */
+    public function isValid(mixed $value, mixed $constraint): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
+        return count($violations) === 0;
     }
 }

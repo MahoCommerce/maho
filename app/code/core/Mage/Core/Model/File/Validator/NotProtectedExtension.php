@@ -1,32 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate_Abstract
+class Mage_Core_Model_File_Validator_NotProtectedExtension
 {
     public const PROTECTED_EXTENSION = 'protectedExtension';
 
     /**
-     * The file extension
-     *
-     * @var string
-     */
-    protected $_value;
-
-    /**
      * Protected file types
      *
-     * @var array
+     * @var array<string>
      */
-    protected $_protectedFileExtensions = [];
+    protected array $_protectedFileExtensions = [];
+
+    /**
+     * @var array<string, string>
+     */
+    protected array $_messageTemplates = [];
+
+    /**
+     * @var array<string>
+     */
+    protected array $messages = [];
 
     public function __construct()
     {
@@ -39,11 +44,11 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate
      *
      * @return $this
      */
-    protected function _initMessageTemplates()
+    protected function _initMessageTemplates(): self
     {
         if (!$this->_messageTemplates) {
             $this->_messageTemplates = [
-                self::PROTECTED_EXTENSION => Mage::helper('core')->__('File with an extension "%value%" is protected and cannot be uploaded'),
+                self::PROTECTED_EXTENSION => Mage::helper('core')->__('File with an extension "%s" is protected and cannot be uploaded'),
             ];
         }
         return $this;
@@ -54,7 +59,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate
      *
      * @return $this
      */
-    protected function _initProtectedFileExtensions()
+    protected function _initProtectedFileExtensions(): self
     {
         if (!$this->_protectedFileExtensions) {
             /** @var Mage_Core_Helper_Data $helper */
@@ -79,19 +84,28 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate
      * validation failed.
      *
      * @param string $value         Extension of file
-     * @return bool
      */
-    #[\Override]
-    public function isValid($value)
+    public function isValid(string $value): bool
     {
-        $value = strtolower(trim($value));
-        $this->_setValue($value);
+        $this->messages = [];
 
-        if (in_array($this->_value, $this->_protectedFileExtensions)) {
-            $this->_error(self::PROTECTED_EXTENSION, $this->_value);
+        $value = strtolower(trim($value));
+
+        if (in_array($value, $this->_protectedFileExtensions)) {
+            $this->messages[] = sprintf($this->_messageTemplates[self::PROTECTED_EXTENSION], $value);
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Returns array of validation failure messages
+     *
+     * @return array<string>
+     */
+    public function getMessages(): array
+    {
+        return $this->messages;
     }
 }

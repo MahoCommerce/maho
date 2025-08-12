@@ -6,7 +6,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,17 +31,16 @@ class Mage_Admin_Model_Variable extends Mage_Core_Model_Abstract
 
     /**
      * @return array|bool
-     * @throws Exception
-     * @throws Zend_Validate_Exception
      */
     public function validate()
     {
         $errors = [];
 
-        if (!Zend_Validate::is($this->getVariableName(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getVariableName())) {
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is required field.');
         }
-        if (!Zend_Validate::is($this->getVariableName(), 'Regex', ['/^[-_a-zA-Z0-9\/]*$/'])) {
+
+        if (!Mage::helper('core')->isValidRegex($this->getVariableName(), '/^[-_a-zA-Z0-9\/]*$/')) {
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is incorrect.');
         }
 

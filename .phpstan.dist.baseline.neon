@@ -6559,12 +6559,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource/Validator/Eav.php
 
 		-
-			message: '#^Call to an undefined method Zend_Validate_Interface\:\:setMessage\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource/Validator/Fields.php
-
-		-
 			message: '#^Method Mage_Api2_Model_Resource_Validator_Fields\:\:_buildValidatorsChain\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12019,12 +12013,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '#^Method Mage_Core_Model_Layout_Validator\:\:validateTemplatePath\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout/Validator.php
-
-		-
 			message: '#^Property Mage_Core_Model_Locale\:\:\$_currencyCache has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -15122,12 +15110,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Downloadable_Model_Link_Api_Validator\:\:validateUploadType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Link/Api/Validator.php
-
-		-
-			message: '#^Method Mage_Downloadable_Model_Link_Api_Validator\:\:validateUrl\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/Validator.php

@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Mage_Customer_Helper_Data as Helper;
-
 class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
     public const CUSTOMER_ID_SESSION_NAME = 'customerId';
@@ -149,7 +147,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 } catch (Mage_Core_Exception $e) {
                     switch ($e->getCode()) {
                         case Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED:
-                            /** @var Helper $helper */
+                            /** @var Mage_Customer_Helper_Data $helper */
                             $helper = Mage::helper('customer');
                             $value = $helper->getEmailConfirmationUrl($login['username']);
                             $message = $helper->__('This account is not confirmed. <a href="%s">Click here</a> to resend confirmation email.', $value);
@@ -179,7 +177,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function _loginPostRedirect()
     {
         Mage::dispatchEvent('customer_controller_account_login_post_redirect_before', ['controller' => $this]);
-        /** @var Helper $helper */
+        /** @var Mage_Customer_Helper_Data $helper */
         $helper = Mage::helper('customer');
 
         $session = $this->_getSession();
@@ -189,8 +187,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $session->setBeforeAuthUrl($helper->getAccountUrl());
             // Redirect customer to the last page visited after logging in
             if ($session->isLoggedIn()) {
-                if (!Mage::getStoreConfigFlag(Helper::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
-                    $referer = $this->getRequest()->getParam(Helper::REFERER_QUERY_PARAM_NAME);
+                if (!Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
+                    $referer = $this->getRequest()->getParam(Mage_Customer_Helper_Data::REFERER_QUERY_PARAM_NAME);
                     if ($referer) {
                         // Rebuild referer URL to handle the case when SID was changed
                         $referer = Mage::getModel('core/url')
@@ -226,7 +224,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $session = $this->_getSession();
         $session->logout()->renewSession();
 
-        if (Mage::getStoreConfigFlag(Helper::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
+        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
             $session->setBeforeAuthUrl(Mage::getBaseUrl());
         } else {
             $session->setBeforeAuthUrl($this->_getRefererUrl());
@@ -331,7 +329,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $store->getId(),
                 $this->getRequest()->getPost('password'),
             );
-            /** @var Helper $customerHelper */
+            /** @var Mage_Customer_Helper_Data $customerHelper */
             $customerHelper = Mage::helper('customer');
             $session->addSuccess($this->__(
                 'Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please <a href="%s">click here</a>.',
@@ -557,11 +555,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $userPrompt = '';
             $userPrompt = match ($configAddressType) {
                 Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $this->__(
-                    'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you shipping address for proper VAT calculation',
+                    'If you are a registered VAT customer, please <a href="%s">click here</a> to enter you shipping address for proper VAT calculation',
                     $this->_getUrl('customer/address/edit'),
                 ),
                 default => $this->__(
-                    'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you billing address for proper VAT calculation',
+                    'If you are a registered VAT customer, please <a href="%s">click here</a> to enter you billing address for proper VAT calculation',
                     $this->_getUrl('customer/address/edit'),
                 ),
             };
@@ -737,7 +735,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            if (!Zend_Validate::is($email, 'EmailAddress')) {
+            if (!Mage::helper('core')->isValidEmail($email)) {
                 $this->_getSession()->setForgottenEmail($email);
                 $this->_getSession()->addError($this->__('Invalid email address.'));
                 $this->_redirect('*/*/forgotpassword');
@@ -751,7 +749,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $customerId = $customer->getId();
             if ($customerId) {
                 try {
-                    /** @var Helper $helper */
+                    /** @var Mage_Customer_Helper_Data $helper */
                     $helper = Mage::helper('customer');
                     $newResetPasswordLinkToken = $helper->generateResetPasswordLinkToken();
                     $newResetPasswordLinkCustomerId = $helper->generateResetPasswordLinkCustomerId($customerId);
