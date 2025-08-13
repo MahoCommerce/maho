@@ -20,18 +20,18 @@ class Varien_Profiler
     private static $_enabled = false;
     private static $_memory_get_usage = false;
 
-    public static function enable()
+    public static function enable(): void
     {
         self::$_enabled = true;
         self::$_memory_get_usage = function_exists('memory_get_usage');
     }
 
-    public static function disable()
+    public static function disable(): void
     {
         self::$_enabled = false;
     }
 
-    public static function reset($timerName)
+    public static function reset($timerName): void
     {
         self::$_timers[$timerName] = [
             'start' => false,
@@ -42,7 +42,7 @@ class Varien_Profiler
         ];
     }
 
-    public static function resume($timerName)
+    public static function resume($timerName): void
     {
         if (!self::$_enabled) {
             return;
@@ -59,12 +59,12 @@ class Varien_Profiler
         self::$_timers[$timerName]['count']++;
     }
 
-    public static function start($timerName)
+    public static function start($timerName): void
     {
         self::resume($timerName);
     }
 
-    public static function pause($timerName)
+    public static function pause($timerName): void
     {
         if (!self::$_enabled) {
             return;
@@ -85,7 +85,7 @@ class Varien_Profiler
         }
     }
 
-    public static function stop($timerName)
+    public static function stop($timerName): void
     {
         self::pause($timerName);
     }

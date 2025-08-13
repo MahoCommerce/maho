@@ -33,7 +33,7 @@ class Mage_Adminhtml_Permissions_OrphanedResourceController extends Mage_Adminht
     /**
      * Index action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('System'))
             ->_title($this->__('Permissions'))
@@ -49,7 +49,7 @@ class Mage_Adminhtml_Permissions_OrphanedResourceController extends Mage_Adminht
     /**
      * Mass delete action
      */
-    public function massDeleteAction()
+    public function massDeleteAction(): void
     {
         $resourceIds = $this->getRequest()->getParam('resource_id');
         try {

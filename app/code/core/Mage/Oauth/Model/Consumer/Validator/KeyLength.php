@@ -6,133 +6,103 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_StringLength
+class Mage_Oauth_Model_Consumer_Validator_KeyLength
 {
-    /**
-     * Key name
-     *
-     * @var string
-     */
-    protected $_name = 'Key';
+    public string $tooShortMessage = '{{ name }} "{{ value }}" is too short. It must have length {{ min }} symbols.';
+    public string $tooLongMessage = '{{ name }} "{{ value }}" is too long. It must have length {{ max }} symbols.';
 
-    /**
-     * Sets validator options
-     *
-     * @param  int|array|Zend_Config $options
-     */
-    public function __construct($options = [])
-    {
-        $args = func_get_args();
-        if (!is_array($options)) {
-            $options = $args;
-            if (!isset($options[1])) {
-                $options[1] = 'utf-8';
-            }
-            parent::__construct($options[0], $options[0], $options[1]);
-            return;
-        } else {
-            if (isset($options['length'])) {
-                $options['max'] =
-                $options['min'] = $options['length'];
-            }
-            if (isset($options['name'])) {
-                $this->_name = $options['name'];
-            }
+    public ?int $min = null;
+    public ?int $max = null;
+    public int $length = 0;
+    public string $encoding = 'utf-8';
+    public string $name = 'Key';
+
+    protected array $messages = [];
+
+    public function __construct(
+        mixed $options = null,
+        ?array $groups = null,
+        mixed $payload = null,
+        ?int $min = null,
+        ?int $max = null,
+        ?int $length = null,
+        ?string $encoding = null,
+        ?string $name = null,
+        ?string $tooShortMessage = null,
+        ?string $tooLongMessage = null,
+    ) {
+        // Symfony constraint compatibility parameters (unused but kept for backward compatibility)
+        unset($options, $groups, $payload);
+        $this->min = $min ?? $this->min;
+        $this->max = $max ?? $this->max;
+        $this->encoding = $encoding ?? $this->encoding;
+        $this->name = $name ?? $this->name;
+        $this->tooShortMessage = $tooShortMessage ?? $this->tooShortMessage;
+        $this->tooLongMessage = $tooLongMessage ?? $this->tooLongMessage;
+
+        if (null !== $length) {
+            $this->min = $this->max = $length;
         }
-        parent::__construct($options);
     }
 
-    /**
-     * Init validation failure message template definitions
-     *
-     * @return $this
-     */
-    protected function _initMessageTemplates()
+    public function validate(mixed $value): bool
     {
-        $_messageTemplates[self::TOO_LONG] =
-            Mage::helper('oauth')->__("%name% '%value%' is too long. It must has length %min% symbols.");
-        $_messageTemplates[self::TOO_SHORT] =
-            Mage::helper('oauth')->__("%name% '%value%' is too short. It must has length %min% symbols.");
+        $this->messages = [];
 
-        return $this;
-    }
-
-    /**
-     * Additional variables available for validation failure messages
-     *
-     * @var array
-     */
-    protected $_messageVariables = [
-        'min'  => '_min',
-        'max'  => '_max',
-        'name' => '_name',
-    ];
-
-    /**
-     * Set length
-     *
-     * @param int $length
-     * @return $this
-     */
-    public function setLength($length)
-    {
-        parent::setMax($length);
-        parent::setMin($length);
-        return $this;
-    }
-
-    /**
-     * Set length
-     *
-     * @return int
-     */
-    public function getLength()
-    {
-        return parent::getMin();
-    }
-
-    /**
-     * Defined by Zend_Validate_Interface
-     *
-     * Returns true if and only if the string length of $value is at least the min option and
-     * no greater than the max option (when the max option is not null).
-     *
-     * @param  string $value
-     * @return bool
-     */
-    #[\Override]
-    public function isValid($value)
-    {
-        $result = parent::isValid($value);
-        if (!$result && isset($this->_messages[self::INVALID])) {
-            throw new Exception($this->_messages[self::INVALID]);
+        if (null === $value || '' === $value) {
+            return true;
         }
-        return $result;
+
+        if (!is_string($value)) {
+            $this->messages[] = 'Value must be a string';
+            return false;
+        }
+
+        $length = iconv_strlen($value, $this->encoding);
+
+        if (null !== $this->min && $length < $this->min) {
+            $message = str_replace(['{{ value }}', '{{ min }}', '{{ name }}'], [$value, (string) $this->min, $this->name], $this->tooShortMessage);
+            $this->messages[] = $message;
+            return false;
+        }
+
+        if (null !== $this->max && $length > $this->max) {
+            $message = str_replace(['{{ value }}', '{{ max }}', '{{ name }}'], [$value, (string) $this->max, $this->name], $this->tooLongMessage);
+            $this->messages[] = $message;
+            return false;
+        }
+
+        return true;
     }
 
-    /**
-     * Set key name
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function setName($name)
+    public function getMessages(): array
     {
-        $this->_name = $name;
+        return $this->messages;
+    }
+
+    public function getMessage(): string
+    {
+        return !empty($this->messages) ? $this->messages[0] : '';
+    }
+
+    public function isValid(mixed $value): bool
+    {
+        return $this->validate($value);
+    }
+
+    public function setLength(int $length): self
+    {
+        $this->min = $this->max = $length;
         return $this;
     }
 
-    /**
-     * Get key name
-     *
-     * @return string
-     */
-    public function getName()
+    public function setName(string $name): self
     {
-        return $this->_name;
+        $this->name = $name;
+        return $this;
     }
 }

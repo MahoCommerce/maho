@@ -6,38 +6,29 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * Date format string
-     */
-    protected static $_format = null;
+    protected static ?IntlDateFormatter $_formatter = null;
 
-    /**
-     * Retrieve datetime format
-     *
-     * @return string
-     */
-    protected function _getFormat()
+    protected function _getFormatter(?string $locale = null): IntlDateFormatter
     {
-        $format = $this->getColumn()->getFormat();
-        if (!$format) {
-            if (is_null(self::$_format)) {
-                try {
-                    self::$_format = Mage::app()->getLocale()->getDateTimeFormat(
-                        Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
-                    );
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                }
-            }
-            $format = self::$_format;
+        $localeCode = $locale ?? Mage::app()->getLocale()->getLocaleCode();
+
+        // Simple caching - could be enhanced to cache per locale if needed
+        if (is_null(self::$_formatter)) {
+            $timezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+            self::$_formatter = new IntlDateFormatter(
+                $localeCode,
+                IntlDateFormatter::MEDIUM,
+                IntlDateFormatter::MEDIUM,
+                $timezone,
+            );
         }
-        return $format;
+        return self::$_formatter;
     }
 
     /**
@@ -49,18 +40,24 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
     public function render(Varien_Object $row)
     {
         if ($data = $this->_getValue($row)) {
-            $format = $this->_getFormat();
-            $useTimezone = $this->getColumn()->getUseTimezone() ?? true;
-            $locale = $this->getColumn()->getLocale() ?? null;
             try {
-                $data = Mage::app()->getLocale()
-                    ->date($data, Varien_Date::DATETIME_INTERNAL_FORMAT, $locale, $useTimezone)
-                    ->toString($format);
+                $useTimezone = $this->getColumn()->getUseTimezone() ?? true;
+                $locale = $this->getColumn()->getLocale() ?? null;
+
+                $dateObj = Mage::app()->getLocale()
+                    ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, $locale, $useTimezone);
+
+                return $this->_getFormatter($locale)->format($dateObj);
             } catch (Exception $e) {
-                $data = Mage::app()->getLocale()
-                    ->date($data, Varien_Date::DATETIME_INTERNAL_FORMAT)->toString($format);
+                // Fallback to simple format
+                try {
+                    $dateObj = Mage::app()->getLocale()
+                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    return $dateObj->format('M j, Y, g:i:s A');
+                } catch (Exception $e2) {
+                    return $data;
+                }
             }
-            return $data;
         }
         return $this->getColumn()->getDefault();
     }

@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -296,7 +296,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Set specified data to current rule.
      * Set conditions and actions recursively.
-     * Convert dates into Zend_Date.
+     * Convert dates into DateTime.
      *
      *
      * @return array
@@ -318,12 +318,12 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
                 }
             } else {
                 /**
-                 * Convert dates into Zend_Date
+                 * Convert dates into DateTime
                  */
                 if (in_array($key, ['from_date', 'to_date']) && $value) {
-                    $value = Mage::app()->getLocale()->date(
+                    $value = Mage::app()->getLocale()->dateMutable(
                         $value,
-                        Varien_Date::DATE_INTERNAL_FORMAT,
+                        Mage_Core_Model_Locale::DATE_FORMAT,
                         null,
                         false,
                     );
@@ -363,10 +363,10 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         }
 
         if ($fromDate && $toDate) {
-            $fromDate = new Zend_Date($fromDate, Varien_Date::DATE_INTERNAL_FORMAT);
-            $toDate = new Zend_Date($toDate, Varien_Date::DATE_INTERNAL_FORMAT);
+            $fromDate = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $fromDate);
+            $toDate = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $toDate);
 
-            if ($fromDate->compare($toDate) === 1) {
+            if ($fromDate > $toDate) {
                 $result[] = Mage::helper('rule')->__('End Date must be greater than Start Date.');
             }
         }

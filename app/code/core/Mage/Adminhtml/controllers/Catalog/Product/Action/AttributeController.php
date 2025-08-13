@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,7 +25,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
         $this->setUsedModuleName('Mage_Catalog');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         if (!$this->_validateProducts()) {
             return;
@@ -38,7 +38,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
     /**
      * Update product attributes
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         if (!$this->_validateProducts()) {
             return;
@@ -76,13 +76,28 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
                     $attribute->getBackend()->validate($data);
                     if ($attribute->getBackendType() == 'datetime') {
                         if (!empty($value)) {
-                            $filterInput    = new Zend_Filter_LocalizedToNormalized([
-                                'date_format' => $dateFormat,
-                            ]);
-                            $filterInternal = new Zend_Filter_NormalizedToLocalized([
-                                'date_format' => Varien_Date::DATE_INTERNAL_FORMAT,
-                            ]);
-                            $value = $filterInternal->filter($filterInput->filter($value));
+                            try {
+                                // Parse date using IntlDateFormatter
+                                $formatter = new IntlDateFormatter(
+                                    Mage::app()->getLocale()->getLocaleCode(),
+                                    IntlDateFormatter::SHORT,
+                                    IntlDateFormatter::NONE,
+                                );
+                                $timestamp = $formatter->parse($value);
+                                if ($timestamp !== false) {
+                                    $value = date(Mage_Core_Model_Locale::DATE_FORMAT, $timestamp);
+                                } else {
+                                    throw new Exception('Invalid date format');
+                                }
+                            } catch (Exception $e) {
+                                // Fallback: try to parse as standard format
+                                $date = DateTime::createFromFormat($dateFormat, $value);
+                                if ($date !== false) {
+                                    $value = $date->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                                } else {
+                                    $value = null;
+                                }
+                            }
                         } else {
                             $value = null;
                         }
@@ -217,7 +232,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
      * Attributes validation action
      *
      */
-    public function validateAction()
+    public function validateAction(): void
     {
         $response = new Varien_Object();
         $response->setError(false);

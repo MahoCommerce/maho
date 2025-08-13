@@ -14,7 +14,7 @@ class Mage_PaypalUk_BmlController extends Mage_Core_Controller_Front_Action
     /**
      * Action for Bill Me Later checkout button (product view and shopping cart pages)
      */
-    public function startAction()
+    public function startAction(): void
     {
         $this->_forward('start', 'express', 'payflow', ['bml' => 1]);
     }

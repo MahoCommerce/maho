@@ -27,7 +27,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     protected $_separator                = '|';
 
     /**
-     * Array of Zend_Date objects per store
+     * Array of DateTime objects per store
      *
      * @var array
      */
@@ -792,16 +792,23 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         if (!isset($this->_dates[$storeId])) {
             $timezone = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $storeId);
             $locale   = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
-            $locale   = new Zend_Locale($locale);
 
-            $dateObj = new Zend_Date(null, null, $locale);
-            $dateObj->setTimezone($timezone);
-            $this->_dates[$storeId] = [$dateObj, $locale::getTranslation(null, 'date', $locale)];
+            $dateObj = new DateTime('now', new DateTimeZone($timezone));
+
+            // Get date format using IntlDateFormatter
+            $formatter = new IntlDateFormatter(
+                $locale,
+                IntlDateFormatter::SHORT,
+                IntlDateFormatter::NONE,
+            );
+            $dateFormat = $formatter->getPattern();
+
+            $this->_dates[$storeId] = [$dateObj, $dateFormat];
         }
 
         if (!is_empty_date($date)) {
             [$dateObj, $format] = $this->_dates[$storeId];
-            $dateObj->setDate($date, Varien_Date::DATETIME_INTERNAL_FORMAT);
+            $dateObj->setDate($date, Mage_Core_Model_Locale::DATETIME_FORMAT);
 
             return $dateObj->toString($format);
         }

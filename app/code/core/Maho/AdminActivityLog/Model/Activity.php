@@ -79,6 +79,15 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         return [];
     }
 
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if (!$this->getId()) {
+            $this->setCreatedAt(Mage::getModel('core/date')->gmtDate());
+        }
+        return parent::_beforeSave();
+    }
+
     /**
      * Get all activities in the same action group
      */

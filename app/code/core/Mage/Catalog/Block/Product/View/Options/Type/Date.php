@@ -79,7 +79,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         if ($dateValue) {
             try {
                 $dateTime = new DateTime($dateValue);
-                $isoValue = $dateTime->format('Y-m-d');
+                $isoValue = $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT);
             } catch (Exception $e) {
                 $isoValue = is_string($dateValue) ? $dateValue : '';
             }
@@ -215,7 +215,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             // Handle single datetime value
             try {
                 $dateTime = new DateTime($datetimeValue);
-                $isoValue = $dateTime->format('Y-m-d\TH:i');
+                $isoValue = $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
             } catch (Exception $e) {
                 $isoValue = '';
             }
@@ -246,7 +246,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
                     }
                 }
 
-                $isoValue = $dateTime->format('Y-m-d\TH:i');
+                $isoValue = $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
             } catch (Exception $e) {
                 $isoValue = '';
             }

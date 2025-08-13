@@ -109,8 +109,8 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     {
         try {
             $collectionsNames = $this->_getCollectionNames();
-            $currentDate = Mage::app()->getLocale()->date();
-            $date = $currentDate->subHour(25);
+            $currentDate = Mage::app()->getLocale()->dateImmutable();
+            $date = $currentDate->modify('-25 hours');
             foreach ($collectionsNames as $collectionName) {
                 Mage::getResourceModel($collectionName)->aggregate($date);
             }
@@ -159,7 +159,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Refresh Statistics'));
 

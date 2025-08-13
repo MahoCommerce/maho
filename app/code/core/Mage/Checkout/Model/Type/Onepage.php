@@ -430,7 +430,7 @@ class Mage_Checkout_Model_Type_Onepage
         // set customer date of birth for further usage
         $dob = '';
         if ($address->getDob()) {
-            $dob = Mage::app()->getLocale()->date($address->getDob(), null, null, false)->toString('yyyy-MM-dd');
+            $dob = Mage::app()->getLocale()->dateMutable($address->getDob(), null, null, false)->format(Mage_Core_Model_Locale::DATE_FORMAT);
             $this->getQuote()->setCustomerDob($dob);
         }
 
@@ -475,7 +475,7 @@ class Mage_Checkout_Model_Type_Onepage
             }
         } elseif (self::METHOD_GUEST == $this->getQuote()->getCheckoutMethod()) {
             $email = $address->getData('email');
-            if (!Zend_Validate::is($email, 'EmailAddress')) {
+            if (!Mage::helper('core')->isValidEmail($email)) {
                 return [
                     'error'   => -1,
                     'message' => Mage::helper('checkout')->__('Invalid email address "%s"', $email),

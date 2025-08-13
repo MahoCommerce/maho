@@ -20,11 +20,20 @@ vendor/bin/rector -c .rector.php
 ./maho cache:flush        # Flush all caches
 ```
 
+### Testing
+```bash
+vendor/bin/pest                      # Run all tests (Install → Backend → Frontend)
+vendor/bin/pest --testsuite=Frontend # Run frontend tests only  
+vendor/bin/pest --testsuite=Backend  # Run backend tests only
+vendor/bin/pest --testsuite=Install  # Run install tests only
+```
+
 ### Database & Indexing
 ```bash
 ./maho index:list         # List all indexes
 ./maho index:reindex      # Reindex specific index
 ./maho index:reindex:all  # Reindex all indexes
+./maho db:query "QUERY"   # Execute a one-shot SQL query
 ```
 
 ## Architecture Overview
@@ -147,10 +156,50 @@ $collection = Mage::getResourceModel('catalog/product_collection')
 - Log errors with `Mage::log()`
 
 ## Testing Approach
-While there's no dedicated test suite, ensure code quality through:
+Maho uses Pest PHP as its testing framework with comprehensive test coverage:
+
+### Test Framework (Pest PHP)
+- **Pest Framework**: Modern PHP testing framework with clean syntax
+- **Three Test Contexts**: Separate base classes for different Maho environments
+  - `MahoFrontendTestCase` - For frontend/customer-facing functionality
+  - `MahoBackendTestCase` - For admin/backend functionality (with `isSecureArea` enabled)
+  - `MahoInstallTestCase` - For installation context tests
+- **Proper Maho Bootstrap**: Each test context initializes Maho with correct paths and settings
+- **Test Isolation**: Clean setup/teardown with `Mage::reset()` between tests
+
+### Test Structure
+```
+tests/
+├── Frontend/           # Frontend context tests
+├── Backend/            # Backend context tests  
+├── Install/            # Install context tests
+├── MahoFrontendTestCase.php
+├── MahoBackendTestCase.php
+├── MahoInstallTestCase.php
+└── Pest.php           # Configuration
+```
+
+### Writing Tests
+Tests must explicitly declare their context:
+```php
+// Frontend test
+uses(Tests\MahoFrontendTestCase::class);
+
+it('can process customer orders', function () {
+    // Test has full Maho frontend context available
+});
+
+// Backend test  
+uses(Tests\MahoBackendTestCase::class);
+
+it('can manage admin users', function () {
+    // Test has full Maho backend context with isSecureArea enabled
+});
+```
+
+### Additional Quality Assurance
 - PHPStan static analysis (level 6)
 - PHP-CS-Fixer for code standards
-- Manual testing of features
 - GitHub Actions CI for automated checks
 
 ## Modern PHP Patterns

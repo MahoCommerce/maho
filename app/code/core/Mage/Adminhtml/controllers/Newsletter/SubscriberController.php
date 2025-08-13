@@ -17,7 +17,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
      */
     public const ADMIN_RESOURCE = 'newsletter/subscriber';
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Subscribers'));
 
@@ -40,7 +40,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
         $this->renderLayout();
     }
 
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $this->getResponse()->setBody(
@@ -51,7 +51,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     /**
      * Export subscribers grid to CSV format
      */
-    public function exportCsvAction()
+    public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/newsletter_subscriber_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('subscribers.csv', -1));
@@ -60,13 +60,13 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     /**
      * Export subscribers grid to XML format
      */
-    public function exportXmlAction()
+    public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/newsletter_subscriber_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('subscribers.xml', -1));
     }
 
-    public function massUnsubscribeAction()
+    public function massUnsubscribeAction(): void
     {
         $subscribersIds = $this->getRequest()->getParam('subscriber');
         if (!is_array($subscribersIds)) {
@@ -88,7 +88,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
         $this->_redirect('*/*/index');
     }
 
-    public function massDeleteAction()
+    public function massDeleteAction(): void
     {
         $subscribersIds = $this->getRequest()->getParam('subscriber');
         if (!is_array($subscribersIds)) {

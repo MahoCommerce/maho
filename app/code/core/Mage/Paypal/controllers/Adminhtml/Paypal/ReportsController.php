@@ -15,7 +15,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     /**
      * Grid action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initAction()
             ->_addContent($this->getLayout()->createBlock('paypal/adminhtml_settlement_report'))
@@ -25,7 +25,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     /**
      * Ajax callback for grid actions
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $this->getResponse()->setBody(
@@ -36,7 +36,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     /**
      * View transaction details action
      */
-    public function detailsAction()
+    public function detailsAction(): void
     {
         $rowId = $this->getRequest()->getParam('id');
         $row = Mage::getModel('paypal/report_settlement_row')->load($rowId);
@@ -54,7 +54,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     /**
      * Forced fetch reports action
      */
-    public function fetchAction()
+    public function fetchAction(): void
     {
         try {
             $reports = Mage::getModel('paypal/report_settlement');

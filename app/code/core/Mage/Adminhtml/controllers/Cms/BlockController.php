@@ -49,7 +49,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Index action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
 
@@ -60,7 +60,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Create new CMS block
      */
-    public function newAction()
+    public function newAction(): void
     {
         // the same form is used to create and edit
         $this->_forward('edit');
@@ -69,7 +69,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Edit CMS block
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
 
@@ -107,7 +107,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Save action
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         // check if data sent
         if ($data = $this->getRequest()->getPost()) {
@@ -156,7 +156,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Delete action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         // check if we know what should be deleted
         if ($id = $this->getRequest()->getParam('block_id')) {

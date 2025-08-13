@@ -454,11 +454,10 @@ class Mage_Paypal_Model_Cart
      * Get/Set for the specified variable.
      * If the value changes, the re-rendering is commenced
      *
-     * @param string $var
      * @param mixed $setValue
      * @return mixed|$this
      */
-    private function _totalAsItem($var, $setValue = null)
+    private function _totalAsItem(string $var, $setValue = null)
     {
         if ($setValue !== null) {
             if ($setValue != $this->$var) {

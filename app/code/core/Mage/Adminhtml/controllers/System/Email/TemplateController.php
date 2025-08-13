@@ -21,7 +21,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Index action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Transactional Emails'));
 
@@ -44,7 +44,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Grid action
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->getResponse()->setBody(
             $this->getLayout()->createBlock('adminhtml/system_email_template_grid')->toHtml(),
@@ -54,7 +54,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * New transactional email action
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -62,7 +62,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Edit transactional email action
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->loadLayout();
         $template = $this->_initTemplate('id');
@@ -99,7 +99,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
      *
      * @throws Mage_Core_Exception
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $request = $this->getRequest();
         $id = $this->getRequest()->getParam('id');
@@ -156,7 +156,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Delete action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $template = $this->_initTemplate('id');
         if ($template->getId()) {
@@ -187,7 +187,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Preview action
      */
-    public function previewAction()
+    public function previewAction(): void
     {
         $this->loadLayout('systemPreview');
         $this->renderLayout();
@@ -196,7 +196,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Set template data to retrieve it in template info form
      */
-    public function defaultTemplateAction()
+    public function defaultTemplateAction(): void
     {
         $template = $this->_initTemplate('id');
         $templateCode = $this->getRequest()->getParam('code');

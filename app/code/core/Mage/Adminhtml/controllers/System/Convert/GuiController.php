@@ -22,7 +22,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profiles list action
      */
     #[\Override]
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('System'))
              ->_title($this->__('Import and Export'))
@@ -56,7 +56,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     }
 
     #[\Override]
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/system_convert_gui_grid')->toHtml());
     }
@@ -65,7 +65,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profile edit action
      */
     #[\Override]
-    public function editAction()
+    public function editAction(): void
     {
         $this->_initProfile();
         $this->loadLayout();
@@ -95,19 +95,19 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
         $this->renderLayout();
     }
 
-    public function uploadAction()
+    public function uploadAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
 
-    public function uploadPostAction()
+    public function uploadPostAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
 
-    public function downloadAction()
+    public function downloadAction(): void
     {
         $filename = $this->getRequest()->getParam('filename');
         if (!$filename || str_contains($filename, '..') || $filename[0] === '.') {

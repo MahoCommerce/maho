@@ -55,7 +55,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Shopping Cart Price Rules'));
 
@@ -64,12 +64,12 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
             ->renderLayout();
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $model = Mage::getModel('salesrule/rule');
@@ -115,7 +115,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
      * Promo quote save action
      *
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($this->getRequest()->getPost()) {
             try {
@@ -201,7 +201,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         $this->_redirect('*/*/');
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             try {
@@ -244,7 +244,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
      *
      * @throws Mage_Core_Exception
      */
-    public function newConditionHtmlAction()
+    public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
@@ -275,7 +275,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         $this->getResponse()->setBody($html);
     }
 
-    public function newActionHtmlAction()
+    public function newActionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
@@ -299,13 +299,13 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         $this->getResponse()->setBody($html);
     }
 
-    public function applyRulesAction()
+    public function applyRulesAction(): void
     {
         $this->_initAction();
         $this->renderLayout();
     }
 
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->_initRule()->loadLayout()->renderLayout();
     }
@@ -313,7 +313,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Coupon codes grid
      */
-    public function couponsGridAction()
+    public function couponsGridAction(): void
     {
         $this->_initRule();
         $this->loadLayout()->renderLayout();
@@ -322,7 +322,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Export coupon codes as excel xml file
      */
-    public function exportCouponsXmlAction()
+    public function exportCouponsXmlAction(): void
     {
         $this->_initRule();
         $rule = Mage::registry('current_promo_quote_rule');
@@ -338,7 +338,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Export coupon codes as CSV file
      */
-    public function exportCouponsCsvAction()
+    public function exportCouponsCsvAction(): void
     {
         $this->_initRule();
         $rule = Mage::registry('current_promo_quote_rule');
@@ -354,7 +354,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Coupons mass delete action
      */
-    public function couponsMassDeleteAction()
+    public function couponsMassDeleteAction(): void
     {
         $this->_initRule();
         $rule = Mage::registry('current_promo_quote_rule');
@@ -378,7 +378,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Generate Coupons action
      */
-    public function generateAction()
+    public function generateAction(): void
     {
         if (!$this->getRequest()->isAjax()) {
             $this->_forward('noRoute');
@@ -424,7 +424,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Chooser source action
      */
-    public function chooserAction()
+    public function chooserAction(): void
     {
         $uniqId = $this->getRequest()->getParam('uniq_id');
         $chooserBlock = $this->getLayout()->createBlock('adminhtml/promo_widget_chooser', '', [

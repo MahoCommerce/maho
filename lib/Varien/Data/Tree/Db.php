@@ -107,7 +107,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     /**
      * @param Zend_Db_Select $select
      */
-    public function setDbSelect($select)
+    public function setDbSelect($select): void
     {
         $this->_select = $select;
     }
@@ -198,7 +198,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @param Varien_Data_Tree_Node $prevNode
      */
     #[\Override]
-    public function moveNodeTo($node, $parentNode, $prevNode = null)
+    public function moveNodeTo($node, $parentNode, $prevNode = null): void
     {
         $data = [];
         $data[$this->_parentField]  = $parentNode->getId();

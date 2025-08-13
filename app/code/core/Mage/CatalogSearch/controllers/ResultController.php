@@ -24,7 +24,7 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
     /**
      * Display search result
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $query = Mage::helper('catalogsearch')->getQuery();
         /** @var Mage_CatalogSearch_Model_Query $query */

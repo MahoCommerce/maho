@@ -32,7 +32,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Display cache management grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Cache Management'));
 
@@ -44,7 +44,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Flush cache storage
      */
-    public function flushAllAction()
+    public function flushAllAction(): void
     {
         Mage::app()->getCache()->flush();
         Mage::dispatchEvent('adminhtml_cache_flush_all');
@@ -55,7 +55,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Flush all Maho caches
      */
-    public function flushSystemAction()
+    public function flushSystemAction(): void
     {
         Mage::app()->getCache()->banUse('config');
         Mage::getConfig()->reinit();
@@ -78,7 +78,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache enabling
      */
-    public function massEnableAction()
+    public function massEnableAction(): void
     {
         $types = $this->getRequest()->getParam('types');
         $allTypes = Mage::app()->useCache();
@@ -100,7 +100,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache disabling
      */
-    public function massDisableAction()
+    public function massDisableAction(): void
     {
         $types = $this->getRequest()->getParam('types');
         $allTypes = Mage::app()->useCache();
@@ -123,7 +123,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache refresh
      */
-    public function massRefreshAction()
+    public function massRefreshAction(): void
     {
         $types = $this->getRequest()->getParam('types');
         $updatedTypes = 0;
@@ -143,7 +143,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Clean catalog files cache
      */
-    public function cleanImagesAction()
+    public function cleanImagesAction(): void
     {
         try {
             Mage::getModel('catalog/product_image')->clearCache();
@@ -165,7 +165,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Clean configurable swatches files cache
      */
-    public function cleanSwatchesAction()
+    public function cleanSwatchesAction(): void
     {
         try {
             Mage::helper('configurableswatches/productimg')->clearSwatchesCache();

@@ -6,7 +6,7 @@
  * @package    Mage_Cron
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -99,8 +99,8 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
             && $this->matchCronExpression($e[4], $d['wday']);
 
         if ($match) {
-            $this->setCreatedAt(date(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT));
-            $this->setScheduledAt(date('Y-m-d H:i:00', (int) $time));
+            $this->setCreatedAt(Mage::getSingleton('core/date')->gmtDate());
+            $this->setScheduledAt(Mage::getSingleton('core/date')->gmtDate('Y-m-d H:i:00', $time));
         }
         return $match;
     }

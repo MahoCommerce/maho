@@ -6,55 +6,68 @@
  * @package    Varien_Filter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Varien_Filter_Object extends Zend_Filter
+class Varien_Filter_Object
 {
     /**
      * @var array
      */
-    protected $_columnFilters = [];
+    protected $_filters = [];
+    protected array $_columnFilters = [];
 
     /**
-     * @param string $column
-     * @return $this
+     * Add filter to apply to all values or specific column
      */
-    #[\Override]
-    public function addFilter(Zend_Filter_Interface $filter, $column = '')
+    public function addFilter(callable|object $filter, string $column = ''): self
     {
         if ('' === $column) {
-            parent::addFilter($filter);
+            $this->_filters[] = $filter;
         } else {
-            if (!isset($this->_columnFilters[$column])) {
-                $this->_columnFilters[$column] = new Zend_Filter();
-            }
-            $this->_columnFilters[$column]->addFilter($filter);
+            $this->_columnFilters[$column][] = $filter;
         }
         return $this;
     }
 
     /**
-     * @param Varien_Object $object
-     * @return mixed
-     * @throws Exception
+     * Filter Varien_Object properties
      */
-    #[\Override]
-    public function filter($object)
+    public function filter(Varien_Object|array $object): Varien_Object|array
     {
-        if (!$object instanceof Varien_Object) {
-            throw new Exception('Expecting an instance of Varien_Object');
+        if (is_array($object)) {
+            // For arrays, just return the array as-is
+            return $object;
         }
+
         $class = $object::class;
         $out = new $class();
+
         foreach ($object->getData() as $column => $value) {
-            $value = parent::filter($value);
-            if (isset($this->_columnFilters[$column])) {
-                $value = $this->_columnFilters[$column]->filter($value);
+            // Apply general filters
+            foreach ($this->_filters as $filter) {
+                if (is_callable($filter)) {
+                    $value = $filter($value);
+                } elseif (is_object($filter) && method_exists($filter, 'filter')) {
+                    $value = $filter->filter($value);
+                }
             }
+
+            // Apply column-specific filters
+            if (isset($this->_columnFilters[$column])) {
+                foreach ($this->_columnFilters[$column] as $filter) {
+                    if (is_callable($filter)) {
+                        $value = $filter($value);
+                    } elseif (is_object($filter) && method_exists($filter, 'filter')) {
+                        $value = $filter->filter($value);
+                    }
+                }
+            }
+
             $out->setData($column, $value);
         }
+
         return $out;
     }
 }

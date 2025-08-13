@@ -10,7 +10,7 @@
 
 class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
 {
-    public function challengeAction()
+    public function challengeAction(): void
     {
         $helper = Mage::helper('captcha');
         try {

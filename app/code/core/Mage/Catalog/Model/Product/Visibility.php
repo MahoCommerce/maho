@@ -110,12 +110,7 @@ class Mage_Catalog_Model_Product_Visibility extends Varien_Object
         ];
     }
 
-    /**
-     * Retrieve option array
-     *
-     * @return array
-     */
-    public static function toOptionArray()
+    public static function toOptionArray(): array
     {
         return self::getOptionArray();
     }

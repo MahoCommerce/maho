@@ -15,7 +15,7 @@ class Mage_Paypal_IpnController extends Mage_Core_Controller_Front_Action
     /**
      * Instantiate IPN model and pass IPN request to it
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         if (!$this->getRequest()->isPost()) {
             return;

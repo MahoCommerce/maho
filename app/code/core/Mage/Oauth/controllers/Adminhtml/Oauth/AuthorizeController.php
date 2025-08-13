@@ -6,7 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,10 +58,8 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
 
     /**
      * Index action.
-     *
-     * @return void
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initForm();
 
@@ -71,10 +69,8 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
 
     /**
      * Index action with a simple design
-     *
-     * @return void
      */
-    public function simpleAction()
+    public function simpleAction(): void
     {
         $this->_initForm(true);
         $this->_initLayoutMessages($this->_sessionName);
@@ -97,11 +93,11 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
         $isException = false;
         try {
             $server->checkAuthorizeRequest();
-        } catch (Mage_Core_Exception $e) {
-            $session->addError($e->getMessage());
         } catch (Mage_Oauth_Exception $e) {
             $isException = true;
             $session->addException($e, $this->__('An error occurred. Your authorization request is invalid.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         } catch (Exception $e) {
             $isException = true;
             $session->addException($e, $this->__('An error occurred.'));
@@ -252,7 +248,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Confirm token authorization action
      */
-    public function confirmAction()
+    public function confirmAction(): void
     {
         $this->_initConfirmPage();
     }
@@ -260,7 +256,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Confirm token authorization simple page
      */
-    public function confirmSimpleAction()
+    public function confirmSimpleAction(): void
     {
         $this->_initConfirmPage();
     }
@@ -268,7 +264,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Reject token authorization action
      */
-    public function rejectAction()
+    public function rejectAction(): void
     {
         $this->_initRejectPage();
     }
@@ -276,7 +272,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Reject token authorization simple page
      */
-    public function rejectSimpleAction()
+    public function rejectSimpleAction(): void
     {
         $this->_initRejectPage();
     }

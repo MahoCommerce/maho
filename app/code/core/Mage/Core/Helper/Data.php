@@ -10,6 +10,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
 class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
@@ -137,7 +141,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format date using current locale options and time zone.
      *
-     * @param   string|int|Zend_Date|null   $date If empty, return current datetime.
+     * @param   string|int|DateTime|null   $date If empty, return current datetime.
      * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
      * @param   bool                        $showTime Whether to include time
      * @return  string
@@ -150,13 +154,26 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format date using current locale options and time zone.
      *
-     * @param   string|int|Zend_Date|null   $date If empty, return current locale datetime.
-     * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
-     * @param   bool                        $showTime Whether to include time
-     * @param   bool                        $useTimezone Convert to local datetime?
+     * @param   string|int|DateTime|null   $date The date to format. Can be:
+     *                                            - null: Uses current time
+     *                                            - int: Unix timestamp (assumes UTC)
+     *                                            - string: Date string (e.g., "2025-08-01 09:24:18")
+     *                                            - DateTime: Existing DateTime object
+     * @param   string                      $format Display format constant:
+     *                                            - FORMAT_TYPE_SHORT: Brief format (e.g., "8/1/25")
+     *                                            - FORMAT_TYPE_MEDIUM: Standard format (e.g., "Aug 1, 2025")
+     *                                            - FORMAT_TYPE_LONG: Detailed format (e.g., "August 1, 2025")
+     *                                            - FORMAT_TYPE_FULL: Complete format (e.g., "Thursday, August 1, 2025")
+     * @param   bool                        $showTime Whether to include time in the output
+     *                                            - true: "Aug 1, 2025, 10:24:18 AM"
+     *                                            - false: "Aug 1, 2025"
+     * @param   bool                        $useTimezone Whether to convert the date to store timezone
+     *                                            - true: Converts from UTC to store timezone before formatting
+     *                                            - false: Formats the date in its current timezone (typically UTC)
+     * @return  string                      Formatted date string according to locale settings
      */
     public function formatTimezoneDate(
-        $date = null,
+        string|int|DateTime|null $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
         bool $showTime = false,
         bool $useTimezone = true,
@@ -170,7 +187,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             $date = $locale->date(Mage::getSingleton('core/date')->gmtTimestamp(), null, null, $useTimezone);
         } elseif (is_int($date)) {
             $date = $locale->date($date, null, null, $useTimezone);
-        } elseif (!$date instanceof Zend_Date) {
+        } elseif (!$date instanceof DateTime) {
             if (($time = strtotime($date)) !== false) {
                 $date = $locale->date($time, null, null, $useTimezone);
             } else {
@@ -178,14 +195,29 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
 
-        $format = $showTime ? $locale->getDateTimeFormat($format) : $locale->getDateFormat($format);
-        return $date->toString($format);
+        $dateStyle = match ($format) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
+        $timeStyle = $showTime ? $dateStyle : IntlDateFormatter::NONE;
+
+        $formatter = new IntlDateFormatter(
+            $locale->getLocaleCode(),
+            $dateStyle,
+            $timeStyle,
+            $date->getTimezone(),
+        );
+
+        return $formatter->format($date);
     }
 
     /**
      * Format time using current locale options
      *
-     * @param   string|Zend_Date|null $time
+     * @param   string|DateTime|null $time
      * @param   string              $format
      * @param   bool                $showDate
      * @return  string
@@ -199,19 +231,36 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $locale = Mage::app()->getLocale();
         if (is_null($time)) {
             $date = $locale->date(time());
-        } elseif ($time instanceof Zend_Date) {
+        } elseif ($time instanceof DateTime) {
             $date = $time;
         } else {
             $date = $locale->date(strtotime($time));
         }
 
-        if ($showDate) {
-            $format = $locale->getDateTimeFormat($format);
-        } else {
-            $format = $locale->getTimeFormat($format);
-        }
+        // Use IntlDateFormatter to format with locale-specific patterns
+        $dateStyle = $showDate ? match ($format) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        } : IntlDateFormatter::NONE;
+        $timeStyle = match ($format) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::SHORT,
+        };
 
-        return $date->toString($format);
+        $formatter = new IntlDateFormatter(
+            $locale->getLocaleCode(),
+            $dateStyle,
+            $timeStyle,
+            $date->getTimezone(),
+        );
+
+        return $formatter->format($date);
     }
 
     /**
@@ -497,89 +546,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Decorate a plain array of arrays or objects
-     * The array actually can be an object with Iterator interface
-     *
-     * Keys with prefix_* will be set:
-     * *_is_first - if the element is first
-     * *_is_odd / *_is_even - for odd/even elements
-     * *_is_last - if the element is last
-     *
-     * The respective key/attribute will be set to element, depending on object it is or array.
-     * Varien_Object is supported.
-     *
-     * $forceSetAll true will cause to set all possible values for all elements.
-     * When false (default), only non-empty values will be set.
-     *
-     * @param Varien_Object[] $array
-     * @param string $prefix
-     * @param bool $forceSetAll
-     * @return mixed
-     * @deprecated since 25.3.0
-     */
-    public function decorateArray($array, $prefix = 'decorated_', $forceSetAll = false)
-    {
-        // check if array or an object to be iterated given
-        if (!(is_array($array) || is_object($array))) {
-            return $array;
-        }
-
-        $keyIsFirst = "{$prefix}is_first";
-        $keyIsOdd   = "{$prefix}is_odd";
-        $keyIsEven  = "{$prefix}is_even";
-        $keyIsLast  = "{$prefix}is_last";
-
-        $count  = count($array); // this will force Iterator to load
-        $i      = 0;
-        $isEven = false;
-        foreach ($array as $key => $element) {
-            if (is_object($element)) {
-                $this->_decorateArrayObject($element, $keyIsFirst, ($i === 0), $forceSetAll || ($i === 0));
-                $this->_decorateArrayObject($element, $keyIsOdd, !$isEven, $forceSetAll || !$isEven);
-                $this->_decorateArrayObject($element, $keyIsEven, $isEven, $forceSetAll || $isEven);
-                $isEven = !$isEven;
-                $i++;
-                $this->_decorateArrayObject($element, $keyIsLast, ($i === $count), $forceSetAll || ($i === $count));
-            } elseif (is_array($element)) {
-                if ($forceSetAll || ($i === 0)) {
-                    $array[$key][$keyIsFirst] = ($i === 0);
-                }
-                if ($forceSetAll || !$isEven) {
-                    $array[$key][$keyIsOdd] = !$isEven;
-                }
-                if ($forceSetAll || $isEven) {
-                    $array[$key][$keyIsEven] = $isEven;
-                }
-                $isEven = !$isEven;
-                $i++;
-                if ($forceSetAll || ($i === $count)) {
-                    $array[$key][$keyIsLast] = ($i === $count);
-                }
-            }
-        }
-
-        return $array;
-    }
-
-    /**
-     * @param Varien_Object $element
-     * @param string $key
-     * @param mixed $value
-     * @param bool $dontSkip
-     * @deprecated since 25.3.0
-     */
-    private function _decorateArrayObject($element, $key, $value, $dontSkip)
-    {
-        if ($dontSkip) {
-            if ($element instanceof Varien_Object) {
-                $element->setData($key, $value);
-            } else {
-                $element->$key = $value;
-            }
-        }
-    }
-
-    /**
      * Transform an assoc array to SimpleXMLElement object
      * Array has some limitations. Appropriate exceptions will be thrown
      *
@@ -767,7 +733,7 @@ XML;
     public function checkLfiProtection($name)
     {
         if (preg_match('#\.\.[\\\/]#', $name)) {
-            throw new Mage_Core_Exception($this->__('Requested file may not include parent directory traversal ("../", "..\\" notation)'));
+            throw new Mage_Core_Exception($this->__('Invalid template path: contains parent directory traversal'));
         }
         return true;
     }
@@ -928,6 +894,98 @@ XML;
         }
     }
 
+    /**
+     * Filter value using specified filter type
+     */
+    public function filter(mixed $value, string $filter, mixed ...$args): mixed
+    {
+        return match ($filter) {
+            'email' => $this->filterEmail($value),
+            'url' => $this->filterUrl($value),
+            'int' => $this->filterInt($value),
+            'float' => $this->filterFloat($value),
+            'alnum' => $this->filterAlnum($value, $args[0] ?? false),
+            'alpha' => $this->filterAlpha($value),
+            'digits' => $this->filterDigits($value),
+            'striptags' => $this->filterStripTags($value, $args[0] ?? null),
+            default => $value,
+        };
+    }
+
+    /**
+     * Sanitize email address by removing invalid characters
+     */
+    public function filterEmail(mixed $value): string
+    {
+        return filter_var($value, FILTER_SANITIZE_EMAIL) ?: '';
+    }
+
+    /**
+     * Sanitize URL by removing invalid characters
+     */
+    public function filterUrl(mixed $value): string
+    {
+        return filter_var($value, FILTER_SANITIZE_URL) ?: '';
+    }
+
+    /**
+     * Extract integer from value, removing all non-digit characters except +/-
+     */
+    public function filterInt(mixed $value): int
+    {
+        return (int) filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+    }
+
+    /**
+     * Extract float from value, keeping digits, +/-, and decimal point
+     */
+    public function filterFloat(mixed $value): float
+    {
+        return (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    }
+
+    /**
+     * Keep only alphanumeric characters (a-z, A-Z, 0-9)
+     */
+    public function filterAlnum(mixed $value, bool $allowWhitespace = false): string
+    {
+        $pattern = $allowWhitespace ? '/[^a-zA-Z0-9\s]/' : '/[^a-zA-Z0-9]/';
+        return preg_replace($pattern, '', (string) $value);
+    }
+
+    /**
+     * Keep only alphabetic characters (a-z, A-Z)
+     */
+    public function filterAlpha(mixed $value): string
+    {
+        return preg_replace('/[^a-zA-Z]/', '', (string) $value);
+    }
+
+    /**
+     * Keep only digits (0-9)
+     */
+    public function filterDigits(mixed $value): string
+    {
+        return preg_replace('/[^0-9]/', '', (string) $value);
+    }
+
+    /**
+     * Remove HTML and PHP tags, optionally allowing specific tags
+     */
+    public function filterStripTags(mixed $value, array|string|null $allowedTags = null): string
+    {
+        return strip_tags((string) $value, $allowedTags);
+    }
+
+
+    /**
+     * Check if value is a valid IP address (IPv4 or IPv6)
+     */
+    public function isValidIp(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_IP) !== false;
+    }
+
     public function getMailerDsn(): string
     {
         $coreHelper = Mage::helper('core');
@@ -983,5 +1041,119 @@ XML;
         }
 
         return $dsn;
+    }
+
+    /**
+     * Symfony validator instance
+     */
+    private static ?ValidatorInterface $symfonyValidator = null;
+
+    /**
+     * Get Symfony validator instance
+     */
+    private function getSymfonyValidator(): ValidatorInterface
+    {
+        if (self::$symfonyValidator === null) {
+            self::$symfonyValidator = Validation::createValidator();
+        }
+        return self::$symfonyValidator;
+    }
+
+    /**
+     * Check if email address is valid using Symfony Email constraint
+     */
+    public function isValidEmail(#[\SensitiveParameter] mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Email());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if value is not blank using Symfony NotBlank constraint
+     */
+    public function isValidNotBlank(mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\NotBlank());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if string matches regex pattern using Symfony Regex constraint
+     */
+    public function isValidRegex(string $value, string $pattern): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(['pattern' => $pattern]));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if string length is valid using Symfony Length constraint
+     */
+    public function isValidLength(string $value, ?int $min = null, ?int $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if numeric value is in valid range using Symfony Range constraint
+     */
+    public function isValidRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
+    {
+        $options = [];
+        if ($min !== null) {
+            $options['min'] = $min;
+        }
+        if ($max !== null) {
+            $options['max'] = $max;
+        }
+
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range($options));
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if URL format is valid using Symfony Url constraint
+     */
+    public function isValidUrl(mixed $value): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
+        return count($violations) === 0;
+    }
+
+
+    /**
+     * Check if date format is valid using Symfony Date constraint
+     */
+    public function isValidDate(string $date): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($date, new Assert\Date());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Check if datetime format is valid using Symfony DateTime constraint
+     */
+    public function isValidDateTime(string $datetime): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($datetime, new Assert\DateTime());
+        return count($violations) === 0;
+    }
+
+    /**
+     * Generic validation method that returns boolean result using Symfony constraints
+     */
+    public function isValid(mixed $value, mixed $constraint): bool
+    {
+        $violations = $this->getSymfonyValidator()->validate($value, $constraint);
+        return count($violations) === 0;
     }
 }

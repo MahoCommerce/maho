@@ -2,6 +2,8 @@ name: Rector
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_call:
   workflow_dispatch:
@@ -18,7 +20,7 @@ jobs:
           php-version: 8.3
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get composer cache directory
         id: composer-cache

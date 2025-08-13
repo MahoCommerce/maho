@@ -41,7 +41,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profiles listing
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Recurring Profiles'));
         $this->loadLayout();
@@ -52,7 +52,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profile main view
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         $this->_viewAction();
     }
@@ -60,7 +60,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profile related orders view
      */
-    public function ordersAction()
+    public function ordersAction(): void
     {
         $this->_viewAction();
     }
@@ -68,7 +68,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Attempt to set profile state
      */
-    public function updateStateAction()
+    public function updateStateAction(): void
     {
         $profile = null;
         try {
@@ -102,7 +102,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Fetch an update with profile
      */
-    public function updateProfileAction()
+    public function updateProfileAction(): void
     {
         $profile = null;
         try {
@@ -130,7 +130,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Generic profile view action
      */
-    protected function _viewAction()
+    protected function _viewAction(): void
     {
         try {
             $profile = $this->_initProfile();

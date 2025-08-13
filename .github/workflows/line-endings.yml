@@ -2,6 +2,8 @@ name: Check Line Endings
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_call:
   workflow_dispatch:
@@ -10,7 +12,7 @@ jobs:
   check-line-endings:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check Line Endings
         run: |

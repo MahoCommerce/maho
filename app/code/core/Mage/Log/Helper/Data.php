@@ -6,7 +6,7 @@
  * @package    Mage_Log
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,11 +20,6 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
      * @var int
      */
     protected $_logLevel;
-
-    /**
-     * Allowed extensions that can be used to create a log file
-     */
-    private $_allowedFileExtensions = ['log', 'txt', 'html', 'csv'];
 
     /**
      * Mage_Log_Helper_Data constructor.
@@ -42,43 +37,40 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     public function isVisitorLogEnabled()
     {
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_VISITORS
-        || $this->isLogEnabled();
+        || $this->isAllVisitorLoggingEnabled();
     }
 
     /**
-     * Are all events should be logged
-     *
-     * @return bool
+     * Are all visitor events and activities should be logged
      */
-    public function isLogEnabled()
+    public function isAllVisitorLoggingEnabled(): bool
     {
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_ALL;
     }
 
     /**
-     * Are all events should be disabled
-     *
-     * @return bool
+     * Are all visitor events and activities should be disabled
      */
-    public function isLogDisabled()
+    public function isVisitorLoggingDisabled(): bool
     {
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_NONE;
     }
 
     /**
-     * Checking if file extensions is allowed. If passed then return true.
-     *
-     * @param string $file
+     * @deprecated Use isAllVisitorLoggingEnabled() instead
      * @return bool
      */
-    public function isLogFileExtensionValid($file)
+    public function isLogEnabled()
     {
-        $result = false;
-        $validatedFileExtension = pathinfo($file, PATHINFO_EXTENSION);
-        if ($validatedFileExtension && in_array($validatedFileExtension, $this->_allowedFileExtensions)) {
-            $result = true;
-        }
+        return $this->isAllVisitorLoggingEnabled();
+    }
 
-        return $result;
+    /**
+     * @deprecated Use isVisitorLoggingDisabled() instead
+     * @return bool
+     */
+    public function isLogDisabled()
+    {
+        return $this->isVisitorLoggingDisabled();
     }
 }

@@ -50,7 +50,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      * Show urlrewrites index page
      *
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initRegistry();
         $this->loadLayout();
@@ -65,7 +65,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      * Show urlrewrite edit/create page
      *
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->_initRegistry();
 
@@ -81,7 +81,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      * Ajax products grid action
      *
      */
-    public function productGridAction()
+    public function productGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/urlrewrite_product_grid')->toHtml());
     }
@@ -90,7 +90,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      * Ajax categories tree loader action
      *
      */
-    public function categoriesJsonAction()
+    public function categoriesJsonAction(): void
     {
         $this->getResponse()->setBodyJson(
             Mage::getBlockSingleton('adminhtml/urlrewrite_category_tree')
@@ -102,7 +102,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      * Urlrewrite save action
      *
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $this->_initRegistry();
 
@@ -186,7 +186,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      * Urlrewrite delete action
      *
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $this->_initRegistry();
 

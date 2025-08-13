@@ -223,7 +223,7 @@ class Mage_Oauth_Model_Server
 
         $url = $this->_request->getScheme() . '://' . $this->_request->getHttpHost() . $this->_request->getRequestUri();
 
-        if (($queryString = Zend_Uri_Http::fromString($url)->getQuery())) {
+        if (($queryString = parse_url($url, PHP_URL_QUERY))) {
             foreach (explode('&', $queryString) as $paramToValue) {
                 $paramData = explode('=', $paramToValue);
 
@@ -428,7 +428,7 @@ class Mage_Oauth_Model_Server
             return;
         }
         if (self::CALLBACK_ESTABLISHED !== $this->_protocolParams['oauth_callback']
-            && !Zend_Uri::check($this->_protocolParams['oauth_callback'])
+            && !Mage::helper('core')->isValidUrl($this->_protocolParams['oauth_callback'])
         ) {
             $this->_throwException('oauth_callback', self::ERR_PARAMETER_REJECTED);
         }

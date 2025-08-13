@@ -9,6 +9,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
 namespace MahoCLI\Commands;
 
 use Mage;
@@ -119,6 +121,11 @@ class TranslationsMissing extends BaseMahoCommand
         $map = [];
         $files = $this->getFiles();
         foreach ($files as $file) {
+            // Skip files that don't exist (e.g., deleted files in a PR)
+            if (!file_exists($file)) {
+                continue;
+            }
+
             $ext = pathinfo($file, PATHINFO_EXTENSION);
             $contents = file_get_contents($file);
 

@@ -4,9 +4,11 @@
  * Maho
  *
  * @package    MahoCLI
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
@@ -58,15 +60,15 @@ class LogStatus extends BaseMahoCommand
                 continue;
             }
 
-            $totalRows += $tableStatus['Rows'];
-            $totalDataLength += $tableStatus['Data_length'];
-            $totalIndexLength += $tableStatus['Index_length'];
+            $totalRows += (int) $tableStatus['Rows'];
+            $totalDataLength += (int) $tableStatus['Data_length'];
+            $totalIndexLength += (int) $tableStatus['Index_length'];
 
             $table->addRow([
                 $tableStatus['Name'],
-                number_format($tableStatus['Rows']),
-                $this->humanReadableSize($tableStatus['Data_length']),
-                $this->humanReadableSize($tableStatus['Index_length']),
+                number_format((int) $tableStatus['Rows']),
+                $this->humanReadableSize((int) $tableStatus['Data_length']),
+                $this->humanReadableSize((int) $tableStatus['Index_length']),
             ]);
         }
 

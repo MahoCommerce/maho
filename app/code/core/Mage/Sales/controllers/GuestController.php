@@ -41,7 +41,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     }
 
     #[\Override]
-    protected function _viewAction()
+    protected function _viewAction(): void
     {
         if (!$this->_loadValidOrder()) {
             return;
@@ -55,7 +55,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     /**
      * Order view form page
      */
-    public function formAction()
+    public function formAction(): void
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $this->_redirect('customer/account/');
@@ -67,7 +67,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     }
 
     #[\Override]
-    public function printInvoiceAction()
+    public function printInvoiceAction(): void
     {
         if (!$this->_loadValidOrder()) {
             return;
@@ -93,7 +93,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     }
 
     #[\Override]
-    public function printShipmentAction()
+    public function printShipmentAction(): void
     {
         if (!$this->_loadValidOrder()) {
             return;
@@ -118,7 +118,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     }
 
     #[\Override]
-    public function printCreditmemoAction()
+    public function printCreditmemoAction(): void
     {
         if (!$this->_loadValidOrder()) {
             return;

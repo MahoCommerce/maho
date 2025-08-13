@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Mage_Customer_Helper_Data as Helper;
-
 class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
     public const CUSTOMER_ID_SESSION_NAME = 'customerId';
@@ -91,7 +89,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Default customer account page
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');
@@ -107,7 +105,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer login form page
      */
-    public function loginAction()
+    public function loginAction(): void
     {
         if ($this->_getSession()->isLoggedIn()) {
             $this->_redirect('*/*/');
@@ -124,7 +122,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Login post action
      */
-    public function loginPostAction()
+    public function loginPostAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
@@ -149,7 +147,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 } catch (Mage_Core_Exception $e) {
                     switch ($e->getCode()) {
                         case Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED:
-                            /** @var Helper $helper */
+                            /** @var Mage_Customer_Helper_Data $helper */
                             $helper = Mage::helper('customer');
                             $value = $helper->getEmailConfirmationUrl($login['username']);
                             $message = $helper->__('This account is not confirmed. <a href="%s">Click here</a> to resend confirmation email.', $value);
@@ -179,7 +177,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function _loginPostRedirect()
     {
         Mage::dispatchEvent('customer_controller_account_login_post_redirect_before', ['controller' => $this]);
-        /** @var Helper $helper */
+        /** @var Mage_Customer_Helper_Data $helper */
         $helper = Mage::helper('customer');
 
         $session = $this->_getSession();
@@ -189,8 +187,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $session->setBeforeAuthUrl($helper->getAccountUrl());
             // Redirect customer to the last page visited after logging in
             if ($session->isLoggedIn()) {
-                if (!Mage::getStoreConfigFlag(Helper::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
-                    $referer = $this->getRequest()->getParam(Helper::REFERER_QUERY_PARAM_NAME);
+                if (!Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
+                    $referer = $this->getRequest()->getParam(Mage_Customer_Helper_Data::REFERER_QUERY_PARAM_NAME);
                     if ($referer) {
                         // Rebuild referer URL to handle the case when SID was changed
                         $referer = Mage::getModel('core/url')
@@ -221,12 +219,12 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer logout action
      */
-    public function logoutAction()
+    public function logoutAction(): void
     {
         $session = $this->_getSession();
         $session->logout()->renewSession();
 
-        if (Mage::getStoreConfigFlag(Helper::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
+        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
             $session->setBeforeAuthUrl(Mage::getBaseUrl());
         } else {
             $session->setBeforeAuthUrl($this->_getRefererUrl());
@@ -237,7 +235,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Logout success page
      */
-    public function logoutSuccessAction()
+    public function logoutSuccessAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -246,7 +244,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer register form page
      */
-    public function createAction()
+    public function createAction(): void
     {
         if ($this->_getSession()->isLoggedIn()) {
             $this->_redirect('*/*');
@@ -261,7 +259,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Create customer account action
      */
-    public function createPostAction()
+    public function createPostAction(): void
     {
         $errUrl = $this->_getUrl('*/*/create', ['_secure' => true]);
 
@@ -331,7 +329,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $store->getId(),
                 $this->getRequest()->getPost('password'),
             );
-            /** @var Helper $customerHelper */
+            /** @var Mage_Customer_Helper_Data $customerHelper */
             $customerHelper = Mage::helper('customer');
             $session->addSuccess($this->__(
                 'Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please <a href="%s">click here</a>.',
@@ -557,11 +555,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $userPrompt = '';
             $userPrompt = match ($configAddressType) {
                 Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $this->__(
-                    'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you shipping address for proper VAT calculation',
+                    'If you are a registered VAT customer, please <a href="%s">click here</a> to enter you shipping address for proper VAT calculation',
                     $this->_getUrl('customer/address/edit'),
                 ),
                 default => $this->__(
-                    'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you billing address for proper VAT calculation',
+                    'If you are a registered VAT customer, please <a href="%s">click here</a> to enter you billing address for proper VAT calculation',
                     $this->_getUrl('customer/address/edit'),
                 ),
             };
@@ -585,7 +583,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Confirm customer account by id and confirmation key
      */
-    public function confirmAction()
+    public function confirmAction(): void
     {
         $session = $this->_getSession();
         if ($session->isLoggedIn()) {
@@ -644,7 +642,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Send confirmation link to specified email
      */
-    public function confirmationAction()
+    public function confirmationAction(): void
     {
         $customer = Mage::getModel('customer/customer');
         if ($this->_getSession()->isLoggedIn()) {
@@ -700,7 +698,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Forgot customer password page
      */
-    public function forgotPasswordAction()
+    public function forgotPasswordAction(): void
     {
         $this->loadLayout();
 
@@ -717,7 +715,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Forgot customer password action
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function forgotPasswordPostAction()
+    public function forgotPasswordPostAction(): void
     {
         $email = (string) $this->getRequest()->getPost('email');
         if ($email) {
@@ -737,7 +735,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            if (!Zend_Validate::is($email, 'EmailAddress')) {
+            if (!Mage::helper('core')->isValidEmail($email)) {
                 $this->_getSession()->setForgottenEmail($email);
                 $this->_getSession()->addError($this->__('Invalid email address.'));
                 $this->_redirect('*/*/forgotpassword');
@@ -751,7 +749,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $customerId = $customer->getId();
             if ($customerId) {
                 try {
-                    /** @var Helper $helper */
+                    /** @var Mage_Customer_Helper_Data $helper */
                     $helper = Mage::helper('customer');
                     $newResetPasswordLinkToken = $helper->generateResetPasswordLinkToken();
                     $newResetPasswordLinkCustomerId = $helper->generateResetPasswordLinkCustomerId($customerId);
@@ -783,7 +781,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Display reset forgotten password form
      *
      */
-    public function changeForgottenAction()
+    public function changeForgottenAction(): void
     {
         try {
             [$customerId, $resetPasswordLinkToken] = $this->_getRestorePasswordParameters($this->_getSession());
@@ -802,7 +800,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * User is redirected on this action when he clicks on the corresponding link in password reset confirmation email.
      *
      */
-    public function resetPasswordAction()
+    public function resetPasswordAction(): void
     {
         try {
             $customerId = (int) $this->getCustomerId();
@@ -821,7 +819,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Reset forgotten password
      * Used to handle data received from reset forgotten password form
      */
-    public function resetPasswordPostAction()
+    public function resetPasswordPostAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
@@ -935,7 +933,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Forgot customer account information page
      */
-    public function editAction()
+    public function editAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');

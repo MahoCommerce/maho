@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,7 +60,6 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
      *
      *
      * @return $this
-     * @throws Zend_Date_Exception
      */
     #[\Override]
     public function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -73,10 +72,10 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
         $dateTo = $object->getToDate();
 
         # fix when from and to day are the same
-        if (($dateFrom instanceof Zend_Date && $dateTo instanceof Zend_Date) &&
+        if (($dateFrom instanceof DateTime && $dateTo instanceof DateTime) &&
             ($dateFrom->getTimestamp() === $dateTo->getTimestamp())
         ) {
-            $dateTo->setHour(23)->setMinute(59)->setSecond(59);
+            $dateTo->setTime(23, 59, 59);
         }
 
         parent::_beforeSave($object);

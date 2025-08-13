@@ -32,7 +32,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Init layout, messages and set active block for customer
      */
-    protected function _viewAction()
+    protected function _viewAction(): void
     {
         if (!$this->_loadValidOrder()) {
             return;
@@ -78,7 +78,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Order view page
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         $this->_viewAction();
     }
@@ -86,7 +86,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Invoice page
      */
-    public function invoiceAction()
+    public function invoiceAction(): void
     {
         $this->_viewAction();
     }
@@ -94,7 +94,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Shipment page
      */
-    public function shipmentAction()
+    public function shipmentAction(): void
     {
         $this->_viewAction();
     }
@@ -102,7 +102,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Creditmemo page
      */
-    public function creditmemoAction()
+    public function creditmemoAction(): void
     {
         $this->_viewAction();
     }
@@ -110,7 +110,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Action for reorder
      */
-    public function reorderAction()
+    public function reorderAction(): void
     {
         if (!$this->_loadValidOrder()) {
             return;
@@ -146,7 +146,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Print Order Action
      */
-    public function printAction()
+    public function printAction(): void
     {
         if (!$this->_loadValidOrder()) {
             return;
@@ -158,7 +158,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Print Invoice Action
      */
-    public function printInvoiceAction()
+    public function printInvoiceAction(): void
     {
         $invoiceId = (int) $this->getRequest()->getParam('invoice_id');
         if ($invoiceId) {
@@ -188,7 +188,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Print Shipment Action
      */
-    public function printShipmentAction()
+    public function printShipmentAction(): void
     {
         $shipmentId = (int) $this->getRequest()->getParam('shipment_id');
         if ($shipmentId) {
@@ -217,7 +217,7 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
     /**
      * Print Creditmemo Action
      */
-    public function printCreditmemoAction()
+    public function printCreditmemoAction(): void
     {
         $creditmemoId = (int) $this->getRequest()->getParam('creditmemo_id');
         if ($creditmemoId) {

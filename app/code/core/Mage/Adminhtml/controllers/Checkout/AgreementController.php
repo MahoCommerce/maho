@@ -40,12 +40,12 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         return $this;
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Terms and Conditions'));
 
@@ -78,7 +78,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
             ->renderLayout();
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($postData = $this->getRequest()->getPost()) {
             $model = Mage::getSingleton('checkout/agreement');
@@ -102,7 +102,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         }
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
         $model = Mage::getSingleton('checkout/agreement')
