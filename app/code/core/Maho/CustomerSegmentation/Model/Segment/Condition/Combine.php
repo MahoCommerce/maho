@@ -113,28 +113,49 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
             ],
         ];
 
-        $cartItemsConditions = [
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product Name'),
-                'value' => 'customersegmentation/segment_condition_cart_items|name',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product SKU'),
-                'value' => 'customersegmentation/segment_condition_cart_items|sku',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product Category'),
-                'value' => 'customersegmentation/segment_condition_cart_items|category_id',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product Price'),
-                'value' => 'customersegmentation/segment_condition_cart_items|price',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Item Quantity'),
-                'value' => 'customersegmentation/segment_condition_cart_items|qty',
-            ],
+        // Dynamically load cart items conditions from product EAV attributes
+        $cartItemsConditions = [];
+        
+        // Load product attributes from EAV
+        $productAttributes = Mage::getResourceSingleton('catalog/product')
+            ->loadAllAttributes()
+            ->getAttributesByCode();
+
+        foreach ($productAttributes as $attribute) {
+            /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
+            if (!$attribute->isAllowedForRuleCondition()
+                || !$attribute->getData('is_used_for_promo_rules')
+            ) {
+                continue;
+            }
+            $cartItemsConditions[] = [
+                'label' => Mage::helper('customersegmentation')->__('Product: %s', $attribute->getFrontendLabel()),
+                'value' => 'customersegmentation/segment_condition_cart_items|product_' . $attribute->getAttributeCode(),
+            ];
+        }
+
+        // Add cart item specific attributes (from quote_item table)
+        $cartItemAttributes = [
+            'qty' => Mage::helper('customersegmentation')->__('Quantity in Cart'),
+            'price' => Mage::helper('customersegmentation')->__('Price'),
+            'base_price' => Mage::helper('customersegmentation')->__('Base Price'),
+            'row_total' => Mage::helper('customersegmentation')->__('Row Total'),
+            'base_row_total' => Mage::helper('customersegmentation')->__('Base Row Total'),
+            'created_at' => Mage::helper('customersegmentation')->__('Added to Cart Date'),
+            'updated_at' => Mage::helper('customersegmentation')->__('Last Updated Date'),
         ];
+
+        foreach ($cartItemAttributes as $code => $label) {
+            $cartItemsConditions[] = [
+                'label' => $label,
+                'value' => 'customersegmentation/segment_condition_cart_items|' . $code,
+            ];
+        }
+
+        // Sort all cart items conditions alphabetically
+        usort($cartItemsConditions, function($a, $b) {
+            return strcmp($a['label'], $b['label']);
+        });
 
         $viewedProductsConditions = [
             [

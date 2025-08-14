@@ -32,20 +32,39 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
     #[\Override]
     public function loadAttributeOptions(): self
     {
-        $attributes = [
-            'product_id' => Mage::helper('customersegmentation')->__('Product ID'),
-            'sku' => Mage::helper('customersegmentation')->__('Product SKU'),
-            'name' => Mage::helper('customersegmentation')->__('Product Name'),
-            'qty' => Mage::helper('customersegmentation')->__('Quantity'),
+        // Load product attributes from EAV
+        $productAttributes = Mage::getResourceSingleton('catalog/product')
+            ->loadAllAttributes()
+            ->getAttributesByCode();
+
+        $attributes = [];
+        
+        // Add product EAV attributes
+        foreach ($productAttributes as $attribute) {
+            /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
+            if (!$attribute->isAllowedForRuleCondition()
+                || !$attribute->getData('is_used_for_promo_rules')
+            ) {
+                continue;
+            }
+            $attributes['product_' . $attribute->getAttributeCode()] = 
+                Mage::helper('customersegmentation')->__('Product: %s', $attribute->getFrontendLabel());
+        }
+
+        // Add cart item specific attributes (from quote_item table)
+        $cartItemAttributes = [
+            'qty' => Mage::helper('customersegmentation')->__('Quantity in Cart'),
             'price' => Mage::helper('customersegmentation')->__('Price'),
             'base_price' => Mage::helper('customersegmentation')->__('Base Price'),
             'row_total' => Mage::helper('customersegmentation')->__('Row Total'),
             'base_row_total' => Mage::helper('customersegmentation')->__('Base Row Total'),
-            'product_type' => Mage::helper('customersegmentation')->__('Product Type'),
             'created_at' => Mage::helper('customersegmentation')->__('Added to Cart Date'),
             'updated_at' => Mage::helper('customersegmentation')->__('Last Updated Date'),
         ];
 
+        $attributes = array_merge($attributes, $cartItemAttributes);
+        
+        asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
     }
@@ -109,8 +128,16 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
+        
+        // Handle product attributes (prefixed with 'product_')
+        if (str_starts_with($attribute, 'product_')) {
+            $productAttributeCode = substr($attribute, 8); // Remove 'product_' prefix
+            return $this->_buildProductAttributeCondition($adapter, $productAttributeCode, $operator, $value);
+        }
+        
+        // Handle cart item attributes (direct quote_item fields)
         return match ($attribute) {
-            'product_id', 'sku', 'name', 'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'product_type', 'created_at', 'updated_at' => $this->_buildCartItemFieldCondition($adapter, $attribute, $operator, $value),
+            'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'created_at', 'updated_at' => $this->_buildCartItemFieldCondition($adapter, $attribute, $operator, $value),
             default => false,
         };
     }
@@ -123,6 +150,41 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             ->where('q.customer_id IS NOT NULL')
             ->where('q.is_active = ?', 1)
             ->where($this->_buildSqlCondition($adapter, "qi.{$field}", $operator, $value));
+
+        return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function _buildProductAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string
+    {
+        $productResource = Mage::getResourceSingleton('catalog/product');
+        $attribute = $productResource->getAttribute($attributeCode);
+        
+        if (!$attribute) {
+            return false;
+        }
+
+        $attributeTable = $attribute->getBackend()->getTable();
+        $attributeId = $attribute->getId();
+
+        $subselect = $adapter->select()
+            ->from(['qi' => $this->_getQuoteItemTable()], [])
+            ->join(['q' => $this->_getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
+            ->join(['p' => $productResource->getTable('catalog/product')], 'qi.product_id = p.entity_id', [])
+            ->where('q.customer_id IS NOT NULL')
+            ->where('q.is_active = ?', 1);
+
+        // Join the appropriate attribute table based on attribute backend type
+        if ($attribute->getBackendType() == 'static') {
+            // Static attributes are stored directly in the product entity table
+            $subselect->where($this->_buildSqlCondition($adapter, "p.{$attributeCode}", $operator, $value));
+        } else {
+            // EAV attributes need to be joined from their respective tables
+            $subselect->join(
+                ['attr' => $attributeTable],
+                "attr.entity_id = p.entity_id AND attr.attribute_id = {$attributeId}",
+                []
+            )->where($this->_buildSqlCondition($adapter, 'attr.value', $operator, $value));
+        }
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
