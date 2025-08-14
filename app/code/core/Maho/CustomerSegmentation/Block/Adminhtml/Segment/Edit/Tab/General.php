@@ -18,13 +18,13 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
     {
         $model = Mage::registry('current_customer_segment');
         $form = new Varien_Data_Form();
-        $form->setHtmlIdPrefix('segment_');
+        $form->setUseContainer(false);
 
         $fieldset = $form->addFieldset('general_fieldset', [
             'legend' => Mage::helper('customersegmentation')->__('General Information'),
         ]);
 
-        if ($model->getId()) {
+        if ($model && $model->getId()) {
             $fieldset->addField('segment_id', 'hidden', [
                 'name' => 'segment_id',
             ]);
@@ -87,7 +87,9 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
             'note'   => Mage::helper('customersegmentation')->__('Leave empty to apply to all customer groups'),
         ]);
 
-        $form->setValues($model->getData());
+        if ($model) {
+            $form->setValues($model->getData());
+        }
         $this->setForm($form);
 
         return parent::_prepareForm();

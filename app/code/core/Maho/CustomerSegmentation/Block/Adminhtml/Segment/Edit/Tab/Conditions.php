@@ -18,8 +18,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions exte
     {
         $model = Mage::registry('current_customer_segment');
         $form = new Varien_Data_Form();
-
-        $form->setHtmlIdPrefix('rule_');
+        $form->setUseContainer(false);
 
         $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
             ->setTemplate('promo/fieldset.phtml')
@@ -36,7 +35,9 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions exte
             'required'       => true,
         ])->setRule($model)->setRenderer(Mage::getBlockSingleton('rule/conditions'));
 
-        $form->setValues($model->getData());
+        if ($model) {
+            $form->setValues($model->getData());
+        }
         $this->setForm($form);
         return parent::_prepareForm();
     }

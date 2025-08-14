@@ -102,12 +102,16 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             }
 
             try {
+                // Debug: Log the received data
+                Mage::log('Received POST data: ' . print_r($data, true), null, 'customer_segmentation_debug.log');
+
                 // Process conditions
                 if (isset($data['rule']['conditions'])) {
                     $data['conditions'] = $data['rule']['conditions'];
                 }
                 unset($data['rule']);
 
+                Mage::log('Processed data before loadPost: ' . print_r($data, true), null, 'customer_segmentation_debug.log');
                 $segment->loadPost($data);
                 $segment->save();
 

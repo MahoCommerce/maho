@@ -20,6 +20,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit extends Mage_Adminh
         $this->_objectId = 'id';
         $this->_blockGroup = 'customersegmentation';
         $this->_controller = 'adminhtml_segment';
+        $this->_mode = 'edit';
 
         $this->_updateButton('save', 'label', Mage::helper('customersegmentation')->__('Save Segment'));
         $this->_updateButton('delete', 'label', Mage::helper('customersegmentation')->__('Delete Segment'));
