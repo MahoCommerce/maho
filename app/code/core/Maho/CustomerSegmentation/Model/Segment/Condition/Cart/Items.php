@@ -118,9 +118,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
     protected function _buildCartItemFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['qi' => $this->_getQuoteItemTable()], ['quote_id'])
+            ->from(['qi' => $this->_getQuoteItemTable()], [])
             ->join(['q' => $this->_getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
             ->where('q.customer_id IS NOT NULL')
+            ->where('q.is_active = ?', 1)
             ->where($this->_buildSqlCondition($adapter, "qi.{$field}", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';

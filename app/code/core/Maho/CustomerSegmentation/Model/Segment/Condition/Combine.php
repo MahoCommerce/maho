@@ -115,6 +115,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
 
         $cartItemsConditions = [
             [
+                'label' => Mage::helper('customersegmentation')->__('Product Name'),
+                'value' => 'customersegmentation/segment_condition_cart_items|name',
+            ],
+            [
                 'label' => Mage::helper('customersegmentation')->__('Product SKU'),
                 'value' => 'customersegmentation/segment_condition_cart_items|sku',
             ],

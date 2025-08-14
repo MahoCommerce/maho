@@ -120,8 +120,14 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
     {
         $subselect = $adapter->select()
             ->from(['q' => $this->_getQuoteTable()], ['customer_id'])
-            ->where('q.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, "q.{$field}", $operator, $value));
+            ->where('q.customer_id IS NOT NULL');
+
+        // Only add active check if we're not specifically filtering by is_active
+        if ($field !== 'is_active') {
+            $subselect->where('q.is_active = ?', 1);
+        }
+
+        $subselect->where($this->_buildSqlCondition($adapter, "q.{$field}", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -131,6 +137,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         $subselect = $adapter->select()
             ->from(['q' => $this->_getQuoteTable()], ['customer_id'])
             ->where('q.customer_id IS NOT NULL')
+            ->where('q.is_active = ?', 1)
             ->where($this->_buildSqlCondition($adapter, 'q.applied_rule_ids', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
