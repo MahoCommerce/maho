@@ -233,6 +233,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             ->where('o.customer_id IS NOT NULL')
             ->where($this->_buildSqlCondition($adapter, "o.{$field}", $operator, $value));
 
+        $subselectSql = $subselect->__toString();
+        Mage::log('Order field condition SQL for ' . $field . ' ' . $operator . ' ' . $value . ': ' . $subselectSql, null, 'customer_segmentation_debug.log');
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 

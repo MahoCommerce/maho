@@ -125,7 +125,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
         $operator = ($aggregator == 'all') ? ' AND ' : ' OR ';
         $sql = implode($operator, $conditions);
 
-        if ($this->getValue()) {
+        // Invert the logic: TRUE should mean positive match, FALSE should mean negative match
+        if (!$this->getValue()) {
             $sql = 'NOT (' . $sql . ')';
         }
 
