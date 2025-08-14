@@ -109,8 +109,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
         switch ($attribute) {
             case 'email':
-            case 'firstname':
-            case 'lastname':
             case 'created_at':
             case 'group_id':
             case 'store_id':
@@ -118,6 +116,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
                 $field = 'e.' . $attribute;
                 return $this->_buildSqlCondition($adapter, $field, $operator, $value);
 
+            case 'firstname':
+            case 'lastname':
             case 'gender':
             case 'dob':
                 return $this->_buildAttributeCondition($adapter, $attribute, $operator, $value);
