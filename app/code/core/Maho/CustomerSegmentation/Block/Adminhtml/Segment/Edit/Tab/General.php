@@ -53,6 +53,14 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
             ],
         ]);
 
+        $fieldset->addField('refresh_mode', 'select', [
+            'label'  => Mage::helper('customersegmentation')->__('Refresh Mode'),
+            'title'  => Mage::helper('customersegmentation')->__('Refresh Mode'),
+            'name'   => 'refresh_mode',
+            'values' => Mage::getModel('customersegmentation/segment')->getRefreshModeOptions(),
+            'note'   => Mage::helper('customersegmentation')->__('Automatic: Refreshed daily via cron. Manual: Must be refreshed manually.'),
+        ]);
+
         if (!Mage::app()->isSingleStoreMode()) {
             $fieldset->addField('website_ids', 'multiselect', [
                 'name'     => 'website_ids',

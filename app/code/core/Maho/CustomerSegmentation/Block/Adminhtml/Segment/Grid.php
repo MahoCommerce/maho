@@ -41,15 +41,9 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
         ]);
 
         $this->addColumn('name', [
-            'header'    => Mage::helper('customersegmentation')->__('Segment Name'),
+            'header'    => Mage::helper('customersegmentation')->__('Name'),
             'align'     => 'left',
             'index'     => 'name',
-        ]);
-
-        $this->addColumn('description', [
-            'header'    => Mage::helper('customersegmentation')->__('Description'),
-            'align'     => 'left',
-            'index'     => 'description',
         ]);
 
         $this->addColumn('is_active', [
@@ -61,6 +55,18 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
             'options'   => [
                 1 => 'Active',
                 0 => 'Inactive',
+            ],
+        ]);
+
+        $this->addColumn('refresh_mode', [
+            'header'    => Mage::helper('customersegmentation')->__('Mode'),
+            'align'     => 'left',
+            'width'     => '80px',
+            'index'     => 'refresh_mode',
+            'type'      => 'options',
+            'options'   => [
+                'auto'   => Mage::helper('customersegmentation')->__('Automatic'),
+                'manual' => Mage::helper('customersegmentation')->__('Manual'),
             ],
         ]);
 
