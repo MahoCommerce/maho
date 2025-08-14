@@ -139,10 +139,10 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     }
 
     #[\Override]
-    public function loadArray($arr, $key = 'conditions')
+    public function loadArray($arr, string $key = 'conditions')
     {
         $this->setData($key, $arr);
 
-        return parent::loadArray($arr, $key);
+        return parent::loadArray($arr);
     }
 }
