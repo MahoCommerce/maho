@@ -38,7 +38,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             ->getAttributesByCode();
 
         $attributes = [];
-        
+
         // Add product EAV attributes
         foreach ($productAttributes as $attribute) {
             /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
@@ -47,7 +47,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             ) {
                 continue;
             }
-            $attributes['product_' . $attribute->getAttributeCode()] = 
+            $attributes['product_' . $attribute->getAttributeCode()] =
                 Mage::helper('customersegmentation')->__('Product: %s', $attribute->getFrontendLabel());
         }
 
@@ -63,7 +63,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         ];
 
         $attributes = array_merge($attributes, $cartItemAttributes);
-        
+
         asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
@@ -128,13 +128,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
-        
+
         // Handle product attributes (prefixed with 'product_')
         if (str_starts_with($attribute, 'product_')) {
             $productAttributeCode = substr($attribute, 8); // Remove 'product_' prefix
             return $this->_buildProductAttributeCondition($adapter, $productAttributeCode, $operator, $value);
         }
-        
+
         // Handle cart item attributes (direct quote_item fields)
         return match ($attribute) {
             'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'created_at', 'updated_at' => $this->_buildCartItemFieldCondition($adapter, $attribute, $operator, $value),
@@ -154,11 +154,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildProductAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string
+    protected function _buildProductAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
     {
         $productResource = Mage::getResourceSingleton('catalog/product');
         $attribute = $productResource->getAttribute($attributeCode);
-        
+
         if (!$attribute) {
             return false;
         }
@@ -182,7 +182,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             $subselect->join(
                 ['attr' => $attributeTable],
                 "attr.entity_id = p.entity_id AND attr.attribute_id = {$attributeId}",
-                []
+                [],
             )->where($this->_buildSqlCondition($adapter, 'attr.value', $operator, $value));
         }
 

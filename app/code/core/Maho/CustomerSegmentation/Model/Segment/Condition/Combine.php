@@ -115,7 +115,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
 
         // Dynamically load cart items conditions from product EAV attributes
         $cartItemsConditions = [];
-        
+
         // Load product attributes from EAV
         $productAttributes = Mage::getResourceSingleton('catalog/product')
             ->loadAllAttributes()
@@ -153,39 +153,75 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
         }
 
         // Sort all cart items conditions alphabetically
-        usort($cartItemsConditions, function($a, $b) {
+        usort($cartItemsConditions, function ($a, $b) {
             return strcmp($a['label'], $b['label']);
         });
 
-        $viewedProductsConditions = [
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product SKU'),
-                'value' => 'customersegmentation/segment_condition_product_viewed|sku',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product Category'),
-                'value' => 'customersegmentation/segment_condition_product_viewed|category_id',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('View Count'),
-                'value' => 'customersegmentation/segment_condition_product_viewed|view_count',
-            ],
+        // Dynamically load viewed products conditions from product EAV attributes
+        $viewedProductsConditions = [];
+
+        foreach ($productAttributes as $attribute) {
+            /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
+            if (!$attribute->isAllowedForRuleCondition()
+                || !$attribute->getData('is_used_for_promo_rules')
+            ) {
+                continue;
+            }
+            $viewedProductsConditions[] = [
+                'label' => Mage::helper('customersegmentation')->__('Product: %s', $attribute->getFrontendLabel()),
+                'value' => 'customersegmentation/segment_condition_product_viewed|product_' . $attribute->getAttributeCode(),
+            ];
+        }
+
+        // Add viewed products specific attributes
+        $viewedProductsConditions[] = [
+            'label' => Mage::helper('customersegmentation')->__('View Count'),
+            'value' => 'customersegmentation/segment_condition_product_viewed|view_count',
+        ];
+        $viewedProductsConditions[] = [
+            'label' => Mage::helper('customersegmentation')->__('First Viewed Date'),
+            'value' => 'customersegmentation/segment_condition_product_viewed|first_viewed_at',
+        ];
+        $viewedProductsConditions[] = [
+            'label' => Mage::helper('customersegmentation')->__('Last Viewed Date'),
+            'value' => 'customersegmentation/segment_condition_product_viewed|last_viewed_at',
         ];
 
-        $wishlistConditions = [
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product SKU'),
-                'value' => 'customersegmentation/segment_condition_product_wishlist|sku',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Product Category'),
-                'value' => 'customersegmentation/segment_condition_product_wishlist|category_id',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Items Count'),
-                'value' => 'customersegmentation/segment_condition_product_wishlist|items_count',
-            ],
+        // Sort viewed products conditions alphabetically
+        usort($viewedProductsConditions, function ($a, $b) {
+            return strcmp($a['label'], $b['label']);
+        });
+
+        // Dynamically load wishlist conditions from product EAV attributes
+        $wishlistConditions = [];
+
+        foreach ($productAttributes as $attribute) {
+            /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
+            if (!$attribute->isAllowedForRuleCondition()
+                || !$attribute->getData('is_used_for_promo_rules')
+            ) {
+                continue;
+            }
+            $wishlistConditions[] = [
+                'label' => Mage::helper('customersegmentation')->__('Product: %s', $attribute->getFrontendLabel()),
+                'value' => 'customersegmentation/segment_condition_product_wishlist|product_' . $attribute->getAttributeCode(),
+            ];
+        }
+
+        // Add wishlist specific attributes
+        $wishlistConditions[] = [
+            'label' => Mage::helper('customersegmentation')->__('Items Count'),
+            'value' => 'customersegmentation/segment_condition_product_wishlist|items_count',
         ];
+        $wishlistConditions[] = [
+            'label' => Mage::helper('customersegmentation')->__('Added to Wishlist Date'),
+            'value' => 'customersegmentation/segment_condition_product_wishlist|added_at',
+        ];
+
+        // Sort wishlist conditions alphabetically
+        usort($wishlistConditions, function ($a, $b) {
+            return strcmp($a['label'], $b['label']);
+        });
 
         $conditions = array_merge_recursive($conditions, [
             [
