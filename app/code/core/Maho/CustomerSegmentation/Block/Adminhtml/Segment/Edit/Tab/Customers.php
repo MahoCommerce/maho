@@ -93,7 +93,6 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Customers exten
             'gmtoffset' => true,
         ]);
 
-
         return parent::_prepareColumns();
     }
 
@@ -101,6 +100,15 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Customers exten
     public function getGridUrl(): string
     {
         return $this->getUrl('*/*/customersGrid', ['_current' => true]);
+    }
+
+    #[\Override]
+    public function getRowUrl($row): string
+    {
+        return $this->getUrl('adminhtml/customer/edit', [
+            'id' => $row->getId(),
+            'store' => $this->getRequest()->getParam('store')
+        ]);
     }
 
     #[\Override]
