@@ -69,28 +69,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
             ],
             [
                 'label' => Mage::helper('customersegmentation')->__('Order History'),
-                'value' => [
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Payment Method'),
-                        'value' => 'customersegmentation/segment_condition_order_attributes|payment_method',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Shipping Method'),
-                        'value' => 'customersegmentation/segment_condition_order_attributes|shipping_method',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Order Status'),
-                        'value' => 'customersegmentation/segment_condition_order_attributes|status',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Store'),
-                        'value' => 'customersegmentation/segment_condition_order_attributes|store_id',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Grand Total'),
-                        'value' => 'customersegmentation/segment_condition_order_attributes|grand_total',
-                    ],
-                ],
+                'value' => $orderConditions,
             ],
             [
                 'label' => Mage::helper('customersegmentation')->__('Shopping Cart'),

@@ -21,8 +21,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions exte
 
         $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
             ->setTemplate('promo/fieldset.phtml')
-            ->setNewChildUrl($this->getUrl('*/*/newConditionHtml/form/rule_conditions_fieldset'))
-            ->setNewConditionUrl($this->getUrl('*/*/newConditionHtml/form/rule_conditions_fieldset'));
+            ->setNewChildUrl($this->getUrl('*/*/newConditionHtml/form/rule_conditions_fieldset'));
 
         $fieldset = $form->addFieldset('conditions_fieldset', [
             'legend' => Mage::helper('customersegmentation')->__('Conditions (leave blank for all customers)'),

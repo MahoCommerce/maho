@@ -76,6 +76,30 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
+    public function getConditions()
+    {
+        if (!$this->_conditions) {
+            $this->_resetConditions();
+        }
+
+        // Load rule conditions if it is applicable
+        if ($this->hasConditionsSerialized()) {
+            $conditions = $this->getConditionsSerialized();
+            if (!empty($conditions)) {
+                $conditions = Mage::helper('core/unserializeArray')->unserialize($conditions);
+                if (is_array($conditions) && !empty($conditions)) {
+                    // Force reset conditions before loading to prevent duplicates
+                    $this->_conditions->setConditions([]);
+                    $this->_conditions->loadArray($conditions);
+                }
+            }
+            $this->unsConditionsSerialized();
+        }
+
+        return $this->_conditions;
+    }
+
+    #[\Override]
     public function getActionsInstance(): Mage_Rule_Model_Action_Collection
     {
         return Mage::getModel('rule/action_collection');
@@ -335,5 +359,16 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             self::STATUS_COMPLETED  => Mage::helper('customersegmentation')->__('Completed'),
             self::STATUS_ERROR      => Mage::helper('customersegmentation')->__('Error'),
         ];
+    }
+
+    #[\Override]
+    public function loadPost(array $data): self
+    {
+        // Ensure conditions are properly reset before loading new data
+        $this->unsConditions();
+
+        parent::loadPost($data);
+
+        return $this;
     }
 }

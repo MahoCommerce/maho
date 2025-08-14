@@ -196,9 +196,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = (is_array($attributeOptions) && isset($attributeOptions[$attribute]) && is_string($attributeOptions[$attribute])) 
-            ? $attributeOptions[$attribute] 
-            : (string)$attribute;
+        $attributeLabel = (is_array($attributeOptions) && isset($attributeOptions[$attribute]) && is_string($attributeOptions[$attribute]))
+            ? $attributeOptions[$attribute]
+            : (string) $attribute;
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();

@@ -113,7 +113,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
             ->joinLeft(['dr' => $this->_getDirectoryRegionTable()], 'ca.region_id = dr.region_id', [])
             ->where(
                 '(' . $this->_buildSqlCondition($adapter, 'ca.region', $operator, $value) .
-                ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')'
+                ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')',
             );
 
         return 'e.entity_id IN (' . $subselect . ')';
