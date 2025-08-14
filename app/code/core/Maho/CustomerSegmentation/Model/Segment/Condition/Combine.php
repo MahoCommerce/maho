@@ -47,25 +47,140 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
             ],
         ];
 
+        $customerPersonalConditions = [
+            [
+                'label' => Mage::helper('customersegmentation')->__('Email'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|email',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('First Name'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|firstname',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Last Name'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|lastname',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Gender'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|gender',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Date of Birth'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|dob',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Customer Since'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|created_at',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Customer Group'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|group_id',
+            ],
+        ];
+
+        $customerAddressConditions = [
+            // These would be specific address attributes
+            [
+                'label' => Mage::helper('customersegmentation')->__('Street Address'),
+                'value' => 'customersegmentation/segment_condition_customer_address|street',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('City'),
+                'value' => 'customersegmentation/segment_condition_customer_address|city',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Country'),
+                'value' => 'customersegmentation/segment_condition_customer_address|country_id',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('State/Province'),
+                'value' => 'customersegmentation/segment_condition_customer_address|region',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Postal Code'),
+                'value' => 'customersegmentation/segment_condition_customer_address|postcode',
+            ],
+        ];
+
+        $cartConditions = [
+            [
+                'label' => Mage::helper('customersegmentation')->__('Cart Total'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|total',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Cart Items Count'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|items_count',
+            ],
+        ];
+
+        $cartItemsConditions = [
+            [
+                'label' => Mage::helper('customersegmentation')->__('Product SKU'),
+                'value' => 'customersegmentation/segment_condition_cart_items|sku',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Product Category'),
+                'value' => 'customersegmentation/segment_condition_cart_items|category_id',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Product Price'),
+                'value' => 'customersegmentation/segment_condition_cart_items|price',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Item Quantity'),
+                'value' => 'customersegmentation/segment_condition_cart_items|qty',
+            ],
+        ];
+
+        $viewedProductsConditions = [
+            [
+                'label' => Mage::helper('customersegmentation')->__('Product SKU'),
+                'value' => 'customersegmentation/segment_condition_product_viewed|sku',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Product Category'),
+                'value' => 'customersegmentation/segment_condition_product_viewed|category_id',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('View Count'),
+                'value' => 'customersegmentation/segment_condition_product_viewed|view_count',
+            ],
+        ];
+
+        $wishlistConditions = [
+            [
+                'label' => Mage::helper('customersegmentation')->__('Product SKU'),
+                'value' => 'customersegmentation/segment_condition_product_wishlist|sku',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Product Category'),
+                'value' => 'customersegmentation/segment_condition_product_wishlist|category_id',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Items Count'),
+                'value' => 'customersegmentation/segment_condition_product_wishlist|items_count',
+            ],
+        ];
+
         $conditions = array_merge_recursive($conditions, [
             [
                 'label' => Mage::helper('customersegmentation')->__('Conditions Combination'),
                 'value' => 'customersegmentation/segment_condition_combine',
             ],
             [
-                'label' => Mage::helper('customersegmentation')->__('Customer Attributes'),
+                'label' => Mage::helper('customersegmentation')->__('Customer Personal Information'),
+                'value' => $customerPersonalConditions,
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Customer Address'),
+                'value' => $customerAddressConditions,
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Newsletter Subscription'),
                 'value' => [
                     [
-                        'label' => Mage::helper('customersegmentation')->__('Customer Personal Information'),
-                        'value' => 'customersegmentation/segment_condition_customer_attributes',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Customer Address'),
-                        'value' => 'customersegmentation/segment_condition_customer_address',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Newsletter Subscription'),
-                        'value' => 'customersegmentation/segment_condition_customer_newsletter',
+                        'label' => Mage::helper('customersegmentation')->__('Is Subscribed'),
+                        'value' => 'customersegmentation/segment_condition_customer_newsletter|is_subscribed',
                     ],
                 ],
             ],
@@ -75,29 +190,19 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
             ],
             [
                 'label' => Mage::helper('customersegmentation')->__('Shopping Cart'),
-                'value' => [
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Shopping Cart Information'),
-                        'value' => 'customersegmentation/segment_condition_cart_attributes',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Cart Items'),
-                        'value' => 'customersegmentation/segment_condition_cart_items',
-                    ],
-                ],
+                'value' => $cartConditions,
             ],
             [
-                'label' => Mage::helper('customersegmentation')->__('Product Interactions'),
-                'value' => [
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Viewed Products'),
-                        'value' => 'customersegmentation/segment_condition_product_viewed',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Wishlist'),
-                        'value' => 'customersegmentation/segment_condition_product_wishlist',
-                    ],
-                ],
+                'label' => Mage::helper('customersegmentation')->__('Cart Items'),
+                'value' => $cartItemsConditions,
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Viewed Products'),
+                'value' => $viewedProductsConditions,
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Wishlist'),
+                'value' => $wishlistConditions,
             ],
         ]);
 
