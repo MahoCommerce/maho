@@ -31,9 +31,6 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Form extends Mage_A
     protected function _prepareLayout(): self
     {
         parent::_prepareLayout();
-        if (Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
-            $this->getLayout()->getBlock('head')->setCanLoadTinyMce(true);
-        }
         return $this;
     }
 }
