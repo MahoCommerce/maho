@@ -216,6 +216,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      *
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function validate(?Varien_Object $object = null): bool
     {
         $errors = [];
@@ -235,9 +236,48 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return true;
     }
 
+    #[\Override]
+    protected function _afterLoad(): self
+    {
+        parent::_afterLoad();
+
+        // Convert comma-separated strings to arrays for form display
+        if ($this->hasData('website_ids')) {
+            $websiteIds = $this->getData('website_ids');
+            if (is_string($websiteIds) && !empty($websiteIds)) {
+                $this->setData('website_ids', explode(',', $websiteIds));
+            }
+        }
+
+        if ($this->hasData('customer_group_ids')) {
+            $groupIds = $this->getData('customer_group_ids');
+            if (is_string($groupIds) && !empty($groupIds)) {
+                $this->setData('customer_group_ids', explode(',', $groupIds));
+            }
+        }
+
+        return $this;
+    }
+
+    #[\Override]
     protected function _beforeSave(): self
     {
         parent::_beforeSave();
+
+        // Convert array fields to comma-separated strings
+        if ($this->hasData('website_ids')) {
+            $websiteIds = $this->getData('website_ids');
+            if (is_array($websiteIds)) {
+                $this->setData('website_ids', implode(',', $websiteIds));
+            }
+        }
+
+        if ($this->hasData('customer_group_ids')) {
+            $groupIds = $this->getData('customer_group_ids');
+            if (is_array($groupIds)) {
+                $this->setData('customer_group_ids', implode(',', $groupIds));
+            }
+        }
 
         // Validate data
         $this->validate();
@@ -258,6 +298,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this;
     }
 
+    #[\Override]
     protected function _afterSave(): self
     {
         parent::_afterSave();
@@ -265,6 +306,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this;
     }
 
+    #[\Override]
     protected function _afterDelete(): self
     {
         parent::_afterDelete();

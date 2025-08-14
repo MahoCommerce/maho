@@ -18,6 +18,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         $this->setValue(null);
     }
 
+    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         return [
@@ -26,6 +27,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         ];
     }
 
+    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -44,50 +46,45 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         return $this;
     }
 
+    #[\Override]
     public function getAttributeElement(): Varien_Data_Form_Element_Abstract
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();
         }
-        
+
         $element = parent::getAttributeElement();
         // Don't set ShowAsText - allow dropdown selection for customer address attributes
         return $element;
     }
 
+    #[\Override]
     public function getInputType(): string
     {
-        switch ($this->getAttribute()) {
-            case 'country_id':
-            case 'region':
-                return 'select';
-            default:
-                return 'string';
-        }
+        return match ($this->getAttribute()) {
+            'country_id', 'region' => 'select',
+            default => 'string',
+        };
     }
 
+    #[\Override]
     public function getValueElementType(): string
     {
-        switch ($this->getAttribute()) {
-            case 'country_id':
-            case 'region':
-                return 'select';
-            default:
-                return 'text';
-        }
+        return match ($this->getAttribute()) {
+            'country_id', 'region' => 'select',
+            default => 'text',
+        };
     }
 
+    #[\Override]
     public function getValueSelectOptions(): array
     {
         $options = [];
-        switch ($this->getAttribute()) {
-            case 'country_id':
-                $options = Mage::getResourceModel('directory/country_collection')->toOptionArray();
-                break;
-            case 'region':
-                $options = Mage::getResourceModel('directory/region_collection')->toOptionArray();
-                break;
-        }
+        $options = match ($this->getAttribute()) {
+            'country_id' => Mage::getResourceModel('directory/country_collection')->toOptionArray(),
+            'region' => Mage::getResourceModel('directory/region_collection')->toOptionArray(),
+            default => $options,
+        };
         return $options;
     }
 
@@ -115,9 +112,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
             ->joinLeft(['dr' => $this->_getDirectoryRegionTable()], 'ca.region_id = dr.region_id', [])
             ->where(
                 $adapter->prepare(
-                    '(' . $this->_buildSqlCondition($adapter, 'ca.region', $operator, $value) . 
-                    ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')'
-                )
+                    '(' . $this->_buildSqlCondition($adapter, 'ca.region', $operator, $value) .
+                    ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')',
+                ),
             );
 
         return 'e.entity_id IN (' . $subselect . ')';
@@ -133,11 +130,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         return Mage::getSingleton('core/resource')->getTableName('directory/country_region');
     }
 
+    #[\Override]
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
+        $attributeLabel = $attributeOptions[$attribute] ?? $attribute;
 
         return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
     }

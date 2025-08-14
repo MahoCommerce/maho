@@ -106,14 +106,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                 }
                 unset($data['rule']);
 
-                // Convert array fields to comma-separated strings
-                if (isset($data['website_ids']) && is_array($data['website_ids'])) {
-                    $data['website_ids'] = implode(',', $data['website_ids']);
-                }
-                if (isset($data['customer_group_ids']) && is_array($data['customer_group_ids'])) {
-                    $data['customer_group_ids'] = implode(',', $data['customer_group_ids']);
-                }
-
                 $segment->loadPost($data);
                 $segment->save();
 
@@ -264,7 +256,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         } else {
             $html = '';
         }
-        
+
         $this->getResponse()->setBody($html);
     }
 
@@ -296,21 +288,16 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->getResponse()->setBody($html);
     }
 
+    #[\Override]
     protected function _isAllowed(): bool
     {
         $action = strtolower($this->getRequest()->getActionName());
-        switch ($action) {
-            case 'save':
-                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save');
-            case 'delete':
-            case 'massdelete':
-                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete');
-            case 'massstatus':
-                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save');
-            case 'refresh':
-                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/refresh');
-            default:
-                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/manage');
-        }
+        return match ($action) {
+            'save' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
+            'delete', 'massdelete' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete'),
+            'massstatus' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
+            'refresh' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/refresh'),
+            default => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/manage'),
+        };
     }
 }

@@ -35,6 +35,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit extends Mage_Adminh
         ";
     }
 
+    #[\Override]
     public function getHeaderText(): string
     {
         $segment = Mage::registry('current_customer_segment');

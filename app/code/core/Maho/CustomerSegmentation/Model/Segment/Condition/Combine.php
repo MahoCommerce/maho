@@ -17,10 +17,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
         $this->setType('customersegmentation/segment_condition_combine');
     }
 
+    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         $conditions = parent::getNewChildSelectOptions();
-        
+
         $orderConditions = [
             [
                 'label' => Mage::helper('customersegmentation')->__('Payment Method'),
@@ -43,10 +44,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => 'customersegmentation/segment_condition_order_attributes|grand_total',
             ],
         ];
-        
-        // Debug what we're generating
-        Mage::log('Order Conditions: ' . print_r($orderConditions, true), null, 'debug.log');
-        
+
         $conditions = array_merge_recursive($conditions, [
             [
                 'label' => Mage::helper('customersegmentation')->__('Conditions Combination'),
@@ -153,6 +151,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
         return $sql;
     }
 
+    #[\Override]
     public function asHtml(): string
     {
         $html = $this->getTypeElement()->getHtml() .

@@ -18,6 +18,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $this->setValue(null);
     }
 
+    #[\Override]
     public function getNewChildSelectOptions(): array
     {
         return [
@@ -26,6 +27,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         ];
     }
 
+    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -55,36 +57,18 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return $this;
     }
 
+    #[\Override]
     public function getInputType(): string
     {
-        switch ($this->getAttribute()) {
-            case 'status':
-            case 'state':
-            case 'store_id':
-            case 'currency_code':
-            case 'payment_method':
-            case 'shipping_method':
-                return 'select';
-            case 'created_at':
-            case 'updated_at':
-                return 'date';
-            case 'total_qty':
-            case 'total_amount':
-            case 'subtotal':
-            case 'tax_amount':
-            case 'shipping_amount':
-            case 'discount_amount':
-            case 'grand_total':
-            case 'days_since_last_order':
-            case 'number_of_orders':
-            case 'average_order_amount':
-            case 'total_ordered_amount':
-                return 'numeric';
-            default:
-                return 'string';
-        }
+        return match ($this->getAttribute()) {
+            'status', 'state', 'store_id', 'currency_code', 'payment_method', 'shipping_method' => 'select',
+            'created_at', 'updated_at' => 'date',
+            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'days_since_last_order', 'number_of_orders', 'average_order_amount', 'total_ordered_amount' => 'numeric',
+            default => 'string',
+        };
     }
 
+    #[\Override]
     public function getValueElementType(): string
     {
         $attribute = $this->getAttribute();
@@ -92,22 +76,14 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             return 'text';
         }
 
-        switch ($attribute) {
-            case 'status':
-            case 'state':
-            case 'store_id':
-            case 'currency_code':
-            case 'payment_method':
-            case 'shipping_method':
-                return 'select';
-            case 'created_at':
-            case 'updated_at':
-                return 'date';
-            default:
-                return 'text';
-        }
+        return match ($attribute) {
+            'status', 'state', 'store_id', 'currency_code', 'payment_method', 'shipping_method' => 'select',
+            'created_at', 'updated_at' => 'date',
+            default => 'text',
+        };
     }
 
+    #[\Override]
     public function getValueSelectOptions(): array
     {
         // Always regenerate options based on current attribute - don't cache
@@ -185,6 +161,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return $options;
     }
 
+    #[\Override]
     public function getValueElement(): Varien_Data_Form_Element_Abstract
     {
         return parent::getValueElement();
@@ -196,27 +173,30 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     }
 
 
+    #[\Override]
     public function asHtml(): string
     {
         return parent::asHtml();
     }
 
+    #[\Override]
     public function getAttributeElement(): Varien_Data_Form_Element_Abstract
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();
         }
-        
+
         $element = parent::getAttributeElement();
         $element->setShowAsText(true);
         return $element;
     }
 
+    #[\Override]
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
+        $attributeLabel = $attributeOptions[$attribute] ?? $attribute;
 
         return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
     }
@@ -226,46 +206,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
-
-        switch ($attribute) {
-            case 'total_qty':
-            case 'total_amount':
-            case 'subtotal':
-            case 'tax_amount':
-            case 'shipping_amount':
-            case 'discount_amount':
-            case 'grand_total':
-            case 'status':
-            case 'state':
-            case 'created_at':
-            case 'updated_at':
-            case 'store_id':
-            case 'base_currency_code':
-                return $this->_buildOrderFieldCondition($adapter, $attribute, $operator, $value);
-
-            case 'payment_method':
-                return $this->_buildPaymentMethodCondition($adapter, $operator, $value);
-
-            case 'shipping_method':
-                return $this->_buildShippingMethodCondition($adapter, $operator, $value);
-
-            case 'coupon_code':
-                return $this->_buildCouponCondition($adapter, $operator, $value);
-
-            case 'days_since_last_order':
-                return $this->_buildDaysSinceLastOrderCondition($adapter, $operator, $value);
-
-            case 'number_of_orders':
-                return $this->_buildOrderCountCondition($adapter, $operator, $value);
-
-            case 'average_order_amount':
-                return $this->_buildAverageOrderCondition($adapter, $operator, $value);
-
-            case 'total_ordered_amount':
-                return $this->_buildTotalOrderedCondition($adapter, $operator, $value);
-        }
-
-        return false;
+        return match ($attribute) {
+            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at', 'store_id', 'base_currency_code' => $this->_buildOrderFieldCondition($adapter, $attribute, $operator, $value),
+            'payment_method' => $this->_buildPaymentMethodCondition($adapter, $operator, $value),
+            'shipping_method' => $this->_buildShippingMethodCondition($adapter, $operator, $value),
+            'coupon_code' => $this->_buildCouponCondition($adapter, $operator, $value),
+            'days_since_last_order' => $this->_buildDaysSinceLastOrderCondition($adapter, $operator, $value),
+            'number_of_orders' => $this->_buildOrderCountCondition($adapter, $operator, $value),
+            'average_order_amount' => $this->_buildAverageOrderCondition($adapter, $operator, $value),
+            'total_ordered_amount' => $this->_buildTotalOrderedCondition($adapter, $operator, $value),
+            default => false,
+        };
     }
 
     protected function _buildOrderFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string

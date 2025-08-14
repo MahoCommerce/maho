@@ -20,6 +20,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection(): self
     {
         $collection = Mage::getModel('customersegmentation/segment')->getCollection();
@@ -27,6 +28,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns(): self
     {
         $this->addColumn('segment_id', [
@@ -103,6 +105,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     protected function _prepareMassaction(): self
     {
         $this->setMassactionIdField('segment_id');
@@ -136,6 +139,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
         return $this;
     }
 
+    #[\Override]
     public function getRowUrl($row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);

@@ -146,6 +146,7 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return $this->_getReadAdapter()->fetchCol($select);
     }
 
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object): self
     {
         // Serialize conditions
@@ -154,19 +155,5 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         }
 
         return parent::_beforeSave($object);
-    }
-
-    protected function _afterLoad(Mage_Core_Model_Abstract $object): self
-    {
-        // Unserialize conditions
-        $conditions = $object->getConditionsSerialized();
-        if (!empty($conditions)) {
-            $conditions = unserialize($conditions);
-            if (is_array($conditions) && !empty($conditions)) {
-                $object->getConditions()->loadArray($conditions);
-            }
-        }
-
-        return parent::_afterLoad($object);
     }
 }

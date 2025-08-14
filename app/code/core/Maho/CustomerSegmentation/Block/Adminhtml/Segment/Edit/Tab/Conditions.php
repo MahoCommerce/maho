@@ -11,6 +11,7 @@
 
 class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     protected function _prepareForm(): self
     {
         $model = Mage::registry('current_customer_segment');

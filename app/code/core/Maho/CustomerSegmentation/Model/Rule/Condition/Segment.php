@@ -18,6 +18,7 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
             ->setValue(null);
     }
 
+    #[\Override]
     public function loadAttributeOptions(): self
     {
         $attributes = [
@@ -27,16 +28,19 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
         return $this;
     }
 
+    #[\Override]
     public function getInputType(): string
     {
         return 'select';
     }
 
+    #[\Override]
     public function getValueElementType(): string
     {
         return 'select';
     }
 
+    #[\Override]
     public function getValueSelectOptions(): array
     {
         $options = [];
@@ -56,6 +60,7 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
         return $this->getData('value_select_options');
     }
 
+    #[\Override]
     public function validate(Varien_Object $object): bool
     {
         $customerId = $object->getCustomerId();
@@ -70,6 +75,7 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
         return $this->validateAttribute($segmentIds);
     }
 
+    #[\Override]
     public function asHtml(): string
     {
         $html = $this->getTypeElement()->getHtml() .
