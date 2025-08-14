@@ -98,6 +98,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         return $this->getData('value_select_options');
     }
 
+    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();

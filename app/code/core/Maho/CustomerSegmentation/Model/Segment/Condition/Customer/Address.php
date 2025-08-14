@@ -88,6 +88,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         return $options;
     }
 
+    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
@@ -111,10 +112,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
             ->from(['ca' => $this->_getCustomerAddressTable()], ['parent_id'])
             ->joinLeft(['dr' => $this->_getDirectoryRegionTable()], 'ca.region_id = dr.region_id', [])
             ->where(
-                $adapter->prepare(
-                    '(' . $this->_buildSqlCondition($adapter, 'ca.region', $operator, $value) .
-                    ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')',
-                ),
+                '(' . $this->_buildSqlCondition($adapter, 'ca.region', $operator, $value) .
+                ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')'
             );
 
         return 'e.entity_id IN (' . $subselect . ')';
@@ -134,9 +133,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
-        $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = $attributeOptions[$attribute] ?? $attribute;
+        $this->loadAttributeOptions();
+        $attributeOptions = $this->getAttributeOption();
+        $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
-        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        return $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
     }
 }

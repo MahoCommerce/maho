@@ -230,6 +230,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
             ? $attributeOptions[$attribute] 
             : (string)$attribute;
 
-        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        return $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
     }
 }

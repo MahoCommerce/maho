@@ -200,7 +200,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             ? $attributeOptions[$attribute] 
             : (string)$attribute;
 
-        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        return $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
     }
 
     #[\Override]

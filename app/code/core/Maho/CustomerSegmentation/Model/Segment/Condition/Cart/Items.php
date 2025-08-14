@@ -143,6 +143,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         $attributeOptions = $this->getAttributeOption();
         $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
-        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        return $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
     }
 }
