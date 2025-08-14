@@ -40,21 +40,25 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions exte
         return parent::_prepareForm();
     }
 
+    #[\Override]
     public function getTabLabel(): string
     {
         return Mage::helper('customersegmentation')->__('Conditions');
     }
 
+    #[\Override]
     public function getTabTitle(): string
     {
         return Mage::helper('customersegmentation')->__('Conditions');
     }
 
+    #[\Override]
     public function canShowTab(): bool
     {
         return true;
     }
 
+    #[\Override]
     public function isHidden(): bool
     {
         return false;

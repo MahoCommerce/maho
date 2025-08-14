@@ -100,6 +100,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return $options;
     }
 
+    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
@@ -225,7 +226,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
     {
         $attribute = $this->getAttribute();
         $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
-        $attributeLabel = $attributeOptions[$attribute] ?? $attribute;
+        $attributeLabel = (is_array($attributeOptions) && isset($attributeOptions[$attribute]) && is_string($attributeOptions[$attribute])) 
+            ? $attributeOptions[$attribute] 
+            : (string)$attribute;
 
         return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
     }

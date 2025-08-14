@@ -34,6 +34,8 @@
  * @method Maho_CustomerSegmentation_Model_Segment setRefreshStatus(string $value)
  * @method Maho_CustomerSegmentation_Model_Segment setRefreshMode(string $value)
  * @method Maho_CustomerSegmentation_Model_Segment setPriority(int $value)
+ * @method Maho_CustomerSegmentation_Model_Resource_Segment getResource()
+ * @method Maho_CustomerSegmentation_Model_Resource_Segment _getResource()
  */
 class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 {
@@ -59,6 +61,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      */
     protected $_eventObject = 'segment';
 
+    #[\Override]
     protected function _construct(): void
     {
         parent::_construct();
@@ -66,11 +69,13 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         $this->setIdFieldName('segment_id');
     }
 
+    #[\Override]
     public function getConditionsInstance(): Maho_CustomerSegmentation_Model_Segment_Condition_Combine
     {
         return Mage::getModel('customersegmentation/segment_condition_combine');
     }
 
+    #[\Override]
     public function getActionsInstance(): Mage_Rule_Model_Action_Collection
     {
         return Mage::getModel('rule/action_collection');
@@ -140,7 +145,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
             $this->setMatchedCustomersCount(count($matchedCustomers))
-                ->setLastRefreshAt(now())
+                ->setLastRefreshAt(Mage::getSingleton('core/locale')->now())
                 ->setRefreshStatus(self::STATUS_COMPLETED)
                 ->save();
 
