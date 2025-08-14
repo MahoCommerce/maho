@@ -261,6 +261,29 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->getResponse()->setBody($html);
     }
 
+    public function customersTabAction(): void
+    {
+        $segmentId = $this->getRequest()->getParam('id');
+        if (!$segmentId) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
+        if (!$segment->getId()) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        Mage::register('current_customer_segment', $segment);
+
+        $this->getResponse()->setBody(
+            $this->getLayout()
+                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_customers')
+                ->toHtml(),
+        );
+    }
+
     public function customersGridAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
@@ -276,11 +299,11 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         }
 
         Mage::register('current_customer_segment', $segment);
-        
+
         $this->getResponse()->setBody(
             $this->getLayout()
-                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_customers_grid')
-                ->toHtml()
+                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_customers')
+                ->toHtml(),
         );
     }
 
