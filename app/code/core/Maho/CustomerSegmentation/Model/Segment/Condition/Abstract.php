@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -139,7 +141,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     }
 
     #[\Override]
-    public function loadArray($arr, string $key = 'conditions')
+    public function loadArray($arr, string $key = 'conditions'): self
     {
         $this->setData($key, $arr);
 
