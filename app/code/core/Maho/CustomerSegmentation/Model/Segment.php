@@ -180,11 +180,10 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
                 'matched_customers' => $matchedCustomers,
             ]);
 
-            // Clear cache
             $this->cleanCache();
-
         } catch (Exception $e) {
             $this->setRefreshStatus(self::STATUS_ERROR)->save();
+            Mage::logException($e);
             throw $e;
         }
 
@@ -226,7 +225,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function cleanCache(): self
     {
-        Mage::app()->getCache()->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, [self::CACHE_TAG]);
+        Mage::app()->getCache()->clean([self::CACHE_TAG]);
         return $this;
     }
 

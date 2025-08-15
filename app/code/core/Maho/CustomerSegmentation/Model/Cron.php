@@ -68,7 +68,7 @@ class Maho_CustomerSegmentation_Model_Cron
                     'Error refreshing segment %d: %s',
                     $segment->getId(),
                     $e->getMessage(),
-                ), Zend_Log::ERR, 'customer_segmentation.log');
+                ), Mage::LOG_ERROR, 'customer_segmentation.log');
 
                 Mage::logException($e);
             }
@@ -113,7 +113,7 @@ class Maho_CustomerSegmentation_Model_Cron
         } catch (Exception $e) {
             Mage::log(
                 sprintf('Error during event cleanup: %s', $e->getMessage()),
-                Zend_Log::ERR,
+                Mage::LOG_ERROR,
                 'customer_segmentation.log',
             );
             Mage::logException($e);
