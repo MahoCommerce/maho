@@ -25,7 +25,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
         return $this;
     }
 
-    public function customerAction()
+    public function customerAction(): void
     {
         $this->_title($this->__('Reports'))
              ->_title($this->__('Reviews'))
@@ -41,7 +41,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review customer report to CSV format
      */
-    public function exportCustomerCsvAction()
+    public function exportCustomerCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_customer_grid');
         $this->_prepareDownloadResponse(...$grid->getCsv('review_customer.csv', -1));
@@ -50,13 +50,13 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review customer report to Excel XML format
      */
-    public function exportCustomerExcelAction()
+    public function exportCustomerExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_customer_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('review_customer.xml', -1));
     }
 
-    public function productAction()
+    public function productAction(): void
     {
         $this->_title($this->__('Reports'))
              ->_title($this->__('Reviews'))
@@ -72,7 +72,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product report to CSV format
      */
-    public function exportProductCsvAction()
+    public function exportProductCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_product_grid');
         $this->_prepareDownloadResponse(...$grid->getCsv('review_product.csv', -1));
@@ -81,13 +81,13 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product report to Excel XML format
      */
-    public function exportProductExcelAction()
+    public function exportProductExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_product_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('review_product.xml', -1));
     }
 
-    public function productDetailAction()
+    public function productDetailAction(): void
     {
         $this->_title($this->__('Reports'))
              ->_title($this->__('Reviews'))
@@ -105,7 +105,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product detail report to CSV format
      */
-    public function exportProductDetailCsvAction()
+    public function exportProductDetailCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getCsv('review_product_detail.csv', -1));
@@ -114,7 +114,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product detail report to ExcelXML format
      */
-    public function exportProductDetailExcelAction()
+    public function exportProductDetailExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_detail_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('review_product_detail.xml', -1));

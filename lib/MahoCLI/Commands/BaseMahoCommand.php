@@ -8,6 +8,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
 namespace MahoCLI\Commands;
 
 use Mage;
@@ -18,7 +20,7 @@ abstract class BaseMahoCommand extends Command
     protected function initMaho(): void
     {
         Mage::register('isSecureArea', true);
-        Mage::app();
+        Mage::app('admin');
     }
 
     public function humanReadableSize(int $bytes): string

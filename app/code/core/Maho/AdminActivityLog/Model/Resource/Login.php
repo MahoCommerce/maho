@@ -21,7 +21,7 @@ class Maho_AdminActivityLog_Model_Resource_Login extends Mage_Core_Model_Resourc
     {
         $daysToKeep = Mage::helper('adminactivitylog')->getDaysToKeepLogs();
         if ($daysToKeep > 0) {
-            $date = Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s', strtotime("-{$daysToKeep} days"));
+            $date = Mage::getModel('core/date')->gmtDate(Mage_Core_Model_Locale::DATETIME_FORMAT, strtotime("-{$daysToKeep} days"));
             Mage::getResourceModel('adminactivitylog/login_collection')
                 ->addFieldToFilter('created_at', ['lt' => $date])
                 ->walk('delete');

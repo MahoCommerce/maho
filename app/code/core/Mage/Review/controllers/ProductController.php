@@ -135,7 +135,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
      * Submit new review action
      *
      */
-    public function postAction()
+    public function postAction(): void
     {
         if (!$this->_validateFormKey()) {
             // returns to the product item page
@@ -207,7 +207,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
      * Show list of product's reviews
      *
      */
-    public function listAction()
+    public function listAction(): void
     {
         if ($product = $this->_initProduct()) {
             Mage::register('productId', $product->getId());
@@ -241,7 +241,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
      * Show details of one review
      *
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         $review = $this->_loadReview((int) $this->getRequest()->getParam('id'));
         if (!$review) {

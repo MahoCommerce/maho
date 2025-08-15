@@ -7,6 +7,8 @@
 /.phpstan.baseline.neon export-ignore
 /.phpstan.neon export-ignore
 /.rector.php export-ignore
+/tests export-ignore
+/phpunit.xml export-ignore
 /README.md export-ignore
 /SECURITY.md export-ignore
 

@@ -34,7 +34,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      * Admin area entry point
      * Always redirects to the startup page url
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $session = Mage::getSingleton('admin/session');
         $url = $session->getUser()->getStartupPageUrl();
@@ -48,7 +48,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator prelogin action
      */
-    public function preloginAction()
+    public function preloginAction(): void
     {
         /** @var Mage_Admin_Model_Session $adminSession */
         $adminSession = Mage::getSingleton('admin/session');
@@ -73,7 +73,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator login action
      */
-    public function loginAction()
+    public function loginAction(): void
     {
         if (Mage::getSingleton('admin/session')->isLoggedIn()) {
             $this->_redirect('*');
@@ -89,7 +89,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator logout action
      */
-    public function logoutAction()
+    public function logoutAction(): void
     {
         /** @var Mage_Admin_Model_Session $adminSession */
         $adminSession = Mage::getSingleton('admin/session');
@@ -102,7 +102,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Global Search Action
      */
-    public function globalSearchAction()
+    public function globalSearchAction(): void
     {
         $searchModules = Mage::getConfig()->getNode('adminhtml/global_search');
         $items = [];
@@ -160,7 +160,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Example action
      */
-    public function exampleAction()
+    public function exampleAction(): void
     {
         $this->_outTemplate('example');
     }
@@ -168,7 +168,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Test action
      */
-    public function testAction()
+    public function testAction(): void
     {
         echo $this->getLayout()->createBlock('core/profiler')->toHtml();
     }
@@ -176,7 +176,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Change locale action
      */
-    public function changeLocaleAction()
+    public function changeLocaleAction(): void
     {
         $locale = $this->getRequest()->getParam('locale');
         if ($locale) {
@@ -188,7 +188,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Denied JSON action
      */
-    public function deniedJsonAction()
+    public function deniedJsonAction(): void
     {
         $this->getResponse()->setBody($this->_getDeniedJson());
     }
@@ -207,7 +207,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Denied IFrame action
      */
-    public function deniedIframeAction()
+    public function deniedIframeAction(): void
     {
         $this->getResponse()->setBody($this->_getDeniedIframe());
     }
@@ -224,7 +224,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Forgot administrator password action
      */
-    public function forgotpasswordAction()
+    public function forgotpasswordAction(): void
     {
         $params = $this->getRequest()->getParams();
 
@@ -234,7 +234,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             if ($this->_validateFormKey()) {
                 if (!empty($email)) {
                     // Validate received data to be an email address
-                    if (Zend_Validate::is($email, 'EmailAddress')) {
+                    if (Mage::helper('core')->isValidEmail($email)) {
                         $collection = Mage::getResourceModel('admin/user_collection');
                         /** @var Mage_Admin_Model_Resource_User_Collection $collection */
                         $collection->addFieldToFilter('email', $email);
@@ -281,7 +281,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      *
      * User is redirected on this action when he clicks on the corresponding link in password reset confirmation email
      */
-    public function resetPasswordAction()
+    public function resetPasswordAction(): void
     {
         $resetPasswordLinkToken = (string) $this->getRequest()->getQuery('token');
         $userId = (int) $this->getRequest()->getQuery('id');
@@ -304,7 +304,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      *
      * Used to handle data received from reset forgotten password form
      */
-    public function resetPasswordPostAction()
+    public function resetPasswordPostAction(): void
     {
         $resetPasswordLinkToken = (string) $this->getRequest()->getQuery('token');
         $userId = (int) $this->getRequest()->getQuery('id');
@@ -374,7 +374,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator passkey register start action
      */
-    public function passkeyregisterstartAction()
+    public function passkeyregisterstartAction(): void
     {
         try {
             if (!$this->getRequest()->isPost()) {
@@ -407,7 +407,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator passkey login start action
      */
-    public function passkeyloginstartAction()
+    public function passkeyloginstartAction(): void
     {
         try {
             if (!$this->getRequest()->isPost()) {

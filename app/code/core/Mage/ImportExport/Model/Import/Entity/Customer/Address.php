@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -182,7 +182,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                         if ($attrParams['type'] === 'select') {
                             $value = $attrParams['options'][strtolower($rowData[$attrAlias])];
                         } elseif ($attrParams['type'] === 'datetime') {
-                            $value = gmdate(Varien_Date::DATETIME_PHP_FORMAT, strtotime($rowData[$attrAlias]));
+                            $value = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, strtotime($rowData[$attrAlias]));
                         } elseif ($attrParams['type'] === 'multiselect') {
                             $value = $attrParams['options'][strtolower($rowData[$attrAlias])];
                             $multiSelect[$attrParams['id']][] = $value;
@@ -205,7 +205,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                     || $rowScope == Mage_ImportExport_Model_Import_Entity_Customer::SCOPE_ADDRESS
                 ) {
                     // entity table data
-                    $now = Varien_Date::now();
+                    $now = Mage_Core_Model_Locale::now();
                     $entityRows[] = [
                         'entity_id'      => $entityId,
                         'entity_type_id' => $this->_entityTypeId,

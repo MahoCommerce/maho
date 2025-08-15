@@ -12,7 +12,7 @@
 
 class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Action
 {
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Notifications'));
 
@@ -23,7 +23,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
             ->renderLayout();
     }
 
-    public function markAsReadAction()
+    public function markAsReadAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             $session = Mage::getSingleton('adminhtml/session');
@@ -52,7 +52,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*/');
     }
 
-    public function massMarkAsReadAction()
+    public function massMarkAsReadAction(): void
     {
         $session = Mage::getSingleton('adminhtml/session');
         $ids = $this->getRequest()->getParam('notification');
@@ -80,7 +80,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*/');
     }
 
-    public function removeAction()
+    public function removeAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             $session = Mage::getSingleton('adminhtml/session');
@@ -108,7 +108,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*/');
     }
 
-    public function massRemoveAction()
+    public function massRemoveAction(): void
     {
         $session = Mage::getSingleton('adminhtml/session');
         $ids = $this->getRequest()->getParam('notification');

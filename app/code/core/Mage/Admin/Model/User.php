@@ -146,7 +146,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'firstname' => $this->getFirstname(),
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
-            'modified'  => $this->_getDateNow(),
+            'modified'  => Mage_Core_Model_Locale::now(),
             'extra'     => serialize($this->getExtra()),
         ];
 
@@ -744,25 +744,24 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * Returns TRUE or array of errors.
      *
      * @return array|true
-     * @throws Zend_Validate_Exception
      */
     public function validate()
     {
         $errors = new ArrayObject();
 
-        if (!Zend_Validate::is($this->getUsername(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getUsername())) {
             $errors->append(Mage::helper('adminhtml')->__('User Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getFirstname(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getFirstname())) {
             $errors->append(Mage::helper('adminhtml')->__('First Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getLastname(), 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getLastname())) {
             $errors->append(Mage::helper('adminhtml')->__('Last Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getEmail(), 'EmailAddress')) {
+        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
             $errors->append(Mage::helper('adminhtml')->__('Please enter a valid email.'));
         }
 
@@ -810,13 +809,12 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      *
      * @param string $password
      * @return array|true
-     * @throws Zend_Validate_Exception
      */
     public function validateCurrentPassword(#[\SensitiveParameter] $password)
     {
         $result = [];
 
-        if (!Zend_Validate::is($password, 'NotEmpty')) {
+        if (!Mage::helper('core')->isValidNotBlank($password)) {
             $result[] = Mage::helper('adminhtml')->__('Current password field cannot be empty.');
         } elseif (is_null($this->getId()) || !Mage::helper('core')->validateHash($password, $this->getPassword())) {
             $result[] = Mage::helper('adminhtml')->__('Invalid current password.');
@@ -843,7 +841,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Invalid password reset token.'));
         }
         $this->setRpToken($newResetPasswordLinkToken);
-        $currentDate = Varien_Date::now();
+        $currentDate = Mage_Core_Model_Locale::now();
         $this->setRpTokenCreatedAt($currentDate);
 
         return $this;
@@ -865,9 +863,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
         $tokenExpirationPeriod = Mage::helper('admin')->getResetPasswordLinkExpirationPeriod();
 
-        $currentDate = Varien_Date::now();
-        $currentTimestamp = Varien_Date::toTimestamp($currentDate);
-        $tokenTimestamp = Varien_Date::toTimestamp($resetPasswordLinkTokenCreatedAt);
+        $currentDate = Mage_Core_Model_Locale::now();
+        $currentTimestamp = strtotime($currentDate);
+        $tokenTimestamp = strtotime($resetPasswordLinkTokenCreatedAt);
         if ($tokenTimestamp > $currentTimestamp) {
             return true;
         }
@@ -892,17 +890,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $this->setData('new_password', null);
         $this->setData('password_confirmation', null);
         return $this;
-    }
-
-    /**
-     * Simple sql format date
-     *
-     * @param string|bool $dayOnly
-     * @return string
-     */
-    protected function _getDateNow($dayOnly = false)
-    {
-        return Varien_Date::now($dayOnly);
     }
 
     /**

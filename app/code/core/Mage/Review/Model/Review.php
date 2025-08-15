@@ -6,7 +6,7 @@
  * @package    Mage_Review
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -130,21 +130,23 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
 
     /**
      * @return array|bool
-     * @throws Zend_Validate_Exception
      */
     public function validate()
     {
         $errors = [];
 
-        if (!Zend_Validate::is($this->getTitle(), 'NotEmpty')) {
+        // Validate title
+        if (!Mage::helper('core')->isValidNotBlank($this->getTitle())) {
             $errors[] = Mage::helper('review')->__('Review summary can\'t be empty');
         }
 
-        if (!Zend_Validate::is($this->getNickname(), 'NotEmpty')) {
+        // Validate nickname
+        if (!Mage::helper('core')->isValidNotBlank($this->getNickname())) {
             $errors[] = Mage::helper('review')->__('Nickname can\'t be empty');
         }
 
-        if (!Zend_Validate::is($this->getDetail(), 'NotEmpty')) {
+        // Validate detail
+        if (!Mage::helper('core')->isValidNotBlank($this->getDetail())) {
             $errors[] = Mage::helper('review')->__('Review can\'t be empty');
         }
 

@@ -20,11 +20,20 @@ vendor/bin/rector -c .rector.php
 ./maho cache:flush        # Flush all caches
 ```
 
+### Testing
+```bash
+vendor/bin/pest                      # Run all tests (Install → Backend → Frontend)
+vendor/bin/pest --testsuite=Frontend # Run frontend tests only  
+vendor/bin/pest --testsuite=Backend  # Run backend tests only
+vendor/bin/pest --testsuite=Install  # Run install tests only
+```
+
 ### Database & Indexing
 ```bash
 ./maho index:list         # List all indexes
 ./maho index:reindex      # Reindex specific index
 ./maho index:reindex:all  # Reindex all indexes
+./maho db:query "QUERY"   # Execute a one-shot SQL query
 ```
 
 ## Architecture Overview
@@ -146,11 +155,170 @@ $collection = Mage::getResourceModel('catalog/product_collection')
 - Use `Mage::throwException()` for user-facing errors
 - Log errors with `Mage::log()`
 
+## Logging System (Monolog)
+
+### Log Level Constants
+Use the new Mage constants instead of Zend_Log constants:
+```php
+// OLD - Don't use these anymore
+Zend_Log::ERR, Zend_Log::WARN, Zend_Log::DEBUG
+
+// NEW - Use these Mage constants
+Mage::LOG_EMERGENCY  // System is unusable
+Mage::LOG_ALERT      // Action must be taken immediately  
+Mage::LOG_CRITICAL   // Critical conditions
+Mage::LOG_ERROR      // Error conditions
+Mage::LOG_WARNING    // Warning conditions
+Mage::LOG_NOTICE     // Normal but significant
+Mage::LOG_INFO       // Informational messages
+Mage::LOG_DEBUG      // Debug-level messages
+
+// Example usage
+Mage::log('Error occurred', Mage::LOG_ERROR);
+Mage::log('Debug info', Mage::LOG_DEBUG, 'custom.log');
+Mage::logException($e); // Logs to exception.log at ERROR level
+```
+
+## HTTP Client (Symfony HttpClient)
+
+### Use Symfony HttpClient instead of deprecated clients:
+```php
+// OLD - Don't use
+new Varien_Http_Client();
+new Varien_Http_Adapter_Curl();
+
+// NEW - Use this
+$client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
+$response = $client->request('GET', $url);
+$data = $response->getContent();
+```
+
+## JSON Handling
+
+### Use Core Helper instead of Zend_Json:
+```php
+// OLD - Don't use
+Zend_Json::encode($data);
+Zend_Json::decode($data);
+
+// NEW - Use this
+Mage::helper('core')->jsonEncode($data);
+Mage::helper('core')->jsonDecode($data);
+
+// Exception handling changed too
+try {
+    $data = Mage::helper('core')->jsonDecode($json);
+} catch (Mage_Core_Exception_Json $e) {
+    // Handle JSON errors
+}
+```
+
+## Validation (Symfony Validator)
+
+### Use Core Helper instead of Zend_Validate:
+```php
+// OLD - Don't use
+Zend_Validate::is($value, 'NotEmpty');
+Zend_Validate::is($value, 'EmailAddress');
+Zend_Validate::is($value, 'Regex', ['/pattern/']);
+
+// NEW - Use these helper methods
+Mage::helper('core')->isValidNotBlank($value);
+Mage::helper('core')->isValidEmail($value);
+Mage::helper('core')->isValidRegex($value, '/pattern/');
+Mage::helper('core')->isValidLength($value, $min, $max);
+Mage::helper('core')->isValidRange($value, $min, $max);
+Mage::helper('core')->isValidUrl($value);
+Mage::helper('core')->isValidDate($value);
+```
+
+## Date Handling (Native PHP DateTime)
+
+### Use Mage_Core_Model_Locale instead of Zend_Date/Varien_Date:
+```php
+// OLD - Don't use
+Varien_Date::now();
+Zend_Date::now();
+Varien_Date::toTimestamp($date);
+
+// NEW - Use these methods
+Mage_Core_Model_Locale::now();           // Current datetime as string
+Mage_Core_Model_Locale::today();         // Current date as string
+strtotime($dateString);                  // Convert to timestamp
+
+// Date format constants
+Mage_Core_Model_Locale::DATETIME_FORMAT;     // 'Y-m-d H:i:s'
+Mage_Core_Model_Locale::DATE_FORMAT;         // 'Y-m-d' 
+Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT; // 'Y-m-d\TH:i'
+```
+
+## Filtering & Locale (Native PHP)
+
+### Use Core Helper filters instead of Zend_Filter:
+```php
+// OLD - Don't use
+new Zend_Filter_LocalizedToNormalized();
+$filter = new Zend_Filter_Email();
+
+// NEW - Use these helper methods
+Mage::app()->getLocale()->normalizeNumber($qty);
+Mage::app()->getLocale()->formatCurrency($amount, $currencyCode);
+Mage::helper('core')->filterEmail($email);
+Mage::helper('core')->filterUrl($url);
+Mage::helper('core')->filterInt($value);
+Mage::helper('core')->filterFloat($value);
+```
+
+## Other Modernizations
+
+- **Exceptions**: Use `Mage_Core_Exception` instead of `Zend_Exception` for custom exception classes.
+- **PDF Generation**: Use DomPdf with HTML/CSS templates instead of `Zend_Pdf` coordinate-based drawing. Extend `Mage_Core_Block_Pdf` for PDF blocks.
+
 ## Testing Approach
-While there's no dedicated test suite, ensure code quality through:
+Maho uses Pest PHP as its testing framework with comprehensive test coverage:
+
+### Test Framework (Pest PHP)
+- **Pest Framework**: Modern PHP testing framework with clean syntax
+- **Three Test Contexts**: Separate base classes for different Maho environments
+  - `MahoFrontendTestCase` - For frontend/customer-facing functionality
+  - `MahoBackendTestCase` - For admin/backend functionality (with `isSecureArea` enabled)
+  - `MahoInstallTestCase` - For installation context tests
+- **Proper Maho Bootstrap**: Each test context initializes Maho with correct paths and settings
+- **Test Isolation**: Clean setup/teardown with `Mage::reset()` between tests
+
+### Test Structure
+```
+tests/
+├── Frontend/           # Frontend context tests
+├── Backend/            # Backend context tests  
+├── Install/            # Install context tests
+├── MahoFrontendTestCase.php
+├── MahoBackendTestCase.php
+├── MahoInstallTestCase.php
+└── Pest.php           # Configuration
+```
+
+### Writing Tests
+Tests must explicitly declare their context:
+```php
+// Frontend test
+uses(Tests\MahoFrontendTestCase::class);
+
+it('can process customer orders', function () {
+    // Test has full Maho frontend context available
+});
+
+// Backend test  
+uses(Tests\MahoBackendTestCase::class);
+
+it('can manage admin users', function () {
+    // Test has full Maho backend context with isSecureArea enabled
+});
+```
+
+### Additional Quality Assurance
 - PHPStan static analysis (level 6)
 - PHP-CS-Fixer for code standards
-- Manual testing of features
 - GitHub Actions CI for automated checks
 
 ## Modern PHP Patterns

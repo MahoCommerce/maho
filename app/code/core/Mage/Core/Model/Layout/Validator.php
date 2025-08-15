@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,9 +16,8 @@
  * Validator for custom layout update
  * Validator checked XML validation and protected expressions
  */
-class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
+class Mage_Core_Model_Layout_Validator
 {
-    public const XML_PATH_LAYOUT_DISALLOWED_BLOCKS       = 'validators/custom_layout/disallowed_block';
     public const XML_INVALID                             = 'invalidXml';
     public const INVALID_TEMPLATE_PATH                   = 'invalidTemplatePath';
     public const INVALID_BLOCK_NAME                      = 'invalidBlockName';
@@ -24,18 +25,11 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
     public const INVALID_XML_OBJECT_EXCEPTION            = 'invalidXmlObject';
 
     /**
-     * The Varien SimpleXml object
-     *
-     * @var Varien_Simplexml_Element
-     */
-    protected $_value;
-
-    /**
      * XPath expression for checking layout update
      *
-     * @var array
+     * @var array<string>
      */
-    protected $_disallowedXPathExpressions = [
+    protected array $_disallowedXPathExpressions = [
         '*//template',
         '*//@template',
         '//*[@method=\'setTemplate\']',
@@ -44,25 +38,30 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
     ];
 
     /**
-     * @var string
-     */
-    protected $_xpathBlockValidationExpression = '';
-
-    /**
-     * Disallowed template name
-     *
-     * @var array
-     */
-    protected $_disallowedBlock = [];
-
-    /**
      * Protected expressions
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $_protectedExpressions = [
+    protected array $_protectedExpressions = [
         self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR => '//action/*[@helper]',
     ];
+
+    /**
+     * Disallowed block names
+     *
+     * @var array<string>
+     */
+    protected array $_disallowedBlocks = [];
+
+    /**
+     * @var array<string, string>
+     */
+    protected array $_messageTemplates = [];
+
+    /**
+     * @var array<string>
+     */
+    protected array $messages = [];
 
     public function __construct()
     {
@@ -73,9 +72,9 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
     /**
      * Initialize messages templates with translating
      *
-     * @return Mage_Core_Model_Layout_Validator
+     * @return $this
      */
-    protected function _initMessageTemplates()
+    protected function _initMessageTemplates(): self
     {
         if (!$this->_messageTemplates) {
             $this->_messageTemplates = [
@@ -94,133 +93,94 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
     }
 
     /**
-     * @return array
+     * Returns array of errors
      */
-    public function getDisallowedBlocks()
+    public function getMessages(): array
     {
-        if (!count($this->_disallowedBlock)) {
-            $disallowedBlockConfig = $this->_getDisallowedBlockConfigValue();
-            if (is_array($disallowedBlockConfig)) {
-                foreach (array_keys($disallowedBlockConfig) as $blockName) {
-                    $this->_disallowedBlock[] = $blockName;
-                }
-            }
-        }
-        return $this->_disallowedBlock;
-    }
-
-    /**
-     * @return mixed
-     */
-    protected function _getDisallowedBlockConfigValue()
-    {
-        return Mage::getStoreConfig(self::XML_PATH_LAYOUT_DISALLOWED_BLOCKS);
+        return $this->messages;
     }
 
     /**
      * Returns true if and only if $value meets the validation requirements
-     *
-     * If $value fails validation, then this method returns false, and
-     * getMessages() will return an array of messages that explain why the
-     * validation failed.
-     *
-     * @throws Exception            Throw exception when xml object is not
-     *                              instance of Varien_Simplexml_Element
-     * @param Varien_Simplexml_Element|string $value
-     * @return bool
      */
-    #[\Override]
-    public function isValid($value)
+    public function isValid(Varien_Simplexml_Element|string $value): bool
     {
+        $this->messages = [];
+
         if (is_string($value)) {
             $value = trim($value);
             try {
-                $value = new Varien_Simplexml_Element('<config>' . $value . '</config>');
+                $value = simplexml_load_string('<config>' . $value . '</config>', 'Varien_Simplexml_Element');
             } catch (Exception $e) {
                 $this->_error(self::XML_INVALID);
                 return false;
             }
-        } elseif (!($value instanceof Varien_Simplexml_Element)) {
-            throw new Exception($this->_messageTemplates[self::INVALID_XML_OBJECT_EXCEPTION]);
         }
-        if ($value->xpath($this->getXpathBlockValidationExpression())) {
-            $this->_error(self::INVALID_BLOCK_NAME);
-            return false;
-        }
+        // If $value is not a string at this point, it must be a Varien_Simplexml_Element
+        // due to the type declaration, so no additional check is needed
+
         // if layout update declare custom templates then validate their paths
-        if ($templatePaths = $value->xpath($this->getXpathValidationExpression())) {
+        if ($templatePaths = $value->xpath('//*[@template]')) {
             try {
-                $this->validateTemplatePath($templatePaths);
+                $this->_validateTemplatePath($templatePaths);
             } catch (Exception $e) {
                 $this->_error(self::INVALID_TEMPLATE_PATH);
                 return false;
             }
         }
-        $this->_setValue($value);
 
+        // XPath expressions
+        $xpathValidationExpression = $this->_getXpathValidationExpression();
+        if ($xpathValidationExpression && $value->xpath($xpathValidationExpression)) {
+            $this->_error(self::INVALID_TEMPLATE_PATH);
+            return false;
+        }
+
+        // Protected expressions
         foreach ($this->_protectedExpressions as $key => $xpr) {
-            if ($this->_value->xpath($xpr)) {
+            if ($value->xpath($xpr)) {
                 $this->_error($key);
                 return false;
             }
         }
+
+        // Disallowed blocks
+        $xpathBlockValidationExpression = $this->_getXpathBlockValidationExpression();
+        if ($xpathBlockValidationExpression && $value->xpath($xpathBlockValidationExpression)) {
+            $this->_error(self::INVALID_BLOCK_NAME);
+            return false;
+        }
+
         return true;
     }
 
-    /**
-     * @return array
-     */
-    public function getProtectedExpressions()
+    public function getDisallowedBlocks(): array
+    {
+        if (!count($this->_disallowedBlocks)) {
+            $disallowedBlockConfig = Mage::getStoreConfig('validators/custom_layout/disallowed_block');
+            if (is_array($disallowedBlockConfig)) {
+                foreach (array_keys($disallowedBlockConfig) as $blockName) {
+                    $this->_disallowedBlocks[] = $blockName;
+                }
+            }
+        }
+        return $this->_disallowedBlocks;
+    }
+
+    public function getProtectedExpressions(): array
     {
         return $this->_protectedExpressions;
     }
 
-    /**
-     * Returns xPath for validate incorrect path to template
-     *
-     * @return string xPath for validate incorrect path to template
-     */
-    public function getXpathValidationExpression()
+    public function validateTemplatePath(array $templatePaths): void
     {
-        return implode(' | ', $this->_disallowedXPathExpressions);
+        $this->_validateTemplatePath($templatePaths);
     }
 
     /**
-     * @return array
+     * @throws Mage_Core_Exception
      */
-    public function getDisallowedXpathValidationExpression()
-    {
-        return $this->_disallowedXPathExpressions;
-    }
-
-    /**
-     * Returns xPath for validate incorrect block name
-     *
-     * @return string xPath for validate incorrect block name
-     */
-    public function getXpathBlockValidationExpression()
-    {
-        if (!$this->_xpathBlockValidationExpression) {
-            if (count($this->_disallowedBlock)) {
-                foreach ($this->_disallowedBlock as $key => $value) {
-                    $this->_xpathBlockValidationExpression .= $key > 0 ? ' | ' : '';
-                    $this->_xpathBlockValidationExpression .=
-                        "//block[translate(@type, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = ";
-                    $this->_xpathBlockValidationExpression .=
-                        "translate('$value', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')]";
-                }
-            }
-        }
-        return $this->_xpathBlockValidationExpression;
-    }
-
-    /**
-     * Validate template path for preventing access to the directory above
-     * If template path value has "../"
-     *
-     * @throws Exception
-     */
-    public function validateTemplatePath(array $templatePaths)
+    protected function _validateTemplatePath(array $templatePaths): void
     {
         /** @var Varien_Simplexml_Element $path */
         foreach ($templatePaths as $path) {
@@ -228,8 +188,74 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
                 ? stripcslashes(trim((string) $path->children(), '"'))
                 : (string) $path;
             if (str_contains($path, '..' . DS)) {
-                throw new Exception();
+                throw new Mage_Core_Exception('Invalid template path: contains parent directory traversal');
             }
+        }
+    }
+
+    public function getDisallowedXpathValidationExpression(): array
+    {
+        return $this->_disallowedXPathExpressions;
+    }
+
+    protected function _getXpathValidationExpression(): string
+    {
+        return implode(' | ', $this->_disallowedXPathExpressions);
+    }
+
+    /**
+     * Set messages for validator
+     *
+     * @return $this
+     */
+    public function setMessages(array $messages): self
+    {
+        // Merge any custom messages with existing templates
+        $this->_messageTemplates = array_merge($this->_messageTemplates, $messages);
+        return $this;
+    }
+
+    /**
+     * Get XPath validation expression
+     */
+    public function getXpathValidationExpression(): string
+    {
+        return $this->_getXpathValidationExpression();
+    }
+
+    /**
+     * Get XPath block validation expression
+     */
+    public function getXpathBlockValidationExpression(): string
+    {
+        return $this->_getXpathBlockValidationExpression();
+    }
+
+    protected function _getXpathBlockValidationExpression(): string
+    {
+        $disallowedBlocks = $this->getDisallowedBlocks();
+        if (!count($disallowedBlocks)) {
+            return '';
+        }
+
+        $expression = '';
+        foreach ($disallowedBlocks as $key => $value) {
+            if ($key > 0) {
+                $expression .= ' | ';
+            }
+            $expression .= "//block[translate(@type, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = ";
+            $expression .= "translate('$value', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')]";
+        }
+        return $expression;
+    }
+
+    /**
+     * Add error message
+     */
+    protected function _error(string $messageKey): void
+    {
+        if (isset($this->_messageTemplates[$messageKey])) {
+            $this->messages[] = $this->_messageTemplates[$messageKey];
         }
     }
 }

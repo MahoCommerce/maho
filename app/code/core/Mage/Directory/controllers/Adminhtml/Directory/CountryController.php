@@ -178,14 +178,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
                 );
             }
 
-            if ($model->hasTranslation()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('directory')->__('Cannot delete country with existing country names. Please delete all country names first.'),
-                );
-                $this->_redirect('*/*/edit', ['_current' => true]);
-                return;
-            }
-
             $model->delete();
 
             Mage::getSingleton('adminhtml/session')->addSuccess(
@@ -222,7 +214,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             foreach ($countryIds as $countryId) {
                 $model = Mage::getModel('directory/country')->load($countryId);
 
-                if (!$model->getId() || $model->hasTranslation()) {
+                if (!$model->getId()) {
                     $skippedCount++;
                 } else {
                     $model->delete();
@@ -238,7 +230,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
             if ($skippedCount > 0) {
                 Mage::getSingleton('adminhtml/session')->addWarning(
-                    Mage::helper('directory')->__('%d country(s) were skipped because they have existing country names.', $skippedCount),
+                    Mage::helper('directory')->__('%d country(s) were skipped because they no longer exist.', $skippedCount),
                 );
             }
         } catch (Mage_Core_Exception $e) {
@@ -252,98 +244,5 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             Mage::getSingleton('adminhtml/session')->addError($error);
         }
         $this->_redirect('*/*/');
-    }
-
-    public function translationGridAction(): void
-    {
-        $this->_initCountry();
-        $this->loadLayout()->renderLayout();
-    }
-
-    public function translationSaveAction(): void
-    {
-        $model = $this->_initCountry();
-        $data = $this->getRequest()->getPost();
-
-        try {
-            if (empty($data) || !$this->getRequest()->isAjax()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Unable to complete this request.'));
-            }
-
-            if ($model === false || !$model->getId()) {
-                Mage::throwException(Mage::helper('directory')->__('This country no longer exists.'));
-            }
-
-            $errors = $model->validateTranslation($data);
-            if (is_array($errors)) {
-                Mage::throwException(implode('<br>', $errors));
-            }
-
-            $model->saveTranslation($data);
-            $this->getResponse()->setBodyJson(['success' => true]);
-
-        } catch (Mage_Core_Exception $e) {
-            $error = $e->getMessage();
-        } catch (Exception $e) {
-            $error = Mage::helper('adminhtml')->__('Internal Error');
-            Mage::logException($e);
-        }
-
-        if (isset($error)) {
-            Mage::getSingleton('adminhtml/session')->setFormData($data);
-            $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
-        }
-    }
-
-    public function translationMassDeleteAction(): void
-    {
-        $model = $this->_initCountry();
-        $localeIds = $this->getRequest()->getPost('locale_id');
-
-        try {
-            if (!$this->getRequest()->isAjax()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Unable to complete this request.'));
-            }
-
-            if ($model === false || !$model->getId()) {
-                Mage::throwException(Mage::helper('directory')->__('This country no longer exists.'));
-            }
-
-            if (!is_array($localeIds)) {
-                Mage::throwException(
-                    Mage::helper('directory')->__('Please select country name(s).'),
-                );
-            }
-
-            $deletedCount = 0;
-
-            foreach ($localeIds as $localeId) {
-                if (!str_contains($localeId, '|')) {
-                    continue;
-                }
-                [$countryId, $locale] = explode('|', $localeId);
-                $result = $model->deleteTranslation($locale);
-                if ($result === true) {
-                    $deletedCount++;
-                }
-            }
-
-            $this->getResponse()->setBodyJson([
-                'success' => true,
-                'message' => Mage::helper('adminhtml')->__('Total of %d record(s) were deleted.', $deletedCount),
-            ]);
-        } catch (Mage_Core_Exception $e) {
-            $error = $e->getMessage();
-        } catch (Exception $e) {
-            $error = Mage::helper('adminhtml')->__('Internal Error');
-            Mage::logException($e);
-        }
-
-        if (isset($error)) {
-            $this->getResponse()->setBodyJson([
-                'error' => true,
-                'message' => $error,
-            ]);
-        }
     }
 }

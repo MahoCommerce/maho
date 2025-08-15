@@ -46,7 +46,10 @@
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^1",
         "mahocommerce/maho-composer-plugin": "^3",
+        "matthiasmullie/minify": "^1.3",
+        "monolog/monolog": "^3.9",
         "pelago/emogrifier": "^7",
+        "php-units-of-measure/php-units-of-measure": "^2.2",
         "shardj/zf1-future": "^1.24.1",
         "spomky-labs/otphp": "^11.3",
         "symfony/cache": "^7.3",
@@ -55,8 +58,9 @@
         "symfony/http-foundation": "^7.3",
         "symfony/mailer": "^7.3",
         "symfony/polyfill-php84": "^1.31",
-        "symfony/var-dumper": "^7.3",
-        "matthiasmullie/minify": "^1.3"
+        "symfony/polyfill-php85": "^1.32",
+        "symfony/validator": "^7.3",
+        "symfony/var-dumper": "^7.3"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "*",
@@ -77,10 +81,11 @@
         "mahocommerce/maho-phpstan-plugin": "^3",
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "rector/rector": "^2"
+        "rector/rector": "^2",
+        "pestphp/pest": "^3.8",
+        "psy/psysh": "^0.12.10"
     },
     "suggest": {
-        "fballiano/openmage-cssjs-minify": "Minification support for CSS/JS",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution",
         "laminas/laminas-json-server": "Install this package if you need JSON-RPC web services functionality",
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
@@ -97,15 +102,17 @@
             "MahoCLI\\": "lib/MahoCLI"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "extra": {
         "patches": {
             "shardj/zf1-future": {
-                "MAG-1.9.3.0": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/c0a65fb380c98ae1e0618014d1bbe4e56fa39e01/MAG-1.9.3.0.patch",
-                "MAG-1.9.3.7 - SUPEE-10415": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/MAG-1.9.3.7.patch",
-                "OM-918 - Add runtime cache to Zend_Locale_Data": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-918.patch",
-                "OM-1081 - Not detecting HTTPS behind a proxy": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-1081.patch",
-                "OM-2047 - Pass delimiter char to preg_quote": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-2047.patch",
-                "OM-2050 - Prevent checking known date codes": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-2050.patch"
+                "MAG-1.9.3.7 - SUPEE-10415": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/cff368fa23f790288f6913ffae20120b6fec45db/MAG-1.9.3.7.patch",
+                "OM-1081 - Not detecting HTTPS behind a proxy": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/cff368fa23f790288f6913ffae20120b6fec45db/OM-1081.patch",
+                "OM-2047 - Pass delimiter char to preg_quote": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/cff368fa23f790288f6913ffae20120b6fec45db/OM-2047.patch"
             }
         }
     },
@@ -114,7 +121,8 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true,
             "magento-hackathon/magento-composer-installer": false,
-            "mahocommerce/maho-composer-plugin": true
+            "mahocommerce/maho-composer-plugin": true,
+            "pestphp/pest-plugin": true
         },
         "platform": {
             "php": "8.3"

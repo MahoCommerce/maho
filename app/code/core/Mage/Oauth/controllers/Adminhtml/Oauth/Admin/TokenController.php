@@ -35,7 +35,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Render grid page
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this
             ->loadLayout()
@@ -46,7 +46,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Render grid AJAX request
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -55,7 +55,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Update revoke status action
      */
-    public function revokeAction()
+    public function revokeAction(): void
     {
         $ids = $this->getRequest()->getParam('items');
         $status = $this->getRequest()->getParam('status');
@@ -109,7 +109,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Delete action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $ids = $this->getRequest()->getParam('items');
 

@@ -104,13 +104,8 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
         return $this->loadByCategoryIds($category);
     }
 
-    /**
-     * Convert items array to array for select options
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('store_id', 'name');
     }

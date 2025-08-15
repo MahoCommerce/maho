@@ -19,7 +19,7 @@ class Mage_Install_IndexController extends Mage_Install_Controller_Action
         parent::preDispatch();
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_forward('begin', 'wizard', 'install');
     }

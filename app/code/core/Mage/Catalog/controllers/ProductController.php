@@ -78,7 +78,7 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    public function viewAction()
+    public function viewAction(): void
     {
         // Get initial data from request
         $categoryId = (int) $this->getRequest()->getParam('category', false);
@@ -117,7 +117,7 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
     /**
      * View product gallery action
      */
-    public function galleryAction()
+    public function galleryAction(): void
     {
         if (!$this->_initProduct()) {
             if (isset($_GET['store']) && !$this->getResponse()->isRedirect()) {

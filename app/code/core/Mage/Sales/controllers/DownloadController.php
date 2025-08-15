@@ -16,7 +16,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
      *
      * @param mixed $info
      */
-    protected function _downloadFileAction($info)
+    protected function _downloadFileAction($info): void
     {
         $secretKey = $this->getRequest()->getParam('key');
         try {
@@ -93,7 +93,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Profile custom options download action
      */
-    public function downloadProfileCustomOptionAction()
+    public function downloadProfileCustomOptionAction(): void
     {
         $recurringProfile = Mage::getModel('sales/recurring_profile')->load($this->getRequest()->getParam('id'));
 
@@ -136,7 +136,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Custom options download action
      */
-    public function downloadCustomOptionAction()
+    public function downloadCustomOptionAction(): void
     {
         $quoteItemOptionId = $this->getRequest()->getParam('id');
         /** @var Mage_Sales_Model_Quote_Item_Option $option */

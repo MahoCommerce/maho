@@ -481,6 +481,34 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     public function getRobots()
     {
         if (empty($this->_data['robots'])) {
+            // Check for product page
+            if ($product = Mage::registry('current_product')) {
+                $robots = $product->getMetaRobots();
+                if ($robots) {
+                    $this->_data['robots'] = $robots;
+                    return $this->_data['robots'];
+                }
+            }
+
+            // Check for category page
+            if ($category = Mage::registry('current_category')) {
+                $robots = $category->getMetaRobots();
+                if ($robots) {
+                    $this->_data['robots'] = $robots;
+                    return $this->_data['robots'];
+                }
+            }
+
+            // Check for CMS page
+            if ($page = Mage::getSingleton('cms/page')) {
+                $robots = $page->getMetaRobots();
+                if ($robots) {
+                    $this->_data['robots'] = $robots;
+                    return $this->_data['robots'];
+                }
+            }
+
+            // Fall back to default
             $this->_data['robots'] = Mage::getStoreConfig('design/head/default_robots');
         }
         return $this->_data['robots'];

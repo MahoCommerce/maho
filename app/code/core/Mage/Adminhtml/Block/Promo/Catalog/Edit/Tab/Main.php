@@ -136,14 +136,14 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Main extends Mage_Adminhtml_Bl
             'name'   => 'from_date',
             'label'  => Mage::helper('catalogrule')->__('From Date'),
             'title'  => Mage::helper('catalogrule')->__('From Date'),
-            'input_format' => Varien_Date::DATE_INTERNAL_FORMAT,
+            'input_format' => Mage_Core_Model_Locale::DATE_FORMAT,
             'format'       => $dateFormatIso,
         ]);
         $fieldset->addField('to_date', 'date', [
             'name'   => 'to_date',
             'label'  => Mage::helper('catalogrule')->__('To Date'),
             'title'  => Mage::helper('catalogrule')->__('To Date'),
-            'input_format' => Varien_Date::DATE_INTERNAL_FORMAT,
+            'input_format' => Mage_Core_Model_Locale::DATE_FORMAT,
             'format'       => $dateFormatIso,
         ]);
 

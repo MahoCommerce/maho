@@ -184,7 +184,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
             if ($message->getId()) {
                 $dsn = Mage::helper('core')->getMailerDsn();
                 if (!$dsn) {
-                    $message->setProcessedAt(Varien_Date::formatDate(true));
+                    $message->setProcessedAt(Mage_Core_Model_Locale::now());
                     $message->save();
                     continue;
                 }
@@ -229,7 +229,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     ]);
 
                     $mailer->send($email);
-                    $message->setProcessedAt(Varien_Date::formatDate(true));
+                    $message->setProcessedAt(Mage_Core_Model_Locale::now());
                     $message->save();
 
                     foreach ($message->getRecipients() as $recipient) {

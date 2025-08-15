@@ -122,7 +122,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Shopping cart display action
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $cart = $this->_getCart();
         if ($cart->getQuote()->getItemsCount()) {
@@ -144,7 +144,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             if (!$this->_getQuote()->validateMinimumAmount()) {
                 $minimumAmount = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())
-                    ->toCurrency(Mage::getStoreConfig('sales/minimum_order/amount'));
+                    ->format(Mage::getStoreConfig('sales/minimum_order/amount'));
 
                 $warning = Mage::getStoreConfig('sales/minimum_order/description') ?: Mage::helper('checkout')->__('Minimum order amount is %s', $minimumAmount);
 
@@ -184,7 +184,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
      *
      * @throws Mage_Core_Exception
      */
-    public function addAction()
+    public function addAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_goBack();
@@ -194,10 +194,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $params = $this->getRequest()->getParams();
         try {
             if (isset($params['qty'])) {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                );
-                $params['qty'] = $filter->filter($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->normalizeNumber($params['qty']);
             }
 
             $product = $this->_initProduct();
@@ -262,7 +259,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Add products in group to shopping cart action
      */
-    public function addgroupAction()
+    public function addgroupAction(): void
     {
         $orderItemIds = $this->getRequest()->getParam('order_items', []);
         $customerId   = $this->_getCustomerSession()->getCustomerId();
@@ -301,7 +298,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Action to reconfigure cart item
      */
-    public function configureAction()
+    public function configureAction(): void
     {
         // Extract item and product to configure
         $id = (int) $this->getRequest()->getParam('id');
@@ -335,7 +332,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Update product configuration for a cart item
      */
-    public function updateItemOptionsAction()
+    public function updateItemOptionsAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
@@ -351,10 +348,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
         try {
             if (isset($params['qty'])) {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                );
-                $params['qty'] = $filter->filter($params['qty']);
+                $params['qty'] = Mage::app()->getLocale()->normalizeNumber($params['qty']);
             }
 
             $quoteItem = $cart->getQuote()->getItemById($id);
@@ -417,7 +411,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Update shopping cart data action
      */
-    public function updatePostAction()
+    public function updatePostAction(): void
     {
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
@@ -443,12 +437,9 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         try {
             $cartData = $this->getRequest()->getParam('cart');
             if (is_array($cartData)) {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                );
                 foreach ($cartData as $index => $data) {
                     if (isset($data['qty'])) {
-                        $cartData[$index]['qty'] = $filter->filter(trim($data['qty']));
+                        $cartData[$index]['qty'] = Mage::app()->getLocale()->normalizeNumber(trim($data['qty']));
                     }
                 }
                 $cart = $this->_getCart();
@@ -486,7 +477,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Delete shoping cart item action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($this->_validateFormKey()) {
             $id = (int) $this->getRequest()->getParam('id');
@@ -509,7 +500,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Initialize shipping information
      */
-    public function estimatePostAction()
+    public function estimatePostAction(): void
     {
         $country    = (string) $this->getRequest()->getParam('country_id');
         $postcode   = (string) $this->getRequest()->getParam('estimate_postcode');
@@ -546,7 +537,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Estimate update action
      */
-    public function estimateUpdatePostAction()
+    public function estimateUpdatePostAction(): void
     {
         $code = (string) $this->getRequest()->getParam('estimate_method');
         if (!empty($code)) {
@@ -558,7 +549,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Initialize coupon
      */
-    public function couponPostAction()
+    public function couponPostAction(): void
     {
         /**
          * No reason continue with empty shopping cart
@@ -616,7 +607,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Minicart delete action
      */
-    public function ajaxDeleteAction()
+    public function ajaxDeleteAction(): void
     {
         if (!$this->_validateFormKey()) {
             Mage::throwException('Invalid form key');
@@ -647,7 +638,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Minicart ajax update qty action
      */
-    public function ajaxUpdateAction()
+    public function ajaxUpdateAction(): void
     {
         if (!$this->_validateFormKey()) {
             Mage::throwException('Invalid form key');
@@ -659,10 +650,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             try {
                 $cart = $this->_getCart();
                 if (isset($qty)) {
-                    $filter = new Zend_Filter_LocalizedToNormalized(
-                        ['locale' => Mage::app()->getLocale()->getLocaleCode()],
-                    );
-                    $qty = $filter->filter($qty);
+                    $qty = Mage::app()->getLocale()->normalizeNumber($qty);
                 }
 
                 $quoteItem = $cart->getQuote()->getItemById($id);

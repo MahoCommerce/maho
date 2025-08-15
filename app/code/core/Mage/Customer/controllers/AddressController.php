@@ -35,7 +35,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     /**
      * Customer addresses list
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         if (count($this->_getSession()->getCustomer()->getAddresses())) {
             $this->loadLayout();
@@ -52,12 +52,12 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this->_forward('form');
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('form');
     }
@@ -65,7 +65,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     /**
      * Address book form
      */
-    public function formAction()
+    public function formAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');

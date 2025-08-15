@@ -45,7 +45,7 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
      * Shared wishlist view page
      *
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $wishlist   = $this->_getWishlist();
         $customerId = Mage::getSingleton('customer/session')->getCustomerId();

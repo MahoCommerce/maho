@@ -45,7 +45,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
     /**
      * Creditmemos grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initAction()
             ->_addContent($this->getLayout()->createBlock('adminhtml/sales_creditmemo'))
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
     /**
      * Creditmemo information page
      */
-    public function viewAction()
+    public function viewAction(): void
     {
         if ($creditmemoId = $this->getRequest()->getParam('creditmemo_id')) {
             $this->_forward('view', 'sales_order_creditmemo', null, ['come_from' => 'sales_creditmemo']);
@@ -67,7 +67,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
     /**
      * Notify user
      */
-    public function emailAction()
+    public function emailAction(): void
     {
         if ($creditmemoId = $this->getRequest()->getParam('creditmemo_id')) {
             if ($creditmemo = Mage::getModel('sales/order_creditmemo')->load($creditmemoId)) {
@@ -103,7 +103,7 @@ class Mage_Adminhtml_Controller_Sales_Creditmemo extends Mage_Adminhtml_Controll
         $this->_redirect('*/*/');
     }
 
-    public function printAction()
+    public function printAction(): void
     {
         /** @see Mage_Adminhtml_Sales_Order_InvoiceController */
         if ($creditmemoId = $this->getRequest()->getParam('creditmemo_id')) {

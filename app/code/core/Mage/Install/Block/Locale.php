@@ -6,6 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,15 +19,15 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
     }
 
     /**
-     * Retrieve locale object
+     * Retrieve locale code
      *
-     * @return Zend_Locale
+     * @return string
      */
     public function getLocale()
     {
         $locale = $this->getData('locale');
         if (is_null($locale)) {
-            $locale = Mage::app()->getLocale()->getLocale();
+            $locale = Mage::app()->getLocale()->getLocaleCode();
             $this->setData('locale', $locale);
         }
         return $locale;
@@ -65,7 +66,7 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
             ->setId('locale')
             ->setTitle(Mage::helper('install')->__('Locale'))
             ->setClass('required-entry')
-            ->setValue($this->getLocale()->__toString())
+            ->setValue($this->getLocale())
             ->setOptions(Mage::app()->getLocale()->getTranslatedOptionLocales())
             ->getHtml();
     }

@@ -432,7 +432,7 @@ class Mage_Core_Model_Design_Package
 
         // Prevent reading files outside of the proper directory while still allowing symlinked files
         if (str_contains($file, '..')) {
-            Mage::log(sprintf('Invalid path requested: %s (params: %s)', $file, json_encode($params)), Zend_Log::ERR);
+            Mage::log(sprintf('Invalid path requested: %s (params: %s)', $file, json_encode($params)), Mage::LOG_ERROR);
             throw new Exception('Invalid path requested.');
         }
 
@@ -493,7 +493,7 @@ class Mage_Core_Model_Design_Package
 
         // Prevent reading files outside of the proper directory while still allowing symlinked files
         if (str_contains((string) $file, '..')) {
-            Mage::log(sprintf('Invalid path requested: %s (params: %s)', $file, json_encode($params)), Zend_Log::ERR);
+            Mage::log(sprintf('Invalid path requested: %s (params: %s)', $file, json_encode($params)), Mage::LOG_ERROR);
             throw new Exception('Invalid path requested.');
         }
 

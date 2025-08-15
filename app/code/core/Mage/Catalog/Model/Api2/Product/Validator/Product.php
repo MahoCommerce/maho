@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -123,7 +123,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         }
         // Validate weight
         if (isset($data['weight']) && !empty($data['weight']) && $data['weight'] > 0
-            && !Zend_Validate::is($data['weight'], 'Between', [0, self::MAX_DECIMAL_VALUE])
+            && ($data['weight'] < 0 || $data['weight'] > self::MAX_DECIMAL_VALUE)
         ) {
             $this->_addError('The "weight" value is not within the specified range.');
         }
@@ -185,7 +185,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                 if ($attribute->getBackendType() == 'datetime') {
                     try {
                         $attribute->getBackend()->formatDate($value);
-                    } catch (Zend_Date_Exception $e) {
+                    } catch (Exception $e) {
                         $this->_addError(sprintf('Invalid date in the "%s" field.', $attributeCode));
                     }
                 }
@@ -268,7 +268,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         if ($this->_isUpdate() && !isset($data['sku'])) {
             return true;
         }
-        if (!Zend_Validate::is((string) $data['sku'], 'StringLength', ['min' => 0, 'max' => 64])) {
+        if (strlen((string) $data['sku']) > 64) {
             $this->_addError('SKU length should be 64 characters maximum.');
         }
     }

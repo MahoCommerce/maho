@@ -46,7 +46,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Statuses grid page
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this
             ->_title($this->__('Sales'))->_title($this->__('Order Statuses'))
@@ -58,7 +58,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * New status form
      */
-    public function newAction()
+    public function newAction(): void
     {
         $data = $this->_getSession()->getFormData(true);
         if ($data) {
@@ -76,7 +76,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Editing existing status form
      */
-    public function editAction()
+    public function editAction(): void
     {
         $status = $this->_initStatus();
         if ($status) {
@@ -97,7 +97,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Save status form processing
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
         $isNew = $this->getRequest()->getParam('is_new');
@@ -156,7 +156,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Assign status to state form
      */
-    public function assignAction()
+    public function assignAction(): void
     {
         $this
             ->_title($this->__('Sales'))->_title($this->__('Assign Order Status to State'))
@@ -168,7 +168,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Save status assignment to state
      */
-    public function assignPostAction()
+    public function assignPostAction(): void
     {
         $data = $this->getRequest()->getPost();
         if ($data) {
@@ -201,7 +201,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Unassign the status from a specific state
      */
-    public function unassignAction()
+    public function unassignAction(): void
     {
         $state  = $this->getRequest()->getParam('state');
         $status = $this->_initStatus();

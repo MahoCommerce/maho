@@ -80,7 +80,7 @@ class Varien_Db_Helper
      * @param string $from
      * @param string $to
      */
-    public static function addTranslate($from, $to)
+    public static function addTranslate($from, $to): void
     {
         self::$_translateMap[$from] = $to;
     }

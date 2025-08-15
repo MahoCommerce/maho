@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -166,61 +166,61 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
             $selectUnions = [];
 
             // apply date boundaries (before calling $this->_applyDateRangeFilter())
-            $dtFormat   = Varien_Date::DATE_INTERNAL_FORMAT;
-            $periodFrom = (!is_null($this->_from) ? new Zend_Date($this->_from, $dtFormat) : null);
-            $periodTo   = (!is_null($this->_to) ? new Zend_Date($this->_to, $dtFormat) : null);
+            $dtFormat   = Mage_Core_Model_Locale::DATE_FORMAT;
+            $periodFrom = (!is_null($this->_from) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_from) ?: new DateTime($this->_from) : null);
+            $periodTo   = (!is_null($this->_to) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_to) ?: new DateTime($this->_to) : null);
             if ($this->_period == 'year') {
                 if ($periodFrom) {
                     // not the first day of the year
-                    if ($periodFrom->toValue(Zend_Date::MONTH) != 1 || $periodFrom->toValue(Zend_Date::DAY) != 1) {
-                        $dtFrom = $periodFrom->getDate();
+                    if ((int) $periodFrom->format('n') != 1 || (int) $periodFrom->format('j') != 1) {
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
                         // last day of the year
-                        $dtTo = $periodFrom->getDate()->setMonth(12)->setDay(31);
-                        if (!$periodTo || $dtTo->isEarlier($periodTo)) {
+                        $dtTo = DateTimeImmutable::createFromMutable($periodFrom)
+                            ->setDate((int) $periodFrom->format('Y'), 12, 31);
+                        if (!$periodTo || $dtTo < $periodTo) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->toString($dtFormat),
-                                $dtTo->toString($dtFormat),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // first day of the next year
-                            $this->_from = $periodFrom->getDate()
-                                ->addYear(1)
-                                ->setMonth(1)
-                                ->setDay(1)
-                                ->toString($dtFormat);
+                            $this->_from = DateTimeImmutable::createFromMutable($periodFrom)
+                                ->modify('+1 year')
+                                ->setDate($periodFrom->format('Y') + 1, 1, 1)
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
 
                 if ($periodTo) {
                     // not the last day of the year
-                    if ($periodTo->toValue(Zend_Date::MONTH) != 12 || $periodTo->toValue(Zend_Date::DAY) != 31) {
-                        $dtFrom = $periodTo->getDate()->setMonth(1)->setDay(1);  // first day of the year
-                        $dtTo = $periodTo->getDate();
-                        if (!$periodFrom || $dtFrom->isLater($periodFrom)) {
+                    if ($periodTo->format('n') != 12 || $periodTo->format('j') != 31) {
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodTo)
+                            ->setDate((int) $periodTo->format('Y'), 1, 1);  // first day of the year
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
+                        if (!$periodFrom || $dtFrom > $periodFrom) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->toString($dtFormat),
-                                $dtTo->toString($dtFormat),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // last day of the previous year
-                            $this->_to = $periodTo->getDate()
-                                ->subYear(1)
-                                ->setMonth(12)
-                                ->setDay(31)
-                                ->toString($dtFormat);
+                            $this->_to = DateTimeImmutable::createFromMutable($periodTo)
+                                ->modify('-1 year')
+                                ->setDate($periodTo->format('Y') - 1, 12, 31)
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
 
                 if ($periodFrom && $periodTo) {
                     // the same year
-                    if ($periodFrom->toValue(Zend_Date::YEAR) == $periodTo->toValue(Zend_Date::YEAR)) {
-                        $dtFrom = $periodFrom->getDate();
-                        $dtTo = $periodTo->getDate();
+                    if ($periodFrom->format('Y') == $periodTo->format('Y')) {
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         $selectUnions[] = $this->_makeBoundarySelect(
-                            $dtFrom->toString($dtFormat),
-                            $dtTo->toString($dtFormat),
+                            $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                            $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                         );
 
                         $this->getSelect()->where('1<>1');
@@ -229,49 +229,59 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
             } elseif ($this->_period == 'month') {
                 if ($periodFrom) {
                     // not the first day of the month
-                    if ($periodFrom->toValue(Zend_Date::DAY) != 1) {
-                        $dtFrom = $periodFrom->getDate();
+                    if ($periodFrom->format('j') != 1) {
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
                         // last day of the month
-                        $dtTo = $periodFrom->getDate()->addMonth(1)->setDay(1)->subDay(1);
-                        if (!$periodTo || $dtTo->isEarlier($periodTo)) {
+                        $dtTo = DateTimeImmutable::createFromMutable($periodFrom)
+                            ->modify('+1 month')
+                            ->setDate((int) $periodFrom->format('Y'), (int) $periodFrom->format('n') + 1, 1)
+                            ->modify('-1 day');
+                        if (!$periodTo || $dtTo < $periodTo) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->toString($dtFormat),
-                                $dtTo->toString($dtFormat),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // first day of the next month
-                            $this->_from = $periodFrom->getDate()->addMonth(1)->setDay(1)->toString($dtFormat);
+                            $this->_from = DateTimeImmutable::createFromMutable($periodFrom)
+                                ->modify('+1 month')
+                                ->setDate((int) $periodFrom->format('Y'), (int) $periodFrom->format('n') + 1, 1)
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
 
                 if ($periodTo) {
                     // not the last day of the month
-                    if ($periodTo->toValue(Zend_Date::DAY) != $periodTo->toValue(Zend_Date::MONTH_DAYS)) {
-                        $dtFrom = $periodTo->getDate()->setDay(1);  // first day of the month
-                        $dtTo = $periodTo->getDate();
-                        if (!$periodFrom || $dtFrom->isLater($periodFrom)) {
+                    if ($periodTo->format('j') != $periodTo->format('t')) {
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodTo)
+                            ->setDate((int) $periodTo->format('Y'), (int) $periodTo->format('n'), 1);  // first day of the month
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
+                        if (!$periodFrom || $dtFrom > $periodFrom) {
                             $selectUnions[] = $this->_makeBoundarySelect(
-                                $dtFrom->toString($dtFormat),
-                                $dtTo->toString($dtFormat),
+                                $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                                $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                             );
 
                             // last day of the previous month
-                            $this->_to = $periodTo->getDate()->setDay(1)->subDay(1)->toString($dtFormat);
+                            $this->_to = DateTimeImmutable::createFromMutable($periodTo)
+                                ->setDate((int) $periodTo->format('Y'), (int) $periodTo->format('n'), 1)
+                                ->modify('-1 day')
+                                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                         }
                     }
                 }
 
                 if ($periodFrom && $periodTo) {
                     // the same month
-                    if ($periodFrom->toValue(Zend_Date::YEAR) == $periodTo->toValue(Zend_Date::YEAR)
-                        && $periodFrom->toValue(Zend_Date::MONTH) == $periodTo->toValue(Zend_Date::MONTH)
+                    if ($periodFrom->format('Y') == $periodTo->format('Y')
+                        && $periodFrom->format('n') == $periodTo->format('n')
                     ) {
-                        $dtFrom = $periodFrom->getDate();
-                        $dtTo = $periodTo->getDate();
+                        $dtFrom = DateTimeImmutable::createFromMutable($periodFrom);
+                        $dtTo = DateTimeImmutable::createFromMutable($periodTo);
                         $selectUnions[] = $this->_makeBoundarySelect(
-                            $dtFrom->toString($dtFormat),
-                            $dtTo->toString($dtFormat),
+                            $dtFrom->format(Mage_Core_Model_Locale::DATE_FORMAT),
+                            $dtTo->format(Mage_Core_Model_Locale::DATE_FORMAT),
                         );
 
                         $this->getSelect()->where('1<>1');

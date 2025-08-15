@@ -23,7 +23,7 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
         $this->setUsedModuleName('Mage_Catalog');
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         try {
             $data = $this->getRequest()->getPost();

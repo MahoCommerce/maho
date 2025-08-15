@@ -71,7 +71,6 @@
 "Invalid seek position","Invalid seek position"
 "Invalid value for '%s'","Invalid value for '%s'"
 "Invalid value for '%s' column","Invalid value for '%s' column"
-"Invalid value in SKU column. HTML tags are not allowed","Invalid value in SKU column. HTML tags are not allowed"
 "Node does not has model token tag","Node does not has model token tag"
 "No filter data provided","No filter data provided"
 "No source specified","No source specified"

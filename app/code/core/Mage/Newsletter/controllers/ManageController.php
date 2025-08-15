@@ -27,7 +27,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');

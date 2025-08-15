@@ -443,7 +443,7 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
      * @param callable $obj_method
      * @param array $args
      */
-    public function each($obj_method, $args = [])
+    public function each($obj_method, $args = []): void
     {
         foreach ($args->_items as $k => $item) {
             $args->_items[$k] = call_user_func($obj_method, $item);

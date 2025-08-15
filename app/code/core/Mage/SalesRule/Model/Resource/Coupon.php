@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,8 +32,8 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
     {
         if (!$object->getExpirationDate()) {
             $object->setExpirationDate(null);
-        } elseif ($object->getExpirationDate() instanceof Zend_Date) {
-            $object->setExpirationDate($object->getExpirationDate()->toString(Varien_Date::DATETIME_INTERNAL_FORMAT));
+        } elseif ($object->getExpirationDate() instanceof DateTime) {
+            $object->setExpirationDate($object->getExpirationDate()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         }
 
         // maintain single primary coupon per rule
@@ -114,11 +114,12 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
             $updateArray['usage_per_customer'] = $rule->getUsesPerCustomer();
         }
 
-        $ruleNewDate = new Zend_Date($rule->getToDate());
-        $ruleOldDate = new Zend_Date($rule->getOrigData('to_date'));
+        // Check if expiration date has changed
+        $newToDate = $rule->getToDate();
+        $oldToDate = $rule->getOrigData('to_date');
 
-        if ($ruleNewDate->compare($ruleOldDate)) {
-            $updateArray['expiration_date'] = $rule->getToDate();
+        if ($newToDate !== $oldToDate) {
+            $updateArray['expiration_date'] = $newToDate;
         }
 
         if (!empty($updateArray)) {

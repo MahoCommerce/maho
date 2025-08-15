@@ -115,7 +115,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      *
      * @param Varien_Db_Select $select
      */
-    public function setDbSelect($select)
+    public function setDbSelect($select): void
     {
         $this->_select = $select;
     }
@@ -189,7 +189,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param Varien_Data_Tree_Node|null $parentNode
      * @param int $level
      */
-    public function addChildNodes($children, $path, $parentNode, $level = 0)
+    public function addChildNodes($children, $path, $parentNode, $level = 0): void
     {
         if (isset($children[$path])) {
             foreach ($children[$path] as $child) {
@@ -274,7 +274,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param Varien_Data_Tree_Node $newParent
      * @param Varien_Data_Tree_Node $prevNode
      */
-    public function move($node, $newParent, $prevNode = null)
+    public function move($node, $newParent, $prevNode = null): void
     {
         $position = 1;
 
@@ -327,7 +327,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param Mage_Catalog_Model_Category $category
      * @param Varien_Data_Tree_Node $rootNode
      */
-    public function loadEnsuredNodes($category, $rootNode)
+    public function loadEnsuredNodes($category, $rootNode): void
     {
         $pathIds = $category->getPathIds();
         $rootNodeId = $rootNode->getId();

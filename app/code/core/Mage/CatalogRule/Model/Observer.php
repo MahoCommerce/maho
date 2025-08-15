@@ -6,7 +6,7 @@
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -94,7 +94,7 @@ class Mage_CatalogRule_Model_Observer
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getQuote();
-        $date = Mage::app()->getLocale()->storeTimeStamp($quote->getStoreId());
+        $date = Mage::app()->getLocale()->storeDate($quote->getStoreId());
         $wId = $quote->getStore()->getWebsiteId();
         $gId = $quote->getCustomerGroupId();
 
@@ -135,7 +135,7 @@ class Mage_CatalogRule_Model_Observer
         if ($observer->hasDate()) {
             $date = $observer->getEvent()->getDate();
         } else {
-            $date = Mage::app()->getLocale()->storeTimeStamp($storeId);
+            $date = Mage::app()->getLocale()->storeDate($storeId);
         }
 
         if ($observer->hasWebsiteId()) {
@@ -403,7 +403,7 @@ class Mage_CatalogRule_Model_Observer
         if ($observer->getEvent()->hasDate()) {
             $date = $observer->getEvent()->getDate();
         } else {
-            $date = Mage::app()->getLocale()->storeTimeStamp($store);
+            $date = Mage::app()->getLocale()->storeDate($store);
         }
 
         $productIds = [];
@@ -469,6 +469,15 @@ class Mage_CatalogRule_Model_Observer
      */
     protected function _getRulePricesKey($keyInfo)
     {
-        return implode('|', $keyInfo);
+        // Convert DateTime objects to date strings for key generation
+        $processedInfo = [];
+        foreach ($keyInfo as $info) {
+            if ($info instanceof DateTime) {
+                $processedInfo[] = $info->format(Mage_Core_Model_Locale::DATE_FORMAT);
+            } else {
+                $processedInfo[] = $info;
+            }
+        }
+        return implode('|', $processedInfo);
     }
 }

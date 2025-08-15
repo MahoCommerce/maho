@@ -48,7 +48,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
 
@@ -65,12 +65,12 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
             ->renderLayout();
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
 
@@ -108,7 +108,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_addBreadcrumb($breadcrumb, $breadcrumb)->renderLayout();
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($this->getRequest()->getPost()) {
             try {
@@ -187,7 +187,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             try {
@@ -226,7 +226,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
-    public function newConditionHtmlAction()
+    public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
@@ -250,7 +250,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->getResponse()->setBody($html);
     }
 
-    public function newActionHtmlAction()
+    public function newActionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
@@ -277,7 +277,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     /**
      * Apply all active catalog price rules
      */
-    public function applyRulesAction()
+    public function applyRulesAction(): void
     {
         $errorMessage = Mage::helper('catalogrule')->__('Unable to apply rules.');
         try {

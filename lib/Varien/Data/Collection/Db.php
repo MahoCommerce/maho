@@ -162,7 +162,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     public function setConnection($conn)
     {
         if (!$conn instanceof Zend_Db_Adapter_Abstract) {
-            throw new Zend_Exception('dbModel read resource does not implement Zend_Db_Adapter_Abstract');
+            throw new Mage_Core_Exception('dbModel read resource does not implement Zend_Db_Adapter_Abstract');
         }
 
         $this->_conn = $conn;
@@ -328,10 +328,9 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @param string $field
      * @param string $direction
-     * @param bool $unshift
      * @return $this
      */
-    private function _setOrder($field, $direction, $unshift = false)
+    private function _setOrder($field, $direction, bool $unshift = false)
     {
         $this->_isOrdersRendered = false;
         $field = (string) $this->_getMappedField($field);

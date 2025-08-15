@@ -51,7 +51,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Show grid action
      *
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Tags'))
@@ -67,7 +67,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Action to draw grid loaded by ajax
      *
      */
-    public function ajaxGridAction()
+    public function ajaxGridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -77,7 +77,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Action to draw pending tags grid loaded by ajax
      *
      */
-    public function ajaxPendingGridAction()
+    public function ajaxPendingGridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -87,7 +87,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * New tag action
      *
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -178,7 +178,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete tag action
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $model   = $this->_initTag();
         $session = Mage::getSingleton('adminhtml/session');
@@ -201,7 +201,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Pending tags
      *
      */
-    public function pendingAction()
+    public function pendingAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Tags'))
@@ -217,7 +217,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Assigned products (with serializer block)
      *
      */
-    public function assignedAction()
+    public function assignedAction(): void
     {
         $this->_title($this->__('Tags'))->_title($this->__('Assigned'));
 
@@ -230,7 +230,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Assigned products grid
      *
      */
-    public function assignedGridOnlyAction()
+    public function assignedGridOnlyAction(): void
     {
         $this->_initTag();
         $this->loadLayout();
@@ -241,7 +241,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Tagged products
      *
      */
-    public function productAction()
+    public function productAction(): void
     {
         $this->_initTag();
         $this->loadLayout();
@@ -252,7 +252,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Customers
      *
      */
-    public function customerAction()
+    public function customerAction(): void
     {
         $this->_initTag();
         $this->loadLayout();
@@ -263,7 +263,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Massaction for removing tags
      *
      */
-    public function massDeleteAction()
+    public function massDeleteAction(): void
     {
         $tagIds = $this->getRequest()->getParam('tag');
         if (!is_array($tagIds)) {
@@ -289,7 +289,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
      * Massaction for changing status of selected tags
      *
      */
-    public function massStatusAction()
+    public function massStatusAction(): void
     {
         $tagIds = $this->getRequest()->getParam('tag');
         $storeId = (int) $this->getRequest()->getParam('store', 0);

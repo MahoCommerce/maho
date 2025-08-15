@@ -82,7 +82,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
-    public function treeJsonAction()
+    public function treeJsonAction(): void
     {
         try {
             $this->_initAction();
@@ -94,7 +94,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
-    public function contentsAction()
+    public function contentsAction(): void
     {
         try {
             $this->_initAction();
@@ -105,7 +105,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
-    public function newFolderAction()
+    public function newFolderAction(): void
     {
         try {
             $this->_initAction();
@@ -118,7 +118,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
-    public function deleteFolderAction()
+    public function deleteFolderAction(): void
     {
         try {
             $path = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
@@ -132,7 +132,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Delete file from media storage
      */
-    public function deleteFilesAction()
+    public function deleteFilesAction(): void
     {
         try {
             if (!$this->getRequest()->isPost()) {
@@ -161,7 +161,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Files upload processing
      */
-    public function uploadAction()
+    public function uploadAction(): void
     {
         try {
             $this->_initAction();
@@ -176,7 +176,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Fire when select image
      */
-    public function onInsertAction()
+    public function onInsertAction(): void
     {
         $helper = Mage::helper('cms/wysiwyg_images');
         $storeId = $this->getRequest()->getParam('store');
@@ -196,7 +196,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Generate image thumbnail on the fly
      */
-    public function thumbnailAction()
+    public function thumbnailAction(): void
     {
         try {
             $file = $this->getRequest()->getParam('file');

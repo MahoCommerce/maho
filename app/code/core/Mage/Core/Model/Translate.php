@@ -397,7 +397,18 @@ class Mage_Core_Model_Translate
         }
 
         try {
-            $result = !empty($args) ? vsprintf($translated, $args) : false;
+            if (!empty($args)) {
+                // Convert any non-string values to strings for vsprintf
+                $stringArgs = array_map(function ($arg) {
+                    if ($arg instanceof DateTime) {
+                        return $arg->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    }
+                    return (string) $arg;
+                }, $args);
+                $result = vsprintf($translated, $stringArgs);
+            } else {
+                $result = false;
+            }
         } catch (ValueError $e) {
             $result = false;
         }

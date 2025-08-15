@@ -3282,7 +3282,7 @@ p.product-name a:hover {
 .products-grid {
   display: grid;
   grid-auto-rows: 1fr;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   grid-gap: 0.5rem;
   grid-row-gap: 2rem;
   text-align: center;
@@ -5366,9 +5366,7 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
   font-size: 0.75rem;
 }
 .dashboard .box-account {
-  padding-bottom: 40px;
-  border-bottom: 1px solid var(--maho-color-border);
-  margin-bottom: 45px;
+  margin-bottom: 10px;
 }
 .dashboard .box-account p,
 .dashboard .box-account address {

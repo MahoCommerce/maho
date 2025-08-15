@@ -797,11 +797,10 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Set Tracking Response Data
      *
-     * @param array $resultArr
      * @param string $trackingValue
      * @param string $errorTitle
      */
-    private function setTrackingResultData($resultArr, $trackingValue, $errorTitle)
+    private function setTrackingResultData(array $resultArr, $trackingValue, $errorTitle)
     {
         if (!$this->_trackingResult) {
             $this->_trackingResult = Mage::getModel('shipping/tracking_result');
@@ -971,7 +970,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             Mage::log(
                 'Unexpected response shape from UPS REST API /shipments endpoint for .ShipmentResults.PackageResults',
-                Zend_Log::WARN,
+                Mage::LOG_WARNING,
             );
             $result->setErrors(Mage::helper('usa')->__('Error reading response from UPS'));
             $this->_debug($debugData);
@@ -1026,8 +1025,8 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $width = $packageParams->getWidth();
         $length = $packageParams->getLength();
         $weight = $packageParams->getWeight();
-        $weightUnits = $packageParams->getWeightUnits() == Zend_Measure_Weight::POUND ? 'LBS' : 'KGS';
-        $dimensionsUnits = $packageParams->getDimensionUnits() == Zend_Measure_Length::INCH ? 'IN' : 'CM';
+        $weightUnits = $packageParams->getWeightUnits() == Mage_Core_Model_Locale::WEIGHT_POUND ? 'LBS' : 'KGS';
+        $dimensionsUnits = $packageParams->getDimensionUnits() == Mage_Core_Model_Locale::LENGTH_INCH ? 'IN' : 'CM';
 
         /**  Shipment API Payload */
         $shipParams = [

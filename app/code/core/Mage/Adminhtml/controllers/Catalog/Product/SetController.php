@@ -18,7 +18,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'catalog/attributes/sets';
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Attributes'))
@@ -41,7 +41,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Attributes'))
@@ -74,7 +74,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
-    public function setGridAction()
+    public function setGridAction(): void
     {
         $this->_setTypeId();
         $this->getResponse()->setBody(
@@ -91,7 +91,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      * [AJAX] Save attribute set data
      *
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         $entityTypeId   = $this->_getEntityTypeId();
         $attributeSetId = $this->getRequest()->getParam('id', false);
@@ -154,7 +154,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         }
     }
 
-    public function addAction()
+    public function addAction(): void
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Attributes'))
@@ -171,7 +171,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         $setId = $this->getRequest()->getParam('id');
         try {

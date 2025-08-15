@@ -19,7 +19,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
         return $this;
     }
 
-    public function searchAction()
+    public function searchAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Search Terms'));
 
@@ -35,7 +35,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     /**
      * Export search report grid to CSV format
      */
-    public function exportSearchCsvAction()
+    public function exportSearchCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_search_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('search.csv', -1));
@@ -44,7 +44,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     /**
      * Export search report to Excel XML format
      */
-    public function exportSearchExcelAction()
+    public function exportSearchExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_search_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('search.xml', -1));

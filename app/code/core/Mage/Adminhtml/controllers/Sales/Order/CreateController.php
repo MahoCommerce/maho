@@ -328,7 +328,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Index page
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Orders'))->_title($this->__('New Order'));
         $this->_initSession();
@@ -368,7 +368,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Loading page block
      */
-    public function loadBlockAction()
+    public function loadBlockAction(): void
     {
         $request = $this->getRequest();
         try {
@@ -416,7 +416,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Adds configured product to quote
      */
-    public function addConfiguredAction()
+    public function addConfiguredAction(): void
     {
         try {
             $this->_initSession()
@@ -435,7 +435,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Start order create action
      */
-    public function startAction()
+    public function startAction(): void
     {
         $this->_getSession()->clear();
         $this->_redirect('*/*', ['customer_id' => $this->getRequest()->getParam('customer_id')]);
@@ -444,7 +444,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Cancel order create
      */
-    public function cancelAction()
+    public function cancelAction(): void
     {
         if ($orderId = $this->_getSession()->getReordered()) {
             $this->_getSession()->clear();
@@ -460,7 +460,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Saving quote and create order
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         try {
             $orderData = $this->getRequest()->getPost('order');
@@ -626,7 +626,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Process data and display index page
      */
-    public function processDataAction()
+    public function processDataAction(): void
     {
         $this->_initSession();
         $this->_processData();

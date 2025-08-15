@@ -77,7 +77,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
         // Date restriction (from_date, to_date)
         if ($restriction->getFromDate() || $restriction->getToDate()) {
             $now = new DateTime();
-            $currentDate = $now->format('Y-m-d H:i:s');
+            $currentDate = $now->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
             if ($restriction->getFromDate() && $currentDate < $restriction->getFromDate()) {
                 return false;

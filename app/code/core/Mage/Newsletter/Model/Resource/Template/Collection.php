@@ -6,7 +6,7 @@
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,13 +34,8 @@ class Mage_Newsletter_Model_Resource_Template_Collection extends Mage_Core_Model
         return $this;
     }
 
-    /**
-     * Returns options array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return $this->_toOptionArray('template_id', 'template_code');
     }

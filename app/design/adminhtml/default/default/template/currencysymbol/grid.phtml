@@ -30,24 +30,36 @@
                     <table cellspacing="0" class="data table-cat-img-sizes">
                         <colgroup>
                             <col width="15%"/>
+                            <col width="15%"/>
+                            <col width="15%"/>
                             <col />
                         </colgroup>
                         <thead>
                             <tr class="headings">
                                 <th><span class="nobr"><span class="not-sort"><?= $this->__('Currency') ?></th>
-                                <th><span class="nobr"><span class="not-sort"><?= $this->__('Symbol') ?><span class="required"><em>*</em></span></th>
+                                <th><span class="nobr"><span class="not-sort"><?= $this->__('Locale') ?></th>
+                                <th><span class="nobr"><span class="not-sort"><?= $this->__('Default Symbol') ?></th>
+                                <th><span class="nobr"><span class="not-sort"><?= $this->__('Custom Symbol') ?><span class="required"><em>*</em></span></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach($this->getCurrencySymbolsData() as $code => $data): ?>
+                            <?php foreach($this->getCurrencySymbolsData() as $key => $data): ?>
                             <tr>
                                 <td class="label">
-                                <label for="custom_currency_symbol<?= $this->escapeHtml($code) ?>"><?= $this->escapeHtml($code) ?> (<?= $this->escapeHtml($data['displayName']) ?>)</label>
+                                    <strong><?= $this->escapeHtml($data['currencyCode']) ?></strong><br/>
+                                    <small><?= $this->escapeHtml($data['displayName']) ?></small>
+                                </td>
+                                <td class="label">
+                                    <strong><?= $this->escapeHtml($data['localeCode']) ?></strong><br/>
+                                    <small><?= $this->escapeHtml($data['localeName']) ?></small>
+                                </td>
+                                <td class="label">
+                                    <strong><?= $this->escapeHtml($data['parentSymbol']) ?></strong>
                                 </td>
                                 <td class="value">
-                                    <input id="custom_currency_symbol<?= $this->escapeHtml($code) ?>" class=" required-entry input-text" type="text" value="<?= $this->quoteEscape($this->escapeHtml($data['displaySymbol'])) ?>"<?= $data['inherited'] ? ' disabled="disabled"' : '';?> name="custom_currency_symbol[<?= $this->escapeHtml($code) ?>]">
-                                    &nbsp; <input id="custom_currency_symbol_inherit<?= $this->escapeHtml($code) ?>" class="checkbox config-inherit" type="checkbox" onclick="toggleUseDefault(<?= '\'' . $this->escapeHtml($code) . '\',\'' . $this->quoteEscape($data['parentSymbol'], true) . '\'' ?>)"<?= $data['inherited'] ? ' checked="checked"' : '' ?> value="1" name="inherit_custom_currency_symbol[<?= $this->escapeHtml($code) ?>]">
-                                    <label class="inherit" title="" for="custom_currency_symbol_inherit<?= $this->escapeHtml($code) ?>"><?= $this->getInheritText() ?></label>
+                                    <input id="custom_currency_symbol<?= $this->escapeHtml($key) ?>" class="input-text" type="text" value="<?= $this->quoteEscape($this->escapeHtml($data['displaySymbol'])) ?>"<?= $data['inherited'] ? ' disabled="disabled"' : '';?> name="custom_currency_symbol[<?= $this->escapeHtml($key) ?>]">
+                                    &nbsp; <input id="custom_currency_symbol_inherit<?= $this->escapeHtml($key) ?>" class="checkbox config-inherit" type="checkbox" onclick="toggleUseDefault(<?= '\'' . $this->escapeHtml($key) . '\',\'' . $this->quoteEscape($data['parentSymbol'], true) . '\'' ?>)"<?= $data['inherited'] ? ' checked="checked"' : '' ?> value="1" name="inherit_custom_currency_symbol[<?= $this->escapeHtml($key) ?>]">
+                                    <label class="inherit" title="" for="custom_currency_symbol_inherit<?= $this->escapeHtml($key) ?>"><?= $this->getInheritText() ?></label>
                                 </td>
                             </tr>
                             <?php endforeach ?>

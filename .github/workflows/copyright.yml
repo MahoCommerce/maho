@@ -3,13 +3,15 @@ name: Copyright Check
 on:
   pull_request:
   push:
+    branches:
+      - main
 
 jobs:
   check-copyright:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Skip OM commits
         if: github.event_name == 'push'

@@ -1328,11 +1328,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $packageParams = $request->getPackageParams();
 
         $packageWeight = $request->getPackageWeight();
-        if ($packageParams->getWeightUnits() != Zend_Measure_Weight::OUNCE) {
+        if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_OUNCE) {
             $packageWeight = round((float) Mage::helper('usa')->convertMeasureWeight(
                 $request->getPackageWeight(),
                 $packageParams->getWeightUnits(),
-                Zend_Measure_Weight::OUNCE,
+                Mage_Core_Model_Locale::WEIGHT_OUNCE,
             ));
         }
 
@@ -1401,11 +1401,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         };
         $packageParams = $request->getPackageParams();
         $packageWeight = $request->getPackageWeight();
-        if ($packageParams->getWeightUnits() != Zend_Measure_Weight::OUNCE) {
+        if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_OUNCE) {
             $packageWeight = round((float) Mage::helper('usa')->convertMeasureWeight(
                 $request->getPackageWeight(),
                 $packageParams->getWeightUnits(),
-                Zend_Measure_Weight::OUNCE,
+                Mage_Core_Model_Locale::WEIGHT_OUNCE,
             ));
         }
 
@@ -1479,35 +1479,35 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $length = $packageParams->getLength();
         $girth = $packageParams->getGirth();
         $packageWeight = $request->getPackageWeight();
-        if ($packageParams->getWeightUnits() != Zend_Measure_Weight::POUND) {
+        if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_POUND) {
             $packageWeight = Mage::helper('usa')->convertMeasureWeight(
                 $request->getPackageWeight(),
                 $packageParams->getWeightUnits(),
-                Zend_Measure_Weight::POUND,
+                Mage_Core_Model_Locale::WEIGHT_POUND,
             );
         }
-        if ($packageParams->getDimensionUnits() != Zend_Measure_Length::INCH) {
+        if ($packageParams->getDimensionUnits() != Mage_Core_Model_Locale::LENGTH_INCH) {
             $length = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getLength(),
                 $packageParams->getDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
             $width = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getWidth(),
                 $packageParams->getDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
             $height = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getHeight(),
                 $packageParams->getDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
         }
-        if ($packageParams->getGirthDimensionUnits() != Zend_Measure_Length::INCH) {
+        if ($packageParams->getGirthDimensionUnits() != Mage_Core_Model_Locale::LENGTH_INCH) {
             $girth = round((float) Mage::helper('usa')->convertMeasureDimension(
                 $packageParams->getGirth(),
                 $packageParams->getGirthDimensionUnits(),
-                Zend_Measure_Length::INCH,
+                Mage_Core_Model_Locale::LENGTH_INCH,
             ));
         }
 
@@ -1620,11 +1620,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             $item->setData($itemShipment);
 
             $itemWeight = $item->getWeight() * $item->getQty();
-            if ($packageParams->getWeightUnits() != Zend_Measure_Weight::POUND) {
+            if ($packageParams->getWeightUnits() != Mage_Core_Model_Locale::WEIGHT_POUND) {
                 $itemWeight = Mage::helper('usa')->convertMeasureWeight(
                     $itemWeight,
                     $packageParams->getWeightUnits(),
-                    Zend_Measure_Weight::POUND,
+                    Mage_Core_Model_Locale::WEIGHT_POUND,
                 );
             }
             if (!empty($countriesOfManufacture[$item->getProductId()])) {

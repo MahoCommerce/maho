@@ -208,7 +208,6 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
      * @param array $params
      * @param bool $withAuth
      * @return string
-     * @throws Zend_Uri_Exception
      */
     protected function getWsdlUrl($params = null, $withAuth = true)
     {
