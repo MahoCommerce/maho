@@ -24,7 +24,7 @@
         <?php foreach ($this->getAvailableCurrencies() as $code): ?>
             <?php $selected = $code == $this->getCurrentCurrencyCode() ? ' selected="selected"' : '' ?>
             <option value="<?= $code ?>"<?= $selected ?> symbol="<?= $this->getCurrencySymbol($code) ?>">
-                <?= $this->getCurrencyName($code) ?>
+                <?= $code ?>
             </option>
         <?php endforeach ?>
         </select>
