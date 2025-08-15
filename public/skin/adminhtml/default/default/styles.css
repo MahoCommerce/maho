@@ -1444,8 +1444,62 @@ button, .form-button {
 
 
 ul.tabs-horiz {
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 4px;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--maho-box-border-color);
+    padding-bottom: 0;
+    position: relative;
+}
+
+/* Specific styles for horizontal tab links */
+ul.tabs-horiz a {
+    padding: 10px 20px !important;
+    margin-bottom: -1px;
+    border: 1px solid transparent !important;
+    border-bottom: 1px solid var(--maho-box-border-color) !important;
+    border-radius: var(--maho-box-border-radius) var(--maho-box-border-radius) 0 0 !important;
+    background: var(--maho-box-shade-1);
+    transition: all 0.2s ease;
+    border-left: 1px solid transparent !important;
+}
+
+ul.tabs-horiz a:hover,
+ul.tabs-horiz a:focus {
+    background: var(--maho-box-shade-2) !important;
+    border-color: var(--maho-box-border-color) !important;
+    border-bottom-color: var(--maho-box-border-color) !important;
+}
+
+ul.tabs-horiz a.active {
+    background: var(--maho-box-background) !important;
+    border: 1px solid var(--maho-box-border-color) !important;
+    border-bottom: 1px solid var(--maho-box-background) !important;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 1;
+    outline: none !important;
+}
+
+/* Tab content area styling */
+ul.tabs-horiz + div,
+.tabs-horiz-container {
+    background: var(--maho-box-background);
+    border: 1px solid var(--maho-box-border-color);
+    border-top: none;
+    padding: 16px;
+    border-radius: 0 0 var(--maho-box-border-radius) var(--maho-box-border-radius);
+    margin-top: -1px;
+}
+
+/* Remove top border from tables inside tab containers */
+#grid_tab_content .grid table,
+#grid_tab_content table.data,
+div[id$="_content"] .grid table,
+div[id$="_content"] table.data,
+.grid-container .grid table {
+    border-top: none !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
 }
 
 ul.tabs {
