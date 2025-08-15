@@ -26,6 +26,14 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
 
         $orderConditions = [
             [
+                'label' => Mage::helper('customersegmentation')->__('Grand Total'),
+                'value' => 'customersegmentation/segment_condition_order_attributes|grand_total',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Order Status'),
+                'value' => 'customersegmentation/segment_condition_order_attributes|status',
+            ],
+            [
                 'label' => Mage::helper('customersegmentation')->__('Payment Method'),
                 'value' => 'customersegmentation/segment_condition_order_attributes|payment_method',
             ],
@@ -34,20 +42,24 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => 'customersegmentation/segment_condition_order_attributes|shipping_method',
             ],
             [
-                'label' => Mage::helper('customersegmentation')->__('Order Status'),
-                'value' => 'customersegmentation/segment_condition_order_attributes|status',
-            ],
-            [
                 'label' => Mage::helper('customersegmentation')->__('Store'),
                 'value' => 'customersegmentation/segment_condition_order_attributes|store_id',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Grand Total'),
-                'value' => 'customersegmentation/segment_condition_order_attributes|grand_total',
             ],
         ];
 
         $customerPersonalConditions = [
+            [
+                'label' => Mage::helper('customersegmentation')->__('Customer Group'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|group_id',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Customer Since'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|created_at',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Date of Birth'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|dob',
+            ],
             [
                 'label' => Mage::helper('customersegmentation')->__('Email'),
                 'value' => 'customersegmentation/segment_condition_customer_attributes|email',
@@ -57,33 +69,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => 'customersegmentation/segment_condition_customer_attributes|firstname',
             ],
             [
-                'label' => Mage::helper('customersegmentation')->__('Last Name'),
-                'value' => 'customersegmentation/segment_condition_customer_attributes|lastname',
-            ],
-            [
                 'label' => Mage::helper('customersegmentation')->__('Gender'),
                 'value' => 'customersegmentation/segment_condition_customer_attributes|gender',
             ],
             [
-                'label' => Mage::helper('customersegmentation')->__('Date of Birth'),
-                'value' => 'customersegmentation/segment_condition_customer_attributes|dob',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Customer Since'),
-                'value' => 'customersegmentation/segment_condition_customer_attributes|created_at',
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Customer Group'),
-                'value' => 'customersegmentation/segment_condition_customer_attributes|group_id',
+                'label' => Mage::helper('customersegmentation')->__('Last Name'),
+                'value' => 'customersegmentation/segment_condition_customer_attributes|lastname',
             ],
         ];
 
         $customerAddressConditions = [
             // These would be specific address attributes
-            [
-                'label' => Mage::helper('customersegmentation')->__('Street Address'),
-                'value' => 'customersegmentation/segment_condition_customer_address|street',
-            ],
             [
                 'label' => Mage::helper('customersegmentation')->__('City'),
                 'value' => 'customersegmentation/segment_condition_customer_address|city',
@@ -93,23 +89,59 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => 'customersegmentation/segment_condition_customer_address|country_id',
             ],
             [
+                'label' => Mage::helper('customersegmentation')->__('Postal Code'),
+                'value' => 'customersegmentation/segment_condition_customer_address|postcode',
+            ],
+            [
                 'label' => Mage::helper('customersegmentation')->__('State/Province'),
                 'value' => 'customersegmentation/segment_condition_customer_address|region',
             ],
             [
-                'label' => Mage::helper('customersegmentation')->__('Postal Code'),
-                'value' => 'customersegmentation/segment_condition_customer_address|postcode',
+                'label' => Mage::helper('customersegmentation')->__('Street Address'),
+                'value' => 'customersegmentation/segment_condition_customer_address|street',
             ],
         ];
 
         $cartConditions = [
             [
-                'label' => Mage::helper('customersegmentation')->__('Cart Total'),
-                'value' => 'customersegmentation/segment_condition_cart_attributes|total',
+                'label' => Mage::helper('customersegmentation')->__('Applied Promotion Rules'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|applied_rule_ids',
             ],
             [
-                'label' => Mage::helper('customersegmentation')->__('Cart Items Count'),
+                'label' => Mage::helper('customersegmentation')->__('Cart Created Date'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|created_at',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Cart Status'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|is_active',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Cart Updated Date'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|updated_at',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Coupon Code'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|coupon_code',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Grand Total'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|base_grand_total',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Items Count'),
                 'value' => 'customersegmentation/segment_condition_cart_attributes|items_count',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Items Quantity'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|items_qty',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Store'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|store_id',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Subtotal'),
+                'value' => 'customersegmentation/segment_condition_cart_attributes|base_subtotal',
             ],
         ];
 

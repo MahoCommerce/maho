@@ -22,7 +22,7 @@ class Mage_Rule_Block_Editable extends Mage_Core_Block_Abstract implements Varie
         $element->addClass('element-value-changer');
         $valueName = $element->getValueName();
 
-        if ($valueName === '') {
+        if ($valueName === '' || $valueName === null) {
             $valueName = '...';
         }
 
