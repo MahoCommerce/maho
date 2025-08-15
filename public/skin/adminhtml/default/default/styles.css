@@ -1502,6 +1502,15 @@ div[id$="_content"] table.data,
     border-top-right-radius: 0 !important;
 }
 
+/* Remove top border from chart/diagram content areas inside tabs */
+#diagram_tab_content,
+#diagram_tab_orders_content,
+#diagram_tab_amounts_content,
+div[id^="diagram_tab"][id$="_content"] {
+    border-top: none !important;
+    border-radius: 0;
+}
+
 ul.tabs {
     flex-direction: column;
     gap: 4px;
