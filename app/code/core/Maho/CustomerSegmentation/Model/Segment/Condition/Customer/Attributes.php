@@ -213,4 +213,27 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
+
+    #[\Override]
+    public function getAttributeName()
+    {
+        $attributeName = parent::getAttributeName();
+        if ($attributeName) {
+            return Mage::helper('customersegmentation')->__('Customer:') . ' ' . $attributeName;
+        }
+        return $attributeName;
+    }
+
+    #[\Override]
+    public function asString($format = ''): string
+    {
+        $attribute = $this->getAttribute();
+        $this->loadAttributeOptions();
+        $attributeOptions = $this->getAttributeOption();
+        $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
+
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        return Mage::helper('customersegmentation')->__('Customer:') . ' ' . $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
+    }
 }

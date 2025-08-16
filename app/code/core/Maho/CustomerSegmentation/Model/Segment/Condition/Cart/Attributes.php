@@ -150,6 +150,16 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
     }
 
     #[\Override]
+    public function getAttributeName()
+    {
+        $attributeName = parent::getAttributeName();
+        if ($attributeName) {
+            return Mage::helper('customersegmentation')->__('Cart:') . ' ' . $attributeName;
+        }
+        return $attributeName;
+    }
+
+    #[\Override]
     public function asString($format = ''): string
     {
         $attribute = $this->getAttribute();
@@ -159,6 +169,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();
-        return $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
+        return Mage::helper('customersegmentation')->__('Cart:') . ' ' . $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
     }
 }
