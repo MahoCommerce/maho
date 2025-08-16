@@ -97,6 +97,10 @@
         </reference>
     </adminhtml_system_config_edit>
     <adminhtml_dashboard_index>
+        <reference name="head">
+            <action method="addJs"><name>chartjs/chart.umd.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/dashboard.js</name></action>
+        </reference>
         <reference name="content">
             <block type="adminhtml/dashboard" name="dashboard">
                 <block type="adminhtml/store_switcher" name="store_switcher" as="store_switcher" template="store/switcher.phtml">
