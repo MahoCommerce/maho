@@ -23,6 +23,7 @@ namespace PHPSTORM_META {
         current_country,
         current_creditmemo,
         current_customer,
+        current_customer_segment,
         current_dataflow_session_id,
         current_email_template,
         current_entity_key,

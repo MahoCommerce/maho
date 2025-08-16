@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CustomerSegmentation
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <adminhtml_customersegmentation_index_index>
+        <reference name="content">
+            <block type="customersegmentation/adminhtml_segment" name="customersegmentation.segment" />
+        </reference>
+    </adminhtml_customersegmentation_index_index>
+
+    <adminhtml_customersegmentation_index_new>
+        <update handle="adminhtml_customersegmentation_index_edit" />
+    </adminhtml_customersegmentation_index_new>
+
+    <adminhtml_customersegmentation_index_edit>
+        <reference name="head">
+            <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name></action>
+        </reference>
+        <reference name="content">
+            <block type="customersegmentation/adminhtml_segment_edit" name="customersegmentation.segment.edit" />
+        </reference>
+        <reference name="left">
+            <block type="customersegmentation/adminhtml_segment_edit_tabs" name="customersegmentation.segment.edit.tabs" />
+        </reference>
+    </adminhtml_customersegmentation_index_edit>
+</layout>

@@ -249,12 +249,10 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
         return $opt;
     }
 
-    /**
-     * @return array
-     */
-    public function getAttributeName()
+    public function getAttributeName(): string
     {
-        return $this->getAttributeOption($this->getAttribute());
+        $attributeName = $this->getAttributeOption($this->getAttribute());
+        return is_string($attributeName) ? $attributeName : (string) $this->getAttribute();
     }
 
     /**
@@ -295,12 +293,10 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
         return $opt;
     }
 
-    /**
-     * @return array
-     */
-    public function getOperatorName()
+    public function getOperatorName(): string
     {
-        return $this->getOperatorOption($this->getOperator());
+        $operatorName = $this->getOperatorOption($this->getOperator());
+        return is_string($operatorName) ? $operatorName : (string) $this->getOperator();
     }
 
     /**
@@ -390,10 +386,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
         return $this->getData('value');
     }
 
-    /**
-     * @return string
-     */
-    public function getValueName()
+    public function getValueName(): string
     {
         $value = $this->getValue();
         if (is_null($value) || $value === '') {
@@ -425,7 +418,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
         if (!empty($valueArr)) {
             $value = implode(', ', $valueArr);
         }
-        return $value;
+        return (string) $value;
     }
 
     /**
