@@ -15,10 +15,6 @@ class Maho_CustomerSegmentation_Model_Observer_PriceRule
 {
     public function addSegmentConditionToSalesRule(Varien_Event_Observer $observer): void
     {
-        if (!Mage::helper('customersegmentation')->isPriceRuleIntegrationEnabled()) {
-            return;
-        }
-
         $additional = $observer->getAdditional();
         $conditions = $additional->getConditions();
 

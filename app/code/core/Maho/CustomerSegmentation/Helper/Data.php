@@ -38,15 +38,6 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
         return (int) Mage::getStoreConfig('customer_segmentation/performance/cache_lifetime', $store);
     }
 
-    public function isPriceRuleIntegrationEnabled(mixed $store = null): bool
-    {
-        return Mage::getStoreConfigFlag('customer_segmentation/integrations/enable_price_rules', $store);
-    }
-
-    public function isNewsletterIntegrationEnabled(mixed $store = null): bool
-    {
-        return Mage::getStoreConfigFlag('customer_segmentation/integrations/enable_newsletter', $store);
-    }
 
     public function getCustomerSegmentIds(int $customerId, ?int $websiteId = null): array
     {

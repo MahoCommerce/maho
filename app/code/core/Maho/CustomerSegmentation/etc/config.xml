@@ -118,10 +118,6 @@
                 <enable_caching>1</enable_caching>
                 <cache_lifetime>3600</cache_lifetime>
             </performance>
-            <integrations>
-                <enable_price_rules>1</enable_price_rules>
-                <enable_newsletter>1</enable_newsletter>
-            </integrations>
         </customer_segmentation>
     </default>
 </config>
