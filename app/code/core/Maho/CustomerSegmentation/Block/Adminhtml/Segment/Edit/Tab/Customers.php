@@ -35,13 +35,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Customers exten
             ->addAttributeToSelect('group_id');
 
         if ($segment && $segment->getId()) {
-            $customerIds = $segment->getMatchingCustomerIds();
-            if (!empty($customerIds)) {
-                $collection->addFieldToFilter('entity_id', ['in' => $customerIds]);
-            } else {
-                // No customers match, show empty grid
-                $collection->addFieldToFilter('entity_id', ['in' => [0]]);
-            }
+            $segment->getResource()->applySegmentToCollection($segment, $collection);
         } else {
             // New segment, show empty grid
             $collection->addFieldToFilter('entity_id', ['in' => [0]]);

@@ -35,7 +35,7 @@ class CronList extends BaseMahoCommand
         $jobs = [];
         $cronNode = Mage::getConfig()->getNode('crontab/jobs');
         $defaultCronNode = Mage::getConfig()->getNode('default/crontab/jobs');
-        
+
         if ($cronNode) {
             $jobs = array_merge($jobs, $cronNode->asArray());
         }
