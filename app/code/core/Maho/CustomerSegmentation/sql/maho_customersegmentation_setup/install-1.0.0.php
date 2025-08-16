@@ -178,5 +178,4 @@ $table = $installer->getConnection()
     ->setComment('Customer Segment Members');
 $installer->getConnection()->createTable($table);
 
-
 $installer->endSetup();
