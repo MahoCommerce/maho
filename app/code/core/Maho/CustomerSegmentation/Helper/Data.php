@@ -28,17 +28,6 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
         return (int) Mage::getStoreConfig('customer_segmentation/general/batch_size', $store);
     }
 
-    public function isCachingEnabled(mixed $store = null): bool
-    {
-        return Mage::getStoreConfigFlag('customer_segmentation/performance/enable_caching', $store);
-    }
-
-    public function getCacheLifetime(mixed $store = null): int
-    {
-        return (int) Mage::getStoreConfig('customer_segmentation/performance/cache_lifetime', $store);
-    }
-
-
     public function getCustomerSegmentIds(int $customerId, ?int $websiteId = null): array
     {
         if (!$this->isEnabled()) {

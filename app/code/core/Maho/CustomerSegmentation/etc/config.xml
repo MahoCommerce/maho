@@ -114,10 +114,6 @@
                 <refresh_frequency>24</refresh_frequency>
                 <batch_size>1000</batch_size>
             </general>
-            <performance>
-                <enable_caching>1</enable_caching>
-                <cache_lifetime>3600</cache_lifetime>
-            </performance>
         </customer_segmentation>
     </default>
 </config>

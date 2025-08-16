@@ -49,8 +49,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     public const MODE_AUTO   = 'auto';
     public const MODE_MANUAL = 'manual';
 
-    public const CACHE_TAG = 'CUSTOMER_SEGMENT';
-
     /**
      * Event prefix for observers
      * @var string
@@ -179,8 +177,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
                 'segment' => $this,
                 'matched_customers' => $matchedCustomers,
             ]);
-
-            $this->cleanCache();
         } catch (Exception $e) {
             $this->setRefreshStatus(self::STATUS_ERROR)->save();
             Mage::logException($e);
@@ -196,38 +192,11 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             return false;
         }
 
-        // Check cache first
-        $cacheKey = $this->_getCacheKey($customerId, $websiteId);
-        $cache = Mage::app()->getCache();
-        $cachedResult = $cache->load($cacheKey);
-
-        if ($cachedResult !== false) {
-            return (bool) $cachedResult;
-        }
-
         // Check database
         $resource = $this->getResource();
-        $isInSegment = $resource->isCustomerInSegment($this->getId(), $customerId, $websiteId);
-
-        // Cache result
-        if (Mage::getStoreConfigFlag('customer_segmentation/performance/enable_caching')) {
-            $lifetime = (int) Mage::getStoreConfig('customer_segmentation/performance/cache_lifetime');
-            $cache->save($isInSegment ? '1' : '0', $cacheKey, [self::CACHE_TAG], $lifetime);
-        }
-
-        return $isInSegment;
+        return $resource->isCustomerInSegment($this->getId(), $customerId, $websiteId);
     }
 
-    protected function _getCacheKey(int $customerId, ?int $websiteId = null): string
-    {
-        return sprintf('%s_%d_%d_%d', self::CACHE_TAG, $this->getId(), $customerId, (int) $websiteId);
-    }
-
-    public function cleanCache(): self
-    {
-        Mage::app()->getCache()->clean([self::CACHE_TAG]);
-        return $this;
-    }
 
     public function getCustomersCollection(): Mage_Customer_Model_Resource_Customer_Collection
     {
@@ -328,22 +297,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this;
     }
 
-    #[\Override]
-    protected function _afterSave(): self
-    {
-        parent::_afterSave();
-        $this->cleanCache();
-        return $this;
-    }
-
-    #[\Override]
-    protected function _afterDelete(): self
-    {
-        parent::_afterDelete();
-        $this->cleanCache();
-        return $this;
-    }
-
     public function getRefreshModeOptions(): array
     {
         return [
@@ -367,9 +320,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     {
         // Ensure conditions are properly reset before loading new data
         $this->unsConditions();
-
         parent::loadPost($data);
-
         return $this;
     }
 }

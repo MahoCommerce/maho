@@ -116,6 +116,18 @@ $table = $installer->getConnection()
         'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
     ], 'Updated At')
     ->addIndex(
+        $installer->getIdxName('customersegmentation/segment_customer', ['segment_id', 'customer_id', 'website_id']),
+        ['segment_id', 'customer_id', 'website_id'],
+    )
+    ->addIndex(
+        $installer->getIdxName('customersegmentation/segment_customer', ['customer_id', 'website_id']),
+        ['customer_id', 'website_id'],
+    )
+    ->addIndex(
+        $installer->getIdxName('customersegmentation/segment_customer', ['segment_id', 'website_id']),
+        ['segment_id', 'website_id'],
+    )
+    ->addIndex(
         $installer->getIdxName('customersegmentation/segment_customer', ['customer_id']),
         ['customer_id'],
     )
@@ -358,5 +370,59 @@ $installer->getConnection()->addIndex(
     ),
     ['customer_id', 'is_active', 'updated_at', 'grand_total'],
 );
+
+/**
+ * Add composite index for newsletter subscription status checks
+ */
+if ($installer->getConnection()->isTableExists($installer->getTable('newsletter/subscriber'))) {
+    $installer->getConnection()->addIndex(
+        $installer->getTable('newsletter/subscriber'),
+        $installer->getIdxName(
+            'newsletter/subscriber',
+            ['customer_id', 'subscriber_status', 'store_id'],
+        ),
+        ['customer_id', 'subscriber_status', 'store_id'],
+    );
+}
+
+/**
+ * Add index for customer address lookups by customer
+ */
+$installer->getConnection()->addIndex(
+    $installer->getTable('customer/address_entity'),
+    $installer->getIdxName(
+        'customer/address_entity',
+        ['parent_id', 'is_active'],
+    ),
+    ['parent_id', 'is_active'],
+);
+
+/**
+ * Add index for reports_viewed_product_index queries
+ */
+if ($installer->getConnection()->isTableExists($installer->getTable('reports/viewed_product_index'))) {
+    $installer->getConnection()->addIndex(
+        $installer->getTable('reports/viewed_product_index'),
+        $installer->getIdxName(
+            'reports/viewed_product_index',
+            ['customer_id', 'added_at'],
+        ),
+        ['customer_id', 'added_at'],
+    );
+}
+
+/**
+ * Add index for wishlist item queries
+ */
+if ($installer->getConnection()->isTableExists($installer->getTable('wishlist/item'))) {
+    $installer->getConnection()->addIndex(
+        $installer->getTable('wishlist/item'),
+        $installer->getIdxName(
+            'wishlist/item',
+            ['wishlist_id', 'product_id', 'added_at'],
+        ),
+        ['wishlist_id', 'product_id', 'added_at'],
+    );
+}
 
 $installer->endSetup();
