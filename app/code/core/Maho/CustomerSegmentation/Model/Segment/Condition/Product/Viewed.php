@@ -224,13 +224,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
     }
 
     #[\Override]
-    public function getAttributeName()
+    public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();
-        if ($attributeName) {
-            return Mage::helper('customersegmentation')->__('Viewed:') . ' ' . $attributeName;
-        }
-        return $attributeName;
+        return Mage::helper('customersegmentation')->__('Viewed:') . ' ' . $attributeName;
     }
 
     #[\Override]
@@ -246,6 +243,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();
-        return $attributeLabel . ' ' . (is_string($operatorName) ? $operatorName : '') . ' ' . (is_string($valueName) ? $valueName : '');
+        return $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 }

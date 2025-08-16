@@ -93,12 +93,8 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
         return $this->_cachedOperatorSelectOptionsCache;
     }
 
-    /**
-     * Retrieve an operator name
-     * @return string
-     */
     #[\Override]
-    public function getOperatorName()
+    public function getOperatorName(): string
     {
         return $this->getOperator() && array_key_exists($this->getOperator(), $this->_operatorSelectOptionsHash)
             ? $this->_operatorSelectOptionsHash[$this->getOperator()]
