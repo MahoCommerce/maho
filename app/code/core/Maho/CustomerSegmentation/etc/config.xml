@@ -20,9 +20,6 @@
                     <segment_customer>
                         <table>customer_segment_customer</table>
                     </segment_customer>
-                    <segment_event>
-                        <table>customer_segment_event</table>
-                    </segment_event>
                 </entities>
             </customersegmentation_resource>
         </models>
@@ -94,14 +91,6 @@
                     <model>customersegmentation/cron::refreshSegments</model>
                 </run>
             </customersegmentation_refresh_segments>
-            <customersegmentation_cleanup_events>
-                <schedule>
-                    <cron_expr>0 3 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>customersegmentation/cron::cleanupEvents</model>
-                </run>
-            </customersegmentation_cleanup_events>
         </jobs>
     </crontab>
     <default>

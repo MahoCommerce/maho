@@ -77,34 +77,4 @@ class Maho_CustomerSegmentation_Model_Cron
         Mage::log('Segment refresh completed.', null, 'customer_segmentation.log');
     }
 
-    /**
-     * Clean up old event records
-     */
-    public function cleanupEvents(): void
-    {
-        if (!Mage::helper('customersegmentation')->isEnabled()) {
-            return;
-        }
-
-        try {
-            $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
-            $table = Mage::getSingleton('core/resource')->getTableName('customersegmentation/segment_event');
-
-            // Remove processed events older than 30 days
-            $deleteCount = $connection->delete($table, [
-                'processed = ?' => 1,
-                'created_at < ?' => date('Y-m-d H:i:s', strtotime('-30 days')),
-            ]);
-
-            Mage::log(sprintf('Cleaned up %d old event records.', $deleteCount), null, 'customer_segmentation.log');
-
-        } catch (Exception $e) {
-            Mage::log(
-                sprintf('Error during event cleanup: %s', $e->getMessage()),
-                Mage::LOG_ERROR,
-                'customer_segmentation.log',
-            );
-            Mage::logException($e);
-        }
-    }
 }
