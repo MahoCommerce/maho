@@ -98,18 +98,6 @@ class Maho_CustomerSegmentation_Model_Cron
 
             Mage::log(sprintf('Cleaned up %d old event records.', $deleteCount), null, 'customer_segmentation.log');
 
-            // Also cleanup guest records older than configured period (default 180 days)
-            $guestTable = Mage::getSingleton('core/resource')->getTableName('customersegmentation/segment_guest');
-            $guestRetentionDays = 180; // Could be made configurable
-
-            $guestDeleteCount = $connection->delete($guestTable, [
-                'last_visit_at < ?' => date('Y-m-d H:i:s', strtotime("-{$guestRetentionDays} days")),
-            ]);
-
-            if ($guestDeleteCount > 0) {
-                Mage::log(sprintf('Cleaned up %d old guest records.', $guestDeleteCount), null, 'customer_segmentation.log');
-            }
-
         } catch (Exception $e) {
             Mage::log(
                 sprintf('Error during event cleanup: %s', $e->getMessage()),

@@ -20,9 +20,6 @@
                     <segment_customer>
                         <table>customer_segment_customer</table>
                     </segment_customer>
-                    <segment_guest>
-                        <table>customer_segment_guest</table>
-                    </segment_guest>
                     <segment_event>
                         <table>customer_segment_event</table>
                     </segment_event>
