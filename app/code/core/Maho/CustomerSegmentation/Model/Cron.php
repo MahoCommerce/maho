@@ -15,19 +15,10 @@ class Maho_CustomerSegmentation_Model_Cron
 {
     public function refreshSegments(): void
     {
-        $helper = Mage::helper('customersegmentation');
-        $refreshFrequency = $helper->getRefreshFrequency();
-
+        // Refresh all active segments with auto refresh mode
         $collection = Mage::getResourceModel('customersegmentation/segment_collection')
             ->addIsActiveFilter()
-            ->addFieldToFilter('refresh_mode', Maho_CustomerSegmentation_Model_Segment::MODE_AUTO)
-            ->addFieldToFilter(
-                ['last_refresh_at', 'last_refresh_at'],
-                [
-                    ['lt' => Mage::app()->getLocale()->utcDate(null, "-{$refreshFrequency} hours", false, Mage_Core_Model_Locale::DATETIME_FORMAT)],
-                    ['null' => true],
-                ],
-            );
+            ->addFieldToFilter('refresh_mode', Maho_CustomerSegmentation_Model_Segment::MODE_AUTO);
 
         Mage::log(
             sprintf('Starting segment refresh. Found %d segments to refresh.', $collection->getSize()),

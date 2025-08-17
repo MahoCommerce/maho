@@ -41,18 +41,6 @@
                             </customersegmentation>
                         </children>
                     </customer>
-                    <system>
-                        <children>
-                            <config>
-                                <children>
-                                    <customer_segmentation translate="title" module="customersegmentation">
-                                        <title>Customer Segmentation Configuration</title>
-                                        <sort_order>300</sort_order>
-                                    </customer_segmentation>
-                                </children>
-                            </config>
-                        </children>
-                    </system>
                 </children>
             </admin>
         </resources>

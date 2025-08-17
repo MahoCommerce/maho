@@ -93,11 +93,4 @@
             </customersegmentation_refresh_segments>
         </jobs>
     </crontab>
-    <default>
-        <customer_segmentation>
-            <general>
-                <refresh_frequency>24</refresh_frequency>
-            </general>
-        </customer_segmentation>
-    </default>
 </config>
