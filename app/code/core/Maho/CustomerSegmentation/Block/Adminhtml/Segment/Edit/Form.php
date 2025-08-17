@@ -26,11 +26,4 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Form extends Mage_A
         $this->setForm($form);
         return parent::_prepareForm();
     }
-
-    #[\Override]
-    protected function _prepareLayout(): self
-    {
-        parent::_prepareLayout();
-        return $this;
-    }
 }

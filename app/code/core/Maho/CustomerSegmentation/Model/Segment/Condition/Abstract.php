@@ -110,19 +110,6 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return Mage::getSingleton('core/resource')->getTableName('sales/quote');
     }
 
-    protected function _createDateRangeSubselect(Varien_Db_Adapter_Interface $adapter, string $table, string $dateField, string $joinField, int $days, string $operator): Varien_Db_Select
-    {
-        $select = $adapter->select()
-            ->from($table, [$joinField])
-            ->where(
-                "DATEDIFF(?, {$dateField}) {$operator} ?",
-                Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT),
-                $days,
-            );
-
-        return $select;
-    }
-
     #[\Override]
     public function asHtml(): string
     {

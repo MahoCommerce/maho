@@ -174,7 +174,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
             ->where($this->_buildSqlCondition(
                 $adapter,
-                $this->_getBirthdayDiffSql($adapter),
+                $this->getBirthdayDiffSql($adapter),
                 $operator,
                 $value,
             ));
@@ -182,7 +182,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _getBirthdayDiffSql(Varien_Db_Adapter_Interface $adapter): string
+    protected function getBirthdayDiffSql(Varien_Db_Adapter_Interface $adapter): string
     {
         $currentDate = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT);
         return "DATEDIFF(DATE_ADD(attr.value, INTERVAL YEAR('{$currentDate}') - YEAR(attr.value) + IF(DAYOFYEAR('{$currentDate}') > DAYOFYEAR(attr.value), 1, 0) YEAR), '{$currentDate}')";

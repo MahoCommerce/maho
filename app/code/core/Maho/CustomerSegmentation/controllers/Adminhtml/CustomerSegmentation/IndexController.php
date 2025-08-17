@@ -311,34 +311,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         );
     }
 
-    public function newConditionAttributeAction(): void
-    {
-        $id = $this->getRequest()->getParam('id');
-        $attribute = $this->getRequest()->getParam('attribute');
-        $type = $this->getRequest()->getParam('type');
-
-        $model = Mage::getModel($type);
-        if (!$model) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        $model->setId($id)
-            ->setType($type)
-            ->setAttribute($attribute)
-            ->setRule(Mage::getModel('customersegmentation/segment'))
-            ->setPrefix('conditions');
-
-        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
-            $model->setJsFormObject($this->getRequest()->getParam('form'));
-            $html = $model->getValueElementHtml();
-        } else {
-            $html = '';
-        }
-
-        $this->getResponse()->setBody($html);
-    }
-
     #[\Override]
     protected function _isAllowed(): bool
     {
