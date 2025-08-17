@@ -28,16 +28,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </refresh_frequency>
-                        <batch_size translate="label comment">
-                            <label>Batch Size for Processing</label>
-                            <comment>Number of customers to process in each batch</comment>
-                            <frontend_type>text</frontend_type>
-                            <validate>validate-digits validate-greater-than-zero</validate>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </batch_size>
                     </fields>
                 </general>
             </groups>
