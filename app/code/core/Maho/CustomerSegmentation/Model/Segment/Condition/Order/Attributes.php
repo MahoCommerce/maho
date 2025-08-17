@@ -283,7 +283,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             ->from(['o' => $this->_getOrderTable()], ['customer_id', 'last_order' => 'MAX(o.created_at)'])
             ->where('o.customer_id IS NOT NULL')
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'DATEDIFF(NOW(), last_order)', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_order)", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

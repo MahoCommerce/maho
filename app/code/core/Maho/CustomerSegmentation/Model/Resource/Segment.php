@@ -91,8 +91,8 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
                     'segment_id'  => $segmentId,
                     'customer_id' => $customerId,
                     'website_id'  => $websiteId,
-                    'added_at'    => Mage::getSingleton('core/locale')->now(),
-                    'updated_at'  => Mage::getSingleton('core/locale')->now(),
+                    'added_at'    => Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT),
+                    'updated_at'  => Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT),
                 ];
             }
             $adapter->insertMultiple($segmentCustomerTable, $insertData);

@@ -97,7 +97,7 @@ class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_C
         $this->addFieldToFilter(
             'last_refresh_at',
             [
-                ['lt' => $this->getConnection()->getDateSubSql('NOW()', $hoursAgo, Varien_Db_Adapter_Interface::INTERVAL_HOUR)],
+                ['lt' => Mage::app()->getLocale()->utcDate(null, "-{$hoursAgo} hours", false, Mage_Core_Model_Locale::DATETIME_FORMAT)],
                 ['null' => true],
             ],
         );

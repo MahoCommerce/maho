@@ -28,7 +28,7 @@ class Maho_CustomerSegmentation_Model_Cron
             ->addFieldToFilter(
                 ['last_refresh_at', 'last_refresh_at'],
                 [
-                    ['lt' => date('Y-m-d H:i:s', strtotime("-{$refreshFrequency} hours"))],
+                    ['lt' => Mage::app()->getLocale()->utcDate(null, "-{$refreshFrequency} hours", false, Mage_Core_Model_Locale::DATETIME_FORMAT)],
                     ['null' => true],
                 ],
             );

@@ -169,7 +169,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
             $this->setMatchedCustomersCount(count($matchedCustomers))
-                ->setLastRefreshAt(Mage::getSingleton('core/locale')->now())
+                ->setLastRefreshAt(Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT))
                 ->setRefreshStatus(self::STATUS_COMPLETED)
                 ->save();
 

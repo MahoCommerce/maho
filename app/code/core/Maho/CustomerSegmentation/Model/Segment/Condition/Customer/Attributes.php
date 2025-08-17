@@ -158,7 +158,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
     protected function _buildDaysSinceCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
-        return $this->_buildSqlCondition($adapter, "DATEDIFF(NOW(), {$field})", $operator, $value);
+        $currentDate = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT);
+        return $this->_buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', {$field})", $operator, $value);
     }
 
     protected function _buildDaysUntilBirthdayCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
@@ -173,12 +174,18 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
             ->where($this->_buildSqlCondition(
                 $adapter,
-                'DATEDIFF(DATE_ADD(attr.value, INTERVAL YEAR(NOW()) - YEAR(attr.value) + IF(DAYOFYEAR(NOW()) > DAYOFYEAR(attr.value), 1, 0) YEAR), NOW())',
+                $this->_getBirthdayDiffSql($adapter),
                 $operator,
                 $value,
             ));
 
         return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function _getBirthdayDiffSql(Varien_Db_Adapter_Interface $adapter): string
+    {
+        $currentDate = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT);
+        return "DATEDIFF(DATE_ADD(attr.value, INTERVAL YEAR('{$currentDate}') - YEAR(attr.value) + IF(DAYOFYEAR('{$currentDate}') > DAYOFYEAR(attr.value), 1, 0) YEAR), '{$currentDate}')";
     }
 
     protected function _buildLifetimeSalesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string

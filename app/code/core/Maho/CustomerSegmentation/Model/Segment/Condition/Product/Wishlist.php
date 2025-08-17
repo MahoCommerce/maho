@@ -208,7 +208,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
             ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id', 'last_added' => 'MAX(wi.added_at)'])
             ->where('w.customer_id IS NOT NULL')
             ->group('w.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'DATEDIFF(NOW(), last_added)', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_added)", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

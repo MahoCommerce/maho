@@ -115,7 +115,8 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         $select = $adapter->select()
             ->from($table, [$joinField])
             ->where(
-                "DATEDIFF(NOW(), {$dateField}) {$operator} ?",
+                "DATEDIFF(?, {$dateField}) {$operator} ?",
+                Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT),
                 $days,
             );
 
