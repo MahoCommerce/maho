@@ -96,7 +96,6 @@
     <default>
         <customer_segmentation>
             <general>
-                <enabled>1</enabled>
                 <refresh_frequency>24</refresh_frequency>
                 <batch_size>1000</batch_size>
             </general>

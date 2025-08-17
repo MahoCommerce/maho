@@ -15,10 +15,6 @@ class Maho_CustomerSegmentation_Model_Cron
 {
     public function refreshSegments(): void
     {
-        if (!Mage::helper('customersegmentation')->isEnabled()) {
-            return;
-        }
-
         $helper = Mage::helper('customersegmentation');
         $refreshFrequency = $helper->getRefreshFrequency();
 
