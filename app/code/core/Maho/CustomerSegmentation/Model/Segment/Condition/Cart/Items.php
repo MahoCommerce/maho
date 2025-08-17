@@ -204,7 +204,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
     public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();
-        return Mage::helper('customersegmentation')->__('Cart:') . ' ' . $attributeName;
+        return Mage::helper('customersegmentation')->__('Cart') . ':' . ' ' . $attributeName;
     }
 
     #[\Override]
@@ -215,7 +215,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         $attributeOptions = $this->getAttributeOption();
         $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
-        $attributeLabel = Mage::helper('customersegmentation')->__('Cart:') . ' ' . $attributeLabel;
+        $attributeLabel = Mage::helper('customersegmentation')->__('Cart') . ':' . ' ' . $attributeLabel;
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();

@@ -197,7 +197,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();
-        return Mage::helper('customersegmentation')->__('Order:') . ' ' . $attributeName;
+        return Mage::helper('customersegmentation')->__('Order') . ':' . ' ' . $attributeName;
     }
 
     #[\Override]
@@ -211,7 +211,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();
-        return Mage::helper('customersegmentation')->__('Order:') . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
+        return Mage::helper('customersegmentation')->__('Order') . ':' . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 
     #[\Override]

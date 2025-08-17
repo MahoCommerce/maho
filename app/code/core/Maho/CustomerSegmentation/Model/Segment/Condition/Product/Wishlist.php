@@ -258,7 +258,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
     public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();
-        return Mage::helper('customersegmentation')->__('Wishlist:') . ' ' . $attributeName;
+        return Mage::helper('customersegmentation')->__('Wishlist') . ':' . ' ' . $attributeName;
     }
 
     #[\Override]
@@ -270,7 +270,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
             ? $attributeOptions[$attribute]
             : (string) $attribute;
 
-        $attributeLabel = Mage::helper('customersegmentation')->__('Wishlist:') . ' ' . $attributeLabel;
+        $attributeLabel = Mage::helper('customersegmentation')->__('Wishlist') . ':' . ' ' . $attributeLabel;
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();

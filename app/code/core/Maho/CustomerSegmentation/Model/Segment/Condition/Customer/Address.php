@@ -135,7 +135,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
     public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();
-        return Mage::helper('customersegmentation')->__('Address:') . ' ' . $attributeName;
+        return Mage::helper('customersegmentation')->__('Address') . ': ' . $attributeName;
     }
 
     #[\Override]
@@ -148,6 +148,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();
-        return Mage::helper('customersegmentation')->__('Address:') . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
+        return Mage::helper('customersegmentation')->__('Address') . ': ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 }

@@ -133,7 +133,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
     public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();
-        return Mage::helper('customersegmentation')->__('Newsletter:') . ' ' . $attributeName;
+        return Mage::helper('customersegmentation')->__('Newsletter') . ':' . ' ' . $attributeName;
     }
 
     #[\Override]
@@ -146,6 +146,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
 
         $operatorName = $this->getOperatorName();
         $valueName = $this->getValueName();
-        return Mage::helper('customersegmentation')->__('Newsletter:') . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
+        return Mage::helper('customersegmentation')->__('Newsletter') . ':' . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 }
