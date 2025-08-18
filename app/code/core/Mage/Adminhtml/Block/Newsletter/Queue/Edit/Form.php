@@ -185,6 +185,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
             ]);
         }
 
+        $form->setUseContainer(true);
         $this->setForm($form);
         return $this;
     }
