@@ -14,11 +14,10 @@ namespace MahoCLI\Commands;
 
 use Exception;
 use Mage;
-use Mage_Core_Model_Resource_Db_Abstract;
-use Sokil\IsoCodes\IsoCodesFactory;
+use Mage_Core_Model_Resource;
+use Varien_Db_Adapter_Interface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -31,29 +30,6 @@ use Symfony\Component\Process\Process;
 )]
 class SysDirectoryRegionsImport extends BaseMahoCommand
 {
-    private const SUBDIVISION_TYPES_TO_IMPORT = [
-        'Metropolitan city',
-        'Province',
-        'Free municipal consortium',
-        'State',
-        'Territory', 
-        'District',
-        'Province',
-        'Prefecture',
-        'County',
-        'Municipality',
-        'Commune',
-        'Department',
-        'Oblast',
-        'Krai',
-        'Autonomous region',
-        'Autonomous district',
-        'Federal city',
-        'Republic',
-        'Governorate',
-        'Emirate',
-    ];
-
     #[\Override]
     protected function configure(): void
     {
@@ -84,26 +60,26 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         // Check if this is a re-execution after package installation
         $isReExecution = getenv('MAHO_ISO_REEXEC') === 'true';
         $packagesInstalledByUs = getenv('MAHO_ISO_INSTALLED') === 'true';
-        
+
         // Check if required packages are available
         $packagesWereAlreadyPresent = class_exists('Sokil\IsoCodes\IsoCodesFactory');
-        
+
         if (!$packagesWereAlreadyPresent) {
             $output->writeln('<info>Installing required ISO codes packages...</info>');
-            
+
             // Install packages
             if (!$this->installIsoPackages($output)) {
                 return Command::FAILURE;
             }
-            
+
             // Re-execute the command with packages installed
             $output->writeln('<info>Re-executing command with packages installed...</info>');
             $exitCode = $this->reExecuteCommand($input, $output, true);
-            
+
             // Clean up packages after re-execution completes
             $output->writeln('<info>Removing temporary ISO codes packages...</info>');
             $this->removeIsoPackages($output);
-            
+
             return $exitCode;
         }
 
@@ -121,20 +97,20 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         if ($isoCountryCode !== $countryCode) {
             $output->writeln("<info>Using ISO code: $isoCountryCode</info>");
         }
-        $output->writeln("<info>Locales: " . implode(', ', $locales) . "</info>");
-        $output->writeln("<info>Strategy: " . ($importRegions ? 'All subdivisions' : 'Leaf subdivisions only') . "</info>");
-        
+        $output->writeln('<info>Locales: ' . implode(', ', $locales) . '</info>');
+        $output->writeln('<info>Strategy: ' . ($importRegions ? 'All subdivisions' : 'Leaf subdivisions only') . '</info>');
+
         if ($dryRun) {
             $output->writeln('<comment>DRY RUN MODE - No changes will be made</comment>');
         }
 
         try {
             // Get subdivisions from ISO codes
-            $isoCodes = new IsoCodesFactory();
-            $subDivisions = $isoCodes->getSubdivisions();
-            
+            $isoCodes = new \Sokil\IsoCodes\IsoCodesFactory(); // @phpstan-ignore class.notFound
+            $subDivisions = $isoCodes->getSubdivisions(); // @phpstan-ignore class.notFound
+
             $subdivisions = $this->collectSubdivisions($subDivisions, $isoCountryCode, $importRegions, $output);
-            
+
             if (empty($subdivisions)) {
                 $output->writeln("<comment>No subdivisions found for $countryCode</comment>");
                 // Clean up packages if we installed them
@@ -143,15 +119,15 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                 }
                 return Command::SUCCESS;
             }
-            
-            $output->writeln("  Found " . count($subdivisions) . " subdivisions to import");
-            
+
+            $output->writeln('  Found ' . count($subdivisions) . ' subdivisions to import');
+
             // Get localized names for each locale
             $subdivisionsByLocale = [];
             foreach ($locales as $mahoLocale) {
                 $subdivisionsByLocale[$mahoLocale] = $this->getLocalizedNames($subdivisions, $mahoLocale, $output);
             }
-            
+
         } catch (Exception $e) {
             $output->writeln("<error>Failed to load ISO subdivision data: {$e->getMessage()}</error>");
             // Clean up packages if we installed them
@@ -162,49 +138,41 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         }
 
         // Process imports
-        $output->writeln("\n<info>Processing " . count($subdivisions) . " regions...</info>");
-        
-        if (!$dryRun) {
-            $progressBar = new ProgressBar($output, count($subdivisions));
-            $progressBar->start();
-        }
+        $output->writeln("\n<info>Processing " . count($subdivisions) . ' regions...</info>');
 
         $imported = 0;
         $updated = 0;
         $skipped = 0;
-        
+
         $importRecords = [];
         $updateRecords = [];
         $skipRecords = [];
-        
-        /** @var Mage_Core_Model_Resource_Db_Abstract $resource */
+
+        /** @var Mage_Core_Model_Resource $resource */
         $resource = Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_write');
-        
+
         foreach ($subdivisions as $subdivision) {
-            if (!$dryRun) {
-                $progressBar->advance();
-            }
-            
+
             $code = $subdivision['code'];
             $defaultName = $subdivision['name'];
-            
+
             // Check if region already exists
             $existingRegion = Mage::getModel('directory/region')
                 ->loadByCode($code, $countryCode);
-            
+
             if ($existingRegion->getId()) {
                 if (!$updateExisting) {
                     $skipRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingRegion->getDefaultName()];
                     $skipped++;
                     continue;
                 }
-                
+
                 // Update existing region
                 if (!$dryRun) {
                     $existingRegion->setDefaultName($defaultName);
                     $existingRegion->save();
-                    
+
                     // Update localized names
                     foreach ($subdivisionsByLocale as $locale => $localizedNames) {
                         if (isset($localizedNames[$code])) {
@@ -212,7 +180,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                                 $existingRegion->getId(),
                                 $locale,
                                 $localizedNames[$code],
-                                $connection
+                                $connection,
                             );
                         }
                     }
@@ -234,7 +202,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                     $region->setCode($code);
                     $region->setDefaultName($defaultName);
                     $region->save();
-                    
+
                     // Insert localized names
                     foreach ($subdivisionsByLocale as $locale => $localizedNames) {
                         if (isset($localizedNames[$code])) {
@@ -242,7 +210,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                                 $region->getId(),
                                 $locale,
                                 $localizedNames[$code],
-                                $connection
+                                $connection,
                             );
                         }
                     }
@@ -253,22 +221,12 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                             $localizedInfo[$locale] = $localizedNames[$code];
                         }
                     }
-                    $importRecords[] = ['code' => $code, 'name' => $defaultName, 'type' => $subdivision['type'], 'locales' => $localizedInfo];
+                    $importRecords[] = ['code' => $code, 'name' => $defaultName, 'locales' => $localizedInfo];
                 }
                 $imported++;
             }
         }
-        
-        if (!$dryRun) {
-            $progressBar->finish();
-            $output->writeln('');
-            
-            // Clear caches
-            $output->writeln('Clearing caches...');
-            Mage::app()->getCacheInstance()->cleanType('config');
-            Mage::app()->getCacheInstance()->cleanType('block_html');
-        }
-        
+
         // Summary
         $output->writeln("\n<info>Import Summary:</info>");
         $table = new Table($output);
@@ -278,7 +236,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $table->addRow(['Skipped', $skipped]);
         $table->addRow(['<info>Total</info>', '<info>' . ($imported + $updated + $skipped) . '</info>']);
         $table->render();
-        
+
         if ($dryRun) {
             $this->showDryRunDetails($output, $importRecords, $updateRecords, $skipRecords);
         }
@@ -292,45 +250,45 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    private function collectSubdivisions($subDivisions, string $countryCode, bool $importRegions, OutputInterface $output): array
+    private function collectSubdivisions(\Sokil\IsoCodes\Database\SubdivisionsInterface $subDivisions, string $countryCode, bool $importRegions, OutputInterface $output): array // @phpstan-ignore class.notFound
     {
         // First pass: collect all subdivisions and analyze the hierarchy
         $allSubdivisions = $this->getAllSubdivisions($subDivisions, $countryCode);
-        
+
         if (empty($allSubdivisions)) {
             return [];
         }
-        
+
         // Second pass: determine what to import based on hierarchy analysis
         return $this->filterSubdivisionsByHierarchy($allSubdivisions, $importRegions, $output);
     }
 
-    private function getAllSubdivisions($subDivisions, string $countryCode): array
+    private function getAllSubdivisions(\Sokil\IsoCodes\Database\SubdivisionsInterface $subDivisions, string $countryCode): array // @phpstan-ignore class.notFound
     {
         $allSubdivisions = [];
         $seen = [];
-        
+
         // Check numeric codes (1-999)
         for ($i = 1; $i <= 999; $i++) {
             $testCodes = [
                 sprintf('%s-%02d', $countryCode, $i),  // IT-01, IT-02, etc.
                 sprintf('%s-%03d', $countryCode, $i),  // US-001, etc.
             ];
-            
+
             foreach ($testCodes as $testCode) {
                 $this->tryAddSubdivision($subDivisions, $testCode, $allSubdivisions, $seen);
             }
         }
-        
+
         // Check letter-based codes
         $letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        
+
         // Single letters (rare but possible)
         for ($i = 0; $i < 26; $i++) {
             $testCode = $countryCode . '-' . $letters[$i];
             $this->tryAddSubdivision($subDivisions, $testCode, $allSubdivisions, $seen);
         }
-        
+
         // Double letters (US-CA, US-NY, IT-TO, IT-MI, etc.)
         for ($i = 0; $i < 26; $i++) {
             for ($j = 0; $j < 26; $j++) {
@@ -338,7 +296,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                 $this->tryAddSubdivision($subDivisions, $testCode, $allSubdivisions, $seen);
             }
         }
-        
+
         // Triple letters (GB-ENG, GB-SCT, etc.)
         for ($i = 0; $i < 26; $i++) {
             for ($j = 0; $j < 26; $j++) {
@@ -348,23 +306,23 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                 }
             }
         }
-        
+
         return $allSubdivisions;
     }
 
-    private function tryAddSubdivision($subDivisions, string $testCode, array &$allSubdivisions, array &$seen): void
+    private function tryAddSubdivision(\Sokil\IsoCodes\Database\SubdivisionsInterface $subDivisions, string $testCode, array &$allSubdivisions, array &$seen): void // @phpstan-ignore class.notFound
     {
         try {
-            $subdivision = $subDivisions->getByCode($testCode);
+            $subdivision = $subDivisions->getByCode($testCode); // @phpstan-ignore class.notFound
             if ($subdivision) {
                 $code = substr($testCode, 3); // Remove country prefix
-                
+
                 // Skip duplicates
                 if (isset($seen[$code])) {
                     return;
                 }
                 $seen[$code] = true;
-                
+
                 $allSubdivisions[] = [
                     'code' => $code,
                     'name' => $subdivision->getName(),
@@ -395,16 +353,16 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         }
 
         if ($output->isVerbose()) {
-            $output->writeln("  Debug: Subdivision type analysis:");
+            $output->writeln('  Debug: Subdivision type analysis:');
             foreach ($typeGroups as $type => $subdivisions) {
-                $output->writeln("    $type: " . count($subdivisions) . " subdivisions");
+                $output->writeln("    $type: " . count($subdivisions) . ' subdivisions');
             }
         }
 
         // Strategy: If we have multiple types, prefer the more specific/granular ones
         // This is based on common administrative patterns
         $result = $this->selectPreferredSubdivisions($typeGroups, $output);
-        
+
         return $result;
     }
 
@@ -420,27 +378,27 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             // Most general (parent regions)
             'Country', 'Region', 'Autonomous region', 'Land', 'Canton',
             'Metropolitan region', 'Overseas region', 'Autonomous community',
-            
+
             // Mid-level administrative divisions (primary subdivisions)
             'State', 'Territory', 'Province', 'Prefecture', 'Governorate', 'Emirate',
             'Federal district', // Equal to State level for countries like Brazil
             'Oblast', 'Krai', 'Republic', 'Federal city', 'Department',
-            
+
             // More specific subdivisions (preferred for import)
-            'Metropolitan city', 'Free municipal consortium', 'Autonomous province', 
-            'Decentralized regional entity', 'District', 'County', 'Municipality', 
+            'Metropolitan city', 'Free municipal consortium', 'Autonomous province',
+            'Decentralized regional entity', 'District', 'County', 'Municipality',
             'Commune', 'Outlying area', 'Special administrative region',
         ];
 
         // Create a scoring system: lower score = more general, higher score = more specific
         $typeScores = array_flip($hierarchyOrder);
-        
+
         // Score each type group
         $scoredTypes = [];
         foreach ($typeGroups as $type => $subdivisions) {
             $score = $typeScores[$type] ?? 50; // Default middle score for unknown types
             $count = count($subdivisions);
-            
+
             $scoredTypes[] = [
                 'type' => $type,
                 'score' => $score,
@@ -453,7 +411,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         usort($scoredTypes, fn($a, $b) => $b['score'] <=> $a['score']);
 
         if ($output->isVerbose()) {
-            $output->writeln("  Debug: Type preference analysis:");
+            $output->writeln('  Debug: Type preference analysis:');
             foreach ($scoredTypes as $typeInfo) {
                 $output->writeln("    {$typeInfo['type']}: score={$typeInfo['score']}, count={$typeInfo['count']}");
             }
@@ -463,25 +421,25 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         // But avoid outliers (types with very few subdivisions if others have many)
         $totalSubdivisions = array_sum(array_column($scoredTypes, 'count'));
         $result = [];
-        
+
         foreach ($scoredTypes as $typeInfo) {
             $coverage = $typeInfo['count'] / $totalSubdivisions;
-            
+
             // Include types that either:
             // 1. Have majority coverage (>40%)
-            // 2. Are among the most specific types and have minimal coverage (>1%)  
+            // 2. Are among the most specific types and have minimal coverage (>1%)
             // 3. Are administrative equivalents at the primary subdivision level
             $isPrimarySubdivision = in_array($typeInfo['type'], ['State', 'Territory', 'Province', 'Federal district', 'Prefecture', 'Governorate', 'Emirate']);
             $isTopTier = $typeInfo['score'] >= ($scoredTypes[0]['score'] - 3); // Within 3 points of top score
             if ($coverage > 0.4 || ($isTopTier && $coverage > 0.01) || ($isPrimarySubdivision && $coverage > 0.01)) {
                 $result = array_merge($result, $typeInfo['subdivisions']);
-                
+
                 if ($output->isVerbose()) {
-                    $output->writeln("    -> Including {$typeInfo['type']} (coverage: " . round($coverage * 100) . "%)");
+                    $output->writeln("    -> Including {$typeInfo['type']} (coverage: " . round($coverage * 100) . '%)');
                 }
             } else {
                 if ($output->isVerbose()) {
-                    $output->writeln("    -> Skipping {$typeInfo['type']} (coverage: " . round($coverage * 100) . "%)");
+                    $output->writeln("    -> Skipping {$typeInfo['type']} (coverage: " . round($coverage * 100) . '%)');
                 }
             }
         }
@@ -515,7 +473,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         if (!empty($importRecords)) {
             $output->writeln("\n<info>Regions to be imported:</info>");
             $table = new Table($output);
-            $table->setHeaders(['Code', 'Name', 'Type', 'Translations']);
+            $table->setHeaders(['Code', 'Name', 'Translations']);
             foreach ($importRecords as $record) {
                 $translations = [];
                 foreach ($record['locales'] as $locale => $name) {
@@ -523,11 +481,11 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                         $translations[] = "$locale: $name";
                     }
                 }
-                $table->addRow([$record['code'], $record['name'], $record['type'], implode("\n", $translations) ?: 'Same as default']);
+                $table->addRow([$record['code'], $record['name'], implode("\n", $translations) ?: 'Same as default']);
             }
             $table->render();
         }
-        
+
         if (!empty($updateRecords)) {
             $output->writeln("\n<info>Regions to be updated:</info>");
             $table = new Table($output);
@@ -537,7 +495,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             }
             $table->render();
         }
-        
+
         if (!empty($skipRecords) && $output->isVerbose()) {
             $output->writeln("\n<info>Regions to be skipped (already exist):</info>");
             $table = new Table($output);
@@ -547,24 +505,24 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             }
             $table->render();
         }
-        
+
         $output->writeln("\n<comment>This was a dry run. Use without --dry-run to apply changes.</comment>");
     }
 
-    private function insertRegionName(int $regionId, string $locale, string $name, $connection): void
+    private function insertRegionName(int $regionId, string $locale, string $name, Varien_Db_Adapter_Interface $connection): void
     {
         $connection->insertOnDuplicate(
             $connection->getTableName('directory/country_region_name'),
             [
                 'locale' => $locale,
                 'region_id' => $regionId,
-                'name' => $name
+                'name' => $name,
             ],
-            ['name']
+            ['name'],
         );
     }
 
-    private function updateRegionName(int $regionId, string $locale, string $name, $connection): void
+    private function updateRegionName(int $regionId, string $locale, string $name, Varien_Db_Adapter_Interface $connection): void
     {
         $this->insertRegionName($regionId, $locale, $name, $connection);
     }
@@ -572,14 +530,14 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
     private function installIsoPackages(OutputInterface $output): bool
     {
         $output->writeln('<info>Installing sokil/php-isocodes and sokil/php-isocodes-db-i18n...</info>');
-        
+
         $process = new Process([
-            'composer', 'require', 
-            'sokil/php-isocodes', 
-            'sokil/php-isocodes-db-i18n', 
-            '--no-interaction'
+            'composer', 'require',
+            'sokil/php-isocodes',
+            'sokil/php-isocodes-db-i18n',
+            '--no-interaction',
         ], MAHO_ROOT_DIR);
-        
+
         $process->setTimeout(300); // 5 minutes timeout
         $process->run();
 
@@ -597,12 +555,12 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
     private function removeIsoPackages(OutputInterface $output): void
     {
         $process = new Process([
-            'composer', 'remove', 
-            'sokil/php-isocodes', 
-            'sokil/php-isocodes-db-i18n', 
-            '--no-interaction'
+            'composer', 'remove',
+            'sokil/php-isocodes',
+            'sokil/php-isocodes-db-i18n',
+            '--no-interaction',
         ], MAHO_ROOT_DIR);
-        
+
         $process->setTimeout(120); // 2 minutes timeout
         $process->run();
 
@@ -618,7 +576,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
     {
         // Build command arguments
         $args = ['php', './maho', 'sys:directory:regions:import'];
-        
+
         // Add all original options
         if ($input->getOption('country')) {
             $args[] = '--country=' . $input->getOption('country');
@@ -635,14 +593,14 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         if ($input->getOption('update-existing')) {
             $args[] = '--update-existing';
         }
-        
+
         // Set environment variable to indicate this is a re-execution
         $env = $_ENV;
         $env['MAHO_ISO_REEXEC'] = 'true';
         if ($packagesInstalledByUs) {
             $env['MAHO_ISO_INSTALLED'] = 'true';
         }
-        
+
         $process = new Process($args, MAHO_ROOT_DIR, $env);
         $process->setTimeout(null); // No timeout for the actual command
         $process->run(function ($type, $buffer) use ($output) {
