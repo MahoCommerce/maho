@@ -1,0 +1,530 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    MahoCLI
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+declare(strict_types=1);
+
+namespace MahoCLI\Commands;
+
+use Exception;
+use Mage;
+use Mage_Core_Model_Resource_Db_Abstract;
+use Sokil\IsoCodes\IsoCodesFactory;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+
+#[AsCommand(
+    name: 'directory:regions:import-iso',
+    description: 'Import states/provinces for a country from ISO 3166-2 standard with localization',
+)]
+class DirectoryRegionsImportIso extends BaseMahoCommand
+{
+    private const SUBDIVISION_TYPES_TO_IMPORT = [
+        'Metropolitan city',
+        'Province',
+        'Free municipal consortium',
+        'State',
+        'Territory', 
+        'District',
+        'Province',
+        'Prefecture',
+        'County',
+        'Municipality',
+        'Commune',
+        'Department',
+        'Oblast',
+        'Krai',
+        'Autonomous region',
+        'Autonomous district',
+        'Federal city',
+        'Republic',
+        'Governorate',
+        'Emirate',
+    ];
+
+    #[\Override]
+    protected function configure(): void
+    {
+        $this
+            ->addOption('country', 'c', InputOption::VALUE_REQUIRED, 'ISO-2 country code (e.g., US, IT, CA)')
+            ->addOption('locales', 'l', InputOption::VALUE_OPTIONAL, 'Comma-separated list of Maho locales (e.g., en_US,it_IT)', 'en_US')
+            ->addOption('import-regions', 'r', InputOption::VALUE_NONE, 'Import regions too (by default only leaf subdivisions)')
+            ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Preview changes without importing')
+            ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing regions (default: skip)');
+    }
+
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $this->initMaho();
+
+        $countryCode = strtoupper($input->getOption('country'));
+        $locales = array_map('trim', explode(',', $input->getOption('locales')));
+        $importRegions = $input->getOption('import-regions');
+        $dryRun = $input->getOption('dry-run');
+        $updateExisting = $input->getOption('update-existing');
+
+        if (!$countryCode) {
+            $output->writeln('<error>Country code is required. Use --country=XX</error>');
+            return Command::FAILURE;
+        }
+
+        // Map country codes to ISO 3166-2 codes if different
+        $isoCountryCode = $this->mapToIsoCode($countryCode);
+
+        // Validate country exists
+        $country = Mage::getModel('directory/country')->loadByCode($countryCode);
+        if (!$country->getId()) {
+            $output->writeln("<error>Country code '$countryCode' not found in database</error>");
+            return Command::FAILURE;
+        }
+
+        $output->writeln("<info>Importing regions for {$country->getName()} ($countryCode)</info>");
+        if ($isoCountryCode !== $countryCode) {
+            $output->writeln("<info>Using ISO code: $isoCountryCode</info>");
+        }
+        $output->writeln("<info>Locales: " . implode(', ', $locales) . "</info>");
+        $output->writeln("<info>Strategy: " . ($importRegions ? 'All subdivisions' : 'Leaf subdivisions only') . "</info>");
+        
+        if ($dryRun) {
+            $output->writeln('<comment>DRY RUN MODE - No changes will be made</comment>');
+        }
+
+        try {
+            // Get subdivisions from ISO codes
+            $isoCodes = new IsoCodesFactory();
+            $subDivisions = $isoCodes->getSubdivisions();
+            
+            $subdivisions = $this->collectSubdivisions($subDivisions, $isoCountryCode, $importRegions, $output);
+            
+            if (empty($subdivisions)) {
+                $output->writeln("<comment>No subdivisions found for $countryCode</comment>");
+                return Command::SUCCESS;
+            }
+            
+            $output->writeln("  Found " . count($subdivisions) . " subdivisions to import");
+            
+            // Get localized names for each locale
+            $subdivisionsByLocale = [];
+            foreach ($locales as $mahoLocale) {
+                $subdivisionsByLocale[$mahoLocale] = $this->getLocalizedNames($subdivisions, $mahoLocale, $output);
+            }
+            
+        } catch (Exception $e) {
+            $output->writeln("<error>Failed to load ISO subdivision data: {$e->getMessage()}</error>");
+            return Command::FAILURE;
+        }
+
+        // Process imports
+        $output->writeln("\n<info>Processing " . count($subdivisions) . " regions...</info>");
+        
+        if (!$dryRun) {
+            $progressBar = new ProgressBar($output, count($subdivisions));
+            $progressBar->start();
+        }
+
+        $imported = 0;
+        $updated = 0;
+        $skipped = 0;
+        
+        $importRecords = [];
+        $updateRecords = [];
+        $skipRecords = [];
+        
+        /** @var Mage_Core_Model_Resource_Db_Abstract $resource */
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+        
+        foreach ($subdivisions as $subdivision) {
+            if (!$dryRun) {
+                $progressBar->advance();
+            }
+            
+            $code = $subdivision['code'];
+            $defaultName = $subdivision['name'];
+            
+            // Check if region already exists
+            $existingRegion = Mage::getModel('directory/region')
+                ->loadByCode($code, $countryCode);
+            
+            if ($existingRegion->getId()) {
+                if (!$updateExisting) {
+                    $skipRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingRegion->getDefaultName()];
+                    $skipped++;
+                    continue;
+                }
+                
+                // Update existing region
+                if (!$dryRun) {
+                    $existingRegion->setDefaultName($defaultName);
+                    $existingRegion->save();
+                    
+                    // Update localized names
+                    foreach ($subdivisionsByLocale as $locale => $localizedNames) {
+                        if (isset($localizedNames[$code])) {
+                            $this->updateRegionName(
+                                $existingRegion->getId(),
+                                $locale,
+                                $localizedNames[$code],
+                                $connection
+                            );
+                        }
+                    }
+                } else {
+                    $localizedInfo = [];
+                    foreach ($subdivisionsByLocale as $locale => $localizedNames) {
+                        if (isset($localizedNames[$code])) {
+                            $localizedInfo[$locale] = $localizedNames[$code];
+                        }
+                    }
+                    $updateRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingRegion->getDefaultName(), 'locales' => $localizedInfo];
+                }
+                $updated++;
+            } else {
+                // Insert new region
+                if (!$dryRun) {
+                    $region = Mage::getModel('directory/region');
+                    $region->setCountryId($countryCode);
+                    $region->setCode($code);
+                    $region->setDefaultName($defaultName);
+                    $region->save();
+                    
+                    // Insert localized names
+                    foreach ($subdivisionsByLocale as $locale => $localizedNames) {
+                        if (isset($localizedNames[$code])) {
+                            $this->insertRegionName(
+                                $region->getId(),
+                                $locale,
+                                $localizedNames[$code],
+                                $connection
+                            );
+                        }
+                    }
+                } else {
+                    $localizedInfo = [];
+                    foreach ($subdivisionsByLocale as $locale => $localizedNames) {
+                        if (isset($localizedNames[$code])) {
+                            $localizedInfo[$locale] = $localizedNames[$code];
+                        }
+                    }
+                    $importRecords[] = ['code' => $code, 'name' => $defaultName, 'type' => $subdivision['type'], 'locales' => $localizedInfo];
+                }
+                $imported++;
+            }
+        }
+        
+        if (!$dryRun) {
+            $progressBar->finish();
+            $output->writeln('');
+            
+            // Clear caches
+            $output->writeln('Clearing caches...');
+            Mage::app()->getCacheInstance()->cleanType('config');
+            Mage::app()->getCacheInstance()->cleanType('block_html');
+        }
+        
+        // Summary
+        $output->writeln("\n<info>Import Summary:</info>");
+        $table = new Table($output);
+        $table->setHeaders(['Action', 'Count']);
+        $table->addRow(['Imported', $imported]);
+        $table->addRow(['Updated', $updated]);
+        $table->addRow(['Skipped', $skipped]);
+        $table->addRow(['<info>Total</info>', '<info>' . ($imported + $updated + $skipped) . '</info>']);
+        $table->render();
+        
+        if ($dryRun) {
+            $this->showDryRunDetails($output, $importRecords, $updateRecords, $skipRecords);
+        }
+
+        return Command::SUCCESS;
+    }
+
+    private function collectSubdivisions($subDivisions, string $countryCode, bool $importRegions, OutputInterface $output): array
+    {
+        // First pass: collect all subdivisions and analyze the hierarchy
+        $allSubdivisions = $this->getAllSubdivisions($subDivisions, $countryCode);
+        
+        if (empty($allSubdivisions)) {
+            return [];
+        }
+        
+        // Second pass: determine what to import based on hierarchy analysis
+        return $this->filterSubdivisionsByHierarchy($allSubdivisions, $importRegions, $output);
+    }
+
+    private function getAllSubdivisions($subDivisions, string $countryCode): array
+    {
+        $allSubdivisions = [];
+        $seen = [];
+        
+        // Check numeric codes (1-999)
+        for ($i = 1; $i <= 999; $i++) {
+            $testCodes = [
+                sprintf('%s-%02d', $countryCode, $i),  // IT-01, IT-02, etc.
+                sprintf('%s-%03d', $countryCode, $i),  // US-001, etc.
+            ];
+            
+            foreach ($testCodes as $testCode) {
+                $this->tryAddSubdivision($subDivisions, $testCode, $allSubdivisions, $seen);
+            }
+        }
+        
+        // Check letter-based codes
+        $letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        
+        // Single letters (rare but possible)
+        for ($i = 0; $i < 26; $i++) {
+            $testCode = $countryCode . '-' . $letters[$i];
+            $this->tryAddSubdivision($subDivisions, $testCode, $allSubdivisions, $seen);
+        }
+        
+        // Double letters (US-CA, US-NY, IT-TO, IT-MI, etc.)
+        for ($i = 0; $i < 26; $i++) {
+            for ($j = 0; $j < 26; $j++) {
+                $testCode = $countryCode . '-' . $letters[$i] . $letters[$j];
+                $this->tryAddSubdivision($subDivisions, $testCode, $allSubdivisions, $seen);
+            }
+        }
+        
+        // Triple letters (GB-ENG, GB-SCT, etc.)
+        for ($i = 0; $i < 26; $i++) {
+            for ($j = 0; $j < 26; $j++) {
+                for ($k = 0; $k < 26; $k++) {
+                    $testCode = $countryCode . '-' . $letters[$i] . $letters[$j] . $letters[$k];
+                    $this->tryAddSubdivision($subDivisions, $testCode, $allSubdivisions, $seen);
+                }
+            }
+        }
+        
+        return $allSubdivisions;
+    }
+
+    private function tryAddSubdivision($subDivisions, string $testCode, array &$allSubdivisions, array &$seen): void
+    {
+        try {
+            $subdivision = $subDivisions->getByCode($testCode);
+            if ($subdivision) {
+                $code = substr($testCode, 3); // Remove country prefix
+                
+                // Skip duplicates
+                if (isset($seen[$code])) {
+                    return;
+                }
+                $seen[$code] = true;
+                
+                $allSubdivisions[] = [
+                    'code' => $code,
+                    'name' => $subdivision->getName(),
+                    'type' => $subdivision->getType(),
+                    'isoCode' => $testCode,
+                ];
+            }
+        } catch (Exception $e) {
+            // Subdivision doesn't exist, continue
+        }
+    }
+
+    private function filterSubdivisionsByHierarchy(array $allSubdivisions, bool $importRegions, OutputInterface $output): array
+    {
+        if ($importRegions) {
+            // Import everything if explicitly requested
+            return $allSubdivisions;
+        }
+
+        // Analyze subdivision types and their frequency
+        $typeGroups = [];
+        foreach ($allSubdivisions as $subdivision) {
+            $type = $subdivision['type'];
+            if (!isset($typeGroups[$type])) {
+                $typeGroups[$type] = [];
+            }
+            $typeGroups[$type][] = $subdivision;
+        }
+
+        if ($output->isVerbose()) {
+            $output->writeln("  Debug: Subdivision type analysis:");
+            foreach ($typeGroups as $type => $subdivisions) {
+                $output->writeln("    $type: " . count($subdivisions) . " subdivisions");
+            }
+        }
+
+        // Strategy: If we have multiple types, prefer the more specific/granular ones
+        // This is based on common administrative patterns
+        $result = $this->selectPreferredSubdivisions($typeGroups, $output);
+        
+        return $result;
+    }
+
+    private function selectPreferredSubdivisions(array $typeGroups, OutputInterface $output): array
+    {
+        // If only one type, return all subdivisions
+        if (count($typeGroups) === 1) {
+            return reset($typeGroups);
+        }
+
+        // Define hierarchy of administrative divisions from most general to most specific
+        $hierarchyOrder = [
+            // Most general (parent regions)
+            'Country', 'Region', 'Autonomous region', 'Land', 'Canton',
+            'Metropolitan region', 'Overseas region', 'Autonomous community',
+            
+            // Mid-level administrative divisions (primary subdivisions)
+            'State', 'Territory', 'Province', 'Prefecture', 'Governorate', 'Emirate',
+            'Federal district', // Equal to State level for countries like Brazil
+            'Oblast', 'Krai', 'Republic', 'Federal city', 'Department',
+            
+            // More specific subdivisions (preferred for import)
+            'Metropolitan city', 'Free municipal consortium', 'Autonomous province', 
+            'Decentralized regional entity', 'District', 'County', 'Municipality', 
+            'Commune', 'Outlying area', 'Special administrative region',
+        ];
+
+        // Create a scoring system: lower score = more general, higher score = more specific
+        $typeScores = array_flip($hierarchyOrder);
+        
+        // Score each type group
+        $scoredTypes = [];
+        foreach ($typeGroups as $type => $subdivisions) {
+            $score = $typeScores[$type] ?? 50; // Default middle score for unknown types
+            $count = count($subdivisions);
+            
+            $scoredTypes[] = [
+                'type' => $type,
+                'score' => $score,
+                'count' => $count,
+                'subdivisions' => $subdivisions,
+            ];
+        }
+
+        // Sort by specificity score (descending) - prefer more specific types
+        usort($scoredTypes, fn($a, $b) => $b['score'] <=> $a['score']);
+
+        if ($output->isVerbose()) {
+            $output->writeln("  Debug: Type preference analysis:");
+            foreach ($scoredTypes as $typeInfo) {
+                $output->writeln("    {$typeInfo['type']}: score={$typeInfo['score']}, count={$typeInfo['count']}");
+            }
+        }
+
+        // Strategy: Choose the most specific type(s) that have reasonable coverage
+        // But avoid outliers (types with very few subdivisions if others have many)
+        $totalSubdivisions = array_sum(array_column($scoredTypes, 'count'));
+        $result = [];
+        
+        foreach ($scoredTypes as $typeInfo) {
+            $coverage = $typeInfo['count'] / $totalSubdivisions;
+            
+            // Include types that either:
+            // 1. Have majority coverage (>40%)
+            // 2. Are among the most specific types and have minimal coverage (>1%)  
+            // 3. Are administrative equivalents at the primary subdivision level
+            $isPrimarySubdivision = in_array($typeInfo['type'], ['State', 'Territory', 'Province', 'Federal district', 'Prefecture', 'Governorate', 'Emirate']);
+            $isTopTier = $typeInfo['score'] >= ($scoredTypes[0]['score'] - 3); // Within 3 points of top score
+            if ($coverage > 0.4 || ($isTopTier && $coverage > 0.01) || ($isPrimarySubdivision && $coverage > 0.01)) {
+                $result = array_merge($result, $typeInfo['subdivisions']);
+                
+                if ($output->isVerbose()) {
+                    $output->writeln("    -> Including {$typeInfo['type']} (coverage: " . round($coverage * 100) . "%)");
+                }
+            } else {
+                if ($output->isVerbose()) {
+                    $output->writeln("    -> Skipping {$typeInfo['type']} (coverage: " . round($coverage * 100) . "%)");
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    private function mapToIsoCode(string $countryCode): string
+    {
+        // Map common country code discrepancies between Magento/Maho and ISO 3166-2
+        return match ($countryCode) {
+            'UK' => 'GB',  // United Kingdom alternative
+            'EL' => 'GR',  // Greece (EL is sometimes used for Greek language)
+            default => $countryCode,
+        };
+    }
+
+    private function getLocalizedNames(array $subdivisions, string $mahoLocale, OutputInterface $output): array
+    {
+        // For now, just return the default names since localization setup is complex
+        // In the future, this could set up translation drivers for different locales
+        $localizedNames = [];
+        foreach ($subdivisions as $subdivision) {
+            $localizedNames[$subdivision['code']] = $subdivision['name'];
+        }
+        return $localizedNames;
+    }
+
+    private function showDryRunDetails(OutputInterface $output, array $importRecords, array $updateRecords, array $skipRecords): void
+    {
+        if (!empty($importRecords)) {
+            $output->writeln("\n<info>Regions to be imported:</info>");
+            $table = new Table($output);
+            $table->setHeaders(['Code', 'Name', 'Type', 'Translations']);
+            foreach ($importRecords as $record) {
+                $translations = [];
+                foreach ($record['locales'] as $locale => $name) {
+                    if ($name !== $record['name']) {
+                        $translations[] = "$locale: $name";
+                    }
+                }
+                $table->addRow([$record['code'], $record['name'], $record['type'], implode("\n", $translations) ?: 'Same as default']);
+            }
+            $table->render();
+        }
+        
+        if (!empty($updateRecords)) {
+            $output->writeln("\n<info>Regions to be updated:</info>");
+            $table = new Table($output);
+            $table->setHeaders(['Code', 'Current Name', 'New Name']);
+            foreach ($updateRecords as $record) {
+                $table->addRow([$record['code'], $record['existing'], $record['name']]);
+            }
+            $table->render();
+        }
+        
+        if (!empty($skipRecords) && $output->isVerbose()) {
+            $output->writeln("\n<info>Regions to be skipped (already exist):</info>");
+            $table = new Table($output);
+            $table->setHeaders(['Code', 'Name']);
+            foreach ($skipRecords as $record) {
+                $table->addRow([$record['code'], $record['existing']]);
+            }
+            $table->render();
+        }
+        
+        $output->writeln("\n<comment>This was a dry run. Use without --dry-run to apply changes.</comment>");
+    }
+
+    private function insertRegionName(int $regionId, string $locale, string $name, $connection): void
+    {
+        $connection->insertOnDuplicate(
+            $connection->getTableName('directory/country_region_name'),
+            [
+                'locale' => $locale,
+                'region_id' => $regionId,
+                'name' => $name
+            ],
+            ['name']
+        );
+    }
+
+    private function updateRegionName(int $regionId, string $locale, string $name, $connection): void
+    {
+        $this->insertRegionName($regionId, $locale, $name, $connection);
+    }
+}
