@@ -575,7 +575,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
     private function reExecuteCommand(InputInterface $input, OutputInterface $output, bool $packagesInstalledByUs = false): int
     {
         // Build command arguments
-        $args = ['php', './maho', 'sys:directory:regions:import'];
+        $args = [PHP_BINARY, './maho', 'sys:directory:regions:import'];
 
         // Add all original options
         if ($input->getOption('country')) {
