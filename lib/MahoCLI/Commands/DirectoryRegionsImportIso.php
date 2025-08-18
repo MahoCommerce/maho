@@ -23,6 +23,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'directory:regions:import-iso',
@@ -102,6 +103,17 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
         }
 
         try {
+            // Check if required packages are available
+            if (!class_exists('Sokil\IsoCodes\IsoCodesFactory')) {
+                $output->writeln('<error>Required ISO codes packages are not installed.</error>');
+                $output->writeln('<info>Run this command to install them:</info>');
+                $output->writeln('<comment>composer require sokil/php-isocodes sokil/php-isocodes-db-i18n --no-interaction</comment>');
+                $output->writeln('');
+                $output->writeln('<info>After installation, you can remove them with:</info>');
+                $output->writeln('<comment>composer remove sokil/php-isocodes sokil/php-isocodes-db-i18n --no-interaction</comment>');
+                return Command::FAILURE;
+            }
+            
             // Get subdivisions from ISO codes
             $isoCodes = new IsoCodesFactory();
             $subDivisions = $isoCodes->getSubdivisions();
