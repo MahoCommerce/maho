@@ -178,4 +178,19 @@ $table = $installer->getConnection()
     ->setComment('Customer Segment Members');
 $installer->getConnection()->createTable($table);
 
+/**
+ * Add customer_segment_ids column to newsletter_queue table
+ */
+$installer->getConnection()->addColumn(
+    $installer->getTable('newsletter/queue'),
+    'customer_segment_ids',
+    [
+        'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'length'   => 255,
+        'nullable' => true,
+        'comment'  => 'Customer Segment IDs (comma-separated)',
+        'after'    => 'newsletter_sender_email',
+    ],
+);
+
 $installer->endSetup();

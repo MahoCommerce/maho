@@ -240,6 +240,12 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
                 $queue->setQueueStatus(Queue::STATUS_SENDING);
             }
 
+            // Save customer segment assignments if CustomerSegmentation module is enabled
+            if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+                $segmentIds = $this->getRequest()->getParam('customer_segments', []);
+                $queue->setCustomerSegmentIds(implode(',', array_filter($segmentIds)));
+            }
+
             $queue->save();
             $this->_redirect('*/*');
         } catch (Mage_Core_Exception $e) {
