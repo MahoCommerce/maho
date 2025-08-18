@@ -143,28 +143,50 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
             $output->writeln('  Found ' . count($subdivisions) . ' subdivisions to import');
 
-            // Get English names first as the reference
+            // Get English names first to use as default
             $englishNames = $this->getLocalizedNames($subdivisions, 'en_US', $output);
-            
-            // Get localized names for each locale (only different from English)
+
+            // Update subdivision data to use English names as default where available
+            foreach ($subdivisions as &$subdivision) {
+                $code = $subdivision['code'];
+                if (isset($englishNames[$code])) {
+                    if ($output->isVerbose() && $subdivision['name'] !== $englishNames[$code]) {
+                        $output->writeln("<comment>  Using English as default for $code: '{$subdivision['name']}' → '{$englishNames[$code]}'</comment>");
+                    }
+                    $subdivision['name'] = $englishNames[$code];
+                }
+            }
+            unset($subdivision); // Break the reference
+
+            // Get localized names for each locale (only different from English default)
             $subdivisionsByLocale = [];
             foreach ($locales as $mahoLocale) {
                 $localizedNames = $this->getLocalizedNames($subdivisions, $mahoLocale, $output);
-                
-                // Only keep names that are different from English
+
+                // Only keep names that are different from the English default
                 $differentNames = [];
                 foreach ($localizedNames as $code => $localizedName) {
-                    $englishName = $englishNames[$code] ?? $localizedName;
-                    if ($localizedName !== $englishName) {
+                    $englishName = $englishNames[$code] ?? null;
+
+                    // Find the subdivision data to get the (now English) default name
+                    $defaultName = null;
+                    foreach ($subdivisions as $subdivision) {
+                        if ($subdivision['code'] === $code) {
+                            $defaultName = $subdivision['name'];
+                            break;
+                        }
+                    }
+
+                    if ($defaultName && $localizedName !== $defaultName) {
                         $differentNames[$code] = $localizedName;
                         if ($output->isVerbose()) {
-                            $output->writeln("<comment>    Keeping $mahoLocale translation for $code: '$englishName' → '$localizedName'</comment>");
+                            $output->writeln("<comment>    Keeping $mahoLocale translation for $code: '$defaultName' → '$localizedName'</comment>");
                         }
-                    } else if ($output->isVerbose()) {
-                        $output->writeln("<comment>    Skipping $mahoLocale for $code: same as English ('$englishName')</comment>");
+                    } elseif ($output->isVerbose()) {
+                        $output->writeln("<comment>    Skipping $mahoLocale for $code: same as English default ('$defaultName')</comment>");
                     }
                 }
-                
+
                 if (!empty($differentNames)) {
                     $subdivisionsByLocale[$mahoLocale] = $differentNames;
                 }
@@ -518,12 +540,12 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
             foreach ($subdivisions as $subdivision) {
                 try {
-                    $localizedSubdivision = $subDivisions->getByCode($subdivision['isoCode']); // @phpstan-ignore class.notFound
+                    $localizedSubdivision = $subDivisions->getByCode($subdivision['isoCode']);
                     if ($localizedSubdivision) {
-                        $localName = $localizedSubdivision->getLocalName(); // @phpstan-ignore class.notFound
+                        $localName = $localizedSubdivision->getLocalName();
 
                         if ($output->isVerbose()) {
-                            $originalName = $localizedSubdivision->getName(); // @phpstan-ignore class.notFound
+                            $originalName = $localizedSubdivision->getName();
                             $isDifferent = $originalName !== $localName ? ' *TRANSLATED*' : '';
                             $output->writeln("<comment>    {$subdivision['code']}: '$originalName' → '$localName'$isDifferent</comment>");
                         }
