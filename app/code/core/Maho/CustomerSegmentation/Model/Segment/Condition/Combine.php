@@ -26,8 +26,28 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
 
         $orderConditions = [
             [
+                'label' => Mage::helper('customersegmentation')->__('Average Order Value'),
+                'value' => 'customersegmentation/segment_condition_customer_clv|average_order_value',
+            ],
+            [
                 'label' => Mage::helper('customersegmentation')->__('Grand Total'),
                 'value' => 'customersegmentation/segment_condition_order_attributes|grand_total',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Lifetime Profit (Sales - Refunds)'),
+                'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_profit',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Lifetime Refunds Amount'),
+                'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_refunds',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Lifetime Sales Amount'),
+                'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_sales',
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Number of Orders'),
+                'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_orders',
             ],
             [
                 'label' => Mage::helper('customersegmentation')->__('Order Status'),
@@ -267,31 +287,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
             [
                 'label' => Mage::helper('customersegmentation')->__('Customer Address'),
                 'value' => $customerAddressConditions,
-            ],
-            [
-                'label' => Mage::helper('customersegmentation')->__('Customer Lifetime Value'),
-                'value' => [
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Lifetime Sales Amount'),
-                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_sales',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Number of Orders'),
-                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_orders',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Average Order Value'),
-                        'value' => 'customersegmentation/segment_condition_customer_clv|average_order_value',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Lifetime Profit (Sales - Refunds)'),
-                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_profit',
-                    ],
-                    [
-                        'label' => Mage::helper('customersegmentation')->__('Lifetime Refunds Amount'),
-                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_refunds',
-                    ],
-                ],
             ],
             [
                 'label' => Mage::helper('customersegmentation')->__('Customer Time-based'),
