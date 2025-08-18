@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <customer>
+            <groups>
+                <customer_segments translate="label">
+                    <label>Customer Segments</label>
+                    <sort_order>110</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <cron_schedule translate="label">
+                            <label>Segment Refresh Cron Schedule</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </cron_schedule>
+                    </fields>
+                </customer_segments>
+            </groups>
+        </customer>
+    </sections>
+</config>

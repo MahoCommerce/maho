@@ -85,7 +85,7 @@
         <jobs>
             <customersegmentation_refresh_segments>
                 <schedule>
-                    <cron_expr>0 2 * * *</cron_expr>
+                    <config_path>customer/customer_segments/cron_schedule</config_path>
                 </schedule>
                 <run>
                     <model>customersegmentation/cron::refreshSegments</model>
@@ -93,4 +93,11 @@
             </customersegmentation_refresh_segments>
         </jobs>
     </crontab>
+    <default>
+        <customer>
+            <customer_segments>
+                <cron_schedule>0 5 * * *</cron_schedule>
+            </customer_segments>
+        </customer>
+    </default>
 </config>

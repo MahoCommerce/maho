@@ -269,6 +269,60 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => $customerAddressConditions,
             ],
             [
+                'label' => Mage::helper('customersegmentation')->__('Customer Lifetime Value'),
+                'value' => [
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Lifetime Sales Amount'),
+                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_sales',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Number of Orders'),
+                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_orders',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Average Order Value'),
+                        'value' => 'customersegmentation/segment_condition_customer_clv|average_order_value',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Lifetime Profit (Sales - Refunds)'),
+                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_profit',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Lifetime Refunds Amount'),
+                        'value' => 'customersegmentation/segment_condition_customer_clv|lifetime_refunds',
+                    ],
+                ],
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Customer Time-based'),
+                'value' => [
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Days Since Last Login'),
+                        'value' => 'customersegmentation/segment_condition_customer_timebased|days_since_last_login',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Days Since Last Order'),
+                        'value' => 'customersegmentation/segment_condition_customer_timebased|days_since_last_order',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Days Inactive (No Login or Order)'),
+                        'value' => 'customersegmentation/segment_condition_customer_timebased|days_inactive',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Days Since First Order'),
+                        'value' => 'customersegmentation/segment_condition_customer_timebased|days_since_first_order',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Average Days Between Orders'),
+                        'value' => 'customersegmentation/segment_condition_customer_timebased|order_frequency_days',
+                    ],
+                    [
+                        'label' => Mage::helper('customersegmentation')->__('Days Without Purchase'),
+                        'value' => 'customersegmentation/segment_condition_customer_timebased|days_without_purchase',
+                    ],
+                ],
+            ],
+            [
                 'label' => Mage::helper('customersegmentation')->__('Newsletter Subscription'),
                 'value' => [
                     [
