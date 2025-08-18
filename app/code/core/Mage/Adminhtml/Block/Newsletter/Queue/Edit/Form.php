@@ -62,7 +62,6 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
                     'label'    => Mage::helper('newsletter')->__('Customer Segments'),
                     'title'    => Mage::helper('newsletter')->__('Customer Segments'),
                     'values'   => $this->getCustomerSegmentOptions(),
-                    'note'     => Mage::helper('newsletter')->__('Leave empty to send to all newsletter subscribers. Select specific segments to target only those customers.'),
                 ]);
             }
         } else {
