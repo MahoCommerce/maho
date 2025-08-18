@@ -81,6 +81,32 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        // Check if this is a re-execution after package installation
+        $isReExecution = getenv('MAHO_ISO_REEXEC') === 'true';
+        $packagesInstalledByUs = getenv('MAHO_ISO_INSTALLED') === 'true';
+        
+        // Check if required packages are available
+        $packagesWereAlreadyPresent = class_exists('Sokil\IsoCodes\IsoCodesFactory');
+        
+        if (!$packagesWereAlreadyPresent) {
+            $output->writeln('<info>Installing required ISO codes packages...</info>');
+            
+            // Install packages
+            if (!$this->installIsoPackages($output)) {
+                return Command::FAILURE;
+            }
+            
+            // Re-execute the command with packages installed
+            $output->writeln('<info>Re-executing command with packages installed...</info>');
+            $exitCode = $this->reExecuteCommand($input, $output, true);
+            
+            // Clean up packages after re-execution completes
+            $output->writeln('<info>Removing temporary ISO codes packages...</info>');
+            $this->removeIsoPackages($output);
+            
+            return $exitCode;
+        }
+
         // Map country codes to ISO 3166-2 codes if different
         $isoCountryCode = $this->mapToIsoCode($countryCode);
 
@@ -103,17 +129,6 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
         }
 
         try {
-            // Check if required packages are available
-            if (!class_exists('Sokil\IsoCodes\IsoCodesFactory')) {
-                $output->writeln('<error>Required ISO codes packages are not installed.</error>');
-                $output->writeln('<info>Run this command to install them:</info>');
-                $output->writeln('<comment>composer require sokil/php-isocodes sokil/php-isocodes-db-i18n --no-interaction</comment>');
-                $output->writeln('');
-                $output->writeln('<info>After installation, you can remove them with:</info>');
-                $output->writeln('<comment>composer remove sokil/php-isocodes sokil/php-isocodes-db-i18n --no-interaction</comment>');
-                return Command::FAILURE;
-            }
-            
             // Get subdivisions from ISO codes
             $isoCodes = new IsoCodesFactory();
             $subDivisions = $isoCodes->getSubdivisions();
@@ -122,6 +137,10 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
             
             if (empty($subdivisions)) {
                 $output->writeln("<comment>No subdivisions found for $countryCode</comment>");
+                // Clean up packages if we installed them
+                if ($packagesInstalledByUs && !$isReExecution) {
+                    $this->removeIsoPackages($output);
+                }
                 return Command::SUCCESS;
             }
             
@@ -135,6 +154,10 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
             
         } catch (Exception $e) {
             $output->writeln("<error>Failed to load ISO subdivision data: {$e->getMessage()}</error>");
+            // Clean up packages if we installed them
+            if ($packagesInstalledByUs && !$isReExecution) {
+                $this->removeIsoPackages($output);
+            }
             return Command::FAILURE;
         }
 
@@ -258,6 +281,12 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
         
         if ($dryRun) {
             $this->showDryRunDetails($output, $importRecords, $updateRecords, $skipRecords);
+        }
+
+        // Clean up packages if we installed them (only if not a re-execution)
+        if ($packagesInstalledByUs && !$isReExecution) {
+            $output->writeln('<info>Removing temporary ISO codes packages...</info>');
+            $this->removeIsoPackages($output);
         }
 
         return Command::SUCCESS;
@@ -538,5 +567,88 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
     private function updateRegionName(int $regionId, string $locale, string $name, $connection): void
     {
         $this->insertRegionName($regionId, $locale, $name, $connection);
+    }
+
+    private function installIsoPackages(OutputInterface $output): bool
+    {
+        $output->writeln('<info>Installing sokil/php-isocodes and sokil/php-isocodes-db-i18n...</info>');
+        
+        $process = new Process([
+            'composer', 'require', 
+            'sokil/php-isocodes', 
+            'sokil/php-isocodes-db-i18n', 
+            '--no-interaction'
+        ], MAHO_ROOT_DIR);
+        
+        $process->setTimeout(300); // 5 minutes timeout
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            $output->writeln('<error>Failed to install ISO packages:</error>');
+            $output->writeln($process->getErrorOutput());
+            return false;
+        }
+
+        $output->writeln('<info>Packages installed successfully.</info>');
+        return true;
+    }
+
+
+    private function removeIsoPackages(OutputInterface $output): void
+    {
+        $process = new Process([
+            'composer', 'remove', 
+            'sokil/php-isocodes', 
+            'sokil/php-isocodes-db-i18n', 
+            '--no-interaction'
+        ], MAHO_ROOT_DIR);
+        
+        $process->setTimeout(120); // 2 minutes timeout
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            $output->writeln('<comment>Warning: Could not remove ISO packages automatically.</comment>');
+            $output->writeln('<comment>You may want to run: composer remove sokil/php-isocodes sokil/php-isocodes-db-i18n</comment>');
+        } else {
+            $output->writeln('<info>Temporary packages removed successfully.</info>');
+        }
+    }
+
+    private function reExecuteCommand(InputInterface $input, OutputInterface $output, bool $packagesInstalledByUs = false): int
+    {
+        // Build command arguments
+        $args = ['php', './maho', 'directory:regions:import-iso'];
+        
+        // Add all original options
+        if ($input->getOption('country')) {
+            $args[] = '--country=' . $input->getOption('country');
+        }
+        if ($input->getOption('locales')) {
+            $args[] = '--locales=' . $input->getOption('locales');
+        }
+        if ($input->getOption('import-regions')) {
+            $args[] = '--import-regions';
+        }
+        if ($input->getOption('dry-run')) {
+            $args[] = '--dry-run';
+        }
+        if ($input->getOption('update-existing')) {
+            $args[] = '--update-existing';
+        }
+        
+        // Set environment variable to indicate this is a re-execution
+        $env = $_ENV;
+        $env['MAHO_ISO_REEXEC'] = 'true';
+        if ($packagesInstalledByUs) {
+            $env['MAHO_ISO_INSTALLED'] = 'true';
+        }
+        
+        $process = new Process($args, MAHO_ROOT_DIR, $env);
+        $process->setTimeout(null); // No timeout for the actual command
+        $process->run(function ($type, $buffer) use ($output) {
+            $output->write($buffer);
+        });
+
+        return $process->getExitCode();
     }
 }
