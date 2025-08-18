@@ -72,7 +72,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
     public function getSubfilterSql(string $fieldName, bool $requireValid, ?int $website): string
     {
         $attribute = $this->getAttribute();
-        $operator = $this->getOperator();
+        $operator = $this->getMappedSqlOperator();
         $value = (int) $this->getValue();
 
         $adapter = $this->getResource()->getReadConnection();

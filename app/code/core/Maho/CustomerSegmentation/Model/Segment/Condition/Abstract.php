@@ -15,10 +15,33 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
 {
     abstract public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false;
 
+    public function getOperator(): string
+    {
+        $operator = parent::getOperator();
+
+        // Ensure operator is always a string, never an array
+        if (is_array($operator)) {
+            Mage::log('Array operator detected in getOperator(): ' . print_r($operator, true) . ' for attribute: ' . $this->getAttribute(), Zend_Log::ERR);
+            return '=';
+        }
+
+        return $operator ?: '=';
+    }
+
     public function getMappedSqlOperator(): string
     {
         $operator = $this->getOperator();
         $value = $this->getValue();
+
+        // Check for literal string '[]' which means an array was converted to string
+        if ($operator === '[]' || $operator === 'Array') {
+            return '=';
+        }
+
+        // Fallback to default operator if none is set
+        if (empty($operator)) {
+            return '=';
+        }
 
         return match ($operator) {
             '==' => $this->_getEqualityOperator($value),
@@ -70,6 +93,11 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
 
     protected function _buildSqlCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
+        // Fallback for empty operator
+        if (empty($operator)) {
+            $operator = '=';
+        }
+
         $value = $this->prepareValueForSql($value, $operator);
 
         return match ($operator) {
