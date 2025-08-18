@@ -26,10 +26,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 #[AsCommand(
-    name: 'directory:regions:import-iso',
+    name: 'sys:directory:regions:import',
     description: 'Import states/provinces for a country from ISO 3166-2 standard with localization',
 )]
-class DirectoryRegionsImportIso extends BaseMahoCommand
+class SysDirectoryRegionsImport extends BaseMahoCommand
 {
     private const SUBDIVISION_TYPES_TO_IMPORT = [
         'Metropolitan city',
@@ -617,7 +617,7 @@ class DirectoryRegionsImportIso extends BaseMahoCommand
     private function reExecuteCommand(InputInterface $input, OutputInterface $output, bool $packagesInstalledByUs = false): int
     {
         // Build command arguments
-        $args = ['php', './maho', 'directory:regions:import-iso'];
+        $args = ['php', './maho', 'sys:directory:regions:import'];
         
         // Add all original options
         if ($input->getOption('country')) {
