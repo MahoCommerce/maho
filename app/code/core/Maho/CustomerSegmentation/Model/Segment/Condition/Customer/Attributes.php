@@ -79,6 +79,22 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     }
 
     #[\Override]
+    public function getOperatorSelectOptions(): array
+    {
+        $operators = parent::getOperatorSelectOptions();
+
+        // For selection fields, use simple is/is not operators
+        if (in_array($this->getAttribute(), ['gender', 'group_id', 'store_id', 'website_id'])) {
+            return [
+                ['value' => '==', 'label' => Mage::helper('rule')->__('is')],
+                ['value' => '!=', 'label' => Mage::helper('rule')->__('is not')],
+            ];
+        }
+
+        return $operators;
+    }
+
+    #[\Override]
     public function getValueSelectOptions(): array
     {
         if (!$this->hasData('value_select_options')) {
