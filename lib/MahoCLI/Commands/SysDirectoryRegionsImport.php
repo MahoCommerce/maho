@@ -38,8 +38,8 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             ->addOption('country', 'c', InputOption::VALUE_REQUIRED, 'ISO-2 country code (e.g., US, IT, CA)')
             ->addOption('locales', 'l', InputOption::VALUE_OPTIONAL, 'Comma-separated list of Maho locales (e.g., en_US,it_IT)', 'en_US')
             ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing regions (default: skip)')
-            ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Preview changes without importing')
-            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip confirmation for package installation');
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip confirmation for package installation')
+            ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Preview changes without importing');
     }
 
     #[\Override]
@@ -82,8 +82,6 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                     $output->writeln('<comment>Installation cancelled.</comment>');
                     return Command::SUCCESS;
                 }
-            } else {
-                $output->writeln('<info>Proceeding with installation (--force flag set).</info>');
             }
 
             $output->writeln('<info>Installing required ISO codes packages...</info>');
@@ -489,15 +487,24 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         if (!empty($importRecords)) {
             $output->writeln("\n<info>Regions to be imported:</info>");
             $table = new Table($output);
-            $table->setHeaders(['Code', 'Name', 'Translations']);
-            foreach ($importRecords as $record) {
-                $translations = [];
-                foreach ($record['locales'] as $locale => $name) {
-                    if ($name !== $record['name']) {
-                        $translations[] = "$locale: $name";
-                    }
+
+            // Build headers dynamically based on locales
+            $headers = ['Code', 'Name'];
+            $locales = [];
+            if (!empty($importRecords)) {
+                $locales = array_keys($importRecords[0]['locales']);
+                foreach ($locales as $locale) {
+                    $headers[] = $locale;
                 }
-                $table->addRow([$record['code'], $record['name'], implode("\n", $translations) ?: 'Same as default']);
+            }
+            $table->setHeaders($headers);
+
+            foreach ($importRecords as $record) {
+                $row = [$record['code'], $record['name']];
+                foreach ($locales as $locale) {
+                    $row[] = $record['locales'][$locale] ?? $record['name'];
+                }
+                $table->addRow($row);
             }
             $table->render();
         }
@@ -505,9 +512,24 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         if (!empty($updateRecords)) {
             $output->writeln("\n<info>Regions to be updated:</info>");
             $table = new Table($output);
-            $table->setHeaders(['Code', 'Current Name', 'New Name']);
+
+            // Build headers dynamically based on locales
+            $headers = ['Code', 'Current Name', 'New Name'];
+            $locales = [];
+            if (!empty($updateRecords) && isset($updateRecords[0]['locales'])) {
+                $locales = array_keys($updateRecords[0]['locales']);
+                foreach ($locales as $locale) {
+                    $headers[] = $locale;
+                }
+            }
+            $table->setHeaders($headers);
+
             foreach ($updateRecords as $record) {
-                $table->addRow([$record['code'], $record['existing'], $record['name']]);
+                $row = [$record['code'], $record['existing'], $record['name']];
+                foreach ($locales as $locale) {
+                    $row[] = $record['locales'][$locale] ?? $record['name'];
+                }
+                $table->addRow($row);
             }
             $table->render();
         }
