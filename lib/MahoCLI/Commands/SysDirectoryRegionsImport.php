@@ -63,12 +63,15 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $packagesInstalledByUs = getenv('MAHO_ISO_INSTALLED') === 'true';
 
         // Check if required packages are available
-        $packagesWereAlreadyPresent = class_exists('Sokil\IsoCodes\IsoCodesFactory');
+        $packagesWereAlreadyPresent = class_exists('Sokil\IsoCodes\IsoCodesFactory')
+            && class_exists('Sokil\IsoCodes\TranslationDriver\SymfonyTranslationDriver')
+            && class_exists('Symfony\Component\Translation\Translator');
 
         if (!$packagesWereAlreadyPresent) {
             $output->writeln('<comment>Required packages are not installed:</comment>');
             $output->writeln('  - sokil/php-isocodes');
             $output->writeln('  - sokil/php-isocodes-db-i18n');
+            $output->writeln('  - symfony/translation');
             $output->writeln('');
             $output->writeln('These packages will be temporarily installed for this operation');
             $output->writeln('and automatically removed when the command completes.');
@@ -140,10 +143,31 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
             $output->writeln('  Found ' . count($subdivisions) . ' subdivisions to import');
 
-            // Get localized names for each locale
+            // Get English names first as the reference
+            $englishNames = $this->getLocalizedNames($subdivisions, 'en_US', $output);
+            
+            // Get localized names for each locale (only different from English)
             $subdivisionsByLocale = [];
             foreach ($locales as $mahoLocale) {
-                $subdivisionsByLocale[$mahoLocale] = $this->getLocalizedNames($subdivisions, $mahoLocale, $output);
+                $localizedNames = $this->getLocalizedNames($subdivisions, $mahoLocale, $output);
+                
+                // Only keep names that are different from English
+                $differentNames = [];
+                foreach ($localizedNames as $code => $localizedName) {
+                    $englishName = $englishNames[$code] ?? $localizedName;
+                    if ($localizedName !== $englishName) {
+                        $differentNames[$code] = $localizedName;
+                        if ($output->isVerbose()) {
+                            $output->writeln("<comment>    Keeping $mahoLocale translation for $code: '$englishName' → '$localizedName'</comment>");
+                        }
+                    } else if ($output->isVerbose()) {
+                        $output->writeln("<comment>    Skipping $mahoLocale for $code: same as English ('$englishName')</comment>");
+                    }
+                }
+                
+                if (!empty($differentNames)) {
+                    $subdivisionsByLocale[$mahoLocale] = $differentNames;
+                }
             }
 
         } catch (Exception $e) {
@@ -191,7 +215,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                     $existingRegion->setDefaultName($defaultName);
                     $existingRegion->save();
 
-                    // Update localized names
+                    // Update localized names (only for names that differ from English)
                     foreach ($subdivisionsByLocale as $locale => $localizedNames) {
                         if (isset($localizedNames[$code])) {
                             $this->updateRegionName(
@@ -221,7 +245,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                     $region->setDefaultName($defaultName);
                     $region->save();
 
-                    // Insert localized names
+                    // Insert localized names (only for names that differ from English)
                     foreach ($subdivisionsByLocale as $locale => $localizedNames) {
                         if (isset($localizedNames[$code])) {
                             $this->insertRegionName(
@@ -473,12 +497,62 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
     private function getLocalizedNames(array $subdivisions, string $mahoLocale, OutputInterface $output): array
     {
-        // For now, just return the default names since localization setup is complex
-        // In the future, this could set up translation drivers for different locales
         $localizedNames = [];
-        foreach ($subdivisions as $subdivision) {
-            $localizedNames[$subdivision['code']] = $subdivision['name'];
+
+        try {
+            // Convert Maho locale format (en_US) to Symfony/ISO format (en)
+            // Take only the language part, not the country part
+            $symfonyLocale = strtok($mahoLocale, '_');
+
+            if ($output->isVerbose()) {
+                $output->writeln("<comment>  Getting localized subdivision names for locale: $symfonyLocale</comment>");
+            }
+
+            // Create Symfony translation driver and set locale
+            $translationDriver = new \Sokil\IsoCodes\TranslationDriver\SymfonyTranslationDriver(); // @phpstan-ignore class.notFound
+            $translationDriver->setLocale($symfonyLocale); // @phpstan-ignore class.notFound
+
+            // Create IsoCodes factory with the translation driver
+            $isoCodes = new \Sokil\IsoCodes\IsoCodesFactory(null, $translationDriver); // @phpstan-ignore class.notFound
+            $subDivisions = $isoCodes->getSubdivisions(); // @phpstan-ignore class.notFound
+
+            foreach ($subdivisions as $subdivision) {
+                try {
+                    $localizedSubdivision = $subDivisions->getByCode($subdivision['isoCode']); // @phpstan-ignore class.notFound
+                    if ($localizedSubdivision) {
+                        $localName = $localizedSubdivision->getLocalName(); // @phpstan-ignore class.notFound
+
+                        if ($output->isVerbose()) {
+                            $originalName = $localizedSubdivision->getName(); // @phpstan-ignore class.notFound
+                            $isDifferent = $originalName !== $localName ? ' *TRANSLATED*' : '';
+                            $output->writeln("<comment>    {$subdivision['code']}: '$originalName' → '$localName'$isDifferent</comment>");
+                        }
+
+                        // Use the localized name
+                        $localizedNames[$subdivision['code']] = $localName;
+                    } else {
+                        if ($output->isVerbose()) {
+                            $output->writeln("<comment>    {$subdivision['code']}: subdivision not found, using original name</comment>");
+                        }
+                        $localizedNames[$subdivision['code']] = $subdivision['name'];
+                    }
+                } catch (\Exception $e) {
+                    if ($output->isVerbose()) {
+                        $output->writeln("<comment>    {$subdivision['code']}: error - {$e->getMessage()}, using original name</comment>");
+                    }
+                    $localizedNames[$subdivision['code']] = $subdivision['name'];
+                }
+            }
+        } catch (\Exception $e) {
+            if ($output->isVerbose()) {
+                $output->writeln("<comment>  Warning: Could not initialize translations for $mahoLocale: {$e->getMessage()}</comment>");
+            }
+            // Fall back to default names
+            foreach ($subdivisions as $subdivision) {
+                $localizedNames[$subdivision['code']] = $subdivision['name'];
+            }
         }
+
         return $localizedNames;
     }
 
@@ -488,18 +562,24 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             $output->writeln("\n<info>Regions to be imported:</info>");
             $table = new Table($output);
 
-            // Build headers dynamically based on locales
-            $headers = ['Code', 'Name'];
-            $locales = array_keys($importRecords[0]['locales']);
-            foreach ($locales as $locale) {
-                $headers[] = $locale;
+            // Build headers dynamically based on locales that have translations
+            $headers = ['Code', 'Name (English)'];
+            $allLocales = [];
+            foreach ($importRecords as $record) {
+                $allLocales = array_merge($allLocales, array_keys($record['locales']));
+            }
+            $allLocales = array_unique($allLocales);
+            sort($allLocales);
+            foreach ($allLocales as $locale) {
+                $headers[] = $locale . ' (if different)';
             }
             $table->setHeaders($headers);
 
             foreach ($importRecords as $record) {
                 $row = [$record['code'], $record['name']];
-                foreach ($locales as $locale) {
-                    $row[] = $record['locales'][$locale] ?? $record['name'];
+                foreach ($allLocales as $locale) {
+                    $translation = $record['locales'][$locale] ?? null;
+                    $row[] = $translation ?: '-';
                 }
                 $table->addRow($row);
             }
@@ -510,21 +590,26 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             $output->writeln("\n<info>Regions to be updated:</info>");
             $table = new Table($output);
 
-            // Build headers dynamically based on locales
-            $headers = ['Code', 'Current Name', 'New Name'];
-            $locales = [];
-            if (isset($updateRecords[0]['locales'])) {
-                $locales = array_keys($updateRecords[0]['locales']);
-                foreach ($locales as $locale) {
-                    $headers[] = $locale;
+            // Build headers dynamically based on locales that have translations
+            $headers = ['Code', 'Current Name', 'New Name (English)'];
+            $allLocales = [];
+            foreach ($updateRecords as $record) {
+                if (isset($record['locales'])) {
+                    $allLocales = array_merge($allLocales, array_keys($record['locales']));
                 }
+            }
+            $allLocales = array_unique($allLocales);
+            sort($allLocales);
+            foreach ($allLocales as $locale) {
+                $headers[] = $locale . ' (if different)';
             }
             $table->setHeaders($headers);
 
             foreach ($updateRecords as $record) {
                 $row = [$record['code'], $record['existing'], $record['name']];
-                foreach ($locales as $locale) {
-                    $row[] = $record['locales'][$locale] ?? $record['name'];
+                foreach ($allLocales as $locale) {
+                    $translation = $record['locales'][$locale] ?? null;
+                    $row[] = $translation ?: '-';
                 }
                 $table->addRow($row);
             }
@@ -564,12 +649,13 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
     private function installIsoPackages(OutputInterface $output): bool
     {
-        $output->writeln('<info>Installing sokil/php-isocodes and sokil/php-isocodes-db-i18n...</info>');
+        $output->writeln('<info>Installing sokil/php-isocodes, sokil/php-isocodes-db-i18n and symfony/translation...</info>');
 
         $process = new Process([
             'composer', 'require',
             'sokil/php-isocodes',
             'sokil/php-isocodes-db-i18n',
+            'symfony/translation',
             '--no-interaction',
         ], MAHO_ROOT_DIR);
 
@@ -593,6 +679,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             'composer', 'remove',
             'sokil/php-isocodes',
             'sokil/php-isocodes-db-i18n',
+            'symfony/translation',
             '--no-interaction',
         ], MAHO_ROOT_DIR);
 
@@ -601,7 +688,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
         if (!$process->isSuccessful()) {
             $output->writeln('<comment>Warning: Could not remove ISO packages automatically.</comment>');
-            $output->writeln('<comment>You may want to run: composer remove sokil/php-isocodes sokil/php-isocodes-db-i18n</comment>');
+            $output->writeln('<comment>You may want to run: composer remove sokil/php-isocodes sokil/php-isocodes-db-i18n symfony/translation</comment>');
         } else {
             $output->writeln('<info>Temporary packages removed successfully.</info>');
         }
