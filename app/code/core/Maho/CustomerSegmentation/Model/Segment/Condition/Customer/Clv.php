@@ -58,7 +58,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
     #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
-        return $this->getSubfilterSql('customer_entity.entity_id', true, $websiteId);
+        return $this->getSubfilterSql('e.entity_id', true, $websiteId);
     }
 
     public function getSubfilterSql(string $fieldName, bool $requireValid, ?int $website): string
@@ -67,11 +67,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
         $operator = $this->getOperator();
         $value = $this->getValue();
 
-        $adapter = $this->getResource()->getReadConnection();
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
 
         // Base query for sales data
-        $salesTable = $this->getResource()->getTable('sales/order');
-        $creditmemoTable = $this->getResource()->getTable('sales/creditmemo');
+        $salesTable = $resource->getTableName('sales/order');
+        $creditmemoTable = $resource->getTableName('sales/creditmemo');
 
         switch ($attribute) {
             case 'lifetime_sales':
@@ -116,8 +117,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                     ->joinLeft(
                         ['refunds' => new Zend_Db_Expr("({$refundsSelect})")],
                         'sales.customer_id = refunds.customer_id',
-                        ['total' => 'COALESCE(sales.amount, 0) - COALESCE(refunds.amount, 0)'],
-                    );
+                        [],
+                    )
+                    ->columns(['total' => new Zend_Db_Expr('COALESCE(sales.amount, 0) - COALESCE(refunds.amount, 0)')]);
                 break;
 
             case 'lifetime_refunds':
@@ -134,19 +136,20 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
 
         if ($website) {
             if (isset($salesTable)) {
-                $select->where('o.store_id IN (?)', $this->getStoreByWebsite($website));
+                $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
+                $select->where('o.store_id IN (?)', $websiteStores);
             }
         }
 
         // Create the final condition
         $clvSelect = $adapter->select()
             ->from(['clv' => new Zend_Db_Expr("({$select})")], ['customer_id'])
-            ->where($this->getResource()->createConditionSql('clv.total', $operator, $value));
+            ->where($adapter->prepareSqlCondition('clv.total', [$operator => $value]));
 
         if ($requireValid) {
-            return $adapter->quoteInto("{$fieldName} IN (?)", new Zend_Db_Expr($clvSelect));
+            return $adapter->quoteInto("{$fieldName} IN (?)", new Zend_Db_Expr((string) $clvSelect));
         } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Zend_Db_Expr($clvSelect));
+            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Zend_Db_Expr((string) $clvSelect));
         }
     }
 
