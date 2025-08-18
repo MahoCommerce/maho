@@ -36,6 +36,7 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
     {
         $this
             ->addOption('locales', 'l', InputOption::VALUE_OPTIONAL, 'Comma-separated list of Maho locales (e.g., en_US,it_IT)', 'en_US')
+            ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing localized names (default: only add new locales)')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip confirmation for package installation')
             ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Preview changes without importing');
     }
@@ -47,6 +48,7 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
 
         $locales = array_map('trim', explode(',', $input->getOption('locales')));
         $dryRun = $input->getOption('dry-run');
+        $updateExisting = $input->getOption('update-existing');
         $force = $input->getOption('force');
 
         // Check if this is a re-execution after package installation
@@ -54,9 +56,9 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
         $packagesInstalledByUs = getenv('MAHO_ISO_INSTALLED') === 'true';
 
         // Check if required packages are available
-        $packagesWereAlreadyPresent = class_exists('Sokil\IsoCodes\IsoCodesFactory')
-            && class_exists('Sokil\IsoCodes\TranslationDriver\SymfonyTranslationDriver')
-            && class_exists('Symfony\Component\Translation\Translator');
+        $packagesWereAlreadyPresent = class_exists(\Sokil\IsoCodes\IsoCodesFactory::class)
+            && class_exists(\Sokil\IsoCodes\TranslationDriver\SymfonyTranslationDriver::class)
+            && class_exists(\Symfony\Component\Translation\Translator::class);
 
         if (!$packagesWereAlreadyPresent) {
             $output->writeln('<comment>Required packages are not installed:</comment>');
@@ -136,35 +138,40 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
             }
             unset($country); // Break the reference
 
-            // Get localized names for each locale (only different from English default)
+            // Get localized names for each locale
             $countriesByLocale = [];
             foreach ($locales as $mahoLocale) {
                 $localizedNames = $this->getLocalizedNames($countriesToProcess, $mahoLocale, $output);
 
-                // Only keep names that are different from the English default
-                $differentNames = [];
-                foreach ($localizedNames as $code => $localizedName) {
-                    // Find the country data to get the (now English) default name
-                    $defaultName = null;
-                    foreach ($countriesToProcess as $country) {
-                        if ($country['code'] === $code) {
-                            $defaultName = $country['name'];
-                            break;
+                if ($mahoLocale === 'en_US') {
+                    // For English locale, include all names (for directory_country_name table)
+                    $countriesByLocale[$mahoLocale] = $localizedNames;
+                } else {
+                    // For non-English locales, only keep names that are different from the English default
+                    $differentNames = [];
+                    foreach ($localizedNames as $code => $localizedName) {
+                        // Find the country data to get the (now English) default name
+                        $defaultName = null;
+                        foreach ($countriesToProcess as $country) {
+                            if ($country['code'] === $code) {
+                                $defaultName = $country['name'];
+                                break;
+                            }
+                        }
+
+                        if ($defaultName && $localizedName !== $defaultName) {
+                            $differentNames[$code] = $localizedName;
+                            if ($output->isVerbose()) {
+                                $output->writeln("<comment>    Keeping $mahoLocale translation for $code: '$defaultName' → '$localizedName'</comment>");
+                            }
+                        } elseif ($output->isVerbose()) {
+                            $output->writeln("<comment>    Skipping $mahoLocale for $code: same as English default ('$defaultName')</comment>");
                         }
                     }
 
-                    if ($defaultName && $localizedName !== $defaultName) {
-                        $differentNames[$code] = $localizedName;
-                        if ($output->isVerbose()) {
-                            $output->writeln("<comment>    Keeping $mahoLocale translation for $code: '$defaultName' → '$localizedName'</comment>");
-                        }
-                    } elseif ($output->isVerbose()) {
-                        $output->writeln("<comment>    Skipping $mahoLocale for $code: same as English default ('$defaultName')</comment>");
+                    if (!empty($differentNames)) {
+                        $countriesByLocale[$mahoLocale] = $differentNames;
                     }
-                }
-
-                if (!empty($differentNames)) {
-                    $countriesByLocale[$mahoLocale] = $differentNames;
                 }
             }
 
@@ -200,30 +207,55 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
             $existingCountry = Mage::getModel('directory/country')->loadByCode($code);
 
             if ($existingCountry->getId()) {
-                // Always process localized names for countries (unlike regions, this is the main purpose)
-                if (!$dryRun) {
-                    // Note: Maho stores country names in directory_country_name table, not in the main directory_country table
-                    // We need to update the localized names
-                    foreach ($countriesByLocale as $locale => $localizedNames) {
-                        if (isset($localizedNames[$code])) {
-                            $this->updateCountryName(
-                                $code,
-                                $locale,
-                                $localizedNames[$code],
-                                $connection,
-                            );
-                        }
-                    }
-                } else {
-                    $localizedInfo = [];
-                    foreach ($countriesByLocale as $locale => $localizedNames) {
-                        if (isset($localizedNames[$code])) {
-                            $localizedInfo[$locale] = $localizedNames[$code];
-                        }
-                    }
-                    $updateRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingCountry->getName(), 'locales' => $localizedInfo];
+                $hasUpdates = false;
+
+                // Update main country name if using English locale and name differs
+                $shouldUpdateMainName = false;
+                if (in_array('en_US', $locales) && $existingCountry->getName() !== $defaultName) {
+                    $shouldUpdateMainName = true;
+                    $hasUpdates = true;
                 }
-                $updated++;
+
+                // Process localized names (non-English), but respect existing ones unless --update-existing is used
+                $localesToProcess = [];
+                foreach ($countriesByLocale as $locale => $localizedNames) {
+                    if (isset($localizedNames[$code])) {
+                        // Check if this localized name already exists
+                        $existingLocalizedName = $this->getExistingCountryName($code, $locale, $connection);
+                        if (!$existingLocalizedName || $updateExisting) {
+                            $localesToProcess[$locale] = $localizedNames[$code];
+                            $hasUpdates = true;
+                        } elseif ($output->isVerbose()) {
+                            $output->writeln("<comment>Skipping $code ($locale): localized name already exists ('$existingLocalizedName')</comment>");
+                        }
+                    }
+                }
+
+                if ($hasUpdates) {
+                    if (!$dryRun) {
+                        // Update main country name if needed
+                        if ($shouldUpdateMainName) {
+                            $existingCountry->setName($defaultName);
+                            $existingCountry->save();
+                        }
+
+                        // Update localized names
+                        foreach ($localesToProcess as $locale => $localizedName) {
+                            $this->updateCountryName($code, $locale, $localizedName, $connection);
+                        }
+                    } else {
+                        $updateRecords[] = [
+                            'code' => $code,
+                            'name' => $defaultName,
+                            'existing' => $existingCountry->getName(),
+                            'locales' => $localesToProcess,
+                            'updateMainName' => $shouldUpdateMainName,
+                        ];
+                    }
+                    $updated++;
+                } else {
+                    $skipped++;
+                }
             } else {
                 // Country doesn't exist in Maho - this is unusual, we'll skip it
                 $output->writeln("<comment>Country $code not found in Maho database, skipping</comment>");
@@ -395,6 +427,18 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
         $output->writeln("\n<comment>This was a dry run. Use without --dry-run to apply changes.</comment>");
     }
 
+    private function getExistingCountryName(string $countryCode, string $locale, Varien_Db_Adapter_Interface $connection): ?string
+    {
+        $tableName = $connection->getTableName('directory_country_name');
+        $select = $connection->select()
+            ->from($tableName, ['name'])
+            ->where('country_id = ?', $countryCode)
+            ->where('locale = ?', $locale);
+
+        $result = $connection->fetchOne($select);
+        return $result ?: null;
+    }
+
     private function updateCountryName(string $countryCode, string $locale, string $name, Varien_Db_Adapter_Interface $connection): void
     {
         $tableName = $connection->getTableName('directory_country_name');
@@ -466,6 +510,9 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
         }
         if ($input->getOption('dry-run')) {
             $args[] = '--dry-run';
+        }
+        if ($input->getOption('update-existing')) {
+            $args[] = '--update-existing';
         }
         if ($input->getOption('force')) {
             $args[] = '--force';

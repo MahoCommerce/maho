@@ -37,7 +37,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $this
             ->addOption('country', 'c', InputOption::VALUE_REQUIRED, 'ISO-2 country code (e.g., US, IT, CA)')
             ->addOption('locales', 'l', InputOption::VALUE_OPTIONAL, 'Comma-separated list of Maho locales (e.g., en_US,it_IT)', 'en_US')
-            ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing regions (default: skip)')
+            ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing regions and localized names (default: only add new locales)')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip confirmation for package installation')
             ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Preview changes without importing');
     }
@@ -63,9 +63,9 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $packagesInstalledByUs = getenv('MAHO_ISO_INSTALLED') === 'true';
 
         // Check if required packages are available
-        $packagesWereAlreadyPresent = class_exists('Sokil\IsoCodes\IsoCodesFactory')
-            && class_exists('Sokil\IsoCodes\TranslationDriver\SymfonyTranslationDriver')
-            && class_exists('Symfony\Component\Translation\Translator');
+        $packagesWereAlreadyPresent = class_exists(\Sokil\IsoCodes\IsoCodesFactory::class)
+            && class_exists(\Sokil\IsoCodes\TranslationDriver\SymfonyTranslationDriver::class)
+            && class_exists(\Symfony\Component\Translation\Translator::class);
 
         if (!$packagesWereAlreadyPresent) {
             $output->writeln('<comment>Required packages are not installed:</comment>');
@@ -226,38 +226,50 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                 ->loadByCode($code, $countryCode);
 
             if ($existingRegion->getId()) {
-                if (!$updateExisting) {
-                    $skipRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingRegion->getDefaultName()];
-                    $skipped++;
-                    continue;
+                // Process localized names, checking each locale individually
+                $localesToProcess = [];
+                $hasUpdates = false;
+
+                foreach ($subdivisionsByLocale as $locale => $localizedNames) {
+                    if (isset($localizedNames[$code])) {
+                        // Check if this localized name already exists
+                        $existingLocalizedName = $this->getExistingRegionName((int) $existingRegion->getId(), $locale, $connection);
+                        if (!$existingLocalizedName || $updateExisting) {
+                            $localesToProcess[$locale] = $localizedNames[$code];
+                            $hasUpdates = true;
+                        } elseif ($output->isVerbose()) {
+                            $output->writeln("<comment>Skipping $code ($locale): localized name already exists ('$existingLocalizedName')</comment>");
+                        }
+                    }
                 }
 
-                // Update existing region
-                if (!$dryRun) {
-                    $existingRegion->setDefaultName($defaultName);
-                    $existingRegion->save();
+                // Update region name if needed (only when $updateExisting is true)
+                $shouldUpdateRegionName = $updateExisting && $existingRegion->getDefaultName() !== $defaultName;
 
-                    // Update localized names (only for names that differ from English)
-                    foreach ($subdivisionsByLocale as $locale => $localizedNames) {
-                        if (isset($localizedNames[$code])) {
+                if ($hasUpdates || $shouldUpdateRegionName) {
+                    if (!$dryRun) {
+                        if ($shouldUpdateRegionName) {
+                            $existingRegion->setDefaultName($defaultName);
+                            $existingRegion->save();
+                        }
+
+                        // Update localized names
+                        foreach ($localesToProcess as $locale => $localizedName) {
                             $this->updateRegionName(
-                                $existingRegion->getId(),
+                                (int) $existingRegion->getId(),
                                 $locale,
-                                $localizedNames[$code],
+                                $localizedName,
                                 $connection,
                             );
                         }
+                    } else {
+                        $updateRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingRegion->getDefaultName(), 'locales' => $localesToProcess];
                     }
+                    $updated++;
                 } else {
-                    $localizedInfo = [];
-                    foreach ($subdivisionsByLocale as $locale => $localizedNames) {
-                        if (isset($localizedNames[$code])) {
-                            $localizedInfo[$locale] = $localizedNames[$code];
-                        }
-                    }
-                    $updateRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingRegion->getDefaultName(), 'locales' => $localizedInfo];
+                    $skipRecords[] = ['code' => $code, 'name' => $defaultName, 'existing' => $existingRegion->getDefaultName()];
+                    $skipped++;
                 }
-                $updated++;
             } else {
                 // Insert new region
                 if (!$dryRun) {
@@ -271,7 +283,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                     foreach ($subdivisionsByLocale as $locale => $localizedNames) {
                         if (isset($localizedNames[$code])) {
                             $this->insertRegionName(
-                                $region->getId(),
+                                (int) $region->getId(),
                                 $locale,
                                 $localizedNames[$code],
                                 $connection,
@@ -651,10 +663,22 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $output->writeln("\n<comment>This was a dry run. Use without --dry-run to apply changes.</comment>");
     }
 
+    private function getExistingRegionName(int $regionId, string $locale, Varien_Db_Adapter_Interface $connection): ?string
+    {
+        $tableName = $connection->getTableName('directory_country_region_name');
+        $select = $connection->select()
+            ->from($tableName, ['name'])
+            ->where('region_id = ?', $regionId)
+            ->where('locale = ?', $locale);
+
+        $result = $connection->fetchOne($select);
+        return $result ?: null;
+    }
+
     private function insertRegionName(int $regionId, string $locale, string $name, Varien_Db_Adapter_Interface $connection): void
     {
         $connection->insertOnDuplicate(
-            $connection->getTableName('directory/country_region_name'),
+            $connection->getTableName('directory_country_region_name'),
             [
                 'locale' => $locale,
                 'region_id' => $regionId,
