@@ -22,6 +22,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Process\Process;
 
 #[AsCommand(
@@ -36,9 +37,9 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $this
             ->addOption('country', 'c', InputOption::VALUE_REQUIRED, 'ISO-2 country code (e.g., US, IT, CA)')
             ->addOption('locales', 'l', InputOption::VALUE_OPTIONAL, 'Comma-separated list of Maho locales (e.g., en_US,it_IT)', 'en_US')
-            ->addOption('import-regions', 'r', InputOption::VALUE_NONE, 'Import regions too (by default only leaf subdivisions)')
+            ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing regions (default: skip)')
             ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Preview changes without importing')
-            ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing regions (default: skip)');
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip confirmation for package installation');
     }
 
     #[\Override]
@@ -48,9 +49,9 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
         $countryCode = strtoupper($input->getOption('country'));
         $locales = array_map('trim', explode(',', $input->getOption('locales')));
-        $importRegions = $input->getOption('import-regions');
         $dryRun = $input->getOption('dry-run');
         $updateExisting = $input->getOption('update-existing');
+        $force = $input->getOption('force');
 
         if (!$countryCode) {
             $output->writeln('<error>Country code is required. Use --country=XX</error>');
@@ -65,6 +66,26 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $packagesWereAlreadyPresent = class_exists('Sokil\IsoCodes\IsoCodesFactory');
 
         if (!$packagesWereAlreadyPresent) {
+            $output->writeln('<comment>Required packages are not installed:</comment>');
+            $output->writeln('  - sokil/php-isocodes');
+            $output->writeln('  - sokil/php-isocodes-db-i18n');
+            $output->writeln('');
+            $output->writeln('These packages will be temporarily installed for this operation');
+            $output->writeln('and automatically removed when the command completes.');
+
+            if (!$force) {
+                /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion('<question>Do you want to proceed with the installation? (yes/no) [yes]:</question> ', true);
+
+                if (!$helper->ask($input, $output, $question)) {
+                    $output->writeln('<comment>Installation cancelled.</comment>');
+                    return Command::SUCCESS;
+                }
+            } else {
+                $output->writeln('<info>Proceeding with installation (--force flag set).</info>');
+            }
+
             $output->writeln('<info>Installing required ISO codes packages...</info>');
 
             // Install packages
@@ -98,7 +119,6 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             $output->writeln("<info>Using ISO code: $isoCountryCode</info>");
         }
         $output->writeln('<info>Locales: ' . implode(', ', $locales) . '</info>');
-        $output->writeln('<info>Strategy: ' . ($importRegions ? 'All subdivisions' : 'Leaf subdivisions only') . '</info>');
 
         if ($dryRun) {
             $output->writeln('<comment>DRY RUN MODE - No changes will be made</comment>');
@@ -109,7 +129,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             $isoCodes = new \Sokil\IsoCodes\IsoCodesFactory(); // @phpstan-ignore class.notFound
             $subDivisions = $isoCodes->getSubdivisions(); // @phpstan-ignore class.notFound
 
-            $subdivisions = $this->collectSubdivisions($subDivisions, $isoCountryCode, $importRegions, $output);
+            $subdivisions = $this->collectSubdivisions($subDivisions, $isoCountryCode, $output);
 
             if (empty($subdivisions)) {
                 $output->writeln("<comment>No subdivisions found for $countryCode</comment>");
@@ -250,7 +270,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    private function collectSubdivisions(\Sokil\IsoCodes\Database\SubdivisionsInterface $subDivisions, string $countryCode, bool $importRegions, OutputInterface $output): array // @phpstan-ignore class.notFound
+    private function collectSubdivisions(\Sokil\IsoCodes\Database\SubdivisionsInterface $subDivisions, string $countryCode, OutputInterface $output): array // @phpstan-ignore class.notFound
     {
         // First pass: collect all subdivisions and analyze the hierarchy
         $allSubdivisions = $this->getAllSubdivisions($subDivisions, $countryCode);
@@ -260,7 +280,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         }
 
         // Second pass: determine what to import based on hierarchy analysis
-        return $this->filterSubdivisionsByHierarchy($allSubdivisions, $importRegions, $output);
+        return $this->filterSubdivisionsByHierarchy($allSubdivisions, $output);
     }
 
     private function getAllSubdivisions(\Sokil\IsoCodes\Database\SubdivisionsInterface $subDivisions, string $countryCode): array // @phpstan-ignore class.notFound
@@ -335,12 +355,8 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         }
     }
 
-    private function filterSubdivisionsByHierarchy(array $allSubdivisions, bool $importRegions, OutputInterface $output): array
+    private function filterSubdivisionsByHierarchy(array $allSubdivisions, OutputInterface $output): array
     {
-        if ($importRegions) {
-            // Import everything if explicitly requested
-            return $allSubdivisions;
-        }
 
         // Analyze subdivision types and their frequency
         $typeGroups = [];
@@ -584,14 +600,14 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         if ($input->getOption('locales')) {
             $args[] = '--locales=' . $input->getOption('locales');
         }
-        if ($input->getOption('import-regions')) {
-            $args[] = '--import-regions';
-        }
         if ($input->getOption('dry-run')) {
             $args[] = '--dry-run';
         }
         if ($input->getOption('update-existing')) {
             $args[] = '--update-existing';
+        }
+        if ($input->getOption('force')) {
+            $args[] = '--force';
         }
 
         // Set environment variable to indicate this is a re-execution
