@@ -47,13 +47,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
         return 'text';
     }
 
-    #[\Override]
-    public function getAttributeElement()
-    {
-        $element = parent::getAttributeElement();
-        $element->setShowAsText(true);
-        return $element;
-    }
 
     #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
@@ -154,15 +147,23 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
     }
 
     #[\Override]
-    public function asHtml(): string
+    public function getAttributeName(): string
     {
-        return $this->getTypeElement()->getHtml()
-            . Mage::helper('customersegmentation')->__(
-                '%s %s %s',
-                $this->getAttributeElement()->getHtml(),
-                $this->getOperatorElement()->getHtml(),
-                $this->getValueElement()->getHtml(),
-            )
-            . $this->getRemoveLinkHtml();
+        $attributeName = parent::getAttributeName();
+        return Mage::helper('customersegmentation')->__('Order') . ':' . ' ' . $attributeName;
     }
+
+    #[\Override]
+    public function asString($format = ''): string
+    {
+        $attribute = $this->getAttribute();
+        $this->loadAttributeOptions();
+        $attributeOptions = $this->getAttributeOption();
+        $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
+
+        $operatorName = $this->getOperatorName();
+        $valueName = $this->getValueName();
+        return Mage::helper('customersegmentation')->__('Order') . ':' . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
+    }
+
 }

@@ -48,13 +48,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
         return 'text';
     }
 
-    #[\Override]
-    public function getAttributeElement()
-    {
-        $element = parent::getAttributeElement();
-        $element->setShowAsText(true);
-        return $element;
-    }
 
     #[\Override]
     public function getInputType(): string

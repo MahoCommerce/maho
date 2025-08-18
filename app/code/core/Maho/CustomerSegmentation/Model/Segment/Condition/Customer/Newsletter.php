@@ -41,17 +41,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         return $this;
     }
 
-    #[\Override]
-    public function getAttributeElement(): Varien_Data_Form_Element_Abstract
-    {
-        if (!$this->hasAttributeOption()) {
-            $this->loadAttributeOptions();
-        }
-
-        $element = parent::getAttributeElement();
-        $element->setShowAsText(true);
-        return $element;
-    }
 
     #[\Override]
     public function getInputType(): string
