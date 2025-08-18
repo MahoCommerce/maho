@@ -490,12 +490,9 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
             // Build headers dynamically based on locales
             $headers = ['Code', 'Name'];
-            $locales = [];
-            if (!empty($importRecords)) {
-                $locales = array_keys($importRecords[0]['locales']);
-                foreach ($locales as $locale) {
-                    $headers[] = $locale;
-                }
+            $locales = array_keys($importRecords[0]['locales']);
+            foreach ($locales as $locale) {
+                $headers[] = $locale;
             }
             $table->setHeaders($headers);
 
@@ -516,7 +513,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
             // Build headers dynamically based on locales
             $headers = ['Code', 'Current Name', 'New Name'];
             $locales = [];
-            if (!empty($updateRecords) && isset($updateRecords[0]['locales'])) {
+            if (isset($updateRecords[0]['locales'])) {
                 $locales = array_keys($updateRecords[0]['locales']);
                 foreach ($locales as $locale) {
                     $headers[] = $locale;
