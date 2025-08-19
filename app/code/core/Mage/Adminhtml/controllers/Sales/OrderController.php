@@ -736,6 +736,59 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
+     * Change email address for guest orders
+     */
+    public function guestOrderEmailChangeAction(): void
+    {
+        $orderId = $this->getRequest()->getParam('order_id');
+        $newEmail = trim($this->getRequest()->getParam('email'));
+
+        try {
+            $order = Mage::getModel('sales/order')->load($orderId);
+            if (!$order->getId()) {
+                throw new Mage_Core_Exception($this->__('This order no longer exists.'));
+            }
+            if (!$order->getCustomerIsGuest()) {
+                throw new Mage_Core_Exception($this->__('Email can only be changed for guest orders.'));
+            }
+
+            // Check if email hasn't changed
+            if ($newEmail === $order->getCustomerEmail()) {
+                $this->_redirect('*/*/view', ['order_id' => $orderId]);
+                return;
+            }
+
+            // Validate email
+            $coreHelper = Mage::helper('core');
+            if (!$coreHelper->isValidNotBlank($newEmail) || !$coreHelper->isValidEmail($newEmail)) {
+                throw new Mage_Core_Exception($this->__('Please enter a valid email address. For example johndoe@domain.com.'));
+            }
+
+            // Update the email
+            $oldEmail = $order->getCustomerEmail();
+            $order->setCustomerEmail($newEmail);
+            $order->addStatusHistoryComment(
+                $this->__(
+                    'Customer email address changed from %s to %s by %s.',
+                    $oldEmail,
+                    $newEmail,
+                    Mage::getSingleton('admin/session')->getUser()->getUsername(),
+                ),
+            );
+            $order->save();
+
+            $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
+        } catch (Mage_Core_Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError($this->__('An error occurred while updating the email address.'));
+        }
+
+        $this->_redirect('*/*/view', ['order_id' => $orderId]);
+    }
+
+    /**
      * Controller pre-dispatch method
      *
      * @return Mage_Adminhtml_Controller_Action
@@ -743,7 +796,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions('cancel', 'massCancel');
+        $this->_setForcedFormKeyActions(['cancel', 'massCancel', 'guestOrderEmailChange']);
         return parent::preDispatch();
     }
 }

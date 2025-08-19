@@ -5437,12 +5437,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/SearchController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Controller_Action\:\:_setForcedFormKeyActions\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/SearchController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Checkout_AgreementController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5837,12 +5831,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Controller_Action\:\:_setForcedFormKeyActions\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
 
 		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Order\:\:setEmailSent\(\) expects int, false given\.$#'
