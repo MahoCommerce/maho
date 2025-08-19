@@ -730,7 +730,7 @@ function addCopyIcons() {
     const copyTexts = document.querySelectorAll('[data-copy-text]');
     copyTexts.forEach(copyText => {
         const iconElement = createCopyIconElement();
-        copyText.parentNode.appendChild(iconElement);
+        copyText.insertAdjacentElement('afterend', iconElement);
     });
 }
 
