@@ -762,33 +762,20 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                 throw new Mage_Core_Exception($this->__('Please enter a valid email address. For example johndoe@domain.com.'));
             }
 
-            // Keep the old email for later
+            // Update the email
             $oldEmail = $order->getCustomerEmail();
-
-            // Use transaction to ensure both email and history comment are saved together
-            $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
-            $connection->beginTransaction();
-
-            try {
-                $order->setCustomerEmail($newEmail);
-                $order->save();
-
-                $order->addStatusHistoryComment(
-                    $this->__(
-                        'Customer email address changed from %s to %s by %s.',
-                        $oldEmail,
-                        $newEmail,
-                        Mage::getSingleton('admin/session')->getUser()->getUsername(),
-                    ),
-                );
-
-                $connection->commit();
-                $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
-            } catch (Exception $e) {
-                $connection->rollBack();
-                throw $e;
-            }
-
+            $order->setCustomerEmail($newEmail);
+            $order->addStatusHistoryComment(
+                $this->__(
+                    'Customer email address changed from %s to %s by %s.',
+                    $oldEmail,
+                    $newEmail,
+                    Mage::getSingleton('admin/session')->getUser()->getUsername(),
+                ),
+            );
+            $order->save();
+            
+            $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
