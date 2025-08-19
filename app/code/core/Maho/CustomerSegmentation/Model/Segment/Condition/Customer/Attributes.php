@@ -243,7 +243,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         // For selection fields, provide custom operator names
         if (in_array($this->getAttribute(), ['gender', 'group_id', 'store_id', 'website_id'])) {
             return match ($this->getOperator()) {
-                '==', '=' => Mage::helper('rule')->__('is'),
+                '==' => Mage::helper('rule')->__('is'),
                 '!=' => Mage::helper('rule')->__('is not'),
                 default => parent::getOperatorName(),
             };
