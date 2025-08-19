@@ -758,7 +758,9 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                 return;
             }
 
-            if (!Mage::helper('core')->isValidEmail($newEmail)) {
+            // Validate email
+            $coreHelper = Mage::helper('core');
+            if (!$coreHelper->isValidNotBlank($newEmail) || !$coreHelper->isValidEmail($newEmail)) {
                 throw new Mage_Core_Exception($this->__('Please enter a valid email address. For example johndoe@domain.com.'));
             }
 
@@ -774,7 +776,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                 ),
             );
             $order->save();
-            
+
             $this->_getSession()->addSuccess($this->__('The email address has been updated successfully.'));
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
