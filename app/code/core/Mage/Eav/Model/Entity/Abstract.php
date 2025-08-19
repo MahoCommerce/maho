@@ -1493,19 +1493,19 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         return $this;
     }
 
-    /**
-     * Save attribute
-     *
-     * @param string $attributeCode
-     * @return $this
-     */
-    public function saveAttribute(Varien_Object $object, $attributeCode)
+    public function saveAttribute(Varien_Object $object, string $attributeCode): self
     {
         $this->_attributeValuesToSave   = [];
         $this->_attributeValuesToDelete = [];
 
         $attribute      = $this->getAttribute($attributeCode);
         $backend        = $attribute->getBackend();
+
+        // Handle static attributes differently
+        if ($backend->isStatic()) {
+            return $this->saveStaticAttribute($object, $attribute);
+        }
+
         $table          = $backend->getTable();
         $entity         = $attribute->getEntity();
         $entityIdField  = $entity->getEntityIdField();
@@ -1549,6 +1549,26 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
             $adapter->rollBack();
             throw $e;
         }
+
+        return $this;
+    }
+
+    /**
+     * Save static attribute to main entity table
+     */
+    protected function saveStaticAttribute(Varien_Object $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): self
+    {
+        $attributeCode = $attribute->getAttributeCode();
+        $newValue = $object->getData($attributeCode);
+        $adapter = $this->_getWriteAdapter();
+        $table = $this->getEntityTable();
+        $entityIdField = $this->getEntityIdField();
+
+        // Prepare the data for the main entity table
+        $data = [$attributeCode => $newValue];
+        $where = $adapter->quoteInto($entityIdField . '=?', $object->getId());
+
+        $adapter->update($table, $data, $where);
 
         return $this;
     }
