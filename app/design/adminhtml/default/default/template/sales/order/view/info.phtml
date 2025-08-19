@@ -172,7 +172,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
 <script type="text/javascript">
 function updateGuestEmail() {
     const currentEmail = <?= Mage::helper('core')->jsonEncode($_order->getCustomerEmail()) ?>;
-    const newEmail = prompt('<?= Mage::helper('sales')->__('Enter new email address:') ?>', currentEmail);
+    const newEmail = prompt('<?= $this->__('Enter new email address:') ?>', currentEmail);
 
     if (newEmail === null) {
         return; // User cancelled

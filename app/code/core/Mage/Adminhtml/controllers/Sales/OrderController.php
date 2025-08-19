@@ -807,7 +807,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions('cancel', 'massCancel', 'guestOrderEmailChange');
+        $this->_setForcedFormKeyActions(['cancel', 'massCancel', 'guestOrderEmailChange']);
         return parent::preDispatch();
     }
 }
