@@ -112,7 +112,14 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
                 </tr>
                 <tr>
                     <td class="label"><label><?= Mage::helper('sales')->__('Email') ?></label></td>
-                    <td class="value"><a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $_order->getCustomerEmail()?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a></td>
+                    <td class="value">
+                        <a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $_order->getCustomerEmail()?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a>
+                        <?php if ($_order->getCustomerIsGuest()): ?>
+                            <button type="button" onclick="updateGuestEmail()">
+                                <span><?= Mage::helper('sales')->__('Edit') ?></span>
+                            </button>
+                        <?php endif; ?>
+                    </td>
                 </tr>
                 <?php if ($_groupName = $this->getCustomerGroupName()) : ?>
                 <tr>
@@ -159,4 +166,43 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     </div>
 </div>
 <div class="clear"></div>
+<?php endif ?>
+
+<?php if ($_order->getCustomerIsGuest()): ?>
+<script type="text/javascript">
+function updateGuestEmail() {
+    const currentEmail = <?= Mage::helper('core')->jsonEncode($_order->getCustomerEmail()) ?>;
+    const newEmail = prompt('<?= Mage::helper('sales')->__('Enter new email address:') ?>', currentEmail);
+
+    if (newEmail === null) {
+        return; // User cancelled
+    }
+
+    // Create and submit a form
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= $this->getUrl('*/*/guestOrderEmailChange') ?>';
+
+    const formKey = document.createElement('input');
+    formKey.type = 'hidden';
+    formKey.name = 'form_key';
+    formKey.value = FORM_KEY;
+    form.appendChild(formKey);
+
+    const orderId = document.createElement('input');
+    orderId.type = 'hidden';
+    orderId.name = 'order_id';
+    orderId.value = '<?= $_order->getId() ?>';
+    form.appendChild(orderId);
+
+    const emailInput = document.createElement('input');
+    emailInput.type = 'hidden';
+    emailInput.name = 'email';
+    emailInput.value = newEmail;
+    form.appendChild(emailInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 <?php endif ?>
