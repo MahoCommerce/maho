@@ -115,9 +115,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
                     <td class="value">
                         <a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $_order->getCustomerEmail()?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a>
                         <?php if ($_order->getCustomerIsGuest()): ?>
-                            <button type="button" onclick="updateGuestEmail()">
-                                <span><?= Mage::helper('sales')->__('Edit') ?></span>
-                            </button>
+                            <button type="button" onclick="updateGuestEmail()"><?= Mage::helper('sales')->__('Edit') ?></button>
                         <?php endif; ?>
                     </td>
                 </tr>
