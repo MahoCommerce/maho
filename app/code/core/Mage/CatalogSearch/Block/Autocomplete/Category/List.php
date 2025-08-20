@@ -33,14 +33,27 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
             $searchType = (int) Mage::getStoreConfig(Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_TYPE);
             $searchSeparator = strtoupper(Mage::getStoreConfig(Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_SEPARATOR));
 
-            // Get max query words from configuration
+            // Get max query words and min query length from configuration
             $maxQueryWords = (int) Mage::getStoreConfig(Mage_CatalogSearch_Model_Query::XML_PATH_MAX_QUERY_WORDS);
+            $minQueryLength = (int) Mage::getStoreConfig(Mage_CatalogSearch_Model_Query::XML_PATH_MIN_QUERY_LENGTH);
 
-            switch ($searchType) {
-                case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_FULLTEXT:
-                    // Fulltext search: split into words and use AND/OR based on separator config
-                    $words = Mage::helper('core/string')->splitWords($query, true, $maxQueryWords);
-                    if ($words) {
+            // Split query into words and filter by minimum length
+            $words = Mage::helper('core/string')->splitWords($query, true, $maxQueryWords);
+            if ($words) {
+                $words = array_filter($words, function ($word) use ($minQueryLength) {
+                    return strlen($word) >= $minQueryLength;
+                });
+            }
+
+            // For COMBINE mode with multiple words, or single/no valid words, use full phrase
+            if (!$words || ($searchType === Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE && count($words) <= 1)) {
+                $collection->addAttributeToFilter('name', ['like' => "%{$query}%"]);
+            } else {
+                // We have valid words to search with
+                switch ($searchType) {
+                    case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_FULLTEXT:
+                    case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE:
+                    default:
                         if ($searchSeparator === 'AND') {
                             // AND logic: all words must be present
                             foreach ($words as $word) {
@@ -54,13 +67,9 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
                             }
                             $collection->addAttributeToFilter('name', $conditions);
                         }
-                    }
-                    break;
+                        break;
 
-                case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE:
-                    // Combined search: match either the full phrase OR individual words (based on separator)
-                    $words = Mage::helper('core/string')->splitWords($query, true, $maxQueryWords);
-                    if ($words && count($words) > 1) {
+                    case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE:
                         if ($searchSeparator === 'AND') {
                             // AND logic for individual words, but also try full phrase
                             // This is complex with EAV, so we'll prioritize full phrase
@@ -77,35 +86,8 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
                             }
                             $collection->addAttributeToFilter('name', $conditions);
                         }
-                    } else {
-                        // Single word search
-                        $collection->addAttributeToFilter('name', ['like' => "%{$query}%"]);
-                    }
-                    break;
-
-                case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE:
-                default:
-                    // LIKE search: split into words and use AND/OR based on separator config
-                    $words = Mage::helper('core/string')->splitWords($query, true, $maxQueryWords);
-                    if ($words && count($words) > 1) {
-                        if ($searchSeparator === 'AND') {
-                            // AND logic: all words must be present
-                            foreach ($words as $word) {
-                                $collection->addAttributeToFilter('name', ['like' => "%{$word}%"]);
-                            }
-                        } else {
-                            // OR logic: any word can match
-                            $conditions = [];
-                            foreach ($words as $word) {
-                                $conditions[] = ['like' => "%{$word}%"];
-                            }
-                            $collection->addAttributeToFilter('name', $conditions);
-                        }
-                    } else {
-                        // Single word search
-                        $collection->addAttributeToFilter('name', ['like' => "%{$query}%"]);
-                    }
-                    break;
+                        break;
+                }
             }
 
             // Only show active categories
