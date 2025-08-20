@@ -35,8 +35,12 @@ $numProducts = count($productList->getLoadedProductCollection());
                     <li class="category-item">
                         <a href="<?= $this->escapeUrl($categoryBlock->getCategoryUrl($category)) ?>" class="category-link">
                             <?php $parentPath = $categoryBlock->getCategoryPath($category); ?>
-                            <?php if ($parentPath): ?>
-                                <span class="category-path"><?= $this->escapeHtml($parentPath) ?> ›</span>
+                            <?php if (!empty($parentPath)): ?>
+                                <span class="category-path">
+                                    <?php foreach ($parentPath as $pathItem): ?>
+                                        <span class="path-item"><?= $this->escapeHtml($pathItem) ?></span>
+                                    <?php endforeach ?>
+                                </span>
                             <?php endif ?>
                             <span class="category-name"><?= $this->escapeHtml($category->getName()) ?></span>
                         </a>

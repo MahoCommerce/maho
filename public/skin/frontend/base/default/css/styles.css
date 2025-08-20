@@ -6599,6 +6599,12 @@ div.paypal-logo span > img {
   margin-bottom: 2px;
 }
 
+.search-autocomplete .category-path .path-item::after {
+  content: ' › ';
+  margin: 0 2px;
+  opacity: 0.6;
+}
+
 .search-autocomplete .category-name {
   font-weight: 500;
 }

@@ -75,9 +75,11 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
     }
 
     /**
-     * Get category path as breadcrumb (excluding root categories)
+     * Get category path as array (excluding root categories and current category)
+     * 
+     * @return array
      */
-    public function getCategoryPath(Mage_Catalog_Model_Category $category): string
+    public function getCategoryPath(Mage_Catalog_Model_Category $category): array
     {
         $path = [];
         $pathIds = explode('/', $category->getPath());
@@ -87,7 +89,7 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
 
         foreach ($pathIds as $categoryId) {
             if ($categoryId == $category->getId()) {
-                // Skip the current category, we'll add it with highlighting
+                // Skip the current category
                 continue;
             }
             $parentCategory = Mage::getModel('catalog/category')->load($categoryId);
@@ -96,6 +98,6 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
             }
         }
 
-        return implode(' > ', $path);
+        return $path;
     }
 }
