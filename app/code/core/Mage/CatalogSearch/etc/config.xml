@@ -123,6 +123,8 @@
                 <search_separator>AND</search_separator>
                 <use_layered_navigation_count>2000</use_layered_navigation_count>
                 <show_autocomplete_results_count>1</show_autocomplete_results_count>
+                <enable_category_autosuggest>1</enable_category_autosuggest>
+                <category_autosuggest_limit>5</category_autosuggest_limit>
                 <redirect_to_product_if_one_result>1</redirect_to_product_if_one_result>
             </search>
             <advanced_search>
