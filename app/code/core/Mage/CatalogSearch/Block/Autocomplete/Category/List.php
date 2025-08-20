@@ -76,8 +76,6 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
 
     /**
      * Get category path as array (excluding root categories and current category)
-     * 
-     * @return array
      */
     public function getCategoryPath(Mage_Catalog_Model_Category $category): array
     {
