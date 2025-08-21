@@ -45,48 +45,39 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
                 });
             }
 
-            // For COMBINE mode with multiple words, or single/no valid words, use full phrase
-            if (!$words || ($searchType === Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE && count($words) <= 1)) {
+            // If no valid words remain, fall back to full phrase search
+            if (!$words) {
                 $collection->addAttributeToFilter('name', ['like' => "%{$query}%"]);
+            } elseif ($searchType === Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE) {
+                // COMBINE: match full phrase OR individual words
+                if ($searchSeparator === 'OR') {
+                    $conditions = [
+                        ['like' => "%{$query}%"], // Full phrase match
+                    ];
+                    foreach ($words as $word) {
+                        if ($word !== $query) {
+                            $conditions[] = ['like' => "%{$word}%"];
+                        }
+                    }
+                    $collection->addAttributeToFilter('name', $conditions);
+                } else {
+                    // With AND separator, just use full phrase (simpler than complex AND logic)
+                    $collection->addAttributeToFilter('name', ['like' => "%{$query}%"]);
+                }
             } else {
-                // We have valid words to search with
-                switch ($searchType) {
-                    case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_FULLTEXT:
-                    case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE:
-                    default:
-                        if ($searchSeparator === 'AND') {
-                            // AND logic: all words must be present
-                            foreach ($words as $word) {
-                                $collection->addAttributeToFilter('name', ['like' => "%{$word}%"]);
-                            }
-                        } else {
-                            // OR logic: any word can match
-                            $conditions = [];
-                            foreach ($words as $word) {
-                                $conditions[] = ['like' => "%{$word}%"];
-                            }
-                            $collection->addAttributeToFilter('name', $conditions);
-                        }
-                        break;
-
-                    case Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE:
-                        if ($searchSeparator === 'AND') {
-                            // AND logic for individual words, but also try full phrase
-                            // This is complex with EAV, so we'll prioritize full phrase
-                            $collection->addAttributeToFilter('name', ['like' => "%{$query}%"]);
-                        } else {
-                            // OR logic: match full phrase OR any individual word
-                            $conditions = [
-                                ['like' => "%{$query}%"], // Full phrase match
-                            ];
-                            foreach ($words as $word) {
-                                if ($word !== $query) {
-                                    $conditions[] = ['like' => "%{$word}%"];
-                                }
-                            }
-                            $collection->addAttributeToFilter('name', $conditions);
-                        }
-                        break;
+                // FULLTEXT and LIKE: search with individual words
+                if ($searchSeparator === 'AND') {
+                    // AND logic: all words must be present
+                    foreach ($words as $word) {
+                        $collection->addAttributeToFilter('name', ['like' => "%{$word}%"]);
+                    }
+                } else {
+                    // OR logic: any word can match
+                    $conditions = [];
+                    foreach ($words as $word) {
+                        $conditions[] = ['like' => "%{$word}%"];
+                    }
+                    $collection->addAttributeToFilter('name', $conditions);
                 }
             }
 
@@ -119,9 +110,6 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
         return $this->_categoryCollection;
     }
 
-    /**
-     * Check if category autosuggest is enabled
-     */
     public function isEnabled(): bool
     {
         return (bool) Mage::getStoreConfig('catalog/search/enable_category_autosuggest');
