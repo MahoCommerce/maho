@@ -118,7 +118,7 @@ function showRegionImportDialog() {
 
             <div id="import-output" style="display: none">
                 <h3><?php echo $this->__('Import Results'); ?>:</h3>
-                <div id="output-content" style="background: #f8f8f8; border: 1px solid #ddd; padding: 10px; border-radius: 4px; max-height: 400px; overflow-y: auto; font-family: monospace; white-space: pre-wrap;"></div>
+                <div id="output-content" style="background: #f8f8f8; border: 1px solid #ddd; padding: 10px; border-radius: 4px; height: 300px; overflow-x: auto; overflow-y: auto; font-family: monospace; white-space: pre;"></div>
             </div>
         </form>
     `;
@@ -156,6 +156,14 @@ function showRegionImportDialog() {
             outputContent.textContent = '<?php echo $this->__('Running import...'); ?>';
             outputDiv.style.display = 'block';
 
+            // Scroll the dialog's internal content to the bottom
+            setTimeout(() => {
+                const dialogContent = dialog.querySelector('.dialog-content');
+                if (dialogContent) {
+                    dialogContent.scrollTop = dialogContent.scrollHeight;
+                }
+            }, 100);
+
             // Disable the OK button during import
             okButton.disabled = true;
             okButton.textContent = '<?php echo $this->__('Running...'); ?>';
@@ -178,8 +186,31 @@ function showRegionImportDialog() {
                 loaderArea: false // Disable automatic loader since we have our own loading state
             })
             .then(data => {
-                // If we get here, the operation was successful
-                outputContent.textContent = data.output || '<?php echo $this->__('Import completed successfully.'); ?>';
+                // Try different ways to get the output
+                let output = data.output || data.responseText || data.message || '';
+
+                // If still no output, try to parse the string representation
+                if (!output && typeof data === 'string') {
+                    try {
+                        const parsed = JSON.parse(data);
+                        output = parsed.output || '';
+                    } catch (e) {
+                        output = data;
+                    }
+                }
+
+                if (output && output.trim() !== '') {
+                    outputContent.textContent = output;
+                } else {
+                    outputContent.textContent = '<?php echo $this->__('Import completed successfully.'); ?>';
+                }
+
+                // Scroll to bottom after content is loaded
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        outputContent.scrollTop = outputContent.scrollHeight;
+                    });
+                });
 
                 // Re-enable button and restore original text
                 okButton.disabled = false;

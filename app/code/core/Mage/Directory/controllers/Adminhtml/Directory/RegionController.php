@@ -364,10 +364,17 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             $outputBuffer = '';
             $logger = function ($message, $level = 'info') use (&$outputBuffer) {
+                // Filter out overly verbose messages
+                if (strpos($message, 'Fetching data for country') !== false ||
+                    strpos($message, 'Processing region data') !== false ||
+                    strpos($message, 'Found') === 0 && strpos($message, 'regions for') !== false) {
+                    return; // Skip these verbose messages
+                }
+
                 $prefix = match ($level) {
-                    'error' => '[ERROR] ',
-                    'comment' => '[INFO] ',
-                    default => '[INFO] ',
+                    'error' => '❌ ',
+                    'comment' => 'ℹ️  ',
+                    default => '✅ ',
                 };
                 $outputBuffer .= $prefix . $message . "\n";
             };
@@ -383,13 +390,14 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             // Process each country
             $countriesArray = explode(',', $countries);
+
             foreach ($countriesArray as $country) {
                 $country = trim($country);
                 if (empty($country)) {
                     continue;
                 }
 
-                $outputBuffer .= "\n=== Processing country: {$country} ===\n";
+                $outputBuffer .= "\n🌍 Processing country: {$country}\n";
 
                 $result = $importCommand->importRegionsData($country, [
                     'locales' => $locales,
@@ -412,35 +420,25 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             // Add summary to output
             if ($totalResults['success']) {
-                $outputBuffer .= "\n=== TOTAL SUMMARY ===\n";
-                $outputBuffer .= "Countries processed: " . count($countriesArray) . "\n";
-                $outputBuffer .= "Updated: {$totalResults['updated']}\n";
-                $outputBuffer .= "Skipped: {$totalResults['skipped']}\n";
-                $outputBuffer .= "Total: {$totalResults['total']}\n";
+                $outputBuffer .= "\n📊 SUMMARY\n";
+                $outputBuffer .= "🏁 Countries processed: " . count($countriesArray) . "\n";
+                $outputBuffer .= "📝 Updated: {$totalResults['updated']}\n";
+                $outputBuffer .= "⏭️  Skipped: {$totalResults['skipped']}\n";
+                $outputBuffer .= "📦 Total: {$totalResults['total']}\n";
 
                 if ($dryRun) {
-                    $outputBuffer .= "\nThis was a DRY RUN - no changes were made.\n";
-                    if (!empty($totalResults['updateRecords'])) {
-                        $outputBuffer .= "\nRegions that would be updated:\n";
-                        foreach ($totalResults['updateRecords'] as $record) {
-                            $outputBuffer .= "- {$record['code']}: {$record['existing']}";
-                            if (!empty($record['updateMainName'])) {
-                                $outputBuffer .= " → {$record['name']}";
-                            }
-                            if (!empty($record['locales'])) {
-                                $localeUpdates = [];
-                                foreach ($record['locales'] as $locale => $name) {
-                                    $localeUpdates[] = "$locale: $name";
-                                }
-                                $outputBuffer .= ' (' . implode(', ', $localeUpdates) . ')';
-                            }
-                            $outputBuffer .= "\n";
-                        }
-                    }
+                    $outputBuffer .= "\n⚠️  This was a DRY RUN - no changes were made.\n";
+                } else {
+                    $outputBuffer .= "\n✨ Import completed successfully!\n";
                 }
             }
 
             if ($totalResults['success']) {
+                // Ensure we always have some output
+                if (empty($outputBuffer)) {
+                    $outputBuffer = "✅ Import process completed\n📦 Total processed: {$totalResults['total']}";
+                }
+
                 $response = [
                     'success' => true,
                     'output' => $outputBuffer,
@@ -451,6 +449,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
                     'error' => $totalResults['error'] ?? 'Unknown error',
                 ];
             }
+
 
             $this->getResponse()->setHeader('Content-type', 'application/json');
             $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
