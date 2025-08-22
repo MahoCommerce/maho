@@ -444,14 +444,12 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             }
 
 
-            $this->getResponse()->setHeader('Content-type', 'application/json');
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
+            $this->getResponse()->setBodyJson($response);
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->getResponse()->setHeader('Content-type', 'application/json');
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+            $this->getResponse()->setBodyJson([
                 'error' => $e->getMessage(),
-            ]));
+            ]);
         }
     }
 }
