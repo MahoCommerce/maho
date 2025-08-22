@@ -405,9 +405,9 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
                     break;
                 }
 
-                $totalResults['updated'] += $result['updated'];
-                $totalResults['skipped'] += $result['skipped'];
-                $totalResults['total'] += $result['total'];
+                $totalResults['updated'] += $result['updated'] ?? 0;
+                $totalResults['skipped'] += $result['skipped'] ?? 0;
+                $totalResults['total'] += $result['total'] ?? 0;
                 $totalResults['updateRecords'] = array_merge($totalResults['updateRecords'], $result['updateRecords'] ?? []);
             }
 

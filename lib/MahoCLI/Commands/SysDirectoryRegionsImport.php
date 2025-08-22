@@ -139,7 +139,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
             if (empty($regionsData)) {
                 $this->log("No regions data found for $countryCode", 'comment');
-                return ['success' => true, 'imported' => 0, 'updated' => 0, 'skipped' => 0, 'message' => 'No regions data found'];
+                return ['success' => true, 'imported' => 0, 'updated' => 0, 'skipped' => 0, 'total' => 0, 'message' => 'No regions data found'];
             }
 
             if ($verbose) {
