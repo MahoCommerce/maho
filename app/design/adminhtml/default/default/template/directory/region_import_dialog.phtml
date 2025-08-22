@@ -1,0 +1,205 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Mage_Directory
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+
+<script type="text/javascript">
+function showRegionImportDialog() {
+    const formHtml = `
+        <form id="region-import-form" style="display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label for="countries" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                    <?php echo $this->__('Countries'); ?>:
+                </label>
+                <select id="countries"
+                        name="countries[]"
+                        multiple
+                        required
+                        style="width: 100%; min-height: 120px; border: 1px solid #ccc; border-radius: 4px;">
+                    <?php
+                    $countries = Mage::getResourceModel('directory/country_collection');
+                    $countriesArray = [];
+                    foreach ($countries as $country) {
+                        $countriesArray[] = [
+                            'id' => $country->getCountryId(),
+                            'name' => $country->getName()
+                        ];
+                    }
+
+                    // Sort countries alphabetically by name
+                    usort($countriesArray, function($a, $b) {
+                        return strcasecmp($a['name'], $b['name']);
+                    });
+
+                    foreach ($countriesArray as $country):
+                    ?>
+                        <option value="<?php echo $country['id']; ?>"><?php echo $this->escapeHtml($country['name']); ?> (<?php echo $country['id']; ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+                <small style="color: #666; margin-top: 5px; display: block;">
+                    <?php echo $this->__('Hold Ctrl/Cmd to select multiple countries'); ?>
+                </small>
+            </div>
+
+            <div>
+                <label for="locales" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                    <?php echo $this->__('Locales'); ?>:
+                </label>
+                <select id="locales"
+                        name="locales[]"
+                        multiple
+                        required
+                        style="width: 100%; min-height: 120px; border: 1px solid #ccc; border-radius: 4px;">
+                    <?php
+                    $availableLocales = ResourceBundle::getLocales('');
+                    $adminLocale = Mage::app()->getLocale()->getLocaleCode();
+                    $defaultLocale = Mage::app()->getLocale()->getLocaleCode();
+
+                    // Build array with display names and codes for sorting
+                    $localeOptions = [];
+                    foreach ($availableLocales as $localeCode) {
+                        if (strpos($localeCode, '_') === false) continue; // Skip language-only codes
+
+                        $displayName = Locale::getDisplayName($localeCode, $adminLocale);
+                        if ($displayName === $localeCode) {
+                            $displayName = Locale::getDisplayName($localeCode, 'en');
+                        }
+                        $displayName = ucfirst($displayName);
+
+                        $localeOptions[] = [
+                            'code' => $localeCode,
+                            'name' => $displayName,
+                            'isSelected' => ($localeCode === 'en_US' || $localeCode === $defaultLocale)
+                        ];
+                    }
+
+                    // Sort by display name, then by code
+                    usort($localeOptions, function($a, $b) {
+                        $nameCompare = strcasecmp($a['name'], $b['name']);
+                        return $nameCompare !== 0 ? $nameCompare : strcmp($a['code'], $b['code']);
+                    });
+
+                    foreach ($localeOptions as $option):
+                    ?>
+                        <option value="<?php echo $option['code']; ?>" <?php echo $option['isSelected'] ? 'selected' : ''; ?>>
+                            <?php echo $this->escapeHtml($option['name']); ?> (<?php echo $option['code']; ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small style="color: #666; margin-top: 5px; display: block;">
+                    <?php echo $this->__('Hold Ctrl/Cmd to select multiple locales'); ?>
+                </small>
+            </div>
+
+            <div>
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="update-existing" name="update-existing" style="margin-right: 8px;">
+                    <?php echo $this->__('Update existing regions and localized names'); ?>
+                </label>
+                <small style="color: #666; margin-left: 24px; display: block;">
+                    <?php echo $this->__('Default: only add new locales'); ?>
+                </small>
+            </div>
+
+            <div>
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="dry-run" name="dry-run" style="margin-right: 8px;" checked>
+                    <?php echo $this->__('Preview changes without importing (Dry Run)'); ?>
+                </label>
+                <small style="color: #666; margin-left: 24px; display: block;">
+                    <?php echo $this->__('Shows what would be imported without making actual changes'); ?>
+                </small>
+            </div>
+
+            <div id="import-output" style="display: none">
+                <h3><?php echo $this->__('Import Results'); ?>:</h3>
+                <div id="output-content" style="background: #f8f8f8; border: 1px solid #ddd; padding: 10px; border-radius: 4px; max-height: 400px; overflow-y: auto; font-family: monospace; white-space: pre-wrap;"></div>
+            </div>
+        </form>
+    `;
+
+    Dialog.confirm(formHtml, {
+        title: '<?php echo $this->__('Import Regions'); ?>',
+        width: 600,
+        height: 600,
+        okLabel: '<?php echo $this->__('Import'); ?>',
+        cancelLabel: null, // Hide cancel button - use X to close
+        onOk: function(dialog) {
+            const form = dialog.querySelector('#region-import-form');
+            const formData = new FormData(form);
+            const outputDiv = dialog.querySelector('#import-output');
+            const outputContent = dialog.querySelector('#output-content');
+            const okButton = dialog.querySelector('.ok');
+
+
+            // Get selected countries and locales
+            const selectedCountries = Array.from(form.querySelector('#countries').selectedOptions).map(opt => opt.value);
+            const selectedLocales = Array.from(form.querySelector('#locales').selectedOptions).map(opt => opt.value);
+
+            // Validate selections
+            if (selectedCountries.length === 0) {
+                alert('<?php echo $this->__('Please select at least one country.'); ?>');
+                return false;
+            }
+
+            if (selectedLocales.length === 0) {
+                alert('<?php echo $this->__('Please select at least one locale.'); ?>');
+                return false;
+            }
+
+            // Show loading state
+            outputContent.textContent = '<?php echo $this->__('Running import...'); ?>';
+            outputDiv.style.display = 'block';
+
+            // Disable the OK button during import
+            okButton.disabled = true;
+            okButton.textContent = '<?php echo $this->__('Running...'); ?>';
+
+            // Prepare parameters
+            const params = new URLSearchParams({
+                countries: selectedCountries.join(','),
+                locales: selectedLocales.join(','),
+                updateExisting: formData.has('update-existing'),
+                dryRun: formData.has('dry-run')
+            });
+
+            // Send AJAX request using mahoFetch
+            mahoFetch('<?php echo $this->getUrl('*/*/import'); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params,
+                loaderArea: false // Disable automatic loader since we have our own loading state
+            })
+            .then(data => {
+                // If we get here, the operation was successful
+                outputContent.textContent = data.output || '<?php echo $this->__('Import completed successfully.'); ?>';
+
+                // Re-enable button and restore original text
+                okButton.disabled = false;
+                okButton.textContent = '<?php echo $this->__('Import'); ?>';
+
+                // Refresh grid if not dry run and successful
+                if (!params.get('dryRun') && typeof regionGridJsObject !== 'undefined') {
+                    regionGridJsObject.doFilter();
+                }
+            })
+            .catch(error => {
+                // mahoFetch throws MahoError for server-side errors
+                outputContent.textContent = '<?php echo $this->__('Error:'); ?> ' + error.message;
+                okButton.disabled = false;
+                okButton.textContent = '<?php echo $this->__('Import'); ?>';
+            });
+
+            // Don't close dialog immediately during import
+            return false;
+        }
+    });
+}
+</script>

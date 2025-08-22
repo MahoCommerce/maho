@@ -66,7 +66,6 @@ $application->add(new \MahoCLI\Commands\Serve());
 $application->add(new \MahoCLI\Commands\Shell());
 
 $application->add(new \MahoCLI\Commands\SysCurrencies());
-$application->add(new \MahoCLI\Commands\SysDirectoryCountriesImport());
 $application->add(new \MahoCLI\Commands\SysDirectoryRegionsImport());
 $application->add(new \MahoCLI\Commands\SysEncryptionKeyRegenerate());
 $application->add(new \MahoCLI\Commands\SysLocales());

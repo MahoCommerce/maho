@@ -346,4 +346,120 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             ]);
         }
     }
+
+    public function importAction(): void
+    {
+        try {
+            $countries = $this->getRequest()->getParam('countries');
+            $locales = $this->getRequest()->getParam('locales', 'en_US');
+            $updateExisting = $this->getRequest()->getParam('updateExisting') === 'true';
+            $dryRun = $this->getRequest()->getParam('dryRun') === 'true';
+
+            if (empty($countries)) {
+                throw new Exception('Countries parameter is required');
+            }
+
+            // Use the import command
+            $importCommand = new \MahoCLI\Commands\SysDirectoryRegionsImport();
+
+            $outputBuffer = '';
+            $logger = function ($message, $level = 'info') use (&$outputBuffer) {
+                $prefix = match ($level) {
+                    'error' => '[ERROR] ',
+                    'comment' => '[INFO] ',
+                    default => '[INFO] ',
+                };
+                $outputBuffer .= $prefix . $message . "\n";
+            };
+
+            $totalResults = [
+                'success' => true,
+                'updated' => 0,
+                'skipped' => 0,
+                'total' => 0,
+                'updateRecords' => [],
+                'error' => null,
+            ];
+
+            // Process each country
+            $countriesArray = explode(',', $countries);
+            foreach ($countriesArray as $country) {
+                $country = trim($country);
+                if (empty($country)) {
+                    continue;
+                }
+
+                $outputBuffer .= "\n=== Processing country: {$country} ===\n";
+
+                $result = $importCommand->importRegionsData($country, [
+                    'locales' => $locales,
+                    'updateExisting' => $updateExisting,
+                    'dryRun' => $dryRun,
+                    'verbose' => true,
+                ], $logger);
+
+                if (!$result['success']) {
+                    $totalResults['success'] = false;
+                    $totalResults['error'] = $result['error'] ?? 'Unknown error';
+                    break;
+                }
+
+                $totalResults['updated'] += $result['updated'];
+                $totalResults['skipped'] += $result['skipped'];
+                $totalResults['total'] += $result['total'];
+                $totalResults['updateRecords'] = array_merge($totalResults['updateRecords'], $result['updateRecords'] ?? []);
+            }
+
+            // Add summary to output
+            if ($totalResults['success']) {
+                $outputBuffer .= "\n=== TOTAL SUMMARY ===\n";
+                $outputBuffer .= "Countries processed: " . count($countriesArray) . "\n";
+                $outputBuffer .= "Updated: {$totalResults['updated']}\n";
+                $outputBuffer .= "Skipped: {$totalResults['skipped']}\n";
+                $outputBuffer .= "Total: {$totalResults['total']}\n";
+
+                if ($dryRun) {
+                    $outputBuffer .= "\nThis was a DRY RUN - no changes were made.\n";
+                    if (!empty($totalResults['updateRecords'])) {
+                        $outputBuffer .= "\nRegions that would be updated:\n";
+                        foreach ($totalResults['updateRecords'] as $record) {
+                            $outputBuffer .= "- {$record['code']}: {$record['existing']}";
+                            if (!empty($record['updateMainName'])) {
+                                $outputBuffer .= " → {$record['name']}";
+                            }
+                            if (!empty($record['locales'])) {
+                                $localeUpdates = [];
+                                foreach ($record['locales'] as $locale => $name) {
+                                    $localeUpdates[] = "$locale: $name";
+                                }
+                                $outputBuffer .= ' (' . implode(', ', $localeUpdates) . ')';
+                            }
+                            $outputBuffer .= "\n";
+                        }
+                    }
+                }
+            }
+
+            if ($totalResults['success']) {
+                $response = [
+                    'success' => true,
+                    'output' => $outputBuffer,
+                ];
+            } else {
+                // For mahoFetch compatibility, use 'error' field which will cause mahoFetch to throw
+                $response = [
+                    'error' => $totalResults['error'] ?? 'Unknown error',
+                ];
+            }
+
+            $this->getResponse()->setHeader('Content-type', 'application/json');
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()->setHeader('Content-type', 'application/json');
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
 }
