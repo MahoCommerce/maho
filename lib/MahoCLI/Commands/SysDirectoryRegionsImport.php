@@ -132,15 +132,19 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
 
         try {
             // Fetch region data from GitHub
-            $this->log('Fetching region data from GitHub...');
+            if ($verbose) {
+                $this->log('Fetching region data from GitHub...');
+            }
             $regionsData = $this->fetchRegionData($countryCode);
 
             if (empty($regionsData)) {
                 $this->log("No regions data found for $countryCode", 'comment');
-                return ['success' => true, 'imported' => 0, 'updated' => 0, 'skipped' => 0, 'message' => 'No regions data found'];
+                return ['success' => true, 'imported' => 0, 'updated' => 0, 'skipped' => 0, 'total' => 0, 'message' => 'No regions data found'];
             }
 
-            $this->log('  Found ' . count($regionsData) . ' regions to process');
+            if ($verbose) {
+                $this->log('  Found ' . count($regionsData) . ' regions to process');
+            }
 
             // Process regions with their localized names
             $regionsByLocale = [];
@@ -175,7 +179,9 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         }
 
         // Process imports
-        $this->log("\nProcessing " . count($regionsData) . ' regions...');
+        if ($verbose) {
+            $this->log("\nProcessing " . count($regionsData) . ' regions...');
+        }
 
         $imported = 0;
         $updated = 0;
