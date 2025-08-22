@@ -364,13 +364,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             $outputBuffer = '';
             $logger = function ($message, $level = 'info') use (&$outputBuffer) {
-                // Filter out overly verbose messages
-                if (strpos($message, 'Fetching data for country') !== false ||
-                    strpos($message, 'Processing region data') !== false ||
-                    strpos($message, 'Found') === 0 && strpos($message, 'regions for') !== false) {
-                    return; // Skip these verbose messages
-                }
-
                 $prefix = match ($level) {
                     'error' => '❌ ',
                     'comment' => 'ℹ️  ',
@@ -421,7 +414,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             // Add summary to output
             if ($totalResults['success']) {
                 $outputBuffer .= "\n📊 SUMMARY\n";
-                $outputBuffer .= "🏁 Countries processed: " . count($countriesArray) . "\n";
+                $outputBuffer .= '🏁 Countries processed: ' . count($countriesArray) . "\n";
                 $outputBuffer .= "📝 Updated: {$totalResults['updated']}\n";
                 $outputBuffer .= "⏭️  Skipped: {$totalResults['skipped']}\n";
                 $outputBuffer .= "📦 Total: {$totalResults['total']}\n";
