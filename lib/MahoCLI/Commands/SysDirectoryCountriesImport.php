@@ -31,6 +31,39 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
 {
     private const DATA_URL = 'https://raw.githubusercontent.com/MahoCommerce/directory-data/main/countries.json';
 
+    private mixed $logger = null;
+
+    private function initLogger(?OutputInterface $output = null, ?callable $loggerCallback = null): void
+    {
+        if ($loggerCallback) {
+            $this->logger = $loggerCallback;
+        } elseif ($output) {
+            $this->logger = function ($message, $level = 'info') use ($output) {
+                match ($level) {
+                    'error' => $output->writeln("<error>$message</error>"),
+                    'comment' => $output->writeln("<comment>$message</comment>"),
+                    default => $output->writeln("<info>$message</info>"),
+                };
+            };
+        } else {
+            $this->logger = function ($message, $level = 'info') {
+                // Silent fallback
+            };
+        }
+    }
+
+    private function log(string $message, string $level = 'info'): void
+    {
+        if ($this->logger) {
+            ($this->logger)($message, $level);
+        }
+    }
+
+    private function isVerbose(?OutputInterface $output = null): bool
+    {
+        return $output && $output->isVerbose();
+    }
+
     #[\Override]
     protected function configure(): void
     {
@@ -46,29 +79,55 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
         return $this->importCountries($input, $output);
     }
 
+    /**
+     * Environment-agnostic method for importing countries from backend
+     */
+    public function importCountriesData(array $options = [], ?callable $logger = null): array
+    {
+        $this->initMaho();
+        $this->initLogger(null, $logger);
+
+        // Parse options with defaults
+        $locales = array_map('trim', explode(',', $options['locales'] ?? 'en_US'));
+        $dryRun = $options['dryRun'] ?? false;
+        $updateExisting = $options['updateExisting'] ?? false;
+        $verbose = $options['verbose'] ?? false;
+
+        return $this->performImport($locales, $dryRun, $updateExisting, $verbose);
+    }
+
     public function importCountries(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
+        $this->initLogger($output);
 
         $locales = array_map('trim', explode(',', $input->getOption('locales')));
         $dryRun = $input->getOption('dry-run');
         $updateExisting = $input->getOption('update-existing');
+        $verbose = $output->isVerbose();
 
-        $output->writeln('<info>Importing country names with localization</info>');
-        $output->writeln('<info>Locales: ' . implode(', ', $locales) . '</info>');
+        $this->log('Importing country names with localization');
+        $this->log('Locales: ' . implode(', ', $locales));
 
         if ($dryRun) {
-            $output->writeln('<comment>DRY RUN MODE - No changes will be made</comment>');
+            $this->log('DRY RUN MODE - No changes will be made', 'comment');
         }
 
+        $result = $this->performImport($locales, $dryRun, $updateExisting, $verbose, $output);
+
+        return $result['success'] ? Command::SUCCESS : Command::FAILURE;
+    }
+
+    private function performImport(array $locales, bool $dryRun, bool $updateExisting, bool $verbose, ?OutputInterface $output = null): array
+    {
         try {
             // Fetch country data from GitHub
-            $output->writeln('<info>Fetching country data from GitHub...</info>');
-            $countriesData = $this->fetchCountryData($output);
+            $this->log('Fetching country data from GitHub...');
+            $countriesData = $this->fetchCountryData();
 
             if (empty($countriesData)) {
-                $output->writeln('<comment>No countries data found</comment>');
-                return Command::FAILURE;
+                $this->log('No countries data found', 'comment');
+                return ['success' => false, 'error' => 'No countries data found'];
             }
 
             // Get all existing countries from Maho database to process
@@ -79,29 +138,29 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
                 $countryCode = $mahoCountry->getCountryId();
                 if (isset($countriesData[$countryCode])) {
                     $countriesToProcess[$countryCode] = $countriesData[$countryCode];
-                } elseif ($output->isVerbose()) {
-                    $output->writeln("<comment>Country $countryCode not found in data source</comment>");
+                } elseif ($verbose) {
+                    $this->log("Country $countryCode not found in data source", 'comment');
                 }
             }
 
             if (empty($countriesToProcess)) {
-                $output->writeln('<comment>No countries to process</comment>');
-                return Command::SUCCESS;
+                $this->log('No countries to process', 'comment');
+                return ['success' => true, 'updated' => 0, 'skipped' => 0, 'message' => 'No countries to process'];
             }
 
-            $output->writeln('  Found ' . count($countriesToProcess) . ' countries to process');
+            $this->log('  Found ' . count($countriesToProcess) . ' countries to process');
 
             // Process countries with their localized names
             $countriesByLocale = [];
             foreach ($locales as $mahoLocale) {
-                $localizedNames = $this->getLocalizedNamesFromData($countriesToProcess, $mahoLocale, $output);
+                $localizedNames = $this->getLocalizedNamesFromData($countriesToProcess, $mahoLocale, $verbose);
 
                 if ($mahoLocale === 'en_US') {
                     // For English locale, include all names (for directory_country_name table)
                     $countriesByLocale[$mahoLocale] = $localizedNames;
                 } else {
                     // For non-English locales, only keep names that are different from the English default
-                    $englishNames = $this->getLocalizedNamesFromData($countriesToProcess, 'en_US', $output);
+                    $englishNames = $this->getLocalizedNamesFromData($countriesToProcess, 'en_US', $verbose);
                     $differentNames = [];
 
                     foreach ($localizedNames as $code => $localizedName) {
@@ -109,11 +168,11 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
 
                         if ($defaultName && $localizedName !== $defaultName) {
                             $differentNames[$code] = $localizedName;
-                            if ($output->isVerbose()) {
-                                $output->writeln("<comment>    Keeping $mahoLocale translation for $code: '$defaultName' → '$localizedName'</comment>");
+                            if ($verbose) {
+                                $this->log("    Keeping $mahoLocale translation for $code: '$defaultName' → '$localizedName'", 'comment');
                             }
-                        } elseif ($output->isVerbose()) {
-                            $output->writeln("<comment>    Skipping $mahoLocale for $code: same as English default ('$defaultName')</comment>");
+                        } elseif ($verbose) {
+                            $this->log("    Skipping $mahoLocale for $code: same as English default ('$defaultName')", 'comment');
                         }
                     }
 
@@ -124,12 +183,12 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
             }
 
         } catch (Exception $e) {
-            $output->writeln("<error>Failed to load country data: {$e->getMessage()}</error>");
-            return Command::FAILURE;
+            $this->log("Failed to load country data: {$e->getMessage()}", 'error');
+            return ['success' => false, 'error' => $e->getMessage()];
         }
 
         // Process imports
-        $output->writeln("\n<info>Processing " . count($countriesToProcess) . ' countries...</info>');
+        $this->log("\nProcessing " . count($countriesToProcess) . ' countries...');
 
         $updated = 0;
         $skipped = 0;
@@ -141,14 +200,14 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
         $connection = $resource->getConnection('core_write');
 
         // Get English names to use as default
-        $englishNames = $this->getLocalizedNamesFromData($countriesToProcess, 'en_US', $output);
+        $englishNames = $this->getLocalizedNamesFromData($countriesToProcess, 'en_US', $verbose);
 
         foreach ($countriesToProcess as $code => $countryData) {
             $defaultName = $englishNames[$code] ?? $countryData['en'] ?? null;
 
             if (!$defaultName) {
-                if ($output->isVerbose()) {
-                    $output->writeln("<comment>No English name found for $code, skipping</comment>");
+                if ($verbose) {
+                    $this->log("No English name found for $code, skipping", 'comment');
                 }
                 $skipped++;
                 continue;
@@ -176,8 +235,8 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
                         if (!$existingLocalizedName || $updateExisting) {
                             $localesToProcess[$locale] = $localizedNames[$code];
                             $hasUpdates = true;
-                        } elseif ($output->isVerbose()) {
-                            $output->writeln("<comment>Skipping $code ($locale): localized name already exists ('$existingLocalizedName')</comment>");
+                        } elseif ($verbose) {
+                            $this->log("Skipping $code ($locale): localized name already exists ('$existingLocalizedName')", 'comment');
                         }
                     }
                 }
@@ -209,28 +268,37 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
                 }
             } else {
                 // Country doesn't exist in Maho - this is unusual, we'll skip it
-                $output->writeln("<comment>Country $code not found in Maho database, skipping</comment>");
+                $this->log("Country $code not found in Maho database, skipping", 'comment');
                 $skipped++;
             }
         }
 
         // Summary
-        $output->writeln("\n<info>Import Summary:</info>");
-        $table = new Table($output);
-        $table->setHeaders(['Action', 'Count']);
-        $table->addRow(['Updated', $updated]);
-        $table->addRow(['Skipped', $skipped]);
-        $table->addRow(['<info>Total</info>', '<info>' . ($updated + $skipped) . '</info>']);
-        $table->render();
+        $this->log("\nImport Summary:");
+        if ($output) {
+            $table = new Table($output);
+            $table->setHeaders(['Action', 'Count']);
+            $table->addRow(['Updated', $updated]);
+            $table->addRow(['Skipped', $skipped]);
+            $table->addRow(['<info>Total</info>', '<info>' . ($updated + $skipped) . '</info>']);
+            $table->render();
 
-        if ($dryRun) {
-            $this->showDryRunDetails($output, [], $updateRecords, []);
+            if ($dryRun) {
+                $this->showDryRunDetails($output, [], $updateRecords, []);
+            }
         }
 
-        return Command::SUCCESS;
+        return [
+            'success' => true,
+            'updated' => $updated,
+            'skipped' => $skipped,
+            'total' => $updated + $skipped,
+            'dryRun' => $dryRun,
+            'updateRecords' => $updateRecords,
+        ];
     }
 
-    private function fetchCountryData(OutputInterface $output): array
+    private function fetchCountryData(): array
     {
         try {
             $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
@@ -245,17 +313,17 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
 
             return $jsonData;
         } catch (Exception $e) {
-            $output->writeln("<error>Failed to fetch country data: {$e->getMessage()}</error>");
+            $this->log("Failed to fetch country data: {$e->getMessage()}", 'error');
             return [];
         }
     }
 
-    private function getLocalizedNamesFromData(array $countriesData, string $mahoLocale, OutputInterface $output): array
+    private function getLocalizedNamesFromData(array $countriesData, string $mahoLocale, bool $verbose = false): array
     {
         $localizedNames = [];
 
-        if ($output->isVerbose()) {
-            $output->writeln("<comment>  Getting localized country names for locale: $mahoLocale</comment>");
+        if ($verbose) {
+            $this->log("  Getting localized country names for locale: $mahoLocale", 'comment');
         }
 
         foreach ($countriesData as $code => $translations) {
@@ -279,10 +347,10 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
                 }
             }
 
-            if ($output->isVerbose() && isset($localizedNames[$code])) {
+            if ($verbose && isset($localizedNames[$code])) {
                 $englishName = $translations['en'] ?? 'N/A';
                 if ($englishName !== $localizedNames[$code]) {
-                    $output->writeln("<comment>    $code: '$englishName' → '{$localizedNames[$code]}' *TRANSLATED*</comment>");
+                    $this->log("    $code: '$englishName' → '{$localizedNames[$code]}' *TRANSLATED*", 'comment');
                 }
             }
         }
@@ -387,5 +455,4 @@ class SysDirectoryCountriesImport extends BaseMahoCommand
             ['name'],
         );
     }
-
 }
