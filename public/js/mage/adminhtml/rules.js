@@ -86,6 +86,12 @@ VarienRulesForm.prototype = {
             }
         }
 
+        // Add attribute change handler for reloading value field when attribute changes
+        var attributeElem = Element.down(container, 'select[name*="[attribute]"]');
+        if (attributeElem) {
+            Event.observe(attributeElem, 'change', this.onAttributeChange.bind(this, container));
+        }
+
         var remove = Element.down(container, '.rule-param-remove');
         if (remove) {
             Event.observe(remove, 'click', this.removeRuleEntry.bind(this, container));
@@ -363,5 +369,102 @@ VarienRulesForm.prototype = {
         }
         grid.reloadParams = {'selected[]':this.chooserSelectedItems.keys()};
         this.updateElement.value = this.chooserSelectedItems.keys().join(', ');
+    },
+
+    onAttributeChange: function (container, event) {
+        if (this.readOnly) {
+            return false;
+        }
+
+        var attributeElem = Event.element(event);
+        // Find type element - it should be a sibling of the attribute element or in the same container
+        var typeElem = Element.down(container, 'input[name*="[type]"]');
+        if (!typeElem) {
+            // Alternative: look for type element by ID pattern
+            var attributeId = attributeElem.id;
+            var typeId = attributeId.replace('__attribute', '__type');
+            typeElem = document.getElementById(typeId);
+        }
+        if (!typeElem) {
+            return;
+        }
+
+        var containerLi = Element.up(container, 'li');
+        if (!containerLi) {
+            return;
+        }
+
+        // Get the condition ID and type
+        var conditionId = typeElem.value;
+        var attributeValue = attributeElem.value;
+        
+        // Create type parameter with attribute
+        var typeParam = conditionId.replace(/\//g, '-') + '|' + attributeValue;
+        
+        // Get element ID for this condition
+        var elementId = typeElem.id.replace(/__type$/, '');
+        
+        // Show loading indicator
+        var loadingElem = document.createElement('span');
+        loadingElem.innerHTML = ' Loading...';
+        loadingElem.className = 'rule-param-loading';
+        loadingElem.style.fontStyle = 'italic';
+        loadingElem.style.color = '#666';
+        containerLi.appendChild(loadingElem);
+        
+        // Make AJAX request to reload condition HTML with new attribute
+        new Ajax.Request(this.newChildUrl, {
+            evalScripts: true,
+            parameters: {
+                form_key: FORM_KEY,
+                type: typeParam,
+                id: elementId
+            },
+            onComplete: this.onAttributeChangeComplete.bind(this, containerLi, loadingElem),
+            onSuccess: function(transport) {
+                if(this._processSuccess(transport)) {
+                    // Create a temporary container for the new HTML
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = transport.responseText;
+                    
+                    // Store reference to parent before removing current element
+                    var parentUl = containerLi.parentNode;
+                    var nextSibling = containerLi.nextSibling;
+                    
+                    // Remove the current condition
+                    parentUl.removeChild(containerLi);
+                    
+                    // Add all the new elements from the response
+                    while (tempDiv.firstChild) {
+                        var newElement = tempDiv.firstChild;
+                        if (nextSibling) {
+                            parentUl.insertBefore(newElement, nextSibling);
+                        } else {
+                            parentUl.appendChild(newElement);
+                        }
+                        
+                        // Re-initialize rule params in this element
+                        if (newElement.nodeType === 1) { // Element node
+                            var elems = newElement.getElementsByClassName ? 
+                                newElement.getElementsByClassName('rule-param') : [];
+                            for (var i=0; i<elems.length; i++) {
+                                this.initParam(elems[i]);
+                            }
+                            // Also check if the element itself is a rule-param
+                            if (newElement.className && newElement.className.indexOf('rule-param') !== -1) {
+                                this.initParam(newElement);
+                            }
+                        }
+                    }
+                }
+            }.bind(this),
+            onFailure: this._processFailure.bind(this)
+        });
+    },
+
+    onAttributeChangeComplete: function (containerLi, loadingElem) {
+        if (loadingElem && loadingElem.parentNode) {
+            loadingElem.parentNode.removeChild(loadingElem);
+        }
     }
 };
