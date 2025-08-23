@@ -32,11 +32,16 @@
         </block>
     </adminhtml_directory_country_grid>
 
-
     <!-- Regions Management -->
     <adminhtml_directory_region_index>
+        <reference name="head">
+            <action method="addJs"><name>maho-dialog.js</name></action>
+        </reference>
         <reference name="content">
             <block type="directory/adminhtml_region" name="directory_region"/>
+        </reference>
+        <reference name="before_body_end">
+            <block type="core/template" template="directory/region_import_dialog.phtml"/>
         </reference>
     </adminhtml_directory_region_index>
 

@@ -19,7 +19,7 @@ abstract class BaseMahoCommand extends Command
 {
     protected function initMaho(): void
     {
-        Mage::register('isSecureArea', true);
+        Mage::register('isSecureArea', true, true);
         Mage::app('admin');
     }
 
