@@ -130,10 +130,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             case 'website_id':
                 $field = 'e.' . $attribute;
                 return $this->_buildSqlCondition($adapter, $field, $operator, $value);
-            
+
             case 'created_at':
                 // Handle datetime field by comparing just the date part
-                $field = "DATE(e.created_at)";
+                $field = 'DATE(e.created_at)';
                 return $this->_buildSqlCondition($adapter, $field, $operator, $value);
 
             case 'firstname':
