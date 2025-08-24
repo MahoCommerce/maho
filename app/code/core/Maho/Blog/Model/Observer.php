@@ -19,7 +19,10 @@ class Maho_Blog_Model_Observer
             return;
         }
 
+        /** @var Varien_Data_Tree_Node $menu */
+        $menu = $observer->getMenu();
         $tree = $menu->getTree();
+
         $blogNode = new Varien_Data_Tree_Node([
             'name' => Mage::helper('blog')->__('Blog'),
             'id' => 'blog-node',
@@ -28,8 +31,6 @@ class Maho_Blog_Model_Observer
             'is_active' => Mage::app()->getRequest()->getModuleName() === 'blog',
         ], 'id', $tree, $menu);
 
-        /** @var Varien_Data_Tree_Node $menu */
-        $menu = $observer->getMenu();
         $menu->addChild($blogNode);
     }
 }
