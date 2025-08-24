@@ -13,16 +13,6 @@
 $installer = $this;
 $installer->startSetup();
 
-$installer->getConnection()->query('drop table IF EXISTS blog_post_entity');
-$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_char');
-$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_datetime');
-$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_decimal');
-$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_int');
-$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_text');
-$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_varchar');
-$installer->getConnection()->query('drop table IF EXISTS blog_post_store');
-$installer->getConnection()->query('delete from eav_entity_type where entity_type_code="blog_post"');
-
 $installer->addEntityType('blog_post', [
     'entity_model'                => 'blog/post',
     'attribute_model'             => '',
