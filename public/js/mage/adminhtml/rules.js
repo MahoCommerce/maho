@@ -73,9 +73,21 @@ class VarienRulesForm {
                 if (changeElem) {
                     changeElem.container = container;
                     if (!changeElem.multiple) {
-                        changeElem.addEventListener('change', (e) => this.hideParamInputField(container, e));
+                        // Only hide on change for select elements, not for text inputs
+                        if (changeElem.tagName === 'SELECT') {
+                            changeElem.addEventListener('change', (e) => this.hideParamInputField(container, e));
+                        }
                     }
                     changeElem.addEventListener('blur', (e) => this.hideParamInputField(container, e));
+                    
+                    // Allow Enter key to submit the value for text inputs
+                    if (changeElem.tagName === 'INPUT') {
+                        changeElem.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                this.hideParamInputField(container, e);
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -287,7 +299,6 @@ class VarienRulesForm {
             method: 'POST',
             body: formData
         })
-        .then(response => response.text())
         .then(responseText => {
             if (this._processSuccess(responseText)) {
                 new_elem.innerHTML = responseText;
@@ -397,6 +408,12 @@ class VarienRulesForm {
             return;
         }
 
+        // Preserve existing operator and value before reloading
+        const operatorElem = container.querySelector('select[name*="[operator]"]');
+        const valueElem = container.querySelector('input[name*="[value]"], select[name*="[value]"]');
+        const existingOperator = operatorElem ? operatorElem.value : null;
+        const existingValue = valueElem ? valueElem.value : null;
+
         // Get the condition ID and type
         const conditionId = typeElem.value;
         const attributeValue = attributeElem.value;
@@ -404,8 +421,10 @@ class VarienRulesForm {
         // Create type parameter with attribute
         const typeParam = conditionId.replace(/\//g, '-') + '|' + attributeValue;
 
-        // Get element ID for this condition
-        const elementId = typeElem.id.replace(/__type$/, '');
+        // Get element ID for this condition - remove prefix and suffix
+        let elementId = typeElem.id.replace(/__type$/, '');
+        // Remove the "conditions__" prefix if present
+        elementId = elementId.replace(/^conditions__/, '');
 
         // Show loading indicator
         const loadingElem = document.createElement('span');
@@ -425,7 +444,6 @@ class VarienRulesForm {
             method: 'POST',
             body: formData
         })
-        .then(response => response.text())
         .then(responseText => {
             this.onAttributeChangeComplete(containerLi, loadingElem);
             if (this._processSuccess(responseText)) {
@@ -458,6 +476,27 @@ class VarienRulesForm {
                         // Also check if the element itself is a rule-param
                         if (newElement.classList && newElement.classList.contains('rule-param')) {
                             this.initParam(newElement);
+                        }
+
+                        // Restore preserved values after reloading
+                        if (existingOperator || existingValue) {
+                            const newOperatorElem = newElement.querySelector('select[name*="[operator]"]');
+                            const newValueElem = newElement.querySelector('input[name*="[value]"], select[name*="[value]"]');
+                            
+                            if (newOperatorElem && existingOperator) {
+                                // Check if the existing operator is still valid for this attribute
+                                const operatorOption = newOperatorElem.querySelector(`option[value="${existingOperator}"]`);
+                                if (operatorOption) {
+                                    newOperatorElem.value = existingOperator;
+                                }
+                            }
+                            
+                            if (newValueElem && existingValue) {
+                                // Only restore value if the input type is compatible
+                                if (newValueElem.type === 'text' || newValueElem.tagName === 'SELECT') {
+                                    newValueElem.value = existingValue;
+                                }
+                            }
                         }
                     }
                 }

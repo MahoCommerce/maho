@@ -20,6 +20,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
         parent::__construct();
         $this->setType('customersegmentation/segment_condition_customer_timebased');
         $this->setValue(null);
+        $this->loadAttributeOptions();
     }
 
     #[\Override]
@@ -32,15 +33,16 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
     public function loadAttributeOptions(): self
     {
         $this->setAttributeOption([
-            'days_since_last_login' => Mage::helper('customersegmentation')->__('Days Since Last Login'),
-            'days_since_last_order' => Mage::helper('customersegmentation')->__('Days Since Last Order'),
-            'days_inactive' => Mage::helper('customersegmentation')->__('Days Inactive (No Login or Order)'),
-            'days_since_first_order' => Mage::helper('customersegmentation')->__('Days Since First Order'),
-            'order_frequency_days' => Mage::helper('customersegmentation')->__('Average Days Between Orders'),
-            'days_without_purchase' => Mage::helper('customersegmentation')->__('Days Without Purchase'),
+            'days_since_last_login' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Since Last Login'),
+            'days_since_last_order' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Since Last Order'),
+            'days_inactive' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Inactive (No Login or Order)'),
+            'days_since_first_order' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Since First Order'),
+            'order_frequency_days' => Mage::helper('customersegmentation')->__('Customer Time-based: Average Days Between Orders'),
+            'days_without_purchase' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Without Purchase'),
         ]);
         return $this;
     }
+
 
     #[\Override]
     public function getValueElementType(): string
@@ -66,7 +68,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
     #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
-        return $this->getSubfilterSql('customer_entity.entity_id', true, $websiteId);
+        return $this->getSubfilterSql('e.entity_id', true, $websiteId);
     }
 
     public function getSubfilterSql(string $fieldName, bool $requireValid, ?int $website): string
@@ -75,40 +77,41 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
         $operator = $this->getMappedSqlOperator();
         $value = (int) $this->getValue();
 
-        $adapter = $this->getResource()->getReadConnection();
-        $now = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $now = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT)->format('Y-m-d H:i:s');
 
         switch ($attribute) {
             case 'days_since_last_login':
-                $logTable = $this->getResource()->getTable('log/customer');
+                $logTable = $resource->getTableName('log/customer');
                 $select = $adapter->select()
                     ->from(['l' => $logTable], ['customer_id', 'days' => "DATEDIFF('{$now}', MAX(l.login_at))"])
                     ->where('l.customer_id IS NOT NULL')
                     ->group('l.customer_id')
-                    ->having($this->getResource()->createConditionSql('days', $operator, $value));
+                    ->having("days {$operator} {$value}");
                 break;
 
             case 'days_since_last_order':
-                $orderTable = $this->getResource()->getTable('sales/order');
+                $orderTable = $resource->getTableName('sales/order');
                 $select = $adapter->select()
                     ->from(['o' => $orderTable], ['customer_id', 'days' => "DATEDIFF('{$now}', MAX(o.created_at))"])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id')
-                    ->having($this->getResource()->createConditionSql('days', $operator, $value));
+                    ->having("days {$operator} {$value}");
 
                 if ($website) {
-                    $select->where('o.store_id IN (?)', $this->getStoreByWebsite($website));
+                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
                 }
                 break;
 
             case 'days_inactive':
-                $logTable = $this->getResource()->getTable('log/customer');
-                $orderTable = $this->getResource()->getTable('sales/order');
+                $logTable = $resource->getTableName('log/customer');
+                $orderTable = $resource->getTableName('sales/order');
 
-                // Get the most recent activity (login or order)
+                // Get the most recent activity (login or order), using registration date as fallback
                 $select = $adapter->select()
-                    ->from(['c' => $this->getResource()->getTable('customer/entity')], ['entity_id'])
+                    ->from(['c' => $resource->getTableName('customer/entity')], ['entity_id'])
                     ->joinLeft(
                         ['l' => $logTable],
                         'c.entity_id = l.customer_id',
@@ -121,32 +124,32 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     )
                     ->columns([
                         'customer_id' => 'c.entity_id',
-                        'days' => "DATEDIFF('{$now}', GREATEST(COALESCE(MAX(l.login_at), '1970-01-01'), COALESCE(MAX(o.created_at), '1970-01-01')))",
+                        'days' => "DATEDIFF('{$now}', GREATEST(COALESCE(MAX(l.login_at), c.created_at), COALESCE(MAX(o.created_at), c.created_at)))",
                     ])
                     ->group('c.entity_id')
-                    ->having($this->getResource()->createConditionSql('days', $operator, $value));
+                    ->having("days {$operator} {$value}");
 
                 if ($website) {
-                    $select->where('o.store_id IN (?) OR o.store_id IS NULL', $this->getStoreByWebsite($website));
+                    $select->where('o.store_id IN (?) OR o.store_id IS NULL', Mage::app()->getWebsite($website)->getStoreIds());
                 }
                 break;
 
             case 'days_since_first_order':
-                $orderTable = $this->getResource()->getTable('sales/order');
+                $orderTable = $resource->getTableName('sales/order');
                 $select = $adapter->select()
                     ->from(['o' => $orderTable], ['customer_id', 'days' => "DATEDIFF('{$now}', MIN(o.created_at))"])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id')
-                    ->having($this->getResource()->createConditionSql('days', $operator, $value));
+                    ->having("days {$operator} {$value}");
 
                 if ($website) {
-                    $select->where('o.store_id IN (?)', $this->getStoreByWebsite($website));
+                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
                 }
                 break;
 
             case 'order_frequency_days':
-                $orderTable = $this->getResource()->getTable('sales/order');
+                $orderTable = $resource->getTableName('sales/order');
                 // Calculate average days between orders
                 $select = $adapter->select()
                     ->from(['o' => $orderTable], [
@@ -157,15 +160,15 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id')
                     ->having('COUNT(*) > 1')  // Need at least 2 orders to calculate frequency
-                    ->having($this->getResource()->createConditionSql('days', $operator, $value));
+                    ->having("days {$operator} {$value}");
 
                 if ($website) {
-                    $select->where('o.store_id IN (?)', $this->getStoreByWebsite($website));
+                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
                 }
                 break;
 
             case 'days_without_purchase':
-                $orderTable = $this->getResource()->getTable('sales/order');
+                $orderTable = $resource->getTableName('sales/order');
 
                 // Get customers who haven't purchased in X days
                 $lastOrderSelect = $adapter->select()
@@ -175,17 +178,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     ->group('o.customer_id');
 
                 if ($website) {
-                    $lastOrderSelect->where('o.store_id IN (?)', $this->getStoreByWebsite($website));
+                    $lastOrderSelect->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
                 }
 
                 $select = $adapter->select()
                     ->from(['lo' => new Zend_Db_Expr("({$lastOrderSelect})")], ['customer_id'])
-                    ->where($this->getResource()->createConditionSql("DATEDIFF('{$now}', lo.last_order)", $operator, $value));
+                    ->where("DATEDIFF('{$now}', lo.last_order) {$operator} {$value}");
 
                 // Also include customers with no orders if operator allows
                 if (in_array($operator, ['>=', '>'])) {
                     $noOrderSelect = $adapter->select()
-                        ->from(['c' => $this->getResource()->getTable('customer/entity')], ['entity_id'])
+                        ->from(['c' => $resource->getTableName('customer/entity')], ['entity_id'])
                         ->joinLeft(
                             ['o' => $orderTable],
                             'c.entity_id = o.customer_id AND o.state NOT IN ("canceled")',
@@ -208,22 +211,27 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
             ->from(['timedata' => new Zend_Db_Expr("({$select})")], ['customer_id']);
 
         if ($requireValid) {
-            return $adapter->quoteInto("{$fieldName} IN (?)", new Zend_Db_Expr($customerIds));
+            return $adapter->quoteInto("{$fieldName} IN (?)", new Zend_Db_Expr((string) $customerIds));
         } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Zend_Db_Expr($customerIds));
+            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Zend_Db_Expr((string) $customerIds));
         }
     }
 
     #[\Override]
     public function asHtml(): string
     {
-        return $this->getTypeElement()->getHtml()
+        $html = $this->getTypeElement()->getHtml()
             . Mage::helper('customersegmentation')->__(
-                '%s %s %s',
+                'If %s %s %s',
                 $this->getAttributeElement()->getHtml(),
                 $this->getOperatorElement()->getHtml(),
                 $this->getValueElement()->getHtml(),
-            )
-            . $this->getRemoveLinkHtml();
+            );
+
+        if ($this->getId() != '1') {
+            $html .= $this->getRemoveLinkHtml();
+        }
+
+        return $html;
     }
 }

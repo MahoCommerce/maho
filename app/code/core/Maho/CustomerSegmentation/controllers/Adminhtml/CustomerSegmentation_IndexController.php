@@ -102,16 +102,12 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             }
 
             try {
-                // Debug: Log the received data
-                Mage::log('Received POST data: ' . print_r($data, true), null, 'customer_segmentation_debug.log');
-
                 // Process conditions
                 if (isset($data['rule']['conditions'])) {
                     $data['conditions'] = $data['rule']['conditions'];
                 }
                 unset($data['rule']);
 
-                Mage::log('Processed data before loadPost: ' . print_r($data, true), null, 'customer_segmentation_debug.log');
                 $segment->loadPost($data);
                 $segment->save();
 
@@ -236,33 +232,53 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
 
     public function newConditionHtmlAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
-        $typeParam = $this->getRequest()->getParam('type');
-        $typeArr = explode('|', str_replace('-', '/', $typeParam));
-        $type = $typeArr[0];
+        try {
+            $id = $this->getRequest()->getParam('id');
+            $typeParam = $this->getRequest()->getParam('type');
+            $form = $this->getRequest()->getParam('form');
 
-        $model = Mage::getModel($type);
-        if (!$model) {
-            $this->getResponse()->setBody('<!-- Model not found: ' . $type . ' -->');
-            return;
-        }
+            $typeArr = explode('|', str_replace('-', '/', $typeParam));
+            $type = $typeArr[0];
 
-        $model->setId($id)
-            ->setType($type)
-            ->setRule(Mage::getModel('customersegmentation/segment'))
-            ->setPrefix('conditions');
-
-        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
-            if (!empty($typeArr[1])) {
-                $model->setAttribute($typeArr[1]);
+            // Validate the type parameter
+            if (empty($type) || !preg_match('/^[a-zA-Z_\/]+$/', $type)) {
+                throw new Exception('Invalid type parameter: ' . $type);
             }
-            $model->setJsFormObject($this->getRequest()->getParam('form'));
-            $html = $model->asHtmlRecursive();
-        } else {
-            $html = '';
-        }
 
-        $this->getResponse()->setBody($html);
+            $model = Mage::getModel($type);
+            if (!$model) {
+                throw new Exception('Model not found: ' . $type);
+            }
+
+            $model->setId($id)
+                ->setType($type)
+                ->setRule(Mage::getModel('customersegmentation/segment'))
+                ->setPrefix('conditions');
+
+            if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+                if (!empty($typeArr[1])) {
+                    $model->setAttribute($typeArr[1]);
+                }
+                $model->setJsFormObject($form ?: 'rule_conditions_fieldset');
+                $html = $model->asHtmlRecursive();
+            } else {
+                $html = '';
+            }
+
+            $this->getResponse()->setBody($html);
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+
+            // Return JSON error response that the JavaScript can handle
+            $this->getResponse()
+                ->clearHeaders()
+                ->setHeader('Content-Type', 'application/json')
+                ->setBody(Mage::helper('core')->jsonEncode([
+                    'error' => true,
+                    'message' => $e->getMessage(),
+                ]));
+        }
     }
 
     public function customersTabAction(): void

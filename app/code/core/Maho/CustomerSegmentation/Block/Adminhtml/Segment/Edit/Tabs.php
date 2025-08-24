@@ -38,7 +38,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tabs extends Mage_A
 
         $segment = Mage::registry('current_customer_segment');
         if ($segment && $segment->getId()) {
-            $customerCount = count($segment->getMatchingCustomerIds());
+            $customerCount = (int) $segment->getMatchedCustomersCount();
             $this->addTab('customers', [
                 'label'     => Mage::helper('customersegmentation')->__('Customers') . ($customerCount ? ' (' . $customerCount . ')' : ''),
                 'title'     => Mage::helper('customersegmentation')->__('View Customers in Segment'),
