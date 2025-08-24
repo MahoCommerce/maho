@@ -238,13 +238,14 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      * @param string $wordSeparatorRegexp
      * @return array
      */
-    public function splitWords($str, $uniqueOnly = false, $maxWordLength = 0, $wordSeparatorRegexp = '\s')
+    public function splitWords($str, $uniqueOnly = false, $maxWordLength = 0, $wordSeparatorRegexp = '\s+')
     {
-        if (is_null($str)) {
+        if (is_null($str) || $str === '') {
             return [];
         }
+
         $result = [];
-        $split = preg_split('#' . $wordSeparatorRegexp . '#siu', $str, -1, PREG_SPLIT_NO_EMPTY);
+        $split = preg_split('#' . $wordSeparatorRegexp . '#siu', trim($str), -1, PREG_SPLIT_NO_EMPTY);
         foreach ($split as $word) {
             if ($uniqueOnly) {
                 $result[$word] = $word;
@@ -255,6 +256,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
         if ($maxWordLength && count($result) > $maxWordLength) {
             $result = array_slice($result, 0, $maxWordLength);
         }
+
         return $result;
     }
 

@@ -6565,6 +6565,50 @@ div.paypal-logo span > img {
   top: -7px;
 }
 
+/* Category Results in Autocomplete */
+.search-autocomplete .category-results {
+  border-bottom: 1px solid var(--maho-color-border-light);
+  margin-bottom: 10px;
+}
+
+.search-autocomplete .category-results-title,
+.search-autocomplete .product-results-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--maho-color-text-secondary);
+  margin: 10px 0 8px;
+  padding: 0 10px;
+}
+
+.search-autocomplete .category-link {
+  display: block;
+  padding: 8px 10px;
+  text-decoration: none;
+  color: var(--maho-color-text-primary);
+}
+
+.search-autocomplete .category-link:hover {
+  background-color: var(--maho-color-background-hover);
+}
+
+.search-autocomplete .category-path {
+  color: var(--maho-color-text-secondary);
+  font-size: 0.688rem;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.search-autocomplete .category-path .path-item::after {
+  content: ' › ';
+  margin: 0 2px;
+  opacity: 0.6;
+}
+
+.search-autocomplete .category-name {
+  font-weight: 500;
+}
+
 /* ============================================ *
  * Search - Advanced
  * ============================================ */

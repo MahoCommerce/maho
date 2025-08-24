@@ -8,16 +8,56 @@
  */
 
 /** @var Mage_CatalogSearch_Block_Autocomplete $this */
+
+// Category search block
+$categoryBlock = $this->getLayout()->createBlock('catalogsearch/autocomplete_category_list');
+$categories = $categoryBlock->isEnabled() ? $categoryBlock->getCategoryCollection() : null;
+$hasCategories = $categories && count($categories) > 0;
+
+// Product search block
 $productList = $this->getLayout()->createBlock('catalogsearch/autocomplete_product_list')
     ->setTemplate('catalog/product/list.phtml');
-$numResults = count($productList->getLoadedProductCollection());
+$numProducts = count($productList->getLoadedProductCollection());
 ?>
-<?php if ($numResults): ?>
+
+<?php if ($numProducts > 0): ?>
     <a class="view-all" onclick="document.getElementById('search_mini_form').submit()" href="#">
-        <?= $this->__("View all %s results", $numResults) ?>
+        <?= $this->__("View all %s results", $numProducts) ?>
     </a>
 <?php endif ?>
 
 <div class="results-list">
-    <?= $productList->toHtml() ?>
+    <?php if ($hasCategories): ?>
+        <div class="category-results">
+            <div class="category-results-title"><?= $this->__('Categories') ?></div>
+            <ul class="category-list">
+                <?php foreach ($categories as $category): ?>
+                    <li class="category-item">
+                        <a href="<?= $this->escapeUrl($categoryBlock->getCategoryUrl($category)) ?>" class="category-link">
+                            <?php $parentPath = $categoryBlock->getCategoryPath($category); ?>
+                            <?php if (!empty($parentPath)): ?>
+                                <span class="category-path">
+                                    <?php foreach ($parentPath as $pathItem): ?>
+                                        <span class="path-item"><?= $this->escapeHtml($pathItem) ?></span>
+                                    <?php endforeach ?>
+                                </span>
+                            <?php endif ?>
+                            <span class="category-name"><?= $this->escapeHtml($category->getName()) ?></span>
+                        </a>
+                    </li>
+                <?php endforeach ?>
+            </ul>
+        </div>
+    <?php endif ?>
+
+    <?php if ($numProducts > 0): ?>
+        <?php if ($hasCategories): ?>
+            <div class="product-results">
+                <div class="product-results-title"><?= $this->__('Products') ?></div>
+        <?php endif ?>
+        <?= $productList->toHtml() ?>
+        <?php if ($hasCategories): ?>
+            </div>
+        <?php endif ?>
+    <?php endif ?>
 </div>
