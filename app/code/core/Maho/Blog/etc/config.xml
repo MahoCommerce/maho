@@ -50,6 +50,14 @@
                     </cms>
                 </observers>
             </controller_front_init_routers>
+            <page_block_html_topmenu_gethtml_before>
+                <observers>
+                    <blog_add_topmenu_items>
+                        <class>blog/observer</class>
+                        <method>addBlogToTopmenuItems</method>
+                    </blog_add_topmenu_items>
+                </observers>
+            </page_block_html_topmenu_gethtml_before>
         </events>
     </global>
     <admin>

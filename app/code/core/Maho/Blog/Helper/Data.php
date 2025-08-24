@@ -17,4 +17,26 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return $this->isModuleEnabled() && $this->isModuleOutputEnabled();
     }
+
+    public function shouldShowInNavigation(): bool
+    {
+        return $this->isEnabled() && $this->hasVisiblePosts();
+    }
+
+    public function hasVisiblePosts(): bool
+    {
+        $today = Mage_Core_Model_Locale::today();
+        $collection = Mage::getResourceModel('blog/post_collection')
+            ->addStoreFilter(Mage::app()->getStore())
+            ->addFieldToFilter('is_active', 1);
+
+        $collection->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
+
+        return $collection->getSize() > 0;
+    }
+
+    public function getBlogUrl(): string
+    {
+        return Mage::getUrl('blog');
+    }
 }
