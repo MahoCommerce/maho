@@ -4,6 +4,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -202,18 +203,6 @@ VarienRulesForm.prototype = {
         var elem = Element.down(elemContainer, '.element-value-changer');
         if (elem) {
            elem.focus();
-           // trying to emulate enter to open dropdown
-//         if (document.createEventObject) {
-//             var event = document.createEventObject();
-//             event.altKey = true;
-//             event.keyCode = 40;
-//             elem.fireEvent("onkeydown", evt);
-//         } else {
-//             var event = document.createEvent("Events");
-//             event.altKey = true;
-//             event.keyCode = 40;
-//             elem.dispatchEvent(event);
-//         }
         }
 
         this.shownElement = container;
@@ -235,10 +224,6 @@ VarienRulesForm.prototype = {
 
                 var str = selectedOptions.join(', ');
                 label.innerHTML = str!='' ? str : '...';
-//              if (elem && elem.selectedIndex>=0) {
-//                  var str = elem.options[elem.selectedIndex].text;
-//                  label.innerHTML = str!='' ? str : '...';
-//              }
             }
 
             elem = Element.down(container, 'input.input-text');
@@ -397,13 +382,13 @@ VarienRulesForm.prototype = {
         // Get the condition ID and type
         var conditionId = typeElem.value;
         var attributeValue = attributeElem.value;
-        
+
         // Create type parameter with attribute
         var typeParam = conditionId.replace(/\//g, '-') + '|' + attributeValue;
-        
+
         // Get element ID for this condition
         var elementId = typeElem.id.replace(/__type$/, '');
-        
+
         // Show loading indicator
         var loadingElem = document.createElement('span');
         loadingElem.innerHTML = ' Loading...';
@@ -411,7 +396,7 @@ VarienRulesForm.prototype = {
         loadingElem.style.fontStyle = 'italic';
         loadingElem.style.color = '#666';
         containerLi.appendChild(loadingElem);
-        
+
         // Make AJAX request to reload condition HTML with new attribute
         new Ajax.Request(this.newChildUrl, {
             evalScripts: true,
@@ -426,14 +411,14 @@ VarienRulesForm.prototype = {
                     // Create a temporary container for the new HTML
                     var tempDiv = document.createElement('div');
                     tempDiv.innerHTML = transport.responseText;
-                    
+
                     // Store reference to parent before removing current element
                     var parentUl = containerLi.parentNode;
                     var nextSibling = containerLi.nextSibling;
-                    
+
                     // Remove the current condition
                     parentUl.removeChild(containerLi);
-                    
+
                     // Add all the new elements from the response
                     while (tempDiv.firstChild) {
                         var newElement = tempDiv.firstChild;
@@ -442,10 +427,10 @@ VarienRulesForm.prototype = {
                         } else {
                             parentUl.appendChild(newElement);
                         }
-                        
+
                         // Re-initialize rule params in this element
                         if (newElement.nodeType === 1) { // Element node
-                            var elems = newElement.getElementsByClassName ? 
+                            var elems = newElement.getElementsByClassName ?
                                 newElement.getElementsByClassName('rule-param') : [];
                             for (var i=0; i<elems.length; i++) {
                                 this.initParam(elems[i]);
