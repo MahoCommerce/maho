@@ -32,13 +32,14 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
     #[\Override]
     public function loadAttributeOptions(): self
     {
+        $prefix = Mage::helper('customersegmentation')->__('Customer Time-based');
         $this->setAttributeOption([
-            'days_since_last_login' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Since Last Login'),
-            'days_since_last_order' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Since Last Order'),
-            'days_inactive' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Inactive (No Login or Order)'),
-            'days_since_first_order' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Since First Order'),
-            'order_frequency_days' => Mage::helper('customersegmentation')->__('Customer Time-based: Average Days Between Orders'),
-            'days_without_purchase' => Mage::helper('customersegmentation')->__('Customer Time-based: Days Without Purchase'),
+            'days_since_last_login' => $prefix . ': ' . Mage::helper('customersegmentation')->__('Days Since Last Login'),
+            'days_since_last_order' => $prefix . ': ' . Mage::helper('customersegmentation')->__('Days Since Last Order'),
+            'days_inactive' => $prefix . ': ' . Mage::helper('customersegmentation')->__('Days Inactive (No Login or Order)'),
+            'days_since_first_order' => $prefix . ': ' . Mage::helper('customersegmentation')->__('Days Since First Order'),
+            'order_frequency_days' => $prefix . ': ' . Mage::helper('customersegmentation')->__('Average Days Between Orders'),
+            'days_without_purchase' => $prefix . ': ' . Mage::helper('customersegmentation')->__('Days Without Purchase'),
         ]);
         return $this;
     }
