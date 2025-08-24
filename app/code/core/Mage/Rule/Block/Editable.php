@@ -46,13 +46,9 @@ class Mage_Rule_Block_Editable extends Mage_Core_Block_Abstract implements Varie
             $html .= '</a><span class="element"> ' . $element->getElementHtml();
 
             if ($element->getExplicitApply()) {
-                $html .= ' <a href="javascript:void(0)" class="rule-param-apply"><img src="'
-                    . $this->getSkinUrl('images/rule_component_apply.gif')
-                    . '" class="v-middle" alt="'
+                $html .= ' <a href="javascript:void(0)" class="rule-param-apply" title="'
                     . Mage::helper('core')->quoteEscape($this->__('Apply'))
-                    . '" title="'
-                    . Mage::helper('core')->quoteEscape($this->__('Apply'))
-                    . '" /></a> ';
+                    . '">' . $this->getIconSvg('circle-check') . '</a> ';
             }
 
             $html .= '</span></span>&nbsp;';

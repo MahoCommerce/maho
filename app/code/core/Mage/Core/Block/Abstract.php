@@ -1160,40 +1160,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      */
     public function getIconSvg(string $name, string $variant = 'outline', string $role = 'none'): string
     {
-        $name = basename(strtolower($name));
-        $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
-
-        $cache = Mage::app()->getCache();
-        $cacheId = "MAHO_ICON_{$variant}_{$name}";
-        $useCache = Mage::app()->useCache('icons');
-
-        if ($useCache && $cachedIcon = $cache->load($cacheId)) {
-            $cachedIcon = str_replace('<svg ', '<svg role="' . $role . '" ', $cachedIcon);
-            return $cachedIcon;
-        }
-
-        $installPath = null;
-        $packageName = 'mahocommerce/icons';
-        try {
-            $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
-        } catch (OutOfBoundsException $e) {
-            return '';
-        }
-        if ($installPath === null) {
-            return '';
-        }
-
-        $iconSvg = file_get_contents("$installPath/icons/$variant/$name.svg", false);
-        if ($iconSvg === false) {
-            return '';
-        }
-
-        if ($useCache) {
-            $cache->save($iconSvg, $cacheId, ['ICONS']);
-        }
-
-        $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
-        return $iconSvg;
+        return $this->helper('core')->getIconSvg($name, $variant, $role);
     }
 
     public function getIconDataUrl(string $name, string $variant = 'outline', array $attributes = []): string

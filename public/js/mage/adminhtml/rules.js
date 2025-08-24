@@ -8,177 +8,182 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var VarienRulesForm = new Class.create();
-VarienRulesForm.prototype = {
-    initialize : function(parent, newChildUrl){
-        this.parent = $(parent);
-        this.newChildUrl  = newChildUrl;
+class VarienRulesForm {
+    constructor(parent, newChildUrl) {
+        this.parent = document.getElementById(parent) || parent;
+        this.newChildUrl = newChildUrl;
         this.shownElement = null;
         this.updateElement = null;
-        this.chooserSelectedItems = $H({});
+        this.chooserSelectedItems = new Map();
         this.readOnly = false;
 
-        var elems = this.parent.getElementsByClassName('rule-param');
-        for (var i=0; i<elems.length; i++) {
-            this.initParam(elems[i]);
-        }
-    },
+        const elems = this.parent.querySelectorAll('.rule-param');
+        elems.forEach(elem => this.initParam(elem));
+    }
 
-    setReadonly: function (readonly){
+    setReadonly(readonly) {
         this.readOnly = readonly;
-        var elems = this.parent.getElementsByClassName('rule-param-remove');
-        for (var i=0; i<elems.length; i++) {
-            var element = elems[i];
-                if (this.readOnly) {
-                    element.hide();
-                } else {
-                    element.show();
-                }
-        }
+        
+        // Handle remove buttons
+        const removeElems = this.parent.querySelectorAll('.rule-param-remove');
+        removeElems.forEach(element => {
+            element.style.display = this.readOnly ? 'none' : '';
+        });
 
-        var elems = this.parent.getElementsByClassName('rule-param-new-child');
-        for (var i=0; i<elems.length; i++) {
-            var element = elems[i];
-            if (this.readOnly) {
-                element.hide();
-            } else {
-                element.show();
-            }
-        }
+        // Handle new child buttons
+        const newChildElems = this.parent.querySelectorAll('.rule-param-new-child');
+        newChildElems.forEach(element => {
+            element.style.display = this.readOnly ? 'none' : '';
+        });
 
-        var elems = this.parent.getElementsByClassName('rule-param');
-        for (var i=0; i<elems.length; i++) {
-            var container = elems[i];
-            var label = Element.down(container, '.label');
+        // Handle labels
+        const paramElems = this.parent.querySelectorAll('.rule-param');
+        paramElems.forEach(container => {
+            const label = container.querySelector('.label');
             if (label) {
                 if (this.readOnly) {
-                    label.addClassName('label-disabled');
+                    label.classList.add('label-disabled');
                 } else {
-                    label.removeClassName('label-disabled');
+                    label.classList.remove('label-disabled');
                 }
             }
-        }
-    },
+        });
+    }
 
-    initParam: function (container) {
+    initParam(container) {
         container.rulesObject = this;
-        var label = Element.down(container, '.label');
+        
+        const label = container.querySelector('.label');
         if (label) {
-            Event.observe(label, 'click', this.showParamInputField.bind(this, container));
+            label.addEventListener('click', (e) => this.showParamInputField(container, e));
         }
 
-        var elem = Element.down(container, '.element');
+        const elem = container.querySelector('.element');
         if (elem) {
-            var trig = elem.down('.rule-chooser-trigger');
+            const trig = elem.querySelector('.rule-chooser-trigger');
             if (trig) {
-                Event.observe(trig, 'click', this.toggleChooser.bind(this, container));
+                trig.addEventListener('click', (e) => this.toggleChooser(container, e));
             }
 
-            var apply = elem.down('.rule-param-apply');
+            const apply = elem.querySelector('.rule-param-apply');
             if (apply) {
-                Event.observe(apply, 'click', this.hideParamInputField.bind(this, container));
+                apply.addEventListener('click', (e) => this.hideParamInputField(container, e));
             } else {
-                elem = elem.down('.element-value-changer');
-                elem.container = container;
-                if (!elem.multiple) {
-                    Event.observe(elem, 'change', this.hideParamInputField.bind(this, container));
+                const changeElem = elem.querySelector('.element-value-changer');
+                if (changeElem) {
+                    changeElem.container = container;
+                    if (!changeElem.multiple) {
+                        changeElem.addEventListener('change', (e) => this.hideParamInputField(container, e));
+                    }
+                    changeElem.addEventListener('blur', (e) => this.hideParamInputField(container, e));
                 }
-                Event.observe(elem, 'blur', this.hideParamInputField.bind(this, container));
             }
         }
 
         // Add attribute change handler for reloading value field when attribute changes
-        var attributeElem = Element.down(container, 'select[name*="[attribute]"]');
+        const attributeElem = container.querySelector('select[name*="[attribute]"]');
         if (attributeElem) {
-            Event.observe(attributeElem, 'change', this.onAttributeChange.bind(this, container));
+            attributeElem.addEventListener('change', (e) => this.onAttributeChange(container, e));
         }
 
-        var remove = Element.down(container, '.rule-param-remove');
+        const remove = container.querySelector('.rule-param-remove');
         if (remove) {
-            Event.observe(remove, 'click', this.removeRuleEntry.bind(this, container));
+            remove.addEventListener('click', (e) => this.removeRuleEntry(container, e));
         }
-    },
+    }
 
-    showChooserElement: function (chooser) {
-        this.chooserSelectedItems = $H({});
-        if (chooser.hasClassName('no-split')) {
+    showChooserElement(chooser) {
+        this.chooserSelectedItems.clear();
+        
+        if (chooser.classList.contains('no-split')) {
             this.chooserSelectedItems.set(this.updateElement.value, 1);
         } else {
-            var values = this.updateElement.value.split(','), s = '';
-            for (i=0; i<values.length; i++) {
-                s = values[i].strip();
-                if (s!='') {
-                   this.chooserSelectedItems.set(s,1);
+            const values = this.updateElement.value.split(',');
+            values.forEach(value => {
+                const s = value.trim();
+                if (s !== '') {
+                    this.chooserSelectedItems.set(s, 1);
                 }
-            }
+            });
         }
-        new Ajax.Request(chooser.getAttribute('url'), {
-            evalScripts: true,
-            parameters: {'form_key': FORM_KEY, 'selected[]':this.chooserSelectedItems.keys() },
-            onSuccess: function(transport) {
-                if (this._processSuccess(transport)) {
-                    $(chooser).update(transport.responseText);
-                    this.showChooserLoaded(chooser, transport);
-                }
-            }.bind(this),
-            onFailure: this._processFailure.bind(this)
+
+        const formData = new FormData();
+        formData.append('form_key', window.FORM_KEY || '');
+        Array.from(this.chooserSelectedItems.keys()).forEach(key => {
+            formData.append('selected[]', key);
         });
-    },
 
-    showChooserLoaded: function(chooser, transport) {
+        mahoFetch(chooser.getAttribute('url'), {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(responseText => {
+            if (this._processSuccess(responseText)) {
+                chooser.innerHTML = responseText;
+                this.showChooserLoaded(chooser, responseText);
+            }
+        })
+        .catch(error => {
+            this._processFailure(error);
+        });
+    }
+
+    showChooserLoaded(chooser, transport) {
         chooser.style.display = 'block';
-    },
+    }
 
-    showChooser: function (container, event) {
-        var chooser = container.up('li');
+    showChooser(container, event) {
+        const chooser = container.closest('li');
         if (!chooser) {
             return;
         }
-        chooser = chooser.down('.rule-chooser');
-        if (!chooser) {
+        const chooserElement = chooser.querySelector('.rule-chooser');
+        if (!chooserElement) {
             return;
         }
-        this.showChooserElement(chooser);
-    },
+        this.showChooserElement(chooserElement);
+    }
 
-    hideChooser: function (container, event) {
-        var chooser = container.up('li');
+    hideChooser(container, event) {
+        const chooser = container.closest('li');
         if (!chooser) {
             return;
         }
-        chooser = chooser.down('.rule-chooser');
-        if (!chooser) {
+        const chooserElement = chooser.querySelector('.rule-chooser');
+        if (!chooserElement) {
             return;
         }
-        chooser.style.display = 'none';
-    },
+        chooserElement.style.display = 'none';
+    }
 
-    toggleChooser: function (container, event) {
+    toggleChooser(container, event) {
         if (this.readOnly) {
             return false;
         }
 
-        var chooser = container.up('li').down('.rule-chooser');
+        const chooser = container.closest('li').querySelector('.rule-chooser');
         if (!chooser) {
             return;
         }
-        if (chooser.style.display=='block') {
+        
+        if (chooser.style.display === 'block') {
             chooser.style.display = 'none';
             this.cleanChooser(container, event);
         } else {
             this.showChooserElement(chooser);
         }
-    },
+    }
 
-    cleanChooser: function (container, event) {
-        var chooser = container.up('li').down('.rule-chooser');
+    cleanChooser(container, event) {
+        const chooser = container.closest('li').querySelector('.rule-chooser');
         if (!chooser) {
             return;
         }
         chooser.innerHTML = '';
-    },
+    }
 
-    showParamInputField: function (container, event) {
+    showParamInputField(container, event) {
         if (this.readOnly) {
             return false;
         }
@@ -187,210 +192,223 @@ VarienRulesForm.prototype = {
             this.hideParamInputField(this.shownElement, event);
         }
 
-        Element.addClassName(container, 'rule-param-edit');
-        var elemContainer = Element.down(container, '.element');
+        container.classList.add('rule-param-edit');
+        const elemContainer = container.querySelector('.element');
 
-        var elem = Element.down(elemContainer, 'input.input-text');
-        if (elem) {
-            elem.focus();
-            if (elem && elem.id && elem.id.match(/__value$/)) {
-                this.updateElement = elem;
-                //this.showChooser(container, event);
+        const inputElem = elemContainer?.querySelector('input.input-text');
+        if (inputElem) {
+            inputElem.focus();
+            if (inputElem.id && inputElem.id.match(/__value$/)) {
+                this.updateElement = inputElem;
             }
-
         }
 
-        var elem = Element.down(elemContainer, '.element-value-changer');
-        if (elem) {
-           elem.focus();
+        const changeElem = elemContainer?.querySelector('.element-value-changer');
+        if (changeElem) {
+            changeElem.focus();
         }
 
         this.shownElement = container;
-    },
+    }
 
-    hideParamInputField: function (container, event) {
-        Element.removeClassName(container, 'rule-param-edit');
-        var label = Element.down(container, '.label'), elem;
+    hideParamInputField(container, event) {
+        container.classList.remove('rule-param-edit');
+        const label = container.querySelector('.label');
 
-        if (!container.hasClassName('rule-param-new-child')) {
-            elem = Element.down(container, '.element-value-changer');
-            if (elem && elem.options) {
-                var selectedOptions = [];
-                for (i=0; i<elem.options.length; i++) {
-                    if (elem.options[i].selected) {
-                        selectedOptions.push(elem.options[i].text);
-                    }
-                }
+        if (!container.classList.contains('rule-param-new-child')) {
+            const selectElem = container.querySelector('.element-value-changer');
+            if (selectElem && selectElem.options) {
+                const selectedOptions = Array.from(selectElem.options)
+                    .filter(option => option.selected)
+                    .map(option => option.text);
 
-                var str = selectedOptions.join(', ');
-                label.innerHTML = str!='' ? str : '...';
+                const str = selectedOptions.join(', ');
+                label.innerHTML = str !== '' ? str : '...';
             }
 
-            elem = Element.down(container, 'input.input-text');
-            if (elem) {
-                var str = elem.value.replace(/(^\s+|\s+$)/g, '');
-                elem.value = str;
-                if (str=='') {
+            const inputElem = container.querySelector('input.input-text');
+            if (inputElem) {
+                let str = inputElem.value.replace(/(^\s+|\s+$)/g, '');
+                inputElem.value = str;
+                if (str === '') {
                     str = '...';
-                } else if (str.length>100) {
-                    str = str.substr(0, 100)+'...';
+                } else if (str.length > 100) {
+                    str = str.substr(0, 100) + '...';
                 }
-                label.innerHTML = str.escapeHTML();
+                label.innerHTML = xssFilter(str);
             }
         } else {
-            elem = Element.down(container, '.element-value-changer');
-            if (elem.value) {
+            const elem = container.querySelector('.element-value-changer');
+            if (elem && elem.value) {
                 this.addRuleNewChild(elem);
             }
-            elem.value = '';
+            if (elem) {
+                elem.value = '';
+            }
         }
 
+        const elem = container.querySelector('.element-value-changer') || container.querySelector('input.input-text');
         if (elem && elem.id && elem.id.match(/__value$/)) {
             this.hideChooser(container, event);
             this.updateElement = null;
         }
 
         this.shownElement = null;
-    },
+    }
 
-    addRuleNewChild: function (elem) {
-        var parent_id = elem.id.replace(/^.*__(.*)__.*$/, '$1');
-        var children_ul = $(elem.id.replace(/__/g, ':').replace(/[^:]*$/, 'children').replace(/:/g, '__'));
-        var max_id = 0, i;
-        var children_inputs = Selector.findChildElements(children_ul, $A(['input.hidden']));
-        if (children_inputs.length) {
-            children_inputs.each(function(el){
-                if (el.id.match(/__type$/)) {
-                    i = 1 * el.id.replace(/^.*__.*?([0-9]+)__.*$/, '$1');
-                    max_id = i > max_id ? i : max_id;
-                }
-            });
-        }
-        var new_id = parent_id + '--' + (max_id + 1);
-        var new_type = elem.value;
-        var new_elem = document.createElement('LI');
-        new_elem.className = 'rule-param-wait';
-        new_elem.innerHTML = Translator.translate('Please wait, loading...');
-        children_ul.insertBefore(new_elem, $(elem).up('li'));
-
-        new Ajax.Request(this.newChildUrl, {
-            evalScripts: true,
-            parameters: {form_key: FORM_KEY, type:new_type.replace('/','-'), id:new_id },
-            onComplete: this.onAddNewChildComplete.bind(this, new_elem),
-            onSuccess: function(transport) {
-                if(this._processSuccess(transport)) {
-                    $(new_elem).update(transport.responseText);
-                }
-            }.bind(this),
-            onFailure: this._processFailure.bind(this)
+    addRuleNewChild(elem) {
+        const parent_id = elem.id.replace(/^.*__(.*)__.*$/, '$1');
+        const children_ul = document.getElementById(
+            elem.id.replace(/__/g, ':').replace(/[^:]*$/, 'children').replace(/:/g, '__')
+        );
+        
+        let max_id = 0;
+        const children_inputs = children_ul.querySelectorAll('input.hidden');
+        children_inputs.forEach(el => {
+            if (el.id.match(/__type$/)) {
+                const i = parseInt(el.id.replace(/^.*__.*?([0-9]+)__.*$/, '$1'));
+                max_id = i > max_id ? i : max_id;
+            }
         });
-    },
+        
+        const new_id = parent_id + '--' + (max_id + 1);
+        const new_type = elem.value;
+        const new_elem = document.createElement('LI');
+        new_elem.className = 'rule-param-wait';
+        new_elem.innerHTML = window.Translator ? Translator.translate('Please wait, loading...') : 'Please wait, loading...';
+        children_ul.insertBefore(new_elem, elem.closest('li'));
 
-    _processSuccess : function(transport) {
-        if (transport.responseText.isJSON()) {
-            var response = transport.responseText.evalJSON();
+        const formData = new FormData();
+        formData.append('form_key', window.FORM_KEY || '');
+        formData.append('type', new_type.replace('/', '-'));
+        formData.append('id', new_id);
+
+        mahoFetch(this.newChildUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(responseText => {
+            if (this._processSuccess(responseText)) {
+                new_elem.innerHTML = responseText;
+                this.onAddNewChildComplete(new_elem);
+            }
+        })
+        .catch(error => {
+            this._processFailure(error);
+        });
+    }
+
+    _processSuccess(responseText) {
+        try {
+            const response = JSON.parse(responseText);
             if (response.error) {
                 alert(response.message);
             }
-            if(response.ajaxExpired && response.ajaxRedirect) {
-                setLocation(response.ajaxRedirect);
+            if (response.ajaxExpired && response.ajaxRedirect) {
+                location.href = response.ajaxRedirect;
             }
             return false;
+        } catch (e) {
+            // Not JSON, continue processing as HTML
+            return true;
         }
-        return true;
-    },
+    }
 
-    _processFailure : function(transport) {
-        location.href = BASE_URL;
-    },
+    _processFailure(error) {
+        console.error('Request failed:', error);
+        if (window.BASE_URL) {
+            location.href = window.BASE_URL;
+        }
+    }
 
-    onAddNewChildComplete: function (new_elem) {
+    onAddNewChildComplete(new_elem) {
         if (this.readOnly) {
             return false;
         }
 
-        $(new_elem).removeClassName('rule-param-wait');
-        var elems = new_elem.getElementsByClassName('rule-param');
-        for (var i=0; i<elems.length; i++) {
-            this.initParam(elems[i]);
+        new_elem.classList.remove('rule-param-wait');
+        const elems = new_elem.querySelectorAll('.rule-param');
+        elems.forEach(elem => this.initParam(elem));
+    }
+
+    removeRuleEntry(container, event) {
+        const li = container.closest('li');
+        if (li && li.parentNode) {
+            li.parentNode.removeChild(li);
         }
-    },
+    }
 
-    removeRuleEntry: function (container, event) {
-        var li = Element.up(container, 'li');
-        li.parentNode.removeChild(li);
-    },
+    chooserGridInit(grid) {
+        // grid.reloadParams = Array.from(this.chooserSelectedItems.keys());
+    }
 
-    chooserGridInit: function (grid) {
-        //grid.reloadParams = {'selected[]':this.chooserSelectedItems.keys()};
-    },
-
-    chooserGridRowInit: function (grid, row) {
+    chooserGridRowInit(grid, row) {
         if (!grid.reloadParams) {
-            grid.reloadParams = {'selected[]':this.chooserSelectedItems.keys()};
+            grid.reloadParams = {'selected[]': Array.from(this.chooserSelectedItems.keys())};
         }
-    },
+    }
 
-    chooserGridRowClick: function (grid, event) {
-        var trElement = Event.findElement(event, 'tr');
-        var isInput = Event.element(event).tagName == 'INPUT';
+    chooserGridRowClick(grid, event) {
+        const trElement = event.target.closest('tr');
+        const isInput = event.target.tagName === 'INPUT';
+        
         if (trElement) {
-            var checkbox = Element.select(trElement, 'input');
-            if (checkbox[0]) {
-                var checked = isInput ? checkbox[0].checked : !checkbox[0].checked;
-                grid.setCheckboxChecked(checkbox[0], checked);
-
+            const checkbox = trElement.querySelector('input');
+            if (checkbox) {
+                const checked = isInput ? checkbox.checked : !checkbox.checked;
+                grid.setCheckboxChecked(checkbox, checked);
             }
         }
-    },
+    }
 
-    chooserGridCheckboxCheck: function (grid, element, checked) {
+    chooserGridCheckboxCheck(grid, element, checked) {
         if (checked) {
-            if (!element.up('th')) {
-                this.chooserSelectedItems.set(element.value,1);
+            if (!element.closest('th')) {
+                this.chooserSelectedItems.set(element.value, 1);
             }
         } else {
-            this.chooserSelectedItems.unset(element.value);
+            this.chooserSelectedItems.delete(element.value);
         }
-        grid.reloadParams = {'selected[]':this.chooserSelectedItems.keys()};
-        this.updateElement.value = this.chooserSelectedItems.keys().join(', ');
-    },
+        grid.reloadParams = {'selected[]': Array.from(this.chooserSelectedItems.keys())};
+        this.updateElement.value = Array.from(this.chooserSelectedItems.keys()).join(', ');
+    }
 
-    onAttributeChange: function (container, event) {
+    onAttributeChange(container, event) {
         if (this.readOnly) {
             return false;
         }
 
-        var attributeElem = Event.element(event);
+        const attributeElem = event.target;
         // Find type element - it should be a sibling of the attribute element or in the same container
-        var typeElem = Element.down(container, 'input[name*="[type]"]');
+        let typeElem = container.querySelector('input[name*="[type]"]');
         if (!typeElem) {
             // Alternative: look for type element by ID pattern
-            var attributeId = attributeElem.id;
-            var typeId = attributeId.replace('__attribute', '__type');
+            const attributeId = attributeElem.id;
+            const typeId = attributeId.replace('__attribute', '__type');
             typeElem = document.getElementById(typeId);
         }
         if (!typeElem) {
             return;
         }
 
-        var containerLi = Element.up(container, 'li');
+        const containerLi = container.closest('li');
         if (!containerLi) {
             return;
         }
 
         // Get the condition ID and type
-        var conditionId = typeElem.value;
-        var attributeValue = attributeElem.value;
+        const conditionId = typeElem.value;
+        const attributeValue = attributeElem.value;
 
         // Create type parameter with attribute
-        var typeParam = conditionId.replace(/\//g, '-') + '|' + attributeValue;
+        const typeParam = conditionId.replace(/\//g, '-') + '|' + attributeValue;
 
         // Get element ID for this condition
-        var elementId = typeElem.id.replace(/__type$/, '');
+        const elementId = typeElem.id.replace(/__type$/, '');
 
         // Show loading indicator
-        var loadingElem = document.createElement('span');
+        const loadingElem = document.createElement('span');
         loadingElem.innerHTML = ' Loading...';
         loadingElem.className = 'rule-param-loading';
         loadingElem.style.fontStyle = 'italic';
@@ -398,58 +416,65 @@ VarienRulesForm.prototype = {
         containerLi.appendChild(loadingElem);
 
         // Make AJAX request to reload condition HTML with new attribute
-        new Ajax.Request(this.newChildUrl, {
-            evalScripts: true,
-            parameters: {
-                form_key: FORM_KEY,
-                type: typeParam,
-                id: elementId
-            },
-            onComplete: this.onAttributeChangeComplete.bind(this, containerLi, loadingElem),
-            onSuccess: function(transport) {
-                if(this._processSuccess(transport)) {
-                    // Create a temporary container for the new HTML
-                    var tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = transport.responseText;
+        const formData = new FormData();
+        formData.append('form_key', window.FORM_KEY || '');
+        formData.append('type', typeParam);
+        formData.append('id', elementId);
 
-                    // Store reference to parent before removing current element
-                    var parentUl = containerLi.parentNode;
-                    var nextSibling = containerLi.nextSibling;
+        mahoFetch(this.newChildUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(responseText => {
+            this.onAttributeChangeComplete(containerLi, loadingElem);
+            if (this._processSuccess(responseText)) {
+                // Create a temporary container for the new HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = responseText;
 
-                    // Remove the current condition
-                    parentUl.removeChild(containerLi);
+                // Store reference to parent before removing current element
+                const parentUl = containerLi.parentNode;
+                const nextSibling = containerLi.nextSibling;
 
-                    // Add all the new elements from the response
-                    while (tempDiv.firstChild) {
-                        var newElement = tempDiv.firstChild;
-                        if (nextSibling) {
-                            parentUl.insertBefore(newElement, nextSibling);
-                        } else {
-                            parentUl.appendChild(newElement);
-                        }
+                // Remove the current condition
+                parentUl.removeChild(containerLi);
 
-                        // Re-initialize rule params in this element
-                        if (newElement.nodeType === 1) { // Element node
-                            var elems = newElement.getElementsByClassName ?
-                                newElement.getElementsByClassName('rule-param') : [];
-                            for (var i=0; i<elems.length; i++) {
-                                this.initParam(elems[i]);
-                            }
-                            // Also check if the element itself is a rule-param
-                            if (newElement.className && newElement.className.indexOf('rule-param') !== -1) {
-                                this.initParam(newElement);
-                            }
+                // Add all the new elements from the response
+                while (tempDiv.firstChild) {
+                    const newElement = tempDiv.firstChild;
+                    if (nextSibling) {
+                        parentUl.insertBefore(newElement, nextSibling);
+                    } else {
+                        parentUl.appendChild(newElement);
+                    }
+
+                    // Re-initialize rule params in this element
+                    if (newElement.nodeType === 1) { // Element node
+                        const elems = newElement.querySelectorAll ? 
+                            newElement.querySelectorAll('.rule-param') : [];
+                        elems.forEach(elem => this.initParam(elem));
+                        
+                        // Also check if the element itself is a rule-param
+                        if (newElement.classList && newElement.classList.contains('rule-param')) {
+                            this.initParam(newElement);
                         }
                     }
                 }
-            }.bind(this),
-            onFailure: this._processFailure.bind(this)
+            }
+        })
+        .catch(error => {
+            this._processFailure(error);
         });
-    },
+    }
 
-    onAttributeChangeComplete: function (containerLi, loadingElem) {
+    onAttributeChangeComplete(containerLi, loadingElem) {
         if (loadingElem && loadingElem.parentNode) {
             loadingElem.parentNode.removeChild(loadingElem);
         }
     }
-};
+
+}
+
+// For backwards compatibility, create the old-style constructor
+window.VarienRulesForm = VarienRulesForm;

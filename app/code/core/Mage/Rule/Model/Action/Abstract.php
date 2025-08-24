@@ -304,8 +304,8 @@ abstract class Mage_Rule_Model_Action_Abstract extends Varien_Object implements 
      */
     public function getAddLinkHtml()
     {
-        $src = Mage::getDesign()->getSkinUrl('images/rule_component_add.gif');
-        return '<img src="' . $src . '" alt="" class="rule-param-add v-middle" />';
+        $icon = Mage::helper('core')->getIconSvg('circle-plus');
+        return '<span class="rule-param-add">' . $icon . '</span>';
     }
 
     /**
@@ -313,9 +313,8 @@ abstract class Mage_Rule_Model_Action_Abstract extends Varien_Object implements 
      */
     public function getRemoveLinkHtml()
     {
-        $src = Mage::getDesign()->getSkinUrl('images/rule_component_remove.gif');
-        return '<span class="rule-param"><a href="javascript:void(0)" class="rule-param-remove"><img src="'
-            . $src . '" alt="" class="v-middle" /></a></span>';
+        $icon = Mage::helper('core')->getIconSvg('circle-x');
+        return '<span class="rule-param"><a href="javascript:void(0)" class="rule-param-remove">' . $icon . '</a></span>';
     }
 
     /**
