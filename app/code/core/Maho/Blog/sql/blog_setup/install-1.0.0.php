@@ -34,54 +34,54 @@ $table = $installer->getConnection()
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
-    ], 'Entity ID')
+    ])
     ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity Type ID')
+    ])
     ->addColumn('attribute_set_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Attribute Set ID')
+    ])
     ->addColumn('url_key', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
         'nullable'  => false,
-    ], 'URL Key')
+    ])
     ->addColumn('title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
         'nullable'  => false,
-    ], 'Title (static)')
+    ])
     ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
-    ], 'Is Active (static)')
+    ])
     ->addColumn('publish_date', Varien_Db_Ddl_Table::TYPE_DATE, null, [
         'nullable'  => true,
-    ], 'Publish Date (static)')
+    ])
     ->addColumn('content', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
         'nullable'  => true,
-    ], 'Content (static)')
+    ])
     ->addColumn('meta_description', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
-    ], 'Meta Description (static)')
+    ])
     ->addColumn('meta_keywords', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
-    ], 'Meta Keywords (static)')
+    ])
     ->addColumn('meta_title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
         'nullable'  => true,
-    ], 'Meta Title (static)')
+    ])
     ->addColumn('meta_robots', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
         'nullable'  => true,
-    ], 'Meta Robots (static)')
+    ])
     ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
         'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
-    ], 'Created At')
+    ])
     ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
         'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
-    ], 'Updated At')
+    ])
     ->addIndex(
         $installer->getIdxName('blog/post', ['entity_type_id']),
         ['entity_type_id'],
@@ -126,27 +126,27 @@ $table = $installer->getConnection()
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
-    ], 'Value ID')
+    ])
     ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity Type ID')
+    ])
     ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Attribute ID')
+    ])
     ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Store ID')
+    ])
     ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity ID')
+    ])
     ->addColumn('value', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
     ], 'Value')
     ->addIndex(
@@ -206,27 +206,27 @@ $table = $installer->getConnection()
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
-    ], 'Value ID')
+    ])
     ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity Type ID')
+    ])
     ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Attribute ID')
+    ])
     ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Store ID')
+    ])
     ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity ID')
+    ])
     ->addColumn('value', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
     ], 'Value')
     ->addIndex(
@@ -286,29 +286,29 @@ $table = $installer->getConnection()
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
-    ], 'Value ID')
+    ])
     ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity Type ID')
+    ])
     ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Attribute ID')
+    ])
     ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Store ID')
+    ])
     ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity ID')
+    ])
     ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
-    ], 'Value')
+    ])
     ->addIndex(
         $installer->getIdxName(
             ['blog/post', 'text'],
@@ -366,29 +366,29 @@ $table = $installer->getConnection()
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
-    ], 'Value ID')
+    ])
     ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity Type ID')
+    ])
     ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Attribute ID')
+    ])
     ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Store ID')
+    ])
     ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
-    ], 'Entity ID')
+    ])
     ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
-    ], 'Value')
+    ])
     ->addIndex(
         $installer->getIdxName(
             ['blog/post', 'varchar'],

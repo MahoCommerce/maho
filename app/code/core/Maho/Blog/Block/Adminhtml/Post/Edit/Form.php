@@ -149,7 +149,6 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
                 'index,nofollow' => Mage::helper('blog')->__('INDEX, NOFOLLOW'),
                 'noindex,nofollow' => Mage::helper('blog')->__('NOINDEX, NOFOLLOW'),
             ],
-            'note' => Mage::helper('blog')->__('Search engine crawler instructions'),
         ]);
 
         if (Mage::registry('blog_post')) {
