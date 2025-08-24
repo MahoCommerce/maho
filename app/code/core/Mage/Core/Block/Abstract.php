@@ -685,12 +685,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $block = $this->getLayout()->getBlock($block);
         }
         if (!$block) {
-            /*
-             * if we don't have block - don't throw exception because
-             * block can simply removed using layout method remove
-             */
-            //Mage::throwException(Mage::helper('core')
-            // ->__('Invalid block name to set child %s: %s', $alias, $block));
             return $this;
         }
         if ($block->getIsAnonymous()) {
