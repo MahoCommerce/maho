@@ -10,6 +10,7 @@
     </adminhtml_blog_post_index>
 
     <adminhtml_blog_post_edit>
+        <update handle="editor"/>
         <reference name="content">
             <block type="blog/adminhtml_post_edit" name="posts_edit"/>
         </reference>

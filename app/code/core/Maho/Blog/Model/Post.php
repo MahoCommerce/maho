@@ -18,6 +18,21 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_post';
 
+    /**
+     * Static attributes that are stored directly in the main entity table
+     */
+    protected array $_staticAttributes = [
+        'title',
+        'url_key',
+        'is_active',
+        'publish_date',
+        'content',
+        'meta_description',
+        'meta_keywords',
+        'meta_title',
+        'meta_robots',
+    ];
+
     #[\Override]
     protected function _construct()
     {
@@ -53,4 +68,21 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     {
         return !empty($this->getImage());
     }
+
+    /**
+     * Check if an attribute is stored as static column in main table
+     */
+    public function isStaticAttribute(string $attributeCode): bool
+    {
+        return in_array($attributeCode, $this->_staticAttributes, true);
+    }
+
+    /**
+     * Get list of static attribute codes
+     */
+    public function getStaticAttributes(): array
+    {
+        return $this->_staticAttributes;
+    }
+
 }

@@ -58,6 +58,32 @@ $table = $installer->getConnection()
     ->addColumn('url_key', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'URL Key')
+    ->addColumn('title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+        'nullable'  => false,
+    ], 'Title (static)')
+    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+        'unsigned'  => true,
+        'nullable'  => false,
+        'default'   => '1',
+    ], 'Is Active (static)')
+    ->addColumn('publish_date', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+        'nullable'  => true,
+    ], 'Publish Date (static)')
+    ->addColumn('content', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+        'nullable'  => true,
+    ], 'Content (static)')
+    ->addColumn('meta_description', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+        'nullable'  => true,
+    ], 'Meta Description (static)')
+    ->addColumn('meta_keywords', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+        'nullable'  => true,
+    ], 'Meta Keywords (static)')
+    ->addColumn('meta_title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+        'nullable'  => true,
+    ], 'Meta Title (static)')
+    ->addColumn('meta_robots', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+        'nullable'  => true,
+    ], 'Meta Robots (static)')
     ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
         'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
@@ -73,6 +99,22 @@ $table = $installer->getConnection()
     ->addIndex(
         $installer->getIdxName('blog/post', ['url_key']),
         ['url_key'],
+    )
+    ->addIndex(
+        $installer->getIdxName('blog/post', ['is_active']),
+        ['is_active'],
+    )
+    ->addIndex(
+        $installer->getIdxName('blog/post', ['publish_date']),
+        ['publish_date'],
+    )
+    ->addIndex(
+        $installer->getIdxName('blog/post', ['is_active', 'publish_date']),
+        ['is_active', 'publish_date'],
+    )
+    ->addIndex(
+        $installer->getIdxName('blog/post', ['title']),
+        ['title'],
     )
     ->addForeignKey(
         $installer->getFkName('blog/post', 'entity_type_id', 'eav/entity_type', 'entity_type_id'),
@@ -405,37 +447,8 @@ $table = $installer->getConnection()
     ->setComment('Blog Post Varchar Attribute Backend Table');
 $installer->getConnection()->createTable($table);
 
-// Common attribute properties
+// EAV attributes (only non-static attributes)
 $attributes = [
-    'title' => [
-        'type' => 'varchar',
-        'label' => 'Title',
-        'input' => 'text',
-        'required' => true,
-        'sort_order' => 10,
-    ],
-    'publish_date' => [
-        'type' => 'datetime',
-        'label' => 'Publish Date',
-        'input' => 'date',
-        'required' => false,
-        'sort_order' => 20,
-    ],
-    'content' => [
-        'type' => 'text',
-        'label' => 'Content',
-        'input' => 'textarea',
-        'required' => true,
-        'sort_order' => 30,
-    ],
-    'is_active' => [
-        'type' => 'int',
-        'label' => 'Is Active',
-        'input' => 'boolean',
-        'required' => true,
-        'sort_order' => 40,
-        'system' => true,
-    ],
     'store_id' => [
         'type' => 'int',
         'label' => 'Store ID',
@@ -457,7 +470,7 @@ $attributes = [
 foreach ($attributes as $code => $options) {
     $installer->addAttribute('blog_post', $code, [
         'type'              => $options['type'],
-        'backend'           => $options['backend_model'] ?? null,
+        'backend'           => $options['backend_model'],
         'frontend'          => '',
         'label'             => $options['label'],
         'input'             => $options['input'],
@@ -474,21 +487,9 @@ foreach ($attributes as $code => $options) {
         'visible_on_front'  => true,
         'unique'            => false,
         'sort_order'        => $options['sort_order'],
-        'system'            => $options['system'] ?? false,
+        'system'            => false,
     ]);
 }
-
-// Adding the url_key as a static column on the main table
-$installer->getConnection()->addColumn(
-    $installer->getTable('blog/post'),
-    'url_key',
-    [
-        'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
-        'length' => 255,
-        'nullable' => false,
-        'comment' => 'URL Key',
-    ],
-);
 
 // Create the blog_website table
 $table = $installer->getConnection()

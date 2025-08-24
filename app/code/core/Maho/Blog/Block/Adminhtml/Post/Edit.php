@@ -29,10 +29,6 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
         ], -100);
 
         $this->_formScripts[] = "
-            function toggleEditor() {
-                tinymce.execCommand('mceToggleEditor', false, wysiwygblock_content);
-            }
-
             function saveAndContinueEdit(){
                 editForm.submit(document.getElementById('edit_form').action+'back/edit/');
             }

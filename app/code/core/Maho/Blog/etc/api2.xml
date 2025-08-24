@@ -35,6 +35,11 @@
                     <url_key>URL Key</url_key>
                     <image>Image</image>
                     <is_active>Is Active</is_active>
+                    <publish_date>Publish Date</publish_date>
+                    <meta_title>Meta Title</meta_title>
+                    <meta_keywords>Meta Keywords</meta_keywords>
+                    <meta_description>Meta Description</meta_description>
+                    <meta_robots>Meta Robots</meta_robots>
                     <created_at>Created At</created_at>
                     <updated_at>Updated At</updated_at>
                     <stores>Store IDs</stores>

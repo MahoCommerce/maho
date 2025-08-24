@@ -32,10 +32,35 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             'entity_type_id',
             'attribute_set_id',
             'increment_id',
+            'title',
+            'url_key',
+            'is_active',
+            'publish_date',
+            'content',
+            'meta_description',
+            'meta_keywords',
+            'meta_title',
+            'meta_robots',
             'created_at',
             'updated_at',
-            'is_active',
+        ];
+    }
+
+    /**
+     * Get static attribute codes
+     */
+    public function getStaticAttributeCodes(): array
+    {
+        return [
+            'title',
             'url_key',
+            'is_active',
+            'publish_date',
+            'content',
+            'meta_description',
+            'meta_keywords',
+            'meta_title',
+            'meta_robots',
         ];
     }
 
@@ -90,16 +115,6 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         return $adapter->fetchCol($select);
     }
 
-    #[\Override]
-    protected function _afterLoad(Varien_Object $object): self
-    {
-        if ($object->getId()) {
-            $stores = $this->lookupStoreIds($object->getId());
-            $object->setData('stores', $stores);
-        }
-
-        return parent::_afterLoad($object);
-    }
 
     public function getPostIdByUrlKey(string $urlKey, int $storeId): ?int
     {
@@ -155,5 +170,78 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         }
 
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Save static attributes directly to main entity table
+     * Override to handle hybrid EAV/static approach
+     */
+    #[\Override]
+    public function save(Varien_Object $object)
+    {
+        $locale = Mage::app()->getLocale();
+
+        if (!$object->getId()) {
+            $object->setCreatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+        }
+        $object->setUpdatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+
+        // Validate and normalize publish_date if provided
+        if ($object->hasData('publish_date') && $object->getData('publish_date')) {
+            $publishDate = $object->getData('publish_date');
+            // Validate the date format using new validation method
+            if (is_string($publishDate) && Mage_Core_Model_Locale::isValidDate($publishDate)) {
+                // Ensure it's in the correct DATE_FORMAT (Y-m-d)
+                if (strlen($publishDate) > 10) {
+                    $publishDate = substr($publishDate, 0, 10);
+                }
+                $object->setData('publish_date', $publishDate);
+            } else {
+                // Invalid date, set to null
+                $object->setData('publish_date', null);
+            }
+        }
+
+        // Save static attributes to main table
+        $this->_saveStaticAttributes($object);
+
+        // Continue with EAV save for non-static attributes
+        return parent::save($object);
+    }
+
+    protected function _saveStaticAttributes(Varien_Object $object): self
+    {
+        $adapter = $this->_getWriteAdapter();
+        $table = $this->getEntityTable();
+        $staticAttributes = $this->getStaticAttributeCodes();
+
+        $data = [];
+        foreach ($staticAttributes as $attributeCode) {
+            if ($object->hasData($attributeCode)) {
+                $data[$attributeCode] = $object->getData($attributeCode);
+            }
+        }
+
+        if (!empty($data)) {
+            if ($object->getId()) {
+                $adapter->update($table, $data, ['entity_id = ?' => $object->getId()]);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Load static attributes from main entity table
+     */
+    #[\Override]
+    protected function _afterLoad(Varien_Object $object): self
+    {
+        if ($object->getId()) {
+            $stores = $this->lookupStoreIds($object->getId());
+            $object->setData('stores', $stores);
+        }
+
+        return parent::_afterLoad($object);
     }
 }

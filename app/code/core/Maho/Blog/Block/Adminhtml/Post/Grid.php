@@ -25,11 +25,11 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
     {
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getModel('blog/post')->getCollection();
-        $collection
-            ->addAttributeToSelect('title')
-            ->addAttributeToSelect('publish_date')
-            ->addAttributeToSelect('created_at')
-            ->addAttributeToSelect('image');
+
+        // Static attributes are automatically selected from main table
+        // Only need to select EAV attributes explicitly
+        $collection->addAttributeToSelect('image');
+
         $this->setCollection($collection);
 
         return parent::_prepareCollection();
@@ -49,6 +49,13 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'header' => Mage::helper('blog')->__('Title'),
             'align' => 'left',
             'index' => 'title',
+        ]);
+
+        $this->addColumn('url_key', [
+            'header' => Mage::helper('blog')->__('URL Key'),
+            'align' => 'left',
+            'index' => 'url_key',
+            'width' => '150px',
         ]);
 
         $this->addColumn('image', [
@@ -78,6 +85,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'header'    => Mage::helper('blog')->__('Status'),
             'index'     => 'is_active',
             'type'      => 'options',
+            'width'     => '80px',
             'options'   => [
                 0 => Mage::helper('blog')->__('Disabled'),
                 1 => Mage::helper('blog')->__('Enabled'),
@@ -150,4 +158,5 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         }
         return $this;
     }
+
 }

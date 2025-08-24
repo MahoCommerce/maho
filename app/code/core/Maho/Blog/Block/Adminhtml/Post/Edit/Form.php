@@ -12,6 +12,16 @@
 class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     #[\Override]
+    protected function _prepareLayout()
+    {
+        parent::_prepareLayout();
+        if (Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
+            $this->getLayout()->getBlock('head')->setCanLoadWysiwyg(true);
+        }
+        return $this;
+    }
+
+    #[\Override]
     protected function _prepareForm()
     {
         $model = Mage::registry('blog_post');
@@ -90,17 +100,60 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         $fieldset->addField('publish_date', 'date', [
             'name'      => 'publish_date',
             'label'     => Mage::helper('blog')->__('Publishing Date'),
-            'format'    => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
+            'format'    => Mage_Core_Model_Locale::DATE_FORMAT,
             'required'  => false,
+            'note'      => Mage::helper('blog')->__('Date when the post should be published (Y-m-d format)'),
         ]);
+
+        $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig();
 
         $fieldset->addField('content', 'editor', [
             'name' => 'content',
             'label' => Mage::helper('blog')->__('Content'),
             'title' => Mage::helper('blog')->__('Content'),
-            'style'     => 'height:36em',
+            'style' => 'height:36em;',
             'required' => true,
-            'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig(),
+            'config' => $wysiwygConfig,
+        ]);
+
+        $metaFieldset = $form->addFieldset('meta_fieldset', [
+            'legend' => Mage::helper('blog')->__('Meta Information'),
+            'class' => 'fieldset-wide',
+        ]);
+
+        $metaFieldset->addField('meta_title', 'text', [
+            'name' => 'meta_title',
+            'label' => Mage::helper('blog')->__('Meta Title'),
+            'title' => Mage::helper('blog')->__('Meta Title'),
+            'note' => Mage::helper('blog')->__('Leave empty to use post title'),
+        ]);
+
+        $metaFieldset->addField('meta_keywords', 'textarea', [
+            'name' => 'meta_keywords',
+            'label' => Mage::helper('blog')->__('Meta Keywords'),
+            'title' => Mage::helper('blog')->__('Meta Keywords'),
+            'note' => Mage::helper('blog')->__('Comma-separated keywords'),
+        ]);
+
+        $metaFieldset->addField('meta_description', 'textarea', [
+            'name' => 'meta_description',
+            'label' => Mage::helper('blog')->__('Meta Description'),
+            'title' => Mage::helper('blog')->__('Meta Description'),
+            'note' => Mage::helper('blog')->__('SEO description for search engines'),
+        ]);
+
+        $metaFieldset->addField('meta_robots', 'select', [
+            'name' => 'meta_robots',
+            'label' => Mage::helper('blog')->__('Meta Robots'),
+            'title' => Mage::helper('blog')->__('Meta Robots'),
+            'options' => [
+                '' => Mage::helper('blog')->__('-- Use System Default --'),
+                'index,follow' => Mage::helper('blog')->__('INDEX, FOLLOW'),
+                'noindex,follow' => Mage::helper('blog')->__('NOINDEX, FOLLOW'),
+                'index,nofollow' => Mage::helper('blog')->__('INDEX, NOFOLLOW'),
+                'noindex,nofollow' => Mage::helper('blog')->__('NOINDEX, NOFOLLOW'),
+            ],
+            'note' => Mage::helper('blog')->__('Search engine crawler instructions'),
         ]);
 
         if (Mage::registry('blog_post')) {
