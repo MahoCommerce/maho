@@ -249,8 +249,10 @@ describe('Blog Navigation Integration', function () {
             ->addStoreFilter($currentStore)
             ->addFieldToFilter('is_active', 1)
             ->addFieldToFilter('entity_id', $futurePost->getId());
-        $futureFilteredCollection->getSelect()->where('publish_date <= ?', 
-            Mage_Core_Model_Locale::today());
+        $futureFilteredCollection->getSelect()->where(
+            'publish_date <= ?',
+            Mage_Core_Model_Locale::today(),
+        );
 
         expect($futureFilteredCollection->getSize())->toBe(0); // Future post filtered out
 
