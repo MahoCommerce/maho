@@ -345,6 +345,12 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
      */
     public function getPageUrl($page)
     {
+        // For first page, return clean URL without page parameter
+        if ($page == 1) {
+            // Explicitly remove the page parameter by setting it to null
+            return $this->getPagerUrl([$this->getPageVarName() => null]);
+        }
+
         return $this->getPagerUrl([$this->getPageVarName() => $page]);
     }
 

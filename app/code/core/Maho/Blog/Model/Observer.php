@@ -56,12 +56,12 @@ class Maho_Blog_Model_Observer
         $lastmod = Mage::getStoreConfigFlag('sitemap/blog/lastmod', $storeId) ? $date : '';
 
         // Add blog index page to sitemap (only if there are posts)
-        $blogIndexXml = $this->getSitemapRow($baseUrl . 'blog', $lastmod, $changefreq, $priority);
+        $blogIndexXml = $this->getSitemapRow(Mage::helper('blog')->getBlogUrl(), $lastmod, $changefreq, $priority);
         $io->streamWrite($blogIndexXml);
 
         // Write blog posts to sitemap
         foreach ($posts as $post) {
-            $xml = $this->getSitemapRow($baseUrl . $post->getUrl(), $lastmod, $changefreq, $priority);
+            $xml = $this->getSitemapRow($post->getUrl(), $lastmod, $changefreq, $priority);
             $io->streamWrite($xml);
         }
     }

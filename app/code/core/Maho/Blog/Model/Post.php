@@ -85,12 +85,8 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return $this->_staticAttributes;
     }
 
-    /**
-     * Get post URL for sitemap
-     */
     public function getUrl(): string
     {
-        return 'blog/' . $this->getUrlKey();
+        return Mage::getUrl($this->getUrlKey());
     }
-
 }

@@ -41,4 +41,10 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return Mage::getUrl('blog');
     }
+
+    public function getPostsPerPage(): int
+    {
+        $postsPerPage = (int) Mage::getStoreConfig('blog/general/posts_per_page');
+        return $postsPerPage > 0 ? $postsPerPage : 20; // Default fallback
+    }
 }

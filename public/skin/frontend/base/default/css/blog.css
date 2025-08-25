@@ -12,6 +12,13 @@
     font-size: 0.75rem;
 }
 
+.blog-index-index .pager {
+    margin-top: 10px;
+}
+.blog-index-index .pager .pages ol {
+    justify-content: center;
+}
+
 /* Blog posts grid */
 #blog_posts {
     --gap: 1.25rem;
