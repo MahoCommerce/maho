@@ -32,7 +32,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         $postId = $this->getRequest()->getParam('post_id');
         $post = Mage::getModel('blog/post')->load($postId);
         if (!$post->getId()) {
-            $this->_forward('noroute');
+            $this->_forward('noRoute');
             return;
         }
 
