@@ -27,7 +27,7 @@
                             <config>
                                 <children>
                                     <blog translate="title">
-                                        <title>Blog Configuration</title>
+                                        <title>Blog</title>
                                     </blog>
                                 </children>
                             </config>
