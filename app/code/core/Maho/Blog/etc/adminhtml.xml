@@ -24,6 +24,13 @@
                     </cms>
                     <system>
                         <children>
+                            <config>
+                                <children>
+                                    <blog translate="title">
+                                        <title>Blog Configuration</title>
+                                    </blog>
+                                </children>
+                            </config>
                             <api>
                                 <children>
                                     <blog_post translate="title">

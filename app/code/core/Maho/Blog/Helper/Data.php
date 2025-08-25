@@ -20,7 +20,9 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function shouldShowInNavigation(): bool
     {
-        return $this->isEnabled() && $this->hasVisiblePosts();
+        return $this->isEnabled()
+            && Mage::getStoreConfigFlag('blog/general/show_in_navigation')
+            && $this->hasVisiblePosts();
     }
 
     public function hasVisiblePosts(): bool

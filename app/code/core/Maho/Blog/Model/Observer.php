@@ -105,4 +105,24 @@ class Maho_Blog_Model_Observer
 
         return $posts;
     }
+
+    /**
+     * Handle search autocomplete content collection event
+     */
+    public function addBlogAutocompleteContent(Varien_Event_Observer $observer): void
+    {
+        $autocompleteData = $observer->getEvent()->getAutocompleteData();
+        $layout = $autocompleteData->getLayout();
+
+        // Create blog autocomplete block
+        $blogBlock = $layout->createBlock('blog/autocomplete');
+
+        if ($blogBlock) {
+            $blogHtml = $blogBlock->toHtml();
+
+            // Append blog HTML to existing autocomplete content
+            $currentHtml = $autocompleteData->getHtml();
+            $autocompleteData->setHtml($currentHtml . $blogHtml);
+        }
+    }
 }
