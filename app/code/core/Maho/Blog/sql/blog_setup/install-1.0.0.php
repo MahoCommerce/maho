@@ -57,7 +57,7 @@ $table = $installer->getConnection()
         'default'   => '1',
     ])
     ->addColumn('publish_date', Varien_Db_Ddl_Table::TYPE_DATE, null, [
-        'nullable'  => true,
+        'nullable'  => false,
     ])
     ->addColumn('content', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
         'nullable'  => true,

@@ -101,8 +101,14 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             'name'      => 'publish_date',
             'label'     => Mage::helper('blog')->__('Publishing Date'),
             'format'    => Mage_Core_Model_Locale::DATE_FORMAT,
-            'required'  => false,
+            'required'  => true,
+            'class'     => 'required-entry',
         ]);
+
+        // Pre-fill with today's date for new posts
+        if (!$model->getId() && !$model->getData('publish_date')) {
+            $model->setData('publish_date', Mage_Core_Model_Locale::today());
+        }
 
         $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig();
 
