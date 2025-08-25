@@ -96,7 +96,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'header' => Mage::helper('blog')->__('Publishing Date'),
             'index'  => 'publish_date',
             'width' => '150px',
-            'type' => 'datetime',
+            'type' => 'date',
         ]);
 
         $this->addColumn('created_at', [

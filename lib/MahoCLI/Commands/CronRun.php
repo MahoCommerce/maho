@@ -103,7 +103,7 @@ class CronRun extends BaseMahoCommand
 
         try {
             $callback = [$model, $run[2]];
-            call_user_func($callback);
+            call_user_func($callback, $schedule);
         } catch (\Exception $e) {
             if ($schedule) {
                 $schedule

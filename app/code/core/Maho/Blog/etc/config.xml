@@ -58,6 +58,14 @@
                     </blog_add_topmenu_items>
                 </observers>
             </page_block_html_topmenu_gethtml_before>
+            <sitemap_urlset_generating_before>
+                <observers>
+                    <blog_add_to_sitemap>
+                        <class>blog/observer</class>
+                        <method>addBlogToSitemap</method>
+                    </blog_add_to_sitemap>
+                </observers>
+            </sitemap_urlset_generating_before>
         </events>
     </global>
     <admin>
@@ -120,7 +128,7 @@
         <sitemap>
             <blog>
                 <priority>0.8</priority>
-                <changefreq>daily</changefreq>
+                <changefreq>weekly</changefreq>
                 <lastmod>1</lastmod>
             </blog>
         </sitemap>
