@@ -116,4 +116,13 @@
             </modules>
         </translate>
     </frontend>
+    <default>
+        <sitemap>
+            <blog>
+                <priority>0.8</priority>
+                <changefreq>daily</changefreq>
+                <lastmod>1</lastmod>
+            </blog>
+        </sitemap>
+    </default>
 </config>
