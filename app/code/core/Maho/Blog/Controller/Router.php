@@ -25,6 +25,13 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
         }
 
         $identifier = trim($request->getPathInfo(), '/');
+
+        // Check if this is a blog URL (starts with 'blog/')
+        if (!preg_match('#^blog/(.+?)/?$#', $identifier, $matches)) {
+            return false;
+        }
+
+        $urlKey = $matches[1];
         $condition = new Varien_Object([
             'identifier' => $identifier,
             'continue'   => true,
@@ -33,7 +40,6 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
             'router'    => $this,
             'condition' => $condition,
         ]);
-        $identifier = $condition->getIdentifier();
 
         if ($condition->getRedirectUrl()) {
             Mage::app()->getFrontController()->getResponse()
@@ -48,7 +54,7 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
         }
 
         $post   = Mage::getModel('blog/post');
-        $postId = $post->getPostIdByUrlKey($identifier, Mage::app()->getStore()->getId());
+        $postId = $post->getPostIdByUrlKey($urlKey, Mage::app()->getStore()->getId());
         if (!$postId) {
             return false;
         }

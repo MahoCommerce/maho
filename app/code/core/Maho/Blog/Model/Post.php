@@ -87,6 +87,6 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 
     public function getUrl(): string
     {
-        return Mage::getUrl($this->getUrlKey());
+        return Mage::getUrl('blog/' . $this->getUrlKey());
     }
 }
