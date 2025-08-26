@@ -76,6 +76,45 @@
             </catalogsearch_autocomplete_collect_content>
         </events>
     </global>
+    <api>
+        <resources>
+            <blog_post translate="title" module="blog">
+                <title>Blog Posts</title>
+                <model>blog/post_api</model>
+                <acl>system/api/blog_post</acl>
+                <methods>
+                    <list translate="title" module="blog">
+                        <title>Retrieve blog posts</title>
+                        <acl>system/api/blog_post</acl>
+                    </list>
+                    <info translate="title" module="blog">
+                        <title>Retrieve blog post info</title>
+                        <acl>system/api/blog_post</acl>
+                    </info>
+                    <create translate="title" module="blog">
+                        <title>Create blog post</title>
+                        <acl>system/api/blog_post</acl>
+                    </create>
+                    <update translate="title" module="blog">
+                        <title>Update blog post</title>
+                        <acl>system/api/blog_post</acl>
+                    </update>
+                    <remove translate="title" module="blog">
+                        <title>Remove blog post</title>
+                        <acl>system/api/blog_post</acl>
+                    </remove>
+                </methods>
+            </blog_post>
+        </resources>
+        <resources_alias>
+            <blog_post>blog_post</blog_post>
+        </resources_alias>
+        <v2>
+            <resources_function_prefix>
+                <blog_post>blogPost</blog_post>
+            </resources_function_prefix>
+        </v2>
+    </api>
     <admin>
         <routers>
             <adminhtml>

@@ -16,6 +16,7 @@ uses(MahoApiTestCase::class);
 describe('Blog Post JSON-RPC API', function () {
     beforeEach(function () {
         $this->skipIfApiNotAvailable();
+        $this->setupBlogApiUser();
     });
 
     describe('Configuration', function () {

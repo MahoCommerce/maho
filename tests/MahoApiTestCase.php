@@ -236,4 +236,87 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     {
         return $this->getApiBaseUrl();
     }
+
+    /**
+     * Setup API user with minimal blog permissions
+     * This ensures the test user has only the required blog API permissions
+     */
+    protected function setupBlogApiUser(): void
+    {
+        $username = $this->apiConfig['username'];
+        $password = $this->apiConfig['password'];
+
+        // Check if user already exists
+        $existingUser = Mage::getModel('api/user')->loadByUsername($username);
+
+        if ($existingUser->getId()) {
+            // User exists, just ensure correct permissions
+            $this->ensureBlogApiPermissions($existingUser);
+            return;
+        }
+
+        // Create new API user with minimal blog permissions
+        $user = Mage::getModel('api/user');
+        $user->setData([
+            'username' => $username,
+            'firstname' => 'Blog',
+            'lastname' => 'API User',
+            'email' => 'blog-api-test@example.com',
+            'password' => $password,
+            'is_active' => 1,
+        ]);
+        $user->save();
+
+        // Create minimal role with only blog API permissions
+        $role = Mage::getModel('api/role');
+        $role->setData([
+            'role_name' => 'Blog API Test Role',
+            'role_type' => 'U',
+            'user_id' => $user->getId(),
+        ]);
+        $role->save();
+
+        // Set blog-specific API permissions
+        $this->setBlogApiPermissions($role);
+    }
+
+    /**
+     * Ensure existing user has correct blog API permissions
+     */
+    private function ensureBlogApiPermissions($user): void
+    {
+        $roles = Mage::getModel('api/role')->getCollection()
+            ->addFieldToFilter('user_id', $user->getId())
+            ->addFieldToFilter('role_type', 'U');
+
+        foreach ($roles as $role) {
+            $this->setBlogApiPermissions($role);
+        }
+    }
+
+    /**
+     * Set minimal blog API permissions for a role
+     */
+    private function setBlogApiPermissions($role): void
+    {
+        // Delete existing permissions for this role
+        Mage::getModel('api/rules')->getCollection()
+            ->addFieldToFilter('role_id', $role->getId())
+            ->walk('delete');
+
+        // Add only blog API permissions
+        $blogPermissions = [
+            'system/api/blog_post', // Blog API resource
+        ];
+
+        foreach ($blogPermissions as $permission) {
+            $rule = Mage::getModel('api/rules');
+            $rule->setData([
+                'role_id' => $role->getId(),
+                'resource_id' => $permission,
+                'privileges' => null, // Grant all privileges for this resource
+            ]);
+            $rule->save();
+        }
+    }
 }

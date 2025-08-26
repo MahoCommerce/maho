@@ -37,6 +37,7 @@ tests/Api/
 - **Features**:
   - Automatic session management
   - Environment-based configuration
+  - Test-specific API user creation with minimal permissions
   - Common assertion helpers
   - Test data cleanup utilities
 
@@ -72,7 +73,7 @@ The framework automatically detects the API base URL using multiple methods:
 
 In most cases, no configuration is needed! The framework will:
 - Automatically detect your API endpoint
-- Use the default test API user created by the setup script
+- Create test-specific API users with minimal permissions
 - Work out of the box in development and CI environments
 
 ## Writing Tests
@@ -116,23 +117,19 @@ describe('My API Resource', function () {
 
 The framework is integrated with GitHub Actions workflow:
 
-1. **API User Setup**: `tests/setup-api-user.php` creates API user and role
+1. **Automatic User Setup**: Each test suite creates its own API user with minimal permissions
 2. **Environment Variables**: Set in workflow for test execution
 3. **Automatic Cleanup**: Sessions are automatically closed after tests
 
 ## Running Tests Locally
 
-1. **Setup API User**:
-   ```bash
-   php tests/setup-api-user.php
-   ```
+Simply run the API tests - no manual setup required:
 
-2. **Run API Tests**:
-   ```bash
-   ./vendor/bin/pest tests/Api/
-   ```
+```bash
+./vendor/bin/pest tests/Api/
+```
 
-That's it! No environment variables needed - everything uses sensible defaults.
+That's it! No environment variables or setup scripts needed - everything uses sensible defaults and creates users automatically.
 
 ### Optional: Custom Configuration
 If you need different settings, you can set environment variables:
@@ -159,6 +156,7 @@ The `BlogPostApiTest.php` demonstrates:
 3. **Test both success and error cases** - Validate proper error handling
 4. **Verify response structure** - Use `assertResponseStructure()` for type safety
 5. **Skip unavailable APIs** - Use `skipIfApiNotAvailable()` for optional features
+6. **Minimal permissions** - Each test suite creates users with only required permissions
 
 ## Extending the Framework
 
