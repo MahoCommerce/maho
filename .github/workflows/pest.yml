@@ -52,5 +52,8 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
+      - name: Setup API User for Testing
+        run: php tests/setup-api-user.php
+
       - name: Run Pest Tests
         run: ./vendor/bin/pest
