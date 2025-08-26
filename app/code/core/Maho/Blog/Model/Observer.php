@@ -13,6 +13,16 @@ declare(strict_types=1);
 
 class Maho_Blog_Model_Observer
 {
+    public function setBlogEntityKey(Varien_Event_Observer $observer): void
+    {
+        $entityKey = 'blog_index';
+        if ($post = Mage::registry('current_blog_post')) {
+            $entityKey = 'blog_post_' . $post->getId();
+        }
+
+        Mage::register('current_entity_key', $entityKey, true);
+    }
+
     public function addBlogToTopmenuItems(Varien_Event_Observer $observer): void
     {
         if (!Mage::helper('blog')->shouldShowInNavigation()) {

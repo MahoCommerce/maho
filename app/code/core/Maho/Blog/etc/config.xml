@@ -50,6 +50,14 @@
                     </cms>
                 </observers>
             </controller_front_init_routers>
+            <controller_action_predispatch_blog>
+                <observers>
+                    <blog_set_entity_key>
+                        <class>blog/observer</class>
+                        <method>setBlogEntityKey</method>
+                    </blog_set_entity_key>
+                </observers>
+            </controller_action_predispatch_blog>
             <page_block_html_topmenu_gethtml_before>
                 <observers>
                     <blog_add_topmenu_items>
