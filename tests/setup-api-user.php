@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Maho API User Setup Script
- * 
+ *
  * This script creates an API user and role for testing purposes.
  * Used in GitHub Actions and local development environments.
  *
@@ -37,17 +37,17 @@ $config = [
 try {
     // Create API role with necessary permissions
     echo "Creating API role: {$config['role_name']}\n";
-    
+
     /** @var Mage_Api_Model_Role $role */
     $role = Mage::getModel('api/role');
-    
+
     // Check if role already exists
     $existingRole = Mage::getModel('api/role')->load($config['role_name'], 'role_name');
     if ($existingRole->getId()) {
         echo "Role already exists, deleting and recreating...\n";
         $existingRole->delete();
     }
-    
+
     $role->setRoleName($config['role_name'])
          ->setRoleType('G')
          ->save();
@@ -60,7 +60,7 @@ try {
 
     // Set permissions for the role - allow access to all blog API resources
     echo "Setting role permissions...\n";
-    
+
     /** @var Mage_Api_Model_Rules $rules */
     $rules = Mage::getModel('api/rules');
     $rules->setRoleId($role->getId())
@@ -71,10 +71,10 @@ try {
 
     // Create API user
     echo "Creating API user: {$config['username']}\n";
-    
+
     /** @var Mage_Api_Model_User $user */
     $user = Mage::getModel('api/user');
-    
+
     // Check if user already exists
     $existingUser = Mage::getModel('api/user')->loadByUsername($config['username']);
     if ($existingUser->getId()) {
@@ -98,7 +98,7 @@ try {
 
     // Assign role to user
     echo "Assigning role to user...\n";
-    
+
     /** @var Mage_Api_Model_User $userRole */
     $userRoleModel = Mage::getModel('api/user');
     $userRoleModel->setUserId($user->getId())
@@ -109,15 +109,15 @@ try {
 
     // Verify the setup by attempting to get API resources
     echo "Verifying API setup...\n";
-    
+
     try {
         /** @var Mage_Api_Model_Server $server */
         $server = Mage::getSingleton('api/server');
         $server->initialize('jsonrpc');
-        
+
         echo "API server initialized successfully.\n";
     } catch (Exception $e) {
-        echo "WARNING: API server verification failed: " . $e->getMessage() . "\n";
+        echo 'WARNING: API server verification failed: ' . $e->getMessage() . "\n";
     }
 
     // Output configuration for use in tests
@@ -130,9 +130,9 @@ try {
     echo "=============================\n";
 
     echo "\nAPI user setup completed successfully!\n";
-    
+
 } catch (Exception $e) {
-    echo "ERROR: " . $e->getMessage() . "\n";
+    echo 'ERROR: ' . $e->getMessage() . "\n";
     echo "Stack trace:\n" . $e->getTraceAsString() . "\n";
     exit(1);
 }

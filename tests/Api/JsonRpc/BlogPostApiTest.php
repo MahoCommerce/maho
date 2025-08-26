@@ -23,11 +23,11 @@ describe('Blog Post JSON-RPC API', function () {
     describe('Configuration', function () {
         it('can detect API base URL automatically', function () {
             $detectedUrl = $this->getDetectedApiUrl();
-            
+
             expect($detectedUrl)->toBeString();
             expect($detectedUrl)->toContain('api.php');
             expect($detectedUrl)->toMatch('/^https?:\/\//'); // Should be a valid URL
-            
+
             // The URL should match what's configured in the system
             if (!isset($_ENV['API_BASE_URL'])) {
                 // If no override, should contain the configured base URL
@@ -46,7 +46,7 @@ describe('Blog Post JSON-RPC API', function () {
 
         it('fails authentication with invalid credentials', function () {
             $client = new Tests\Api\Client\JsonRpcClient($this->apiConfig['base_url']);
-            
+
             expect(fn() => $client->login('invalid_user', 'invalid_password'))
                 ->toThrow(Exception::class, 'Login failed');
         });
@@ -70,12 +70,12 @@ describe('Blog Post JSON-RPC API', function () {
 
         it('can list blog posts', function () {
             $response = $this->authenticatedCall('blog_post.list');
-            
+
             $this->assertSuccessfulResponse($response);
             $result = $response->getResult();
-            
+
             expect($result)->toBeArray();
-            
+
             if (!empty($result)) {
                 $this->assertResponseStructure($response, [
                     0 => [ // First post structure
@@ -83,7 +83,7 @@ describe('Blog Post JSON-RPC API', function () {
                         'title' => 'string',
                         'url_key' => 'string',
                         'is_active' => 'int',
-                    ]
+                    ],
                 ]);
             }
         });
@@ -101,17 +101,17 @@ describe('Blog Post JSON-RPC API', function () {
             ];
 
             $response = $this->authenticatedCall('blog_post.create', [$postData]);
-            
+
             $this->assertSuccessfulResponse($response, 'Failed to create blog post');
             $postId = $response->getResult();
-            
+
             expect($postId)->toBeInt()->toBeGreaterThan(0);
             $this->testPostIds[] = $postId;
 
             // Verify the created post
             $infoResponse = $this->authenticatedCall('blog_post.info', [$postId]);
             $this->assertSuccessfulResponse($infoResponse);
-            
+
             $postInfo = $infoResponse->getResult();
             expect($postInfo['title'])->toBe($postData['title']);
             expect($postInfo['url_key'])->toBe($postData['url_key']);
@@ -135,7 +135,7 @@ describe('Blog Post JSON-RPC API', function () {
 
             // Now test info retrieval
             $response = $this->authenticatedCall('blog_post.info', [$postId]);
-            
+
             $this->assertResponseStructure($response, [
                 'post_id' => 'int',
                 'title' => 'string',
@@ -182,7 +182,7 @@ describe('Blog Post JSON-RPC API', function () {
             // Verify the update
             $infoResponse = $this->authenticatedCall('blog_post.info', [$postId]);
             $updatedPost = $infoResponse->getResult();
-            
+
             expect($updatedPost['title'])->toBe($updateData['title']);
             expect($updatedPost['content'])->toBe($updateData['content']);
             expect($updatedPost['meta_title'])->toBe($updateData['meta_title']);
@@ -226,7 +226,7 @@ describe('Blog Post JSON-RPC API', function () {
 
         it('handles non-existent post ID gracefully', function () {
             $nonExistentId = 999999;
-            
+
             $response = $this->authenticatedCall('blog_post.info', [$nonExistentId]);
             $this->assertErrorResponse($response);
         });
@@ -243,7 +243,7 @@ describe('Blog Post JSON-RPC API', function () {
 
             $response = $this->authenticatedCall('blog_post.create', [$postData]);
             // Should either succeed (with date corrected) or fail with validation error
-            
+
             if ($response->isSuccess()) {
                 $this->testPostIds[] = $response->getResult();
             } else {
@@ -284,12 +284,12 @@ describe('Blog Post JSON-RPC API', function () {
             // Filter by active status
             $filters = ['is_active' => 1];
             $response = $this->authenticatedCall('blog_post.list', [$filters]);
-            
+
             $this->assertSuccessfulResponse($response);
             $posts = $response->getResult();
-            
+
             expect($posts)->toBeArray();
-            
+
             // Verify all returned posts are active
             foreach ($posts as $post) {
                 expect($post['is_active'])->toBe(1);
@@ -303,17 +303,17 @@ describe('Blog Post JSON-RPC API', function () {
                 ['blog_post.list', []],
                 ['resources', []], // Get available API resources
             ];
-            
+
             $sessionId = $this->getAuthenticatedSessionId();
             $responses = $this->apiClient->multiCall($calls, $sessionId);
-            
+
             expect($responses)->toHaveCount(2);
             expect($responses[0])->toHaveKey('result');
             expect($responses[1])->toHaveKey('result');
-            
+
             // First call should return blog posts array
             expect($responses[0]['result'])->toBeArray();
-            
+
             // Second call should return available resources
             expect($responses[1]['result'])->toBeArray();
         });

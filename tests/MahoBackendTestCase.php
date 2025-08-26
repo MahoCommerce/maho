@@ -31,7 +31,7 @@ abstract class MahoBackendTestCase extends BaseTestCase
         $this->setMahoRoot();
         Mage::register('isSecureArea', true);
         Mage::app();
-        
+
         // Start database transaction if enabled
         if ($this->shouldUseTransactions()) {
             $this->startTransaction();
@@ -49,7 +49,7 @@ abstract class MahoBackendTestCase extends BaseTestCase
         if ($this->useTransactions && $this->connection) {
             $this->rollbackTransaction();
         }
-        
+
         // Reset Maho state and restore error handlers
         Mage::reset();
         restore_error_handler();

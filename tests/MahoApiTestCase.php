@@ -25,15 +25,15 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->apiConfig = $this->getApiConfig();
         $this->apiClient = new JsonRpcClient($this->apiConfig['base_url']);
-        
+
         // Set up basic auth if configured
         if (!empty($this->apiConfig['username']) && !empty($this->apiConfig['password'])) {
             $this->apiClient->withBasicAuth($this->apiConfig['username'], $this->apiConfig['password']);
         }
-        
+
         $this->apiClient->withTimeout($this->apiConfig['timeout'] ?? 30);
     }
 
@@ -47,7 +47,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
             }
             $this->sessionId = null;
         }
-        
+
         parent::tearDown();
     }
 
@@ -60,7 +60,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
             'base_url' => $this->getApiBaseUrl(),
             'username' => $_ENV['API_USERNAME'] ?? 'test_api_user',
             'password' => $_ENV['API_PASSWORD'] ?? 'test_api_password_123',
-            'timeout' => (int)($_ENV['API_TIMEOUT'] ?? 30),
+            'timeout' => (int) ($_ENV['API_TIMEOUT'] ?? 30),
         ];
     }
 
@@ -78,40 +78,40 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
             // Method 1: Try to get from current store configuration
             $store = Mage::app()->getStore();
             $baseUrl = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
-            
+
             // If we got a valid URL, use it
             if ($baseUrl && filter_var($baseUrl, FILTER_VALIDATE_URL)) {
                 $baseUrl = rtrim($baseUrl, '/');
                 return $baseUrl . '/api.php';
             }
-            
+
             // Method 2: Try to get from configuration directly
             $unsecureBaseUrl = Mage::getStoreConfig('web/unsecure/base_url');
             $secureBaseUrl = Mage::getStoreConfig('web/secure/base_url');
-            
+
             // Prefer HTTPS if available, otherwise HTTP
             $configuredUrl = $secureBaseUrl ?: $unsecureBaseUrl;
-            
+
             if ($configuredUrl && filter_var($configuredUrl, FILTER_VALIDATE_URL)) {
                 $configuredUrl = rtrim($configuredUrl, '/');
                 return $configuredUrl . '/api.php';
             }
-            
+
             // Method 3: Try to detect from server environment (for local development)
             if (isset($_SERVER['HTTP_HOST'])) {
                 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
                 $host = $_SERVER['HTTP_HOST'];
                 $baseDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
                 $baseDir = ($baseDir === '/') ? '' : $baseDir;
-                
+
                 return $scheme . '://' . $host . $baseDir . '/api.php';
             }
-            
+
         } catch (Exception $e) {
             // Log error but don't fail the test setup
             error_log('Failed to detect API base URL: ' . $e->getMessage());
         }
-        
+
         // Final fallback
         return 'http://localhost/api.php';
     }
@@ -124,10 +124,10 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
         if ($this->sessionId === null) {
             $this->sessionId = $this->apiClient->login(
                 $this->apiConfig['username'],
-                $this->apiConfig['password']
+                $this->apiConfig['password'],
             );
         }
-        
+
         return $this->sessionId;
     }
 
@@ -149,10 +149,10 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
             $error = $response->getError();
             $errorMessage = $error['message'] ?? 'Unknown API error';
             $fullMessage = $message ? "{$message}: {$errorMessage}" : $errorMessage;
-            
+
             $this->fail($fullMessage . " (HTTP: {$response->getHttpCode()})");
         }
-        
+
         $this->assertTrue($response->isSuccess(), $message);
     }
 
@@ -163,7 +163,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     {
         $this->assertFalse($response->isSuccess(), 'Expected error response but got success');
         $this->assertTrue($response->hasError(), 'Expected error in response');
-        
+
         if ($expectedMessage !== null) {
             $error = $response->getError();
             $actualMessage = $error['message'] ?? '';
@@ -178,7 +178,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     {
         $this->assertSuccessfulResponse($response);
         $result = $response->getResult();
-        
+
         foreach ($structure as $key => $type) {
             if (is_numeric($key)) {
                 // Numeric key means we're checking if a key exists
@@ -186,7 +186,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
             } else {
                 // String key means we're checking key existence and type
                 $this->assertArrayHasKey($key, $result, "Expected key '{$key}' in response");
-                
+
                 if ($type === 'array') {
                     $this->assertIsArray($result[$key], "Expected '{$key}' to be array");
                 } elseif ($type === 'string') {
@@ -209,7 +209,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     }
 
     /**
-     * Clean up test data created during tests (override in specific tests)  
+     * Clean up test data created during tests (override in specific tests)
      */
     protected function cleanupTestData(array $testData): void
     {

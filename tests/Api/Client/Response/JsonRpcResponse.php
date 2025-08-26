@@ -25,12 +25,12 @@ class JsonRpcResponse
         $this->rawResponse = $response;
         $this->httpCode = $httpCode;
         $this->expectedId = $expectedId;
-        
+
         $decoded = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \InvalidArgumentException('Invalid JSON response: ' . json_last_error_msg());
         }
-        
+
         $this->data = $decoded;
         $this->validateResponse();
     }
@@ -50,7 +50,7 @@ class JsonRpcResponse
         if ($this->hasError()) {
             throw new \RuntimeException('Cannot get result from error response');
         }
-        
+
         return $this->data['result'] ?? null;
     }
 
@@ -94,7 +94,7 @@ class JsonRpcResponse
         // Validate ID matches
         if (isset($this->data['id']) && $this->data['id'] !== $this->expectedId) {
             throw new \InvalidArgumentException(
-                sprintf('Response ID mismatch: expected %s, got %s', $this->expectedId, $this->data['id'])
+                sprintf('Response ID mismatch: expected %s, got %s', $this->expectedId, $this->data['id']),
             );
         }
 

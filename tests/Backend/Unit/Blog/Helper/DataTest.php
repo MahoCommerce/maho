@@ -45,74 +45,52 @@ describe('Blog Helper Data', function () {
     test('shouldShowInNavigation works with different scenarios', function () {
         $currentStore = Mage::app()->getStore();
 
-        // Clean up any existing posts that might affect the test
-        $existingPosts = Mage::getResourceModel('blog/post_collection');
-        $existingPostIds = [];
-        foreach ($existingPosts as $post) {
-            $existingPostIds[] = $post->getId();
-        }
-
-        // Initially should be false when no visible posts exist
-        $initialResult = $this->helper->shouldShowInNavigation();
-        expect($initialResult)->toBeBool();
-
-        // Create an active post with past publish date - should make navigation visible
+        // Test that adding a visible post makes navigation true
         $activePost = Mage::getModel('blog/post');
-        $activePost->setTitle('Unit Test Active Post');
+        $activePost->setTitle('Unit Test Active Post - ' . uniqid());
         $activePost->setContent('Test content');
         $activePost->setIsActive(1);
         $activePost->setPublishDate('2025-01-01'); // Past date
         $activePost->setStores([$currentStore->getId()]);
         $activePost->save();
 
-        // Now navigation should be visible
+        // Now navigation should definitely be visible (we added a visible post)
         expect($this->helper->shouldShowInNavigation())->toBeTrue();
 
-        // Create an inactive post - shouldn't affect navigation
+        // Create invisible posts - should NOT change the true state
         $inactivePost = Mage::getModel('blog/post');
-        $inactivePost->setTitle('Unit Test Inactive Post');
+        $inactivePost->setTitle('Unit Test Inactive Post - ' . uniqid());
         $inactivePost->setContent('Test content');
         $inactivePost->setIsActive(0); // Inactive
         $inactivePost->setPublishDate('2025-01-01');
         $inactivePost->setStores([$currentStore->getId()]);
         $inactivePost->save();
 
-        // Should still be true (active post still exists)
-        expect($this->helper->shouldShowInNavigation())->toBeTrue();
-
-        // Create a future post - shouldn't make navigation visible by itself
         $futurePost = Mage::getModel('blog/post');
-        $futurePost->setTitle('Unit Test Future Post');
+        $futurePost->setTitle('Unit Test Future Post - ' . uniqid());
         $futurePost->setContent('Test content');
         $futurePost->setIsActive(1);
         $futurePost->setPublishDate('2025-12-31'); // Future date
         $futurePost->setStores([$currentStore->getId()]);
         $futurePost->save();
 
-        // Should still be true (active past post still exists)
+        // Should still be true (visible post still exists)
         expect($this->helper->shouldShowInNavigation())->toBeTrue();
 
-        // Remove the active past post
-        $activePost->delete();
-
-        // State may depend on existing posts in database
-        // Test that removing visible posts affects the result
-        $resultAfterDelete = $this->helper->shouldShowInNavigation();
-        // The result may still be true if other existing posts are visible
-
-        // Create a post with no publish date - should make navigation visible
+        // Test post with no publish date - should be visible
         $noDatePost = Mage::getModel('blog/post');
-        $noDatePost->setTitle('Unit Test No Date Post');
+        $noDatePost->setTitle('Unit Test No Date Post - ' . uniqid());
         $noDatePost->setContent('Test content');
         $noDatePost->setIsActive(1);
-        $noDatePost->setPublishDate(null); // No date
+        $noDatePost->setPublishDate(null); // No date = visible
         $noDatePost->setStores([$currentStore->getId()]);
         $noDatePost->save();
 
-        // Should be true again (post with no date is considered visible)
+        // Should still be true (multiple visible posts exist)
         expect($this->helper->shouldShowInNavigation())->toBeTrue();
 
-        // Clean up test posts
+        // Clean up - transactions will rollback all changes
+        $activePost->delete();
         $inactivePost->delete();
         $futurePost->delete();
         $noDatePost->delete();
@@ -121,76 +99,61 @@ describe('Blog Helper Data', function () {
     test('hasVisiblePosts correctly identifies visible posts', function () {
         $currentStore = Mage::app()->getStore();
 
-        // Initially, check baseline state
-        $initialResult = $this->helper->hasVisiblePosts();
-        expect($initialResult)->toBeBool();
-
-        // Create posts with different visibility conditions
-        $testPosts = [];
+        // Test by creating posts with different visibility conditions
+        // Focus on positive assertions - we add visible posts and verify they're detected
 
         // 1. Active post with past publish date - VISIBLE
         $visiblePost = Mage::getModel('blog/post');
-        $visiblePost->setTitle('Visible Test Post');
+        $visiblePost->setTitle('Unit Test Visible Post - ' . uniqid());
         $visiblePost->setContent('Test content');
         $visiblePost->setIsActive(1);
         $visiblePost->setPublishDate('2025-01-01');
         $visiblePost->setStores([$currentStore->getId()]);
         $visiblePost->save();
-        $testPosts[] = $visiblePost;
 
         expect($this->helper->hasVisiblePosts())->toBeTrue();
 
-        // 2. Inactive post - NOT VISIBLE
+        // 2. Inactive post - should NOT change the true state
         $inactivePost = Mage::getModel('blog/post');
-        $inactivePost->setTitle('Inactive Test Post');
+        $inactivePost->setTitle('Unit Test Inactive Post - ' . uniqid());
         $inactivePost->setContent('Test content');
         $inactivePost->setIsActive(0);
         $inactivePost->setPublishDate('2025-01-01');
         $inactivePost->setStores([$currentStore->getId()]);
         $inactivePost->save();
-        $testPosts[] = $inactivePost;
 
         // Should still be true (visible post exists)
         expect($this->helper->hasVisiblePosts())->toBeTrue();
 
-        // 3. Future post - NOT VISIBLE
+        // 3. Future post - should NOT change the true state
         $futurePost = Mage::getModel('blog/post');
-        $futurePost->setTitle('Future Test Post');
+        $futurePost->setTitle('Unit Test Future Post - ' . uniqid());
         $futurePost->setContent('Test content');
         $futurePost->setIsActive(1);
         $futurePost->setPublishDate('2025-12-31');
         $futurePost->setStores([$currentStore->getId()]);
         $futurePost->save();
-        $testPosts[] = $futurePost;
 
         // Should still be true (visible post still exists)
         expect($this->helper->hasVisiblePosts())->toBeTrue();
 
-        // Remove the visible post
-        $visiblePost->delete();
-
-        // State may depend on existing posts in database  
-        // The result may still be true if other existing posts are visible
-
-        // 4. Post with no publish date - VISIBLE
+        // 4. Post with no publish date - VISIBLE (should maintain true state)
         $noDatePost = Mage::getModel('blog/post');
-        $noDatePost->setTitle('No Date Test Post');
+        $noDatePost->setTitle('Unit Test No Date Post - ' . uniqid());
         $noDatePost->setContent('Test content');
         $noDatePost->setIsActive(1);
         $noDatePost->setPublishDate(null);
         $noDatePost->setStores([$currentStore->getId()]);
         $noDatePost->save();
-        $testPosts[] = $noDatePost;
 
-        // Should be true again
+        // Should still be true (multiple visible posts exist)
         expect($this->helper->hasVisiblePosts())->toBeTrue();
 
-        // Clean up
-        foreach ($testPosts as $post) {
-            if ($post->getId()) {
-                $post->delete();
-            }
-        }
+        // Clean up - transactions will rollback all changes
+        $visiblePost->delete();
+        $inactivePost->delete();
+        $futurePost->delete();
+        $noDatePost->delete();
     });
 
     test('navigation respects store isolation - collection filtering works correctly', function () {

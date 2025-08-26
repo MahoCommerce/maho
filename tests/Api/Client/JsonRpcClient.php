@@ -49,7 +49,7 @@ class JsonRpcClient
     public function login(string $username, string $password): string
     {
         $response = $this->call('login', [$username, $password]);
-        
+
         if (!$response->isSuccess()) {
             throw new \Exception('Login failed: ' . $response->getError()['message'] ?? 'Unknown error');
         }
@@ -77,7 +77,7 @@ class JsonRpcClient
         }
 
         $response = $this->call('multiCall', [$multiCallParams], $sessionId);
-        
+
         if (!$response->isSuccess()) {
             throw new \Exception('MultiCall failed: ' . $response->getError()['message'] ?? 'Unknown error');
         }
@@ -88,7 +88,7 @@ class JsonRpcClient
     private function makeRequest(array $payload): JsonRpcResponse
     {
         $url = $this->baseUrl . '/jsonrpc';
-        
+
         $context = [
             'http' => [
                 'method' => 'POST',
@@ -96,12 +96,12 @@ class JsonRpcClient
                 'content' => json_encode($payload),
                 'timeout' => $this->timeout,
                 'ignore_errors' => true, // Don't throw on HTTP errors
-            ]
+            ],
         ];
 
         $context = stream_context_create($context);
         $response = file_get_contents($url, false, $context);
-        
+
         if ($response === false) {
             throw new \Exception('Failed to make HTTP request to ' . $url);
         }
@@ -111,7 +111,7 @@ class JsonRpcClient
         if (isset($http_response_header)) {
             foreach ($http_response_header as $header) {
                 if (preg_match('/HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
-                    $httpCode = (int)$matches[1];
+                    $httpCode = (int) $matches[1];
                     break;
                 }
             }
@@ -123,16 +123,16 @@ class JsonRpcClient
     private function buildHeaders(): string
     {
         $headers = [];
-        
+
         foreach ($this->defaultHeaders as $key => $value) {
             $headers[] = "{$key}: {$value}";
         }
-        
+
         if ($this->username && $this->password) {
             $auth = base64_encode($this->username . ':' . $this->password);
             $headers[] = "Authorization: Basic {$auth}";
         }
-        
+
         return implode("\r\n", $headers) . "\r\n";
     }
 }
