@@ -151,6 +151,36 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     #[\Override]
     protected function _beforeSave(Varien_Object $object): self
     {
+        $coreHelper = Mage::helper('core');
+
+        // Strip all HTML tags from title and meta fields
+        $stringFields = ['title', 'url_key', 'meta_title', 'meta_keywords', 'meta_description'];
+        foreach ($stringFields as $field) {
+            if ($object->hasData($field)) {
+                $value = $coreHelper->filterStripTags($object->getData($field));
+                $object->setData($field, trim($value)); // Remove leading/trailing whitespace
+            }
+        }
+
+        // Ensure is_active is a valid boolean
+        $isActive = $coreHelper->filterInt($object->getData('is_active') ?? 0) ? 1 : 0;
+        $object->setData('is_active', $isActive);
+
+        // Validate publish_date and set to today if empty/invalid
+        if (!$object->hasData('publish_date') || empty($object->getData('publish_date')) || !$coreHelper->isValidDate($object->getData('publish_date'))) {
+            $locale = Mage::app()->getLocale();
+            $today = $locale->utcDate(null, null, true, Mage_Core_Model_Locale::DATE_FORMAT);
+            $object->setData('publish_date', $today);
+        }
+
+        // Filter HTML content
+        if ($object->hasData('content')) {
+            $content = $object->getData('content');
+            $filteredContent = Mage::getModel('core/input_filter_maliciousCode')->filter($content);
+            $object->setData('content', $filteredContent);
+        }
+
+        // Auto-generate URL key from title if empty
         if (empty($object->getData('url_key'))) {
             $storeId = null;
             if (is_array($object->getData('stores'))) {
@@ -183,21 +213,6 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         }
         $object->setUpdatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
 
-        // Validate and normalize publish_date if provided
-        if ($object->hasData('publish_date') && $object->getData('publish_date')) {
-            $publishDate = $object->getData('publish_date');
-            // Validate the date format using new validation method
-            if (is_string($publishDate) && Mage_Core_Model_Locale::isValidDate($publishDate)) {
-                // Ensure it's in the correct DATE_FORMAT (Y-m-d)
-                if (strlen($publishDate) > 10) {
-                    $publishDate = substr($publishDate, 0, 10);
-                }
-                $object->setData('publish_date', $publishDate);
-            } else {
-                // Invalid date, set to null
-                $object->setData('publish_date', null);
-            }
-        }
 
         // Save static attributes to main table
         $this->_saveStaticAttributes($object);

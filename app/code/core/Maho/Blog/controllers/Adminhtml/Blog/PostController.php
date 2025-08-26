@@ -11,6 +11,15 @@
 
 class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_Action
 {
+    public const ADMIN_RESOURCE = 'cms/blog_posts';
+
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['save', 'delete', 'massDelete']);
+        return parent::preDispatch();
+    }
+
     protected function _initAction(): self
     {
         $this->loadLayout()
@@ -34,7 +43,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     {
         $this->_title($this->__('Blog Post'));
 
-        $id = $this->getRequest()->getParam('id');
+        $id = $this->getRequest()->getUserParam('id');
         $model = Mage::getModel('blog/post');
 
         if ($id) {
@@ -69,7 +78,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     {
         if ($data = $this->getRequest()->getPost()) {
             $model = Mage::getModel('blog/post');
-            $id = $this->getRequest()->getParam('id');
+            $id = $this->getRequest()->getUserParam('id');
 
             if ($id) {
                 $model->load($id);
@@ -95,7 +104,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
+                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getUserParam('id')]);
                 return;
             }
         }
@@ -104,7 +113,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
 
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
+        if ($id = $this->getRequest()->getUserParam('id')) {
             try {
                 $model = Mage::getModel('blog/post');
                 $model->load($id);
@@ -124,7 +133,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
 
     public function massDeleteAction(): void
     {
-        $postIds = $this->getRequest()->getParam('post');
+        $postIds = $this->getRequest()->getUserParam('post');
         if (!is_array($postIds)) {
             Mage::getSingleton('adminhtml/session')->addError(
                 Mage::helper('blog')->__('Please select post(s)'),

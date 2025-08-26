@@ -43,12 +43,4 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
         }
         return Mage::helper('blog')->__('New Post');
     }
-
-    #[\Override]
-    public function getFormHtml(): string
-    {
-        $html = parent::getFormHtml();
-        $html .= $this->getLayout()->createBlock('adminhtml/catalog_product_composite_configure')->toHtml();
-        return $html;
-    }
 }
