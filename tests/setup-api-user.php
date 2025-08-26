@@ -8,8 +8,6 @@ declare(strict_types=1);
  * This script creates an API user and role for testing purposes.
  * Used in GitHub Actions and local development environments.
  *
- * @category   Tests
- * @package    Setup
  * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */

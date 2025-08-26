@@ -18,6 +18,7 @@
             <ignore>
                 <path>app/code/core/Mage/*/sql/**/*</path>
                 <path>app/code/core/Mage/*/data/**/*</path>
+                <path>tests/**/*</path>
             </ignore>
             <extensions>
                 <extension>php</extension>
