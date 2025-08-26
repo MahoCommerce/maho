@@ -37,7 +37,9 @@ describe('Blog Helper Data', function () {
         $url = $this->helper->getBlogUrl();
 
         expect($url)->toBeString();
-        expect($url)->toContain('blog');
+
+        $expectedPrefix = $this->helper->getBlogUrlPrefix();
+        expect($url)->toContain($expectedPrefix);
     });
 
     test('shouldShowInNavigation works with different scenarios', function () {
