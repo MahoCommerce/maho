@@ -14,15 +14,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-// Bootstrap Maho
 require __DIR__ . '/../vendor/autoload.php';
-
-// Check installation with more detailed error reporting
-if (!Mage::isInstalled()) {
-    echo "ERROR: Maho is not installed yet.\n";
-    exit(1);
-}
-
 Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
 
 // Get configuration from environment or use defaults
