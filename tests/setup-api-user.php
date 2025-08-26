@@ -17,8 +17,19 @@ declare(strict_types=1);
 // Bootstrap Maho
 require __DIR__ . '/../vendor/autoload.php';
 
+// Check installation with more detailed error reporting
 if (!Mage::isInstalled()) {
     echo "ERROR: Maho is not installed yet.\n";
+    
+    // Provide additional debugging information
+    $localXmlPath = __DIR__ . '/../app/etc/local.xml';
+    if (!file_exists($localXmlPath)) {
+        echo "DEBUG: local.xml file does not exist at: $localXmlPath\n";
+    } else {
+        echo "DEBUG: local.xml exists but installation check failed\n";
+        echo "DEBUG: This might indicate database connectivity issues\n";
+    }
+    
     exit(1);
 }
 
