@@ -140,18 +140,6 @@ class Maho_Blog_Block_Autocomplete extends Mage_Core_Block_Template
         return $date->format('M j, Y');
     }
 
-    /**
-     * Get truncated content for preview
-     */
-    public function getTruncatedContent(Maho_Blog_Model_Post $post, int $length = 80): string
-    {
-        $content = strip_tags($post->getContent());
-        if (strlen($content) <= $length) {
-            return $content;
-        }
-
-        return substr($content, 0, $length) . '...';
-    }
 
     #[\Override]
     protected function _toHtml()
@@ -179,7 +167,7 @@ class Maho_Blog_Block_Autocomplete extends Mage_Core_Block_Template
                 $html .= '<div class="blog-date">' . $this->escapeHtml($publishDate) . '</div>';
             }
 
-            $excerpt = $this->getTruncatedContent($post);
+            $excerpt = Mage::helper('blog')->truncateContent($post, 80);
             if ($excerpt) {
                 $html .= '<div class="blog-excerpt">' . $this->escapeHtml($excerpt) . '</div>';
             }

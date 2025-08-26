@@ -23,6 +23,10 @@ $posts = $this->getPosts();
                 <?php endif ?>
                 <strong><?= $post->getTitle() ?></strong>
                 <div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
+                <?php $excerpt = Mage::helper('blog')->truncateContent($post); ?>
+                <?php if ($excerpt): ?>
+                    <div class="blog_post_excerpt"><?= $this->escapeHtml($excerpt) ?></div>
+                <?php endif ?>
             </a>
         <?php endforeach ?>
     </div>

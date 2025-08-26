@@ -12,6 +12,10 @@
     font-size: 0.75rem;
 }
 
+.blog_post_excerpt {
+    margin-top: 10px;
+}
+
 .blog-index-index .pager {
     margin-top: 10px;
 }

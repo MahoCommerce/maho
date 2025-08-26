@@ -47,4 +47,17 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         $postsPerPage = (int) Mage::getStoreConfig('blog/general/posts_per_page');
         return $postsPerPage > 0 ? $postsPerPage : 20; // Default fallback
     }
+
+    /**
+     * Get truncated content for preview
+     */
+    public function truncateContent(Maho_Blog_Model_Post $post, int $length = 150): string
+    {
+        $content = strip_tags($post->getContent());
+        if (strlen($content) <= $length) {
+            return $content;
+        }
+
+        return substr($content, 0, $length) . '...';
+    }
 }
