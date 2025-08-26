@@ -25,13 +25,9 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
         }
 
         $identifier = trim($request->getPathInfo(), '/');
+        $helper = Mage::helper('blog');
+        $urlPrefix = $helper->getBlogUrlPrefix();
 
-        // Check if this is a blog URL (starts with 'blog/')
-        if (!preg_match('#^blog/(.+?)/?$#', $identifier, $matches)) {
-            return false;
-        }
-
-        $urlKey = $matches[1];
         $condition = new Varien_Object([
             'identifier' => $identifier,
             'continue'   => true,
@@ -40,6 +36,7 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
             'router'    => $this,
             'condition' => $condition,
         ]);
+        $identifier = $condition->getIdentifier();
 
         if ($condition->getRedirectUrl()) {
             Mage::app()->getFrontController()->getResponse()
@@ -53,7 +50,26 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
             return false;
         }
 
-        $post   = Mage::getModel('blog/post');
+        // Check if this matches the blog index page (exact match with prefix only)
+        if ($identifier === $urlPrefix) {
+            $request->setModuleName('blog')
+                ->setControllerName('index')
+                ->setActionName('index');
+            $request->setAlias(
+                Mage_Core_Model_Url_Rewrite::REWRITE_REQUEST_PATH_ALIAS,
+                $identifier,
+            );
+            return true;
+        }
+
+        // Check if this is a blog post URL (prefix/post-url-key)
+        $pattern = '#^' . preg_quote($urlPrefix, '#') . '/(.+?)/?$#';
+        if (!preg_match($pattern, $identifier, $matches)) {
+            return false;
+        }
+
+        $urlKey = $matches[1];
+        $post = Mage::getModel('blog/post');
         $postId = $post->getPostIdByUrlKey($urlKey, Mage::app()->getStore()->getId());
         if (!$postId) {
             return false;

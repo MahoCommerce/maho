@@ -183,6 +183,7 @@
         <blog>
             <general>
                 <show_in_navigation>1</show_in_navigation>
+                <url_prefix>blog</url_prefix>
                 <posts_per_page>20</posts_per_page>
             </general>
             <search>

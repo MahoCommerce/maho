@@ -37,9 +37,16 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         return $collection->getSize() > 0;
     }
 
-    public function getBlogUrl(): string
+    public function getBlogUrlPrefix(?int $storeId = null): string
     {
-        return Mage::getUrl('blog');
+        $prefix = Mage::getStoreConfig('blog/general/url_prefix', $storeId);
+        return $prefix ?: 'blog';
+    }
+
+    public function getBlogUrl(?int $storeId = null): string
+    {
+        $prefix = $this->getBlogUrlPrefix($storeId);
+        return Mage::getUrl($prefix);
     }
 
     public function getPostsPerPage(): int

@@ -67,6 +67,14 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </show_in_navigation>
+                        <url_prefix translate="label">
+                            <label>URL Prefix</label>
+                            <validate>validate-code required-entry</validate>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </url_prefix>
                         <posts_per_page translate="label">
                             <label>Posts per Page</label>
                             <validate>validate-digits validate-digits-range digits-range-1-100</validate>
