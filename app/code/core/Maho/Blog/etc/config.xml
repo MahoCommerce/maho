@@ -44,10 +44,10 @@
         <events>
             <controller_front_init_routers>
                 <observers>
-                    <cms>
+                    <blog>
                         <class>Maho_Blog_Controller_Router</class>
                         <method>initControllerRouters</method>
-                    </cms>
+                    </blog>
                 </observers>
             </controller_front_init_routers>
             <controller_action_predispatch_blog>
