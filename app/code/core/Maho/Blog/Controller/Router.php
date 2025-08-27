@@ -28,28 +28,6 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
         $helper = Mage::helper('blog');
         $urlPrefix = $helper->getBlogUrlPrefix();
 
-        $condition = new Varien_Object([
-            'identifier' => $identifier,
-            'continue'   => true,
-        ]);
-        Mage::dispatchEvent('cms_controller_router_match_before', [
-            'router'    => $this,
-            'condition' => $condition,
-        ]);
-        $identifier = $condition->getIdentifier();
-
-        if ($condition->getRedirectUrl()) {
-            Mage::app()->getFrontController()->getResponse()
-                ->setRedirect($condition->getRedirectUrl())
-                ->sendResponse();
-            $request->setDispatched(true);
-            return true;
-        }
-
-        if (!$condition->getContinue()) {
-            return false;
-        }
-
         // Check if this matches the blog index page (exact match with prefix only)
         if ($identifier === $urlPrefix) {
             $request->setModuleName('blog')
