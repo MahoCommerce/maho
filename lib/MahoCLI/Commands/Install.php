@@ -127,7 +127,12 @@ class Install extends BaseMahoCommand
         if ($input->getOption('sample_data')) {
             $output->writeln('<info>Downloading sample data...</info>');
 
-            $sampleDataUrl = 'https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/main.tar.gz';
+            // Get Maho version and determine the corresponding branch
+            $mahoVersion = Mage::getVersion(); // e.g., "25.9.0"
+            $versionParts = explode('.', $mahoVersion);
+            $branchVersion = "{$versionParts[0]}.{$versionParts[1]}"; // e.g., "25.9"
+
+            $sampleDataUrl = "https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/{$branchVersion}.tar.gz";
             $tempFile = tempnam(sys_get_temp_dir(), 'maho_sample_data');
             $targetDir = Mage::getBaseDir();
 
@@ -152,7 +157,8 @@ class Install extends BaseMahoCommand
             }
 
             // Copy media files
-            $sourceMediaDir = $targetDir . '/maho-sample-data-main/media';
+            $sampleDataDirName = "maho-sample-data-{$branchVersion}";
+            $sourceMediaDir = $targetDir . "/{$sampleDataDirName}/media";
             $targetMediaDir = $targetDir . '/public/media';
 
             $copyCommand = "cp -R $sourceMediaDir/* $targetMediaDir/";
@@ -173,7 +179,7 @@ class Install extends BaseMahoCommand
             $dbUser = $input->getOption('db_user');
             $dbPass = $input->getOption('db_pass');
             $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
-            $sampleDataDir = $targetDir . '/maho-sample-data-main';
+            $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
             try {
                 // Create PDO connection
@@ -212,7 +218,7 @@ class Install extends BaseMahoCommand
 
             // Clean up
             unlink($tempFile);
-            $rmCommand = 'rm -rf ' . escapeshellarg($targetDir . '/maho-sample-data-main');
+            $rmCommand = 'rm -rf ' . escapeshellarg($targetDir . "/{$sampleDataDirName}");
             exec($rmCommand, $rmOutput, $rmReturnVar);
 
             if ($rmReturnVar !== 0) {
