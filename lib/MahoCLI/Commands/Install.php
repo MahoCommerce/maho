@@ -127,7 +127,12 @@ class Install extends BaseMahoCommand
         if ($input->getOption('sample_data')) {
             $output->writeln('<info>Downloading sample data...</info>');
 
-            $sampleDataUrl = 'https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/main.tar.gz';
+            // Get Maho version and determine the corresponding branch
+            $mahoVersion = Mage::getVersion(); // e.g., "25.9.0"
+            $versionParts = explode('.', $mahoVersion);
+            $branchVersion = "{$versionParts[0]}.{$versionParts[1]}"; // e.g., "25.9"
+
+            $sampleDataUrl = "https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/{$branchVersion}.tar.gz";
             $tempFile = tempnam(sys_get_temp_dir(), 'maho_sample_data');
             $targetDir = Mage::getBaseDir();
 
@@ -152,7 +157,8 @@ class Install extends BaseMahoCommand
             }
 
             // Copy media files
-            $sourceMediaDir = $targetDir . '/maho-sample-data-main/media';
+            $sampleDataDirName = "maho-sample-data-{$branchVersion}";
+            $sourceMediaDir = $targetDir . "/{$sampleDataDirName}/media";
             $targetMediaDir = $targetDir . '/public/media';
 
             $copyCommand = "cp -R $sourceMediaDir/* $targetMediaDir/";
@@ -173,7 +179,7 @@ class Install extends BaseMahoCommand
             $dbUser = $input->getOption('db_user');
             $dbPass = $input->getOption('db_pass');
             $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
-            $sampleDataDir = $targetDir . '/maho-sample-data-main';
+            $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
             try {
                 // Create PDO connection
@@ -206,12 +212,13 @@ class Install extends BaseMahoCommand
                 return Command::FAILURE;
             }
 
+            $this->importBlogPosts($sampleDataDir, $output);
             $output->writeln('<info>Sample data, media files, and database content installed successfully</info>');
             $output->writeln('<info>Please run ./maho index:reindex:all && ./maho cache:flush</info>');
 
             // Clean up
             unlink($tempFile);
-            $rmCommand = 'rm -rf ' . escapeshellarg($targetDir . '/maho-sample-data-main');
+            $rmCommand = 'rm -rf ' . escapeshellarg($targetDir . "/{$sampleDataDirName}");
             exec($rmCommand, $rmOutput, $rmReturnVar);
 
             if ($rmReturnVar !== 0) {
@@ -308,5 +315,55 @@ class Install extends BaseMahoCommand
 
         $output->writeln('<info>Force preparation completed</info>');
         return true;
+    }
+
+    private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void
+    {
+        if (!Mage::getConfig()->getModuleConfig('Maho_Blog') || !Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
+            $output->writeln('<comment>Blog module not available, skipping blog import</comment>');
+            return;
+        }
+
+        $csvPath = $sampleDataDir . '/blog_posts_en.csv';
+        if (!file_exists($csvPath)) {
+            $output->writeln('<comment>Blog CSV file not found, skipping blog import</comment>');
+            return;
+        }
+
+        $output->writeln('<info>Importing blog posts from CSV...</info>');
+
+        try {
+            // Get the English store view ID
+            $store = Mage::getModel('core/store')->load('en', 'code');
+            $storeId = $store->getId();
+
+            // Read and parse CSV
+            $csvData = array_map('str_getcsv', file($csvPath));
+            $headers = array_shift($csvData); // Remove header row
+
+            $importedCount = 0;
+            foreach ($csvData as $row) {
+                $postData = array_combine($headers, $row);
+                $post = Mage::getModel('blog/post');
+                $post->setData([
+                    'title' => $postData['title'],
+                    'url_key' => $postData['url_key'],
+                    'is_active' => (bool) $postData['is_active'],
+                    'publish_date' => $postData['publish_date'],
+                    'content' => $postData['content'],
+                    'image' => $postData['image'],
+                    'meta_title' => $postData['meta_title'],
+                    'meta_description' => $postData['meta_description'],
+                    'meta_keywords' => $postData['meta_keywords'],
+                ]);
+                $post->setStores([$storeId]);
+                $post->save();
+                $importedCount++;
+            }
+
+            $output->writeln("<info>Successfully imported {$importedCount} blog posts</info>");
+        } catch (Exception $e) {
+            $output->writeln("<error>Failed to import blog posts: {$e->getMessage()}</error>");
+        }
     }
 }
