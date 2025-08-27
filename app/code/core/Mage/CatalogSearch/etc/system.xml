@@ -106,10 +106,18 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </show_autocomplete_results_count>
+                            <redirect_to_product_if_one_result translate="label">
+                            <label>Redirect to product page if search generates one result</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>75</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </redirect_to_product_if_one_result>
                         <enable_category_autosuggest translate="label">
                             <label>Enable Category Search in Autosuggest</label>
                             <frontend_type>boolean</frontend_type>
-                            <sort_order>75</sort_order>
+                            <sort_order>76</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -117,20 +125,12 @@
                         <category_autosuggest_limit translate="label">
                             <label>Maximum Categories in Autosuggest</label>
                             <validate>validate-digits</validate>
-                            <sort_order>76</sort_order>
+                            <sort_order>77</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <depends><enable_category_autosuggest>1</enable_category_autosuggest></depends>
                         </category_autosuggest_limit>
-                        <redirect_to_product_if_one_result translate="label">
-                            <label>Redirect to product page if search generates one result</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>80</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </redirect_to_product_if_one_result>
                     </fields>
                 </search>
                 <advanced_search translate="label" module="catalogsearch">

@@ -6566,12 +6566,14 @@ div.paypal-logo span > img {
 }
 
 /* Category Results in Autocomplete */
-.search-autocomplete .category-results {
+.search-autocomplete .category-results,
+.search-autocomplete .blog-results {
   border-bottom: 1px solid var(--maho-color-border-light);
   margin-bottom: 10px;
 }
 
 .search-autocomplete .category-results-title,
+.search-autocomplete .blog-results-title,
 .search-autocomplete .product-results-title {
   font-size: 0.75rem;
   font-weight: 600;
@@ -6607,6 +6609,36 @@ div.paypal-logo span > img {
 
 .search-autocomplete .category-name {
   font-weight: 500;
+}
+
+/* Blog Results in Autocomplete */
+.search-autocomplete .blog-item > a {
+  display: block;
+  padding: 8px 10px;
+  text-decoration: none;
+  color: var(--maho-color-text-primary);
+}
+
+.search-autocomplete .blog-item > a:hover {
+  background-color: var(--maho-color-background-hover);
+}
+
+.search-autocomplete .blog-title {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.search-autocomplete .blog-date {
+  color: var(--maho-color-text-secondary);
+  font-size: 0.688rem;
+}
+
+.search-autocomplete .blog-excerpt {
+  color: var(--maho-color-text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin-top: 3px;
 }
 
 /* ============================================ *

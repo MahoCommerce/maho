@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <cms>
+            <children>
+                <blog_posts module="blog">
+                    <title>Blog Posts</title>
+                    <action>adminhtml/blog_post</action>
+                    <sort_order>10</sort_order>
+                </blog_posts>
+            </children>
+        </cms>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <cms>
+                        <children>
+                            <blog_posts>
+                                <title>Blog Posts</title>
+                            </blog_posts>
+                        </children>
+                    </cms>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <blog translate="title">
+                                        <title>Blog</title>
+                                    </blog>
+                                </children>
+                            </config>
+                            <api>
+                                <children>
+                                    <blog_post translate="title">
+                                        <title>Blog Posts</title>
+                                    </blog_post>
+                                </children>
+                            </api>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

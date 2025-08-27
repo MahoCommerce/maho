@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<config>
+    <api2>
+        <resource_groups>
+            <blog translate="title" module="blog">
+                <title>Blog</title>
+                <sort_order>150</sort_order>
+            </blog>
+        </resource_groups>
+        <resources>
+            <blog_post translate="title" module="blog">
+                <group>blog</group>
+                <model>blog/api2_post</model>
+                <working_model>blog/post</working_model>
+                <title>Blog Posts</title>
+                <sort_order>10</sort_order>
+                <privileges>
+                    <admin>
+                        <create>1</create>
+                        <retrieve>1</retrieve>
+                        <update>1</update>
+                        <delete>1</delete>
+                    </admin>
+                    <customer>
+                        <retrieve>1</retrieve>
+                    </customer>
+                    <guest>
+                        <retrieve>1</retrieve>
+                    </guest>
+                </privileges>
+                <attributes translate="title" module="blog">
+                    <post_id>Post ID</post_id>
+                    <title>Title</title>
+                    <content>Content</content>
+                    <url_key>URL Key</url_key>
+                    <image>Image</image>
+                    <is_active>Is Active</is_active>
+                    <publish_date>Publish Date</publish_date>
+                    <meta_title>Meta Title</meta_title>
+                    <meta_keywords>Meta Keywords</meta_keywords>
+                    <meta_description>Meta Description</meta_description>
+                    <meta_robots>Meta Robots</meta_robots>
+                    <created_at>Created At</created_at>
+                    <updated_at>Updated At</updated_at>
+                    <stores>Store IDs</stores>
+                </attributes>
+                <routes>
+                    <route_collection>
+                        <route>/blog/posts</route>
+                        <action_type>collection</action_type>
+                    </route_collection>
+                    <route_entity>
+                        <route>/blog/posts/:id</route>
+                        <action_type>entity</action_type>
+                    </route_entity>
+                </routes>
+                <versions>1</versions>
+            </blog_post>
+        </resources>
+    </api2>
+</config>
