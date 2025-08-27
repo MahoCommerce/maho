@@ -18,6 +18,16 @@ $hasCategories = $categories && count($categories) > 0;
 $productList = $this->getLayout()->createBlock('catalogsearch/autocomplete_product_list')
     ->setTemplate('catalog/product/list.phtml');
 $numProducts = count($productList->getLoadedProductCollection());
+
+// Collect additional autocomplete content through events
+$autocompleteData = new Varien_Object([
+    'html' => '',
+    'layout' => $this->getLayout()
+]);
+Mage::dispatchEvent('catalogsearch_autocomplete_collect_content', [
+    'autocomplete_data' => $autocompleteData
+]);
+$additionalAutocompleteHtml = $autocompleteData->getHtml();
 ?>
 
 <?php if ($numProducts > 0): ?>
@@ -50,13 +60,15 @@ $numProducts = count($productList->getLoadedProductCollection());
         </div>
     <?php endif ?>
 
+    <?= $additionalAutocompleteHtml ?>
+
     <?php if ($numProducts > 0): ?>
-        <?php if ($hasCategories): ?>
+        <?php if ($hasCategories || !empty($additionalAutocompleteHtml)): ?>
             <div class="product-results">
                 <div class="product-results-title"><?= $this->__('Products') ?></div>
         <?php endif ?>
         <?= $productList->toHtml() ?>
-        <?php if ($hasCategories): ?>
+        <?php if ($hasCategories || !empty($additionalAutocompleteHtml)): ?>
             </div>
         <?php endif ?>
     <?php endif ?>

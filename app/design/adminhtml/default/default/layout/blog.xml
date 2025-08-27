@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<layout>
+    <adminhtml_blog_post_index>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Blog Posts</title></action>
+        </reference>
+        <reference name="content">
+            <block type="blog/adminhtml_post" name="posts"/>
+        </reference>
+    </adminhtml_blog_post_index>
+
+    <adminhtml_blog_post_edit>
+        <update handle="editor"/>
+        <reference name="content">
+            <block type="blog/adminhtml_post_edit" name="posts_edit"/>
+        </reference>
+    </adminhtml_blog_post_edit>
+</layout>

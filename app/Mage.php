@@ -735,7 +735,7 @@ final class Mage
             if (is_string($options)) {
                 $options = ['etc_dir' => $options];
             }
-            $etcDir = self::getRoot() . DS . 'etc';
+            $etcDir = self::getRoot() . DS . 'app' . DS . 'etc';
             if (!empty($options['etc_dir'])) {
                 $etcDir = $options['etc_dir'];
             }

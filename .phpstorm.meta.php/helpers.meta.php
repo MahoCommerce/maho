@@ -26,6 +26,7 @@ namespace PHPSTORM_META {
         'api2/data' => \Mage_Api2_Helper_Data::class,
         'authorizenet/admin' => \Mage_Authorizenet_Helper_Admin::class,
         'authorizenet/data' => \Mage_Authorizenet_Helper_Data::class,
+        'blog/data' => \Maho_Blog_Helper_Data::class,
         'captcha/data' => \Maho_Captcha_Helper_Data::class,
         'cataloginventory/data' => \Mage_CatalogInventory_Helper_Data::class,
         'cataloginventory/minsaleqty' => \Mage_CatalogInventory_Helper_Minsaleqty::class,

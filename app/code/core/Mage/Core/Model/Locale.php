@@ -676,7 +676,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      *                               * Returns: YYYY-MM-DD HH:mm:ss (MySQL datetime format)
      *                             - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
      */
-    public function utcDate(mixed $store, string|int|DateTime|null $date, bool $includeTime = false, ?string $format = null): DateTime|string|null
+    public function utcDate(mixed $store, string|int|DateTime|null $date = null, bool $includeTime = false, ?string $format = null): DateTime|string|null
     {
         // Special handling for HTML5 native input formats
         if ($format === 'html5' && is_string($date)) {

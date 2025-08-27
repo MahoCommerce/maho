@@ -6,13 +6,10 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @todo       Separate order, mode and pager
- */
 class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
 {
     protected $_collection = null;
@@ -345,6 +342,12 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
      */
     public function getPageUrl($page)
     {
+        // For first page, return clean URL without page parameter
+        if ($page == 1) {
+            // Explicitly remove the page parameter by setting it to null
+            return $this->getPagerUrl([$this->getPageVarName() => null]);
+        }
+
         return $this->getPagerUrl([$this->getPageVarName() => $page]);
     }
 
