@@ -212,6 +212,7 @@ class Install extends BaseMahoCommand
                 return Command::FAILURE;
             }
 
+            $this->clearEavAttributeCache($output);
             $this->importBlogPosts($sampleDataDir, $output);
             $output->writeln('<info>Sample data, media files, and database content installed successfully</info>');
             $output->writeln('<info>Please run ./maho index:reindex:all && ./maho cache:flush</info>');
@@ -315,6 +316,14 @@ class Install extends BaseMahoCommand
 
         $output->writeln('<info>Force preparation completed</info>');
         return true;
+    }
+
+    private function clearEavAttributeCache(OutputInterface $output): void
+    {
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+        Mage::unregister('_singleton/eav/config');
+        Mage::unregister('_helper/eav');
     }
 
     private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void
