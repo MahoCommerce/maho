@@ -41,8 +41,9 @@ $jsVarName = 'opFile' . rand();
     <div class="input-box<?= $fileExists ? ' no-display' : '' ?>">
         <input type="file" id="option_<?= $optionId ?>" name="<?= $fileName ?>" class="product-custom-option<?= $option->getIsRequired() ? ' required-entry' : '' ?>" <?= $fileExists ? 'disabled="disabled"' : '' ?> onchange="opConfig.reloadPrice()" />
         <input type="hidden" name="<?= $fieldNameAction ?>" value="<?= $fieldValueAction ?>" />
-        <?php if ($option->getFileExtension()): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $option->getFileExtension() ?></strong></p>
+        <?php $sanitizedExtensions = $this->getSanitizedFileExtension(); ?>
+        <?php if ($sanitizedExtensions): ?>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $sanitizedExtensions ?></strong></p>
         <?php endif ?>
         <?php if ($option->getImageSizeX() > 0): ?>
         <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image width')?>: <strong><?= $option->getImageSizeX() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
