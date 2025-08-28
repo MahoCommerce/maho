@@ -176,7 +176,8 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         // Filter HTML content
         if ($object->hasData('content')) {
             $content = $object->getData('content');
-            $filteredContent = Mage::getModel('core/input_filter_maliciousCode')->filter($content);
+            $filter = Mage::getModel('core/input_filter_maliciousCode');
+            $filteredContent = $filter->linkFilter($filter->filter($content));
             $object->setData('content', $filteredContent);
         }
 
