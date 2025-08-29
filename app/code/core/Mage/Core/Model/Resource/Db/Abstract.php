@@ -13,11 +13,6 @@
 abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Resource_Abstract
 {
     /**
-     * @deprecated since 1.5.0.0
-     */
-    public const CHECKSUM_KEY_NAME = 'Checksum';
-
-    /**
      * Cached resources singleton
      *
      * @var Mage_Core_Model_Resource

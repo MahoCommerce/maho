@@ -69,7 +69,12 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         foreach ($customerIds as $customerId) {
             $customer = Mage::getModel('customer/customer')->load($customerId);
             if ($customer->getId()) {
-                $newMembers[$customerId] = $customer->getWebsiteId();
+                $websiteId = $customer->getWebsiteId();
+                // Ensure websiteId is valid - fallback to default if not set
+                if (!$websiteId) {
+                    $websiteId = Mage::app()->getDefaultStoreView()->getWebsiteId();
+                }
+                $newMembers[$customerId] = (int) $websiteId;
             }
         }
 
@@ -160,5 +165,30 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         }
 
         return parent::_beforeSave($object);
+    }
+
+    public function getWebsiteIds(?int $segmentId): array
+    {
+        if ($segmentId === null) {
+            return [];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['website_ids'])
+            ->where('segment_id = ?', $segmentId);
+
+        $websiteIds = $adapter->fetchOne($select);
+        return $websiteIds ? explode(',', $websiteIds) : [];
+    }
+
+    public function getCustomerSegmentRelations(int|string $segmentId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getTable('customersegmentation/segment_customer'), ['customer_id', 'website_id'])
+            ->where('segment_id = ?', (int) $segmentId);
+
+        return $adapter->fetchAll($select);
     }
 }
