@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,7 +22,7 @@ class Mage_Rule_Block_Editable extends Mage_Core_Block_Abstract implements Varie
         $element->addClass('element-value-changer');
         $valueName = $element->getValueName();
 
-        if ($valueName === '') {
+        if ($valueName === '' || $valueName === null) {
             $valueName = '...';
         }
 
@@ -46,13 +46,9 @@ class Mage_Rule_Block_Editable extends Mage_Core_Block_Abstract implements Varie
             $html .= '</a><span class="element"> ' . $element->getElementHtml();
 
             if ($element->getExplicitApply()) {
-                $html .= ' <a href="javascript:void(0)" class="rule-param-apply"><img src="'
-                    . $this->getSkinUrl('images/rule_component_apply.gif')
-                    . '" class="v-middle" alt="'
+                $html .= ' <a href="javascript:void(0)" class="rule-param-apply" title="'
                     . Mage::helper('core')->quoteEscape($this->__('Apply'))
-                    . '" title="'
-                    . Mage::helper('core')->quoteEscape($this->__('Apply'))
-                    . '" /></a> ';
+                    . '">' . $this->getIconSvg('circle-check') . '</a> ';
             }
 
             $html .= '</span></span>&nbsp;';

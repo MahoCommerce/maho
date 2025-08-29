@@ -48,16 +48,17 @@
 <script>
 const queueControl = new EmailTemplateEditForm({
     forms: {
-        edit: new varienForm('newsletter_template_edit_form'),
-        preview: new varienForm('newsletter_template_preview_form'),
+        edit: new varienForm('queue_edit_form'),
+        preview: new varienForm('newsletter_queue_preview_form'),
     },
     elements: {
         templateId: 'id',
         templateText: 'text',
-        templateStyles: 'template_styles',
+        templateStyles: 'styles',
         previewId: 'preview_id',
         previewText: 'preview_text',
         previewStyles: 'preview_styles',
+        previewType: 'preview_type',
     },
 });
 </script>

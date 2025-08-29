@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <customer>
+            <children>
+                <customersegmentation translate="title" module="customersegmentation">
+                    <title>Customer Segments</title>
+                    <action>adminhtml/customerSegmentation_index/index</action>
+                    <sort_order>50</sort_order>
+                </customersegmentation>
+            </children>
+        </customer>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <customer>
+                        <children>
+                            <customersegmentation translate="title" module="customersegmentation">
+                                <title>Customer Segments</title>
+                                <sort_order>50</sort_order>
+                                <children>
+                                    <manage translate="title">
+                                        <title>Manage Segments</title>
+                                        <sort_order>10</sort_order>
+                                    </manage>
+                                    <save translate="title">
+                                        <title>Save Segments</title>
+                                        <sort_order>20</sort_order>
+                                    </save>
+                                    <delete translate="title">
+                                        <title>Delete Segments</title>
+                                        <sort_order>30</sort_order>
+                                    </delete>
+                                    <refresh translate="title">
+                                        <title>Refresh Segments</title>
+                                        <sort_order>40</sort_order>
+                                    </refresh>
+                                </children>
+                            </customersegmentation>
+                        </children>
+                    </customer>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

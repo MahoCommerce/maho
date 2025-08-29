@@ -78,7 +78,7 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
                     '<img src="<?= Mage::getDesign()->getSkinUrl('images/rule_chooser_trigger.gif') ?>" class="v-middle" alt="<?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Open Chooser')) ?>" />' +
                 '</a>&nbsp;' +
                 '<a href="javascript:void(0)" onclick="WidgetInstance.hideEntityChooser(\'<?= $container['name'] ?>_ids_{{id}}\')" title="<?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Apply')) ?>">' +
-                    '<img src="<?= Mage::getDesign()->getSkinUrl('images/rule_component_apply.gif') ?>" class="v-middle" alt="<?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Apply')) ?>" />' +
+                    '<?= $this->helper('core')->jsQuoteEscape($this->getIconSvg('circle-check')) ?>' +
                 '</a>' +
             '</p>'+
             '<div class="chooser"></div>'+

@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -238,6 +239,12 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
                 && $this->getRequest()->getParam('_resume', false)
             ) {
                 $queue->setQueueStatus(Queue::STATUS_SENDING);
+            }
+
+            // Save customer segment assignments if CustomerSegmentation module is enabled
+            if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+                $segmentIds = $this->getRequest()->getParam('customer_segments', []);
+                $queue->setCustomerSegmentIds(implode(',', array_filter($segmentIds)));
             }
 
             $queue->save();

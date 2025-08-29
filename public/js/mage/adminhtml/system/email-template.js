@@ -144,7 +144,7 @@ class EmailTemplateEditForm {
         if (resumeFlag) {
             resumeFlag.value = '1';
         }
-        this.form.edit.submit();
+        this.forms.edit.submit();
         return false;
     }
 
