@@ -80,6 +80,7 @@
                 <error_email/>
                 <error_email_template>sitemap_generate_error_email_template</error_email_template>
                 <error_email_identity>general</error_email_identity>
+                <max_urls_per_file>20000</max_urls_per_file>
             </generate>
         </sitemap>
     </default>

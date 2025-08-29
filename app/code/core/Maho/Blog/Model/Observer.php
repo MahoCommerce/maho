@@ -45,14 +45,16 @@ class Maho_Blog_Model_Observer
     }
 
     /**
-     * Add blog posts to sitemap generation
+     * Add blog content to sitemap generation
      */
     public function addBlogToSitemap(Varien_Event_Observer $observer): void
     {
+        /** @var Mage_Sitemap_Model_Sitemap $sitemap */
+        $sitemap = $observer->getEvent()->getSitemap();
         $storeId = (int) $observer->getEvent()->getStoreId();
-        $date = $observer->getEvent()->getDate();
         $baseUrl = $observer->getEvent()->getBaseUrl();
-        $io = $observer->getEvent()->getFile();
+        $date = $observer->getEvent()->getDate();
+        $maxUrlsPerFile = (int) $observer->getEvent()->getMaxUrlsPerFile();
 
         // Get blog posts collection for sitemap
         $posts = $this->getBlogPostsForSitemap($storeId);
@@ -65,21 +67,136 @@ class Maho_Blog_Model_Observer
         $priority = (string) Mage::getStoreConfig('sitemap/blog/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/blog/lastmod', $storeId) ? $date : '';
 
-        // Add blog index page to sitemap (only if there are posts)
-        $blogIndexXml = $this->getSitemapRow(Mage::helper('blog')->getBlogUrl($storeId), $lastmod, $changefreq, $priority);
-        $io->streamWrite($blogIndexXml);
+        // Prepare items including blog index
+        $blogItems = [];
 
-        // Write blog posts to sitemap
+        // Add blog index as first item
+        $blogIndex = new Varien_Object();
+        $blogIndex->setUrl(str_replace($baseUrl, '', Mage::helper('blog')->getBlogUrl($storeId)));
+        $blogItems[] = $blogIndex;
+
+        // Add all blog posts
         foreach ($posts as $post) {
-            $xml = $this->getSitemapRow($post->getUrl(), $lastmod, $changefreq, $priority);
-            $io->streamWrite($xml);
+            $blogPost = new Varien_Object();
+            $blogPost->setUrl(str_replace($baseUrl, '', $post->getUrl()));
+            // Only set image data if the post has an image
+            if ($post->hasImage()) {
+                $blogPost->setImageUrl($post->getImageUrl());
+                $blogPost->setImageTitle($post->getTitle()); // Use post title as image title (same as frontend alt text)
+            }
+            $blogItems[] = $blogPost;
         }
+
+        // Generate blog sitemap files
+        $this->writeBlogSitemapFiles(
+            $sitemap,
+            $blogItems,
+            $baseUrl,
+            $lastmod,
+            $changefreq,
+            $priority,
+            $maxUrlsPerFile,
+        );
+    }
+
+    /**
+     * Write blog sitemap files
+     */
+    protected function writeBlogSitemapFiles(
+        Mage_Sitemap_Model_Sitemap $sitemap,
+        array $items,
+        string $baseUrl,
+        string $lastmod,
+        string $changefreq,
+        string $priority,
+        int $maxUrlsPerFile,
+    ): void {
+        if (empty($items)) {
+            return;
+        }
+
+        $itemCount = count($items);
+        $fileCount = 1;
+        $currentFileItemCount = 0;
+        $io = null;
+
+        foreach ($items as $index => $item) {
+            // Start new file if needed
+            if ($currentFileItemCount === 0) {
+                if ($io) {
+                    $io->streamWrite('</urlset>');
+                    $io->streamClose();
+                }
+
+                $filename = $this->getBlogSitemapFilename($sitemap, $fileCount, $itemCount, $maxUrlsPerFile);
+                $io = $this->openBlogSitemapFile($sitemap, $filename);
+                $sitemap->addSitemapFile($filename, $lastmod);
+            }
+
+            // Write URL to sitemap
+            $xml = $this->getSitemapRow($baseUrl . $item->getUrl(), $lastmod, $changefreq, $priority, $item->getImageUrl(), $item->getImageTitle());
+            $io->streamWrite($xml);
+
+            $currentFileItemCount++;
+
+            // Check if we need to start a new file
+            if ($currentFileItemCount >= $maxUrlsPerFile && $index < $itemCount - 1) {
+                $currentFileItemCount = 0;
+                $fileCount++;
+            }
+        }
+
+        // Close last file
+        if ($io) {
+            $io->streamWrite('</urlset>');
+            $io->streamClose();
+        }
+    }
+
+    /**
+     * Get blog sitemap filename
+     */
+    protected function getBlogSitemapFilename(Mage_Sitemap_Model_Sitemap $sitemap, int $fileNumber, int $totalItems, int $maxUrlsPerFile): string
+    {
+        $baseName = pathinfo($sitemap->getSitemapFilename(), PATHINFO_FILENAME);
+
+        // If only one file is needed, use simple naming
+        if ($totalItems <= $maxUrlsPerFile) {
+            return $baseName . '-blog.xml';
+        }
+
+        // Multiple files needed, add number
+        return $baseName . '-blog-' . $fileNumber . '.xml';
+    }
+
+    /**
+     * Open and initialize a blog sitemap file
+     */
+    protected function openBlogSitemapFile(Mage_Sitemap_Model_Sitemap $sitemap, string $filename): Varien_Io_File
+    {
+        $io = new Varien_Io_File();
+        $io->setAllowCreateFolders(true);
+
+        // Files should be saved in public directory for web accessibility
+        $resolvedPath = Mage::getBaseDir('public');
+
+        $io->open(['path' => $resolvedPath]);
+
+        if ($io->fileExists($filename) && !$io->isWriteable($filename)) {
+            Mage::throwException(Mage::helper('sitemap')->__('File "%s" cannot be saved. Please, make sure the directory "%s" is writeable by web server.', $filename, $resolvedPath));
+        }
+
+        $io->streamOpen($filename);
+        $io->streamWrite('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
+        $io->streamWrite('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n");
+
+        return $io;
     }
 
     /**
      * Generate sitemap row XML for a URL
      */
-    protected function getSitemapRow(string $url, ?string $lastmod = null, ?string $changefreq = null, ?string $priority = null): string
+    protected function getSitemapRow(string $url, ?string $lastmod = null, ?string $changefreq = null, ?string $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
     {
         $row = '<loc>' . htmlspecialchars($url) . '</loc>';
         if ($lastmod) {
@@ -91,6 +208,14 @@ class Maho_Blog_Model_Observer
         if ($priority) {
             $row .= sprintf('<priority>%.1f</priority>', $priority);
         }
+        if ($imageUrl) {
+            $row .= '<image:image>';
+            $row .= '<image:loc>' . htmlspecialchars($imageUrl) . '</image:loc>';
+            if ($imageTitle) {
+                $row .= '<image:title>' . htmlspecialchars($imageTitle) . '</image:title>';
+            }
+            $row .= '</image:image>';
+        }
 
         return '<url>' . $row . '</url>' . "\n";
     }
@@ -101,6 +226,7 @@ class Maho_Blog_Model_Observer
 
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getResourceModel('blog/post_collection')
+            ->addAttributeToSelect('image')
             ->addStoreFilter($storeId)
             ->addFieldToFilter('is_active', 1)
             ->addFieldToFilter('publish_date', [

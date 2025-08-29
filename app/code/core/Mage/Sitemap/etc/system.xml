@@ -20,9 +20,84 @@
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
             <groups>
+                <generate translate="label">
+                    <label>Generation Settings</label>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <max_urls_per_file translate="label comment">
+                            <label>Maximum URLs per Sitemap File</label>
+                            <comment>Split sitemap files when they exceed this number of URLs (default: 20000)</comment>
+                            <validate>required-entry validate-greater-than-zero validate-number</validate>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </max_urls_per_file>
+                        <error_email translate="label">
+                            <label>Error Email Recipient</label>
+                            <validate>validate-email</validate>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </error_email>
+                        <error_email_identity translate="label">
+                            <label>Error Email Sender</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </error_email_identity>
+                        <error_email_template translate="label">
+                            <label>Error Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </error_email_template>
+                        <frequency translate="label">
+                            <label>Frequency</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_cron_frequency</source_model>
+                            <backend_model>adminhtml/system_config_backend_sitemap_cron</backend_model>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </frequency>
+                        <time translate="label">
+                            <label>Start Time</label>
+                            <frontend_type>time</frontend_type>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </time>
+                    </fields>
+                </generate>
                 <category translate="label">
                     <label>Categories Options</label>
-                    <sort_order>1</sort_order>
+                    <sort_order>2</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
@@ -58,7 +133,7 @@
                 </category>
                 <product translate="label">
                     <label>Products Options</label>
-                    <sort_order>2</sort_order>
+                    <sort_order>3</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
@@ -94,7 +169,7 @@
                 </product>
                 <page translate="label">
                     <label>CMS Pages Options</label>
-                    <sort_order>3</sort_order>
+                    <sort_order>4</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
@@ -128,72 +203,6 @@
                         </lastmod>
                     </fields>
                 </page>
-                <generate translate="label">
-                    <label>Generation Settings</label>
-                    <sort_order>50</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
-                    <fields>
-                        <enabled translate="label">
-                            <label>Enabled</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </enabled>
-                        <error_email translate="label">
-                            <label>Error Email Recipient</label>
-                            <validate>validate-email</validate>
-                            <sort_order>5</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </error_email>
-                        <error_email_identity translate="label">
-                            <label>Error Email Sender</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_email_identity</source_model>
-                            <sort_order>6</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </error_email_identity>
-                        <error_email_template translate="label">
-                            <label>Error Email Template</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_email_template</source_model>
-                            <sort_order>7</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </error_email_template>
-                        <frequency translate="label">
-                            <label>Frequency</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_cron_frequency</source_model>
-                            <backend_model>adminhtml/system_config_backend_sitemap_cron</backend_model>
-                            <sort_order>4</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </frequency>
-                        <time translate="label">
-                            <label>Start Time</label>
-                            <frontend_type>time</frontend_type>
-                            <sort_order>3</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </time>
-                    </fields>
-                </generate>
             </groups>
         </sitemap>
     </sections>
