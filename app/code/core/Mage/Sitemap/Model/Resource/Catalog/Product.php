@@ -46,6 +46,37 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
         $urlRewrite = $this->_factory->getProductUrlRewriteHelper();
         $urlRewrite->joinTableToSelect($this->_select, $storeId);
 
+        // Join name attribute and base image from media gallery for sitemap with store fallback
+        $this->_loadAttribute('name');
+
+        $nameAttribute = $this->_attributesCache['name'];
+
+        // Join name attribute with store fallback
+        $this->_select->joinLeft(
+            ['name_attr_global' => $nameAttribute['table']],
+            'main_table.entity_id=name_attr_global.entity_id AND name_attr_global.store_id=0 AND name_attr_global.attribute_id=' . $nameAttribute['attribute_id'],
+            [],
+        )->joinLeft(
+            ['name_attr_store' => $nameAttribute['table']],
+            'main_table.entity_id=name_attr_store.entity_id AND name_attr_store.store_id=' . $storeId . ' AND name_attr_store.attribute_id=' . $nameAttribute['attribute_id'],
+            ['name' => 'COALESCE(name_attr_store.value, name_attr_global.value)'],
+        );
+
+        // Fallback to simple image attribute approach due to media gallery complexity
+        $this->_loadAttribute('image');
+        $imageAttribute = $this->_attributesCache['image'];
+
+        // Join base image attribute with store fallback
+        $this->_select->joinLeft(
+            ['image_attr_global' => $imageAttribute['table']],
+            'main_table.entity_id=image_attr_global.entity_id AND image_attr_global.store_id=0 AND image_attr_global.attribute_id=' . $imageAttribute['attribute_id'],
+            [],
+        )->joinLeft(
+            ['image_attr_store' => $imageAttribute['table']],
+            'main_table.entity_id=image_attr_store.entity_id AND image_attr_store.store_id=' . $storeId . ' AND image_attr_store.attribute_id=' . $imageAttribute['attribute_id'],
+            ['image' => 'COALESCE(image_attr_store.value, image_attr_global.value)'],
+        );
+
         $this->_addFilter(
             $storeId,
             'visibility',

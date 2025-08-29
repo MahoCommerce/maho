@@ -127,6 +127,14 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
         $entity = new Varien_Object();
         $entity->setId($row[$this->getIdFieldName()]);
         $entity->setUrl($this->_getEntityUrl($row, $entity));
+
+        // Pass through all additional data from the row (like name, image, etc.)
+        foreach ($row as $key => $value) {
+            if ($key !== $this->getIdFieldName() && !$entity->hasData($key)) {
+                $entity->setData($key, $value);
+            }
+        }
+
         return $entity;
     }
 
