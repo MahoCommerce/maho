@@ -187,49 +187,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         return '<url>' . $row . '</url>' . "\n";
     }
 
-    /**
-     * Generate split sitemaps
-     *
-     * @throws Throwable
-     */
-    protected function generateSplitSitemaps(): self
-    {
-        $storeId = $this->getStoreId();
-        $date = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
-        $baseUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
-        $maxUrlsPerFile = (int) Mage::getStoreConfig('sitemap/generate/max_urls_per_file', $storeId);
-
-        // Reset sitemap files array
-        $this->_sitemapFiles = [];
-
-        // Generate categories sitemap
-        $this->generateCategoriesSitemap($storeId, $baseUrl, $date, $maxUrlsPerFile);
-
-        // Generate products sitemap
-        $this->generateProductsSitemap($storeId, $baseUrl, $date, $maxUrlsPerFile);
-
-        // Generate CMS pages sitemap
-        $this->generatePagesSitemap($storeId, $baseUrl, $date, $maxUrlsPerFile);
-
-        // Dispatch event for other modules (like blog) to add their sitemaps
-        Mage::dispatchEvent('sitemap_urlset_generating_before', [
-            'sitemap' => $this,
-            'base_url' => $baseUrl,
-            'date' => $date,
-            'store_id' => $storeId,
-            'max_urls_per_file' => $maxUrlsPerFile,
-        ]);
-
-        // Generate sitemap index
-        $this->generateSitemapIndex($storeId, $baseUrl, $date);
-
-        $this->setSitemapTime(
-            Mage::getSingleton('core/date')->gmtDate(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT),
-        );
-        $this->save();
-
-        return $this;
-    }
 
     /**
      * Generate categories sitemap files
