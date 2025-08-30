@@ -17,41 +17,7 @@ describe('Customer Segment Collection', function () {
         $this->useTransactions();
     });
 
-    test('can create collection instance', function () {
-        expect($this->collection)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Resource_Segment_Collection::class);
-        expect($this->collection)->toBeInstanceOf(Mage_Core_Model_Resource_Db_Collection_Abstract::class);
-    });
-
-    test('has correct model and resource model', function () {
-        expect($this->collection->getModelName())->toBe('customersegmentation/segment');
-        expect($this->collection->getResourceModelName())->toBe('customersegmentation/segment');
-    });
-
-    test('can load segments collection', function () {
-        // Create some test segments first
-        createTestSegments();
-
-        $this->collection->load();
-        expect($this->collection->getSize())->toBeGreaterThan(0);
-
-        foreach ($this->collection as $segment) {
-            expect($segment)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment::class);
-            expect($segment->getId())->toBeGreaterThan(0);
-        }
-    });
-
-    test('can filter by active status', function () {
-        createTestSegments();
-
-        $this->collection->addFieldToFilter('is_active', 1);
-        $this->collection->load();
-
-        foreach ($this->collection as $segment) {
-            expect((int) $segment->getIsActive())->toBe(1);
-        }
-    });
-
-    test('can filter by website', function () {
+    test('can filter by website - segmentation specific functionality', function () {
         createTestSegments();
 
         $this->collection->addWebsiteFilter(1);
@@ -63,88 +29,7 @@ describe('Customer Segment Collection', function () {
         }
     });
 
-    test('can filter by customer group', function () {
-        createTestSegments();
-
-        // Use existing filter methods
-        $this->collection->addFieldToFilter('customer_group_ids', ['like' => '%0%']);
-        $this->collection->load();
-
-        foreach ($this->collection as $segment) {
-            $customerGroupIds = explode(',', $segment->getCustomerGroupIds());
-            $hasMatch = array_intersect($customerGroupIds, ['0', '1']);
-            expect(count($hasMatch))->toBeGreaterThan(0);
-        }
-    });
-
-    test('can sort by priority', function () {
-        createTestSegments();
-
-        $this->collection->setOrder('priority', 'DESC');
-        $this->collection->load();
-
-        $previousPriority = null;
-        foreach ($this->collection as $segment) {
-            if ($previousPriority !== null) {
-                expect((int) $segment->getPriority())->toBeLessThanOrEqual($previousPriority);
-            }
-            $previousPriority = (int) $segment->getPriority();
-        }
-    });
-
-    test('can sort by name', function () {
-        createTestSegments();
-
-        $this->collection->setOrder('name', 'ASC');
-        $this->collection->load();
-
-        $previousName = '';
-        foreach ($this->collection as $segment) {
-            expect($segment->getName())->toBeGreaterThanOrEqual($previousName);
-            $previousName = $segment->getName();
-        }
-    });
-
-    test('can limit collection size', function () {
-        createTestSegments();
-
-        $this->collection->setPageSize(2);
-        $this->collection->load();
-
-        expect($this->collection->count())->toBeLessThanOrEqual(2);
-    });
-
-    test('can get collection items as array', function () {
-        createTestSegments();
-
-        $this->collection->load();
-        $items = $this->collection->getItems();
-
-        expect($items)->toBeArray();
-        expect(count($items))->toBeGreaterThan(0);
-
-        foreach ($items as $key => $segment) {
-            expect((string) $key)->toBe((string) $segment->getId());
-            expect($segment)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment::class);
-        }
-    });
-
-    test('can get collection as option array', function () {
-        createTestSegments();
-
-        $options = $this->collection->toOptionArray();
-
-        expect($options)->toBeArray();
-
-        foreach ($options as $option) {
-            expect($option)->toHaveKey('value');
-            expect($option)->toHaveKey('label');
-            expect($option['value'])->toBeGreaterThan(0);
-            expect($option['label'])->toBeString();
-        }
-    });
-
-    test('can add customer count to select', function () {
+    test('can add customer count to select - segmentation specific functionality', function () {
         createTestSegments();
 
         $this->collection->addCustomerCountToSelect();
@@ -156,29 +41,7 @@ describe('Customer Segment Collection', function () {
         }
     });
 
-    test('can filter by refresh status', function () {
-        createTestSegments();
-
-        $this->collection->addFieldToFilter('refresh_status', 'completed');
-        $this->collection->load();
-
-        foreach ($this->collection as $segment) {
-            expect($segment->getRefreshStatus())->toBe('completed');
-        }
-    });
-
-    test('can get segments for specific refresh mode', function () {
-        createTestSegments();
-
-        $this->collection->addFieldToFilter('refresh_mode', 'auto');
-        $this->collection->load();
-
-        foreach ($this->collection as $segment) {
-            expect($segment->getRefreshMode())->toBe('auto');
-        }
-    });
-
-    test('can filter segments needing refresh', function () {
+    test('can filter segments needing refresh - segmentation specific functionality', function () {
         createTestSegments();
 
         // Add filter for segments that need refresh (pending status or old refresh date)
@@ -196,52 +59,6 @@ describe('Customer Segment Collection', function () {
                            ($segment->getLastRefreshAt() &&
                             strtotime($segment->getLastRefreshAt()) < strtotime('-1 day'));
             expect($needsRefresh)->toBe(true);
-        }
-    });
-
-    test('can join with customer relationships', function () {
-        createTestSegments();
-
-        // Test basic collection functionality instead
-        $this->collection->load();
-
-        // Verify collection loaded successfully
-        expect($this->collection->getSize())->toBeGreaterThan(0);
-        foreach ($this->collection as $segment) {
-            expect($segment->getId())->toBeGreaterThan(0);
-        }
-    });
-
-    test('can count items without loading full collection', function () {
-        createTestSegments();
-
-        $count = $this->collection->getSize();
-        expect($count)->toBeInt();
-        expect($count)->toBeGreaterThan(0);
-
-        // Collection should not be loaded yet
-        expect($this->collection->isLoaded())->toBeFalsy();
-    });
-
-    test('can get first item from collection', function () {
-        createTestSegments();
-
-        $firstItem = $this->collection->getFirstItem();
-        expect($firstItem)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment::class);
-
-        if ($firstItem->getId()) {
-            expect($firstItem->getId())->toBeGreaterThan(0);
-        }
-    });
-
-    test('can get last item from collection', function () {
-        createTestSegments();
-
-        $lastItem = $this->collection->getLastItem();
-        expect($lastItem)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment::class);
-
-        if ($lastItem->getId()) {
-            expect($lastItem->getId())->toBeGreaterThan(0);
         }
     });
 

@@ -69,27 +69,39 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
 
         switch ($attribute) {
             case 'lifetime_sales':
+                $joinConditions = 'c.entity_id = o.customer_id AND o.state NOT IN (\'canceled\', \'closed\')';
+                if ($website) {
+                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
+                    $joinConditions .= ' AND o.store_id IN (' . implode(',', $websiteStores) . ')';
+                }
                 $select = $adapter->select()
-                    ->from(['o' => $salesTable], ['customer_id', 'total' => 'SUM(o.grand_total)'])
-                    ->where('o.customer_id IS NOT NULL')
-                    ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-                    ->group('o.customer_id');
+                    ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
+                    ->joinLeft(['o' => $salesTable], $joinConditions, ['total' => 'COALESCE(SUM(o.grand_total), 0)'])
+                    ->group('c.entity_id');
                 break;
 
             case 'lifetime_orders':
+                $joinConditions = 'c.entity_id = o.customer_id AND o.state NOT IN (\'canceled\', \'closed\')';
+                if ($website) {
+                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
+                    $joinConditions .= ' AND o.store_id IN (' . implode(',', $websiteStores) . ')';
+                }
                 $select = $adapter->select()
-                    ->from(['o' => $salesTable], ['customer_id', 'total' => 'COUNT(*)'])
-                    ->where('o.customer_id IS NOT NULL')
-                    ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-                    ->group('o.customer_id');
+                    ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
+                    ->joinLeft(['o' => $salesTable], $joinConditions, ['total' => 'COUNT(o.entity_id)'])
+                    ->group('c.entity_id');
                 break;
 
             case 'average_order_value':
+                $joinConditions = 'c.entity_id = o.customer_id AND o.state NOT IN (\'canceled\', \'closed\')';
+                if ($website) {
+                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
+                    $joinConditions .= ' AND o.store_id IN (' . implode(',', $websiteStores) . ')';
+                }
                 $select = $adapter->select()
-                    ->from(['o' => $salesTable], ['customer_id', 'total' => 'AVG(o.grand_total)'])
-                    ->where('o.customer_id IS NOT NULL')
-                    ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-                    ->group('o.customer_id');
+                    ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
+                    ->joinLeft(['o' => $salesTable], $joinConditions, ['total' => 'COALESCE(AVG(o.grand_total), 0)'])
+                    ->group('c.entity_id');
                 break;
 
             case 'lifetime_profit':
@@ -127,14 +139,20 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                 return $requireValid ? 'FALSE' : 'TRUE';
         }
 
-        if ($website) {
+        if ($website && !in_array($attribute, ['lifetime_sales', 'lifetime_orders', 'average_order_value'])) {
+            // Store filter is already handled in JOIN conditions for the main attributes
+            $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
             if (isset($salesTable)) {
-                $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
                 $select->where('o.store_id IN (?)', $websiteStores);
             }
         }
+        
+        // For LEFT JOIN queries, filter by customer website
+        if ($website && in_array($attribute, ['lifetime_sales', 'lifetime_orders', 'average_order_value'])) {
+            $select->where('c.website_id = ?', $website);
+        }
 
-        // Create the final condition using standard SQL building
+        // Standard condition building
         $clvSelect = $adapter->select()
             ->from(['clv' => new Zend_Db_Expr("({$select})")], ['customer_id'])
             ->where($this->_buildSqlCondition($adapter, 'clv.total', $operator, $value));

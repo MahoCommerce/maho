@@ -272,7 +272,287 @@ describe('Segment Matching Integration', function () {
         }
     });
 
+    test('can match customers with zero lifetime orders', function () {
+        // Create customers specifically for CLV testing
+        createClvTestCustomers();
+        
+        $segment = createMatchingTestSegment('Zero Orders Segment', [
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'lifetime_orders',
+            'operator' => '==',
+            'value' => '0',
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+        expect(count($matchedCustomers))->toBeGreaterThan(0);
+
+        // Verify matched customers actually have 0 orders
+        foreach ($matchedCustomers as $customerId) {
+            $orderCount = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
+                ->getSize();
+            expect($orderCount)->toBe(0);
+        }
+    });
+
+    test('can match customers with lifetime orders less than or equal to 1', function () {
+        createClvTestCustomers();
+        
+        $segment = createMatchingTestSegment('LE 1 Orders Segment', [
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'lifetime_orders',
+            'operator' => '<=',
+            'value' => '1',
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+        expect(count($matchedCustomers))->toBeGreaterThan(0);
+
+        // Verify matched customers have <= 1 orders
+        foreach ($matchedCustomers as $customerId) {
+            $orderCount = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
+                ->getSize();
+            expect($orderCount)->toBeLessThanOrEqual(1);
+        }
+    });
+
+    test('can match customers with lifetime orders greater than 1', function () {
+        createClvTestCustomers();
+        
+        $segment = createMatchingTestSegment('GT 1 Orders Segment', [
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'lifetime_orders',
+            'operator' => '>',
+            'value' => '1',
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+
+        // Verify matched customers have > 1 orders
+        foreach ($matchedCustomers as $customerId) {
+            $orderCount = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
+                ->getSize();
+            expect($orderCount)->toBeGreaterThan(1);
+        }
+    });
+
+    test('can match customers with zero lifetime sales', function () {
+        createClvTestCustomers();
+        
+        $segment = createMatchingTestSegment('Zero Sales Segment', [
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'lifetime_sales',
+            'operator' => '==',
+            'value' => '0',
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+        expect(count($matchedCustomers))->toBeGreaterThan(0);
+
+        // Verify matched customers have 0 lifetime sales
+        foreach ($matchedCustomers as $customerId) {
+            $orders = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
+            
+            $totalSales = 0.0;
+            foreach ($orders as $order) {
+                $totalSales += (float) $order->getGrandTotal();
+            }
+            expect($totalSales)->toBe(0.0);
+        }
+    });
+
+    test('can match customers with lifetime sales less than or equal to 100', function () {
+        createClvTestCustomers();
+        
+        $segment = createMatchingTestSegment('LE 100 Sales Segment', [
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'lifetime_sales',
+            'operator' => '<=',
+            'value' => '100',
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+
+        // Verify matched customers have <= 100 lifetime sales
+        foreach ($matchedCustomers as $customerId) {
+            $orders = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
+            
+            $totalSales = 0.0;
+            foreach ($orders as $order) {
+                $totalSales += (float) $order->getGrandTotal();
+            }
+            expect($totalSales)->toBeLessThanOrEqual(100.0);
+        }
+    });
+
+    test('can match customers with zero average order value', function () {
+        createClvTestCustomers();
+        
+        $segment = createMatchingTestSegment('Zero AOV Segment', [
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'average_order_value',
+            'operator' => '==',
+            'value' => '0',
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+        expect(count($matchedCustomers))->toBeGreaterThan(0);
+
+        // Verify matched customers have 0 average order value (no orders)
+        foreach ($matchedCustomers as $customerId) {
+            $orderCount = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
+                ->getSize();
+            expect($orderCount)->toBe(0);
+        }
+    });
+
+    test('CLV conditions work correctly with combine conditions', function () {
+        createClvTestCustomers();
+        
+        $segment = createMatchingTestSegment('Zero Orders General Group', [
+            'type' => 'customersegmentation/segment_condition_combine',
+            'aggregator' => 'all',
+            'value' => 1,
+            'conditions' => [
+                [
+                    'type' => 'customersegmentation/segment_condition_customer_attributes',
+                    'attribute' => 'group_id',
+                    'operator' => '==',
+                    'value' => '1',
+                ],
+                [
+                    'type' => 'customersegmentation/segment_condition_customer_clv',
+                    'attribute' => 'lifetime_orders',
+                    'operator' => '==',
+                    'value' => '0',
+                ],
+            ],
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+
+        // Verify customers meet both conditions
+        foreach ($matchedCustomers as $customerId) {
+            $customer = Mage::getModel('customer/customer')->load($customerId);
+            expect((int) $customer->getGroupId())->toBe(1);
+            
+            $orderCount = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
+                ->getSize();
+            expect($orderCount)->toBe(0);
+        }
+    });
+
     // Helper methods
+    function createClvTestCustomers(): void
+    {
+        $uniqueId = uniqid('clv_test_', true);
+        
+        // Create customers with different order scenarios
+        $customers = [
+            // Customer with 0 orders
+            [
+                'firstname' => 'Zero',
+                'lastname' => 'Orders',
+                'email' => "zero.orders.{$uniqueId}@clvtest.com",
+                'group_id' => 1,
+                'website_id' => 1,
+                'order_count' => 0,
+            ],
+            // Another customer with 0 orders (different group)
+            [
+                'firstname' => 'Another',
+                'lastname' => 'Zero',
+                'email' => "another.zero.{$uniqueId}@clvtest.com",
+                'group_id' => 2,
+                'website_id' => 1,
+                'order_count' => 0,
+            ],
+            // Customer with exactly 1 order
+            [
+                'firstname' => 'Single',
+                'lastname' => 'Order',
+                'email' => "single.order.{$uniqueId}@clvtest.com",
+                'group_id' => 1,
+                'website_id' => 1,
+                'order_count' => 1,
+            ],
+            // Customer with 2 orders  
+            [
+                'firstname' => 'Double',
+                'lastname' => 'Orders',
+                'email' => "double.orders.{$uniqueId}@clvtest.com",
+                'group_id' => 1,
+                'website_id' => 1,
+                'order_count' => 2,
+            ],
+            // Customer with 3 orders
+            [
+                'firstname' => 'Triple',
+                'lastname' => 'Orders',
+                'email' => "triple.orders.{$uniqueId}@clvtest.com",
+                'group_id' => 1,
+                'website_id' => 1,
+                'order_count' => 3,
+            ],
+        ];
+
+        foreach ($customers as $customerData) {
+            $customer = Mage::getModel('customer/customer');
+            $customer->setFirstname($customerData['firstname']);
+            $customer->setLastname($customerData['lastname']);
+            $customer->setEmail($customerData['email']);
+            $customer->setGroupId($customerData['group_id']);
+            $customer->setWebsiteId($customerData['website_id']);
+            $customer->save();
+            
+            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
+            
+            // Create orders for this customer
+            $orderCount = $customerData['order_count'];
+            $orderValues = [25.50, 75.00, 150.00]; // Different order values
+            
+            for ($i = 0; $i < $orderCount; $i++) {
+                $order = Mage::getModel('sales/order');
+                $order->setCustomerId($customer->getId());
+                $order->setCustomerEmail($customer->getEmail());
+                $order->setGrandTotal($orderValues[$i % count($orderValues)]);
+                $order->setStatus('pending');
+                $order->setState(Mage_Sales_Model_Order::STATE_NEW);
+                $order->setStoreId(1);
+                $order->save();
+                
+                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
+            }
+        }
+    }
+
     function createMatchingTestCustomers(): void
     {
         $uniqueId = uniqid('test_', true);
