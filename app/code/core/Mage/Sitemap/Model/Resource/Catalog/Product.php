@@ -63,6 +63,50 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
     }
 
     /**
+     * Load product attributes for specific entity IDs
+     */
+    public function loadAttributesForIds(array $entityIds, int $storeId): array
+    {
+        if (empty($entityIds)) {
+            return [];
+        }
+
+        $nameAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'name');
+        $imageAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'image');
+        $attributeMap = [
+            $nameAttr->getId() => 'name',
+            $imageAttr->getId() => 'image',
+        ];
+
+        $read = $this->_getReadAdapter();
+        $select = $read->select()
+            ->from(['attr' => 'catalog_product_entity_varchar'], ['entity_id', 'attribute_id', 'value', 'store_id'])
+            ->where('attr.entity_id IN (?)', $entityIds)
+            ->where('attr.attribute_id IN (?)', array_keys($attributeMap))
+            ->where('attr.store_id IN (?)', [0, $storeId])
+            ->order(['entity_id ASC', 'attribute_id ASC', 'FIELD(store_id, ' . $storeId . ', 0) DESC']);
+
+        $results = $read->fetchAll($select);
+        $attributes = [];
+
+        // Process results with store fallback logic
+        foreach ($results as $row) {
+            $entityId = $row['entity_id'];
+            $attributeCode = $attributeMap[$row['attribute_id']];
+
+            // Only set if not already set (store-specific values come first due to ORDER BY)
+            if (!isset($attributes[$entityId][$attributeCode])) {
+                if (!isset($attributes[$entityId])) {
+                    $attributes[$entityId] = [];
+                }
+                $attributes[$entityId][$attributeCode] = $row['value'];
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
      * Retrieve entity url
      *
      * @param array $row
