@@ -37,6 +37,16 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected $_filePath;
 
     /**
+     * Array to store generated sitemap files for index
+     */
+    protected array $_sitemapFiles = [];
+
+    /**
+     * Current URL count for splitting logic
+     */
+    protected int $_currentUrlCount = 0;
+
+    /**
      * Init model
      */
     #[\Override]
@@ -117,95 +127,34 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
      */
     public function generateXml()
     {
-        $io = new Varien_Io_File();
-        $io->setAllowCreateFolders(true);
-        $io->open(['path' => $this->getPath()]);
-
-        if ($io->fileExists($this->getSitemapFilename()) && !$io->isWriteable($this->getSitemapFilename())) {
-            Mage::throwException(Mage::helper('sitemap')->__('File "%s" cannot be saved. Please, make sure the directory "%s" is writeable by web server.', $this->getSitemapFilename(), $this->getPath()));
-        }
-
-        $io->streamOpen($this->getSitemapFilename());
-
-        $io->streamWrite('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
-        $io->streamWrite('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
-
         $storeId = $this->getStoreId();
-        $date    = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
+        $date = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
         $baseUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+        $maxUrlsPerFile = (int) Mage::getStoreConfig('sitemap/generate/max_urls_per_file', $storeId);
 
-        /**
-         * Generate categories sitemap
-         */
-        $changefreq = (string) Mage::getStoreConfig('sitemap/category/changefreq', $storeId);
-        $priority   = (string) Mage::getStoreConfig('sitemap/category/priority', $storeId);
-        $lastmod    = Mage::getStoreConfigFlag('sitemap/category/lastmod', $storeId) ? $date : '';
-        $collection = Mage::getResourceModel('sitemap/catalog_category')->getCollection($storeId);
-        $categories = new Varien_Object();
-        $categories->setItems($collection);
-        Mage::dispatchEvent('sitemap_categories_generating_before', [
-            'collection' => $categories,
-            'store_id' => $storeId,
-        ]);
-        foreach ($categories->getItems() as $item) {
-            $xml = $this->getSitemapRow($baseUrl . $item->getUrl(), $lastmod, $changefreq, $priority);
-            $io->streamWrite($xml);
-        }
-        unset($collection);
+        // Reset sitemap files array
+        $this->_sitemapFiles = [];
 
-        /**
-         * Generate products sitemap
-         */
-        $changefreq = (string) Mage::getStoreConfig('sitemap/product/changefreq', $storeId);
-        $priority   = (string) Mage::getStoreConfig('sitemap/product/priority', $storeId);
-        $lastmod    = Mage::getStoreConfigFlag('sitemap/product/lastmod', $storeId) ? $date : '';
-        $collection = Mage::getResourceModel('sitemap/catalog_product')->getCollection($storeId);
-        $products = new Varien_Object();
-        $products->setItems($collection);
-        Mage::dispatchEvent('sitemap_products_generating_before', [
-            'collection' => $products,
-            'store_id' => $storeId,
-        ]);
-        foreach ($products->getItems() as $item) {
-            $xml = $this->getSitemapRow($baseUrl . $item->getUrl(), $lastmod, $changefreq, $priority);
-            $io->streamWrite($xml);
-        }
-        unset($collection);
+        // Generate categories sitemap
+        $this->generateCategoriesSitemap($storeId, $baseUrl, $date, $maxUrlsPerFile);
 
-        /**
-         * Generate cms pages sitemap
-         */
-        $homepage = (string) Mage::getStoreConfig('web/default/cms_home_page', $storeId);
-        $changefreq = (string) Mage::getStoreConfig('sitemap/page/changefreq', $storeId);
-        $priority   = (string) Mage::getStoreConfig('sitemap/page/priority', $storeId);
-        $lastmod    = Mage::getStoreConfigFlag('sitemap/page/lastmod', $storeId) ? $date : '';
-        $collection = Mage::getResourceModel('sitemap/cms_page')->getCollection($storeId);
-        $pages = new Varien_Object();
-        $pages->setItems($collection);
-        Mage::dispatchEvent('sitemap_cms_pages_generating_before', [
-            'collection' => $pages,
-            'store_id' => $storeId,
-        ]);
-        foreach ($pages->getItems() as $item) {
-            $url = $item->getUrl();
-            if ($url == $homepage) {
-                $url = '';
-            }
+        // Generate products sitemap
+        $this->generateProductsSitemap($storeId, $baseUrl, $date, $maxUrlsPerFile);
 
-            $xml = $this->getSitemapRow($baseUrl . $url, $lastmod, $changefreq, $priority);
-            $io->streamWrite($xml);
-        }
-        unset($collection);
+        // Generate CMS pages sitemap
+        $this->generatePagesSitemap($storeId, $baseUrl, $date, $maxUrlsPerFile);
 
+        // Dispatch event for other modules (like blog) to add their sitemaps
         Mage::dispatchEvent('sitemap_urlset_generating_before', [
-            'file'      => $io ,
-            'base_url'  => $baseUrl ,
-            'date'      => $date,
-            'store_id'  => $storeId,
+            'sitemap' => $this,
+            'base_url' => $baseUrl,
+            'date' => $date,
+            'store_id' => $storeId,
+            'max_urls_per_file' => $maxUrlsPerFile,
         ]);
 
-        $io->streamWrite('</urlset>');
-        $io->streamClose();
+        // Generate sitemap index
+        $this->generateSitemapIndex($storeId, $baseUrl, $date);
 
         $this->setSitemapTime(
             Mage::getSingleton('core/date')->gmtDate(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT),
@@ -222,7 +171,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
      * @param null|string $changefreq
      * @param null|string $priority
      */
-    protected function getSitemapRow(string $url, $lastmod = null, $changefreq = null, $priority = null): string
+    protected function getSitemapRow(string $url, $lastmod = null, $changefreq = null, $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
     {
         $row = '<loc>' . htmlspecialchars($url) . '</loc>';
         if ($lastmod) {
@@ -234,7 +183,309 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         if ($priority) {
             $row .= sprintf('<priority>%.1f</priority>', $priority);
         }
+        if ($imageUrl) {
+            $row .= '<image:image>';
+            $row .= '<image:loc>' . htmlspecialchars($imageUrl) . '</image:loc>';
+            if ($imageTitle) {
+                $row .= '<image:title>' . htmlspecialchars($imageTitle) . '</image:title>';
+            }
+            $row .= '</image:image>';
+        }
 
-        return '<url>' . $row . '</url>';
+        return '<url>' . $row . '</url>' . "\n";
     }
+
+    protected function generateCategoriesSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
+    {
+        $changefreq = (string) Mage::getStoreConfig('sitemap/category/changefreq', $storeId);
+        $priority = (string) Mage::getStoreConfig('sitemap/category/priority', $storeId);
+        $lastmod = Mage::getStoreConfigFlag('sitemap/category/lastmod', $storeId) ? $date : '';
+        $includeImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
+        $categoryResource = Mage::getResourceModel('sitemap/catalog_category');
+        $fullCollection = $categoryResource->getCollection($storeId);
+        if (empty($fullCollection)) {
+            return;
+        }
+
+        $totalItems = count($fullCollection);
+        $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
+        foreach ($chunks as $pageNumber => $chunk) {
+            $entityIds = array_keys($chunk);
+
+            // Load attributes efficiently for just these categories
+            if ($includeImages && !empty($entityIds)) {
+                $attributes = $categoryResource->loadAttributesForIds($entityIds, $storeId);
+
+                // Merge attribute data back into collection items
+                foreach ($chunk as $item) {
+                    if (isset($attributes[$item->getId()])) {
+                        $item->addData($attributes[$item->getId()]);
+                    }
+                }
+            }
+
+            $categories = new Varien_Object();
+            $categories->setItems($chunk);
+            Mage::dispatchEvent('sitemap_categories_generating_before', [
+                'collection' => $categories,
+                'store_id' => $storeId,
+            ]);
+
+            $this->writeSingleSitemapFile(
+                'categories',
+                $categories->getItems(),
+                $baseUrl,
+                $lastmod,
+                $changefreq,
+                $priority,
+                $pageNumber + 1, // 1-indexed
+                $totalItems,
+                $maxUrlsPerFile,
+            );
+        }
+    }
+
+    /**
+     * Generate products sitemap files
+     */
+    protected function generateProductsSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
+    {
+        $changefreq = (string) Mage::getStoreConfig('sitemap/product/changefreq', $storeId);
+        $priority = (string) Mage::getStoreConfig('sitemap/product/priority', $storeId);
+        $lastmod = Mage::getStoreConfigFlag('sitemap/product/lastmod', $storeId) ? $date : '';
+        $includeImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
+        $productResource = Mage::getResourceModel('sitemap/catalog_product');
+        $fullCollection = $productResource->getCollection($storeId);
+        if (empty($fullCollection)) {
+            return;
+        }
+
+        $totalItems = count($fullCollection);
+        $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
+        foreach ($chunks as $pageNumber => $chunk) {
+            $entityIds = array_keys($chunk);
+
+            // Load attributes efficiently for just these products
+            if ($includeImages && !empty($entityIds)) {
+                $attributes = $productResource->loadAttributesForIds($entityIds, $storeId);
+
+                // Merge attribute data back into collection items
+                foreach ($chunk as $item) {
+                    if (isset($attributes[$item->getId()])) {
+                        $item->addData($attributes[$item->getId()]);
+                    }
+                }
+            }
+
+            $products = new Varien_Object();
+            $products->setItems($chunk);
+            Mage::dispatchEvent('sitemap_products_generating_before', [
+                'collection' => $products,
+                'store_id' => $storeId,
+            ]);
+
+            $this->writeSingleSitemapFile(
+                'products',
+                $products->getItems(),
+                $baseUrl,
+                $lastmod,
+                $changefreq,
+                $priority,
+                $pageNumber + 1, // 1-indexed
+                $totalItems,
+                $maxUrlsPerFile,
+            );
+        }
+    }
+
+    /**
+     * Generate CMS pages sitemap files
+     */
+    protected function generatePagesSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
+    {
+        $homepage = (string) Mage::getStoreConfig('web/default/cms_home_page', $storeId);
+        $changefreq = (string) Mage::getStoreConfig('sitemap/page/changefreq', $storeId);
+        $priority = (string) Mage::getStoreConfig('sitemap/page/priority', $storeId);
+        $lastmod = Mage::getStoreConfigFlag('sitemap/page/lastmod', $storeId) ? $date : '';
+        $pagesResource = Mage::getResourceModel('sitemap/cms_page');
+        $fullCollection = $pagesResource->getCollection($storeId);
+        if (empty($fullCollection)) {
+            return;
+        }
+
+        $totalItems = count($fullCollection);
+        $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
+        foreach ($chunks as $pageNumber => $chunk) {
+            $pages = new Varien_Object();
+            $pages->setItems($chunk);
+            Mage::dispatchEvent('sitemap_cms_pages_generating_before', [
+                'collection' => $pages,
+                'store_id' => $storeId,
+            ]);
+
+            // Process pages to handle homepage URL
+            $pageItems = [];
+            foreach ($chunk as $item) {
+                $url = $item->getUrl();
+                if ($url == $homepage) {
+                    $url = '';
+                }
+                $item->setUrl($url);
+                $pageItems[] = $item;
+            }
+
+            $this->writeSingleSitemapFile(
+                'pages',
+                $pageItems,
+                $baseUrl,
+                $lastmod,
+                $changefreq,
+                $priority,
+                $pageNumber + 1, // 1-indexed
+                $totalItems,
+                $maxUrlsPerFile,
+            );
+        }
+    }
+
+    /**
+     * Write a single sitemap file for a collection page
+     */
+    protected function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, string $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
+    {
+        if (empty($items)) {
+            return;
+        }
+
+        $filename = $this->getSplitSitemapFilename($type, $pageNumber, $totalItems, $maxUrlsPerFile);
+        $io = $this->openSitemapFile($filename);
+
+        $this->_sitemapFiles[] = [
+            'filename' => $filename,
+            'lastmod' => Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT),
+        ];
+
+        foreach ($items as $item) {
+            // Write URL to sitemap
+            $imageUrl = null;
+            $imageTitle = null;
+
+            // Handle product images for sitemap (only if enabled in configuration)
+            $storeId = $this->getStoreId();
+            $includeProductImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
+            $includeCategoryImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
+
+            if ($type === 'products' && $includeProductImages && $item->getImage() && $item->getImage() !== 'no_selection') {
+                $imageUrl = Mage::getBaseUrl('media') . 'catalog/product' . $item->getImage();
+                $imageTitle = $item->getName();
+            }
+
+            // Handle category images for sitemap (only if enabled in configuration)
+            if ($type === 'categories' && $includeCategoryImages && $item->getImage()) {
+                $imageUrl = Mage::getBaseUrl('media') . 'catalog/category/' . $item->getImage();
+                $imageTitle = $item->getName();
+            }
+
+            $xml = $this->getSitemapRow($baseUrl . $item->getUrl(), $lastmod, $changefreq, $priority, $imageUrl, $imageTitle);
+            $io->streamWrite($xml);
+        }
+
+        $io->streamWrite('</urlset>');
+        $io->streamClose();
+    }
+
+    /**
+     * Get sitemap filename for a content type
+     */
+    protected function getSplitSitemapFilename(string $type, int $fileNumber, int $totalItems, int $maxUrlsPerFile): string
+    {
+        $baseName = pathinfo($this->getSitemapFilename(), PATHINFO_FILENAME);
+
+        // If only one file is needed, use simple naming
+        if ($totalItems <= $maxUrlsPerFile) {
+            return $baseName . '-' . $type . '.xml';
+        }
+
+        // Multiple files needed, add number
+        return $baseName . '-' . $type . '-' . $fileNumber . '.xml';
+    }
+
+    /**
+     * Open and initialize a sitemap file
+     */
+    protected function openSitemapFile(string $filename): Varien_Io_File
+    {
+        $io = new Varien_Io_File();
+        $io->setAllowCreateFolders(true);
+
+        // Files should be saved in public directory for web accessibility
+        $resolvedPath = Mage::getBaseDir('public');
+
+        $io->open(['path' => $resolvedPath]);
+
+        if ($io->fileExists($filename) && !$io->isWriteable($filename)) {
+            Mage::throwException(Mage::helper('sitemap')->__('File "%s" cannot be saved. Please, make sure the directory "%s" is writeable by web server.', $filename, $resolvedPath));
+        }
+
+        $io->streamOpen($filename);
+        $io->streamWrite('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
+        $io->streamWrite('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n");
+
+        return $io;
+    }
+
+    /**
+     * Generate sitemap index file
+     */
+    protected function generateSitemapIndex(int $storeId, string $baseUrl, string $date): void
+    {
+        if (empty($this->_sitemapFiles)) {
+            return;
+        }
+
+        $io = new Varien_Io_File();
+        $io->setAllowCreateFolders(true);
+
+        // Files should be saved in public directory for web accessibility
+        $resolvedPath = Mage::getBaseDir('public');
+
+        $io->open(['path' => $resolvedPath]);
+
+        $indexFilename = $this->getSitemapFilename();
+        if ($io->fileExists($indexFilename) && !$io->isWriteable($indexFilename)) {
+            Mage::throwException(Mage::helper('sitemap')->__('File "%s" cannot be saved. Please, make sure the directory "%s" is writeable by web server.', $indexFilename, $resolvedPath));
+        }
+
+        $io->streamOpen($indexFilename);
+        $io->streamWrite('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
+        $io->streamWrite('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n");
+
+        foreach ($this->_sitemapFiles as $sitemapFile) {
+            $io->streamWrite('<sitemap>' . "\n");
+            $sitemapUrl = rtrim($baseUrl, '/') . '/' . ltrim($this->getSitemapPath() . $sitemapFile['filename'], '/');
+            $io->streamWrite('<loc>' . htmlspecialchars($sitemapUrl) . '</loc>' . "\n");
+            $io->streamWrite('<lastmod>' . $sitemapFile['lastmod'] . '</lastmod>' . "\n");
+            $io->streamWrite('</sitemap>' . "\n");
+        }
+
+        $io->streamWrite('</sitemapindex>');
+        $io->streamClose();
+    }
+
+
+    /**
+     * Add sitemap file to the index (for external modules like blog)
+     */
+    public function addSitemapFile(string $filename, ?string $lastmod = null): void
+    {
+        if (!$lastmod) {
+            $lastmod = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
+        }
+
+        $this->_sitemapFiles[] = [
+            'filename' => $filename,
+            'lastmod' => $lastmod,
+        ];
+    }
+
 }
