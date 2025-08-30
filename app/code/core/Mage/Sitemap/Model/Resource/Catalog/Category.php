@@ -53,40 +53,53 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
         $urlRewrite = $this->_factory->getCategoryUrlRewriteHelper();
         $urlRewrite->joinTableToSelect($this->_select, $storeId);
 
-        $includeImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
-        if ($includeImages) {
-            $this->_loadAttribute('name');
-            $this->_loadAttribute('image');
-
-            $nameAttribute = $this->_attributesCache['name'];
-            $imageAttribute = $this->_attributesCache['image'];
-
-            // Join name attribute with store fallback
-            $this->_select->joinLeft(
-                ['name_attr_global' => $nameAttribute['table']],
-                'main_table.entity_id=name_attr_global.entity_id AND name_attr_global.store_id=0 AND name_attr_global.attribute_id=' . $nameAttribute['attribute_id'],
-                [],
-            )->joinLeft(
-                ['name_attr_store' => $nameAttribute['table']],
-                'main_table.entity_id=name_attr_store.entity_id AND name_attr_store.store_id=' . $storeId . ' AND name_attr_store.attribute_id=' . $nameAttribute['attribute_id'],
-                ['name' => 'COALESCE(name_attr_store.value, name_attr_global.value)'],
-            );
-
-            // Join image attribute with store fallback
-            $this->_select->joinLeft(
-                ['image_attr_global' => $imageAttribute['table']],
-                'main_table.entity_id=image_attr_global.entity_id AND image_attr_global.store_id=0 AND image_attr_global.attribute_id=' . $imageAttribute['attribute_id'],
-                [],
-            )->joinLeft(
-                ['image_attr_store' => $imageAttribute['table']],
-                'main_table.entity_id=image_attr_store.entity_id AND image_attr_store.store_id=' . $storeId . ' AND image_attr_store.attribute_id=' . $imageAttribute['attribute_id'],
-                ['image' => 'COALESCE(image_attr_store.value, image_attr_global.value)'],
-            );
-        }
-
         $this->_addFilter($storeId, 'is_active', 1);
 
         return $this->_loadEntities();
+    }
+
+    /**
+     * Load category attributes for specific entity IDs
+     */
+    public function loadAttributesForIds(array $entityIds, int $storeId): array
+    {
+        if (empty($entityIds)) {
+            return [];
+        }
+
+        $nameAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_category', 'name');
+        $imageAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_category', 'image');
+        $attributeMap = [
+            $nameAttr->getId() => 'name',
+            $imageAttr->getId() => 'image',
+        ];
+
+        $read = $this->_getReadAdapter();
+        $select = $read->select()
+            ->from(['attr' => 'catalog_category_entity_varchar'], ['entity_id', 'attribute_id', 'value', 'store_id'])
+            ->where('attr.entity_id IN (?)', $entityIds)
+            ->where('attr.attribute_id IN (?)', array_keys($attributeMap))
+            ->where('attr.store_id IN (?)', [0, $storeId])
+            ->order(['entity_id ASC', 'attribute_id ASC', 'FIELD(store_id, ' . $storeId . ', 0) DESC']);
+
+        $results = $read->fetchAll($select);
+        $attributes = [];
+
+        // Process results with store fallback logic
+        foreach ($results as $row) {
+            $entityId = $row['entity_id'];
+            $attributeCode = $attributeMap[$row['attribute_id']];
+
+            // Only set if not already set (store-specific values come first due to ORDER BY)
+            if (!isset($attributes[$entityId][$attributeCode])) {
+                if (!isset($attributes[$entityId])) {
+                    $attributes[$entityId] = [];
+                }
+                $attributes[$entityId][$attributeCode] = $row['value'];
+            }
+        }
+
+        return $attributes;
     }
 
     /**

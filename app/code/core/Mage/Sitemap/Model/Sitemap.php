@@ -195,39 +195,37 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         return '<url>' . $row . '</url>' . "\n";
     }
 
-
-    /**
-     * Generate categories sitemap files
-     */
     protected function generateCategoriesSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
     {
         $changefreq = (string) Mage::getStoreConfig('sitemap/category/changefreq', $storeId);
         $priority = (string) Mage::getStoreConfig('sitemap/category/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/category/lastmod', $storeId) ? $date : '';
-
-        // Get total count first
-        $countCollection = Mage::getResourceModel('sitemap/catalog_category')->getCollection($storeId);
-        $totalItems = count($countCollection);
-        unset($countCollection);
-
-        if ($totalItems === 0) {
+        $includeImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
+        $categoryResource = Mage::getResourceModel('sitemap/catalog_category');
+        $fullCollection = $categoryResource->getCollection($storeId);
+        if (empty($fullCollection)) {
             return;
         }
 
-        // Calculate how many pages we need
-        $totalPages = (int) ceil($totalItems / $maxUrlsPerFile);
+        $totalItems = count($fullCollection);
+        $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
+        foreach ($chunks as $pageNumber => $chunk) {
+            $entityIds = array_keys($chunk);
 
-        // Generate one sitemap file per page
-        for ($page = 1; $page <= $totalPages; $page++) {
-            // Load only this page's categories
-            $collection = Mage::getResourceModel('sitemap/catalog_category')->getCollection($storeId);
+            // Load attributes efficiently for just these categories
+            if ($includeImages && !empty($entityIds)) {
+                $attributes = $categoryResource->loadAttributesForIds($entityIds, $storeId);
 
-            // Apply pagination
-            $collection = $this->paginateCollection($collection, $page, $maxUrlsPerFile);
+                // Merge attribute data back into collection items
+                foreach ($chunk as $item) {
+                    if (isset($attributes[$item->getId()])) {
+                        $item->addData($attributes[$item->getId()]);
+                    }
+                }
+            }
 
             $categories = new Varien_Object();
-            $categories->setItems($collection);
-
+            $categories->setItems($chunk);
             Mage::dispatchEvent('sitemap_categories_generating_before', [
                 'collection' => $categories,
                 'store_id' => $storeId,
@@ -240,12 +238,10 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 $lastmod,
                 $changefreq,
                 $priority,
-                $page,
+                $pageNumber + 1, // 1-indexed
                 $totalItems,
                 $maxUrlsPerFile,
             );
-
-            unset($collection);
         }
     }
 
@@ -257,30 +253,32 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $changefreq = (string) Mage::getStoreConfig('sitemap/product/changefreq', $storeId);
         $priority = (string) Mage::getStoreConfig('sitemap/product/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/product/lastmod', $storeId) ? $date : '';
-
-        // Get total count first
-        $countCollection = Mage::getResourceModel('sitemap/catalog_product')->getCollection($storeId);
-        $totalItems = count($countCollection);
-        unset($countCollection);
-
-        if ($totalItems === 0) {
+        $includeImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
+        $productResource = Mage::getResourceModel('sitemap/catalog_product');
+        $fullCollection = $productResource->getCollection($storeId);
+        if (empty($fullCollection)) {
             return;
         }
 
-        // Calculate how many pages we need
-        $totalPages = (int) ceil($totalItems / $maxUrlsPerFile);
+        $totalItems = count($fullCollection);
+        $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
+        foreach ($chunks as $pageNumber => $chunk) {
+            $entityIds = array_keys($chunk);
 
-        // Generate one sitemap file per page
-        for ($page = 1; $page <= $totalPages; $page++) {
-            // Load only this page's products
-            $collection = Mage::getResourceModel('sitemap/catalog_product')->getCollection($storeId);
+            // Load attributes efficiently for just these products
+            if ($includeImages && !empty($entityIds)) {
+                $attributes = $productResource->loadAttributesForIds($entityIds, $storeId);
 
-            // Apply pagination - Magento collections are 1-indexed
-            $collection = $this->paginateCollection($collection, $page, $maxUrlsPerFile);
+                // Merge attribute data back into collection items
+                foreach ($chunk as $item) {
+                    if (isset($attributes[$item->getId()])) {
+                        $item->addData($attributes[$item->getId()]);
+                    }
+                }
+            }
 
             $products = new Varien_Object();
-            $products->setItems($collection);
-
+            $products->setItems($chunk);
             Mage::dispatchEvent('sitemap_products_generating_before', [
                 'collection' => $products,
                 'store_id' => $storeId,
@@ -293,12 +291,10 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 $lastmod,
                 $changefreq,
                 $priority,
-                $page,
+                $pageNumber + 1, // 1-indexed
                 $totalItems,
                 $maxUrlsPerFile,
             );
-
-            unset($collection);
         }
     }
 
@@ -311,30 +307,17 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $changefreq = (string) Mage::getStoreConfig('sitemap/page/changefreq', $storeId);
         $priority = (string) Mage::getStoreConfig('sitemap/page/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/page/lastmod', $storeId) ? $date : '';
-
-        // Get total count first
-        $countCollection = Mage::getResourceModel('sitemap/cms_page')->getCollection($storeId);
-        $totalItems = count($countCollection);
-        unset($countCollection);
-
-        if ($totalItems === 0) {
+        $pagesResource = Mage::getResourceModel('sitemap/cms_page');
+        $fullCollection = $pagesResource->getCollection($storeId);
+        if (empty($fullCollection)) {
             return;
         }
 
-        // Calculate how many pages we need
-        $totalPages = (int) ceil($totalItems / $maxUrlsPerFile);
-
-        // Generate one sitemap file per page
-        for ($page = 1; $page <= $totalPages; $page++) {
-            // Load only this page's CMS pages
-            $collection = Mage::getResourceModel('sitemap/cms_page')->getCollection($storeId);
-
-            // Apply pagination
-            $collection = $this->paginateCollection($collection, $page, $maxUrlsPerFile);
-
+        $totalItems = count($fullCollection);
+        $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
+        foreach ($chunks as $pageNumber => $chunk) {
             $pages = new Varien_Object();
-            $pages->setItems($collection);
-
+            $pages->setItems($chunk);
             Mage::dispatchEvent('sitemap_cms_pages_generating_before', [
                 'collection' => $pages,
                 'store_id' => $storeId,
@@ -342,7 +325,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
 
             // Process pages to handle homepage URL
             $pageItems = [];
-            foreach ($pages->getItems() as $item) {
+            foreach ($chunk as $item) {
                 $url = $item->getUrl();
                 if ($url == $homepage) {
                     $url = '';
@@ -358,22 +341,11 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 $lastmod,
                 $changefreq,
                 $priority,
-                $page,
+                $pageNumber + 1, // 1-indexed
                 $totalItems,
                 $maxUrlsPerFile,
             );
-
-            unset($collection);
         }
-    }
-
-    /**
-     * Apply pagination to a collection
-     */
-    protected function paginateCollection(array $collection, int $page, int $pageSize): array
-    {
-        $offset = ($page - 1) * $pageSize;
-        return array_slice($collection, $offset, $pageSize, true);
     }
 
     /**
@@ -499,6 +471,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $io->streamWrite('</sitemapindex>');
         $io->streamClose();
     }
+
 
     /**
      * Add sitemap file to the index (for external modules like blog)
