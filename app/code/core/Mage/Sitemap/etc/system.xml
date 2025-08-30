@@ -38,7 +38,7 @@
                         <max_urls_per_file translate="label comment">
                             <label>Maximum URLs per Sitemap File</label>
                             <comment>Split sitemap files when they exceed this number of URLs</comment>
-                            <validate>required-entry validate-greater-than-zero validate-number</validate>
+                            <validate>required-entry validate-greater-than-zero validate-number validate-number-range number-range-1-50000</validate>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
