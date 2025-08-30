@@ -37,7 +37,7 @@
                         </enabled>
                         <max_urls_per_file translate="label comment">
                             <label>Maximum URLs per Sitemap File</label>
-                            <comment>Split sitemap files when they exceed this number of URLs (default: 20000)</comment>
+                            <comment>Split sitemap files when they exceed this number of URLs</comment>
                             <validate>required-entry validate-greater-than-zero validate-number</validate>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
@@ -129,6 +129,14 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </lastmod>
+                        <include_images translate="label">
+                            <label>Include Images</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </include_images>
                     </fields>
                 </category>
                 <product translate="label">
@@ -165,6 +173,14 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </lastmod>
+                        <include_images translate="label">
+                            <label>Include Images</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </include_images>
                     </fields>
                 </product>
                 <page translate="label">

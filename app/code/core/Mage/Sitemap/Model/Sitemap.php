@@ -398,17 +398,18 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             $imageUrl = null;
             $imageTitle = null;
 
-            // Handle product images for sitemap
-            if ($type === 'products' && $item->getImage() && $item->getImage() !== 'no_selection') {
-                $storeId = $this->getStoreId();
-                $productModel = Mage::getModel('catalog/product')->setStoreId($storeId);
-                $productModel->setImage($item->getImage());
-                $imageUrl = Mage::helper('catalog/image')->init($productModel, 'image')->__toString();
+            // Handle product images for sitemap (only if enabled in configuration)
+            $storeId = $this->getStoreId();
+            $includeProductImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
+            $includeCategoryImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
+
+            if ($type === 'products' && $includeProductImages && $item->getImage() && $item->getImage() !== 'no_selection') {
+                $imageUrl = Mage::getBaseUrl('media') . 'catalog/product' . $item->getImage();
                 $imageTitle = $item->getName();
             }
 
-            // Handle category images for sitemap
-            if ($type === 'categories' && $item->getImage()) {
+            // Handle category images for sitemap (only if enabled in configuration)
+            if ($type === 'categories' && $includeCategoryImages && $item->getImage()) {
                 $imageUrl = Mage::getBaseUrl('media') . 'catalog/category/' . $item->getImage();
                 $imageTitle = $item->getName();
             }
@@ -512,4 +513,5 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             'lastmod' => $lastmod,
         ];
     }
+
 }

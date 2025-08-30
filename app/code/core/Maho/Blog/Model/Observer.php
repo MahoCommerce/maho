@@ -56,6 +56,11 @@ class Maho_Blog_Model_Observer
         $date = $observer->getEvent()->getDate();
         $maxUrlsPerFile = (int) $observer->getEvent()->getMaxUrlsPerFile();
 
+        // Check if blog sitemap generation is enabled
+        if (!Mage::getStoreConfigFlag('blog/sitemap/enabled', $storeId)) {
+            return;
+        }
+
         // Get blog posts collection for sitemap
         $posts = $this->getBlogPostsForSitemap($storeId);
         if (empty($posts)) {
@@ -63,9 +68,10 @@ class Maho_Blog_Model_Observer
         }
 
         // Get blog sitemap configuration
-        $changefreq = (string) Mage::getStoreConfig('sitemap/blog/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('sitemap/blog/priority', $storeId);
-        $lastmod = Mage::getStoreConfigFlag('sitemap/blog/lastmod', $storeId) ? $date : '';
+        $changefreq = (string) Mage::getStoreConfig('blog/sitemap/changefreq', $storeId);
+        $priority = (string) Mage::getStoreConfig('blog/sitemap/priority', $storeId);
+        $lastmod = Mage::getStoreConfigFlag('blog/sitemap/lastmod', $storeId) ? $date : '';
+        $includeBlogImages = Mage::getStoreConfigFlag('blog/sitemap/include_images', $storeId);
 
         // Prepare items including blog index
         $blogItems = [];
@@ -79,8 +85,9 @@ class Maho_Blog_Model_Observer
         foreach ($posts as $post) {
             $blogPost = new Varien_Object();
             $blogPost->setUrl(str_replace($baseUrl, '', $post->getUrl()));
-            // Only set image data if the post has an image
-            if ($post->hasImage()) {
+
+            // Only set image data if the post has an image AND images are enabled in configuration
+            if ($includeBlogImages && $post->hasImage()) {
                 $blogPost->setImageUrl($post->getImageUrl());
                 $blogPost->setImageTitle($post->getTitle()); // Use post title as image title (same as frontend alt text)
             }

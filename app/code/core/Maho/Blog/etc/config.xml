@@ -190,13 +190,13 @@
                 <enable_autosuggest>1</enable_autosuggest>
                 <autosuggest_limit>3</autosuggest_limit>
             </search>
-        </blog>
-        <sitemap>
-            <blog>
-                <priority>0.8</priority>
+            <sitemap>
+                <enabled>1</enabled>
                 <changefreq>weekly</changefreq>
+                <priority>0.8</priority>
                 <lastmod>1</lastmod>
-            </blog>
-        </sitemap>
+                <include_images>1</include_images>
+            </sitemap>
+        </blog>
     </default>
 </config>

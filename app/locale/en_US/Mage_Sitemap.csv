@@ -35,7 +35,7 @@
 "Show lastmod","Show lastmod"
 "Sitemap","Sitemap"
 "Sitemap generate Warnings","Sitemap generate Warnings"
-"Split sitemap files when they exceed this number of URLs (default: 20000)","Split sitemap files when they exceed this number of URLs (default: 20000)"
+"Split sitemap files when they exceed this number of URLs","Split sitemap files when they exceed this number of URLs"
 "Start Time","Start Time"
 "Store View","Store View"
 "The priority must be between 0 and 1.","The priority must be between 0 and 1."
