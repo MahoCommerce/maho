@@ -56,10 +56,6 @@ class Maho_Blog_Model_Observer
         $date = $observer->getEvent()->getDate();
         $maxUrlsPerFile = (int) $observer->getEvent()->getMaxUrlsPerFile();
 
-        // Check if blog sitemap generation is enabled
-        if (!Mage::getStoreConfigFlag('blog/sitemap/enabled', $storeId)) {
-            return;
-        }
 
         // Get blog posts collection for sitemap
         $posts = $this->getBlogPostsForSitemap($storeId);

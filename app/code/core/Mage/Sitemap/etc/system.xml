@@ -32,8 +32,8 @@
                             <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </enabled>
                         <max_urls_per_file translate="label comment">
                             <label>Maximum URLs per Sitemap File</label>
@@ -41,8 +41,8 @@
                             <validate>required-entry validate-greater-than-zero validate-number</validate>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </max_urls_per_file>
                         <error_email translate="label">
                             <label>Error Email Recipient</label>

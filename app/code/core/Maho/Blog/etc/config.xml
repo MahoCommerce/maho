@@ -191,7 +191,6 @@
                 <autosuggest_limit>3</autosuggest_limit>
             </search>
             <sitemap>
-                <enabled>1</enabled>
                 <changefreq>weekly</changefreq>
                 <priority>0.8</priority>
                 <lastmod>1</lastmod>

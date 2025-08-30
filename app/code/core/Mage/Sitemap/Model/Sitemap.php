@@ -490,7 +490,8 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
 
         foreach ($this->_sitemapFiles as $sitemapFile) {
             $io->streamWrite('<sitemap>' . "\n");
-            $io->streamWrite('<loc>' . htmlspecialchars($baseUrl . $this->getSitemapPath() . $sitemapFile['filename']) . '</loc>' . "\n");
+            $sitemapUrl = rtrim($baseUrl, '/') . '/' . ltrim($this->getSitemapPath() . $sitemapFile['filename'], '/');
+            $io->streamWrite('<loc>' . htmlspecialchars($sitemapUrl) . '</loc>' . "\n");
             $io->streamWrite('<lastmod>' . $sitemapFile['lastmod'] . '</lastmod>' . "\n");
             $io->streamWrite('</sitemap>' . "\n");
         }
