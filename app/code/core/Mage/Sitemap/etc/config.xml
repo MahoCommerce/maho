@@ -69,17 +69,20 @@
                 <priority>0.5</priority>
                 <changefreq>daily</changefreq>
                 <lastmod>1</lastmod>
+                <include_images>1</include_images>
             </category>
             <product>
                 <priority>1</priority>
                 <changefreq>daily</changefreq>
                 <lastmod>1</lastmod>
+                <include_images>1</include_images>
             </product>
             <generate>
                 <enabled>0</enabled>
                 <error_email/>
                 <error_email_template>sitemap_generate_error_email_template</error_email_template>
                 <error_email_identity>general</error_email_identity>
+                <max_urls_per_file>20000</max_urls_per_file>
             </generate>
         </sitemap>
     </default>

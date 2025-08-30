@@ -6,7 +6,7 @@
  * @package    Mage_Sitemap
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -127,6 +127,14 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
         $entity = new Varien_Object();
         $entity->setId($row[$this->getIdFieldName()]);
         $entity->setUrl($this->_getEntityUrl($row, $entity));
+
+        // Pass through all additional data from the row (like name, image, etc.)
+        foreach ($row as $key => $value) {
+            if ($key !== $this->getIdFieldName() && !$entity->hasData($key)) {
+                $entity->setData($key, $value);
+            }
+        }
+
         return $entity;
     }
 
