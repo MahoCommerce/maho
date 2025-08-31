@@ -783,7 +783,7 @@ describe('Order Attributes Condition Integration Tests', function () {
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(0);
 
-            // Should include USD
+            // Should include USD (default Maho currency)
             $hasUSD = false;
             foreach ($options as $option) {
                 if ($option['value'] === 'USD') {

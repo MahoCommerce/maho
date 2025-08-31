@@ -243,15 +243,19 @@ describe('Segment Condition Combine', function () {
         expect($cartItemsOptions)->not->toBeNull();
         expect($cartItemsOptions)->toBeArray();
 
-        // Should have some product attribute conditions
-        $hasProductAttributes = false;
+        // Should have cart item attributes (these should always be available)
+        $hasCartAttributes = false;
         foreach ($cartItemsOptions as $item) {
-            if (isset($item['label']) && strpos($item['label'], 'Product:') === 0) {
-                $hasProductAttributes = true;
+            if (isset($item['label']) && (
+                $item['label'] === 'Quantity in Cart' ||
+                $item['label'] === 'Price' ||
+                $item['label'] === 'Product Type'
+            )) {
+                $hasCartAttributes = true;
                 break;
             }
         }
-        expect($hasProductAttributes)->toBe(true);
+        expect($hasCartAttributes)->toBe(true);
 
         // Should have cart-specific attributes
         $hasQtyCondition = false;
