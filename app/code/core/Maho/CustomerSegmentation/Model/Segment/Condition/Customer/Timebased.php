@@ -80,7 +80,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
-        $now = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT)->format('Y-m-d H:i:s');
+        $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
         switch ($attribute) {
             case 'days_since_last_login':
@@ -155,7 +155,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 $select = $adapter->select()
                     ->from(['o' => $orderTable], [
                         'customer_id',
-                        'days' => 'DATEDIFF(MAX(o.created_at), MIN(o.created_at)) / GREATEST(COUNT(*) - 1, 1)',
+                        'days' => new Zend_Db_Expr('DATEDIFF(MAX(o.created_at), MIN(o.created_at)) / GREATEST(COUNT(*) - 1, 1)'),
                     ])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])

@@ -178,7 +178,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
     protected function _buildDaysSinceCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
-        $currentDate = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $currentDate = Mage_Core_Model_Locale::now();
         return $this->_buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', {$field})", $operator, $value);
     }
 
@@ -204,17 +204,33 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
     protected function getBirthdayDiffSql(Varien_Db_Adapter_Interface $adapter): string
     {
-        $currentDate = Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT);
-        return "DATEDIFF(DATE_ADD(attr.value, INTERVAL YEAR('{$currentDate}') - YEAR(attr.value) + IF(DAYOFYEAR('{$currentDate}') > DAYOFYEAR(attr.value), 1, 0) YEAR), '{$currentDate}')";
+        $currentDate = Mage_Core_Model_Locale::now();
+        
+        // Calculate next birthday by properly handling year differences to avoid BIGINT overflow
+        // This handles cases where birth year > current year (test data) or birth year < current year (real data)
+        return "CASE 
+            WHEN YEAR(attr.value) > YEAR('{$currentDate}') THEN
+                DATEDIFF(DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}'), '-%m-%d')), '{$currentDate}')
+            ELSE
+                DATEDIFF(
+                    CASE 
+                        WHEN DAYOFYEAR('{$currentDate}') > DAYOFYEAR(attr.value) THEN
+                            DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}') + 1, '-%m-%d'))
+                        ELSE
+                            DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}'), '-%m-%d'))
+                    END,
+                    '{$currentDate}'
+                )
+            END";
     }
 
     protected function _buildLifetimeSalesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id', 'total' => 'SUM(o.grand_total)'])
+            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'total', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -222,10 +238,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     protected function _buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id', 'count' => 'COUNT(*)'])
+            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'count', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -233,10 +249,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     protected function _buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id', 'average' => 'AVG(o.grand_total)'])
+            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'average', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

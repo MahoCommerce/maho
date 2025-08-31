@@ -210,7 +210,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at', 'store_id', 'base_currency_code' => $this->_buildOrderFieldCondition($adapter, $attribute, $operator, $value),
+            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at', 'store_id', 'currency_code' => $this->_buildOrderFieldCondition($adapter, $attribute, $operator, $value),
             'payment_method' => $this->_buildPaymentMethodCondition($adapter, $operator, $value),
             'shipping_method' => $this->_buildShippingMethodCondition($adapter, $operator, $value),
             'coupon_code' => $this->_buildCouponCondition($adapter, $operator, $value),
@@ -224,10 +224,19 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
 
     protected function _buildOrderFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
+        // Map attribute names to correct database field names
+        $fieldMapping = [
+            'currency_code' => 'order_currency_code',
+            'total_qty' => 'total_qty_ordered',
+            'total_amount' => 'grand_total',
+        ];
+        
+        $dbField = $fieldMapping[$field] ?? $field;
+        
         $subselect = $adapter->select()
             ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, "o.{$field}", $operator, $value));
+            ->where($this->_buildSqlCondition($adapter, "o.{$dbField}", $operator, $value));
 
         $subselectSql = $subselect->__toString();
         Mage::log('Order field condition SQL for ' . $field . ' ' . $operator . ' ' . $value . ': ' . $subselectSql, null, 'customer_segmentation_debug.log');
@@ -268,11 +277,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
 
     protected function _buildDaysSinceLastOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
+        $currentDate = Mage_Core_Model_Locale::now();
+        
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id', 'last_order' => 'MAX(o.created_at)'])
+            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_order)", $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', MAX(o.created_at))", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -280,11 +291,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     protected function _buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id', 'order_count' => 'COUNT(*)'])
+            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'order_count', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -292,11 +303,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     protected function _buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id', 'avg_amount' => 'AVG(o.grand_total)'])
+            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'avg_amount', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -304,11 +315,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     protected function _buildTotalOrderedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id', 'total_amount' => 'SUM(o.grand_total)'])
+            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'total_amount', $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

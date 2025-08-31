@@ -60,6 +60,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             'base_row_total' => Mage::helper('customersegmentation')->__('Base Row Total'),
             'created_at' => Mage::helper('customersegmentation')->__('Added to Cart Date'),
             'updated_at' => Mage::helper('customersegmentation')->__('Last Updated Date'),
+            'product_type' => Mage::helper('customersegmentation')->__('Product Type'),
         ];
 
         $attributes = array_merge($attributes, $cartItemAttributes);
@@ -138,6 +139,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         // Handle cart item attributes (direct quote_item fields)
         return match ($attribute) {
             'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'created_at', 'updated_at' => $this->_buildCartItemFieldCondition($adapter, $attribute, $operator, $value),
+            'product_type' => $this->_buildProductTypeCondition($adapter, $operator, $value),
             default => false,
         };
     }
@@ -185,6 +187,19 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
                 [],
             )->where($this->_buildSqlCondition($adapter, 'attr.value', $operator, $value));
         }
+
+        return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function _buildProductTypeCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    {
+        $subselect = $adapter->select()
+            ->from(['qi' => $this->_getQuoteItemTable()], [])
+            ->join(['q' => $this->_getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
+            ->join(['p' => Mage::getSingleton('core/resource')->getTableName('catalog/product')], 'qi.product_id = p.entity_id', [])
+            ->where('q.customer_id IS NOT NULL')
+            ->where('q.is_active = ?', 1)
+            ->where($this->_buildSqlCondition($adapter, 'p.type_id', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

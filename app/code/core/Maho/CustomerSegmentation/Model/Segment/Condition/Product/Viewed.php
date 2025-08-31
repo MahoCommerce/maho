@@ -192,7 +192,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
             ->from(['rv' => $this->_getReportViewedTable()], ['customer_id', 'last_viewed' => 'MAX(rv.added_at)'])
             ->where('rv.customer_id IS NOT NULL')
             ->group('rv.customer_id')
-            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, 'now', false, Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_viewed)", $operator, $value));
+            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_viewed)", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

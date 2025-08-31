@@ -15,10 +15,11 @@ class Maho_CustomerSegmentation_Model_Cron
 {
     public function refreshSegments(): void
     {
-        // Refresh all active segments with auto refresh mode
+        // Refresh active segments with auto refresh mode that need refreshing (24 hours since last refresh)
         $collection = Mage::getResourceModel('customersegmentation/segment_collection')
             ->addIsActiveFilter()
-            ->addFieldToFilter('refresh_mode', Maho_CustomerSegmentation_Model_Segment::MODE_AUTO);
+            ->addAutoRefreshFilter()
+            ->addNeedsRefreshFilter(24);
 
         Mage::log(
             sprintf('Starting segment refresh. Found %d segments to refresh.', $collection->getSize()),

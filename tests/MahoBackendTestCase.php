@@ -135,7 +135,7 @@ abstract class MahoBackendTestCase extends BaseTestCase
             $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
             // Clean up in dependency order (children first) - relationships handled by CASCADE
-            $cleanupOrder = ['sales_flat_order', 'customer_entity', 'customer_segment', 'blog_post_entity'];
+            $cleanupOrder = ['sales_flat_order_payment', 'sales_flat_order', 'customer_address_entity', 'customer_entity', 'customer_segment', 'blog_post_entity'];
 
             foreach ($cleanupOrder as $table) {
                 if (isset($this->createdRecords[$table]) && !empty($this->createdRecords[$table])) {
@@ -159,7 +159,9 @@ abstract class MahoBackendTestCase extends BaseTestCase
         $idFields = [
             'customer_segment' => 'segment_id',
             'customer_entity' => 'entity_id',
+            'customer_address_entity' => 'entity_id',
             'sales_flat_order' => 'entity_id',
+            'sales_flat_order_payment' => 'entity_id',
             'blog_post_entity' => 'entity_id',
         ];
 

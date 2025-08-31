@@ -101,22 +101,59 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
             return $this->_buildRegionCondition($adapter, $operator, $value);
         }
 
-        $subselect = $adapter->select()
-            ->from(['ca' => $this->_getCustomerAddressTable()], ['parent_id'])
-            ->where($this->_buildSqlCondition($adapter, "ca.{$attribute}", $operator, $value));
+        return $this->_buildAddressAttributeCondition($adapter, $attribute, $operator, $value);
+    }
 
-        return 'e.entity_id IN (' . $subselect . ')';
+    protected function _buildAddressAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
+    {
+        $attributeData = $this->_getCustomerAddressAttributeTable($attributeCode);
+        if (!$attributeData) {
+            return false;
+        }
+
+        $subselect = $adapter->select()
+            ->from(['attr' => $attributeData['table']], ['entity_id'])
+            ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
+            ->where($this->_buildSqlCondition($adapter, 'attr.value', $operator, $value));
+
+        return 'e.entity_id IN (SELECT ca.parent_id FROM ' . $this->_getCustomerAddressTable() . ' ca WHERE ca.entity_id IN (' . $subselect . '))';
     }
 
     protected function _buildRegionCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
+        // Handle region field which can be either text (EAV varchar attribute) or region_id (EAV int attribute)
+        $regionAttributeData = $this->_getCustomerAddressAttributeTable('region');
+        $regionIdAttributeData = $this->_getCustomerAddressAttributeTable('region_id');
+        
+        $conditions = [];
+        
+        // Check text region field
+        if ($regionAttributeData) {
+            $regionSubselect = $adapter->select()
+                ->from(['region_attr' => $regionAttributeData['table']], ['entity_id'])
+                ->where('region_attr.attribute_id = ?', $regionAttributeData['attribute_id'])
+                ->where($this->_buildSqlCondition($adapter, 'region_attr.value', $operator, $value));
+            $conditions[] = 'ca.entity_id IN (' . $regionSubselect . ')';
+        }
+        
+        // Check directory region lookup via region_id
+        if ($regionIdAttributeData) {
+            $regionIdSubselect = $adapter->select()
+                ->from(['rid_attr' => $regionIdAttributeData['table']], ['entity_id'])
+                ->joinLeft(['dr' => $this->_getDirectoryRegionTable()], 'rid_attr.value = dr.region_id', [])
+                ->where('rid_attr.attribute_id = ?', $regionIdAttributeData['attribute_id'])
+                ->where($this->_buildSqlCondition($adapter, 'dr.default_name', $operator, $value));
+            $conditions[] = 'ca.entity_id IN (' . $regionIdSubselect . ')';
+        }
+        
+        if (empty($conditions)) {
+            return false;
+        }
+        
+        $combinedCondition = implode(' OR ', $conditions);
         $subselect = $adapter->select()
             ->from(['ca' => $this->_getCustomerAddressTable()], ['parent_id'])
-            ->joinLeft(['dr' => $this->_getDirectoryRegionTable()], 'ca.region_id = dr.region_id', [])
-            ->where(
-                '(' . $this->_buildSqlCondition($adapter, 'ca.region', $operator, $value) .
-                ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')',
-            );
+            ->where($combinedCondition);
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

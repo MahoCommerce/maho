@@ -120,6 +120,21 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return Mage::getSingleton('core/resource')->getTableName('sales/quote');
     }
 
+    protected function _getCustomerAddressAttributeTable(string $attributeCode): array|false
+    {
+        $attribute = Mage::getSingleton('eav/config')
+            ->getAttribute('customer_address', $attributeCode);
+
+        if (!$attribute) {
+            return false;
+        }
+
+        return [
+            'table' => $attribute->getBackendTable(),
+            'attribute_id' => $attribute->getId(),
+        ];
+    }
+
     #[\Override]
     public function asHtml(): string
     {
