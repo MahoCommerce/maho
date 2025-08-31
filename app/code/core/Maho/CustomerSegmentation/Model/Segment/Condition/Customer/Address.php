@@ -119,7 +119,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         return 'e.entity_id IN (SELECT ca.parent_id FROM ' . $this->_getCustomerAddressTable() . ' ca WHERE ca.entity_id IN (' . $subselect . '))';
     }
 
-    protected function _buildRegionCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function _buildRegionCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
     {
         // Handle region field which can be either text (EAV varchar attribute) or region_id (EAV int attribute)
         $regionAttributeData = $this->_getCustomerAddressAttributeTable('region');
