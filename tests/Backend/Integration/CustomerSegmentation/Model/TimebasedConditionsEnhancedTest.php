@@ -32,37 +32,38 @@ describe('Enhanced Time-based Customer Conditions', function () {
 
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load((int) $customerId);
-                
+
                 // Get all activity timestamps
                 $createdAt = strtotime($customer->getCreatedAt());
                 $mostRecentActivity = $createdAt;
-                
+
                 // Check login activity
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $logTable = $resource->getTableName('log/customer');
-                
-                $loginResult = $adapter->fetchRow($adapter->select()
+
+                $loginResult = $adapter->fetchRow(
+                    $adapter->select()
                     ->from($logTable, ['last_login' => 'MAX(login_at)'])
-                    ->where('customer_id = ?', $customerId)
+                    ->where('customer_id = ?', $customerId),
                 );
-                
+
                 if ($loginResult && $loginResult['last_login']) {
                     $mostRecentActivity = max($mostRecentActivity, strtotime($loginResult['last_login']));
                 }
-                
+
                 // Check order activity
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled'])
                     ->setOrder('created_at', 'DESC')
                     ->setPageSize(1);
-                
+
                 if ($orders->getSize() > 0) {
                     $lastOrder = $orders->getFirstItem();
                     $mostRecentActivity = max($mostRecentActivity, strtotime($lastOrder->getCreatedAt()));
                 }
-                
+
                 // Verify the calculation matches expected behavior
                 $now = time();
                 $daysDiff = (int) (($now - $mostRecentActivity) / 86400);
@@ -83,22 +84,23 @@ describe('Enhanced Time-based Customer Conditions', function () {
 
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load((int) $customerId);
-                
-                // For customers with no login or order activity, 
+
+                // For customers with no login or order activity,
                 // should fall back to registration date
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $logTable = $resource->getTableName('log/customer');
-                
-                $loginResult = $adapter->fetchRow($adapter->select()
+
+                $loginResult = $adapter->fetchRow(
+                    $adapter->select()
                     ->from($logTable, ['last_login' => 'MAX(login_at)'])
-                    ->where('customer_id = ?', $customerId)
+                    ->where('customer_id = ?', $customerId),
                 );
-                
+
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled']);
-                
+
                 // If customer has no login or orders, should use registration date
                 if ((!$loginResult || !$loginResult['last_login']) && $orders->getSize() === 0) {
                     $registrationDays = (int) ((time() - strtotime($customer->getCreatedAt())) / 86400);
@@ -117,16 +119,16 @@ describe('Enhanced Time-based Customer Conditions', function () {
             ]);
 
             $matchedCustomersGte = $segmentGte->getMatchingCustomerIds();
-            
+
             // Test that customers with no orders are included
             $customersWithNoOrders = 0;
             $customersWithOldOrders = 0;
-            
+
             foreach ($matchedCustomersGte as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled']);
-                    
+
                 if ($orders->getSize() === 0) {
                     $customersWithNoOrders++;
                 } else {
@@ -136,9 +138,9 @@ describe('Enhanced Time-based Customer Conditions', function () {
                     expect($daysDiff)->toBeGreaterThanOrEqual(30);
                 }
             }
-            
+
             expect($customersWithNoOrders)->toBeGreaterThan(0, 'Should include customers with no orders');
-            
+
             // Now test < operator which should exclude customers with no orders
             $segmentLt = createTimebasedTestSegment('Recent Purchase LT 30', [
                 'type' => 'customersegmentation/segment_condition_customer_timebased',
@@ -148,15 +150,15 @@ describe('Enhanced Time-based Customer Conditions', function () {
             ]);
 
             $matchedCustomersLt = $segmentLt->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomersLt as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled']);
-                    
+
                 // Should only include customers with orders
                 expect($orders->getSize())->toBeGreaterThan(0);
-                
+
                 $lastOrder = $orders->setOrder('created_at', 'DESC')->getFirstItem();
                 $daysDiff = (int) ((time() - strtotime($lastOrder->getCreatedAt())) / 86400);
                 expect($daysDiff)->toBeLessThan(30);
@@ -172,26 +174,26 @@ describe('Enhanced Time-based Customer Conditions', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled'])
                     ->setOrder('created_at', 'ASC');
-                
+
                 $orderCount = $orders->getSize();
                 expect($orderCount)->toBeGreaterThan(1, 'Customer should have more than 1 order for frequency calculation');
-                
+
                 // Manual calculation to verify
                 $orderDates = [];
                 foreach ($orders as $order) {
                     $orderDates[] = strtotime($order->getCreatedAt());
                 }
-                
+
                 sort($orderDates);
                 $totalDays = (int) (($orderDates[count($orderDates) - 1] - $orderDates[0]) / 86400);
                 $expectedFrequency = $totalDays / max($orderCount - 1, 1);
-                
+
                 expect($expectedFrequency)->toBeLessThanOrEqual(50);
             }
         });
@@ -207,9 +209,9 @@ describe('Enhanced Time-based Customer Conditions', function () {
             $todayCustomer->setGroupId(1);
             $todayCustomer->setWebsiteId(1);
             $todayCustomer->save();
-            
+
             test()->trackCreatedRecord('customer_entity', (int) $todayCustomer->getId());
-            
+
             // Create order for today
             $order = Mage::getModel('sales/order');
             $order->setCustomerId($todayCustomer->getId());
@@ -220,9 +222,9 @@ describe('Enhanced Time-based Customer Conditions', function () {
             $order->setStoreId(1);
             $order->setCreatedAt(date('Y-m-d H:i:s')); // Today
             $order->save();
-            
+
             test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
-            
+
             // Test that this customer is found with 0 days condition
             $segment = createTimebasedTestSegment('Zero Days Since Order', [
                 'type' => 'customersegmentation/segment_condition_customer_timebased',
@@ -245,14 +247,14 @@ describe('Enhanced Time-based Customer Conditions', function () {
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled'])
                     ->setOrder('created_at', 'DESC')
                     ->setPageSize(1);
-                    
+
                 if ($orders->getSize() > 0) {
                     $lastOrder = $orders->getFirstItem();
                     $daysDiff = (int) ((time() - strtotime($lastOrder->getCreatedAt())) / 86400);
@@ -262,7 +264,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
                     expect(true)->toBe(true);
                 }
             }
-            
+
             // Ensure we have at least one assertion even if no customers match
             if (empty($matchedCustomers)) {
                 expect(true)->toBe(true);
@@ -274,9 +276,9 @@ describe('Enhanced Time-based Customer Conditions', function () {
                 'days_since_last_order',
                 'days_since_first_order',
                 'order_frequency_days',
-                'days_without_purchase'
+                'days_without_purchase',
             ];
-            
+
             foreach ($conditions as $condition) {
                 $segment = createTimebasedTestSegment("Website Test {$condition}", [
                     'type' => 'customersegmentation/segment_condition_customer_timebased',
@@ -284,19 +286,19 @@ describe('Enhanced Time-based Customer Conditions', function () {
                     'operator' => '>=',
                     'value' => '0',
                 ]);
-                
+
                 $segment->setWebsiteIds('1');
                 $segment->save();
-                
+
                 $matchedCustomers = $segment->getMatchingCustomerIds();
-                
+
                 foreach ($matchedCustomers as $customerId) {
                     // For order-related conditions, verify orders are from correct website
                     if (in_array($condition, ['days_since_last_order', 'days_since_first_order', 'order_frequency_days', 'days_without_purchase'])) {
                         $orders = Mage::getResourceModel('sales/order_collection')
                             ->addFieldToFilter('customer_id', $customerId)
                             ->addFieldToFilter('state', ['neq' => 'canceled']);
-                            
+
                         if ($orders->getSize() > 0) {
                             foreach ($orders as $order) {
                                 $storeIds = Mage::app()->getWebsite(1)->getStoreIds();
@@ -336,13 +338,13 @@ describe('Enhanced Time-based Customer Conditions', function () {
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
-            
+
             // Should include all customers with orders
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled']);
-                    
+
                 expect($orders->getSize())->toBeGreaterThan(0);
             }
         });
@@ -356,7 +358,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
                 'NULL',
                 '<script>alert("xss")</script>',
             ];
-            
+
             foreach ($maliciousValues as $maliciousValue) {
                 $segment = createTimebasedTestSegment("Security Test {$maliciousValue}", [
                     'type' => 'customersegmentation/segment_condition_customer_timebased',
@@ -383,7 +385,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
     {
         $uniqueId = uniqid('enhanced_', true);
         $baseTime = time();
-        
+
         $customers = [
             // Customer with recent activity (login 2 days ago, no orders)
             [
@@ -500,24 +502,24 @@ describe('Enhanced Time-based Customer Conditions', function () {
             $customer->setWebsiteId($customerData['website_id']);
             $customer->setCreatedAt($customerData['created_at']);
             $customer->save();
-            
+
             test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
-            
+
             // Create login record if specified
             if (isset($customerData['login_days_ago']) && $customerData['login_days_ago'] !== null) {
                 $loginAt = date('Y-m-d H:i:s', $baseTime - ($customerData['login_days_ago'] * 86400));
-                
+
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_write');
                 $logTable = $resource->getTableName('log/customer');
-                
+
                 $adapter->insert($logTable, [
                     'customer_id' => $customer->getId(),
                     'login_at' => $loginAt,
                     'logout_at' => null,
                 ]);
             }
-            
+
             // Create orders if specified
             foreach ($customerData['orders'] as $orderData) {
                 $order = Mage::getModel('sales/order');
@@ -527,12 +529,12 @@ describe('Enhanced Time-based Customer Conditions', function () {
                 $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                 $order->setStatus($orderData['status']);
                 $order->setStoreId(1);
-                
+
                 $orderCreatedAt = date('Y-m-d H:i:s', $baseTime - ($orderData['days_ago'] * 86400));
                 $order->setCreatedAt($orderCreatedAt);
-                
+
                 $order->save();
-                
+
                 test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
             }
         }

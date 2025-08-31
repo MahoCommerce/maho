@@ -146,7 +146,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                 $select->where('o.store_id IN (?)', $websiteStores);
             }
         }
-        
+
         // For LEFT JOIN queries, filter by customer website
         if ($website && in_array($attribute, ['lifetime_sales', 'lifetime_orders', 'average_order_value'])) {
             $select->where('c.website_id = ?', $website);

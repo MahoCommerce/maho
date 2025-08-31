@@ -233,7 +233,7 @@ describe('Customer Address Integration Tests', function () {
             $regionCollection = Mage::getResourceModel('directory/region_collection')
                 ->addCountryFilter('US')
                 ->setPageSize(1);
-            
+
             $region = $regionCollection->getFirstItem();
             if (!$region || !$region->getId()) {
                 $this->markTestSkipped('No regions found in directory for testing');
@@ -476,7 +476,7 @@ describe('Customer Address Integration Tests', function () {
 
         test('handles multiple operators correctly', function () {
             $operators = ['==', '!=', '{}', '!{}', '()', '!()'];
-            
+
             foreach ($operators as $operator) {
                 $condition = Mage::getModel('customersegmentation/segment_condition_customer_address');
                 $condition->setAttribute('firstname');
@@ -496,14 +496,14 @@ describe('Customer Address Integration Tests', function () {
         test('provides correct attribute options', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_customer_address');
             $condition->loadAttributeOptions();
-            
+
             $options = $condition->getAttributeOption();
-            
+
             $expectedAttributes = [
-                'firstname', 'lastname', 'company', 'street', 'city', 
-                'region', 'postcode', 'country_id', 'telephone'
+                'firstname', 'lastname', 'company', 'street', 'city',
+                'region', 'postcode', 'country_id', 'telephone',
             ];
-            
+
             foreach ($expectedAttributes as $attr) {
                 expect(isset($options[$attr]))->toBe(true);
                 expect($options[$attr])->toBeString();
@@ -513,14 +513,14 @@ describe('Customer Address Integration Tests', function () {
 
         test('provides correct input types for address attributes', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_customer_address');
-            
+
             // Select input types
             $condition->setAttribute('country_id');
             expect($condition->getInputType())->toBe('select');
-            
+
             $condition->setAttribute('region');
             expect($condition->getInputType())->toBe('select');
-            
+
             // String input types
             $textAttributes = ['firstname', 'lastname', 'company', 'street', 'city', 'postcode', 'telephone'];
             foreach ($textAttributes as $attr) {
@@ -531,12 +531,12 @@ describe('Customer Address Integration Tests', function () {
 
         test('provides select options for country and region', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_customer_address');
-            
+
             $condition->setAttribute('country_id');
             $options = $condition->getValueSelectOptions();
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(0);
-            
+
             $condition->setAttribute('region');
             $options = $condition->getValueSelectOptions();
             expect($options)->toBeArray();
@@ -550,7 +550,7 @@ describe('Customer Address Integration Tests', function () {
             $condition->setAttribute('city');
             $condition->setOperator('==');
             $condition->setValue('New York');
-            
+
             $string = $condition->asString();
             expect($string)->toContain('Address');
             expect($string)->toContain('City');
@@ -563,7 +563,7 @@ describe('Customer Address Integration Tests', function () {
 function createCustomerAddressTestData(): void
 {
     $uniqueId = uniqid('addr_', true);
-    
+
     $customers = [
         // Customer with single US address
         [
@@ -724,7 +724,7 @@ function createCustomerAddressTestData(): void
     $regionCollection = Mage::getResourceModel('directory/region_collection')
         ->addCountryFilter('US')
         ->setPageSize(1);
-    
+
     $directoryRegion = $regionCollection->getFirstItem();
     if ($directoryRegion && $directoryRegion->getId()) {
         // Add customer with directory region ID
@@ -759,7 +759,7 @@ function createCustomerAddressTestData(): void
         $customer->setGroupId(1);
         $customer->setWebsiteId(1);
         $customer->save();
-        
+
         test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
 
         // Create addresses
@@ -768,29 +768,29 @@ function createCustomerAddressTestData(): void
             $address->setCustomerId($customer->getId());
             $address->setFirstname($addressData['firstname']);
             $address->setLastname($addressData['lastname']);
-            
+
             if (isset($addressData['company'])) {
                 $address->setCompany($addressData['company']);
             }
-            
+
             $address->setStreet($addressData['street']);
             $address->setCity($addressData['city']);
-            
+
             if (isset($addressData['region'])) {
                 $address->setRegion($addressData['region']);
             }
-            
+
             if (isset($addressData['region_id']) && $addressData['region_id']) {
                 $address->setRegionId($addressData['region_id']);
             }
-            
+
             $address->setPostcode($addressData['postcode']);
             $address->setCountryId($addressData['country_id']);
-            
+
             if (isset($addressData['telephone'])) {
                 $address->setTelephone($addressData['telephone']);
             }
-            
+
             $address->save();
             test()->trackCreatedRecord('customer_address_entity', (int) $address->getId());
         }
@@ -820,7 +820,7 @@ function createCustomerAddressTestSegment(string $name, array $conditions): Maho
     $segment->setRefreshStatus('pending');
     $segment->setPriority(10);
     $segment->save();
-    
+
     test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
     return $segment;
@@ -831,6 +831,6 @@ function getCustomerAddresses(int $customerId): array
     $addressCollection = Mage::getResourceModel('customer/address_collection')
         ->addAttributeToSelect('*')
         ->addAttributeToFilter('parent_id', $customerId);
-    
+
     return $addressCollection->getItems();
 }

@@ -37,18 +37,18 @@ describe('Customer Attributes Integration Tests', function () {
 
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
             $sql = $condition->getConditionsSql($adapter);
-            
+
             // Test SQL is properly formed
             expect($sql)->toBeString();
             expect($sql)->toContain('CASE');
             expect($sql)->toContain('DATEDIFF');
-            
+
             // For each matched customer, verify they have birthday today (month-day matches)
             $todayMonthDay = date('m-d');
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $dob = $customer->getDob();
-                
+
                 if (!empty($dob) && $dob !== '0000-00-00') {
                     $dobMonthDay = date('m-d', strtotime($dob));
                     expect($dobMonthDay)->toBe($todayMonthDay, "Customer {$customerId} DOB {$dob} should have today's month-day {$todayMonthDay}");
@@ -72,7 +72,7 @@ describe('Customer Attributes Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $dob = $customer->getDob();
-                
+
                 if (!empty($dob) && $dob !== '0000-00-00') {
                     $dobMonthDay = date('m-d', strtotime($dob));
                     expect($dobMonthDay)->toBe($tomorrowMonthDay, "Customer {$customerId} DOB {$dob} should have tomorrow's month-day {$tomorrowMonthDay}");
@@ -94,16 +94,16 @@ describe('Customer Attributes Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $dob = $customer->getDob();
-                
+
                 if (!empty($dob) && $dob !== '0000-00-00') {
                     $dobDate = new DateTime($dob);
-                    
+
                     // Special handling for Feb 29 leap year birthdays
                     if ($dobDate->format('m-d') === '02-29') {
                         $today = new DateTime();
                         $currentYear = (int) $today->format('Y');
                         $isLeapYear = ($currentYear % 4 === 0 && $currentYear % 100 !== 0) || ($currentYear % 400 === 0);
-                        
+
                         // Test should handle this edge case gracefully
                         expect(true)->toBe(true); // Birthday calculation handles leap years
                     }
@@ -120,11 +120,11 @@ describe('Customer Attributes Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $dob = $customer->getDob();
-                
+
                 // Should not include customers with null or invalid DOB
                 expect($dob)->not()->toBeNull();
                 expect($dob)->not()->toBe('');
@@ -146,15 +146,15 @@ describe('Customer Attributes Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $dob = $customer->getDob();
-                
+
                 if (!empty($dob) && $dob !== '0000-00-00') {
                     // Use the same logic as the SQL: calculate days until next birthday
                     $today = new DateTime();
                     $dobDate = new DateTime($dob);
-                    
+
                     // Get this year's birthday
                     $thisYearBirthday = new DateTime($today->format('Y') . '-' . $dobDate->format('m-d'));
-                    
+
                     // If birthday has already passed this year, calculate next year's birthday
                     if ($thisYearBirthday <= $today) {
                         $nextBirthday = new DateTime(($today->format('Y') + 1) . '-' . $dobDate->format('m-d'));
@@ -162,7 +162,7 @@ describe('Customer Attributes Integration Tests', function () {
                     } else {
                         $daysDiff = $today->diff($thisYearBirthday)->days;
                     }
-                    
+
                     expect($daysDiff)->toBeLessThanOrEqual(365);
                 }
             }
@@ -200,11 +200,11 @@ describe('Customer Attributes Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $createdAt = $customer->getCreatedAt();
-                
+
                 $now = new DateTime();
                 $registrationDate = new DateTime($createdAt);
                 $daysDiff = $now->diff($registrationDate)->days;
-                
+
                 expect($daysDiff)->toBe(0);
             }
         });
@@ -223,11 +223,11 @@ describe('Customer Attributes Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $createdAt = $customer->getCreatedAt();
-                
+
                 $now = new DateTime();
                 $registrationDate = new DateTime($createdAt);
                 $daysDiff = $now->diff($registrationDate)->days;
-                
+
                 expect($daysDiff)->toBeGreaterThanOrEqual(365);
             }
         });
@@ -245,11 +245,11 @@ describe('Customer Attributes Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $createdAt = $customer->getCreatedAt();
-                
+
                 $now = new DateTime();
                 $registrationDate = new DateTime($createdAt);
                 $daysDiff = $now->diff($registrationDate)->days;
-                
+
                 expect($daysDiff)->toBeLessThanOrEqual(30);
             }
         });
@@ -334,7 +334,7 @@ describe('Customer Attributes Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $dob = $customer->getDob();
-                
+
                 if (!empty($dob)) {
                     expect(date('Y-m-d', strtotime($dob)))->toBe($testDate);
                 }
@@ -460,7 +460,7 @@ describe('Customer Attributes Integration Tests', function () {
                         $totalSales += (float) $order->getGrandTotal();
                         $orderCount++;
                     }
-                    
+
                     $averageOrderValue = $totalSales / $orderCount;
                     expect($averageOrderValue)->toBeGreaterThanOrEqual(100.0);
                 }
@@ -565,12 +565,12 @@ describe('Customer Attributes Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             // Should handle null gender values without errors
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $gender = $customer->getGender();
-                
+
                 // Gender can be null, 1 (male), 2 (female), or 3 (not specified)
                 if ($gender !== null) {
                     expect((int) $gender)->not()->toBe(1);
@@ -738,7 +738,7 @@ describe('Customer Attributes Integration Tests', function () {
 
         test('handles all supported operators correctly', function () {
             $operators = ['==', '!=', '>=', '<=', '>', '<', '{}', '!{}'];
-            
+
             foreach ($operators as $operator) {
                 $condition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
                 $condition->setAttribute('email');
@@ -755,11 +755,11 @@ describe('Customer Attributes Integration Tests', function () {
 
         test('handles input type validation correctly', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
-            
+
             // Test different attribute input types
             $testCases = [
                 'email' => 'string',
-                'firstname' => 'string', 
+                'firstname' => 'string',
                 'lastname' => 'string',
                 'gender' => 'select',
                 'dob' => 'date',
@@ -783,11 +783,11 @@ describe('Customer Attributes Integration Tests', function () {
 
         test('handles value element type validation correctly', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
-            
+
             // Test different attribute value element types
             $testCases = [
                 'email' => 'text',
-                'firstname' => 'text', 
+                'firstname' => 'text',
                 'lastname' => 'text',
                 'gender' => 'select',
                 'dob' => 'date',
@@ -811,16 +811,16 @@ describe('Customer Attributes Integration Tests', function () {
 
         test('provides correct operator options for selection fields', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
-            
+
             $selectionAttributes = ['gender', 'group_id', 'store_id', 'website_id'];
-            
+
             foreach ($selectionAttributes as $attribute) {
                 $condition->setAttribute($attribute);
                 $operators = $condition->getOperatorSelectOptions();
-                
+
                 expect($operators)->toBeArray();
                 expect($operators)->toHaveCount(2); // Should only have 'is' and 'is not'
-                
+
                 $operatorValues = array_column($operators, 'value');
                 expect($operatorValues)->toContain('==');
                 expect($operatorValues)->toContain('!=');
@@ -832,7 +832,7 @@ describe('Customer Attributes Integration Tests', function () {
     function createCustomerAttributesTestData(): void
     {
         $uniqueId = uniqid('customer_attr_', true);
-        
+
         $customers = [
             // Customer with birthday today (born in 1990, birthday today)
             [
@@ -966,25 +966,25 @@ describe('Customer Attributes Integration Tests', function () {
             $customer->setGroupId($customerData['group_id']);
             $customer->setWebsiteId(1);
             $customer->setCreatedAt($customerData['created_at']);
-            
+
             if (isset($customerData['dob']) && $customerData['dob'] !== null) {
                 $customer->setDob($customerData['dob']);
             }
-            
+
             if (isset($customerData['gender']) && $customerData['gender'] !== null) {
                 $customer->setGender($customerData['gender']);
             }
-            
+
             $customer->save();
             test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
-            
+
             // Create orders if specified
             foreach ($customerData['orders'] as $orderData) {
                 $order = Mage::getModel('sales/order');
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
-                
+
                 // Set state and status according to Maho patterns
                 if ($orderData['status'] === 'canceled') {
                     $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
@@ -993,12 +993,12 @@ describe('Customer Attributes Integration Tests', function () {
                     $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                     $order->setStatus($orderData['status']);
                 }
-                
+
                 $order->setStoreId(1);
                 $orderCreatedAt = date('Y-m-d H:i:s', strtotime("-{$orderData['days_ago']} days"));
                 $order->setCreatedAt($orderCreatedAt);
                 $order->save();
-                
+
                 test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
             }
         }
@@ -1027,7 +1027,7 @@ describe('Customer Attributes Integration Tests', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-        
+
         test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;

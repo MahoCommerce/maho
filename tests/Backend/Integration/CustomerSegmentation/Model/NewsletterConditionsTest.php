@@ -124,11 +124,11 @@ describe('Newsletter Customer Conditions', function () {
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $subscriberTable = $resource->getTableName('newsletter/subscriber');
-                
+
                 $select = $adapter->select()
                     ->from($subscriberTable, ['subscriber_id'])
                     ->where('customer_id = ?', $customerId);
-                    
+
                 $subscriberRecord = $adapter->fetchRow($select);
                 expect($subscriberRecord)->not()->toBeFalse();
                 expect($subscriberRecord['subscriber_id'])->not()->toBeNull();
@@ -152,7 +152,7 @@ describe('Newsletter Customer Conditions', function () {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
                 expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-                
+
                 $changeDate = strtotime($subscriber->getChangeStatusAt());
                 $thirtyDaysAgo = strtotime('-30 days');
                 expect($changeDate)->toBeGreaterThanOrEqual($thirtyDaysAgo);
@@ -161,7 +161,7 @@ describe('Newsletter Customer Conditions', function () {
 
         test('can find customers who changed status before specific date', function () {
             $cutoffDate = date('Y-m-d', strtotime('-60 days'));
-            
+
             $segment = createNewsletterTestSegment('Old Status Change', [
                 'type' => 'customersegmentation/segment_condition_customer_newsletter',
                 'attribute' => 'change_status_at',
@@ -176,7 +176,7 @@ describe('Newsletter Customer Conditions', function () {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
                 expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-                
+
                 $changeDate = strtotime($subscriber->getChangeStatusAt());
                 $cutoffTimestamp = strtotime($cutoffDate);
                 expect($changeDate)->toBeLessThan($cutoffTimestamp);
@@ -185,7 +185,7 @@ describe('Newsletter Customer Conditions', function () {
 
         test('can find customers who changed status on exact date', function () {
             $exactDate = date('Y-m-d', strtotime('-15 days'));
-            
+
             $segment = createNewsletterTestSegment('Exact Date Status Change', [
                 'type' => 'customersegmentation/segment_condition_customer_newsletter',
                 'attribute' => 'change_status_at',
@@ -200,7 +200,7 @@ describe('Newsletter Customer Conditions', function () {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
                 expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-                
+
                 $changeDate = date('Y-m-d', strtotime($subscriber->getChangeStatusAt()));
                 expect($changeDate)->toBe($exactDate);
             }
@@ -209,7 +209,7 @@ describe('Newsletter Customer Conditions', function () {
         test('handles date range queries correctly', function () {
             $startDate = date('Y-m-d', strtotime('-45 days'));
             $endDate = date('Y-m-d', strtotime('-15 days'));
-            
+
             // Find customers who changed status between two dates
             $segment = createNewsletterTestSegment('Date Range Status Change', [
                 'type' => 'customersegmentation/segment_condition_combine',
@@ -238,11 +238,11 @@ describe('Newsletter Customer Conditions', function () {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
                 expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-                
+
                 $changeDate = strtotime($subscriber->getChangeStatusAt());
                 $startTimestamp = strtotime($startDate);
                 $endTimestamp = strtotime($endDate . ' 23:59:59');
-                
+
                 expect($changeDate)->toBeGreaterThanOrEqual($startTimestamp);
                 expect($changeDate)->toBeLessThanOrEqual($endTimestamp);
             }
@@ -265,10 +265,10 @@ describe('Newsletter Customer Conditions', function () {
             foreach ($matchedCustomers as $customerId) {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
-                
+
                 $changeStatusAt = $subscriber->getChangeStatusAt();
                 expect($changeStatusAt)->not()->toBeNull();
-                
+
                 $daysDiff = (int) ((time() - strtotime($changeStatusAt)) / 86400);
                 expect($daysDiff)->toBeLessThanOrEqual(7);
             }
@@ -302,7 +302,7 @@ describe('Newsletter Customer Conditions', function () {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
                 expect((int) $subscriber->getSubscriberStatus())->toBe(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
-                
+
                 $changeDate = strtotime($subscriber->getChangeStatusAt());
                 $thirtyDaysAgo = strtotime('-30 days');
                 expect($changeDate)->toBeGreaterThanOrEqual($thirtyDaysAgo);
@@ -320,7 +320,7 @@ describe('Newsletter Customer Conditions', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
@@ -340,18 +340,19 @@ describe('Newsletter Customer Conditions', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 // Verify customer has at least one newsletter record
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $subscriberTable = $resource->getTableName('newsletter/subscriber');
-                
-                $count = $adapter->fetchOne($adapter->select()
+
+                $count = $adapter->fetchOne(
+                    $adapter->select()
                     ->from($subscriberTable, ['COUNT(*)'])
-                    ->where('customer_id = ?', $customerId)
+                    ->where('customer_id = ?', $customerId),
                 );
-                
+
                 expect((int) $count)->toBeGreaterThan(0);
             }
         });
@@ -365,7 +366,7 @@ describe('Newsletter Customer Conditions', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             // Should return empty array for invalid status
             expect($matchedCustomers)->toBeArray();
             expect(count($matchedCustomers))->toBe(0);
@@ -373,7 +374,7 @@ describe('Newsletter Customer Conditions', function () {
 
         test('handles future dates in change_status_at', function () {
             $futureDate = date('Y-m-d', strtotime('+30 days'));
-            
+
             $segment = createNewsletterTestSegment('Future Status Change', [
                 'type' => 'customersegmentation/segment_condition_customer_newsletter',
                 'attribute' => 'change_status_at',
@@ -382,13 +383,13 @@ describe('Newsletter Customer Conditions', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             // All customers with valid change dates should be included
             foreach ($matchedCustomers as $customerId) {
                 $subscriber = getNewsletterSubscriberForCustomer($customerId);
                 expect($subscriber)->not()->toBeNull();
                 expect($subscriber->getChangeStatusAt())->not()->toBeNull();
-                
+
                 $changeDate = strtotime($subscriber->getChangeStatusAt());
                 $futureTimestamp = strtotime($futureDate . ' 23:59:59');
                 expect($changeDate)->toBeLessThanOrEqual($futureTimestamp);
@@ -401,7 +402,7 @@ describe('Newsletter Customer Conditions', function () {
     {
         $uniqueId = uniqid('newsletter_', true);
         $baseTime = time();
-        
+
         $customers = [
             // Subscribed customer with recent status change
             [
@@ -494,9 +495,9 @@ describe('Newsletter Customer Conditions', function () {
             $customer->setGroupId($customerData['group_id']);
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
-            
+
             test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
-            
+
             // Create newsletter subscription if specified
             if ($customerData['subscriber_status'] !== null) {
                 $subscriber = Mage::getModel('newsletter/subscriber');
@@ -506,7 +507,7 @@ describe('Newsletter Customer Conditions', function () {
                 $subscriber->setSubscriberStatus($customerData['subscriber_status']);
                 $subscriber->setChangeStatusAt($customerData['change_status_at']);
                 $subscriber->save();
-                
+
                 test()->trackCreatedRecord('newsletter_subscriber', (int) $subscriber->getId());
             }
         }
@@ -535,7 +536,7 @@ describe('Newsletter Customer Conditions', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-        
+
         test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;
@@ -547,10 +548,10 @@ describe('Newsletter Customer Conditions', function () {
         if (!$customer->getId()) {
             return null;
         }
-        
+
         $subscriber = Mage::getModel('newsletter/subscriber');
         $subscriber->loadByCustomer($customer);
-        
+
         return $subscriber->getId() ? $subscriber : null;
     }
 });

@@ -50,7 +50,7 @@ describe('Combine Condition Performance Tests', function () {
         $testData = new Varien_Object([
             'email' => 'test@level5test1.com',
             'firstname' => 'Performance',
-            'lastname' => 'Test'
+            'lastname' => 'Test',
         ]);
 
         $result = $rootCombine->validate($testData);
@@ -96,7 +96,7 @@ describe('Combine Condition Performance Tests', function () {
         $testData = new Varien_Object([
             'email' => 'user@test50.com', // Should match condition 50
             'firstname' => 'Wide',
-            'lastname' => 'Test'
+            'lastname' => 'Test',
         ]);
 
         $result = $rootCombine->validate($testData);
@@ -168,7 +168,7 @@ describe('Combine Condition Performance Tests', function () {
         $testData1 = new Varien_Object([
             'firstname' => 'User25',
             'lastname' => 'TestUser',
-            'email' => 'user25@example.com'
+            'email' => 'user25@example.com',
         ]);
         $result1 = $rootCombine->validate($testData1);
         $validationTime1 = microtime(true) - $validationStart;
@@ -178,7 +178,7 @@ describe('Combine Condition Performance Tests', function () {
         $testData2 = new Varien_Object([
             'firstname' => 'DeepUser',
             'lastname' => 'Level1Level2Level3Level4Level5Test',
-            'email' => 'deep@example.com'
+            'email' => 'deep@example.com',
         ]);
         $result2 = $rootCombine->validate($testData2);
         $validationTime2 = microtime(true) - $validationStart2;
@@ -213,7 +213,7 @@ describe('Combine Condition Performance Tests', function () {
 
         // Mock the getConditions method to return our structure
         $conditions = $rootCombine->getConditions();
-        
+
         $sqlStart = microtime(true);
         $sql = $rootCombine->getConditionsSql($this->adapter, 1);
         $sqlTime = microtime(true) - $sqlStart;
@@ -287,7 +287,7 @@ describe('Combine Condition Performance Tests', function () {
             $testDataSets[] = new Varien_Object([
                 'email' => "user{$i}@test22.com", // Should match some conditions
                 'firstname' => "User{$i}",
-                'lastname' => 'ConcurrentTest'
+                'lastname' => 'ConcurrentTest',
             ]);
         }
 
@@ -303,7 +303,7 @@ describe('Combine Condition Performance Tests', function () {
         // Performance assertions
         expect($validationTime)->toBeLessThan(2.0); // 100 validations under 2 seconds
         expect(count($results))->toBe(100);
-        
+
         // At least some should match
         $trueCount = array_sum($results);
         expect($trueCount)->toBeGreaterThan(0);
@@ -314,7 +314,7 @@ describe('Combine Condition Performance Tests', function () {
 
         // Load condition options multiple times (simulating UI usage)
         $combine = Mage::getModel('customersegmentation/segment_condition_combine');
-        
+
         for ($i = 0; $i < 10; $i++) {
             $options = $combine->getNewChildSelectOptions();
             expect($options)->toBeArray();

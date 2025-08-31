@@ -37,16 +37,16 @@ describe('Time-based Customer Conditions', function () {
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $logTable = $resource->getTableName('log/customer');
-                
+
                 $select = $adapter->select()
                     ->from($logTable, ['customer_id', 'login_at'])
                     ->where('customer_id = ?', $customerId)
                     ->order('login_at DESC')
                     ->limit(1);
-                    
+
                 $loginData = $adapter->fetchRow($select);
                 expect($loginData)->not()->toBeFalse();
-                
+
                 // Verify the calculation is correct
                 $now = date('Y-m-d H:i:s');
                 $expectedDays = (int) ((strtotime($now) - strtotime($loginData['login_at'])) / 86400);
@@ -69,14 +69,14 @@ describe('Time-based Customer Conditions', function () {
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $logTable = $resource->getTableName('log/customer');
-                
+
                 $select = $adapter->select()
                     ->from($logTable, ['last_login' => 'MAX(login_at)'])
                     ->where('customer_id = ?', $customerId);
-                    
+
                 $result = $adapter->fetchRow($select);
                 $lastLogin = $result['last_login'];
-                
+
                 $now = date('Y-m-d H:i:s');
                 $daysDiff = (int) ((strtotime($now) - strtotime($lastLogin)) / 86400);
                 expect($daysDiff)->toBeLessThanOrEqual(30);
@@ -98,14 +98,14 @@ describe('Time-based Customer Conditions', function () {
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $logTable = $resource->getTableName('log/customer');
-                
+
                 $select = $adapter->select()
                     ->from($logTable, ['last_login' => 'MAX(login_at)'])
                     ->where('customer_id = ?', $customerId);
-                    
+
                 $result = $adapter->fetchRow($select);
                 $lastLogin = $result['last_login'];
-                
+
                 $now = date('Y-m-d H:i:s');
                 $daysDiff = (int) ((strtotime($now) - strtotime($lastLogin)) / 86400);
                 expect($daysDiff)->toBeGreaterThan(60);
@@ -206,12 +206,12 @@ describe('Time-based Customer Conditions', function () {
 
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
-                
+
                 // Get last login
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_read');
                 $logTable = $resource->getTableName('log/customer');
-                
+
                 $loginSelect = $adapter->select()
                     ->from($logTable, ['last_login' => 'MAX(login_at)'])
                     ->where('customer_id = ?', $customerId);
@@ -550,11 +550,11 @@ describe('Time-based Customer Conditions', function () {
             // Should include recently registered customers (within our test timeframe)
             expect($matchedCustomers)->toBeArray();
             expect(count($matchedCustomers))->toBeGreaterThan(0);
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $registrationDate = $customer->getCreatedAt();
-                
+
                 $now = date('Y-m-d H:i:s');
                 $daysDiff = (int) ((strtotime($now) - strtotime($registrationDate)) / 86400);
                 // Should be within reasonable test timeframe (allow up to 400 days for our test data)
@@ -571,10 +571,10 @@ describe('Time-based Customer Conditions', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             // Should find some customers
             expect($matchedCustomers)->toBeArray();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
@@ -589,7 +589,7 @@ describe('Time-based Customer Conditions', function () {
                     $daysDiff = (int) ((strtotime($now) - strtotime($lastOrder->getCreatedAt())) / 86400);
                     expect($daysDiff)->toBeLessThanOrEqual(30);
                 }
-                
+
                 expect(true)->toBe(true); // Ensure we have at least one assertion
             }
         });
@@ -619,7 +619,7 @@ describe('Time-based Customer Conditions', function () {
     function createTimebasedTestData(): void
     {
         $uniqueId = uniqid('timebased_', true);
-        
+
         // Create customers with various scenarios
         $customers = [
             // Customer with recent login and recent order (5 days ago)
@@ -750,31 +750,31 @@ describe('Time-based Customer Conditions', function () {
             $customer->setWebsiteId($customerData['website_id']);
             $customer->setCreatedAt($customerData['created_at']);
             $customer->save();
-            
+
             test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
-            
+
             // Create login record if specified
             if (isset($customerData['login_days_ago']) && $customerData['login_days_ago'] !== null) {
                 $loginAt = date('Y-m-d H:i:s', strtotime("-{$customerData['login_days_ago']} days"));
-                
+
                 $resource = Mage::getSingleton('core/resource');
                 $adapter = $resource->getConnection('core_write');
                 $logTable = $resource->getTableName('log/customer');
-                
+
                 $adapter->insert($logTable, [
                     'customer_id' => $customer->getId(),
                     'login_at' => $loginAt,
                     'logout_at' => null,
                 ]);
             }
-            
+
             // Create orders if specified
             foreach ($customerData['orders'] as $orderData) {
                 $order = Mage::getModel('sales/order');
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
-                
+
                 // Set state and status according to Maho patterns
                 if ($orderData['status'] === 'canceled') {
                     $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
@@ -784,14 +784,14 @@ describe('Time-based Customer Conditions', function () {
                     $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                     $order->setStatus($orderData['status']);
                 }
-                
+
                 $order->setStoreId(1);
-                
+
                 $orderCreatedAt = date('Y-m-d H:i:s', strtotime("-{$orderData['days_ago']} days"));
                 $order->setCreatedAt($orderCreatedAt);
-                
+
                 $order->save();
-                
+
                 test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
             }
         }
@@ -820,7 +820,7 @@ describe('Time-based Customer Conditions', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-        
+
         test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;

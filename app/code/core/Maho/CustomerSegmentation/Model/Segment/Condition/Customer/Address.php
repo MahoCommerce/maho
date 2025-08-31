@@ -124,9 +124,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         // Handle region field which can be either text (EAV varchar attribute) or region_id (EAV int attribute)
         $regionAttributeData = $this->_getCustomerAddressAttributeTable('region');
         $regionIdAttributeData = $this->_getCustomerAddressAttributeTable('region_id');
-        
+
         $conditions = [];
-        
+
         // Check text region field
         if ($regionAttributeData) {
             $regionSubselect = $adapter->select()
@@ -135,7 +135,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
                 ->where($this->_buildSqlCondition($adapter, 'region_attr.value', $operator, $value));
             $conditions[] = 'ca.entity_id IN (' . $regionSubselect . ')';
         }
-        
+
         // Check directory region lookup via region_id
         if ($regionIdAttributeData) {
             $regionIdSubselect = $adapter->select()
@@ -145,11 +145,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
                 ->where($this->_buildSqlCondition($adapter, 'dr.default_name', $operator, $value));
             $conditions[] = 'ca.entity_id IN (' . $regionIdSubselect . ')';
         }
-        
+
         if (empty($conditions)) {
             return false;
         }
-        
+
         $combinedCondition = implode(' OR ', $conditions);
         $subselect = $adapter->select()
             ->from(['ca' => $this->_getCustomerAddressTable()], ['parent_id'])

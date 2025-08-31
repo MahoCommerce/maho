@@ -15,7 +15,7 @@ describe('Product Viewed Condition Integration Tests', function () {
     beforeEach(function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_product_viewed');
         $this->adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-        
+
         // Set up test data - just verify tables exist
         setupTestData();
     });
@@ -47,14 +47,14 @@ describe('Product Viewed Condition Integration Tests', function () {
 
         // Check all required attributes exist
         $expectedAttributes = [
-            'product_id', 'product_name', 'product_sku', 'category_id', 
-            'view_count', 'last_viewed_at', 'days_since_last_view'
+            'product_id', 'product_name', 'product_sku', 'category_id',
+            'view_count', 'last_viewed_at', 'days_since_last_view',
         ];
-        
+
         foreach ($expectedAttributes as $attribute) {
             expect($options)->toHaveKey($attribute);
         }
-        
+
         // Test attribute labels
         expect($options['product_id'])->toBeString();
         expect($options['product_name'])->toBeString();
@@ -107,7 +107,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('123');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
@@ -121,7 +121,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('Test Product');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
@@ -137,7 +137,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('TEST-SKU');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
@@ -151,7 +151,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('5');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
@@ -165,7 +165,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('5');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
@@ -181,7 +181,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('2025-01-01');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
@@ -196,7 +196,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('30');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
@@ -215,7 +215,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('test');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBe(false);
         });
 
@@ -225,7 +225,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('rv.product_id =');
         });
@@ -236,7 +236,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             $this->condition->setValue('1,2,3');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            
+
             expect($sql)->toBeString();
             expect($sql)->toContain('rv.product_id IN');
         });
@@ -244,26 +244,26 @@ describe('Product Viewed Condition Integration Tests', function () {
 
     test('table name methods return correct table names', function () {
         $condition = new Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed();
-        
+
         // Use reflection to test protected methods
         $reflection = new ReflectionClass($condition);
-        
+
         $getReportViewedTable = $reflection->getMethod('_getReportViewedTable');
         $getReportViewedTable->setAccessible(true);
         expect($getReportViewedTable->invoke($condition))->toContain('report_viewed_product_index');
-        
+
         $getProductTable = $reflection->getMethod('_getProductTable');
         $getProductTable->setAccessible(true);
         expect($getProductTable->invoke($condition))->toContain('catalog_product_entity');
-        
+
         $getProductVarcharTable = $reflection->getMethod('_getProductVarcharTable');
         $getProductVarcharTable->setAccessible(true);
         expect($getProductVarcharTable->invoke($condition))->toContain('catalog_product_entity_varchar');
-        
+
         $getCatalogCategoryProductTable = $reflection->getMethod('_getCatalogCategoryProductTable');
         $getCatalogCategoryProductTable->setAccessible(true);
         expect($getCatalogCategoryProductTable->invoke($condition))->toContain('catalog_category_product');
-        
+
         $getNameAttributeId = $reflection->getMethod('_getNameAttributeId');
         $getNameAttributeId->setAccessible(true);
         $nameAttrId = $getNameAttributeId->invoke($condition);
@@ -272,13 +272,13 @@ describe('Product Viewed Condition Integration Tests', function () {
 
     test('attribute name and string representation work correctly', function () {
         $this->condition->setAttribute('product_name');
-        
+
         $attributeName = $this->condition->getAttributeName();
         expect($attributeName)->toContain('Viewed');
-        
+
         $this->condition->setOperator('{}');
         $this->condition->setValue('Test');
-        
+
         $stringRepresentation = $this->condition->asString();
         expect($stringRepresentation)->toContain('Viewed');
         expect($stringRepresentation)->toContain('Product Name');
@@ -287,16 +287,17 @@ describe('Product Viewed Condition Integration Tests', function () {
 });
 
 // Helper method to set up test data
-function setupTestData() {
+function setupTestData()
+{
     // This would normally set up test customers, products, and viewed product records
     // For now, we'll just ensure the tables exist and are accessible
     $tables = [
         'report_viewed_product_index',
         'catalog_product_entity',
         'catalog_product_entity_varchar',
-        'catalog_category_product'
+        'catalog_category_product',
     ];
-    
+
     foreach ($tables as $table) {
         $tableName = Mage::getSingleton('core/resource')->getTableName($table);
         expect($tableName)->toBeString();

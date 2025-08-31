@@ -60,7 +60,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 // Verify this customer has both sales and refunds
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $creditmemoCount = 0;
                 foreach ($orders as $order) {
                     $creditmemoCount += Mage::getResourceModel('sales/order_creditmemo_collection')
@@ -165,7 +165,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 // Verify this customer actually has credit memos
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $creditmemoCount = 0;
                 foreach ($orders as $order) {
                     $creditmemoCount += Mage::getResourceModel('sales/order_creditmemo_collection')
@@ -195,7 +195,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 // Verify this customer has no credit memos
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $creditmemoCount = 0;
                 foreach ($orders as $order) {
                     $creditmemoCount += Mage::getResourceModel('sales/order_creditmemo_collection')
@@ -230,7 +230,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 foreach ($orders as $order) {
                     $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
                         ->addFieldToFilter('order_id', $order->getId());
-                    
+
                     foreach ($creditmemos as $creditmemo) {
                         $expectedRefunds += (float) $creditmemo->getGrandTotal();
                     }
@@ -334,7 +334,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
-            
+
             $customersWithNoOrders = 0;
             foreach ($matchedCustomers as $customerId) {
                 $orderCount = Mage::getResourceModel('sales/order_collection')
@@ -348,7 +348,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                     expect($profit)->toBe(0.0);
                 }
             }
-            
+
             // Either we tested some customers with no orders, or none matched (both are valid)
             expect($customersWithNoOrders)->toBeInt();
             expect($customersWithNoOrders >= 0)->toBe(true);
@@ -456,7 +456,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                         $totalSales += (float) $order->getGrandTotal();
                         $orderCount++;
                     }
-                    
+
                     $aov = $totalSales / $orderCount;
                     expect($aov)->toBeGreaterThanOrEqual(75.0);
                 }
@@ -468,7 +468,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
     function createClvConditionTestData(): void
     {
         $uniqueId = uniqid('clv_test_', true);
-        
+
         $customers = [
             // Customer with sales only (no refunds) - high profit
             [
@@ -582,9 +582,9 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             $customer->setGroupId($customerData['group_id']);
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
-            
+
             test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
-            
+
             // Create orders and credit memos
             foreach ($customerData['orders'] as $orderData) {
                 $order = Mage::getModel('sales/order');
@@ -593,7 +593,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 $order->setGrandTotal($orderData['total']);
                 $order->setStoreId(1);
                 $order->setCreatedAt(date('Y-m-d H:i:s', strtotime('-' . rand(1, 90) . ' days')));
-                
+
                 if ($orderData['status'] === 'canceled') {
                     $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
                     $order->setStatus('canceled');
@@ -601,10 +601,10 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                     $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                     $order->setStatus($orderData['status']);
                 }
-                
+
                 $order->save();
                 test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
-                
+
                 // Create credit memos for this order
                 foreach ($orderData['refunds'] as $refundAmount) {
                     $creditmemo = Mage::getModel('sales/order_creditmemo');
@@ -616,7 +616,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                     $creditmemo->setState(Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED);
                     $creditmemo->setCreatedAt(date('Y-m-d H:i:s', strtotime('-' . rand(1, 30) . ' days')));
                     $creditmemo->save();
-                    
+
                     test()->trackCreatedRecord('sales_flat_creditmemo', (int) $creditmemo->getId());
                 }
             }
@@ -634,7 +634,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         foreach ($orders as $order) {
             $total += (float) $order->getGrandTotal();
         }
-        
+
         return $total;
     }
 
@@ -642,22 +642,22 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
     {
         // For test purposes, we'll calculate based on the actual creditmemos created
         $customerId = (int) $customerId;
-        
+
         // Find orders for this customer
         $orders = Mage::getResourceModel('sales/order_collection')
             ->addFieldToFilter('customer_id', $customerId);
-        
+
         $total = 0.0;
         foreach ($orders as $order) {
             // Get creditmemos for this order
             $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
                 ->addFieldToFilter('order_id', $order->getId());
-                
+
             foreach ($creditmemos as $creditmemo) {
                 $total += (float) $creditmemo->getGrandTotal();
             }
         }
-        
+
         return $total;
     }
 
@@ -683,7 +683,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-        
+
         test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;

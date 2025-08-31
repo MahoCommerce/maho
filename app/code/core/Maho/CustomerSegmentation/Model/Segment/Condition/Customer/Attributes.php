@@ -205,7 +205,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     protected function getBirthdayDiffSql(Varien_Db_Adapter_Interface $adapter): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
-        
+
         // Calculate next birthday by properly handling year differences to avoid BIGINT overflow
         // This handles cases where birth year > current year (test data) or birth year < current year (real data)
         return "CASE 

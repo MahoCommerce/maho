@@ -32,7 +32,7 @@ describe('Order Attributes Condition Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasHighQtyOrder = false;
                 foreach ($orders as $order) {
                     if ((float) $order->getTotalQtyOrdered() >= 5) {
@@ -53,11 +53,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasHighValueOrder = false;
                 foreach ($orders as $order) {
                     if ((float) $order->getGrandTotal() >= 200.00) {
@@ -78,11 +78,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasHighSubtotalOrder = false;
                 foreach ($orders as $order) {
                     if ((float) $order->getSubtotal() >= 150.00) {
@@ -103,11 +103,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasHighTaxOrder = false;
                 foreach ($orders as $order) {
                     if ((float) $order->getTaxAmount() >= 15.00) {
@@ -129,11 +129,11 @@ describe('Order Attributes Condition Integration Tests', function () {
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasHighShippingOrder = false;
                 foreach ($orders as $order) {
                     if ((float) $order->getShippingAmount() >= 20.00) {
@@ -155,11 +155,11 @@ describe('Order Attributes Condition Integration Tests', function () {
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasDiscountedOrder = false;
                 foreach ($orders as $order) {
                     if (abs((float) $order->getDiscountAmount()) >= 10.00) {
@@ -182,11 +182,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasCompleteOrder = false;
                 foreach ($orders as $order) {
                     if ($order->getStatus() === 'complete') {
@@ -208,11 +208,11 @@ describe('Order Attributes Condition Integration Tests', function () {
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasProcessingOrder = false;
                 foreach ($orders as $order) {
                     if ($order->getState() === 'processing') {
@@ -233,11 +233,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasNonCanceledOrder = false;
                 foreach ($orders as $order) {
                     if ($order->getStatus() !== 'canceled') {
@@ -261,11 +261,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasRecentOrder = false;
                 foreach ($orders as $order) {
                     $orderDate = date('Y-m-d', strtotime($order->getCreatedAt()));
@@ -288,11 +288,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasRecentlyUpdatedOrder = false;
                 foreach ($orders as $order) {
                     $updateDate = date('Y-m-d', strtotime($order->getUpdatedAt()));
@@ -316,11 +316,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasUSDOrder = false;
                 foreach ($orders as $order) {
                     if ($order->getOrderCurrencyCode() === 'USD') {
@@ -341,11 +341,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasMainStoreOrder = false;
                 foreach ($orders as $order) {
                     if ((int) $order->getStoreId() === 1) {
@@ -368,11 +368,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasCheckmoPayment = false;
                 foreach ($orders as $order) {
                     $payment = $order->getPayment();
@@ -411,11 +411,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasFlatrateShipping = false;
                 foreach ($orders as $order) {
                     $shippingMethod = $order->getShippingMethod();
@@ -439,11 +439,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasCouponOrder = false;
                 foreach ($orders as $order) {
                     $couponCode = $order->getCouponCode();
@@ -465,11 +465,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasSave10Coupon = false;
                 foreach ($orders as $order) {
                     if ($order->getCouponCode() === 'SAVE10') {
@@ -492,18 +492,18 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->setOrder('created_at', 'DESC');
-                
+
                 if ($orders->getSize() > 0) {
                     $lastOrder = $orders->getFirstItem();
                     $lastOrderDate = new DateTime($lastOrder->getCreatedAt());
                     $now = new DateTime();
                     $daysSinceLastOrder = $now->diff($lastOrderDate)->days;
-                    
+
                     expect($daysSinceLastOrder)->toBeLessThanOrEqual(30);
                 }
             }
@@ -518,18 +518,18 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->setOrder('created_at', 'DESC');
-                
+
                 if ($orders->getSize() > 0) {
                     $lastOrder = $orders->getFirstItem();
                     $lastOrderDate = new DateTime($lastOrder->getCreatedAt());
                     $now = new DateTime();
                     $daysSinceLastOrder = $now->diff($lastOrderDate)->days;
-                    
+
                     expect($daysSinceLastOrder)->toBeGreaterThanOrEqual(90);
                 }
             }
@@ -561,13 +561,13 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orderCount = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled'])
                     ->getSize();
-                
+
                 expect($orderCount)->toBeGreaterThanOrEqual(3);
             }
         });
@@ -581,13 +581,13 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orderCount = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled'])
                     ->getSize();
-                
+
                 expect($orderCount)->toBe(1);
             }
         });
@@ -618,12 +618,12 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled']);
-                
+
                 if ($orders->getSize() > 0) {
                     $totalAmount = 0;
                     $orderCount = 0;
@@ -631,7 +631,7 @@ describe('Order Attributes Condition Integration Tests', function () {
                         $totalAmount += (float) $order->getGrandTotal();
                         $orderCount++;
                     }
-                    
+
                     $averageOrderAmount = $totalAmount / $orderCount;
                     expect($averageOrderAmount)->toBeGreaterThanOrEqual(150.00);
                 }
@@ -664,17 +664,17 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled']);
-                
+
                 $totalAmount = 0;
                 foreach ($orders as $order) {
                     $totalAmount += (float) $order->getGrandTotal();
                 }
-                
+
                 expect($totalAmount)->toBeGreaterThanOrEqual(500.00);
             }
         });
@@ -699,12 +699,12 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('loads order status options dynamically', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
             $condition->setAttribute('status');
-            
+
             $options = $condition->getValueSelectOptions();
-            
+
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(1); // Should have at least "Please select..." + status options
-            
+
             $hasStatusOptions = false;
             foreach ($options as $option) {
                 if (!empty($option['value']) && $option['value'] !== '') {
@@ -718,12 +718,12 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('loads order state options dynamically', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
             $condition->setAttribute('state');
-            
+
             $options = $condition->getValueSelectOptions();
-            
+
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(1);
-            
+
             $hasStateOptions = false;
             foreach ($options as $option) {
                 if (!empty($option['value']) && $option['value'] !== '') {
@@ -737,12 +737,12 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('loads payment method options dynamically', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
             $condition->setAttribute('payment_method');
-            
+
             $options = $condition->getValueSelectOptions();
-            
+
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(1);
-            
+
             // Should include at least checkmo (Check/Money Order)
             $hasCheckmo = false;
             foreach ($options as $option) {
@@ -757,12 +757,12 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('loads shipping method options dynamically', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
             $condition->setAttribute('shipping_method');
-            
+
             $options = $condition->getValueSelectOptions();
-            
+
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(1);
-            
+
             // Should include flatrate shipping options
             $hasFlatrate = false;
             foreach ($options as $option) {
@@ -777,12 +777,12 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('loads currency options dynamically', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
             $condition->setAttribute('currency_code');
-            
+
             $options = $condition->getValueSelectOptions();
-            
+
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(0);
-            
+
             // Should include USD
             $hasUSD = false;
             foreach ($options as $option) {
@@ -797,12 +797,12 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('loads store options dynamically', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
             $condition->setAttribute('store_id');
-            
+
             $options = $condition->getValueSelectOptions();
-            
+
             expect($options)->toBeArray();
             expect(count($options))->toBeGreaterThan(1);
-            
+
             // Should have "Please select..." as first option
             expect($options[0]['value'])->toBe('');
         });
@@ -820,14 +820,14 @@ describe('Order Attributes Condition Integration Tests', function () {
             // Should not fail even if some customers have no orders
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
-            
+
             // All matched customers should have at least one order
             foreach ($matchedCustomers as $customerId) {
                 $orderCount = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled'])
                     ->getSize();
-                
+
                 expect($orderCount)->toBeGreaterThan(0);
             }
         });
@@ -867,11 +867,11 @@ describe('Order Attributes Condition Integration Tests', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            
+
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId);
-                
+
                 $hasPositiveAmountOrder = false;
                 foreach ($orders as $order) {
                     if ((float) $order->getGrandTotal() > 0) {
@@ -887,38 +887,38 @@ describe('Order Attributes Condition Integration Tests', function () {
     describe('SQL Generation and Performance', function () {
         test('generates valid SQL for all supported attributes', function () {
             $attributes = [
-                'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 
+                'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount',
                 'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at',
                 'store_id', 'currency_code', 'payment_method', 'shipping_method', 'coupon_code',
-                'days_since_last_order', 'number_of_orders', 'average_order_amount', 'total_ordered_amount'
+                'days_since_last_order', 'number_of_orders', 'average_order_amount', 'total_ordered_amount',
             ];
 
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-            
+
             foreach ($attributes as $attribute) {
                 $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
                 $condition->setAttribute($attribute);
                 $condition->setOperator('>=');
-                
+
                 // Use appropriate values based on attribute type
                 $value = match ($attribute) {
                     'created_at', 'updated_at' => '2024-01-01',
                     'status' => 'pending',
-                    'state' => 'new', 
+                    'state' => 'new',
                     'currency_code' => 'USD',
                     'payment_method' => 'checkmo',
                     'shipping_method' => 'flatrate_flatrate',
                     'store_id' => '1',
-                    default => '1'
+                    default => '1',
                 };
-                
+
                 $condition->setValue($value);
-                
+
                 $sql = $condition->getConditionsSql($adapter);
-                
+
                 // Check that SQL is either a string or false
                 expect(is_string($sql) || $sql === false)->toBe(true, "Attribute '{$attribute}' must return string or false, got: " . gettype($sql));
-                
+
                 if ($sql !== false && $sql !== null) {
                     expect($sql)->toContain('e.entity_id IN');
                 }
@@ -934,15 +934,15 @@ describe('Order Attributes Condition Integration Tests', function () {
             ];
 
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-            
+
             foreach ($calculatedFields as $attribute => $expectedSqlParts) {
                 $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
                 $condition->setAttribute($attribute);
                 $condition->setOperator('>=');
                 $condition->setValue('1');
-                
+
                 $sql = $condition->getConditionsSql($adapter);
-                
+
                 expect($sql)->toBeString();
                 foreach ($expectedSqlParts as $sqlPart) {
                     expect($sql)->toContain($sqlPart);
@@ -955,7 +955,7 @@ describe('Order Attributes Condition Integration Tests', function () {
     function createOrderAttributesTestData(): void
     {
         $uniqueId = uniqid('order_attr_', true);
-        
+
         $customers = [
             // Customer with high-value orders
             [
@@ -1010,7 +1010,7 @@ describe('Order Attributes Condition Integration Tests', function () {
                     ],
                 ],
             ],
-            
+
             // Customer with single recent order
             [
                 'firstname' => 'Recent',
@@ -1034,7 +1034,7 @@ describe('Order Attributes Condition Integration Tests', function () {
                     ],
                 ],
             ],
-            
+
             // Customer with old orders
             [
                 'firstname' => 'Old',
@@ -1073,7 +1073,7 @@ describe('Order Attributes Condition Integration Tests', function () {
                     ],
                 ],
             ],
-            
+
             // Customer with canceled order (should be excluded from some calculations)
             [
                 'firstname' => 'Canceled',
@@ -1112,7 +1112,7 @@ describe('Order Attributes Condition Integration Tests', function () {
                     ],
                 ],
             ],
-            
+
             // Customer with multiple small orders
             [
                 'firstname' => 'Frequent',
@@ -1181,7 +1181,7 @@ describe('Order Attributes Condition Integration Tests', function () {
                     ],
                 ],
             ],
-            
+
             // Customer with no orders
             [
                 'firstname' => 'No',
@@ -1200,16 +1200,16 @@ describe('Order Attributes Condition Integration Tests', function () {
             $customer->setGroupId(1);
             $customer->setWebsiteId(1);
             $customer->save();
-            
+
             test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
-            
+
             // Create orders
             foreach ($customerData['orders'] as $orderData) {
                 $order = Mage::getModel('sales/order');
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setStoreId(1);
-                
+
                 // Set order amounts
                 $order->setGrandTotal($orderData['grand_total']);
                 $order->setSubtotal($orderData['subtotal']);
@@ -1217,7 +1217,7 @@ describe('Order Attributes Condition Integration Tests', function () {
                 $order->setShippingAmount($orderData['shipping_amount']);
                 $order->setDiscountAmount($orderData['discount_amount']);
                 $order->setTotalQtyOrdered($orderData['total_qty_ordered']);
-                
+
                 // Set order status and state according to Maho patterns
                 if ($orderData['status'] === 'canceled') {
                     $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
@@ -1226,33 +1226,33 @@ describe('Order Attributes Condition Integration Tests', function () {
                     $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                     $order->setStatus($orderData['status']);
                 }
-                
+
                 // Set currency
                 $order->setOrderCurrencyCode($orderData['currency_code']);
                 $order->setBaseCurrencyCode($orderData['currency_code']);
-                
+
                 // Set shipping method
                 $order->setShippingMethod($orderData['shipping_method']);
-                
+
                 // Set coupon code if provided
                 if (!empty($orderData['coupon_code'])) {
                     $order->setCouponCode($orderData['coupon_code']);
                 }
-                
+
                 // Set created date
                 $orderCreatedAt = date('Y-m-d H:i:s', strtotime("-{$orderData['days_ago']} days"));
                 $order->setCreatedAt($orderCreatedAt);
                 $order->setUpdatedAt($orderCreatedAt);
-                
+
                 $order->save();
                 test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
-                
+
                 // Create payment record
                 $payment = Mage::getModel('sales/order_payment');
                 $payment->setParentId($order->getId());
                 $payment->setMethod($orderData['payment_method']);
                 $payment->save();
-                
+
                 test()->trackCreatedRecord('sales_flat_order_payment', (int) $payment->getId());
             }
         }
@@ -1281,7 +1281,7 @@ describe('Order Attributes Condition Integration Tests', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-        
+
         test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;

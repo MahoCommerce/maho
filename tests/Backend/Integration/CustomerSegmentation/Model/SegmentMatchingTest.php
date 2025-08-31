@@ -275,7 +275,7 @@ describe('Segment Matching Integration', function () {
     test('can match customers with zero lifetime orders', function () {
         // Create customers specifically for CLV testing
         createClvTestCustomers();
-        
+
         $segment = createMatchingTestSegment('Zero Orders Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'lifetime_orders',
@@ -300,7 +300,7 @@ describe('Segment Matching Integration', function () {
 
     test('can match customers with lifetime orders less than or equal to 1', function () {
         createClvTestCustomers();
-        
+
         $segment = createMatchingTestSegment('LE 1 Orders Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'lifetime_orders',
@@ -325,7 +325,7 @@ describe('Segment Matching Integration', function () {
 
     test('can match customers with lifetime orders greater than 1', function () {
         createClvTestCustomers();
-        
+
         $segment = createMatchingTestSegment('GT 1 Orders Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'lifetime_orders',
@@ -349,7 +349,7 @@ describe('Segment Matching Integration', function () {
 
     test('can match customers with zero lifetime sales', function () {
         createClvTestCustomers();
-        
+
         $segment = createMatchingTestSegment('Zero Sales Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'lifetime_sales',
@@ -367,7 +367,7 @@ describe('Segment Matching Integration', function () {
             $orders = Mage::getResourceModel('sales/order_collection')
                 ->addFieldToFilter('customer_id', $customerId)
                 ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
-            
+
             $totalSales = 0.0;
             foreach ($orders as $order) {
                 $totalSales += (float) $order->getGrandTotal();
@@ -378,7 +378,7 @@ describe('Segment Matching Integration', function () {
 
     test('can match customers with lifetime sales less than or equal to 100', function () {
         createClvTestCustomers();
-        
+
         $segment = createMatchingTestSegment('LE 100 Sales Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'lifetime_sales',
@@ -395,7 +395,7 @@ describe('Segment Matching Integration', function () {
             $orders = Mage::getResourceModel('sales/order_collection')
                 ->addFieldToFilter('customer_id', $customerId)
                 ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
-            
+
             $totalSales = 0.0;
             foreach ($orders as $order) {
                 $totalSales += (float) $order->getGrandTotal();
@@ -406,7 +406,7 @@ describe('Segment Matching Integration', function () {
 
     test('can match customers with zero average order value', function () {
         createClvTestCustomers();
-        
+
         $segment = createMatchingTestSegment('Zero AOV Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'average_order_value',
@@ -431,7 +431,7 @@ describe('Segment Matching Integration', function () {
 
     test('CLV conditions work correctly with combine conditions', function () {
         createClvTestCustomers();
-        
+
         $segment = createMatchingTestSegment('Zero Orders General Group', [
             'type' => 'customersegmentation/segment_condition_combine',
             'aggregator' => 'all',
@@ -460,7 +460,7 @@ describe('Segment Matching Integration', function () {
         foreach ($matchedCustomers as $customerId) {
             $customer = Mage::getModel('customer/customer')->load($customerId);
             expect((int) $customer->getGroupId())->toBe(1);
-            
+
             $orderCount = Mage::getResourceModel('sales/order_collection')
                 ->addFieldToFilter('customer_id', $customerId)
                 ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
@@ -473,7 +473,7 @@ describe('Segment Matching Integration', function () {
     function createClvTestCustomers(): void
     {
         $uniqueId = uniqid('clv_test_', true);
-        
+
         // Create customers with different order scenarios
         $customers = [
             // Customer with 0 orders
@@ -503,7 +503,7 @@ describe('Segment Matching Integration', function () {
                 'website_id' => 1,
                 'order_count' => 1,
             ],
-            // Customer with 2 orders  
+            // Customer with 2 orders
             [
                 'firstname' => 'Double',
                 'lastname' => 'Orders',
@@ -531,13 +531,13 @@ describe('Segment Matching Integration', function () {
             $customer->setGroupId($customerData['group_id']);
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
-            
+
             test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
-            
+
             // Create orders for this customer
             $orderCount = $customerData['order_count'];
             $orderValues = [25.50, 75.00, 150.00]; // Different order values
-            
+
             for ($i = 0; $i < $orderCount; $i++) {
                 $order = Mage::getModel('sales/order');
                 $order->setCustomerId($customer->getId());
@@ -547,7 +547,7 @@ describe('Segment Matching Integration', function () {
                 $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                 $order->setStoreId(1);
                 $order->save();
-                
+
                 test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
             }
         }

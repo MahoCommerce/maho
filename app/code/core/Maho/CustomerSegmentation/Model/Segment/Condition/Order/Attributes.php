@@ -230,9 +230,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             'total_qty' => 'total_qty_ordered',
             'total_amount' => 'grand_total',
         ];
-        
+
         $dbField = $fieldMapping[$field] ?? $field;
-        
+
         $subselect = $adapter->select()
             ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
@@ -278,7 +278,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     protected function _buildDaysSinceLastOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
-        
+
         $subselect = $adapter->select()
             ->from(['o' => $this->_getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')

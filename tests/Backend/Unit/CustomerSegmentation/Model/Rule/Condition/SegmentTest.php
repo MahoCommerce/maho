@@ -28,7 +28,7 @@ describe('Rule Condition Segment', function () {
     test('has correct attribute options', function () {
         $this->segmentCondition->loadAttributeOptions();
         $options = $this->segmentCondition->getAttributeOption();
-        
+
         expect($options)->toBeArray();
         expect($options)->toHaveKey('customer_segment');
         expect($options['customer_segment'])->toBe('Customer Segment');
@@ -45,9 +45,9 @@ describe('Rule Condition Segment', function () {
     test('can load value select options from active segments', function () {
         // Test that the method returns an array (actual segments will depend on test data)
         $options = $this->segmentCondition->getValueSelectOptions();
-        
+
         expect($options)->toBeArray();
-        
+
         // Each option should have value and label keys
         foreach ($options as $option) {
             expect($option)->toHaveKey('value');
@@ -64,11 +64,11 @@ describe('Rule Condition Segment', function () {
 
         // Create a simple test where we mock the validateAttribute method behavior
         // Since validateAttribute is protected, we'll test the overall validation
-        
+
         // Create test object with customer ID
         $testObject = new Varien_Object([
             'customer_id' => 123,
-            'store' => null
+            'store' => null,
         ]);
 
         // The actual test will depend on the implementation - for now verify it doesn't crash
@@ -84,7 +84,7 @@ describe('Rule Condition Segment', function () {
         // Create test object with customer ID
         $testObject = new Varien_Object([
             'customer_id' => 123,
-            'store' => null
+            'store' => null,
         ]);
 
         $result = $this->segmentCondition->validate($testObject);
@@ -102,7 +102,7 @@ describe('Rule Condition Segment', function () {
         // Create test object with customer ID and store
         $testObject = new Varien_Object([
             'customer_id' => 456,
-            'store' => $store
+            'store' => $store,
         ]);
 
         $result = $this->segmentCondition->validate($testObject);
@@ -117,7 +117,7 @@ describe('Rule Condition Segment', function () {
         // Create test object without customer ID (guest)
         $testObject = new Varien_Object([
             'customer_id' => null,
-            'store' => null
+            'store' => null,
         ]);
 
         $result = $this->segmentCondition->validate($testObject);
@@ -137,7 +137,7 @@ describe('Rule Condition Segment', function () {
         // Create test object with customer ID - without segments, should return false
         $testObject = new Varien_Object([
             'customer_id' => 123,
-            'store' => null
+            'store' => null,
         ]);
 
         $result = $this->segmentCondition->validate($testObject);
@@ -150,7 +150,7 @@ describe('Rule Condition Segment', function () {
 
         $testObject = new Varien_Object([
             'customer_id' => 123,
-            'store' => null
+            'store' => null,
         ]);
 
         // Test different operators - just verify they don't crash
@@ -167,7 +167,7 @@ describe('Rule Condition Segment', function () {
         // Test that options are cached by calling twice and ensuring we get same result
         $options1 = $this->segmentCondition->getValueSelectOptions();
         $options2 = $this->segmentCondition->getValueSelectOptions();
-        
+
         expect($options1)->toEqual($options2);
         expect($options1)->toBeArray();
     });
