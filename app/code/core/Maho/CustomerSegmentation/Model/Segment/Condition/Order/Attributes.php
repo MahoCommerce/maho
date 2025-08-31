@@ -210,19 +210,19 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at', 'store_id', 'currency_code' => $this->_buildOrderFieldCondition($adapter, $attribute, $operator, $value),
-            'payment_method' => $this->_buildPaymentMethodCondition($adapter, $operator, $value),
-            'shipping_method' => $this->_buildShippingMethodCondition($adapter, $operator, $value),
-            'coupon_code' => $this->_buildCouponCondition($adapter, $operator, $value),
-            'days_since_last_order' => $this->_buildDaysSinceLastOrderCondition($adapter, $operator, $value),
-            'number_of_orders' => $this->_buildOrderCountCondition($adapter, $operator, $value),
-            'average_order_amount' => $this->_buildAverageOrderCondition($adapter, $operator, $value),
-            'total_ordered_amount' => $this->_buildTotalOrderedCondition($adapter, $operator, $value),
+            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at', 'store_id', 'currency_code' => $this->buildOrderFieldCondition($adapter, $attribute, $operator, $value),
+            'payment_method' => $this->buildPaymentMethodCondition($adapter, $operator, $value),
+            'shipping_method' => $this->buildShippingMethodCondition($adapter, $operator, $value),
+            'coupon_code' => $this->buildCouponCondition($adapter, $operator, $value),
+            'days_since_last_order' => $this->buildDaysSinceLastOrderCondition($adapter, $operator, $value),
+            'number_of_orders' => $this->buildOrderCountCondition($adapter, $operator, $value),
+            'average_order_amount' => $this->buildAverageOrderCondition($adapter, $operator, $value),
+            'total_ordered_amount' => $this->buildTotalOrderedCondition($adapter, $operator, $value),
             default => false,
         };
     }
 
-    protected function _buildOrderFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildOrderFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
         // Map attribute names to correct database field names
         $fieldMapping = [
@@ -234,9 +234,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $dbField = $fieldMapping[$field] ?? $field;
 
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, "o.{$dbField}", $operator, $value));
+            ->where($this->buildSqlCondition($adapter, "o.{$dbField}", $operator, $value));
 
         $subselectSql = $subselect->__toString();
         Mage::log('Order field condition SQL for ' . $field . ' ' . $operator . ' ' . $value . ': ' . $subselectSql, null, 'customer_segmentation_debug.log');
@@ -244,87 +244,87 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildPaymentMethodCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildPaymentMethodCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
-            ->join(['p' => $this->_getOrderPaymentTable()], 'o.entity_id = p.parent_id', [])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
+            ->join(['p' => $this->getOrderPaymentTable()], 'o.entity_id = p.parent_id', [])
             ->where('o.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'p.method', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'p.method', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildShippingMethodCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildShippingMethodCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'o.shipping_method', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'o.shipping_method', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildCouponCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildCouponCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'o.coupon_code', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'o.coupon_code', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildDaysSinceLastOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildDaysSinceLastOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
 
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', MAX(o.created_at))", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', MAX(o.created_at))", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildTotalOrderedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildTotalOrderedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _getOrderPaymentTable(): string
+    protected function getOrderPaymentTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/order_payment');
     }

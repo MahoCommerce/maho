@@ -109,115 +109,115 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'product_id' => $this->_buildProductViewCondition($adapter, $operator, $value),
-            'product_name' => $this->_buildProductNameViewCondition($adapter, $operator, $value),
-            'product_sku' => $this->_buildProductSkuViewCondition($adapter, $operator, $value),
-            'category_id' => $this->_buildCategoryViewCondition($adapter, $operator, $value),
-            'view_count' => $this->_buildViewCountCondition($adapter, $operator, $value),
-            'last_viewed_at' => $this->_buildLastViewedCondition($adapter, $operator, $value),
-            'days_since_last_view' => $this->_buildDaysSinceViewCondition($adapter, $operator, $value),
+            'product_id' => $this->buildProductViewCondition($adapter, $operator, $value),
+            'product_name' => $this->buildProductNameViewCondition($adapter, $operator, $value),
+            'product_sku' => $this->buildProductSkuViewCondition($adapter, $operator, $value),
+            'category_id' => $this->buildCategoryViewCondition($adapter, $operator, $value),
+            'view_count' => $this->buildViewCountCondition($adapter, $operator, $value),
+            'last_viewed_at' => $this->buildLastViewedCondition($adapter, $operator, $value),
+            'days_since_last_view' => $this->buildDaysSinceViewCondition($adapter, $operator, $value),
             default => false,
         };
     }
 
-    protected function _buildProductViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->_getReportViewedTable()], ['customer_id'])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
             ->where('rv.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'rv.product_id', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'rv.product_id', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildProductNameViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductNameViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->_getReportViewedTable()], ['customer_id'])
-            ->join(['p' => $this->_getProductTable()], 'rv.product_id = p.entity_id', [])
-            ->join(['pv' => $this->_getProductVarcharTable()], 'p.entity_id = pv.entity_id AND pv.attribute_id = ' . $this->_getNameAttributeId(), [])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
+            ->join(['p' => $this->getProductTable()], 'rv.product_id = p.entity_id', [])
+            ->join(['pv' => $this->getProductVarcharTable()], 'p.entity_id = pv.entity_id AND pv.attribute_id = ' . $this->getNameAttributeId(), [])
             ->where('rv.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'pv.value', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'pv.value', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildProductSkuViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductSkuViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->_getReportViewedTable()], ['customer_id'])
-            ->join(['p' => $this->_getProductTable()], 'rv.product_id = p.entity_id', [])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
+            ->join(['p' => $this->getProductTable()], 'rv.product_id = p.entity_id', [])
             ->where('rv.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'p.sku', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'p.sku', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildCategoryViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildCategoryViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->_getReportViewedTable()], ['customer_id'])
-            ->join(['ccp' => $this->_getCatalogCategoryProductTable()], 'rv.product_id = ccp.product_id', [])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
+            ->join(['ccp' => $this->getCatalogCategoryProductTable()], 'rv.product_id = ccp.product_id', [])
             ->where('rv.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'ccp.category_id', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'ccp.category_id', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildViewCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildViewCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->_getReportViewedTable()], ['customer_id', 'view_count' => 'COUNT(*)'])
-            ->where('rv.customer_id IS NOT NULL')
-            ->group('rv.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'view_count', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
-
-    protected function _buildLastViewedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        $subselect = $adapter->select()
-            ->from(['rv' => $this->_getReportViewedTable()], ['customer_id', 'last_viewed' => 'MAX(rv.added_at)'])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id', 'view_count' => 'COUNT(*)'])
             ->where('rv.customer_id IS NOT NULL')
             ->group('rv.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'last_viewed', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'view_count', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildDaysSinceViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildLastViewedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->_getReportViewedTable()], ['customer_id', 'last_viewed' => 'MAX(rv.added_at)'])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id', 'last_viewed' => 'MAX(rv.added_at)'])
             ->where('rv.customer_id IS NOT NULL')
             ->group('rv.customer_id')
-            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_viewed)", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'last_viewed', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _getReportViewedTable(): string
+    protected function buildDaysSinceViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    {
+        $subselect = $adapter->select()
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id', 'last_viewed' => 'MAX(rv.added_at)'])
+            ->where('rv.customer_id IS NOT NULL')
+            ->group('rv.customer_id')
+            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_viewed)", $operator, $value));
+
+        return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function getReportViewedTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('reports/viewed_product_index');
     }
 
-    protected function _getProductTable(): string
+    protected function getProductTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('catalog/product');
     }
 
-    protected function _getProductVarcharTable(): string
+    protected function getProductVarcharTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('catalog_product_entity_varchar');
     }
 
-    protected function _getCatalogCategoryProductTable(): string
+    protected function getCatalogCategoryProductTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('catalog/category_product');
     }
 
-    protected function _getNameAttributeId(): int
+    protected function getNameAttributeId(): int
     {
         return (int) Mage::getResourceModel('eav/entity_attribute')
             ->getIdByCode('catalog_product', 'name');

@@ -26,8 +26,8 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         }
 
         return match ($operator) {
-            '==' => $this->_getEqualityOperator($value),
-            '!=' => $this->_getInequalityOperator($value),
+            '==' => $this->getEqualityOperator($value),
+            '!=' => $this->getInequalityOperator($value),
             '>=' => '>=',
             '<=' => '<=',
             '>' => '>',
@@ -40,7 +40,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         };
     }
 
-    protected function _getEqualityOperator(mixed $value): string
+    protected function getEqualityOperator(mixed $value): string
     {
         if (is_array($value) && count($value) > 1) {
             return 'IN';
@@ -48,7 +48,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return '=';
     }
 
-    protected function _getInequalityOperator(mixed $value): string
+    protected function getInequalityOperator(mixed $value): string
     {
         if (is_array($value) && count($value) > 1) {
             return 'NOT IN';
@@ -73,7 +73,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         }
     }
 
-    protected function _buildSqlCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildSqlCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
         // Fallback for empty operator
         if (empty($operator)) {
@@ -90,12 +90,12 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         };
     }
 
-    protected function _getCustomerTable(): string
+    protected function getCustomerTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('customer/entity');
     }
 
-    protected function _getCustomerAttributeTable(string $attributeCode): array|false
+    protected function getCustomerAttributeTable(string $attributeCode): array|false
     {
         $attribute = Mage::getSingleton('eav/config')
             ->getAttribute('customer', $attributeCode);
@@ -110,17 +110,17 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         ];
     }
 
-    protected function _getOrderTable(): string
+    protected function getOrderTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/order');
     }
 
-    protected function _getQuoteTable(): string
+    protected function getQuoteTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/quote');
     }
 
-    protected function _getCustomerAddressAttributeTable(string $attributeCode): array|false
+    protected function getCustomerAddressAttributeTable(string $attributeCode): array|false
     {
         $attribute = Mage::getSingleton('eav/config')
             ->getAttribute('customer_address', $attributeCode);

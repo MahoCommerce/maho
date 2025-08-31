@@ -129,41 +129,41 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             case 'store_id':
             case 'website_id':
                 $field = 'e.' . $attribute;
-                return $this->_buildSqlCondition($adapter, $field, $operator, $value);
+                return $this->buildSqlCondition($adapter, $field, $operator, $value);
 
             case 'created_at':
                 // Handle datetime field by comparing just the date part
                 $field = 'DATE(e.created_at)';
-                return $this->_buildSqlCondition($adapter, $field, $operator, $value);
+                return $this->buildSqlCondition($adapter, $field, $operator, $value);
 
             case 'firstname':
             case 'lastname':
             case 'gender':
             case 'dob':
-                return $this->_buildAttributeCondition($adapter, $attribute, $operator, $value);
+                return $this->buildAttributeCondition($adapter, $attribute, $operator, $value);
 
             case 'days_since_registration':
-                return $this->_buildDaysSinceCondition($adapter, 'e.created_at', $operator, $value);
+                return $this->buildDaysSinceCondition($adapter, 'e.created_at', $operator, $value);
 
             case 'days_until_birthday':
-                return $this->_buildDaysUntilBirthdayCondition($adapter, $operator, $value);
+                return $this->buildDaysUntilBirthdayCondition($adapter, $operator, $value);
 
             case 'lifetime_sales':
-                return $this->_buildLifetimeSalesCondition($adapter, $operator, $value);
+                return $this->buildLifetimeSalesCondition($adapter, $operator, $value);
 
             case 'number_of_orders':
-                return $this->_buildOrderCountCondition($adapter, $operator, $value);
+                return $this->buildOrderCountCondition($adapter, $operator, $value);
 
             case 'average_order_value':
-                return $this->_buildAverageOrderCondition($adapter, $operator, $value);
+                return $this->buildAverageOrderCondition($adapter, $operator, $value);
         }
 
         return false;
     }
 
-    protected function _buildAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
+    protected function buildAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
     {
-        $attributeData = $this->_getCustomerAttributeTable($attributeCode);
+        $attributeData = $this->getCustomerAttributeTable($attributeCode);
         if (!$attributeData) {
             return false;
         }
@@ -171,20 +171,20 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         $subselect = $adapter->select()
             ->from(['attr' => $attributeData['table']], ['entity_id'])
             ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
-            ->where($this->_buildSqlCondition($adapter, 'attr.value', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'attr.value', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildDaysSinceCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildDaysSinceCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
-        return $this->_buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', {$field})", $operator, $value);
+        return $this->buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', {$field})", $operator, $value);
     }
 
-    protected function _buildDaysUntilBirthdayCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
+    protected function buildDaysUntilBirthdayCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
     {
-        $attributeData = $this->_getCustomerAttributeTable('dob');
+        $attributeData = $this->getCustomerAttributeTable('dob');
         if (!$attributeData) {
             return false;
         }
@@ -192,7 +192,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         $subselect = $adapter->select()
             ->from(['attr' => $attributeData['table']], ['entity_id'])
             ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
-            ->where($this->_buildSqlCondition(
+            ->where($this->buildSqlCondition(
                 $adapter,
                 $this->getBirthdayDiffSql($adapter),
                 $operator,
@@ -224,35 +224,35 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             END";
     }
 
-    protected function _buildLifetimeSalesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildLifetimeSalesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['o' => $this->_getOrderTable()], ['customer_id'])
+            ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
             ->group('o.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

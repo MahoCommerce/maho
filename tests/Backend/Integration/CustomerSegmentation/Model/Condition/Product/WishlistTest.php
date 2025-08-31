@@ -307,27 +307,27 @@ describe('Product Wishlist Condition Integration Tests', function () {
         // Use reflection to test protected methods
         $reflection = new ReflectionClass($condition);
 
-        $getWishlistTable = $reflection->getMethod('_getWishlistTable');
+        $getWishlistTable = $reflection->getMethod('getWishlistTable');
         $getWishlistTable->setAccessible(true);
         expect($getWishlistTable->invoke($condition))->toContain('wishlist');
 
-        $getWishlistItemTable = $reflection->getMethod('_getWishlistItemTable');
+        $getWishlistItemTable = $reflection->getMethod('getWishlistItemTable');
         $getWishlistItemTable->setAccessible(true);
         expect($getWishlistItemTable->invoke($condition))->toContain('wishlist_item');
 
-        $getProductTable = $reflection->getMethod('_getProductTable');
+        $getProductTable = $reflection->getMethod('getProductTable');
         $getProductTable->setAccessible(true);
         expect($getProductTable->invoke($condition))->toContain('catalog_product_entity');
 
-        $getProductVarcharTable = $reflection->getMethod('_getProductVarcharTable');
+        $getProductVarcharTable = $reflection->getMethod('getProductVarcharTable');
         $getProductVarcharTable->setAccessible(true);
         expect($getProductVarcharTable->invoke($condition))->toContain('catalog_product_entity_varchar');
 
-        $getCatalogCategoryProductTable = $reflection->getMethod('_getCatalogCategoryProductTable');
+        $getCatalogCategoryProductTable = $reflection->getMethod('getCatalogCategoryProductTable');
         $getCatalogCategoryProductTable->setAccessible(true);
         expect($getCatalogCategoryProductTable->invoke($condition))->toContain('catalog_category_product');
 
-        $getNameAttributeId = $reflection->getMethod('_getNameAttributeId');
+        $getNameAttributeId = $reflection->getMethod('getNameAttributeId');
         $getNameAttributeId->setAccessible(true);
         $nameAttrId = $getNameAttributeId->invoke($condition);
         expect($nameAttrId)->toBeGreaterThan(0);

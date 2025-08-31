@@ -98,15 +98,15 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         $value = $this->getValue();
 
         if ($attribute === 'region') {
-            return $this->_buildRegionCondition($adapter, $operator, $value);
+            return $this->buildRegionCondition($adapter, $operator, $value);
         }
 
-        return $this->_buildAddressAttributeCondition($adapter, $attribute, $operator, $value);
+        return $this->buildAddressAttributeCondition($adapter, $attribute, $operator, $value);
     }
 
-    protected function _buildAddressAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
+    protected function buildAddressAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
     {
-        $attributeData = $this->_getCustomerAddressAttributeTable($attributeCode);
+        $attributeData = $this->getCustomerAddressAttributeTable($attributeCode);
         if (!$attributeData) {
             return false;
         }
@@ -114,16 +114,16 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         $subselect = $adapter->select()
             ->from(['attr' => $attributeData['table']], ['entity_id'])
             ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
-            ->where($this->_buildSqlCondition($adapter, 'attr.value', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'attr.value', $operator, $value));
 
-        return 'e.entity_id IN (SELECT ca.parent_id FROM ' . $this->_getCustomerAddressTable() . ' ca WHERE ca.entity_id IN (' . $subselect . '))';
+        return 'e.entity_id IN (SELECT ca.parent_id FROM ' . $this->getCustomerAddressTable() . ' ca WHERE ca.entity_id IN (' . $subselect . '))';
     }
 
-    protected function _buildRegionCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
+    protected function buildRegionCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
     {
         // Handle region field which can be either text (EAV varchar attribute) or region_id (EAV int attribute)
-        $regionAttributeData = $this->_getCustomerAddressAttributeTable('region');
-        $regionIdAttributeData = $this->_getCustomerAddressAttributeTable('region_id');
+        $regionAttributeData = $this->getCustomerAddressAttributeTable('region');
+        $regionIdAttributeData = $this->getCustomerAddressAttributeTable('region_id');
 
         $conditions = [];
 
@@ -132,7 +132,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
             $regionSubselect = $adapter->select()
                 ->from(['region_attr' => $regionAttributeData['table']], ['entity_id'])
                 ->where('region_attr.attribute_id = ?', $regionAttributeData['attribute_id'])
-                ->where($this->_buildSqlCondition($adapter, 'region_attr.value', $operator, $value));
+                ->where($this->buildSqlCondition($adapter, 'region_attr.value', $operator, $value));
             $conditions[] = 'ca.entity_id IN (' . $regionSubselect . ')';
         }
 
@@ -140,9 +140,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         if ($regionIdAttributeData) {
             $regionIdSubselect = $adapter->select()
                 ->from(['rid_attr' => $regionIdAttributeData['table']], ['entity_id'])
-                ->joinLeft(['dr' => $this->_getDirectoryRegionTable()], 'rid_attr.value = dr.region_id', [])
+                ->joinLeft(['dr' => $this->getDirectoryRegionTable()], 'rid_attr.value = dr.region_id', [])
                 ->where('rid_attr.attribute_id = ?', $regionIdAttributeData['attribute_id'])
-                ->where($this->_buildSqlCondition($adapter, 'dr.default_name', $operator, $value));
+                ->where($this->buildSqlCondition($adapter, 'dr.default_name', $operator, $value));
             $conditions[] = 'ca.entity_id IN (' . $regionIdSubselect . ')';
         }
 
@@ -152,18 +152,18 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
 
         $combinedCondition = implode(' OR ', $conditions);
         $subselect = $adapter->select()
-            ->from(['ca' => $this->_getCustomerAddressTable()], ['parent_id'])
+            ->from(['ca' => $this->getCustomerAddressTable()], ['parent_id'])
             ->where($combinedCondition);
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _getCustomerAddressTable(): string
+    protected function getCustomerAddressTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('customer/address_entity');
     }
 
-    protected function _getDirectoryRegionTable(): string
+    protected function getDirectoryRegionTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('directory/country_region');
     }

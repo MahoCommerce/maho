@@ -133,30 +133,30 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         // Handle product attributes (prefixed with 'product_')
         if (str_starts_with($attribute, 'product_')) {
             $productAttributeCode = substr($attribute, 8); // Remove 'product_' prefix
-            return $this->_buildProductAttributeCondition($adapter, $productAttributeCode, $operator, $value);
+            return $this->buildProductAttributeCondition($adapter, $productAttributeCode, $operator, $value);
         }
 
         // Handle cart item attributes (direct quote_item fields)
         return match ($attribute) {
-            'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'created_at', 'updated_at' => $this->_buildCartItemFieldCondition($adapter, $attribute, $operator, $value),
-            'product_type' => $this->_buildProductTypeCondition($adapter, $operator, $value),
+            'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'created_at', 'updated_at' => $this->buildCartItemFieldCondition($adapter, $attribute, $operator, $value),
+            'product_type' => $this->buildProductTypeCondition($adapter, $operator, $value),
             default => false,
         };
     }
 
-    protected function _buildCartItemFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildCartItemFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['qi' => $this->_getQuoteItemTable()], [])
-            ->join(['q' => $this->_getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
+            ->from(['qi' => $this->getQuoteItemTable()], [])
+            ->join(['q' => $this->getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
             ->where('q.customer_id IS NOT NULL')
             ->where('q.is_active = ?', 1)
-            ->where($this->_buildSqlCondition($adapter, "qi.{$field}", $operator, $value));
+            ->where($this->buildSqlCondition($adapter, "qi.{$field}", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildProductAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
+    protected function buildProductAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
     {
         $productResource = Mage::getResourceSingleton('catalog/product');
         $attribute = $productResource->getAttribute($attributeCode);
@@ -169,8 +169,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         $attributeId = $attribute->getId();
 
         $subselect = $adapter->select()
-            ->from(['qi' => $this->_getQuoteItemTable()], [])
-            ->join(['q' => $this->_getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
+            ->from(['qi' => $this->getQuoteItemTable()], [])
+            ->join(['q' => $this->getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
             ->join(['p' => $productResource->getTable('catalog/product')], 'qi.product_id = p.entity_id', [])
             ->where('q.customer_id IS NOT NULL')
             ->where('q.is_active = ?', 1);
@@ -178,39 +178,39 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         // Join the appropriate attribute table based on attribute backend type
         if ($attribute->getBackendType() == 'static') {
             // Static attributes are stored directly in the product entity table
-            $subselect->where($this->_buildSqlCondition($adapter, "p.{$attributeCode}", $operator, $value));
+            $subselect->where($this->buildSqlCondition($adapter, "p.{$attributeCode}", $operator, $value));
         } else {
             // EAV attributes need to be joined from their respective tables
             $subselect->join(
                 ['attr' => $attributeTable],
                 "attr.entity_id = p.entity_id AND attr.attribute_id = {$attributeId}",
                 [],
-            )->where($this->_buildSqlCondition($adapter, 'attr.value', $operator, $value));
+            )->where($this->buildSqlCondition($adapter, 'attr.value', $operator, $value));
         }
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildProductTypeCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductTypeCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['qi' => $this->_getQuoteItemTable()], [])
-            ->join(['q' => $this->_getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
+            ->from(['qi' => $this->getQuoteItemTable()], [])
+            ->join(['q' => $this->getQuoteTable()], 'qi.quote_id = q.entity_id', ['customer_id'])
             ->join(['p' => Mage::getSingleton('core/resource')->getTableName('catalog/product')], 'qi.product_id = p.entity_id', [])
             ->where('q.customer_id IS NOT NULL')
             ->where('q.is_active = ?', 1)
-            ->where($this->_buildSqlCondition($adapter, 'p.type_id', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'p.type_id', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
     #[\Override]
-    protected function _getQuoteTable(): string
+    protected function getQuoteTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/quote');
     }
 
-    protected function _getQuoteItemTable(): string
+    protected function getQuoteItemTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/quote_item');
     }

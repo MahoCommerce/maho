@@ -248,23 +248,23 @@ describe('Product Viewed Condition Integration Tests', function () {
         // Use reflection to test protected methods
         $reflection = new ReflectionClass($condition);
 
-        $getReportViewedTable = $reflection->getMethod('_getReportViewedTable');
+        $getReportViewedTable = $reflection->getMethod('getReportViewedTable');
         $getReportViewedTable->setAccessible(true);
         expect($getReportViewedTable->invoke($condition))->toContain('report_viewed_product_index');
 
-        $getProductTable = $reflection->getMethod('_getProductTable');
+        $getProductTable = $reflection->getMethod('getProductTable');
         $getProductTable->setAccessible(true);
         expect($getProductTable->invoke($condition))->toContain('catalog_product_entity');
 
-        $getProductVarcharTable = $reflection->getMethod('_getProductVarcharTable');
+        $getProductVarcharTable = $reflection->getMethod('getProductVarcharTable');
         $getProductVarcharTable->setAccessible(true);
         expect($getProductVarcharTable->invoke($condition))->toContain('catalog_product_entity_varchar');
 
-        $getCatalogCategoryProductTable = $reflection->getMethod('_getCatalogCategoryProductTable');
+        $getCatalogCategoryProductTable = $reflection->getMethod('getCatalogCategoryProductTable');
         $getCatalogCategoryProductTable->setAccessible(true);
         expect($getCatalogCategoryProductTable->invoke($condition))->toContain('catalog_category_product');
 
-        $getNameAttributeId = $reflection->getMethod('_getNameAttributeId');
+        $getNameAttributeId = $reflection->getMethod('getNameAttributeId');
         $getNameAttributeId->setAccessible(true);
         $nameAttrId = $getNameAttributeId->invoke($condition);
         expect($nameAttrId)->toBeGreaterThan(0);

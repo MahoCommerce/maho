@@ -118,137 +118,137 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'product_id' => $this->_buildProductWishlistCondition($adapter, $operator, $value),
-            'product_name' => $this->_buildProductNameWishlistCondition($adapter, $operator, $value),
-            'product_sku' => $this->_buildProductSkuWishlistCondition($adapter, $operator, $value),
-            'category_id' => $this->_buildCategoryWishlistCondition($adapter, $operator, $value),
-            'wishlist_items_count' => $this->_buildWishlistItemsCountCondition($adapter, $operator, $value),
-            'added_at' => $this->_buildAddedAtCondition($adapter, $operator, $value),
-            'days_since_added' => $this->_buildDaysSinceAddedCondition($adapter, $operator, $value),
-            'wishlist_shared' => $this->_buildWishlistSharedCondition($adapter, $operator, $value),
+            'product_id' => $this->buildProductWishlistCondition($adapter, $operator, $value),
+            'product_name' => $this->buildProductNameWishlistCondition($adapter, $operator, $value),
+            'product_sku' => $this->buildProductSkuWishlistCondition($adapter, $operator, $value),
+            'category_id' => $this->buildCategoryWishlistCondition($adapter, $operator, $value),
+            'wishlist_items_count' => $this->buildWishlistItemsCountCondition($adapter, $operator, $value),
+            'added_at' => $this->buildAddedAtCondition($adapter, $operator, $value),
+            'days_since_added' => $this->buildDaysSinceAddedCondition($adapter, $operator, $value),
+            'wishlist_shared' => $this->buildWishlistSharedCondition($adapter, $operator, $value),
             default => false,
         };
     }
 
-    protected function _buildProductWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['wi' => $this->_getWishlistItemTable()], [])
-            ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
+            ->from(['wi' => $this->getWishlistItemTable()], [])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
             ->where('w.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'wi.product_id', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'wi.product_id', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildProductNameWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductNameWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['wi' => $this->_getWishlistItemTable()], [])
-            ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
-            ->join(['p' => $this->_getProductTable()], 'wi.product_id = p.entity_id', [])
-            ->join(['pv' => $this->_getProductVarcharTable()], 'p.entity_id = pv.entity_id AND pv.attribute_id = ' . $this->_getNameAttributeId(), [])
+            ->from(['wi' => $this->getWishlistItemTable()], [])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
+            ->join(['p' => $this->getProductTable()], 'wi.product_id = p.entity_id', [])
+            ->join(['pv' => $this->getProductVarcharTable()], 'p.entity_id = pv.entity_id AND pv.attribute_id = ' . $this->getNameAttributeId(), [])
             ->where('w.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'pv.value', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'pv.value', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildProductSkuWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductSkuWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['wi' => $this->_getWishlistItemTable()], [])
-            ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
-            ->join(['p' => $this->_getProductTable()], 'wi.product_id = p.entity_id', [])
+            ->from(['wi' => $this->getWishlistItemTable()], [])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
+            ->join(['p' => $this->getProductTable()], 'wi.product_id = p.entity_id', [])
             ->where('w.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'p.sku', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'p.sku', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildCategoryWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildCategoryWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['wi' => $this->_getWishlistItemTable()], [])
-            ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
-            ->join(['ccp' => $this->_getCatalogCategoryProductTable()], 'wi.product_id = ccp.product_id', [])
+            ->from(['wi' => $this->getWishlistItemTable()], [])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
+            ->join(['ccp' => $this->getCatalogCategoryProductTable()], 'wi.product_id = ccp.product_id', [])
             ->where('w.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'ccp.category_id', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'ccp.category_id', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildWishlistItemsCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildWishlistItemsCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['wi' => $this->_getWishlistItemTable()], [])
-            ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id', 'items_count' => 'COUNT(*)'])
-            ->where('w.customer_id IS NOT NULL')
-            ->group('w.customer_id')
-            ->having($this->_buildSqlCondition($adapter, 'items_count', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
-
-    protected function _buildAddedAtCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        $subselect = $adapter->select()
-            ->from(['wi' => $this->_getWishlistItemTable()], [])
-            ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
-            ->where('w.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'wi.added_at', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
-
-    protected function _buildDaysSinceAddedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        $subselect = $adapter->select()
-            ->from(['wi' => $this->_getWishlistItemTable()], [])
-            ->join(['w' => $this->_getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id', 'last_added' => 'MAX(wi.added_at)'])
+            ->from(['wi' => $this->getWishlistItemTable()], [])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id', 'items_count' => 'COUNT(*)'])
             ->where('w.customer_id IS NOT NULL')
             ->group('w.customer_id')
-            ->having($this->_buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_added)", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'items_count', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildWishlistSharedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildAddedAtCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['w' => $this->_getWishlistTable()], ['customer_id'])
+            ->from(['wi' => $this->getWishlistItemTable()], [])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
             ->where('w.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'w.shared', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'wi.added_at', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _getWishlistTable(): string
+    protected function buildDaysSinceAddedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    {
+        $subselect = $adapter->select()
+            ->from(['wi' => $this->getWishlistItemTable()], [])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id', 'last_added' => 'MAX(wi.added_at)'])
+            ->where('w.customer_id IS NOT NULL')
+            ->group('w.customer_id')
+            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_added)", $operator, $value));
+
+        return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function buildWishlistSharedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    {
+        $subselect = $adapter->select()
+            ->from(['w' => $this->getWishlistTable()], ['customer_id'])
+            ->where('w.customer_id IS NOT NULL')
+            ->where($this->buildSqlCondition($adapter, 'w.shared', $operator, $value));
+
+        return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function getWishlistTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('wishlist/wishlist');
     }
 
-    protected function _getWishlistItemTable(): string
+    protected function getWishlistItemTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('wishlist/item');
     }
 
-    protected function _getProductTable(): string
+    protected function getProductTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('catalog/product');
     }
 
-    protected function _getProductVarcharTable(): string
+    protected function getProductVarcharTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('catalog_product_entity_varchar');
     }
 
-    protected function _getCatalogCategoryProductTable(): string
+    protected function getCatalogCategoryProductTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('catalog/category_product');
     }
 
-    protected function _getNameAttributeId(): int
+    protected function getNameAttributeId(): int
     {
         return (int) Mage::getResourceModel('eav/entity_attribute')
             ->getIdByCode('catalog_product', 'name');

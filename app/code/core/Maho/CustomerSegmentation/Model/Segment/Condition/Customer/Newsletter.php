@@ -87,33 +87,33 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'subscriber_status' => $this->_buildSubscriberStatusCondition($adapter, $operator, $value),
-            'change_status_at' => $this->_buildStatusChangeDateCondition($adapter, $operator, $value),
+            'subscriber_status' => $this->buildSubscriberStatusCondition($adapter, $operator, $value),
+            'change_status_at' => $this->buildStatusChangeDateCondition($adapter, $operator, $value),
             default => false,
         };
     }
 
-    protected function _buildSubscriberStatusCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildSubscriberStatusCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['ns' => $this->_getNewsletterSubscriberTable()], ['customer_id'])
+            ->from(['ns' => $this->getNewsletterSubscriberTable()], ['customer_id'])
             ->where('ns.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'ns.subscriber_status', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'ns.subscriber_status', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildStatusChangeDateCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildStatusChangeDateCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['ns' => $this->_getNewsletterSubscriberTable()], ['customer_id'])
+            ->from(['ns' => $this->getNewsletterSubscriberTable()], ['customer_id'])
             ->where('ns.customer_id IS NOT NULL')
-            ->where($this->_buildSqlCondition($adapter, 'ns.change_status_at', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'ns.change_status_at', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _getNewsletterSubscriberTable(): string
+    protected function getNewsletterSubscriberTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('newsletter/subscriber');
     }

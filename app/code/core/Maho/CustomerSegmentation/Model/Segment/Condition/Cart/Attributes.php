@@ -110,16 +110,16 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'items_count', 'items_qty', 'base_subtotal', 'base_grand_total', 'created_at', 'updated_at', 'is_active', 'store_id', 'coupon_code' => $this->_buildCartFieldCondition($adapter, $attribute, $operator, $value),
-            'applied_rule_ids' => $this->_buildAppliedRulesCondition($adapter, $operator, $value),
+            'items_count', 'items_qty', 'base_subtotal', 'base_grand_total', 'created_at', 'updated_at', 'is_active', 'store_id', 'coupon_code' => $this->buildCartFieldCondition($adapter, $attribute, $operator, $value),
+            'applied_rule_ids' => $this->buildAppliedRulesCondition($adapter, $operator, $value),
             default => false,
         };
     }
 
-    protected function _buildCartFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildCartFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['q' => $this->_getQuoteTable()], ['customer_id'])
+            ->from(['q' => $this->getQuoteTable()], ['customer_id'])
             ->where('q.customer_id IS NOT NULL');
 
         // Only add active check if we're not specifically filtering by is_active
@@ -127,24 +127,24 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
             $subselect->where('q.is_active = ?', 1);
         }
 
-        $subselect->where($this->_buildSqlCondition($adapter, "q.{$field}", $operator, $value));
+        $subselect->where($this->buildSqlCondition($adapter, "q.{$field}", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function _buildAppliedRulesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildAppliedRulesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['q' => $this->_getQuoteTable()], ['customer_id'])
+            ->from(['q' => $this->getQuoteTable()], ['customer_id'])
             ->where('q.customer_id IS NOT NULL')
             ->where('q.is_active = ?', 1)
-            ->where($this->_buildSqlCondition($adapter, 'q.applied_rule_ids', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'q.applied_rule_ids', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
     #[\Override]
-    protected function _getQuoteTable(): string
+    protected function getQuoteTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/quote');
     }
