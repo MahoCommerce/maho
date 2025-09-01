@@ -13,7 +13,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Customer Attributes Integration Tests', function () {
     beforeEach(function () {
-        $this->useTransactions();
         createCustomerAttributesTestData();
     });
 
@@ -976,7 +975,6 @@ describe('Customer Attributes Integration Tests', function () {
             }
 
             $customer->save();
-            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
 
             // Create orders if specified
             foreach ($customerData['orders'] as $orderData) {
@@ -999,7 +997,6 @@ describe('Customer Attributes Integration Tests', function () {
                 $order->setCreatedAt($orderCreatedAt);
                 $order->save();
 
-                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
             }
         }
     }
@@ -1028,7 +1025,6 @@ describe('Customer Attributes Integration Tests', function () {
         $segment->setPriority(10);
         $segment->save();
 
-        test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;
     }

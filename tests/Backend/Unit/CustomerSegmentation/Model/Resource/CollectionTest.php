@@ -14,7 +14,6 @@ uses(Tests\MahoBackendTestCase::class);
 describe('Customer Segment Collection', function () {
     beforeEach(function () {
         $this->collection = Mage::getResourceModel('customersegmentation/segment_collection');
-        $this->useTransactions();
     });
 
     test('can filter by website - segmentation specific functionality', function () {
@@ -104,8 +103,6 @@ describe('Customer Segment Collection', function () {
                 $segment->setData($key, $value);
             }
             $segment->save();
-            // Track created segment for cleanup
-            test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
         }
     }
 });

@@ -14,7 +14,6 @@ uses(Tests\MahoBackendTestCase::class);
 describe('Customer Segment Resource Model', function () {
     beforeEach(function () {
         $this->resource = Mage::getResourceModel('customersegmentation/segment');
-        $this->useTransactions();
     });
 
     test('can get matched customers for segment - core segmentation functionality', function () {
@@ -24,8 +23,6 @@ describe('Customer Segment Resource Model', function () {
         $segment->setIsActive(1);
         $segment->setWebsiteIds('1');
         $this->resource->save($segment);
-        // Track created segment for cleanup
-        $this->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         // Test the core segmentation functionality
         $matchedCustomers = $this->resource->getMatchingCustomerIds($segment);
@@ -45,8 +42,6 @@ describe('Customer Segment Resource Model', function () {
             $customer->setWebsiteId(1);
             $customer->setGroupId(1);
             $customer->save();
-            // Track created customer for cleanup
-            $this->trackCreatedRecord('customer_entity', (int) $customer->getId());
             $customerIds[] = $customer->getId();
         }
 
@@ -56,8 +51,6 @@ describe('Customer Segment Resource Model', function () {
         $segment->setIsActive(1);
         $segment->setWebsiteIds('1');
         $this->resource->save($segment);
-        // Track created segment for cleanup
-        $this->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         $segmentId = $segment->getId();
 
@@ -82,16 +75,12 @@ describe('Customer Segment Resource Model', function () {
         $segment1->setIsActive(1);
         $segment1->setWebsiteIds('1');
         $this->resource->save($segment1);
-        // Track created segment for cleanup
-        $this->trackCreatedRecord('customer_segment', (int) $segment1->getId());
 
         $segment2 = Mage::getModel('customersegmentation/segment');
         $segment2->setName('Website 2 Segment');
         $segment2->setIsActive(1);
         $segment2->setWebsiteIds('2');
         $this->resource->save($segment2);
-        // Track created segment for cleanup
-        $this->trackCreatedRecord('customer_segment', (int) $segment2->getId());
 
         // Test website-specific segment retrieval
         $website1SegmentIds = $this->resource->getActiveSegmentIds(1);

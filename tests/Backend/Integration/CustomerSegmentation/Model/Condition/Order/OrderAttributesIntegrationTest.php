@@ -13,7 +13,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Order Attributes Condition Integration Tests', function () {
     beforeEach(function () {
-        $this->useTransactions();
         createOrderAttributesTestData();
     });
 
@@ -1201,7 +1200,6 @@ describe('Order Attributes Condition Integration Tests', function () {
             $customer->setWebsiteId(1);
             $customer->save();
 
-            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
 
             // Create orders
             foreach ($customerData['orders'] as $orderData) {
@@ -1245,7 +1243,6 @@ describe('Order Attributes Condition Integration Tests', function () {
                 $order->setUpdatedAt($orderCreatedAt);
 
                 $order->save();
-                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
 
                 // Create payment record
                 $payment = Mage::getModel('sales/order_payment');
@@ -1253,7 +1250,6 @@ describe('Order Attributes Condition Integration Tests', function () {
                 $payment->setMethod($orderData['payment_method']);
                 $payment->save();
 
-                test()->trackCreatedRecord('sales_flat_order_payment', (int) $payment->getId());
             }
         }
     }
@@ -1282,7 +1278,6 @@ describe('Order Attributes Condition Integration Tests', function () {
         $segment->setPriority(10);
         $segment->save();
 
-        test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;
     }

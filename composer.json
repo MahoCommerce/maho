@@ -116,6 +116,9 @@
             }
         }
     },
+    "scripts": {
+        "test": "php tests/pest-with-test-db.php"
+    },
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,

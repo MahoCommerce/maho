@@ -13,7 +13,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Segment Refresh Operations', function () {
     beforeEach(function () {
-        $this->useTransactions();
         createRefreshTestCustomers();
         createRefreshTestOrders();
     });
@@ -301,8 +300,6 @@ describe('Segment Refresh Operations', function () {
             $customer = Mage::getModel('customer/customer');
             $customer->setData($customerData);
             $customer->save();
-            // Track created customer for cleanup
-            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
         }
     }
 
@@ -326,8 +323,6 @@ describe('Segment Refresh Operations', function () {
                 $order->setStatus($orderData[$orderIndex]['status']);
                 $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                 $order->save();
-                // Track created order for cleanup
-                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
 
                 $orderIndex++;
             }
@@ -357,8 +352,6 @@ describe('Segment Refresh Operations', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-        // Track created segment for cleanup
-        test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;
     }

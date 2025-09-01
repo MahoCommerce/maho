@@ -13,7 +13,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Complex Condition Combinations', function () {
     beforeEach(function () {
-        $this->useTransactions();
         createComplexTestCustomers();
         createComplexTestOrders();
         createComplexTestCarts();
@@ -458,8 +457,6 @@ describe('Complex Condition Combinations', function () {
             $customer = Mage::getModel('customer/customer');
             $customer->setData($customerData);
             $customer->save();
-            // Track created customer for cleanup
-            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
         }
     }
 
@@ -484,8 +481,6 @@ describe('Complex Condition Combinations', function () {
                 $order->setStatus($orderData[$orderIndex]['status']);
                 $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                 $order->save();
-                // Track created order for cleanup
-                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
 
                 $orderIndex++;
             }
@@ -521,8 +516,6 @@ describe('Complex Condition Combinations', function () {
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);
         $segment->save();
-        // Track created segment for cleanup
-        test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;
     }

@@ -15,7 +15,6 @@ describe('Blog Helper Data', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('blog');
         // Enable database transactions to isolate test data changes
-        $this->useTransactions();
     });
 
     test('helper instance is correct type', function () {

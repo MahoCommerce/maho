@@ -13,7 +13,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Segment Matching Integration', function () {
     beforeEach(function () {
-        $this->useTransactions();
         createMatchingTestCustomers();
         createMatchingTestOrders();
     });
@@ -532,7 +531,6 @@ describe('Segment Matching Integration', function () {
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
 
-            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
 
             // Create orders for this customer
             $orderCount = $customerData['order_count'];
@@ -548,7 +546,6 @@ describe('Segment Matching Integration', function () {
                 $order->setStoreId(1);
                 $order->save();
 
-                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
             }
         }
     }
@@ -584,8 +581,6 @@ describe('Segment Matching Integration', function () {
             $customer = Mage::getModel('customer/customer');
             $customer->setData($customerData);
             $customer->save();
-            // Track created customer for cleanup
-            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
         }
     }
 
@@ -610,8 +605,6 @@ describe('Segment Matching Integration', function () {
                 $order->setStatus($orderData[$orderIndex]['status']);
                 $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                 $order->save();
-                // Track created order for cleanup
-                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
 
                 $orderIndex++;
             }
@@ -640,8 +633,6 @@ describe('Segment Matching Integration', function () {
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');
         $segment->save();
-        // Track created segment for cleanup
-        test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;
     }

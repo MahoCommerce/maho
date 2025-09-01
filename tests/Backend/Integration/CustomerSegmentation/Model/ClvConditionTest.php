@@ -13,7 +13,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('CLV Condition Tests - Profit and Refunds Focus', function () {
     beforeEach(function () {
-        $this->useTransactions();
         createClvConditionTestData();
     });
 
@@ -583,7 +582,6 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             $customer->setWebsiteId($customerData['website_id']);
             $customer->save();
 
-            test()->trackCreatedRecord('customer_entity', (int) $customer->getId());
 
             // Create orders and credit memos
             foreach ($customerData['orders'] as $orderData) {
@@ -603,7 +601,6 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 }
 
                 $order->save();
-                test()->trackCreatedRecord('sales_flat_order', (int) $order->getId());
 
                 // Create credit memos for this order
                 foreach ($orderData['refunds'] as $refundAmount) {
@@ -617,7 +614,6 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                     $creditmemo->setCreatedAt(date('Y-m-d H:i:s', strtotime('-' . rand(1, 30) . ' days')));
                     $creditmemo->save();
 
-                    test()->trackCreatedRecord('sales_flat_creditmemo', (int) $creditmemo->getId());
                 }
             }
         }
@@ -684,7 +680,6 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         $segment->setPriority(10);
         $segment->save();
 
-        test()->trackCreatedRecord('customer_segment', (int) $segment->getId());
 
         return $segment;
     }
