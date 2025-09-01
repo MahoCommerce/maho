@@ -185,7 +185,7 @@ describe('Time-based Customer Conditions', function () {
             foreach ($matchedCustomers as $customerId) {
                 $storeIds = Mage::app()->getWebsite(1)->getStoreIds();
                 $storeIds[] = 0; // Include admin store
-                
+
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
                     ->addFieldToFilter('state', ['neq' => 'canceled'])
@@ -195,7 +195,7 @@ describe('Time-based Customer Conditions', function () {
                     $customersWithOrders++;
                 }
             }
-            
+
             // Expect at least one customer to have orders (the segment logic should ensure this)
             expect($customersWithOrders)->toBeGreaterThan(0);
         });

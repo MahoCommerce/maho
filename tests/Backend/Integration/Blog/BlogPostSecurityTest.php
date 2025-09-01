@@ -10,8 +10,7 @@
 
 uses(Tests\MahoBackendTestCase::class);
 
-beforeEach(function () {
-});
+beforeEach(function () {});
 
 it('filters out dangerous JavaScript code from blog post content', function () {
     $post = Mage::getModel('blog/post');

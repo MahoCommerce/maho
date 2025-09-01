@@ -296,25 +296,25 @@ describe('Customer Address Integration Tests', function () {
             $addressCollection = Mage::getResourceModel('customer/address_collection')
                 ->addAttributeToSelect('*')
                 ->addAttributeToFilter('city', 'Los Angeles');
-            
+
             // If no Los Angeles addresses exist, let's just test with any existing city
             if ($addressCollection->getSize() == 0) {
                 // Find any address and use its city for the test
                 $anyAddressCollection = Mage::getResourceModel('customer/address_collection')
                     ->addAttributeToSelect('*')
                     ->setPageSize(1);
-                
+
                 $anyAddress = $anyAddressCollection->getFirstItem();
                 if (!$anyAddress->getId()) {
                     expect(true)->toBe(true); // No addresses at all - skip test
                     return;
                 }
-                
+
                 $testCity = $anyAddress->getCity();
             } else {
                 $testCity = 'Los Angeles';
             }
-            
+
             $segment = createCustomerAddressTestSegment('Multi Address Match', [
                 'type' => 'customersegmentation/segment_condition_customer_address',
                 'attribute' => 'city',
@@ -327,7 +327,7 @@ describe('Customer Address Integration Tests', function () {
 
             // At least the segment logic is working if we get matched customers
             expect(count($matchedCustomers))->toBeGreaterThanOrEqual(0);
-            
+
             // If we have matches, do a basic verification that makes sense
             if (count($matchedCustomers) > 0) {
                 foreach ($matchedCustomers as $customerId) {

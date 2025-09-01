@@ -40,12 +40,12 @@ class PestTestRunner
 
             // Flush cache after tests complete
             echo "\nFlushing cache after tests...\n";
-            $this->executeCommand("./maho cache:flush --ansi");
+            $this->executeCommand('./maho cache:flush --ansi');
             echo "✓ Cache flushed\n";
 
             return $exitCode;
         } catch (Exception $e) {
-            echo "Error: " . $e->getMessage() . "\n";
+            echo 'Error: ' . $e->getMessage() . "\n";
             return 1;
         } finally {
             $this->restoreLocalXml();
@@ -55,27 +55,27 @@ class PestTestRunner
     private function loadDatabaseConfig(): void
     {
         if (!file_exists(self::LOCAL_XML_PATH)) {
-            throw new Exception("local.xml not found. Please install Maho first.");
+            throw new Exception('local.xml not found. Please install Maho first.');
         }
 
         $xml = simplexml_load_file(self::LOCAL_XML_PATH);
         if ($xml === false) {
-            throw new Exception("Could not parse local.xml");
+            throw new Exception('Could not parse local.xml');
         }
 
         $connection = $xml->global->resources->default_setup->connection;
         $this->dbConfig = [
-            'host' => (string)$connection->host,
-            'user' => (string)$connection->username,
-            'pass' => (string)$connection->password,
-            'name' => (string)$connection->dbname,
+            'host' => (string) $connection->host,
+            'user' => (string) $connection->username,
+            'pass' => (string) $connection->password,
+            'name' => (string) $connection->dbname,
         ];
     }
 
     private function backupLocalXml(): void
     {
         if (!copy(self::LOCAL_XML_PATH, self::LOCAL_XML_BACKUP)) {
-            throw new Exception("Failed to backup local.xml");
+            throw new Exception('Failed to backup local.xml');
         }
         echo "✓ Backed up local.xml\n";
     }
@@ -94,13 +94,13 @@ class PestTestRunner
 
     private function setupTestDatabase(): void
     {
-        echo "Creating fresh test database: " . $this->testDbName . "\n";
+        echo 'Creating fresh test database: ' . $this->testDbName . "\n";
 
         // Drop existing test database
-        $this->executeCommand($this->getMysqlCommand("DROP DATABASE IF EXISTS `" . $this->testDbName . "`;"));
+        $this->executeCommand($this->getMysqlCommand('DROP DATABASE IF EXISTS `' . $this->testDbName . '`;'));
 
         // Create new test database
-        $this->executeCommand($this->getMysqlCommand("CREATE DATABASE `" . $this->testDbName . "`;"));
+        $this->executeCommand($this->getMysqlCommand('CREATE DATABASE `' . $this->testDbName . '`;'));
         echo "✓ Created test database\n";
 
         // Temporarily move local.xml so Maho thinks it's not installed
@@ -111,25 +111,25 @@ class PestTestRunner
 
         try {
             // Install Maho with sample data
-            $installCmd = "./maho install --ansi" .
-            " --license_agreement_accepted yes" .
-            " --locale en_US" .
-            " --timezone Europe/London" .
-            " --default_currency USD" .
-            " --db_host " . escapeshellarg($this->dbConfig['host']) .
-            " --db_name " . escapeshellarg($this->testDbName) .
-            " --db_user " . escapeshellarg($this->dbConfig['user']) .
-            " --db_pass " . escapeshellarg($this->dbConfig['pass']) .
-            " --url http://maho.test/" .
-            " --secure_base_url http://maho.test/" .
-            " --use_secure 0" .
-            " --use_secure_admin 0" .
-            " --admin_lastname admin" .
-            " --admin_firstname admin" .
-            " --admin_email admin@test.com" .
-            " --admin_username admin" .
-            " --admin_password testpassword123" .
-            " --sample_data 1";
+            $installCmd = './maho install --ansi' .
+            ' --license_agreement_accepted yes' .
+            ' --locale en_US' .
+            ' --timezone Europe/London' .
+            ' --default_currency USD' .
+            ' --db_host ' . escapeshellarg($this->dbConfig['host']) .
+            ' --db_name ' . escapeshellarg($this->testDbName) .
+            ' --db_user ' . escapeshellarg($this->dbConfig['user']) .
+            ' --db_pass ' . escapeshellarg($this->dbConfig['pass']) .
+            ' --url http://maho.test/' .
+            ' --secure_base_url http://maho.test/' .
+            ' --use_secure 0' .
+            ' --use_secure_admin 0' .
+            ' --admin_lastname admin' .
+            ' --admin_firstname admin' .
+            ' --admin_email admin@test.com' .
+            ' --admin_username admin' .
+            ' --admin_password testpassword123' .
+            ' --sample_data 1';
 
             echo "Installing Maho with sample data...\n";
             $this->executeCommand($installCmd);
@@ -137,8 +137,8 @@ class PestTestRunner
 
             // Reindex and flush cache
             echo "Reindexing and flushing cache...\n";
-            $this->executeCommand("./maho index:reindex:all --ansi");
-            $this->executeCommand("./maho cache:flush --ansi");
+            $this->executeCommand('./maho index:reindex:all --ansi');
+            $this->executeCommand('./maho cache:flush --ansi');
             echo "✓ Completed setup\n";
         } finally {
             // Restore the temporary local.xml if it exists
@@ -150,14 +150,14 @@ class PestTestRunner
 
     private function getMysqlCommand(string $sql): string
     {
-        $cmd = "mysql -h " . escapeshellarg($this->dbConfig['host']) .
-               " -u " . escapeshellarg($this->dbConfig['user']);
+        $cmd = 'mysql -h ' . escapeshellarg($this->dbConfig['host']) .
+               ' -u ' . escapeshellarg($this->dbConfig['user']);
 
         if (!empty($this->dbConfig['pass'])) {
-            $cmd .= " -p" . escapeshellarg($this->dbConfig['pass']);
+            $cmd .= ' -p' . escapeshellarg($this->dbConfig['pass']);
         }
 
-        return $cmd . " -e " . escapeshellarg($sql);
+        return $cmd . ' -e ' . escapeshellarg($sql);
     }
 
     private function executeCommand(string $command): void
@@ -174,9 +174,9 @@ class PestTestRunner
 
     private function runPest(array $args): int
     {
-        $pestCmd = "./vendor/bin/pest --colors=always";
+        $pestCmd = './vendor/bin/pest --colors=always';
         if (!empty($args)) {
-            $pestCmd .= " " . implode(" ", array_map('escapeshellarg', $args));
+            $pestCmd .= ' ' . implode(' ', array_map('escapeshellarg', $args));
         }
 
         echo "\nRunning Pest tests...\n";

@@ -302,7 +302,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
                                 // Convert both to same type for comparison
                                 $orderStoreId = (int) $order->getStoreId();
                                 $websiteStoreIds = array_map('intval', $storeIds);
-                                
+
                                 // Allow store ID 0 (admin/default) or must be in website 1
                                 $isValidStore = ($orderStoreId === 0) || in_array($orderStoreId, $websiteStoreIds);
                                 expect($isValidStore)->toBe(true);
