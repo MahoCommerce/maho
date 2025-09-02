@@ -260,24 +260,20 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                     $model->setAttribute($typeArr[1]);
                 }
                 $model->setJsFormObject($form ?: 'rule_conditions_fieldset');
-                $html = $model->asHtmlRecursive();
+                $html = '<li>' . $model->asHtmlRecursive() . '</li>';
             } else {
                 $html = '';
             }
 
             $this->getResponse()->setBody($html);
-
         } catch (Exception $e) {
             Mage::logException($e);
-
-            // Return JSON error response that the JavaScript can handle
             $this->getResponse()
                 ->clearHeaders()
-                ->setHeader('Content-Type', 'application/json')
-                ->setBody(Mage::helper('core')->jsonEncode([
+                ->setBodyJson([
                     'error' => true,
                     'message' => $e->getMessage(),
-                ]));
+                ]);
         }
     }
 
