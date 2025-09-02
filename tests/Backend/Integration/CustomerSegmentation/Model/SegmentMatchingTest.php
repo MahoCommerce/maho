@@ -302,7 +302,7 @@ describe('Segment Matching Integration', function () {
         createClvTestCustomers();
 
         $segment = createMatchingTestSegment('Zero Orders Segment (Customer Attrs)', [
-            'type' => 'customersegmentation/segment_condition_customer_attributes',
+            'type' => 'customersegmentation/segment_condition_customer_clv',
             'attribute' => 'number_of_orders',
             'operator' => '==',
             'value' => '0',
