@@ -277,8 +277,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
 
     protected function buildDaysSinceLastOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
-        $currentDate = Mage_Core_Model_Locale::now();
-
+        $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
