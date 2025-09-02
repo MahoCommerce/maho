@@ -47,9 +47,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             'website_id' => Mage::helper('customersegmentation')->__('Website'),
             'days_since_registration' => Mage::helper('customersegmentation')->__('Days Since Registration'),
             'days_until_birthday' => Mage::helper('customersegmentation')->__('Days Until Birthday'),
-            'lifetime_sales' => Mage::helper('customersegmentation')->__('Lifetime Sales Amount'),
-            'number_of_orders' => Mage::helper('customersegmentation')->__('Number of Orders'),
-            'average_order_value' => Mage::helper('customersegmentation')->__('Average Order Value'),
         ];
 
         $this->setAttributeOption($attributes);
@@ -148,6 +145,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             case 'days_until_birthday':
                 return $this->buildDaysUntilBirthdayCondition($adapter, $operator, $value);
 
+                // Order-related attributes (moved to Order History in UI but still handled here)
             case 'lifetime_sales':
                 return $this->buildLifetimeSalesCondition($adapter, $operator, $value);
 

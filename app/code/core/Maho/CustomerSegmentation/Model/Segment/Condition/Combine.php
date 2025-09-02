@@ -49,6 +49,21 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
             ];
         }
 
+
+        // Add order-related customer attributes to Order History
+        // These were moved from Customer Personal Information as they're order-related
+        $orderRelatedCustomerAttributes = [
+            'lifetime_sales' => Mage::helper('customersegmentation')->__('Lifetime Sales Amount'),
+            'number_of_orders' => Mage::helper('customersegmentation')->__('Number of Orders'),
+            'average_order_value' => Mage::helper('customersegmentation')->__('Average Order Value'),
+        ];
+        foreach ($orderRelatedCustomerAttributes as $code => $label) {
+            $orderConditions[] = [
+                'label' => $label,
+                'value' => 'customersegmentation/segment_condition_customer_attributes|' . $code,
+            ];
+        }
+
         // Generate customer personal conditions from condition class
         $customerPersonalConditions = [];
         $customerAttributesCondition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
