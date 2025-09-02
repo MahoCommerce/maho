@@ -63,6 +63,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => 'customersegmentation/segment_condition_customer_attributes|' . $code,
             ];
         }
+        usort($orderConditions, fn($a, $b) => strcmp($a['label'], $b['label']));
 
         // Generate customer personal conditions from condition class
         $customerPersonalConditions = [];
