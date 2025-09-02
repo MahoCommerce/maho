@@ -44,6 +44,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
             'telephone' => Mage::helper('customersegmentation')->__('Telephone'),
         ];
 
+        asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
     }

@@ -31,13 +31,16 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
     #[\Override]
     public function loadAttributeOptions(): self
     {
-        $this->setAttributeOption([
+        $attributes = [
             'lifetime_sales' => Mage::helper('customersegmentation')->__('Lifetime Sales Amount'),
             'lifetime_orders' => Mage::helper('customersegmentation')->__('Number of Orders'),
             'average_order_value' => Mage::helper('customersegmentation')->__('Average Order Value'),
             'lifetime_profit' => Mage::helper('customersegmentation')->__('Lifetime Profit (Sales - Refunds)'),
             'lifetime_refunds' => Mage::helper('customersegmentation')->__('Lifetime Refunds Amount'),
-        ]);
+        ];
+
+        asort($attributes);
+        $this->setAttributeOption($attributes);
         return $this;
     }
 

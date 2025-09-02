@@ -42,6 +42,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
             'days_since_last_view' => Mage::helper('customersegmentation')->__('Days Since Last View'),
         ];
 
+        asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
     }

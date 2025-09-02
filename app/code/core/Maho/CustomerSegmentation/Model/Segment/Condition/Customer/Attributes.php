@@ -49,6 +49,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             'days_until_birthday' => Mage::helper('customersegmentation')->__('Days Until Birthday'),
         ];
 
+        asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
     }
@@ -206,12 +207,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
         // Calculate next birthday by properly handling year differences to avoid BIGINT overflow
         // This handles cases where birth year > current year (test data) or birth year < current year (real data)
-        return "CASE 
+        return "CASE
             WHEN YEAR(attr.value) > YEAR('{$currentDate}') THEN
                 DATEDIFF(DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}'), '-%m-%d')), '{$currentDate}')
             ELSE
                 DATEDIFF(
-                    CASE 
+                    CASE
                         WHEN DAYOFYEAR('{$currentDate}') > DAYOFYEAR(attr.value) THEN
                             DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}') + 1, '-%m-%d'))
                         ELSE

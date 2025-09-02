@@ -43,6 +43,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
             'wishlist_shared' => Mage::helper('customersegmentation')->__('Wishlist Shared'),
         ];
 
+        // Sort attributes alphabetically by label
+        asort($attributes);
+
         $this->setAttributeOption($attributes);
         return $this;
     }

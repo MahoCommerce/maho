@@ -37,6 +37,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
             'change_status_at' => Mage::helper('customersegmentation')->__('Status Change Date'),
         ];
 
+        asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
     }

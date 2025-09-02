@@ -55,6 +55,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             'total_ordered_amount' => Mage::helper('customersegmentation')->__('Total Ordered Amount'),
         ];
 
+        asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
     }

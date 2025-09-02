@@ -32,14 +32,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
     #[\Override]
     public function loadAttributeOptions(): self
     {
-        $this->setAttributeOption([
+        $attributes = [
             'days_since_last_login' => Mage::helper('customersegmentation')->__('Days Since Last Login'),
             'days_since_last_order' => Mage::helper('customersegmentation')->__('Days Since Last Order'),
             'days_inactive' => Mage::helper('customersegmentation')->__('Days Inactive (No Login or Order)'),
             'days_since_first_order' => Mage::helper('customersegmentation')->__('Days Since First Order'),
             'order_frequency_days' => Mage::helper('customersegmentation')->__('Average Days Between Orders'),
             'days_without_purchase' => Mage::helper('customersegmentation')->__('Days Without Purchase'),
-        ]);
+        ];
+
+        asort($attributes);
+        $this->setAttributeOption($attributes);
         return $this;
     }
 

@@ -45,6 +45,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
             'coupon_code' => Mage::helper('customersegmentation')->__('Coupon Code'),
         ];
 
+        asort($attributes);
         $this->setAttributeOption($attributes);
         return $this;
     }
