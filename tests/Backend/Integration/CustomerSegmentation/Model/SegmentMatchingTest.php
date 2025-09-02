@@ -277,7 +277,7 @@ describe('Segment Matching Integration', function () {
 
         $segment = createMatchingTestSegment('Zero Orders Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
-            'attribute' => 'lifetime_orders',
+            'attribute' => 'number_of_orders',
             'operator' => '==',
             'value' => '0',
         ]);
@@ -328,7 +328,7 @@ describe('Segment Matching Integration', function () {
 
         $segment = createMatchingTestSegment('LE 1 Orders Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
-            'attribute' => 'lifetime_orders',
+            'attribute' => 'number_of_orders',
             'operator' => '<=',
             'value' => '1',
         ]);
@@ -353,7 +353,7 @@ describe('Segment Matching Integration', function () {
 
         $segment = createMatchingTestSegment('GT 1 Orders Segment', [
             'type' => 'customersegmentation/segment_condition_customer_clv',
-            'attribute' => 'lifetime_orders',
+            'attribute' => 'number_of_orders',
             'operator' => '>',
             'value' => '1',
         ]);
@@ -470,7 +470,7 @@ describe('Segment Matching Integration', function () {
                 ],
                 [
                     'type' => 'customersegmentation/segment_condition_customer_clv',
-                    'attribute' => 'lifetime_orders',
+                    'attribute' => 'number_of_orders',
                     'operator' => '==',
                     'value' => '0',
                 ],
