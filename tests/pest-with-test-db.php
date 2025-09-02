@@ -140,10 +140,14 @@ class PestTestRunner
             $this->executeCommand('./maho index:reindex:all --ansi');
             $this->executeCommand('./maho cache:flush --ansi');
             echo "✓ Completed setup\n";
+
+            // Keep the NEW local.xml (pointing to test DB) and don't restore the original yet
+            // The original will be restored in the finally block of run()
         } finally {
-            // Restore the temporary local.xml if it exists
+            // Don't restore the temp local.xml here - we want to keep using the test database
+            // Only clean up the temp file if it exists
             if (file_exists($tempLocalXml)) {
-                rename($tempLocalXml, self::LOCAL_XML_PATH);
+                unlink($tempLocalXml);
             }
         }
     }
