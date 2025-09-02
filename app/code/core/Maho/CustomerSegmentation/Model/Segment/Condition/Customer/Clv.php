@@ -33,7 +33,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
     {
         $attributes = [
             'lifetime_sales' => Mage::helper('customersegmentation')->__('Lifetime Sales Amount'),
-            'lifetime_orders' => Mage::helper('customersegmentation')->__('Number of Orders'),
+            'number_of_orders' => Mage::helper('customersegmentation')->__('Number of Orders'),
             'average_order_value' => Mage::helper('customersegmentation')->__('Average Order Value'),
             'lifetime_profit' => Mage::helper('customersegmentation')->__('Lifetime Profit (Sales - Refunds)'),
             'lifetime_refunds' => Mage::helper('customersegmentation')->__('Lifetime Refunds Amount'),
@@ -83,7 +83,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                     ->group('c.entity_id');
                 break;
 
-            case 'lifetime_orders':
+            case 'number_of_orders':
                 $joinConditions = 'c.entity_id = o.customer_id AND o.state NOT IN (\'canceled\', \'closed\')';
                 if ($website) {
                     $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
@@ -142,7 +142,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                 return $requireValid ? 'FALSE' : 'TRUE';
         }
 
-        if ($website && !in_array($attribute, ['lifetime_sales', 'lifetime_orders', 'average_order_value'])) {
+        if ($website && !in_array($attribute, ['lifetime_sales', 'lifetime_orders', 'number_of_orders', 'average_order_value'])) {
             // Store filter is already handled in JOIN conditions for the main attributes
             $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
             if (isset($salesTable)) {

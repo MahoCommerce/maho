@@ -394,7 +394,7 @@ describe('Customer Attributes Integration Tests', function () {
     describe('Customer Lifetime Value Fields', function () {
         test('filters customers by lifetime sales amount', function () {
             $segment = createCustomerAttributesTestSegment('High Value Customers', [
-                'type' => 'customersegmentation/segment_condition_customer_attributes',
+                'type' => 'customersegmentation/segment_condition_customer_clv',
                 'attribute' => 'lifetime_sales',
                 'operator' => '>=',
                 'value' => '500',
@@ -419,7 +419,7 @@ describe('Customer Attributes Integration Tests', function () {
 
         test('filters customers by number of orders', function () {
             $segment = createCustomerAttributesTestSegment('Frequent Buyers', [
-                'type' => 'customersegmentation/segment_condition_customer_attributes',
+                'type' => 'customersegmentation/segment_condition_customer_clv',
                 'attribute' => 'number_of_orders',
                 'operator' => '>=',
                 'value' => '3',
@@ -439,7 +439,7 @@ describe('Customer Attributes Integration Tests', function () {
 
         test('filters customers by average order value', function () {
             $segment = createCustomerAttributesTestSegment('High AOV Customers', [
-                'type' => 'customersegmentation/segment_condition_customer_attributes',
+                'type' => 'customersegmentation/segment_condition_customer_clv',
                 'attribute' => 'average_order_value',
                 'operator' => '>=',
                 'value' => '100',
@@ -592,7 +592,7 @@ describe('Customer Attributes Integration Tests', function () {
 
         test('handles customers with no orders for CLV calculations', function () {
             $segment = createCustomerAttributesTestSegment('Customers with Orders', [
-                'type' => 'customersegmentation/segment_condition_customer_attributes',
+                'type' => 'customersegmentation/segment_condition_customer_clv',
                 'attribute' => 'number_of_orders',
                 'operator' => '>=',
                 'value' => '1',
@@ -721,18 +721,19 @@ describe('Customer Attributes Integration Tests', function () {
         });
 
         test('generates correct SQL for complex calculated fields', function () {
-            $condition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
+            $condition = Mage::getModel('customersegmentation/segment_condition_customer_clv');
             $condition->setAttribute('lifetime_sales');
             $condition->setOperator('>=');
             $condition->setValue('500');
 
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-            $sql = $condition->getConditionsSql($adapter);
+            $sql = $condition->getSubfilterSql('c.entity_id', true, null);
 
             expect($sql)->toBeString();
             expect($sql)->toContain('SUM');
             expect($sql)->toContain('grand_total');
-            expect($sql)->toContain('HAVING');
+            // CLV class generates subquery structure instead of HAVING clause
+            expect($sql)->toContain('total >=');
         });
 
         test('handles all supported operators correctly', function () {
@@ -768,9 +769,6 @@ describe('Customer Attributes Integration Tests', function () {
                 'website_id' => 'multiselect',
                 'days_since_registration' => 'numeric',
                 'days_until_birthday' => 'numeric',
-                'lifetime_sales' => 'numeric',
-                'number_of_orders' => 'numeric',
-                'average_order_value' => 'numeric',
             ];
 
             foreach ($testCases as $attribute => $expectedType) {
@@ -796,9 +794,6 @@ describe('Customer Attributes Integration Tests', function () {
                 'website_id' => 'select',
                 'days_since_registration' => 'text',
                 'days_until_birthday' => 'text',
-                'lifetime_sales' => 'text',
-                'number_of_orders' => 'text',
-                'average_order_value' => 'text',
             ];
 
             foreach ($testCases as $attribute => $expectedType) {

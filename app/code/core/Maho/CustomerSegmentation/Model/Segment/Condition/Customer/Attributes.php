@@ -61,7 +61,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             'gender' => 'select',
             'group_id', 'store_id', 'website_id' => 'multiselect',
             'dob', 'created_at' => 'date',
-            'days_since_registration', 'days_until_birthday', 'lifetime_sales', 'number_of_orders', 'average_order_value' => 'numeric',
+            'days_since_registration', 'days_until_birthday' => 'numeric',
             default => 'string',
         };
     }
@@ -145,16 +145,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
             case 'days_until_birthday':
                 return $this->buildDaysUntilBirthdayCondition($adapter, $operator, $value);
-
-                // Order-related attributes (moved to Order History in UI but still handled here)
-            case 'lifetime_sales':
-                return $this->buildLifetimeSalesCondition($adapter, $operator, $value);
-
-            case 'number_of_orders':
-                return $this->buildOrderCountCondition($adapter, $operator, $value);
-
-            case 'average_order_value':
-                return $this->buildAverageOrderCondition($adapter, $operator, $value);
         }
 
         return false;
@@ -221,61 +211,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
                     '{$currentDate}'
                 )
             END";
-    }
-
-    protected function buildLifetimeSalesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        // Special handling for "equals 0" - need to check customers with no orders
-        if (($operator === '==' || $operator === '=') && $value == 0) {
-            $subselect = $adapter->select()
-                ->from(['o' => $this->getOrderTable()], ['customer_id'])
-                ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-                ->where('o.customer_id IS NOT NULL');
-
-            return 'e.entity_id NOT IN (' . $subselect . ')';
-        }
-
-        // For all other cases, use the original logic
-        $subselect = $adapter->select()
-            ->from(['o' => $this->getOrderTable()], ['customer_id'])
-            ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-            ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
-
-    protected function buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        // Special handling for "equals 0" - need to check customers with no orders
-        if (($operator === '==' || $operator === '=') && $value == 0) {
-            $subselect = $adapter->select()
-                ->from(['o' => $this->getOrderTable()], ['customer_id'])
-                ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-                ->where('o.customer_id IS NOT NULL');
-
-            return 'e.entity_id NOT IN (' . $subselect . ')';
-        }
-
-        // For all other cases, use the original logic
-        $subselect = $adapter->select()
-            ->from(['o' => $this->getOrderTable()], ['customer_id'])
-            ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-            ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
-
-    protected function buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        $subselect = $adapter->select()
-            ->from(['o' => $this->getOrderTable()], ['customer_id'])
-            ->where('o.state NOT IN (?)', ['canceled', 'closed'])
-            ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
     }
 
     #[\Override]
