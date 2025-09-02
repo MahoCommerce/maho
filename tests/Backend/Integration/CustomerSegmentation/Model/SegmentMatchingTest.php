@@ -297,6 +297,32 @@ describe('Segment Matching Integration', function () {
         }
     });
 
+    test('can match customers with zero orders using customer attributes condition', function () {
+        // Create customers specifically for testing
+        createClvTestCustomers();
+
+        $segment = createMatchingTestSegment('Zero Orders Segment (Customer Attrs)', [
+            'type' => 'customersegmentation/segment_condition_customer_attributes',
+            'attribute' => 'number_of_orders',
+            'operator' => '==',
+            'value' => '0',
+        ]);
+
+        $matchedCustomers = $segment->getMatchingCustomerIds();
+
+        expect($matchedCustomers)->toBeArray();
+        expect(count($matchedCustomers))->toBeGreaterThan(0);
+
+        // Verify matched customers actually have 0 orders
+        foreach ($matchedCustomers as $customerId) {
+            $orderCount = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
+                ->getSize();
+            expect($orderCount)->toBe(0);
+        }
+    });
+
     test('can match customers with lifetime orders less than or equal to 1', function () {
         createClvTestCustomers();
 

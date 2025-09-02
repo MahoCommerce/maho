@@ -226,6 +226,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
     protected function buildLifetimeSalesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
+        // Special handling for "equals 0" - need to check customers with no orders
+        if (($operator === '==' || $operator === '=') && $value == 0) {
+            $subselect = $adapter->select()
+                ->from(['o' => $this->getOrderTable()], ['customer_id'])
+                ->where('o.state NOT IN (?)', ['canceled', 'closed'])
+                ->where('o.customer_id IS NOT NULL');
+
+            return 'e.entity_id NOT IN (' . $subselect . ')';
+        }
+
+        // For all other cases, use the original logic
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
@@ -237,6 +248,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
     protected function buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
+        // Special handling for "equals 0" - need to check customers with no orders
+        if (($operator === '==' || $operator === '=') && $value == 0) {
+            $subselect = $adapter->select()
+                ->from(['o' => $this->getOrderTable()], ['customer_id'])
+                ->where('o.state NOT IN (?)', ['canceled', 'closed'])
+                ->where('o.customer_id IS NOT NULL');
+
+            return 'e.entity_id NOT IN (' . $subselect . ')';
+        }
+
+        // For all other cases, use the original logic
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
