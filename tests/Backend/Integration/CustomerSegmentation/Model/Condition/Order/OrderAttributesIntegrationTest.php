@@ -540,7 +540,7 @@ describe('Order Attributes Condition Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 if ($orders->getSize() > 0) {
                     $totalAmount = 0;
@@ -586,7 +586,7 @@ describe('Order Attributes Condition Integration Tests', function () {
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 $totalAmount = 0;
                 foreach ($orders as $order) {
@@ -712,23 +712,29 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('handles customers with no orders gracefully', function () {
             $segment = createOrderAttributesTestSegment('Has Orders', [
                 'type' => 'customersegmentation/segment_condition_order_attributes',
-                'attribute' => 'number_of_orders',
-                'operator' => '>=',
-                'value' => '1',
+                'attribute' => 'total_amount',
+                'operator' => '>',
+                'value' => '0',
             ]);
 
             // Should not fail even if some customers have no orders
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
 
-            // All matched customers should have at least one order
+            // All matched customers should have at least one order with positive amount
             foreach ($matchedCustomers as $customerId) {
-                $orderCount = Mage::getResourceModel('sales/order_collection')
+                $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled'])
-                    ->getSize();
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
-                expect($orderCount)->toBeGreaterThan(0);
+                $hasPositiveAmountOrder = false;
+                foreach ($orders as $order) {
+                    if ((float) $order->getGrandTotal() > 0) {
+                        $hasPositiveAmountOrder = true;
+                        break;
+                    }
+                }
+                expect($hasPositiveAmountOrder)->toBe(true);
             }
         });
 

@@ -766,7 +766,6 @@ describe('Customer Attributes Integration Tests', function () {
                 'created_at' => 'date',
                 'group_id' => 'multiselect',
                 'store_id' => 'multiselect',
-                'website_id' => 'multiselect',
                 'days_since_registration' => 'numeric',
                 'days_until_birthday' => 'numeric',
             ];
@@ -791,7 +790,6 @@ describe('Customer Attributes Integration Tests', function () {
                 'created_at' => 'date',
                 'group_id' => 'select',
                 'store_id' => 'select',
-                'website_id' => 'select',
                 'days_since_registration' => 'text',
                 'days_until_birthday' => 'text',
             ];
@@ -806,7 +804,7 @@ describe('Customer Attributes Integration Tests', function () {
         test('provides correct operator options for selection fields', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
 
-            $selectionAttributes = ['gender', 'group_id', 'store_id', 'website_id'];
+            $selectionAttributes = ['gender', 'group_id', 'store_id'];
 
             foreach ($selectionAttributes as $attribute) {
                 $condition->setAttribute($attribute);

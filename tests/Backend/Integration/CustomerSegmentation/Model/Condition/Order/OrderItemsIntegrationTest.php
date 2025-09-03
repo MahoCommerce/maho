@@ -27,24 +27,25 @@ describe('Order Items Condition Integration Tests', function () {
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
+            expect(count($matchedCustomers))->toBeGreaterThan(0, 'Segment should match at least one customer with T-Shirt products');
 
-            // Verify each matched customer has actually bought a product containing "T-Shirt"
+            // Verify each matched customer actually has T-Shirt products
             foreach ($matchedCustomers as $customerId) {
-                $hasTShirtOrder = false;
+                $hasTShirt = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
                     foreach ($orderItems as $item) {
                         if (strpos($item->getName(), 'T-Shirt') !== false) {
-                            $hasTShirtOrder = true;
+                            $hasTShirt = true;
                             break 2;
                         }
                     }
                 }
-                expect($hasTShirtOrder)->toBe(true);
+                expect($hasTShirt)->toBe(true);
             }
         });
 
@@ -59,23 +60,23 @@ describe('Order Items Condition Integration Tests', function () {
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
 
-            // Verify each matched customer has bought the specific SKU
+            // Verify each matched customer actually has the specific SKU
             foreach ($matchedCustomers as $customerId) {
-                $hasSkuOrder = false;
+                $hasTargetSku = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
                     foreach ($orderItems as $item) {
                         if ($item->getSku() === 'TEST-SKU-001') {
-                            $hasSkuOrder = true;
+                            $hasTargetSku = true;
                             break 2;
                         }
                     }
                 }
-                expect($hasSkuOrder)->toBe(true);
+                expect($hasTargetSku)->toBe(true);
             }
         });
 
@@ -90,24 +91,23 @@ describe('Order Items Condition Integration Tests', function () {
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
 
-            // Verify each matched customer has bought simple products
+            // Verify each matched customer actually has simple products
             foreach ($matchedCustomers as $customerId) {
-                $hasSimpleProductOrder = false;
+                $hasSimpleProduct = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
                     foreach ($orderItems as $item) {
-                        $product = Mage::getModel('catalog/product')->load($item->getProductId());
-                        if ($product->getTypeId() === 'simple') {
-                            $hasSimpleProductOrder = true;
+                        if ($item->getProductType() === 'simple') {
+                            $hasSimpleProduct = true;
                             break 2;
                         }
                     }
                 }
-                expect($hasSimpleProductOrder)->toBe(true);
+                expect($hasSimpleProduct)->toBe(true);
             }
         });
     });
@@ -129,7 +129,7 @@ describe('Order Items Condition Integration Tests', function () {
                 $hasHighQtyOrder = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
@@ -160,7 +160,7 @@ describe('Order Items Condition Integration Tests', function () {
                 $hasHighValueItem = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
@@ -191,7 +191,7 @@ describe('Order Items Condition Integration Tests', function () {
                 $hasDiscountedItem = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
@@ -237,7 +237,7 @@ describe('Order Items Condition Integration Tests', function () {
                 $hasHighQtyTShirt = false;
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled']);
+                    ->addFieldToFilter('status', ['neq' => 'canceled']);
 
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
@@ -311,7 +311,7 @@ describe('Order Items Condition Integration Tests', function () {
 
 function createOrderItemsTestData(): void
 {
-    // Clean up existing test data
+    // Clean up existing test data - be more aggressive
     $orderItems = Mage::getResourceModel('sales/order_item_collection')
         ->addFieldToFilter('sku', ['like' => 'TEST-%']);
     foreach ($orderItems as $item) {
@@ -328,6 +328,14 @@ function createOrderItemsTestData(): void
         ->addFieldToFilter('email', ['like' => '%orderitemstest%']);
     foreach ($customers as $customer) {
         $customer->delete();
+    }
+
+    // Also clean up any stray customers that might interfere
+    for ($i = 1; $i <= 10; $i++) {
+        $testCustomer = Mage::getModel('customer/customer')->load($i);
+        if ($testCustomer->getId() && strpos($testCustomer->getEmail() ?? '', 'orderitemstest') !== false) {
+            $testCustomer->delete();
+        }
     }
 
     // Create test customers
@@ -423,7 +431,23 @@ function createOrderItemsTestOrder(int $customerId, array $items, string $state 
         // Set a dummy product ID (in real scenario, this would reference actual products)
         $orderItem->setProductId(1);
 
-        $orderItem->save();
+        try {
+            $orderItem->save();
+
+            // Debug: verify the item was saved
+            if (!$orderItem->getId()) {
+                throw new Exception('Failed to save order item: ' . $itemData['name'] . ' - no ID assigned');
+            }
+
+            // Verify the item can be loaded back
+            $testLoad = Mage::getModel('sales/order_item')->load($orderItem->getId());
+            if (!$testLoad->getId()) {
+                throw new Exception('Order item was saved but cannot be loaded back: ' . $itemData['name']);
+            }
+
+        } catch (Exception $e) {
+            throw new Exception('Exception saving order item: ' . $itemData['name'] . ' - ' . $e->getMessage());
+        }
     }
 
     return $order;
@@ -431,6 +455,16 @@ function createOrderItemsTestOrder(int $customerId, array $items, string $state 
 
 function createOrderItemsTestSegment(string $name, array $conditions): Maho_CustomerSegmentation_Model_Segment
 {
+    // Wrap single condition in combine structure if needed
+    if (isset($conditions['type']) && $conditions['type'] !== 'customersegmentation/segment_condition_combine') {
+        $conditions = [
+            'type' => 'customersegmentation/segment_condition_combine',
+            'aggregator' => 'all',
+            'value' => 1,
+            'conditions' => [$conditions],
+        ];
+    }
+
     $segment = Mage::getModel('customersegmentation/segment');
     $segment->setName($name);
     $segment->setIsActive(1);

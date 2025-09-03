@@ -51,12 +51,14 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
                 $attribute->getStoreLabel() ?: $attribute->getFrontendLabel();
         }
 
-        // Add order item specific attributes
+        // Add order item specific attributes (stored directly on order item)
+        $attributes['product_name'] = Mage::helper('customersegmentation')->__('Product Name');
+        $attributes['product_sku'] = Mage::helper('customersegmentation')->__('Product SKU');
+        $attributes['product_type'] = Mage::helper('customersegmentation')->__('Product Type');
         $attributes['qty_ordered'] = Mage::helper('customersegmentation')->__('Quantity Ordered');
         $attributes['row_total'] = Mage::helper('customersegmentation')->__('Row Total');
         $attributes['row_total_incl_tax'] = Mage::helper('customersegmentation')->__('Row Total (Inc. Tax)');
         $attributes['discount_amount'] = Mage::helper('customersegmentation')->__('Discount Amount');
-        $attributes['product_type'] = Mage::helper('customersegmentation')->__('Product Type');
 
         asort($attributes);
         $this->setAttributeOption($attributes);
@@ -155,14 +157,23 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
 
         // Handle product attributes
         if (str_starts_with($attribute, 'product_')) {
-            $attributeCode = substr($attribute, 8);
-            return $this->buildProductAttributeCondition($adapter, $attributeCode, $operator, $value);
+            $attributeCode = substr($attribute, 8); // Remove 'product_' prefix
+
+            // Check if this is a special order item field vs. actual product attribute
+            return match ($attributeCode) {
+                'name' => $this->buildOrderItemFieldCondition($adapter, 'name', $operator, $value),
+                'sku' => $this->buildOrderItemFieldCondition($adapter, 'sku', $operator, $value),
+                'type' => $this->buildOrderItemFieldCondition($adapter, 'product_type', $operator, $value),
+                default => $this->buildProductAttributeCondition($adapter, $attributeCode, $operator, $value),
+            };
         }
 
-        // Handle order item specific attributes
+        // Handle other order item specific attributes
         return match ($attribute) {
+            'product_name' => $this->buildOrderItemFieldCondition($adapter, 'name', $operator, $value),
+            'product_sku' => $this->buildOrderItemFieldCondition($adapter, 'sku', $operator, $value),
+            'product_type' => $this->buildOrderItemFieldCondition($adapter, 'product_type', $operator, $value),
             'qty_ordered', 'row_total', 'row_total_incl_tax', 'discount_amount' => $this->buildOrderItemFieldCondition($adapter, $attribute, $operator, $value),
-            'product_type' => $this->buildProductTypeCondition($adapter, $operator, $value),
             default => false,
         };
     }
@@ -181,7 +192,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
             ->join(['o' => $this->getOrderTable()], 'oi.order_id = o.entity_id', ['customer_id'])
             ->join(['p' => $productResource->getTable('catalog/product')], 'oi.product_id = p.entity_id', [])
             ->where('o.customer_id IS NOT NULL')
-            ->where('o.state NOT IN (?)', ['canceled']);
+            ->where('o.status NOT IN (?)', ['canceled']);
 
         // Join the appropriate attribute table based on attribute backend type
         if ($attribute->getBackendType() == 'static') {
@@ -213,20 +224,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildProductTypeCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        $productResource = Mage::getResourceSingleton('catalog/product');
-
-        $subselect = $adapter->select()
-            ->from(['oi' => $this->getOrderItemTable()], [])
-            ->join(['o' => $this->getOrderTable()], 'oi.order_id = o.entity_id', ['customer_id'])
-            ->join(['p' => $productResource->getTable('catalog/product')], 'oi.product_id = p.entity_id', [])
-            ->where('o.customer_id IS NOT NULL')
-            ->where('o.state NOT IN (?)', ['canceled'])
-            ->where($this->buildSqlCondition($adapter, 'p.type_id', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
 
     #[\Override]
     protected function getOrderTable(): string

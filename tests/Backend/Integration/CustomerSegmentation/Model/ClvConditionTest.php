@@ -127,11 +127,11 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 // Verify canceled orders are not included in profit calculation
                 $canceledOrders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['in' => ['canceled', 'closed']]);
+                    ->addFieldToFilter('status', ['in' => ['canceled', 'closed']]);
 
                 $validOrders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
+                    ->addFieldToFilter('status', ['nin' => ['canceled', 'closed']]);
 
                 // Calculate what sales should be (excluding canceled/closed)
                 $expectedSales = 0.0;
@@ -422,11 +422,12 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
+            expect($matchedCustomers)->toBeArray();
 
             foreach ($matchedCustomers as $customerId) {
                 $orderCount = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']])
+                    ->addFieldToFilter('status', ['nin' => ['canceled', 'closed']])
                     ->getSize();
 
                 expect($orderCount)->toBeGreaterThanOrEqual(2);
@@ -446,7 +447,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
                     ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
+                    ->addFieldToFilter('status', ['nin' => ['canceled', 'closed']]);
 
                 if ($orders->getSize() > 0) {
                     $totalSales = 0.0;
@@ -624,7 +625,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         $customerId = (int) $customerId;
         $orders = Mage::getResourceModel('sales/order_collection')
             ->addFieldToFilter('customer_id', $customerId)
-            ->addFieldToFilter('state', ['nin' => ['canceled', 'closed']]);
+            ->addFieldToFilter('status', ['nin' => ['canceled', 'closed']]);
 
         $total = 0.0;
         foreach ($orders as $order) {

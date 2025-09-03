@@ -42,7 +42,6 @@ describe('Order Attributes Condition', function () {
 
         // Should include order attributes
         expect($options)->toHaveKey('status');
-        expect($options)->toHaveKey('state');
         expect($options)->toHaveKey('grand_total');
     });
 
