@@ -246,6 +246,31 @@ describe('Segment Matching Integration', function () {
         $matchedCustomers = $segment->getMatchingCustomerIds();
 
         expect($matchedCustomers)->toBeArray();
+        expect(count($matchedCustomers))->toBeGreaterThan(0);
+
+        // Validate complex nested logic: (firstname=John AND email contains @test.com) OR (order >= 500)
+        foreach ($matchedCustomers as $customerId) {
+            $customer = Mage::getModel('customer/customer')->load($customerId);
+
+            // First condition: John AND @test.com
+            $firstNameMatch = $customer->getFirstname() === 'John';
+            $emailMatch = strpos($customer->getEmail(), '@test.com') !== false;
+            $firstCondition = $firstNameMatch && $emailMatch;
+
+            // Second condition: has order >= 500
+            $orders = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId);
+            $secondCondition = false;
+            foreach ($orders as $order) {
+                if ($order->getGrandTotal() >= 500) {
+                    $secondCondition = true;
+                    break;
+                }
+            }
+
+            // Customer must meet at least one condition (ANY aggregator)
+            expect($firstCondition || $secondCondition)->toBe(true);
+        }
     });
 
     test('segment matching respects website restrictions', function () {
