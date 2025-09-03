@@ -169,6 +169,32 @@ describe('Order Attributes Condition Integration Tests', function () {
                 expect($hasDiscountedOrder)->toBe(true);
             }
         });
+
+        test('filters customers by grand total', function () {
+            $segment = createOrderAttributesTestSegment('High Value Orders', [
+                'type' => 'customersegmentation/segment_condition_order_attributes',
+                'attribute' => 'grand_total',
+                'operator' => '>=',
+                'value' => '500.00',
+            ]);
+
+            $matchedCustomers = $segment->getMatchingCustomerIds();
+            expect($matchedCustomers)->toBeArray();
+
+            foreach ($matchedCustomers as $customerId) {
+                $orders = Mage::getResourceModel('sales/order_collection')
+                    ->addFieldToFilter('customer_id', $customerId);
+
+                $hasHighGrandTotalOrder = false;
+                foreach ($orders as $order) {
+                    if ((float) $order->getGrandTotal() >= 500.00) {
+                        $hasHighGrandTotalOrder = true;
+                        break;
+                    }
+                }
+                expect($hasHighGrandTotalOrder)->toBe(true, "Customer {$customerId} should have order with grand total >= 500");
+            }
+        });
     });
 
     describe('Order Status and State Conditions', function () {

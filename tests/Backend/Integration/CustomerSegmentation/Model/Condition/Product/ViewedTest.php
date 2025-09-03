@@ -172,7 +172,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             expect($sql)->toContain('COUNT(*)');
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');
-            expect($sql)->toContain('view_count');
+            expect($sql)->toContain('COUNT(*)');
         });
 
         test('generates correct SQL for last_viewed_at condition', function () {
@@ -286,20 +286,177 @@ describe('Product Viewed Condition Integration Tests', function () {
 
 });
 
-// Helper method to set up test data
+// Helper methods for test data setup
 function setupTestData()
 {
-    // This would normally set up test customers, products, and viewed product records
-    // For now, we'll just ensure the tables exist and are accessible
-    $tables = [
-        'report_viewed_product_index',
-        'catalog_product_entity',
-        'catalog_product_entity_varchar',
-        'catalog_category_product',
+    // Legacy compatibility function - calls the new comprehensive setup
+    setupProductViewedTestData();
+}
+
+function setupProductViewedTestData(): void
+{
+    $uniqueId = uniqid('viewed_', true);
+
+    // Ensure we have test categories
+    $electronicsCategory = createTestCategory('Electronics', 'electronics-test');
+    $clothingCategory = createTestCategory('Clothing', 'clothing-test');
+
+    // Create test products
+    $laptop = createTestProduct('Test Laptop Pro', 'test-laptop-pro-' . $uniqueId, (int) $electronicsCategory->getId());
+    $shirt = createTestProduct('Test Shirt Cotton', 'test-shirt-cotton-' . $uniqueId, (int) $clothingCategory->getId());
+    $phone = createTestProduct('Test Smartphone', 'test-smartphone-' . $uniqueId, (int) $electronicsCategory->getId());
+
+    // Create test customers with varying view patterns
+    $customers = [
+        // High-frequency viewer (views multiple products frequently)
+        [
+            'firstname' => 'Heavy',
+            'lastname' => 'Viewer',
+            'email' => "heavy.viewer.{$uniqueId}@test.com",
+            'views' => [
+                ['product_id' => $laptop->getId(), 'days_ago' => 2],
+                ['product_id' => $laptop->getId(), 'days_ago' => 3],
+                ['product_id' => $laptop->getId(), 'days_ago' => 5],
+                ['product_id' => $phone->getId(), 'days_ago' => 3],
+                ['product_id' => $phone->getId(), 'days_ago' => 4],
+            ],
+        ],
+        // Recent viewer (views in last few days)
+        [
+            'firstname' => 'Recent',
+            'lastname' => 'Viewer',
+            'email' => "recent.viewer.{$uniqueId}@test.com",
+            'views' => [
+                ['product_id' => $shirt->getId(), 'days_ago' => 1],
+                ['product_id' => $laptop->getId(), 'days_ago' => 2],
+            ],
+        ],
+        // Old viewer (hasn't viewed recently)
+        [
+            'firstname' => 'Old',
+            'lastname' => 'Viewer',
+            'email' => "old.viewer.{$uniqueId}@test.com",
+            'views' => [
+                ['product_id' => $shirt->getId(), 'days_ago' => 35],
+                ['product_id' => $phone->getId(), 'days_ago' => 40],
+            ],
+        ],
+        // Category-specific viewer (only views electronics)
+        [
+            'firstname' => 'Electronics',
+            'lastname' => 'Fan',
+            'email' => "electronics.fan.{$uniqueId}@test.com",
+            'views' => [
+                ['product_id' => $laptop->getId(), 'days_ago' => 7],
+                ['product_id' => $phone->getId(), 'days_ago' => 10],
+                ['product_id' => $laptop->getId(), 'days_ago' => 12],
+            ],
+        ],
+        // Low-frequency viewer
+        [
+            'firstname' => 'Light',
+            'lastname' => 'Viewer',
+            'email' => "light.viewer.{$uniqueId}@test.com",
+            'views' => [
+                ['product_id' => $shirt->getId(), 'days_ago' => 20],
+            ],
+        ],
+        // Customer with no views (for control)
+        [
+            'firstname' => 'No',
+            'lastname' => 'Views',
+            'email' => "no.views.{$uniqueId}@test.com",
+            'views' => [],
+        ],
     ];
 
-    foreach ($tables as $table) {
-        $tableName = Mage::getSingleton('core/resource')->getTableName($table);
-        expect($tableName)->toBeString();
+    foreach ($customers as $customerData) {
+        // Create customer
+        $customer = Mage::getModel('customer/customer');
+        $customer->setFirstname($customerData['firstname']);
+        $customer->setLastname($customerData['lastname']);
+        $customer->setEmail($customerData['email']);
+        $customer->setGroupId(1);
+        $customer->setWebsiteId(1);
+        $customer->save();
+
+        // Create product view records
+        $reportTable = Mage::getSingleton('core/resource')->getTableName('reports/viewed_product_index');
+        foreach ($customerData['views'] as $viewData) {
+            $viewDate = date('Y-m-d H:i:s', strtotime("-{$viewData['days_ago']} days"));
+
+            Mage::getSingleton('core/resource')->getConnection('core_write')->insertOnDuplicate(
+                $reportTable,
+                [
+                    'visitor_id' => null,
+                    'customer_id' => $customer->getId(),
+                    'product_id' => $viewData['product_id'],
+                    'store_id' => 1,
+                    'added_at' => $viewDate,
+                ],
+                ['added_at'], // Only update the added_at field on duplicate
+            );
+        }
     }
+}
+
+function createTestCategory(string $name, string $urlKey): Mage_Catalog_Model_Category
+{
+    $category = Mage::getModel('catalog/category');
+    $category->setName($name);
+    $category->setUrlKey($urlKey . '-' . uniqid());
+    $category->setIsActive(1);
+    $category->setParentId(2); // Default category
+    $category->setPath('1/2'); // Root path
+    $category->save();
+    return $category;
+}
+
+function createTestProduct(string $name, string $sku, int $categoryId): Mage_Catalog_Model_Product
+{
+    $product = Mage::getModel('catalog/product');
+    $product->setName($name);
+    $product->setSku($sku);
+    $product->setPrice(99.99);
+    $product->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+    $product->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
+    $product->setAttributeSetId(4); // Default attribute set
+    $product->setWebsiteIds([1]);
+    $product->setCategoryIds([$categoryId]);
+    $product->save();
+
+    // Assign product to category
+    $category = Mage::getModel('catalog/category')->load($categoryId);
+    $category->setPostedProducts([$product->getId() => 0]);
+    $category->save();
+
+    return $product;
+}
+
+function createProductViewedTestSegment(string $name, array $conditions): Maho_CustomerSegmentation_Model_Segment
+{
+    // Wrap single condition in combine structure if needed
+    if (isset($conditions['type']) && $conditions['type'] !== 'customersegmentation/segment_condition_combine') {
+        $conditions = [
+            'type' => 'customersegmentation/segment_condition_combine',
+            'aggregator' => 'all',
+            'value' => 1,
+            'conditions' => [$conditions],
+        ];
+    }
+
+    $segment = Mage::getModel('customersegmentation/segment');
+    $segment->setName($name);
+    $segment->setDescription('Product viewed test segment for ' . $name);
+    $segment->setIsActive(1);
+    $segment->setWebsiteIds('1');
+    $segment->setCustomerGroupIds('0,1,2,3');
+    $segment->setConditionsSerialized(serialize($conditions));
+    $segment->setRefreshMode('manual');
+    $segment->setRefreshStatus('pending');
+    $segment->setPriority(10);
+    $segment->save();
+
+    return $segment;
 }

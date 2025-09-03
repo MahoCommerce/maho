@@ -168,10 +168,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
     protected function buildViewCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->getReportViewedTable()], ['customer_id', 'view_count' => 'COUNT(*)'])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
             ->where('rv.customer_id IS NOT NULL')
             ->group('rv.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'view_count', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -179,10 +179,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
     protected function buildLastViewedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->getReportViewedTable()], ['customer_id', 'last_viewed' => 'MAX(rv.added_at)'])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
             ->where('rv.customer_id IS NOT NULL')
             ->group('rv.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'last_viewed', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'MAX(rv.added_at)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -190,10 +190,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
     protected function buildDaysSinceViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
-            ->from(['rv' => $this->getReportViewedTable()], ['customer_id', 'last_viewed' => 'MAX(rv.added_at)'])
+            ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
             ->where('rv.customer_id IS NOT NULL')
             ->group('rv.customer_id')
-            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_viewed)", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', MAX(rv.added_at))", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

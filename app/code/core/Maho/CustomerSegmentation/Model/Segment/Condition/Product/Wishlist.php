@@ -185,10 +185,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
-            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id', 'items_count' => 'COUNT(*)'])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
             ->where('w.customer_id IS NOT NULL')
             ->group('w.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'items_count', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -208,10 +208,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
-            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id', 'last_added' => 'MAX(wi.added_at)'])
+            ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
             ->where('w.customer_id IS NOT NULL')
             ->group('w.customer_id')
-            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', last_added)", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', MAX(wi.added_at))", $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
