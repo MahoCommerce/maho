@@ -22,10 +22,10 @@ vendor/bin/rector -c .rector.php
 
 ### Testing
 ```bash
-vendor/bin/pest                      # Run all tests (Install → Backend → Frontend)
-vendor/bin/pest --testsuite=Frontend # Run frontend tests only  
-vendor/bin/pest --testsuite=Backend  # Run backend tests only
-vendor/bin/pest --testsuite=Install  # Run install tests only
+composer test                        # Run all tests (Install → Backend → Frontend)
+composer test -- --testsuite=Frontend # Run frontend tests only  
+composer test -- --testsuite=Backend  # Run backend tests only
+composer test -- --testsuite=Install  # Run install tests only
 ```
 
 ### Database & Indexing
