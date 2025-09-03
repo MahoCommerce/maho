@@ -179,7 +179,9 @@
         });
 
         dialog.showModal();
-        dialog.querySelector('.dialog-content')?.focus();
+        if (!dialog.querySelector('[autofocus]')) {
+            dialog.querySelector('.dialog-content')?.focus();
+        }
 
 
         if (typeof options.onOpen === 'function') {
