@@ -258,7 +258,7 @@ describe('Complex Condition Combinations', function () {
             'conditions' => [
                 [
                     'type' => 'customersegmentation/segment_condition_customer_clv',
-                    'attribute' => 'total_lifetime_value',
+                    'attribute' => 'lifetime_sales',
                     'operator' => '>=',
                     'value' => '500',
                 ],
@@ -287,8 +287,35 @@ describe('Complex Condition Combinations', function () {
         $matchedCustomers = $segment->getMatchingCustomerIds();
 
         expect($matchedCustomers)->toBeArray();
+        expect(count($matchedCustomers))->toBeGreaterThan(0);
 
-        // Test validates structure and basic matching logic
+        // Verify each matched customer meets the conditions:
+        // lifetime_sales >= 500 AND (email contains @test.com OR newsletter subscriber)
+        foreach ($matchedCustomers as $customerId) {
+            $customer = Mage::getModel('customer/customer')->load($customerId);
+
+            // Calculate lifetime sales
+            $orders = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('status', ['nin' => ['canceled', 'closed']]);
+
+            $lifetimeSales = 0.0;
+            foreach ($orders as $order) {
+                $lifetimeSales += (float) $order->getGrandTotal();
+            }
+
+            // First condition: lifetime_sales >= 500
+            expect($lifetimeSales)->toBeGreaterThanOrEqual(500.0);
+
+            // Second condition: email contains @test.com OR newsletter subscriber
+            $emailMatch = strpos($customer->getEmail(), '@test.com') !== false;
+
+            $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail($customer->getEmail());
+            $newsletterMatch = $subscriber->isSubscribed();
+
+            $secondCondition = $emailMatch || $newsletterMatch;
+            expect($secondCondition)->toBe(true);
+        }
     });
 
     test('can handle product-based conditions with customer criteria', function () {
@@ -466,9 +493,9 @@ describe('Complex Condition Combinations', function () {
 
         $orderData = [
             ['grand_total' => 75.50, 'status' => 'pending'],
-            ['grand_total' => 250.00, 'status' => 'pending'],
+            ['grand_total' => 650.00, 'status' => 'pending'],  // High value for CLV test
             ['grand_total' => 125.00, 'status' => 'processing'],
-            ['grand_total' => 300.00, 'status' => 'pending'],
+            ['grand_total' => 800.00, 'status' => 'pending'],  // High value for CLV test
         ];
 
         $orderIndex = 0;

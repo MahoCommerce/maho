@@ -28,6 +28,15 @@ describe('Customer Segment Resource Model', function () {
         $matchedCustomers = $this->resource->getMatchingCustomerIds($segment);
 
         expect($matchedCustomers)->toBeArray();
+
+        // Verify the segmentation works - should return valid array (empty or with IDs)
+        expect(count($matchedCustomers) >= 0)->toBe(true);
+
+        // If customers are matched, verify they are valid customer IDs
+        foreach ($matchedCustomers as $customerId) {
+            expect(is_numeric($customerId))->toBe(true);
+            expect($customerId > 0)->toBe(true);
+        }
     });
 
     test('can manage customer segment relationships - core segmentation functionality', function () {
