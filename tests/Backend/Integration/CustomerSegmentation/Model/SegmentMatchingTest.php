@@ -301,9 +301,9 @@ describe('Segment Matching Integration', function () {
         $website2Customers = Mage::getModel('customer/customer')->getCollection()
             ->addFieldToFilter('website_id', 2)
             ->addFieldToFilter('email', ['like' => '%@multiwebsite.com%']);
-        
+
         expect($website2Customers->getSize())->toBeGreaterThan(0);
-        
+
         // Verify none of the website 2 customers are in the matched results
         foreach ($website2Customers as $customer) {
             expect($matchedCustomers)->not->toContain($customer->getId());
@@ -341,9 +341,9 @@ describe('Segment Matching Integration', function () {
         $otherGroupCustomers = Mage::getModel('customer/customer')->getCollection()
             ->addFieldToFilter('group_id', ['neq' => 1])
             ->addFieldToFilter('email', ['like' => '%@grouptest.com%']);
-        
+
         expect($otherGroupCustomers->getSize())->toBeGreaterThan(0);
-        
+
         // Verify none of the other group customers are in the matched results
         foreach ($otherGroupCustomers as $customer) {
             expect($matchedCustomers)->not->toContain($customer->getId());
@@ -381,7 +381,7 @@ describe('Segment Matching Integration', function () {
         $group3Customers = Mage::getModel('customer/customer')->getCollection()
             ->addFieldToFilter('group_id', 3)
             ->addFieldToFilter('email', ['like' => '%@grouptest.com%']);
-        
+
         if ($group3Customers->getSize() > 0) {
             foreach ($group3Customers as $customer) {
                 expect($matchedCustomers)->not->toContain($customer->getId());
@@ -423,9 +423,9 @@ describe('Segment Matching Integration', function () {
         // Add OR condition: different website OR different group (using multiple WHERE calls)
         $excludedCustomers->getSelect()->where('e.website_id != ?', 1);
         $excludedCustomers->getSelect()->orWhere('e.group_id != ?', 2);
-        
+
         expect($excludedCustomers->getSize())->toBeGreaterThan(0);
-        
+
         foreach ($excludedCustomers as $customer) {
             expect($matchedCustomers)->not->toContain($customer->getId());
         }
@@ -853,7 +853,7 @@ describe('Segment Matching Integration', function () {
     function createMultiWebsiteTestCustomers(): void
     {
         $uniqueId = uniqid('multiwebsite_', true);
-        
+
         // Ensure we have website 2 available (create if doesn't exist)
         $website2 = Mage::getModel('core/website')->load(2);
         if (!$website2->getId()) {
@@ -874,7 +874,7 @@ describe('Segment Matching Integration', function () {
             ],
             [
                 'firstname' => 'Website1',
-                'lastname' => 'Customer2', 
+                'lastname' => 'Customer2',
                 'email' => "w1.customer2.{$uniqueId}@multiwebsite.com",
                 'group_id' => 2,
                 'website_id' => 1,
@@ -900,7 +900,7 @@ describe('Segment Matching Integration', function () {
         ];
 
         $allCustomers = array_merge($website1Customers, $website2Customers);
-        
+
         foreach ($allCustomers as $customerData) {
             $customer = Mage::getModel('customer/customer');
             $customer->setData($customerData);
@@ -911,7 +911,7 @@ describe('Segment Matching Integration', function () {
     function createMultiGroupTestCustomers(): void
     {
         $uniqueId = uniqid('multigroup_', true);
-        
+
         // Create customers in different groups (0 = not logged in, 1 = general, 2 = wholesale, 3 = retail)
         $customers = [
             [
@@ -968,7 +968,7 @@ describe('Segment Matching Integration', function () {
     function createMultiWebsiteAndGroupTestCustomers(): void
     {
         $uniqueId = uniqid('combined_', true);
-        
+
         // Ensure website 2 exists
         $website2 = Mage::getModel('core/website')->load(2);
         if (!$website2->getId()) {
