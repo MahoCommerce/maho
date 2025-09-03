@@ -48,9 +48,21 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => 'customersegmentation/segment_condition_customer_clv|' . $code,
             ];
         }
-        usort($orderConditions, function($a, $b) {
+        usort($orderConditions, function ($a, $b) {
             return strcasecmp($a['label'], $b['label']);
         });
+
+        // Generate order items conditions from condition class
+        $orderItemsConditions = [];
+        $orderItemsCondition = Mage::getModel('customersegmentation/segment_condition_order_items');
+        $orderItemsCondition->loadAttributeOptions();
+        $orderItemsAttributes = $orderItemsCondition->getAttributeOption();
+        foreach ($orderItemsAttributes as $code => $label) {
+            $orderItemsConditions[] = [
+                'label' => $label,
+                'value' => 'customersegmentation/segment_condition_order_items|' . $code,
+            ];
+        }
 
         // Generate customer personal conditions from condition class
         $customerPersonalConditions = [];
@@ -148,6 +160,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
             [
                 'label' => Mage::helper('customersegmentation')->__('Order History'),
                 'value' => $orderConditions,
+            ],
+            [
+                'label' => Mage::helper('customersegmentation')->__('Order Items'),
+                'value' => $orderItemsConditions,
             ],
             [
                 'label' => Mage::helper('customersegmentation')->__('Shopping Cart'),
