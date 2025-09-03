@@ -44,7 +44,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             'created_at' => Mage::helper('customersegmentation')->__('Customer Since'),
             'group_id' => Mage::helper('customersegmentation')->__('Customer Group'),
             'store_id' => Mage::helper('customersegmentation')->__('Account Created In Store'),
-            'website_id' => Mage::helper('customersegmentation')->__('Website'),
             'days_since_registration' => Mage::helper('customersegmentation')->__('Days Since Registration'),
             'days_until_birthday' => Mage::helper('customersegmentation')->__('Days Until Birthday'),
         ];
@@ -59,7 +58,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     {
         return match ($this->getAttribute()) {
             'gender' => 'select',
-            'group_id', 'store_id', 'website_id' => 'multiselect',
+            'group_id', 'store_id' => 'multiselect',
             'dob', 'created_at' => 'date',
             'days_since_registration', 'days_until_birthday' => 'numeric',
             default => 'string',
@@ -70,7 +69,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     public function getValueElementType(): string
     {
         return match ($this->getAttribute()) {
-            'gender', 'group_id', 'store_id', 'website_id' => 'select',
+            'gender', 'group_id', 'store_id' => 'select',
             'dob', 'created_at' => 'date',
             default => 'text',
         };
@@ -82,7 +81,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         $operators = parent::getOperatorSelectOptions();
 
         // For selection fields, use simple is/is not operators
-        if (in_array($this->getAttribute(), ['gender', 'group_id', 'store_id', 'website_id'])) {
+        if (in_array($this->getAttribute(), ['gender', 'group_id', 'store_id'])) {
             return [
                 ['value' => '==', 'label' => Mage::helper('rule')->__('is')],
                 ['value' => '!=', 'label' => Mage::helper('rule')->__('is not')],
@@ -105,8 +104,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
                     ->toOptionArray(),
                 'store_id' => Mage::getSingleton('adminhtml/system_store')
                     ->getStoreValuesForForm(),
-                'website_id' => Mage::getSingleton('adminhtml/system_store')
-                    ->getWebsiteValuesForForm(),
                 default => [],
             };
             $this->setData('value_select_options', $options);
@@ -125,7 +122,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             case 'email':
             case 'group_id':
             case 'store_id':
-            case 'website_id':
                 $field = 'e.' . $attribute;
                 return $this->buildSqlCondition($adapter, $field, $operator, $value);
 
@@ -217,7 +213,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     public function getOperatorName(): string
     {
         // For selection fields, provide custom operator names
-        if (in_array($this->getAttribute(), ['gender', 'group_id', 'store_id', 'website_id'])) {
+        if (in_array($this->getAttribute(), ['gender', 'group_id', 'store_id'])) {
             return match ($this->getOperator()) {
                 '==' => Mage::helper('rule')->__('is'),
                 '!=' => Mage::helper('rule')->__('is not'),
