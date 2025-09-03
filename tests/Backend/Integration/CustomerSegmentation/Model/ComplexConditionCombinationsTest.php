@@ -337,7 +337,7 @@ describe('Complex Condition Combinations', function () {
                     'conditions' => [
                         [
                             'type' => 'customersegmentation/segment_condition_product_wishlist',
-                            'attribute' => 'item_count',
+                            'attribute' => 'wishlist_items_count',
                             'operator' => '>',
                             'value' => '0',
                         ],

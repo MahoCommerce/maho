@@ -377,7 +377,7 @@ describe('Customer Attributes Integration Tests', function () {
         test('filters customers by website_id', function () {
             $segment = createCustomerAttributesTestSegment('Website ID Filter', [
                 'type' => 'customersegmentation/segment_condition_customer_attributes',
-                'attribute' => 'website_id',
+                'attribute' => 'store_id',
                 'operator' => '==',
                 'value' => '1',
             ]);

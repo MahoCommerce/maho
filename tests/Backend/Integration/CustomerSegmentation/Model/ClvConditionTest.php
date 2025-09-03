@@ -416,7 +416,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
         test('lifetime_orders still works correctly', function () {
             $segment = createClvConditionTestSegment('Orders Regression', [
                 'type' => 'customersegmentation/segment_condition_customer_clv',
-                'attribute' => 'lifetime_orders',
+                'attribute' => 'number_of_orders',
                 'operator' => '>=',
                 'value' => '2',
             ]);
