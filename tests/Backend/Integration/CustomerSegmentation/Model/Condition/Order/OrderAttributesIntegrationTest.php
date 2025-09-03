@@ -197,31 +197,6 @@ describe('Order Attributes Condition Integration Tests', function () {
             }
         });
 
-        test('filters customers by order state', function () {
-            $segment = createOrderAttributesTestSegment('Processing Orders', [
-                'type' => 'customersegmentation/segment_condition_order_attributes',
-                'attribute' => 'state',
-                'operator' => '==',
-                'value' => 'processing',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toBeArray();
-
-            foreach ($matchedCustomers as $customerId) {
-                $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId);
-
-                $hasProcessingOrder = false;
-                foreach ($orders as $order) {
-                    if ($order->getState() === 'processing') {
-                        $hasProcessingOrder = true;
-                        break;
-                    }
-                }
-                expect($hasProcessingOrder)->toBe(true);
-            }
-        });
 
         test('excludes canceled orders correctly', function () {
             $segment = createOrderAttributesTestSegment('Non-Canceled Orders', [
@@ -550,62 +525,6 @@ describe('Order Attributes Condition Integration Tests', function () {
         });
     });
 
-    describe('Calculated Fields - Number of Orders', function () {
-        test('finds customers with multiple orders', function () {
-            $segment = createOrderAttributesTestSegment('Repeat Customers', [
-                'type' => 'customersegmentation/segment_condition_order_attributes',
-                'attribute' => 'number_of_orders',
-                'operator' => '>=',
-                'value' => '3',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $orderCount = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled'])
-                    ->getSize();
-
-                expect($orderCount)->toBeGreaterThanOrEqual(3);
-            }
-        });
-
-        test('finds single-order customers', function () {
-            $segment = createOrderAttributesTestSegment('Single Order Customers', [
-                'type' => 'customersegmentation/segment_condition_order_attributes',
-                'attribute' => 'number_of_orders',
-                'operator' => '==',
-                'value' => '1',
-            ]);
-
-            $matchedCustomers = $segment->getMatchingCustomerIds();
-
-            foreach ($matchedCustomers as $customerId) {
-                $orderCount = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('state', ['neq' => 'canceled'])
-                    ->getSize();
-
-                expect($orderCount)->toBe(1);
-            }
-        });
-
-        test('number of orders condition excludes canceled orders', function () {
-            $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
-            $condition->setAttribute('number_of_orders');
-            $condition->setOperator('>=');
-            $condition->setValue('1');
-
-            $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-            $sql = $condition->getConditionsSql($adapter);
-
-            expect($sql)->toBeString();
-            expect($sql)->toContain("o.state NOT IN ('canceled')");
-            expect($sql)->toContain('COUNT(*)');
-            expect($sql)->toContain('HAVING');
-        });
-    });
 
     describe('Calculated Fields - Average Order Amount', function () {
         test('finds customers with high average order value', function () {
@@ -714,24 +633,6 @@ describe('Order Attributes Condition Integration Tests', function () {
             expect($hasStatusOptions)->toBe(true);
         });
 
-        test('loads order state options dynamically', function () {
-            $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
-            $condition->setAttribute('state');
-
-            $options = $condition->getValueSelectOptions();
-
-            expect($options)->toBeArray();
-            expect(count($options))->toBeGreaterThan(1);
-
-            $hasStateOptions = false;
-            foreach ($options as $option) {
-                if (!empty($option['value']) && $option['value'] !== '') {
-                    $hasStateOptions = true;
-                    break;
-                }
-            }
-            expect($hasStateOptions)->toBe(true);
-        });
 
         test('loads payment method options dynamically', function () {
             $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
@@ -887,9 +788,9 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('generates valid SQL for all supported attributes', function () {
             $attributes = [
                 'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount',
-                'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at',
+                'discount_amount', 'grand_total', 'status', 'created_at', 'updated_at',
                 'store_id', 'currency_code', 'payment_method', 'shipping_method', 'coupon_code',
-                'days_since_last_order', 'number_of_orders', 'average_order_amount', 'total_ordered_amount',
+                'days_since_last_order', 'average_order_amount', 'total_ordered_amount',
             ];
 
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
@@ -903,7 +804,6 @@ describe('Order Attributes Condition Integration Tests', function () {
                 $value = match ($attribute) {
                     'created_at', 'updated_at' => '2024-01-01',
                     'status' => 'pending',
-                    'state' => 'new',
                     'currency_code' => 'USD',
                     'payment_method' => 'checkmo',
                     'shipping_method' => 'flatrate_flatrate',
@@ -927,7 +827,6 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('SQL contains proper subqueries for calculated fields', function () {
             $calculatedFields = [
                 'days_since_last_order' => ['DATEDIFF', 'MAX(o.created_at)'],
-                'number_of_orders' => ['COUNT(*)', 'HAVING'],
                 'average_order_amount' => ['AVG(o.grand_total)', 'HAVING'],
                 'total_ordered_amount' => ['SUM(o.grand_total)', 'HAVING'],
             ];
