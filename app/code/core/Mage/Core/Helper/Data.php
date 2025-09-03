@@ -1156,4 +1156,50 @@ XML;
         $violations = $this->getSymfonyValidator()->validate($value, $constraint);
         return count($violations) === 0;
     }
+
+    /**
+     * Get SVG icon content
+     *
+     * @param string $name Icon name (e.g., 'circle-x', 'plus', etc.)
+     * @param string $variant Icon variant: 'outline' or 'filled'
+     * @param string $role ARIA role, see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles
+     * @return string SVG icon HTML or empty string if not found
+     */
+    public function getIconSvg(string $name, string $variant = 'outline', string $role = 'none'): string
+    {
+        $name = basename(strtolower($name));
+        $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
+
+        $cache = Mage::app()->getCache();
+        $cacheId = "MAHO_ICON_{$variant}_{$name}";
+        $useCache = Mage::app()->useCache('icons');
+
+        if ($useCache && $cachedIcon = $cache->load($cacheId)) {
+            $cachedIcon = str_replace('<svg ', '<svg role="' . $role . '" ', $cachedIcon);
+            return $cachedIcon;
+        }
+
+        $installPath = null;
+        $packageName = 'mahocommerce/icons';
+        try {
+            $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
+        } catch (OutOfBoundsException $e) {
+            return '';
+        }
+        if ($installPath === null) {
+            return '';
+        }
+
+        $iconSvg = file_get_contents("$installPath/icons/$variant/$name.svg", false);
+        if ($iconSvg === false) {
+            return '';
+        }
+
+        if ($useCache) {
+            $cache->save($iconSvg, $cacheId, ['ICONS']);
+        }
+
+        $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
+        return $iconSvg;
+    }
 }

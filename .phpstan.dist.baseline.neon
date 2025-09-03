@@ -20278,12 +20278,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Action/Collection.php
 
 		-
-			message: '#^Binary operation "\." between array and '' '' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
-
-		-
 			message: '#^Method Mage_Rule_Model_Condition_Abstract\:\:getAttributeOption\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -22073,12 +22067,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Rule/Condition/Product.php
-
-		-
-			message: '#^Return type \(string\) of method Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned\:\:getOperatorName\(\) should be compatible with return type \(array\) of method Mage_Rule_Model_Condition_Abstract\:\:getOperatorName\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Rule/Condition/Product/Attribute/Assigned.php
 
 		-
 			message: '#^Call to an undefined method Mage_Rule_Model_Action_Collection\:\:validate\(\)\.$#'

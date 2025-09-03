@@ -55,6 +55,15 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
                     'value'     => Mage::app()->getStore(true)->getId(),
                 ]);
             }
+
+            if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+                $fieldset->addField('customer_segments', 'multiselect', [
+                    'name'     => 'customer_segments[]',
+                    'label'    => Mage::helper('newsletter')->__('Customer Segments'),
+                    'title'    => Mage::helper('newsletter')->__('Customer Segments'),
+                    'values'   => $this->getCustomerSegmentOptions(),
+                ]);
+            }
         } else {
             $fieldset->addField('date', 'date', [
                 'name'      => 'start_at',
@@ -176,7 +185,29 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
             ]);
         }
 
+        $form->setUseContainer(true);
         $this->setForm($form);
         return $this;
+    }
+
+    /**
+     * Get customer segment options for multiselect
+     * Only called if CustomerSegmentation module is enabled
+     */
+    protected function getCustomerSegmentOptions(): array
+    {
+        $collection = Mage::getResourceModel('customersegmentation/segment_collection')
+            ->addFieldToFilter('is_active', 1)
+            ->setOrder('name', 'ASC');
+
+        $options = [];
+        foreach ($collection as $segment) {
+            $options[] = [
+                'value' => $segment->getId(),
+                'label' => $segment->getName(),
+            ];
+        }
+
+        return $options;
     }
 }

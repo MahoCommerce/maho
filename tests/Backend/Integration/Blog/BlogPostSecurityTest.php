@@ -10,20 +10,7 @@
 
 uses(Tests\MahoBackendTestCase::class);
 
-beforeEach(function () {
-    $this->createdPosts = [];
-});
-
-afterEach(function () {
-    // Clean up created posts
-    foreach ($this->createdPosts as $post) {
-        try {
-            $post->delete();
-        } catch (Exception $e) {
-            // Ignore delete errors during cleanup
-        }
-    }
-});
+beforeEach(function () {});
 
 it('filters out dangerous JavaScript code from blog post content', function () {
     $post = Mage::getModel('blog/post');
@@ -34,7 +21,6 @@ it('filters out dangerous JavaScript code from blog post content', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->not->toContain('<script>');
@@ -52,7 +38,6 @@ it('filters out onclick and other JavaScript event handlers', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->not->toContain('onclick');
@@ -71,7 +56,6 @@ it('filters out iframe and object tags', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->not->toContain('<iframe');
@@ -88,7 +72,6 @@ it('filters out CSS expressions and behaviors', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->not->toContain('expression(');
@@ -105,7 +88,6 @@ it('filters out data: URLs and base64 content', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->not->toContain('data:');
@@ -121,7 +103,6 @@ it('preserves target="_blank" in links', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->toContain('target="_blank"');
@@ -138,7 +119,6 @@ it('adds target="_blank" to links without it', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->toContain('target="_blank"');
@@ -154,7 +134,6 @@ it('adds security attributes to all links', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->toContain('rel="noopener noreferrer"');
@@ -170,7 +149,6 @@ it('preserves safe HTML content', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->toContain('<h2>Blog Title</h2>');
@@ -188,7 +166,6 @@ it('filters out PHP code', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->not->toContain('<?php');
@@ -205,7 +182,6 @@ it('filters out javascript: URLs', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     expect($savedContent)->not->toContain('javascript:');
@@ -222,7 +198,6 @@ it('handles multiple malicious attempts in one content block', function () {
          ->setIsActive(1)
          ->setPublishDate('2025-01-01');
     $post->save();
-    $this->createdPosts[] = $post;
 
     $savedContent = $post->getContent();
     // Verify dangerous tags and attributes are removed

@@ -39,6 +39,7 @@ namespace PHPSTORM_META {
         'configurableswatches/productlist' => \Mage_ConfigurableSwatches_Helper_Productlist::class,
         'configurableswatches/swatchdimensions' => \Mage_ConfigurableSwatches_Helper_Swatchdimensions::class,
         'currencysymbol/data' => \Mage_CurrencySymbol_Helper_Data::class,
+        'customersegmentation/data' => \Maho_CustomerSegmentation_Helper_Data::class,
         'giftmessage/data' => \Mage_GiftMessage_Helper_Data::class,
         'giftmessage/message' => \Mage_GiftMessage_Helper_Message::class,
         'giftmessage/url' => \Mage_GiftMessage_Helper_Url::class,
