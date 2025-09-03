@@ -41,7 +41,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             'discount_amount' => Mage::helper('customersegmentation')->__('Discount Amount'),
             'grand_total' => Mage::helper('customersegmentation')->__('Grand Total'),
             'status' => Mage::helper('customersegmentation')->__('Order Status'),
-            'state' => Mage::helper('customersegmentation')->__('Order State'),
             'created_at' => Mage::helper('customersegmentation')->__('Purchase Date'),
             'updated_at' => Mage::helper('customersegmentation')->__('Last Modified'),
             'store_id' => Mage::helper('customersegmentation')->__('Store'),
@@ -64,7 +63,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     public function getInputType(): string
     {
         return match ($this->getAttribute()) {
-            'status', 'state', 'store_id', 'currency_code', 'payment_method', 'shipping_method' => 'select',
+            'status', 'store_id', 'currency_code', 'payment_method', 'shipping_method' => 'select',
             'created_at', 'updated_at' => 'date',
             'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'days_since_last_order', 'number_of_orders', 'average_order_amount', 'total_ordered_amount' => 'numeric',
             default => 'string',
@@ -80,7 +79,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         }
 
         return match ($attribute) {
-            'status', 'state', 'store_id', 'currency_code', 'payment_method', 'shipping_method' => 'select',
+            'status', 'store_id', 'currency_code', 'payment_method', 'shipping_method' => 'select',
             'created_at', 'updated_at' => 'date',
             default => 'text',
         };
@@ -100,13 +99,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
                 }
                 break;
 
-            case 'state':
-                $options = [['value' => '', 'label' => Mage::helper('customersegmentation')->__('Please select...')]];
-                $states = Mage::getSingleton('sales/order_config')->getStates();
-                foreach ($states as $key => $value) {
-                    $options[] = ['value' => $key, 'label' => $value];
-                }
-                break;
 
             case 'store_id':
                 $options = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm();
@@ -211,7 +203,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'state', 'created_at', 'updated_at', 'store_id', 'currency_code' => $this->buildOrderFieldCondition($adapter, $attribute, $operator, $value),
+            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'created_at', 'updated_at', 'store_id', 'currency_code' => $this->buildOrderFieldCondition($adapter, $attribute, $operator, $value),
             'payment_method' => $this->buildPaymentMethodCondition($adapter, $operator, $value),
             'shipping_method' => $this->buildShippingMethodCondition($adapter, $operator, $value),
             'coupon_code' => $this->buildCouponCondition($adapter, $operator, $value),
@@ -290,6 +282,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
 
     protected function buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
+        // Special case: if checking for 0 orders with equals operator, find customers NOT in orders table
+        if ($operator === '=' && (int)$value === 0) {
+            $subselect = $adapter->select()
+                ->from(['o' => $this->getOrderTable()], ['customer_id'])
+                ->where('o.customer_id IS NOT NULL')
+                ->where('o.state NOT IN (?)', ['canceled']);
+            
+            return 'e.entity_id NOT IN (' . $subselect . ')';
+        }
+        
+        // For all other cases, use the original logic
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
