@@ -69,6 +69,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
     }
 
     #[\Override]
+    public function getAttributeName(): string
+    {
+        $attributeName = parent::getAttributeName();
+        return Mage::helper('customersegmentation')->__('Customer Time-based') . ':' . ' ' . $attributeName;
+    }
+
+    #[\Override]
     public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
     {
         return $this->getSubfilterSql('e.entity_id', true, $websiteId);

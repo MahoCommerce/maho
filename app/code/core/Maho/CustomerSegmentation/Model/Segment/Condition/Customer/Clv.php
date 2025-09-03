@@ -171,7 +171,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
     public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();
-        return Mage::helper('customersegmentation')->__('Order') . ':' . ' ' . $attributeName;
+        return Mage::helper('customersegmentation')->__('Customer Lifetime Value') . ':' . ' ' . $attributeName;
     }
 
     #[\Override]

@@ -49,7 +49,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             'shipping_method' => Mage::helper('customersegmentation')->__('Shipping Method'),
             'coupon_code' => Mage::helper('customersegmentation')->__('Coupon Code'),
             'days_since_last_order' => Mage::helper('customersegmentation')->__('Days Since Last Order'),
-            'number_of_orders' => Mage::helper('customersegmentation')->__('Number of Orders'),
             'average_order_amount' => Mage::helper('customersegmentation')->__('Average Order Amount'),
             'total_ordered_amount' => Mage::helper('customersegmentation')->__('Total Ordered Amount'),
         ];
@@ -65,7 +64,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return match ($this->getAttribute()) {
             'status', 'store_id', 'currency_code', 'payment_method', 'shipping_method' => 'select',
             'created_at', 'updated_at' => 'date',
-            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'days_since_last_order', 'number_of_orders', 'average_order_amount', 'total_ordered_amount' => 'numeric',
+            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'days_since_last_order', 'average_order_amount', 'total_ordered_amount' => 'numeric',
             default => 'string',
         };
     }
@@ -208,7 +207,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             'shipping_method' => $this->buildShippingMethodCondition($adapter, $operator, $value),
             'coupon_code' => $this->buildCouponCondition($adapter, $operator, $value),
             'days_since_last_order' => $this->buildDaysSinceLastOrderCondition($adapter, $operator, $value),
-            'number_of_orders' => $this->buildOrderCountCondition($adapter, $operator, $value),
             'average_order_amount' => $this->buildAverageOrderCondition($adapter, $operator, $value),
             'total_ordered_amount' => $this->buildTotalOrderedCondition($adapter, $operator, $value),
             default => false,
@@ -280,28 +278,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildOrderCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
-    {
-        // Special case: if checking for 0 orders with equals operator, find customers NOT in orders table
-        if ($operator === '=' && (int)$value === 0) {
-            $subselect = $adapter->select()
-                ->from(['o' => $this->getOrderTable()], ['customer_id'])
-                ->where('o.customer_id IS NOT NULL')
-                ->where('o.state NOT IN (?)', ['canceled']);
-            
-            return 'e.entity_id NOT IN (' . $subselect . ')';
-        }
-        
-        // For all other cases, use the original logic
-        $subselect = $adapter->select()
-            ->from(['o' => $this->getOrderTable()], ['customer_id'])
-            ->where('o.customer_id IS NOT NULL')
-            ->where('o.state NOT IN (?)', ['canceled'])
-            ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'COUNT(*)', $operator, $value));
-
-        return 'e.entity_id IN (' . $subselect . ')';
-    }
 
     protected function buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
     {
