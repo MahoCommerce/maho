@@ -49,10 +49,41 @@
         if ($('entity') && $('file_format')) {
             var form      = $('export_filter_form');
             var oldAction = form.action;
-            form.action   = oldAction + ((oldAction.slice(-1) != '/') ? '/' : '') + 'entity/' + $F('entity') + '/file_format/' + $F('file_format');
+            
+            // DEBUG: Log form details
+            console.log('=== getFile() DEBUG ===');
+            console.log('Form element:', form);
+            console.log('Form action will be:', '<?= $this->getUrl('*/*/export') ?>');
+            console.log('Entity value:', $F('entity'));
+            console.log('File format value:', $F('file_format'));
+            
+            // Add entity and file_format as hidden inputs to the filter form
+            var entityInput = document.createElement('input');
+            entityInput.type = 'hidden';
+            entityInput.name = 'entity';
+            entityInput.value = $F('entity');
+            form.appendChild(entityInput);
+            
+            var fileFormatInput = document.createElement('input');
+            fileFormatInput.type = 'hidden';
+            fileFormatInput.name = 'file_format';
+            fileFormatInput.value = $F('file_format');
+            form.appendChild(fileFormatInput);
+            
+            // DEBUG: Log all form data that will be submitted
+            var formData = new FormData(form);
+            console.log('Form data being submitted:');
+            for (var pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            // Submit the complete form with all filter data
+            form.action = '<?= $this->getUrl('*/*/export') ?>';
+            console.log('Submitting form to:', form.action);
             form.submit();
-            form.action   = oldAction;
+            form.action = oldAction;
         } else {
+            console.log('ERROR: Missing entity or file_format');
             alert('<?= $this->jsQuoteEscape($this->__('Invalid data')) ?>');
         }
     }
