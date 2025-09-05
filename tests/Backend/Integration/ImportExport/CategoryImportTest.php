@@ -41,18 +41,26 @@ afterEach(function () {
     }
 });
 
-it('creates new categories from category_path', function () {
-    $csvData = [
-        ['category_path', '_store', 'name', 'is_active'],
-        ['electronics', '', 'Electronics', '1'],
-        ['electronics/phones', '', 'Phones', '1'],
-        ['clothing', '', 'Clothing', '1'],
+it('creates new categories with parent_id', function () {
+    // First import top-level categories
+    $csvData1 = [
+        ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
+        ['', '2', '', 'Electronics', '1', 'electronics'],
+        ['', '2', '', 'Clothing', '1', 'clothing'],
     ];
+    createAndImportCsv($csvData1);
 
-    createAndImportCsv($csvData);
+    $electronics = findCategoryByUrlKey('electronics');
+    $clothing = findCategoryByUrlKey('clothing');
+
+    // Then import subcategories
+    $csvData2 = [
+        ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
+        ['', (string) $electronics->getId(), '', 'Phones', '1', 'phones'],
+    ];
+    createAndImportCsv($csvData2);
 
     // Check electronics category was created
-    $electronics = findCategoryByUrlKey('electronics');
     expect($electronics)->not->toBeNull()
         ->and($electronics->getName())->toBe('Electronics')
         ->and($electronics->getIsActive())->toBe('1');
@@ -80,8 +88,8 @@ it('updates existing categories', function () {
         ->save();
 
     $csvData = [
-        ['category_path', '_store', 'name', 'is_active'],
-        ['test-category', '', 'Updated Name', '1'],
+        ['category_id', 'parent_id', '_store', 'name', 'is_active'],
+        [(string) $category->getId(), '', '', 'Updated Name', '1'],
     ];
 
     createAndImportCsv($csvData);
@@ -93,15 +101,21 @@ it('updates existing categories', function () {
 });
 
 it('handles multi-store data correctly', function () {
-    $csvData = [
-        ['category_path', '_store', 'name', 'description'],
-        ['test-multistore', '', 'Test English', 'English description'],
-        ['test-multistore', 'default', 'Test German', 'German description'],
+    // First create the category
+    $csvData1 = [
+        ['category_id', 'parent_id', '_store', 'name', 'description', 'url_key'],
+        ['', '2', '', 'Test English', 'English description', 'test-multistore'],
     ];
-
-    createAndImportCsv($csvData);
+    createAndImportCsv($csvData1);
 
     $category = findCategoryByUrlKey('test-multistore');
+
+    // Then update with store-specific data
+    $csvData2 = [
+        ['category_id', 'parent_id', '_store', 'name', 'description'],
+        [(string) $category->getId(), '', 'default', 'Test German', 'German description'],
+    ];
+    createAndImportCsv($csvData2);
     expect($category)->not->toBeNull();
 
     // Check default store data (admin store)
@@ -119,10 +133,10 @@ it('handles multi-store data correctly', function () {
         ->and($storeCategory->getDescription())->toBe('German description');
 });
 
-it('validates required category_path field', function () {
+it('validates required parent_id field for new categories', function () {
     $csvData = [
-        ['category_path', '_store', 'name'],
-        ['', '', 'Invalid Category'], // Empty path
+        ['category_id', 'parent_id', '_store', 'name'],
+        ['', '', '', 'Invalid Category'], // No parent_id for new category
     ];
 
     createAndImportCsv($csvData);
@@ -141,23 +155,23 @@ it('validates required category_path field', function () {
     expect($hasPathEmptyError)->toBeTrue();
 });
 
-it('validates category_path format', function () {
+it('validates parent_id format', function () {
     $csvData = [
-        ['category_path', '_store', 'name'],
-        ['invalid/path with spaces!', '', 'Invalid Category'],
-        ['invalid@path#with$special%chars', '', 'Another Invalid'],
+        ['category_id', 'parent_id', '_store', 'name'],
+        ['', 'invalid_id', '', 'Invalid Category'],
+        ['', '99999', '', 'Non-existent Parent'], // Non-existent parent ID
     ];
 
     createAndImportCsv($csvData);
 
-    // Should have validation errors for invalid paths
+    // Should have validation errors for invalid parent IDs
     expect($GLOBALS['testImportModel']->getErrorsCount())->toBeGreaterThan(0);
 });
 
 it('validates parent category exists', function () {
     $csvData = [
-        ['category_path', '_store', 'name'],
-        ['nonexistent-parent/child', '', 'Child Category'],
+        ['category_id', 'parent_id', '_store', 'name'],
+        ['', '9999', '', 'Child Category'], // Non-existent parent ID
     ];
 
     createAndImportCsv($csvData);
@@ -189,8 +203,8 @@ it('handles delete behavior correctly', function () {
     $categoryId = $category->getId();
 
     $csvData = [
-        ['category_path', '_store', 'name'],
-        ['to-delete', '', 'To Delete'],
+        ['category_id', 'parent_id', '_store', 'name'],
+        [(string) $categoryId, '', '', 'To Delete'],
     ];
 
     createAndImportCsv($csvData, Mage_ImportExport_Model_Import::BEHAVIOR_DELETE);
@@ -201,17 +215,28 @@ it('handles delete behavior correctly', function () {
 });
 
 it('maintains category tree integrity', function () {
-    $csvData = [
-        ['category_path', '_store', 'name', 'is_active'],
-        ['level1', '', 'Level 1', '1'],
-        ['level1/level2', '', 'Level 2', '1'],
-        ['level1/level2/level3', '', 'Level 3', '1'],
+    // Import Level 1 first
+    $csvData1 = [
+        ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
+        ['', '2', '', 'Level 1', '1', 'level1'],
     ];
-
-    createAndImportCsv($csvData);
-
+    createAndImportCsv($csvData1);
     $level1 = findCategoryByUrlKey('level1');
+
+    // Import Level 2 under Level 1
+    $csvData2 = [
+        ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
+        ['', (string) $level1->getId(), '', 'Level 2', '1', 'level2'],
+    ];
+    createAndImportCsv($csvData2);
     $level2 = findCategoryByUrlKey('level2');
+
+    // Import Level 3 under Level 2
+    $csvData3 = [
+        ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
+        ['', (string) $level2->getId(), '', 'Level 3', '1', 'level3'],
+    ];
+    createAndImportCsv($csvData3);
     $level3 = findCategoryByUrlKey('level3');
 
     expect($level1)->not->toBeNull()
@@ -235,27 +260,35 @@ it('maintains category tree integrity', function () {
 
 it('generates url_key from name when missing', function () {
     $csvData = [
-        ['category_path', '_store', 'name'],
-        ['auto-generated-key', '', 'Auto Generated Key!'], // Name with special chars
+        ['category_id', 'parent_id', '_store', 'name'],
+        ['', '2', '', 'Auto Generated Key!'], // Name with special chars, no url_key
     ];
 
     createAndImportCsv($csvData);
 
-    $category = findCategoryByUrlKey('auto-generated-key');
+    $category = findCategoryByUrlKey('auto-generated-key-');
     expect($category)->not->toBeNull()
         ->and($category->getName())->toBe('Auto Generated Key!')
-        ->and($category->getUrlKey())->toBe('auto-generated-key');
+        ->and($category->getUrlKey())->toBe('auto-generated-key-');
 });
 
 it('handles scope resolution correctly', function () {
-    $csvData = [
-        ['category_path', '_store', 'name', 'description'],
-        ['test-scope', '', 'Test Category', 'Default description'], // Default scope
-        ['', 'default', '', 'Store description'], // Store scope for same category
-        ['another-category', '', 'Another Category', 'Another description'], // New default scope
+    // First create categories in default scope
+    $csvData1 = [
+        ['category_id', 'parent_id', '_store', 'name', 'description', 'url_key'],
+        ['', '2', '', 'Test Category', 'Default description', 'test-scope'],
+        ['', '2', '', 'Another Category', 'Another description', 'another-category'],
     ];
+    createAndImportCsv($csvData1);
 
-    createAndImportCsv($csvData);
+    $category = findCategoryByUrlKey('test-scope');
+
+    // Then update with store scope data
+    $csvData2 = [
+        ['category_id', 'parent_id', '_store', 'name', 'description'],
+        [(string) $category->getId(), '', 'default', '', 'Store description'], // Store scope for same category
+    ];
+    createAndImportCsv($csvData2);
 
     $category = findCategoryByUrlKey('test-scope');
     expect($category)->not->toBeNull();

@@ -19,15 +19,15 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      * to avoid interference with same attribute name.
      */
     public const COL_STORE = '_store';
-    public const COL_CATEGORY_PATH = 'category_path';
     public const COL_CATEGORY_ID = 'category_id';
+    public const COL_PARENT_ID = 'parent_id';
 
     /**
-     * Categories ID to URL key path hash.
+     * Category parent relationships cache.
      *
      * @var array
      */
-    protected $_categoryPaths = [];
+    protected $_categoryParents = [];
 
     /**
      * Attributes that should use value index instead of label
@@ -57,7 +57,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
-    protected $_permanentAttributes = [self::COL_CATEGORY_PATH];
+    protected $_permanentAttributes = [self::COL_CATEGORY_ID, self::COL_PARENT_ID];
 
     /**
      * Constructor.
@@ -71,78 +71,29 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
              ->_initBooleanAttributes()
              ->_initAttrValues();
 
-        $this->_initCategoryPaths();
+        $this->_initCategoryParents();
     }
 
     /**
-     * Initialize category paths hash.
+     * Initialize category parent relationships.
      *
      * @return $this
      */
-    protected function _initCategoryPaths(): self
+    protected function _initCategoryParents(): self
     {
         /** @var Mage_Catalog_Model_Resource_Category_Collection $collection */
         $collection = Mage::getResourceModel('catalog/category_collection');
         $collection->addAttributeToFilter('level', ['gt' => 0])
                    ->load();
 
-        // Cache for individually loaded categories to avoid repeated loads
-        $loadedCategories = [];
-
         foreach ($collection as $category) {
             /** @var Mage_Catalog_Model_Category $category */
-            $categoryId = $category->getId();
-            $pathIds = explode('/', $category->getPath());
-            $pathSegments = [];
-
-            foreach ($pathIds as $pathId) {
-                if ($pathId == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-                    continue; // Skip root category ID
-                }
-
-                // Use individual loading for EAV attributes - collections don't work reliably
-                if (!isset($loadedCategories[$pathId])) {
-                    $pathCategoryModel = Mage::getModel('catalog/category');
-
-                    // Try to load with the default store first to get URL key
-                    $defaultStoreId = Mage::app()->getDefaultStoreView()->getId();
-                    if ($defaultStoreId) {
-                        $pathCategoryModel->setStoreId($defaultStoreId);
-                    }
-
-                    $loadedCategories[$pathId] = $pathCategoryModel->load($pathId);
-                }
-
-                $pathCategory = $loadedCategories[$pathId];
-                if ($pathCategory->getId()) {
-                    $urlKey = $pathCategory->getUrlKey();
-
-                    // Generate URL key from name if missing
-                    if (!$urlKey && $pathCategory->getName()) {
-                        $urlKey = $this->_formatUrlKey($pathCategory->getName());
-                    }
-
-                    if ($urlKey) {
-                        $pathSegments[] = $urlKey;
-                    }
-                }
-            }
-
-            if (!empty($pathSegments)) {
-                $this->_categoryPaths[$categoryId] = implode('/', $pathSegments);
-            }
+            $this->_categoryParents[$category->getId()] = $category->getParentId();
         }
 
         return $this;
     }
 
-    /**
-     * Format string as URL key.
-     */
-    protected function _formatUrlKey(string $name): string
-    {
-        return strtolower(preg_replace('/[^a-zA-Z0-9-_]/', '-', $name));
-    }
 
     /**
      * Initialize boolean attributes that should export values instead of labels
@@ -199,7 +150,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         $writer = $this->getWriter();
         $validAttrCodes = $this->_getExportAttrCodes();
         $writer->setHeaderCols(array_merge(
-            [self::COL_CATEGORY_PATH, self::COL_STORE],
+            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE],
             $validAttrCodes,
         ));
 
@@ -221,7 +172,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         $validAttrCodes = $this->_getExportAttrCodes();
 
         $writer->setHeaderCols(array_merge(
-            [self::COL_CATEGORY_ID, self::COL_STORE, self::COL_CATEGORY_PATH],
+            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE],
             $validAttrCodes,
         ));
 
@@ -260,22 +211,13 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         foreach ($collection as $category) {
             /** @var Mage_Catalog_Model_Category $category */
             $categoryId = $category->getId();
-
-            if (!isset($this->_categoryPaths[$categoryId])) {
-                // Debug: Log when categories are skipped due to missing paths
-                if (defined('MAHO_TEST_DEBUG')) {
-                    Mage::log("Skipping category ID $categoryId - no path found", Mage::LOG_DEBUG);
-                }
-                continue; // Skip categories without valid path
-            }
-
-            $categoryPath = $this->_categoryPaths[$categoryId];
+            $parentId = $this->_categoryParents[$categoryId] ?? $category->getParentId();
 
             // Export default store data first
             $dataRow = [
                 self::COL_CATEGORY_ID => (string) $categoryId,
+                self::COL_PARENT_ID => (string) $parentId,
                 self::COL_STORE => '',
-                self::COL_CATEGORY_PATH => $categoryPath,
             ];
 
             // Load default store data
@@ -312,8 +254,8 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
 
                 $storeDataRow = [
                     self::COL_CATEGORY_ID => (string) $categoryId,
+                    self::COL_PARENT_ID => (string) $parentId,
                     self::COL_STORE => $storeCode,
-                    self::COL_CATEGORY_PATH => '',  // Empty for store rows
                 ];
 
                 $hasStoreSpecificData = false;
@@ -370,10 +312,10 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @return $this
      */
-    public function refreshCategoryPaths(): self
+    public function refreshCategoryParents(): self
     {
-        $this->_categoryPaths = [];
-        $this->_initCategoryPaths();
+        $this->_categoryParents = [];
+        $this->_initCategoryParents();
         return $this;
     }
 

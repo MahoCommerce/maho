@@ -76,37 +76,52 @@ it('exports categories with correct CSV structure', function () {
     $lines = explode("\n", trim($csvContent));
 
     // Check header row exists
-    expect($lines[0])->toContain('category_path')
+    expect($lines[0])->toContain('category_id')
+        ->and($lines[0])->toContain('parent_id')
         ->and($lines[0])->toContain('_store')
         ->and($lines[0])->toContain('name');
 });
 
-it('generates correct category paths using url_key', function () {
+it('generates correct parent-child relationships', function () {
     $result = $this->exportModel->exportFile();
     $csvContent = $result['value'];
     $lines = explode("\n", trim($csvContent));
 
-    // Test with sample data categories - look for our test categories we created
-    $foundElectronics = false;
-    $foundPhones = false;
+    // Parse CSV to check parent-child relationships
+    $categories = [];
+    $header = str_getcsv($lines[0]);
+    $categoryIdIndex = array_search('category_id', $header);
+    $parentIdIndex = array_search('parent_id', $header);
+    $nameIndex = array_search('name', $header);
 
-    foreach ($lines as $line) {
-        // Look for our test electronics category
-        if (strpos($line, 'default-category/electronics,') !== false && strpos($line, 'Electronics') !== false) {
-            $foundElectronics = true;
-            expect($line)->toContain('Electronics');
+    // Skip header row
+    for ($i = 1; $i < count($lines); $i++) {
+        if (empty(trim($lines[$i]))) {
+            continue;
         }
 
-        // Look for our test phones category
-        if (strpos($line, 'default-category/electronics/phones,') !== false) {
-            $foundPhones = true;
-            expect($line)->toContain('Phones');
+        $row = str_getcsv($lines[$i]);
+        if (count($row) > max($categoryIdIndex, $parentIdIndex, $nameIndex)) {
+            $categories[$row[$categoryIdIndex]] = [
+                'parent_id' => $row[$parentIdIndex],
+                'name' => $row[$nameIndex],
+            ];
         }
     }
 
-    // Our test categories should be found in the export
-    expect($foundElectronics)->toBeTrue();
-    expect($foundPhones)->toBeTrue();
+    // Check that we have categories with valid parent relationships
+    expect(count($categories))->toBeGreaterThan(0);
+
+    // Check that categories have proper parent references
+    $foundValidParentChild = false;
+    foreach ($categories as $categoryId => $data) {
+        if (!empty($data['parent_id']) && isset($categories[$data['parent_id']])) {
+            $foundValidParentChild = true;
+            break;
+        }
+    }
+
+    expect($foundValidParentChild)->toBeTrue();
 });
 
 it('exports multi-store data correctly', function () {
@@ -122,17 +137,26 @@ it('exports multi-store data correctly', function () {
     $defaultStoreRow = false;
     $storeSpecificRow = false;
 
+    $electronicsId = $this->electronicsCategory->getId();
+
     foreach ($lines as $line) {
-        // Look for the electronics category line specifically (not phones)
-        if (strpos($line, 'default-category/electronics,') !== false) {
-            if (strpos($line, ',"",') !== false || strpos($line, ',,"') !== false) {
-                // Default store (empty _store column)
-                $defaultStoreRow = true;
-                expect($line)->toContain('Electronics');
-            } elseif (strpos($line, ',default,') !== false) {
-                // Store-specific row
-                $storeSpecificRow = true;
-                expect($line)->toContain('Elektronik');
+        // Look for lines that start with the electronics category ID
+        if (strpos($line, $electronicsId . ',') === 0) {
+            $columns = str_getcsv($line);
+            if (count($columns) >= 3) {
+                $categoryId = $columns[0];
+                $parentId = $columns[1];
+                $storeCode = $columns[2];
+
+                if ($storeCode === '' || $storeCode === '""') {
+                    // Default store (empty _store column)
+                    $defaultStoreRow = true;
+                    expect($line)->toContain('Electronics');
+                } elseif ($storeCode === 'default' || $storeCode === 'en') {
+                    // Store-specific row
+                    $storeSpecificRow = true;
+                    expect($line)->toContain('Elektronik');
+                }
             }
         }
     }
@@ -162,30 +186,56 @@ it('maintains hierarchical order in export', function () {
     $csvContent = $result['value'];
     $lines = explode("\n", trim($csvContent));
 
-    // Check sample data hierarchy - men should come before men subcategories
-    $menIndex = -1;
-    $menSubIndex = -1;
+    // Parse CSV to find parent-child relationships
+    $categories = [];
+    $header = str_getcsv($lines[0]);
+    $categoryIdIndex = array_search('category_id', $header);
+    $parentIdIndex = array_search('parent_id', $header);
 
-    foreach ($lines as $index => $line) {
-        if (strpos($line, 'default-category/men,') !== false) {
-            if ($menIndex === -1) {
-                $menIndex = $index;
-            }
+    // Skip header row and parse categories
+    for ($i = 1; $i < count($lines); $i++) {
+        if (empty(trim($lines[$i]))) {
+            continue;
         }
-        if (strpos($line, 'default-category/men/') !== false) {
-            if ($menSubIndex === -1) {
-                $menSubIndex = $index;
+
+        $row = str_getcsv($lines[$i]);
+        if (count($row) > max($categoryIdIndex, $parentIdIndex)) {
+            $categoryId = (int) $row[$categoryIdIndex];
+            $parentId = (int) $row[$parentIdIndex];
+
+            $categories[$i] = [
+                'category_id' => $categoryId,
+                'parent_id' => $parentId,
+                'line_index' => $i,
+            ];
+        }
+    }
+
+    // Verify we have hierarchical data (categories with different parent IDs)
+    $parentIds = array_column($categories, 'parent_id');
+    $uniqueParentIds = array_unique($parentIds);
+    expect(count($uniqueParentIds))->toBeGreaterThan(1, 'Should have categories with different parent IDs');
+
+    // Find a parent-child relationship and verify ordering
+    $foundHierarchy = false;
+    foreach ($categories as $category) {
+        $categoryId = $category['category_id'];
+        $parentId = $category['parent_id'];
+
+        // Find children of this category
+        foreach ($categories as $potentialChild) {
+            if ($potentialChild['parent_id'] === $categoryId) {
+                // Found a parent-child relationship - check ordering
+                expect($category['line_index'])->toBeLessThan(
+                    $potentialChild['line_index'],
+                    "Parent category {$categoryId} should appear before child category {$potentialChild['category_id']}",
+                );
+                $foundHierarchy = true;
             }
         }
     }
 
-    // Parent should come before child in export (if both exist in sample data)
-    if ($menIndex !== -1 && $menSubIndex !== -1) {
-        expect($menIndex)->toBeLessThan($menSubIndex);
-    } else {
-        // If sample data structure is different, just verify we have hierarchical data
-        expect($csvContent)->toMatch('/default-category\/[^\/]+\/[^\/]+/'); // Has nested categories
-    }
+    expect($foundHierarchy)->toBeTrue('Should have at least one parent-child relationship in the export');
 });
 
 it('handles categories without url_key gracefully', function () {
@@ -214,7 +264,8 @@ it('exports all required permanent attributes', function () {
     $headerLine = $lines[0];
 
     // Check permanent attributes are present
-    expect($headerLine)->toContain('category_path')
+    expect($headerLine)->toContain('category_id')
+        ->and($headerLine)->toContain('parent_id')
         ->and($headerLine)->toContain('_store');
 });
 

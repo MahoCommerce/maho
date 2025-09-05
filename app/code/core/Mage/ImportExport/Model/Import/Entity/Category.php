@@ -31,8 +31,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      * Permanent column names.
      */
     public const COL_STORE = '_store';
-    public const COL_CATEGORY_PATH = 'category_path';
     public const COL_CATEGORY_ID = 'category_id';
+    public const COL_PARENT_ID = 'parent_id';
 
     /**
      * Error codes.
@@ -53,7 +53,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
-    protected $_permanentAttributes = [self::COL_CATEGORY_PATH];
+    protected $_permanentAttributes = [self::COL_CATEGORY_ID, self::COL_PARENT_ID];
 
     /**
      * Particular attributes.
@@ -63,18 +63,18 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     protected $_particularAttributes = [self::COL_STORE];
 
     /**
-     * Existing categories by path.
+     * Valid parent IDs cache.
      *
      * @var array
      */
-    protected $_categoriesByPath = [];
+    protected $_validParentIds = [];
 
     /**
-     * Category paths to IDs mapping.
+     * Existing category IDs.
      *
      * @var array
      */
-    protected $_pathToId = [];
+    protected $_categoryIds = [];
 
     /**
      * New categories to create.
@@ -154,99 +154,28 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     }
 
     /**
-     * Initialize existing categories.
+     * Initialize existing category IDs.
      *
      * @return $this
      */
     protected function _initCategories(): self
     {
-        /** @var Mage_Catalog_Model_Resource_Category_Collection $collection */
-        $collection = Mage::getResourceModel('catalog/category_collection');
-        $collection->addAttributeToSelect(['url_key', 'name'])
-                   ->addAttributeToFilter('level', ['gt' => 0])
-                   ->setOrder('level', 'ASC')
-                   ->setOrder('entity_id', 'ASC')
-                   ->load();
+        $select = $this->_connection->select()
+            ->from(Mage::getSingleton('core/resource')->getTableName('catalog_category_entity'), ['entity_id', 'parent_id'])
+            ->where('level > 0');
 
-        // First, detect duplicate URL keys - this is a halting error
-        $urlKeyCount = [];
-        $categoriesById = [];
+        $categories = $this->_connection->fetchAll($select);
 
-        foreach ($collection as $category) {
-            /** @var Mage_Catalog_Model_Category $category */
-            $categoriesById[$category->getId()] = $category;
+        foreach ($categories as $category) {
+            $categoryId = (int) $category['entity_id'];
+            $parentId = (int) $category['parent_id'];
 
-            $urlKey = $category->getUrlKey();
-            if (!$urlKey && $category->getName()) {
-                // Load fresh category if URL key not properly loaded
-                $freshCategory = Mage::getModel('catalog/category')->load($category->getId());
-                $urlKey = $freshCategory->getUrlKey();
-                if (!$urlKey && $freshCategory->getName()) {
-                    $urlKey = $this->_formatUrlKey($freshCategory->getName());
-                }
-            }
-
-            if ($urlKey) {
-                if (!isset($urlKeyCount[$urlKey])) {
-                    $urlKeyCount[$urlKey] = 0;
-                }
-                $urlKeyCount[$urlKey]++;
-            }
+            $this->_categoryIds[$categoryId] = $parentId;
+            $this->_validParentIds[$categoryId] = true;
         }
 
-        // Check for duplicate URL keys - this can cause issues with path resolution
-        $duplicates = [];
-        foreach ($urlKeyCount as $urlKey => $count) {
-            if ($count > 1) {
-                $duplicates[] = $urlKey;
-            }
-        }
-
-        // Log warning for duplicates but don't halt - use the first occurrence
-        if (!empty($duplicates)) {
-            Mage::log(
-                'Warning: Duplicate URL keys found in existing categories: ' . implode(', ', $duplicates) .
-                '. Using first occurrence for path mapping. Consider cleaning up category data for better import/export reliability.',
-                Mage::LOG_WARNING,
-            );
-        }
-
-        // Now build the path mappings - each URL key is guaranteed to be unique
-        foreach ($collection as $category) {
-            /** @var Mage_Catalog_Model_Category $category */
-            $pathIds = explode('/', $category->getPath());
-            $pathSegments = [];
-
-            foreach ($pathIds as $pathId) {
-                if ($pathId == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-                    continue;
-                }
-
-                if (isset($categoriesById[$pathId])) {
-                    $pathCategory = $categoriesById[$pathId];
-                    $urlKey = $pathCategory->getUrlKey();
-
-                    if (!$urlKey && $pathCategory->getName()) {
-                        // Load fresh category if URL key not properly loaded
-                        $freshCategory = Mage::getModel('catalog/category')->load($pathId);
-                        $urlKey = $freshCategory->getUrlKey();
-                        if (!$urlKey && $freshCategory->getName()) {
-                            $urlKey = $this->_formatUrlKey($freshCategory->getName());
-                        }
-                    }
-
-                    if ($urlKey) {
-                        $pathSegments[] = $urlKey;
-                    }
-                }
-            }
-
-            if (!empty($pathSegments)) {
-                $categoryPath = implode('/', $pathSegments);
-                $this->_categoriesByPath[$categoryPath] = $category;
-                $this->_pathToId[$categoryPath] = (int) $category->getId();
-            }
-        }
+        // Add default category (ID 2) as a valid parent
+        $this->_validParentIds[2] = true;
 
         return $this;
     }
@@ -292,14 +221,10 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {
             // Refresh category mapping for each batch to pick up newly created categories
             $this->_initCategories();
+            $entityRows = [];
             $entityRowsUp = [];
             $attributes = [];
-            $storeRows = []; // Store scope rows to process after default scope
-            $lastCategoryPath = null; // Track last category path for empty path store rows
-
-            // Group rows by hierarchy level and process in order
-            $rowsByLevel = [];
-            $seenPaths = []; // Track paths to prevent duplicates
+            $storeRows = [];
 
             foreach ($bunch as $rowNum => $rowData) {
                 if (!$this->validateRow($rowData, $rowNum)) {
@@ -307,119 +232,105 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 }
 
                 $rowScope = $this->getRowScope($rowData);
+
                 if (self::SCOPE_DEFAULT == $rowScope) {
-                    $categoryPath = $rowData[self::COL_CATEGORY_PATH];
-                    $lastCategoryPath = $categoryPath; // Track last category path
+                    $categoryId = isset($rowData[self::COL_CATEGORY_ID]) ? trim($rowData[self::COL_CATEGORY_ID]) : '';
+                    $parentId = isset($rowData[self::COL_PARENT_ID]) ? (int) trim($rowData[self::COL_PARENT_ID]) : null;
 
-                    // Skip duplicate paths within the same batch
-                    if (!isset($seenPaths[$categoryPath])) {
-                        $seenPaths[$categoryPath] = true;
-
-                        $level = substr_count($categoryPath, '/');
-
-                        if (!isset($rowsByLevel[$level])) {
-                            $rowsByLevel[$level] = [];
-                        }
-                        $rowsByLevel[$level][] = ['rowData' => $rowData, 'rowNum' => $rowNum];
-                    } else {
-                        // Add error for duplicate path but don't process
-                        $this->addRowError(self::ERROR_DUPLICATE_PATH, $rowNum, $categoryPath);
-                    }
-                } else {
-                    // Store scope rows for later processing (after categories are created)
-                    $storeRows[] = [
-                        'rowData' => $rowData,
-                        'rowNum' => $rowNum,
-                        'rowScope' => $rowScope,
-                        'categoryPath' => $lastCategoryPath,  // Use last category path if current path is empty
-                    ];
-                }
-            }
-
-            // Process rows level by level (parents first)
-            ksort($rowsByLevel);
-
-            foreach ($rowsByLevel as $level => $rows) {
-                foreach ($rows as $rowInfo) {
-                    $rowData = $rowInfo['rowData'];
-                    $rowNum = $rowInfo['rowNum'];
-
-                    $this->_processedEntitiesCount++;
-                    $categoryPath = $rowData[self::COL_CATEGORY_PATH];
-
-                    $entityId = $this->_findCategoryByPath($categoryPath);
-                    if ($entityId) {
+                    if (!empty($categoryId)) {
                         // Update existing category
-                        $entityRowsUp[] = [
-                            'entity_id' => $entityId,
-                            'updated_at' => Mage_Core_Model_Locale::now(),
-                        ];
-                    } else {
-                        // Create new category immediately
-                        $parentId = $this->_getParentId($categoryPath);
-                        if (!$parentId) {
-                            continue;
-                        }
+                        $categoryIdInt = (int) $categoryId;
+                        if (isset($this->_categoryIds[$categoryIdInt])) {
+                            $entityRowsUp[] = [
+                                'entity_id' => $categoryIdInt,
+                                'updated_at' => Mage_Core_Model_Locale::now(),
+                            ];
 
-                        $categoryLevel = count(explode('/', $categoryPath)) + 1; // +1 because root is level 1
-                        $position = $this->_getNextPosition($parentId);
+                            // Update parent if provided
+                            if ($parentId !== null && $parentId !== $this->_categoryIds[$categoryIdInt]) {
+                                $entityRowsUp[count($entityRowsUp) - 1]['parent_id'] = $parentId;
+                            }
+
+                            $this->_collectAttributeData($rowData, $rowScope, $categoryIdInt, $attributes, true);
+                        } else {
+                            // Category ID provided but not in cache - check if it exists in database
+                            $existingCategory = Mage::getModel('catalog/category')->load($categoryIdInt);
+                            if ($existingCategory->getId()) {
+                                // Category exists - add it to our cache and update it
+                                $this->_categoryIds[$categoryIdInt] = $existingCategory->getParentId();
+                                $this->_validParentIds[$categoryIdInt] = true;
+
+                                $entityRowsUp[] = [
+                                    'entity_id' => $categoryIdInt,
+                                    'updated_at' => Mage_Core_Model_Locale::now(),
+                                ];
+
+                                // Update parent if provided
+                                if ($parentId !== null && $parentId !== $existingCategory->getParentId()) {
+                                    $entityRowsUp[count($entityRowsUp) - 1]['parent_id'] = $parentId;
+                                }
+
+                                $this->_collectAttributeData($rowData, $rowScope, $categoryIdInt, $attributes, true);
+                            }
+                        }
+                    } else {
+                        // Create new category
+                        if ($parentId === null) {
+                            $parentId = 2; // Default category
+                        }
 
                         $entityRow = [
                             'entity_type_id' => $this->_entityTypeId,
                             'attribute_set_id' => $this->_defaultAttributeSetId,
                             'parent_id' => $parentId,
+                            'position' => $this->_getNextPosition($parentId),
+                            'level' => $this->_getCategoryLevel($parentId) + 1,
+                            'children_count' => 0,
                             'created_at' => Mage_Core_Model_Locale::now(),
                             'updated_at' => Mage_Core_Model_Locale::now(),
-                            'path' => '',  // Will be updated after insert
-                            'position' => $position,
-                            'level' => $categoryLevel,
-                            'children_count' => 0,
                         ];
 
-                        // Insert immediately so mapping is available for children
-                        $this->_connection->insert($this->_connection->getTableName('catalog_category_entity'), $entityRow);
-                        $entityId = (int) $this->_connection->lastInsertId();
-
-                        // Update mapping immediately
-                        $this->_pathToId[$categoryPath] = $entityId;
-
-                        // Update path
-                        $parentPath = $this->_getPathById($parentId);
-                        $path = $parentPath ? $parentPath . '/' . $entityId : $entityId;
-
-                        $this->_connection->update(
-                            $this->_connection->getTableName('catalog_category_entity'),
-                            ['path' => $path],
-                            ['entity_id = ?' => $entityId],
-                        );
+                        // Store row data to collect attributes after insertion
+                        $entityRow['_temp_row_data'] = $rowData;
+                        $entityRow['_temp_row_scope'] = $rowScope;
+                        $entityRows[] = $entityRow;
                     }
-
-                    // Collect attribute data for this category
-                    $this->_collectAttributeData($rowData, self::SCOPE_DEFAULT, $categoryPath, $attributes, true);
+                } else {
+                    // Store scope rows for later processing
+                    $storeRows[] = [
+                        'rowData' => $rowData,
+                        'rowScope' => $rowScope,
+                    ];
                 }
+            }
+
+            // Insert new categories
+            if ($entityRows) {
+                $newCategoryAttributes = $this->_insertCategories($entityRows);
+                // Merge new category attributes with existing attributes
+                $attributes = array_merge_recursive($attributes, $newCategoryAttributes);
             }
 
             // Update existing categories
             if ($entityRowsUp) {
-                $this->_connection->insertOnDuplicate($entityTable, $entityRowsUp, ['updated_at']);
+                $this->_connection->insertOnDuplicate($entityTable, $entityRowsUp, ['updated_at', 'parent_id']);
             }
 
-            // Process store scope rows now that categories exist
+            // Process store scope rows
             foreach ($storeRows as $storeRowInfo) {
                 $rowData = $storeRowInfo['rowData'];
                 $rowScope = $storeRowInfo['rowScope'];
-                $categoryPath = $rowData[self::COL_CATEGORY_PATH];
 
-                // Use tracked category path if current path is empty
-                if (empty($categoryPath) && !empty($storeRowInfo['categoryPath'])) {
-                    $categoryPath = $storeRowInfo['categoryPath'];
+                // For store rows, we need to find the category ID
+                $categoryId = null;
+                if (isset($rowData[self::COL_CATEGORY_ID]) && !empty(trim($rowData[self::COL_CATEGORY_ID]))) {
+                    $categoryId = (int) trim($rowData[self::COL_CATEGORY_ID]);
                 }
 
-                if (!empty($categoryPath) && isset($this->_pathToId[$categoryPath])) {
-                    $this->_collectAttributeData($rowData, $rowScope, $categoryPath, $attributes, true);
+                if ($categoryId && isset($this->_categoryIds[$categoryId])) {
+                    $this->_collectAttributeData($rowData, $rowScope, $categoryId, $attributes, true);
                 }
             }
-
 
             // Save attributes
             $this->_saveAttributes($attributes);
@@ -429,19 +340,15 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     }
 
     /**
-     * Get parent category ID for given path.
+     * Get category level by parent ID.
      */
-    protected function _getParentId(string $categoryPath): ?int
+    protected function _getCategoryLevel(int $parentId): int
     {
-        $pathParts = explode('/', $categoryPath);
-        if (count($pathParts) <= 1) {
-            return 2; // Default category ID - top-level categories go under default category
-        }
+        $select = $this->_connection->select()
+            ->from(Mage::getSingleton('core/resource')->getTableName('catalog_category_entity'), 'level')
+            ->where('entity_id = ?', $parentId);
 
-        array_pop($pathParts); // Remove last segment
-        $parentPath = implode('/', $pathParts);
-
-        return isset($this->_pathToId[$parentPath]) ? (int) $this->_pathToId[$parentPath] : null;
+        return (int) $this->_connection->fetchOne($select);
     }
 
     /**
@@ -460,23 +367,23 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     /**
      * Insert new categories.
      */
-    protected function _insertCategories(array $entityRows): void
+    protected function _insertCategories(array $entityRows): array
     {
         $entityTable = Mage::getSingleton('core/resource')->getTableName('catalog_category_entity');
+        $newCategoryAttributes = [];
 
         foreach ($entityRows as &$row) {
-
             // Extract temporary data before database insert
-            $categoryPath = $row['_temp_category_path'] ?? '';
-            unset($row['_temp_category_path']);
+            $tempRowData = $row['_temp_row_data'] ?? null;
+            $tempRowScope = $row['_temp_row_scope'] ?? null;
+            unset($row['_temp_row_data'], $row['_temp_row_scope']);
 
             $this->_connection->insert($entityTable, $row);
-            $entityId = $this->_connection->lastInsertId();
+            $entityId = (int) $this->_connection->lastInsertId();
 
-            // Update path-to-ID mapping for the newly created category
-            if ($categoryPath) {
-                $this->_pathToId[$categoryPath] = $entityId;
-            }
+            // Update category ID cache
+            $this->_categoryIds[$entityId] = $row['parent_id'];
+            $this->_validParentIds[$entityId] = true;
 
             // Update path
             $parentPath = '';
@@ -492,7 +399,15 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             );
 
             $row['entity_id'] = $entityId;
+            $this->_processedEntitiesCount++;
+
+            // Collect attributes for this newly created category
+            if ($tempRowData && $tempRowScope) {
+                $this->_collectAttributeData($tempRowData, $tempRowScope, $entityId, $newCategoryAttributes, false);
+            }
         }
+
+        return $newCategoryAttributes;
     }
 
     /**
@@ -510,7 +425,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     /**
      * Collect attribute data for saving.
      */
-    protected function _collectAttributeData(array $rowData, int $rowScope, string $categoryPath, array &$attributes, bool $categoryExists = true): void
+    protected function _collectAttributeData(array $rowData, int $rowScope, int|string $categoryIdentifier, array &$attributes, bool $categoryExists = true): void
     {
         $storeId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
 
@@ -542,26 +457,24 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         }
 
         if ($categoryExists) {
-            $entityId = $this->_findCategoryByPath($categoryPath);
-            if (!$entityId) {
-                return;
+            if (is_int($categoryIdentifier)) {
+                $entityId = $categoryIdentifier;
+            } else {
+                return; // Invalid identifier
             }
         } else {
-            // For new categories, use the category path as a temporary key
-            // We'll replace this with the actual entity ID after insertion
-            $entityId = '__NEW__' . $categoryPath;
+            // For new categories, use the temporary identifier
+            $entityId = $categoryIdentifier;
         }
 
-        // Generate url_key if not provided
-        if (!isset($rowData['url_key']) && !empty($categoryPath)) {
-            $pathParts = explode('/', $categoryPath);
-            $urlKey = end($pathParts);
-            $rowData['url_key'] = $urlKey;
+        // Generate url_key if not provided and we have a name
+        if (!isset($rowData['url_key']) && !empty($rowData['name'])) {
+            $rowData['url_key'] = $this->_formatUrlKey($rowData['name']);
         }
 
         foreach ($rowData as $attrCode => $value) {
             // Skip system columns and null values (but allow empty strings)
-            if (in_array($attrCode, [self::COL_CATEGORY_PATH, self::COL_STORE]) || is_null($value)) {
+            if (in_array($attrCode, [self::COL_PARENT_ID, self::COL_STORE]) || is_null($value)) {
                 continue;
             }
 
@@ -604,18 +517,21 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 continue;
             }
 
-            // Replace temporary entity IDs with real ones
-            foreach ($attrData as &$attrRow) {
+            // Skip any attributes with temporary identifiers (should not happen in new approach)
+            $validAttrData = [];
+            foreach ($attrData as $attrRow) {
                 $entityId = $attrRow['entity_id'];
-                if (is_string($entityId) && str_starts_with($entityId, '__NEW__')) {
-                    $categoryPath = substr($entityId, 7); // Remove '__NEW__' prefix
-                    if (isset($this->_pathToId[$categoryPath])) {
-                        $attrRow['entity_id'] = $this->_pathToId[$categoryPath];
-                    } else {
-                        continue 2; // Skip this attribute completely
-                    }
+                if (is_numeric($entityId) && (int) $entityId > 0) {
+                    $validAttrData[] = $attrRow;
                 }
+                // Skip any remaining temporary identifiers from old logic
             }
+
+            if (empty($validAttrData)) {
+                continue; // No valid attributes to save for this code
+            }
+
+            $attrData = $validAttrData;
 
             $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_category', $attrCode);
             if (!$attribute) {
@@ -660,31 +576,12 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
                 $rowScope = $this->getRowScope($rowData);
                 if (self::SCOPE_DEFAULT == $rowScope) {
-                    // Priority: use category_id if provided, otherwise fall back to category_path
+                    // Use category_id for deletion (required in new parent_id approach)
                     if (isset($rowData[self::COL_CATEGORY_ID]) && !empty(trim($rowData[self::COL_CATEGORY_ID]))) {
                         $categoryId = (int) trim($rowData[self::COL_CATEGORY_ID]);
                         // Verify the category exists before adding to delete list
-                        $category = Mage::getModel('catalog/category')->load($categoryId);
-                        if ($category->getId() && $categoryId > 2) { // Don't delete root or default category
+                        if (isset($this->_categoryIds[$categoryId]) && $categoryId > 2) { // Don't delete root or default category
                             $idsToDelete[] = $categoryId;
-                        }
-                    } elseif (isset($rowData[self::COL_CATEGORY_PATH]) && !empty(trim($rowData[self::COL_CATEGORY_PATH]))) {
-                        $categoryPath = trim($rowData[self::COL_CATEGORY_PATH]);
-
-                        // First try exact path match
-                        if (isset($this->_pathToId[$categoryPath])) {
-                            $idsToDelete[] = $this->_pathToId[$categoryPath];
-                        } else {
-                            // If not found, try to find by the last segment (single-level path)
-                            // For user convenience, allow 'category-name' to match 'parent/category-name'
-                            foreach ($this->_pathToId as $fullPath => $id) {
-                                $pathSegments = explode('/', $fullPath);
-                                $lastSegment = end($pathSegments);
-                                if ($lastSegment === $categoryPath) {
-                                    $idsToDelete[] = $id;
-                                    break; // Take the first match to avoid duplicates
-                                }
-                            }
                         }
                     }
                 }
@@ -741,9 +638,9 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         // Delete all non-system categories (this implements the "replace all" behavior)
         // Keep root (1) and default category (2)
         $categoriesToDelete = [];
-        foreach ($this->_pathToId as $path => $id) {
-            if ($id > 2) { // Skip root (1) and default category (2)
-                $categoriesToDelete[] = $id;
+        foreach ($this->_categoryIds as $categoryId => $parentId) {
+            if ($categoryId > 2) { // Skip root (1) and default category (2)
+                $categoriesToDelete[] = $categoryId;
             }
         }
 
@@ -752,10 +649,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             $allIdsToDelete = $this->_expandIdsWithChildren($categoriesToDelete);
             $this->_connection->delete($entityTable, ['entity_id IN (?)' => $allIdsToDelete]);
 
-            // Clear the path mappings since we deleted everything
-            $this->_pathToId = [];
+            // Clear the category mappings since we deleted everything
+            $this->_categoryIds = [];
+            $this->_validParentIds = [2 => true]; // Keep default category as valid parent
 
-            // Rebuild path mapping with just system categories
+            // Rebuild category mapping with just system categories
             $this->_initCategories();
         }
 
@@ -769,7 +667,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      */
     public function getRowScope(array $rowData): int
     {
-        $hasPath = isset($rowData[self::COL_CATEGORY_PATH]) && strlen(trim($rowData[self::COL_CATEGORY_PATH]));
+        $hasPath = isset($rowData[self::COL_PARENT_ID]) && strlen(trim($rowData[self::COL_PARENT_ID]));
         $hasCategoryId = isset($rowData[self::COL_CATEGORY_ID]) && strlen(trim($rowData[self::COL_CATEGORY_ID]));
         $hasStore = !empty($rowData[self::COL_STORE]);
 
@@ -784,8 +682,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             }
         }
 
-        // For non-DELETE behaviors, require category_path
-        if ($hasPath && !$hasStore) {
+        // For non-DELETE behaviors, accept either parent_id (for new categories) or category_id (for updates)
+        if (($hasPath || $hasCategoryId) && !$hasStore) {
             return self::SCOPE_DEFAULT;  // New category or default store update
         } elseif ($hasStore) {
             return self::SCOPE_STORE;    // Store-specific data (with or without path)
@@ -809,33 +707,40 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
         $rowScope = $this->getRowScope($rowData);
 
-        // Check for empty category path (SCOPE_NULL means empty path)
+        // Check for invalid row scope
         if (self::SCOPE_NULL == $rowScope) {
             $this->addRowError(self::ERROR_CATEGORY_PATH_EMPTY, $rowNum);
             return false;
         }
 
         if (self::SCOPE_DEFAULT == $rowScope) {
-            $categoryPath = trim($rowData[self::COL_CATEGORY_PATH]);
+            // For new categories, validate parent_id
+            $parentId = isset($rowData[self::COL_PARENT_ID]) ? trim($rowData[self::COL_PARENT_ID]) : '';
 
-            if (!$this->_isValidCategoryPath($categoryPath)) {
-                $this->addRowError(self::ERROR_CATEGORY_PATH_INVALID, $rowNum);
-                return false;
-            }
-
-            if (!$this->_hasValidParent($categoryPath)) {
+            // For new categories (no category_id), parent_id is required
+            $categoryId = isset($rowData[self::COL_CATEGORY_ID]) ? trim($rowData[self::COL_CATEGORY_ID]) : '';
+            if (empty($categoryId) && empty($parentId)) {
                 $this->addRowError(self::ERROR_PARENT_NOT_FOUND, $rowNum);
                 return false;
             }
 
+            // If parent_id is provided, validate it exists
+            if (!empty($parentId)) {
+                $parentIdInt = (int) $parentId;
+                if ($parentIdInt <= 0 || !isset($this->_validParentIds[$parentIdInt])) {
+                    $this->addRowError(self::ERROR_PARENT_NOT_FOUND, $rowNum);
+                    return false;
+                }
+            }
+
             // Check if name is missing or empty (required for non-DELETE behaviors)
             if (!isset($rowData['name']) || empty(trim($rowData['name']))) {
-                $this->addRowError(self::ERROR_INVALID_NAME, $rowNum, $categoryPath);
+                $this->addRowError(self::ERROR_INVALID_NAME, $rowNum, $categoryId ?: $parentId);
                 return false;
             }
 
             // Validate attribute data types
-            if (!$this->_validateAttributeTypes($rowData, $rowNum, $categoryPath)) {
+            if (!$this->_validateAttributeTypes($rowData, $rowNum, $categoryId ?: $parentId)) {
                 return false;
             }
         }
@@ -850,7 +755,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     protected function _validateDeleteRow(array $rowData, int $rowNum): bool
     {
         $hasCategoryId = isset($rowData[self::COL_CATEGORY_ID]) && !empty(trim($rowData[self::COL_CATEGORY_ID]));
-        $hasCategoryPath = isset($rowData[self::COL_CATEGORY_PATH]) && !empty(trim($rowData[self::COL_CATEGORY_PATH]));
+        $hasCategoryPath = isset($rowData[self::COL_PARENT_ID]) && !empty(trim($rowData[self::COL_PARENT_ID]));
 
         // Must have either category_id or category_path for DELETE
         if (!$hasCategoryId && !$hasCategoryPath) {
@@ -876,7 +781,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
         // If category_path is provided (fallback), validate it using existing path validation
         if (!$hasCategoryId && $hasCategoryPath) {
-            $categoryPath = trim($rowData[self::COL_CATEGORY_PATH]);
+            $categoryPath = trim($rowData[self::COL_PARENT_ID]);
             if (!$this->_isValidCategoryPath($categoryPath)) {
                 $this->addRowError(self::ERROR_CATEGORY_PATH_INVALID, $rowNum, $categoryPath);
                 return false;
@@ -957,27 +862,6 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     }
 
     /**
-     * Find category ID by path, handling both exact paths and default category fallback.
-     */
-    protected function _findCategoryByPath(string $categoryPath): ?int
-    {
-        // Try exact path first
-        if (isset($this->_pathToId[$categoryPath])) {
-            return $this->_pathToId[$categoryPath];
-        }
-
-        // If it's a single-level path, also try looking for it under default-category
-        if (!str_contains($categoryPath, '/')) {
-            $fullPath = 'default-category/' . $categoryPath;
-            if (isset($this->_pathToId[$fullPath])) {
-                return $this->_pathToId[$fullPath];
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Format string as URL key.
      */
     protected function _formatUrlKey(string $name): string
@@ -993,16 +877,14 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     #[\Override]
     public function validateData()
     {
-        // For DELETE behavior, adjust permanent attributes to allow either category_id or category_path
+        // For DELETE behavior, adjust permanent attributes to allow either category_id or parent_id
         if (Mage_ImportExport_Model_Import::BEHAVIOR_DELETE == $this->getBehavior()) {
-            // Initialize paths even for DELETE operations (needed for path-based deletion fallback)
-            $this->_collectNewCategoryPaths();
 
             $originalPermanentAttributes = $this->_permanentAttributes;
 
             // Check if we have either category_id or category_path column
             $columns = $this->_getSource()->getColNames();
-            if (in_array(self::COL_CATEGORY_ID, $columns) || in_array(self::COL_CATEGORY_PATH, $columns)) {
+            if (in_array(self::COL_CATEGORY_ID, $columns) || in_array(self::COL_PARENT_ID, $columns)) {
                 // Temporarily allow validation to pass - we'll validate in _validateDeleteRow
                 $this->_permanentAttributes = [];
                 parent::validateData();
@@ -1016,8 +898,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             }
         }
 
-        // For non-DELETE behaviors, require category_path and collect paths
-        $this->_collectNewCategoryPaths();
+        // For non-DELETE behaviors, require parent_id for new categories
         return parent::validateData();
     }
 
@@ -1031,8 +912,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
         while ($source->valid()) {
             $rowData = $source->current();
-            if (isset($rowData[self::COL_CATEGORY_PATH]) && !empty($rowData[self::COL_CATEGORY_PATH])) {
-                $categoryPath = trim($rowData[self::COL_CATEGORY_PATH]);
+            if (isset($rowData[self::COL_PARENT_ID]) && !empty($rowData[self::COL_PARENT_ID])) {
+                $categoryPath = trim($rowData[self::COL_PARENT_ID]);
                 if ($categoryPath && $this->getRowScope($rowData) == self::SCOPE_DEFAULT) {
                     $this->_newCategories[$categoryPath] = true;
                 }
