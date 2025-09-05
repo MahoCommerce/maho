@@ -103,7 +103,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     public function getFilterAction()
     {
         $data = $this->getRequest()->getParams();
-        if ($this->getRequest()->isXmlHttpRequest() && $data) {
+        if ($data) {
             try {
                 $this->loadLayout();
 
