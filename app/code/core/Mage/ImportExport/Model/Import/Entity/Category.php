@@ -266,6 +266,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     /**
      * Import data rows.
      */
+    #[\Override]
     protected function _importData(): bool
     {
         $this->_saveValidatedBunches();
@@ -798,6 +799,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      *
      * @param int $rowNum
      */
+    #[\Override]
     public function validateRow(array $rowData, $rowNum): bool
     {
         // Handle DELETE behavior separately with different validation rules
@@ -898,7 +900,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 $value = trim($rowData[$attrCode]);
                 // Accept 0, 1, '0', '1', 'true', 'false', 'yes', 'no'
                 if (!in_array(strtolower($value), ['0', '1', 'true', 'false', 'yes', 'no'], true)) {
-                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum, $value, $attrCode, $categoryPath);
+                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum);
                     $valid = false;
                 }
             }
@@ -910,7 +912,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             if (isset($rowData[$attrCode]) && !empty($rowData[$attrCode])) {
                 $value = trim($rowData[$attrCode]);
                 if (!is_numeric($value)) {
-                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum, $value, $attrCode, $categoryPath);
+                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum);
                     $valid = false;
                 }
             }
@@ -986,7 +988,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     /**
      * Validate data rows and create new category paths mapping.
      *
-     * @return bool
+     * @return Mage_ImportExport_Model_Import_Entity_Abstract
      */
     #[\Override]
     public function validateData()
@@ -1003,14 +1005,14 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             if (in_array(self::COL_CATEGORY_ID, $columns) || in_array(self::COL_CATEGORY_PATH, $columns)) {
                 // Temporarily allow validation to pass - we'll validate in _validateDeleteRow
                 $this->_permanentAttributes = [];
-                $result = parent::validateData();
+                parent::validateData();
                 $this->_permanentAttributes = $originalPermanentAttributes;
-                return $result;
+                return $this;
             } else {
-                // Neither column present - add a custom error and return false
+                // Neither column present - add a custom error and return this
                 $this->addRowError(self::ERROR_DELETE_IDENTIFIER_MISSING, 0);
                 $this->_permanentAttributes = $originalPermanentAttributes;
-                return false;
+                return $this;
             }
         }
 
@@ -1044,6 +1046,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     /**
      * EAV entity type code getter.
      */
+    #[\Override]
     public function getEntityTypeCode(): string
     {
         return 'catalog_category';

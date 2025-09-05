@@ -69,8 +69,9 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         $this->_initStores()
              ->_initWebsites()
              ->_initBooleanAttributes()
-             ->_initAttrValues()
-             ->_initCategoryPaths();
+             ->_initAttrValues();
+
+        $this->_categoryPaths = [];
     }
 
     /**
@@ -183,6 +184,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @return string
      */
+    #[\Override]
     public function export()
     {
         // Prepare headers
@@ -204,6 +206,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @return array
      */
+    #[\Override]
     public function exportFile()
     {
         $writer = $this->getWriter();
@@ -339,6 +342,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @return Mage_Catalog_Model_Resource_Category_Attribute_Collection
      */
+    #[\Override]
     public function getAttributeCollection()
     {
         return Mage::getResourceModel('catalog/category_attribute_collection');
@@ -347,6 +351,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
     /**
      * EAV entity type code getter.
      */
+    #[\Override]
     public function getEntityTypeCode(): string
     {
         return 'catalog_category';
