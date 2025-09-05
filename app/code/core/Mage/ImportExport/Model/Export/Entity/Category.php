@@ -71,7 +71,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
              ->_initBooleanAttributes()
              ->_initAttrValues();
 
-        $this->_categoryPaths = [];
+        $this->_initCategoryPaths();
     }
 
     /**
@@ -102,7 +102,15 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
 
                 // Use individual loading for EAV attributes - collections don't work reliably
                 if (!isset($loadedCategories[$pathId])) {
-                    $loadedCategories[$pathId] = Mage::getModel('catalog/category')->load($pathId);
+                    $pathCategoryModel = Mage::getModel('catalog/category');
+
+                    // Try to load with the default store first to get URL key
+                    $defaultStoreId = Mage::app()->getDefaultStoreView()->getId();
+                    if ($defaultStoreId) {
+                        $pathCategoryModel->setStoreId($defaultStoreId);
+                    }
+
+                    $loadedCategories[$pathId] = $pathCategoryModel->load($pathId);
                 }
 
                 $pathCategory = $loadedCategories[$pathId];
