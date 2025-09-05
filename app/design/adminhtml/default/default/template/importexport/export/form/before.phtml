@@ -20,22 +20,36 @@
      */
     varienForm.prototype.getFilter = function()
     {
-        if ($('entity') && $F('entity')) {
-            var url = "<?= $this->getUrl('*/*/getFilter') ?>";
-            url += ((url.slice(-1) != '/') ? '/' : '') + 'entity/' + $F('entity');
+        const entityElement = document.getElementById('entity');
+        if (entityElement && entityElement.value) {
+            let url = "<?= $this->getUrl('*/*/getFilter') ?>";
+            url += ((url.slice(-1) !== '/') ? '/' : '') + 'entity/' + entityElement.value;
 
-            new Ajax.Request(url, {
-                method:      'post',
-                //parameters:  $(this.formId).serialize(),
-                evalScripts: true,
-                onComplete:  function(transport) {
-                    var responseText = transport.responseText.replace(/>\s+</g, '><');
-                    $('export_filter_grid_container').update(responseText);
-                    $('export_filter_container').show();
+            mahoFetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            })
+            .then(responseText => {
+                const cleanedResponse = responseText.replace(/>\s+</g, '><');
+                const container = document.getElementById('export_filter_grid_container');
+                if (container) {
+                    container.innerHTML = cleanedResponse;
                 }
+                const filterContainer = document.getElementById('export_filter_container');
+                if (filterContainer) {
+                    filterContainer.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Filter request failed:', error);
             });
         } else {
-            $('export_filter_container').hide();
+            const filterContainer = document.getElementById('export_filter_container');
+            if (filterContainer) {
+                filterContainer.style.display = 'none';
+            }
         }
     };
 
@@ -46,12 +60,30 @@
      */
     function getFile()
     {
-        if ($('entity') && $('file_format')) {
-            var form      = $('export_filter_form');
-            var oldAction = form.action;
-            form.action   = oldAction + ((oldAction.slice(-1) != '/') ? '/' : '') + 'entity/' + $F('entity') + '/file_format/' + $F('file_format');
+        const entityElement = document.getElementById('entity');
+        const fileFormatElement = document.getElementById('file_format');
+        
+        if (entityElement && fileFormatElement) {
+            const form = document.getElementById('export_filter_form');
+            const oldAction = form.action;
+            
+            // Add entity and file_format as hidden inputs to the filter form
+            const entityInput = document.createElement('input');
+            entityInput.type = 'hidden';
+            entityInput.name = 'entity';
+            entityInput.value = entityElement.value;
+            form.appendChild(entityInput);
+            
+            const fileFormatInput = document.createElement('input');
+            fileFormatInput.type = 'hidden';
+            fileFormatInput.name = 'file_format';
+            fileFormatInput.value = fileFormatElement.value;
+            form.appendChild(fileFormatInput);
+            
+            // Submit the complete form with all filter data
+            form.action = '<?= $this->getUrl('*/*/export') ?>';
             form.submit();
-            form.action   = oldAction;
+            form.action = oldAction;
         } else {
             alert('<?= $this->jsQuoteEscape($this->__('Invalid data')) ?>');
         }

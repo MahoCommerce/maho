@@ -13,6 +13,7 @@
 "Can not determine attribute filter type","Can not determine attribute filter type"
 "Can not find required columns: %s","Can not find required columns: %s"
 "Cannot get autoincrement value","Cannot get autoincrement value"
+"Categories","Categories"
 "Check Data","Check Data"
 "Checked rows: %d, checked entities: %d, invalid rows: %d, total errors: %d","Checked rows: %d, checked entities: %d, invalid rows: %d, total errors: %d"
 "Column names: ""%s"" are invalid","Column names: ""%s"" are invalid"

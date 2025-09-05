@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,12 +56,21 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
                 $model = Mage::getModel('importexport/export');
                 $model->setData($this->getRequest()->getParams());
 
-                $result         = $model->exportFile();
-                $result['type'] = 'filename';
+                $result = $model->exportFile();
+
+                // Handle different result types correctly
+                if (isset($result['type']) && $result['type'] === 'string') {
+                    // For string content, pass the content directly
+                    $content = $result['value'];
+                } else {
+                    // For file-based exports, use the full result array
+                    $result['type'] = 'filename';
+                    $content = $result;
+                }
 
                 return $this->_prepareDownloadResponse(
                     $model->getFileName(),
-                    $result,
+                    $content,
                     $model->getContentType(),
                 );
             } catch (Mage_Core_Exception $e) {
@@ -94,7 +103,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     public function getFilterAction()
     {
         $data = $this->getRequest()->getParams();
-        if ($this->getRequest()->isXmlHttpRequest() && $data) {
+        if ($data) {
             try {
                 $this->loadLayout();
 
