@@ -561,7 +561,7 @@ class Mage_Core_Model_Locale extends Varien_Object
             // DateTime created from timestamp always has +00:00 timezone, convert to UTC
             $date->setTimezone(new DateTimeZone('UTC'));
         } elseif ($part !== null) {
-            $date = DateTime::createFromFormat($part, $date) ?: new DateTime($date ?: 'now');
+            $date = DateTime::createFromFormat($part, $date ?: 'now') ?: new DateTime($date ?: 'now');
         } else {
             $date = new DateTime($date ?: 'now');
         }

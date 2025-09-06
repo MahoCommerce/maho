@@ -82,7 +82,7 @@
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "rector/rector": "^2",
-        "pestphp/pest": "^3.8",
+        "pestphp/pest": "^4",
         "psy/psysh": "^0.12.10"
     },
     "suggest": {
@@ -116,6 +116,9 @@
             }
         }
     },
+    "scripts": {
+        "test": "php tests/pest-with-test-db.php"
+    },
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
@@ -126,6 +129,7 @@
         },
         "platform": {
             "php": "8.3"
-        }
+        },
+        "process-timeout": 1800
     }
 }

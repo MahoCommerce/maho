@@ -22,10 +22,10 @@ vendor/bin/rector -c .rector.php
 
 ### Testing
 ```bash
-vendor/bin/pest                      # Run all tests (Install → Backend → Frontend)
-vendor/bin/pest --testsuite=Frontend # Run frontend tests only  
-vendor/bin/pest --testsuite=Backend  # Run backend tests only
-vendor/bin/pest --testsuite=Install  # Run install tests only
+composer test                        # Run all tests (Install → Backend → Frontend)
+composer test -- --testsuite=Frontend # Run frontend tests only  
+composer test -- --testsuite=Backend  # Run backend tests only
+composer test -- --testsuite=Install  # Run install tests only
 ```
 
 ### Database & Indexing
@@ -111,6 +111,7 @@ Observers are configured in module's `config.xml`.
 
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
 - When you write Javascript, never use prototypejs or jquery, only the most modern vanillajs
+- When making AJAX requests in JavaScript, always use `mahoFetch()` instead of the native `fetch()` API for consistency and proper error handling
 - If you're integrating new tools/libraries, always use their latest available version
 - Update headers of the PHP files, adding the current year for the copyright Maho line
 - For new PHP files, only include Maho copyright with the current year - no other entities:
