@@ -810,7 +810,7 @@
             <custom_options>
                 <date_fields_order>m,d,y</date_fields_order>
                 <time_format>12h</time_format>
-                <forbidden_extensions>php,exe</forbidden_extensions>
+                <forbidden_extensions>php,php3,php4,php5,php7,php8,phtml,phar,exe,bat,cmd,com,scr,vbs,js,jar,py,pl,rb,sh,asp,aspx,jsp,cgi,htaccess</forbidden_extensions>
             </custom_options>
             <layered_navigation>
                 <price_range_calculation>auto</price_range_calculation>

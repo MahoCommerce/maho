@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,5 +26,18 @@ class Mage_Catalog_Block_Product_View_Options_Type_File extends Mage_Catalog_Blo
             $info = new Varien_Object($info);
         }
         return $info;
+    }
+
+    /**
+     * Get sanitized file extensions for display (removes forbidden extensions)
+     */
+    public function getSanitizedFileExtension(): string
+    {
+        $option = $this->getOption();
+        $originalExtensions = $option->getFileExtension();
+
+        $result = Mage::helper('catalog')->validateFileExtensionsAgainstForbiddenList($originalExtensions);
+
+        return empty($result['allowed']) ? '' : implode(', ', $result['allowed']);
     }
 }
