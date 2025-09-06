@@ -387,9 +387,51 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
                         }
                     }
                 }
+
+                // Validate file extensions before saving
+                if ($this->getData('type') === self::OPTION_TYPE_FILE && $this->getData('file_extension')) {
+                    $this->validateFileExtensions($this->getData('file_extension'));
+                }
+
                 $this->save();
             }
         }//eof foreach()
+        return $this;
+    }
+
+    /**
+     * @throws Mage_Core_Exception
+     */
+    #[\Override]
+    protected function _beforeSave(): self
+    {
+        parent::_beforeSave();
+
+        // Validate file extensions for file type options
+        if ($this->getType() === self::OPTION_TYPE_FILE && $this->getFileExtension()) {
+            $this->validateFileExtensions($this->getFileExtension());
+        }
+
+        return $this;
+    }
+
+    /**
+     * Validate file extensions against forbidden list
+     * @throws Mage_Core_Exception
+     */
+    protected function validateFileExtensions(string $extensions): self
+    {
+        $result = Mage::helper('catalog')->validateFileExtensionsAgainstForbiddenList($extensions);
+
+        if (!empty($result['forbidden'])) {
+            throw new Mage_Core_Exception(
+                Mage::helper('catalog')->__(
+                    'The following file extensions are not allowed for security reasons: %s',
+                    implode(', ', $result['forbidden']),
+                ),
+            );
+        }
+
         return $this;
     }
 

@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -447,5 +448,52 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     public function shouldDisplayProductCountOnLayer($storeId = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_DISPLAY_PRODUCT_COUNT, $storeId);
+    }
+
+    /**
+     * Validate file extensions against forbidden list
+     *
+     * @param string $extensions Comma-separated list of extensions
+     * @return array Array with 'allowed', 'forbidden', and 'original' keys
+     */
+    public function validateFileExtensionsAgainstForbiddenList(string $extensions): array
+    {
+        $result = [
+            'allowed' => [],
+            'forbidden' => [],
+            'original' => $extensions,
+        ];
+
+        if (!$extensions) {
+            return $result;
+        }
+
+        // Parse input extensions
+        preg_match_all('/[a-z0-9]+/si', strtolower($extensions), $matches);
+        $inputExtensions = $matches[0];
+
+        if (empty($inputExtensions)) {
+            return $result;
+        }
+
+        // Get forbidden extensions from config
+        $forbiddenExtensionsConfig = Mage::getStoreConfig('catalog/custom_options/forbidden_extensions');
+        if (!$forbiddenExtensionsConfig) {
+            $result['allowed'] = $inputExtensions;
+            return $result;
+        }
+
+        $forbiddenExtensions = array_map('trim', array_map('strtolower', explode(',', $forbiddenExtensionsConfig)));
+
+        // Split extensions into allowed and forbidden
+        foreach ($inputExtensions as $extension) {
+            if (in_array($extension, $forbiddenExtensions)) {
+                $result['forbidden'][] = $extension;
+            } else {
+                $result['allowed'][] = $extension;
+            }
+        }
+
+        return $result;
     }
 }

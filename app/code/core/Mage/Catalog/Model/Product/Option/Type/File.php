@@ -230,10 +230,22 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
         // File extension - validate this FIRST
         $_allowed = $this->_parseExtensionsString($option->getFileExtension());
+        $_forbidden = $this->_parseExtensionsString(Mage::getStoreConfig('catalog/custom_options/forbidden_extensions'));
+
         if ($_allowed !== null) {
+            // Check if any allowed extension is in the forbidden list
+            if ($_forbidden !== null) {
+                $forbiddenFound = array_intersect(array_map('strtolower', $_allowed), array_map('strtolower', $_forbidden));
+                if (!empty($forbiddenFound)) {
+                    Mage::throwException(Mage::helper('catalog')->__(
+                        'The following file extensions are not allowed for security reasons: %s',
+                        implode(', ', $forbiddenFound),
+                    ));
+                }
+            }
             $upload->addValidator('Extension', false, $_allowed);
         } else {
-            $_forbidden = $this->_parseExtensionsString($this->getConfigData('forbidden_extensions'));
+            // No specific allowed extensions - use forbidden list as fallback
             if ($_forbidden !== null) {
                 $upload->addValidator('ExcludeExtension', false, $_forbidden);
             }
@@ -380,18 +392,20 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
         // File extension validation - check this FIRST before trying to read the file
         $_allowed = $this->_parseExtensionsString($option->getFileExtension());
+        $_forbidden = $this->_parseExtensionsString(Mage::getStoreConfig('catalog/custom_options/forbidden_extensions'));
+        $extension = strtolower(pathinfo($fileFullPath, PATHINFO_EXTENSION));
+
         if ($_allowed !== null) {
-            $extension = strtolower(pathinfo($fileFullPath, PATHINFO_EXTENSION));
-            if (!in_array($extension, array_map('strtolower', $_allowed))) {
+            // Check if allowed extension is in forbidden list first
+            if ($_forbidden !== null && in_array($extension, array_map('strtolower', $_forbidden))) {
+                $errors[] = sprintf('The file extension "%s" is not allowed for security reasons.', $extension);
+            } elseif (!in_array($extension, array_map('strtolower', $_allowed))) {
                 $errors[] = sprintf('The file extension "%s" is not allowed.', $extension);
             }
         } else {
-            $_forbidden = $this->_parseExtensionsString($this->getConfigData('forbidden_extensions'));
-            if ($_forbidden !== null) {
-                $extension = strtolower(pathinfo($fileFullPath, PATHINFO_EXTENSION));
-                if (in_array($extension, array_map('strtolower', $_forbidden))) {
-                    $errors[] = sprintf('The file extension "%s" is not allowed.', $extension);
-                }
+            // No specific allowed extensions - check forbidden list
+            if ($_forbidden !== null && in_array($extension, array_map('strtolower', $_forbidden))) {
+                $errors[] = sprintf('The file extension "%s" is not allowed for security reasons.', $extension);
             }
         }
 
