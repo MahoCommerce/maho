@@ -15,7 +15,7 @@ describe('Product Option File Extension Security Validation', function () {
     beforeEach(function () {
         $this->option = Mage::getModel('catalog/product_option');
         $this->option->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE);
-        
+
         // Use reflection to access protected method
         $this->reflection = new ReflectionClass($this->option);
         $this->validateMethod = $this->reflection->getMethod('validateFileExtensions');
@@ -67,7 +67,7 @@ describe('Product Option File Extension Security Validation', function () {
     describe('_beforeSave validation integration', function () {
         it('validates file extensions during beforeSave for file type options', function () {
             $this->option->setFileExtension('php,exe');
-            
+
             expect(fn() => $this->option->save())
                 ->toThrow(Mage_Core_Exception::class);
         });
@@ -75,14 +75,14 @@ describe('Product Option File Extension Security Validation', function () {
         it('skips validation for non-file type options', function () {
             $this->option->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD);
             $this->option->setFileExtension('php'); // This should be ignored
-            
+
             // Should not throw exception because it's not a file type option
             expect(fn() => $this->option->save())->not()->toThrow(Mage_Core_Exception::class);
         });
 
         it('allows safe extensions during beforeSave', function () {
             $this->option->setFileExtension('jpg,png,pdf');
-            
+
             expect(fn() => $this->option->save())->not()->toThrow(Mage_Core_Exception::class);
         });
     });
@@ -102,9 +102,9 @@ describe('Product Option File Extension Security Validation', function () {
                 'file_extension' => 'php,exe',
                 'is_require' => 0,
             ];
-            
+
             $this->option->setOptions([$optionData]);
-            
+
             expect(fn() => $this->option->saveOptions())
                 ->toThrow(Mage_Core_Exception::class);
         });
@@ -116,9 +116,9 @@ describe('Product Option File Extension Security Validation', function () {
                 'file_extension' => 'jpg,png,pdf',
                 'is_require' => 0,
             ];
-            
+
             $this->option->setOptions([$optionData]);
-            
+
             expect(fn() => $this->option->saveOptions())->not()->toThrow(Mage_Core_Exception::class);
         });
     });
