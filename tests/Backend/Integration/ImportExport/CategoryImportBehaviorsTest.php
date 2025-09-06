@@ -305,37 +305,37 @@ describe('DELETE Behavior', function () {
 });
 
 describe('REPLACE Behavior', function () {
-    it('replaces all categories with imported data', function () {
-        // Create initial categories
+    it('works exactly like APPEND behavior', function () {
+        // Create initial categories with description
         $setupData = [
-            ['category_id', 'parent_id', '_store', 'name', 'url_key'],
-            ['', '2', '', 'Original 1', 'original-1'],
-            ['', '2', '', 'Original 2', 'original-2'],
-            ['', '2', '', 'Original 3', 'original-3'],
+            ['category_id', 'parent_id', '_store', 'name', 'url_key', 'description'],
+            ['', '2', '', 'Original 1', 'original-1', 'Original description 1'],
+            ['', '2', '', 'Original 2', 'original-2', 'Original description 2'],
         ];
 
         createAndImportBehaviorCsv($setupData, Mage_ImportExport_Model_Import::BEHAVIOR_APPEND);
 
-        // Verify initial categories
-        expect(findCategoryByUrlKeyBehavior('original-1'))->not->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('original-2'))->not->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('original-3'))->not->toBeNull();
+        // Get category ID for updating
+        $originalCat1 = findCategoryByUrlKeyBehavior('original-1');
+        expect($originalCat1)->not->toBeNull();
+        expect($originalCat1->getDescription())->toBe('Original description 1');
 
-        // Replace with new set of categories
+        // REPLACE: update existing category and create new one (same as APPEND)
         $replaceData = [
             ['category_id', 'parent_id', '_store', 'name', 'url_key'],
-            ['', '2', '', 'New Category 1', 'new-1'],
-            ['', '2', '', 'New Category 2', 'new-2'],
+            [(string) $originalCat1->getId(), '2', '', 'Updated Name', 'updated-1'], // Update existing
+            ['', '2', '', 'New Category', 'new-1'], // Create new
         ];
 
         createAndImportBehaviorCsv($replaceData, Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE);
 
-        // Verify replacement: old categories gone, new ones added
-        expect(findCategoryByUrlKeyBehavior('original-1'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('original-2'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('original-3'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('new-1'))->not->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('new-2'))->not->toBeNull();
+        // Verify REPLACE behavior works exactly like APPEND for categories
+        $updatedCat = findCategoryByUrlKeyBehavior('updated-1');
+        expect($updatedCat)->not->toBeNull()
+            ->and($updatedCat->getName())->toBe('Updated Name')
+            ->and($updatedCat->getDescription())->toBe('Original description 1') // Description preserved (not in CSV)
+            ->and(findCategoryByUrlKeyBehavior('original-2'))->not->toBeNull() // Untouched category remains
+            ->and(findCategoryByUrlKeyBehavior('new-1'))->not->toBeNull(); // New category created
     });
 
     it('preserves system categories during replace', function () {
@@ -352,7 +352,7 @@ describe('REPLACE Behavior', function () {
 
         createAndImportBehaviorCsv($setupData, Mage_ImportExport_Model_Import::BEHAVIOR_APPEND);
 
-        // Replace with different categories
+        // Replace: add new category (same as APPEND for categories)
         $replaceData = [
             ['category_id', 'parent_id', '_store', 'name', 'url_key'],
             ['', '2', '', 'Replace Test 3', 'replace-test-3'],
@@ -367,10 +367,10 @@ describe('REPLACE Behavior', function () {
         expect($rootCategoryAfter->getId())->toBe($rootCategory->getId())
             ->and($defaultCategoryAfter->getId())->toBe($defaultCategory->getId());
 
-        // Verify replacement worked
-        expect(findCategoryByUrlKeyBehavior('replace-test-1'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('replace-test-2'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('replace-test-3'))->not->toBeNull();
+        // Verify REPLACE works like APPEND: all categories still exist
+        expect(findCategoryByUrlKeyBehavior('replace-test-1'))->not->toBeNull() // Still exists
+            ->and(findCategoryByUrlKeyBehavior('replace-test-2'))->not->toBeNull() // Still exists
+            ->and(findCategoryByUrlKeyBehavior('replace-test-3'))->not->toBeNull(); // New category created
     });
 
     it('handles hierarchical replace correctly', function () {
@@ -394,7 +394,7 @@ describe('REPLACE Behavior', function () {
         ];
         createAndImportBehaviorCsv($childrenData, Mage_ImportExport_Model_Import::BEHAVIOR_APPEND);
 
-        // Replace with new hierarchy
+        // Replace with new hierarchy - REPLACE works same as APPEND for categories
         $newParentData = [
             ['category_id', 'parent_id', '_store', 'name', 'url_key'],
             ['', '2', '', 'New Parent', 'new-parent'],
@@ -408,12 +408,12 @@ describe('REPLACE Behavior', function () {
         ];
         createAndImportBehaviorCsv($newChildData, Mage_ImportExport_Model_Import::BEHAVIOR_APPEND);
 
-        // Verify old hierarchy is gone, new hierarchy exists
-        expect(findCategoryByUrlKeyBehavior('old-parent'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('old-child-1'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('old-child-2'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('keep-parent'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('keep-child'))->toBeNull()
+        // Verify REPLACE works same as APPEND - all categories still exist, new ones added
+        expect(findCategoryByUrlKeyBehavior('old-parent'))->not->toBeNull()
+            ->and(findCategoryByUrlKeyBehavior('old-child-1'))->not->toBeNull()
+            ->and(findCategoryByUrlKeyBehavior('old-child-2'))->not->toBeNull()
+            ->and(findCategoryByUrlKeyBehavior('keep-parent'))->not->toBeNull()
+            ->and(findCategoryByUrlKeyBehavior('keep-child'))->not->toBeNull()
             ->and(findCategoryByUrlKeyBehavior('new-parent'))->not->toBeNull()
             ->and(findCategoryByUrlKeyBehavior('new-child'))->not->toBeNull();
     });
@@ -508,18 +508,19 @@ describe('Behavior Comparison', function () {
 
         createAndImportBehaviorCsv($initialData, Mage_ImportExport_Model_Import::BEHAVIOR_APPEND);
 
-        // Test 2: REPLACE behavior - REPLACE deletes all existing categories first
+        // Test 2: REPLACE behavior - REPLACE works same as APPEND for categories
+        $behaviorTest1New = findCategoryByUrlKeyBehavior('behavior-test-1');
         $replaceData = [
             ['category_id', 'parent_id', '_store', 'name', 'url_key'],
-            ['', '2', '', 'Replaced 1', 'behavior-test-1'],  // New category with same url_key
-            ['', '2', '', 'New 3', 'behavior-test-3'],       // Add new
+            [(string) $behaviorTest1New->getId(), '2', '', 'Replaced 1', 'behavior-test-1'], // Update existing (keep same url_key)
+            ['', '2', '', 'New 3', 'behavior-test-3'],       // Create new (same as APPEND)
         ];
         createAndImportBehaviorCsv($replaceData, Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE);
 
-        // REPLACE: Only categories in import should exist (all are new since REPLACE deleted originals)
-        expect(findCategoryByUrlKeyBehavior('behavior-test-1'))->not->toBeNull() // Recreated
-            ->and(findCategoryByUrlKeyBehavior('behavior-test-2'))->toBeNull()    // Deleted (not in import)
-            ->and(findCategoryByUrlKeyBehavior('behavior-test-3'))->not->toBeNull(); // Added
+        // REPLACE: Works same as APPEND - updates existing, creates new, leaves untouched unchanged
+        expect(findCategoryByUrlKeyBehavior('behavior-test-1'))->not->toBeNull()      // Updated existing
+            ->and(findCategoryByUrlKeyBehavior('behavior-test-2'))->not->toBeNull() // Unchanged existing
+            ->and(findCategoryByUrlKeyBehavior('behavior-test-3'))->not->toBeNull(); // Created new
 
         expect(findCategoryByUrlKeyBehavior('behavior-test-1')->getName())->toBe('Replaced 1');
     });

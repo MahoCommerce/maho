@@ -109,8 +109,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         self::ERROR_CIRCULAR_REFERENCE => 'Circular reference detected in category path "%s"',
         self::ERROR_DUPLICATE_PATH => 'Duplicate category path "%s" found',
         self::ERROR_INVALID_NAME => 'Invalid category name for path "%s"',
-        self::ERROR_INVALID_ATTRIBUTE_TYPE => 'Invalid value "%s" for attribute "%s" in category "%s"',
-        self::ERROR_MISSING_REQUIRED_ATTRIBUTE => 'Required attribute "%s" is missing for category "%s"',
+        self::ERROR_INVALID_ATTRIBUTE_TYPE => 'Invalid value for attribute "%s"',
+        self::ERROR_MISSING_REQUIRED_ATTRIBUTE => 'Required attribute "%s" is missing',
         self::ERROR_DELETE_IDENTIFIER_MISSING => 'For DELETE operations, either category_id or category_path must be provided',
         self::ERROR_CATEGORY_ID_INVALID => 'Category ID "%s" is invalid or does not exist',
     ];
@@ -198,8 +198,6 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     #[\Override]
     protected function _importData(): bool
     {
-        $this->_saveValidatedBunches();
-
         if (Mage_ImportExport_Model_Import::BEHAVIOR_DELETE == $this->getBehavior()) {
             return $this->_deleteCategories();
         } elseif (Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE == $this->getBehavior()) {
@@ -487,6 +485,9 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 continue;
             }
 
+            // Convert export labels back to database values
+            $value = $this->_convertLabelToValue($attrCode, $value);
+
             $attributes[$attrCode][] = [
                 'entity_type_id' => $this->_entityTypeId,
                 'entity_id' => $entityId,
@@ -496,6 +497,54 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             ];
 
         }
+    }
+
+    /**
+     * Convert export labels back to database values.
+     */
+    protected function _convertLabelToValue(string $attrCode, mixed $value): mixed
+    {
+        if (empty($value) || !is_string($value)) {
+            return $value;
+        }
+
+        // Handle display_mode attribute specifically
+        if ($attrCode === 'display_mode') {
+            $labelToValueMap = [
+                'Products only' => 'PRODUCTS',
+                'Static block only' => 'PAGE',
+                'Static block and products' => 'PRODUCTS_AND_PAGE',
+            ];
+
+            return $labelToValueMap[$value] ?? $value;
+        }
+
+        // Handle other select/multiselect attributes by getting their source model
+        $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_category', $attrCode);
+        if ($attribute && $attribute->usesSource()) {
+            try {
+                $source = $attribute->getSource();
+                $options = [];
+
+                foreach ($source->getAllOptions() as $option) {
+                    $innerOptions = is_array($option['value']) ? $option['value'] : [$option];
+                    foreach ($innerOptions as $innerOption) {
+                        if (isset($innerOption['value']) && isset($innerOption['label'])) {
+                            $options[$innerOption['label']] = $innerOption['value'];
+                        }
+                    }
+                }
+
+                // If we found a matching label, return its value
+                if (isset($options[$value])) {
+                    return $options[$value];
+                }
+            } catch (Exception $e) {
+                // If we can't get options, return the original value
+            }
+        }
+
+        return $value;
     }
 
     /**
@@ -627,37 +676,12 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
     /**
      * Save and replace categories.
-     * REPLACE behavior: Delete non-system categories not in import, then save/update categories from import
+     * REPLACE behavior: Same as APPEND for categories - update existing, create new if needed
      */
     protected function _saveAndReplaceCategories(): bool
     {
-        // For REPLACE behavior, we'll delete existing non-system categories first,
-        // then proceed with normal save logic
-        $entityTable = Mage::getSingleton('core/resource')->getTableName('catalog_category_entity');
-
-        // Delete all non-system categories (this implements the "replace all" behavior)
-        // Keep root (1) and default category (2)
-        $categoriesToDelete = [];
-        foreach ($this->_categoryIds as $categoryId => $parentId) {
-            if ($categoryId > 2) { // Skip root (1) and default category (2)
-                $categoriesToDelete[] = $categoryId;
-            }
-        }
-
-        if (!empty($categoriesToDelete)) {
-            // Use cascade deletion to also delete child categories
-            $allIdsToDelete = $this->_expandIdsWithChildren($categoriesToDelete);
-            $this->_connection->delete($entityTable, ['entity_id IN (?)' => $allIdsToDelete]);
-
-            // Clear the category mappings since we deleted everything
-            $this->_categoryIds = [];
-            $this->_validParentIds = [2 => true]; // Keep default category as valid parent
-
-            // Rebuild category mapping with just system categories
-            $this->_initCategories();
-        }
-
-        // Now save/update categories from import data (normal behavior)
+        // For categories, REPLACE works exactly the same as APPEND
+        // Both behaviors: update existing categories, create new ones if they don't exist
         return $this->_saveCategories();
     }
 
@@ -799,15 +823,28 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         $valid = true;
 
         // Validate boolean attributes
-        $booleanAttrs = ['is_active', 'include_in_menu', 'is_anchor', 'display_mode'];
+        $booleanAttrs = ['is_active', 'include_in_menu', 'is_anchor'];
         foreach ($booleanAttrs as $attrCode) {
             if (isset($rowData[$attrCode]) && !empty($rowData[$attrCode])) {
                 $value = trim($rowData[$attrCode]);
                 // Accept 0, 1, '0', '1', 'true', 'false', 'yes', 'no'
                 if (!in_array(strtolower($value), ['0', '1', 'true', 'false', 'yes', 'no'], true)) {
-                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum);
+                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum, $attrCode);
                     $valid = false;
                 }
+            }
+        }
+
+        // Validate display_mode attribute
+        if (isset($rowData['display_mode']) && !empty($rowData['display_mode'])) {
+            $value = trim($rowData['display_mode']);
+            $validDisplayModes = [
+                'PRODUCTS', 'PAGE', 'PRODUCTS_AND_PAGE', // Accept database values
+                'Products only', 'Static block only', 'Static block and products', // Accept export labels
+            ];
+            if (!in_array($value, $validDisplayModes, true)) {
+                $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum, 'display_mode');
+                $valid = false;
             }
         }
 
@@ -817,7 +854,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             if (isset($rowData[$attrCode]) && !empty($rowData[$attrCode])) {
                 $value = trim($rowData[$attrCode]);
                 if (!is_numeric($value)) {
-                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum);
+                    $this->addRowError(self::ERROR_INVALID_ATTRIBUTE_TYPE, $rowNum, $attrCode);
                     $valid = false;
                 }
             }
