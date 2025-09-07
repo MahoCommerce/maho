@@ -54,6 +54,10 @@
                     <model_token>importexport/import_entity_product</model_token>
                     <label>Products</label>
                 </catalog_product>
+                <catalog_category translate="label">
+                    <model_token>importexport/import_entity_category</model_token>
+                    <label>Categories</label>
+                </catalog_category>
                 <customer translate="label">
                     <model_token>importexport/import_entity_customer</model_token>
                     <label>Customers</label>
@@ -64,6 +68,10 @@
                     <model_token>importexport/export_entity_product</model_token>
                     <label>Products</label>
                 </catalog_product>
+                <catalog_category translate="label">
+                    <model_token>importexport/export_entity_category</model_token>
+                    <label>Categories</label>
+                </catalog_category>
                 <customer translate="label">
                     <model_token>importexport/export_entity_customer</model_token>
                     <label>Customers</label>
