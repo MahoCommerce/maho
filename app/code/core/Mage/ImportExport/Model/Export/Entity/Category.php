@@ -37,6 +37,20 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
     protected $_indexValueAttributes = [];
 
     /**
+     * Attribute code to ID mapping for faster lookups.
+     *
+     * @var array
+     */
+    protected $_attributeCodeToId = [];
+
+    /**
+     * Preloaded category attribute data by store.
+     *
+     * @var array
+     */
+    protected $_categoryAttributeData = [];
+
+    /**
      * Disabled attributes for export.
      *
      * @var array
@@ -71,7 +85,8 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
              ->_initBooleanAttributes()
              ->_initAttrValues();
 
-        $this->_initCategoryParents();
+        $this->_initCategoryParents()
+             ->_initAttributeMapping();
     }
 
     /**
@@ -94,6 +109,19 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         return $this;
     }
 
+    /**
+     * Initialize attribute code to ID mapping for faster lookups.
+     *
+     * @return $this
+     */
+    protected function _initAttributeMapping(): self
+    {
+        foreach ($this->getAttributeCollection() as $attribute) {
+            $this->_attributeCodeToId[$attribute->getAttributeCode()] = $attribute->getAttributeId();
+        }
+
+        return $this;
+    }
 
     /**
      * Initialize boolean attributes that should export values instead of labels
@@ -208,9 +236,18 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         $writer = $this->getWriter();
         $defaultStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
 
+        // Get category IDs for batch processing
+        $categoryIds = [];
+        foreach ($collection as $category) {
+            $categoryIds[] = (int) $category->getId();
+        }
+
+        // Preload all attribute data for all categories and stores
+        $this->_preloadCategoryAttributeData($categoryIds, $validAttrCodes);
+
         foreach ($collection as $category) {
             /** @var Mage_Catalog_Model_Category $category */
-            $categoryId = $category->getId();
+            $categoryId = (int) $category->getId();
             $parentId = $this->_categoryParents[$categoryId] ?? $category->getParentId();
 
             // Export default store data first
@@ -220,14 +257,9 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
                 self::COL_STORE => '',
             ];
 
-            // Load default store data
-            $defaultCategory = Mage::getModel('catalog/category');
-            $defaultCategory->setStoreId($defaultStoreId);
-            $defaultCategory->load($categoryId);
-
-            // Add attribute values for default store - read directly from database to avoid fallback issues
+            // Add attribute values for default store
             foreach ($validAttrCodes as $attrCode) {
-                $attrValue = $this->_getAttributeValueDirectly((int) $categoryId, $attrCode, $defaultStoreId);
+                $attrValue = $this->_getCachedAttributeValue($categoryId, $attrCode, $defaultStoreId);
 
                 if ($attrValue !== null && $attrValue !== '') {
                     if (isset($this->_attributeValues[$attrCode][$attrValue])) {
@@ -247,11 +279,6 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
                     continue; // Already exported default
                 }
 
-                // Load store-specific category data
-                $storeCategory = Mage::getModel('catalog/category');
-                $storeCategory->setStoreId($storeId);
-                $storeCategory->load($categoryId);
-
                 $storeDataRow = [
                     self::COL_CATEGORY_ID => (string) $categoryId,
                     self::COL_PARENT_ID => (string) $parentId,
@@ -260,10 +287,10 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
 
                 $hasStoreSpecificData = false;
 
-                // Add attribute values for this store - read directly from database
+                // Add attribute values for this store
                 foreach ($validAttrCodes as $attrCode) {
-                    $storeValue = $this->_getAttributeValueDirectly((int) $categoryId, $attrCode, $storeId);
-                    $defaultValue = $this->_getAttributeValueDirectly((int) $categoryId, $attrCode, $defaultStoreId);
+                    $storeValue = $this->_getCachedAttributeValue($categoryId, $attrCode, $storeId);
+                    $defaultValue = $this->_getCachedAttributeValue($categoryId, $attrCode, $defaultStoreId);
 
                     // Only include if different from default
                     if ($storeValue !== null && $storeValue !== '' && $storeValue != $defaultValue) {
@@ -320,53 +347,73 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
     }
 
     /**
-     * Get attribute value directly from database to avoid fallback issues.
+     * Preload all category attribute data for batch processing.
      */
-    protected function _getAttributeValueDirectly(int $categoryId, string $attrCode, int $storeId): ?string
+    protected function _preloadCategoryAttributeData(array $categoryIds, array $attrCodes): void
     {
-        // Find the attribute in our collection
-        $attribute = null;
-        foreach ($this->getAttributeCollection() as $attr) {
-            if ($attr->getAttributeCode() === $attrCode) {
-                $attribute = $attr;
-                break;
-            }
-        }
-
-        if (!$attribute) {
-            return null;
+        if (empty($categoryIds) || empty($attrCodes)) {
+            return;
         }
 
         $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $attributeId = $attribute->getAttributeId();
+        $resource = Mage::getSingleton('core/resource');
 
-        // Determine the backend table based on attribute backend type
-        $backendType = $attribute->getBackendType();
-        $tableName = 'catalog_category_entity_' . $backendType;
-        $table = Mage::getSingleton('core/resource')->getTableName($tableName);
-
-        // Query the specific store value
-        $select = $connection->select()
-            ->from($table, 'value')
-            ->where('entity_id = ?', $categoryId)
-            ->where('attribute_id = ?', $attributeId)
-            ->where('store_id = ?', $storeId)
-            ->limit(1);
-
-        $value = $connection->fetchOne($select);
-
-        // If no value found for this store and it's not the admin store, try admin store as fallback
-        if (($value === false || $value === null) && $storeId != 0) {
-            $select = $connection->select()
-                ->from($table, 'value')
-                ->where('entity_id = ?', $categoryId)
-                ->where('attribute_id = ?', $attributeId)
-                ->where('store_id = ?', 0)
-                ->limit(1);
-
-            $value = $connection->fetchOne($select);
+        // Group attributes by backend type to minimize queries
+        $attributesByType = [];
+        foreach ($this->getAttributeCollection() as $attribute) {
+            $attrCode = $attribute->getAttributeCode();
+            if (in_array($attrCode, $attrCodes)) {
+                $backendType = $attribute->getBackendType();
+                $attributesByType[$backendType][$attrCode] = $attribute->getAttributeId();
+            }
         }
 
-        return $value !== false ? (string) $value : null;
+        // Load data for each backend type in bulk
+        foreach ($attributesByType as $backendType => $attributes) {
+            $tableName = 'catalog_category_entity_' . $backendType;
+            $table = $resource->getTableName($tableName);
+            $attributeIds = array_values($attributes);
+
+            $select = $connection->select()
+                ->from($table, ['entity_id', 'attribute_id', 'store_id', 'value'])
+                ->where('entity_id IN (?)', $categoryIds)
+                ->where('attribute_id IN (?)', $attributeIds);
+
+            $data = $connection->fetchAll($select);
+
+            // Organize data by category, attribute, and store
+            foreach ($data as $row) {
+                $categoryId = $row['entity_id'];
+                $attributeId = $row['attribute_id'];
+                $storeId = $row['store_id'];
+                $value = $row['value'];
+
+                // Find attribute code by ID
+                $attrCode = array_search($attributeId, $attributes);
+                if ($attrCode !== false) {
+                    $this->_categoryAttributeData[$categoryId][$attrCode][$storeId] = $value;
+                }
+            }
+        }
+    }
+
+    /**
+     * Get cached attribute value with fallback logic.
+     */
+    protected function _getCachedAttributeValue(int $categoryId, string $attrCode, int $storeId): ?string
+    {
+        // Check for store-specific value
+        if (isset($this->_categoryAttributeData[$categoryId][$attrCode][$storeId])) {
+            $value = $this->_categoryAttributeData[$categoryId][$attrCode][$storeId];
+            return $value !== '' ? (string) $value : null;
+        }
+
+        // Fallback to admin store (0) if not found and current store is not admin
+        if ($storeId != 0 && isset($this->_categoryAttributeData[$categoryId][$attrCode][0])) {
+            $value = $this->_categoryAttributeData[$categoryId][$attrCode][0];
+            return $value !== '' ? (string) $value : null;
+        }
+
+        return null;
     }
 }
