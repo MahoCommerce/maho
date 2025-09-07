@@ -403,7 +403,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             unset($row['_temp_row_data'], $row['_temp_row_scope']);
 
             $this->_connection->insert($entityTable, $row);
-            
+
             // Use specified entity_id if provided, otherwise use auto-generated ID
             $entityId = isset($row['entity_id']) ? (int) $row['entity_id'] : (int) $this->_connection->lastInsertId();
 
