@@ -269,6 +269,32 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                                 }
 
                                 $this->_collectAttributeData($rowData, $rowScope, $categoryIdInt, $attributes, true);
+                            } else {
+                                // Category doesn't exist - create it with the specified ID
+                                if ($parentId === null) {
+                                    $parentId = 2; // Default category
+                                }
+
+                                $entityRow = [
+                                    'entity_id' => $categoryIdInt, // Use the specified ID
+                                    'entity_type_id' => $this->_entityTypeId,
+                                    'attribute_set_id' => $this->_defaultAttributeSetId,
+                                    'parent_id' => $parentId,
+                                    'position' => $this->_getNextPosition($parentId),
+                                    'level' => $this->_getCategoryLevel($parentId) + 1,
+                                    'children_count' => 0,
+                                    'created_at' => Mage_Core_Model_Locale::now(),
+                                    'updated_at' => Mage_Core_Model_Locale::now(),
+                                ];
+
+                                // Store row data to collect attributes after insertion
+                                $entityRow['_temp_row_data'] = $rowData;
+                                $entityRow['_temp_row_scope'] = $rowScope;
+                                $entityRows[] = $entityRow;
+
+                                // Add to our cache so future references work
+                                $this->_categoryIds[$categoryIdInt] = $parentId;
+                                $this->_validParentIds[$categoryIdInt] = true;
                             }
                         }
                     } else {
@@ -377,7 +403,9 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             unset($row['_temp_row_data'], $row['_temp_row_scope']);
 
             $this->_connection->insert($entityTable, $row);
-            $entityId = (int) $this->_connection->lastInsertId();
+            
+            // Use specified entity_id if provided, otherwise use auto-generated ID
+            $entityId = isset($row['entity_id']) ? (int) $row['entity_id'] : (int) $this->_connection->lastInsertId();
 
             // Update category ID cache
             $this->_categoryIds[$entityId] = $row['parent_id'];
