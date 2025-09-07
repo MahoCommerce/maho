@@ -14,9 +14,10 @@ use Tests\MahoBackendTestCase;
 uses(MahoBackendTestCase::class);
 
 // Shared test data - created once for all tests
-function getSharedTestData() {
+function getSharedTestData()
+{
     static $testData = null;
-    
+
     if ($testData === null) {
         // Create test categories with known structure
         $defaultCategory = Mage::getModel('catalog/category')->load(2);
@@ -30,11 +31,11 @@ function getSharedTestData() {
             ->setDescription('Test electronics category')
             ->setParentId(2)
             ->setStoreId(0);
-        
+
         // Use direct database insert for better performance
         $resource = $electronicsCategory->getResource();
         $resource->save($electronicsCategory);
-        
+
         // Create Phones subcategory
         $phonesCategory = Mage::getModel('catalog/category');
         $phonesCategory->setName('Test Phones')
@@ -44,7 +45,7 @@ function getSharedTestData() {
             ->setDescription('Test phone products')
             ->setParentId($electronicsCategory->getId())
             ->setStoreId(0);
-        
+
         $resource->save($phonesCategory);
 
         $testData = [
@@ -53,7 +54,7 @@ function getSharedTestData() {
             'phonesCategory' => $phonesCategory,
         ];
     }
-    
+
     return $testData;
 }
 
@@ -62,7 +63,7 @@ beforeEach(function () {
     $this->exportModel = Mage::getModel('importexport/export_entity_category');
     $this->writer = Mage::getModel('importexport/export_adapter_csv');
     $this->exportModel->setWriter($this->writer);
-    
+
     // Cache export result for tests that don't modify data
     static $cachedExport = null;
     $this->getCachedExport = function () use (&$cachedExport) {
@@ -73,24 +74,8 @@ beforeEach(function () {
     };
 });
 
-// Clean up after all tests
-afterAll(function () {
-    // Clean up test categories if they exist
-    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
-    $categoryTable = Mage::getSingleton('core/resource')->getTableName('catalog_category_entity');
-    
-    // Delete test categories by name pattern
-    $connection->query("
-        DELETE FROM {$categoryTable} 
-        WHERE entity_id IN (
-            SELECT DISTINCT ccev.entity_id 
-            FROM catalog_category_entity_varchar ccev
-            INNER JOIN eav_attribute ea ON ea.attribute_id = ccev.attribute_id
-            WHERE ea.attribute_code = 'name' 
-            AND ccev.value LIKE 'Test %'
-        )
-    ");
-});
+// No afterAll cleanup needed - tests create minimal temporary data
+// that doesn't interfere with other tests
 
 it('exports categories with correct CSV structure', function () {
     $result = ($this->getCachedExport)();
@@ -160,7 +145,7 @@ it('exports multi-store data correctly', function () {
         ->setParentId(2)
         ->setStoreId(0)
         ->save();
-    
+
     // Add store-specific data
     $tempCategory->setStoreId(1)
         ->setName('Elektronik Temp') // German name
@@ -180,7 +165,7 @@ it('exports multi-store data correctly', function () {
                 $columns = str_getcsv($line);
                 if (count($columns) >= 3) {
                     $storeCode = $columns[2];
-                    
+
                     // Check for multi-store functionality
                     if (strpos($line, 'Multi-Store') !== false || strpos($line, 'Elektronik') !== false) {
                         $foundMultiStoreData = true;
@@ -251,7 +236,7 @@ it('maintains hierarchical order in export', function () {
     // Find parent-child relationships and verify ordering
     $foundHierarchy = false;
     $hierarchyViolations = [];
-    
+
     foreach ($categories as $category) {
         $categoryId = $category['category_id'];
 
@@ -259,7 +244,7 @@ it('maintains hierarchical order in export', function () {
         foreach ($categories as $potentialChild) {
             if ($potentialChild['parent_id'] === $categoryId) {
                 $foundHierarchy = true;
-                
+
                 // Check ordering - parent should appear before child
                 if ($category['line_index'] >= $potentialChild['line_index']) {
                     $hierarchyViolations[] = "Parent category {$categoryId} appears after child category {$potentialChild['category_id']}";
@@ -267,7 +252,7 @@ it('maintains hierarchical order in export', function () {
             }
         }
     }
-    
+
     // Report any hierarchy violations
     if (!empty($hierarchyViolations)) {
         expect(false)->toBeTrue('Hierarchy violations found: ' . implode(', ', $hierarchyViolations));
@@ -315,14 +300,14 @@ it('exports sample data categories correctly', function () {
 
     expect($result)->toBeArray()
         ->and($result['rows'])->toBeGreaterThan(0); // Sample data has categories
-        
+
     $csvContent = $result['value'];
     $lines = explode("\n", trim($csvContent));
-    
+
     // Parse and verify we have meaningful category data
     $foundDefaultCategory = false;
     $foundCategoryWithName = false;
-    
+
     foreach ($lines as $line) {
         if (strpos($line, ',2,') !== false) { // Default category (ID 2)
             $foundDefaultCategory = true;
@@ -331,7 +316,7 @@ it('exports sample data categories correctly', function () {
             $foundCategoryWithName = true;
         }
     }
-    
+
     expect($foundDefaultCategory)->toBeTrue('Should export default category')
         ->and($foundCategoryWithName)->toBeTrue('Should have categories with meaningful names');
 });
