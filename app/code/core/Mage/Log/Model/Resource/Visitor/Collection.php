@@ -122,40 +122,6 @@ class Mage_Log_Model_Resource_Visitor_Collection extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Get GROUP BY date format
-     *
-     * @deprecated since 1.5.0.0
-     * @param string $type
-     * @return string
-     */
-    protected function _getGroupByDateFormat($type)
-    {
-        $format = match ($type) {
-            'day' => '%Y-%m-%d',
-            default => '%Y-%m-%d %H',
-        };
-        return $format;
-    }
-
-    /**
-     * Get range by type
-     *
-     * @deprecated since 1.5.0.0
-     * @param string $typeCode
-     * @return string
-     */
-    protected function _getRangeByType($typeCode)
-    {
-        $range = match ($typeCode) {
-            'day' => 'DAY',
-            'hour' => 'HOUR',
-            default => 'MINUTE',
-        };
-
-        return $range;
-    }
-
-    /**
      * Filter by customer ID, as 'type' field does not exist
      */
     #[\Override]

@@ -27,12 +27,6 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
     protected $_useSessionInUrl = false;
 
     /**
-     * @deprecated after 1.4.0.0-alpha2
-     * @var Mage_Core_Model_Url
-     */
-    protected static $_urlInstance;
-
-    /**
      * Modifier Callbacks
      *
      * @var array

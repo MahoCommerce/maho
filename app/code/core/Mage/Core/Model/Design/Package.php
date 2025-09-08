@@ -17,11 +17,6 @@ class Mage_Core_Model_Design_Package
     public const DEFAULT_THEME   = 'default';
     public const BASE_PACKAGE    = 'base';
 
-    /**
-     * @deprecated after 1.4.0.0-alpha3
-     */
-    public const FALLBACK_THEME  = 'default';
-
     private static $_regexMatchCache      = [];
     private static $_customThemeTypeCache = [];
 

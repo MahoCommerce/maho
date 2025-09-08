@@ -68,50 +68,6 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     }
 
     /**
-     * Set flag about joined table.
-     * setFlag method must be used in future.
-     *
-     * @deprecated after 1.3.2.3
-     *
-     * @param string $table
-     * @return $this
-     */
-    public function setJoinFlag($table)
-    {
-        $this->setFlag($table, true);
-        return $this;
-    }
-
-    /**
-     * Get flag's status about joined table.
-     * getFlag method must be used in future.
-     *
-     * @deprecated after 1.3.2.3
-     *
-     * @param string $table
-     * @return bool
-     */
-    public function getJoinFlag($table)
-    {
-        return $this->getFlag($table);
-    }
-
-    /**
-     * Unset value of join flag.
-     * Set false (bool) value to flag instead in future.
-     *
-     * @deprecated after 1.3.2.3
-     *
-     * @param string $table
-     * @return $this
-     */
-    public function unsetJoinFlag($table = null)
-    {
-        $this->setFlag($table, false);
-        return $this;
-    }
-
-    /**
      * Sett
      *
      * @param int $limit
