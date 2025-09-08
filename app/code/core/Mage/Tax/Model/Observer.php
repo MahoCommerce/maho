@@ -127,7 +127,7 @@ class Mage_Tax_Model_Observer
                                     Mage::getModel('tax/sales_order_tax_item')->setData($data)->save();
                                 } catch (Zend_Db_Statement_Exception $e) {
                                     // Ignore duplicate key constraint violations (1062)
-                                    if (strpos($e->getMessage(), '1062') === false) {
+                                    if (!str_contains($e->getMessage(), '1062')) {
                                         throw $e;
                                     }
                                 }
