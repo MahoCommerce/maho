@@ -539,30 +539,6 @@ class Mage_Core_Model_Translate_Inline
     }
 
     /**
-     * Check is a Request contain Json flag
-     *
-     * @deprecated 1.3.2.2
-     * @return bool
-     */
-    public function getIsAjaxRequest()
-    {
-        return (bool) Mage::app()->getRequest()->getQuery('isAjax');
-    }
-
-    /**
-     * Set is a Request contain Json flag
-     *
-     * @param bool $flag
-     * @deprecated 1.3.2.2
-     * @return $this
-     */
-    public function setIsAjaxRequest($flag)
-    {
-        Mage::app()->getRequest()->setQuery('isAjax', (int) (bool) $flag);
-        return $this;
-    }
-
-    /**
      * Retrieve flag about parsed content is Json
      *
      * @return bool
