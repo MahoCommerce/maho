@@ -844,42 +844,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     }
 
     /**
-     * Add foreign key to table. If FK with same name exist - it will be deleted
-     *
-     * @deprecated since 1.4.0.1
-     * @param string $fkName foreign key name
-     * @param string $tableName main table name
-     * @param string $columnName main table field name
-     * @param string $refTableName referred table name
-     * @param string $refColumnName referred table field name
-     * @param string $onUpdate on update statement
-     * @param string $onDelete on delete statement
-     * @param bool $purge
-     * @return mixed
-     */
-    public function addConstraint(
-        $fkName,
-        $tableName,
-        $columnName,
-        $refTableName,
-        $refColumnName,
-        $onDelete = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
-        $onUpdate = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
-        $purge = false,
-    ) {
-        return $this->addForeignKey(
-            $fkName,
-            $tableName,
-            $columnName,
-            $refTableName,
-            $refColumnName,
-            $onDelete,
-            $onUpdate,
-            $purge,
-        );
-    }
-
-    /**
      * Check does table column exist
      *
      * @param string $tableName
@@ -1913,19 +1877,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
             case 'varbinary':
                 return Varien_Db_Ddl_Table::TYPE_VARBINARY;
         }
-    }
-
-    /**
-     * Truncate table
-     *
-     * @deprecated since 1.4.0.1
-     * @param string $tableName
-     * @param string $schemaName
-     * @return $this
-     */
-    public function truncate($tableName, $schemaName = null)
-    {
-        return $this->truncateTable($tableName, $schemaName);
     }
 
     /**

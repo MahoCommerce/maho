@@ -1230,18 +1230,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     }
 
     /**
-     * @param string|array $data
-     * @param array $allowedTags
-     * @return string
-     * @see self::escapeHtml()
-     * @deprecated after 1.4.0.0-rc1
-     */
-    public function htmlEscape($data, $allowedTags = null)
-    {
-        return $this->escapeHtml($data, $allowedTags);
-    }
-
-    /**
      * Escape html entities
      *
      * @param string|string[] $data
@@ -1294,17 +1282,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     public function stripTags($data, $allowableTags = null, $allowHtmlEntities = false)
     {
         return $this->helper('core')->stripTags($data, $allowableTags, $allowHtmlEntities);
-    }
-
-    /**
-     * @param string $data
-     * @return string
-     * @deprecated after 1.4.0.0-rc1
-     * @see self::escapeUrl()
-     */
-    public function urlEscape($data)
-    {
-        return $this->escapeUrl($data);
     }
 
     /**
