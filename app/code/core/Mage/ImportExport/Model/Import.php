@@ -325,52 +325,6 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     }
 
     /**
-     * Import data from array.
-     *
-     * @param array $data Import data array
-     * @param string $entity Entity type (catalog_product, customer, etc.)
-     * @param string $behavior Import behavior (append, replace, delete)
-     * @throws Mage_Core_Exception
-     */
-    public function importFromArray(array $data, string $entity, string $behavior = self::BEHAVIOR_APPEND): bool
-    {
-        if (empty($data)) {
-            Mage::throwException(Mage::helper('importexport')->__('Import data array cannot be empty'));
-        }
-
-        // Set import parameters
-        $this->setData([
-            'entity' => $entity,
-            'behavior' => $behavior,
-        ]);
-
-        // Validate entity
-        $validEntities = array_keys(Mage_ImportExport_Model_Config::getModels(self::CONFIG_KEY_ENTITIES));
-        if (!in_array($entity, $validEntities)) {
-            Mage::throwException(
-                Mage::helper('importexport')->__('Invalid entity type: %s. Valid types: %s', $entity, implode(', ', $validEntities)),
-            );
-        }
-
-        // Validate and import
-        if (!$this->validateSource($data)) {
-            return false;
-        }
-
-        $this->addLogComment(Mage::helper('importexport')->__('Begin import from array of "%s" with "%s" behavior', $entity, $behavior));
-        $result = $this->_getEntityAdapter()
-            ->setSource($this->_getSourceAdapter($data))
-            ->importData();
-
-        $this->addLogComment([
-            Mage::helper('importexport')->__('Checked rows: %d, checked entities: %d, invalid rows: %d, total errors: %d', $this->getProcessedRowsCount(), $this->getProcessedEntitiesCount(), $this->getInvalidRowsCount(), $this->getErrorsCount()),
-            Mage::helper('importexport')->__('Array import has been done successfully.'),
-        ]);
-
-        return $result;
-    }
-
-    /**
      * Import possibility getter.
      *
      * @return bool

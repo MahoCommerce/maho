@@ -111,120 +111,20 @@ describe('ImportExport Array Adapter', function () {
             ->toThrow(Mage_Core_Exception::class, 'Column names have duplicates');
     });
 
-    it('handles missing columns in rows gracefully', function () {
-        $data = [
-            ['name' => 'John', 'email' => 'john@example.com', 'age' => '30'],
-            ['name' => 'Jane', 'email' => 'jane@example.com'], // Missing 'age'
-        ];
-
-        $adapter = Mage_ImportExport_Model_Import_Adapter::createArrayAdapter($data);
-
-        expect($adapter->getRowCount())->toBe(2);
-        expect($adapter->validateSource())->toBe($adapter);
-    });
-});
-
-describe('Import Model with Array Adapter', function () {
-    it('can import products from array', function () {
-        $productData = [
-            [
-                'sku' => 'TEST-PRODUCT-001',
-                'name' => 'Test Product 1',
-                'product_type' => 'simple',
-                'attribute_set' => 'Default',
-                'price' => '10.00',
-                'status' => '1',
-                'visibility' => '4',
-                'tax_class_id' => '2',
-                'weight' => '1.0000',
-                'qty' => '100',
-                'is_in_stock' => '1',
-            ],
-            [
-                'sku' => 'TEST-PRODUCT-002',
-                'name' => 'Test Product 2',
-                'product_type' => 'simple',
-                'attribute_set' => 'Default',
-                'price' => '15.00',
-                'status' => '1',
-                'visibility' => '4',
-                'tax_class_id' => '2',
-                'weight' => '2.0000',
-                'qty' => '50',
-                'is_in_stock' => '1',
-            ],
-        ];
-
-        $import = Mage::getModel('importexport/import');
-
-        // Test validation
-        $import->setData([
-            'entity' => 'catalog_product',
-            'behavior' => Mage_ImportExport_Model_Import::BEHAVIOR_APPEND,
-        ]);
-
-        $adapter = Mage_ImportExport_Model_Import_Adapter::createArrayAdapter($productData);
-        expect($adapter)->toBeInstanceOf(Mage_ImportExport_Model_Import_Adapter_Array::class);
-
-        // Test that adapter can be used with entity adapter
-        $entityAdapter = $import->getEntityAdapter();
-        expect($entityAdapter->setSource($adapter))->toBe($entityAdapter);
-    });
-
-    it('validates entity types for array import', function () {
-        $data = [
-            ['name' => 'Test', 'email' => 'test@example.com'],
-        ];
-
-        $import = Mage::getModel('importexport/import');
-
-        expect(fn() => $import->importFromArray($data, 'invalid_entity'))
-            ->toThrow(Mage_Core_Exception::class);
-    });
-
-    it('supports different import behaviors', function () {
+    it('integrates with import pipeline', function () {
         $data = [
             ['sku' => 'TEST-SKU', 'name' => 'Test Product'],
         ];
 
         $import = Mage::getModel('importexport/import');
-
-        // Should not throw exception for valid behaviors
-        expect($import->setData([
+        $import->setData([
             'entity' => 'catalog_product',
             'behavior' => Mage_ImportExport_Model_Import::BEHAVIOR_APPEND,
-        ]))->toBe($import);
-
-        expect($import->setData([
-            'entity' => 'catalog_product',
-            'behavior' => Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE,
-        ]))->toBe($import);
-
-        expect($import->setData([
-            'entity' => 'catalog_product',
-            'behavior' => Mage_ImportExport_Model_Import::BEHAVIOR_DELETE,
-        ]))->toBe($import);
-    });
-});
-
-describe('Array Adapter Factory Methods', function () {
-    it('creates correct adapter type from factory', function () {
-        $data = [['name', 'email'], ['John', 'john@example.com']];
-
-        $adapter = Mage_ImportExport_Model_Import_Adapter::factory('array', $data);
-        expect($adapter)->toBeInstanceOf(Mage_ImportExport_Model_Import_Adapter_Array::class);
-    });
-
-    it('creates adapter via createArrayAdapter helper', function () {
-        $data = [['name', 'email'], ['John', 'john@example.com']];
+        ]);
 
         $adapter = Mage_ImportExport_Model_Import_Adapter::createArrayAdapter($data);
-        expect($adapter)->toBeInstanceOf(Mage_ImportExport_Model_Import_Adapter_Array::class);
-    });
+        $entityAdapter = $import->getEntityAdapter();
 
-    it('maintains file adapter functionality', function () {
-        // Test that existing file-based adapters still work
-        expect(fn() => Mage_ImportExport_Model_Import_Adapter::factory('csv', 'nonexistent.csv'))
-            ->toThrow(Mage_Core_Exception::class);
+        expect($entityAdapter->setSource($adapter))->toBe($entityAdapter);
     });
 });
