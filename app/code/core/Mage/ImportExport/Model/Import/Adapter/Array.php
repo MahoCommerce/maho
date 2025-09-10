@@ -85,6 +85,11 @@ class Mage_ImportExport_Model_Import_Adapter_Array extends Mage_ImportExport_Mod
             $this->_count = count($this->_data);
         }
 
+        // Check for duplicate column names
+        if (count($this->_colNames) !== count(array_unique($this->_colNames))) {
+            Mage::throwException(Mage::helper('importexport')->__('Column names have duplicates'));
+        }
+
         // Validate we have data after header processing
         if ($this->_count === 0) {
             Mage::throwException(Mage::helper('importexport')->__('No data rows found after header processing'));

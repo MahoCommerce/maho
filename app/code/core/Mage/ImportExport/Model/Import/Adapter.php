@@ -59,6 +59,10 @@ class Mage_ImportExport_Model_Import_Adapter
      */
     public static function createArrayAdapter($data)
     {
+        if (!is_array($data)) {
+            Mage::throwException(Mage::helper('importexport')->__('Source data must be an array'));
+        }
+
         return self::factory('array', $data);
     }
 }

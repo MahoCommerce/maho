@@ -100,6 +100,16 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     }
 
     /**
+     * Public getter for entity adapter.
+     *
+     * @return Mage_ImportExport_Model_Import_Entity_Abstract
+     */
+    public function getEntityAdapter()
+    {
+        return $this->_getEntityAdapter();
+    }
+
+    /**
      * Returns source adapter object.
      *
      * @param string|array $source Full path to source file or array data

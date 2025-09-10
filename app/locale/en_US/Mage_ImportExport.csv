@@ -95,6 +95,7 @@
 "Select File to Import","Select File to Import"
 "Skip","Skip"
 "Source data array cannot be empty","Source data array cannot be empty"
+"Source data must be an array","Source data must be an array"
 "Source file moving failed","Source file moving failed"
 "Source is not set","Source is not set"
 "Source must be a string file path or array","Source must be a string file path or array"
