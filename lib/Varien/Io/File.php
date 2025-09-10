@@ -877,9 +877,9 @@ class Varien_Io_File extends Varien_Io_Abstract
         }
 
         $owner     = posix_getpwuid(fileowner($filename));
-        $groupinfo = posix_getgrnam(filegroup($filename));
+        $groupinfo = posix_getgrgid(filegroup($filename));
 
-        return $owner['name'] . ' / ' . $groupinfo;
+        return $owner['name'] . ' / ' . $groupinfo['name'];
     }
 
     #[\Override]
