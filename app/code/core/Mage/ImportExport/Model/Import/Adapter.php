@@ -14,7 +14,7 @@ class Mage_ImportExport_Model_Import_Adapter
     /**
      * Adapter factory. Checks for availability, loads and create instance of import adapter object.
      *
-     * @param string $type Adapter type ('csv', 'xml' etc.)
+     * @param string $type Adapter type ('csv', 'xml', 'array' etc.)
      * @param mixed $options OPTIONAL Adapter constructor options
      * @throws Exception
      * @return Mage_ImportExport_Model_Import_Adapter_Abstract
@@ -27,7 +27,7 @@ class Mage_ImportExport_Model_Import_Adapter
         $adapterClass = self::class . '_' . ucfirst(strtolower($type));
 
         if (!class_exists($adapterClass)) {
-            Mage::throwException("'{$type}' file extension is not supported");
+            Mage::throwException("'{$type}' adapter type is not supported");
         }
         $adapter = new $adapterClass($options);
 
@@ -48,5 +48,16 @@ class Mage_ImportExport_Model_Import_Adapter
     public static function findAdapterFor($source)
     {
         return self::factory(pathinfo($source, PATHINFO_EXTENSION), $source);
+    }
+
+    /**
+     * Create adapter instance for array data.
+     *
+     * @param array $data Source data array
+     * @return Mage_ImportExport_Model_Import_Adapter_Abstract
+     */
+    public static function createArrayAdapter($data)
+    {
+        return self::factory('array', $data);
     }
 }

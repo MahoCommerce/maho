@@ -102,12 +102,16 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     /**
      * Returns source adapter object.
      *
-     * @param string $sourceFile Full path to source file
+     * @param string|array $source Full path to source file or array data
      * @return Mage_ImportExport_Model_Import_Adapter_Abstract
      */
-    protected function _getSourceAdapter($sourceFile)
+    protected function _getSourceAdapter($source)
     {
-        return Mage_ImportExport_Model_Import_Adapter::findAdapterFor($sourceFile);
+        if (is_array($source)) {
+            return Mage_ImportExport_Model_Import_Adapter::createArrayAdapter($source);
+        }
+
+        return Mage_ImportExport_Model_Import_Adapter::findAdapterFor($source);
     }
 
     /**
@@ -311,6 +315,53 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     }
 
     /**
+     * Import data from array.
+     *
+     * @param array $data Import data array
+     * @param string $entity Entity type (catalog_product, customer, etc.)
+     * @param string $behavior Import behavior (append, replace, delete)
+     * @return bool
+     * @throws Mage_Core_Exception
+     */
+    public function importFromArray(array $data, string $entity, string $behavior = self::BEHAVIOR_APPEND): bool
+    {
+        if (empty($data)) {
+            Mage::throwException(Mage::helper('importexport')->__('Import data array cannot be empty'));
+        }
+
+        // Set import parameters
+        $this->setData([
+            'entity' => $entity,
+            'behavior' => $behavior,
+        ]);
+
+        // Validate entity
+        $validEntities = array_keys(Mage_ImportExport_Model_Config::getModels(self::CONFIG_KEY_ENTITIES));
+        if (!in_array($entity, $validEntities)) {
+            Mage::throwException(
+                Mage::helper('importexport')->__('Invalid entity type: %s. Valid types: %s', $entity, implode(', ', $validEntities)),
+            );
+        }
+
+        // Validate and import
+        if (!$this->validateSource($data)) {
+            return false;
+        }
+
+        $this->addLogComment(Mage::helper('importexport')->__('Begin import from array of "%s" with "%s" behavior', $entity, $behavior));
+        $result = $this->_getEntityAdapter()
+            ->setSource($this->_getSourceAdapter($data))
+            ->importData();
+
+        $this->addLogComment([
+            Mage::helper('importexport')->__('Checked rows: %d, checked entities: %d, invalid rows: %d, total errors: %d', $this->getProcessedRowsCount(), $this->getProcessedEntitiesCount(), $this->getInvalidRowsCount(), $this->getErrorsCount()),
+            Mage::helper('importexport')->__('Array import has been done successfully.'),
+        ]);
+
+        return $result;
+    }
+
+    /**
      * Import possibility getter.
      *
      * @return bool
@@ -415,14 +466,14 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     /**
      * Validates source file and returns validation result.
      *
-     * @param string $sourceFile Full path to source file
+     * @param string|array $source Full path to source file or array data
      * @return bool
      */
-    public function validateSource($sourceFile)
+    public function validateSource($source)
     {
         $this->addLogComment(Mage::helper('importexport')->__('Begin data validation'));
         $result = $this->_getEntityAdapter()
-            ->setSource($this->_getSourceAdapter($sourceFile))
+            ->setSource($this->_getSourceAdapter($source))
             ->isDataValid();
 
         $messages = $this->getOperationResultMessages($result);
