@@ -320,7 +320,6 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
      * @param array $data Import data array
      * @param string $entity Entity type (catalog_product, customer, etc.)
      * @param string $behavior Import behavior (append, replace, delete)
-     * @return bool
      * @throws Mage_Core_Exception
      */
     public function importFromArray(array $data, string $entity, string $behavior = self::BEHAVIOR_APPEND): bool
