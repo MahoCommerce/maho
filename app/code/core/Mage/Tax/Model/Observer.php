@@ -122,14 +122,15 @@ class Mage_Tax_Model_Observer
                                     'tax_percent'   => $quoteItemId['percent'],
                                 ];
 
-                                // Use try-catch to handle concurrent duplicate key violations
-                                try {
+                                // Check if this tax item already exists to prevent duplicates
+                                $existingItem = Mage::getModel('tax/sales_order_tax_item')
+                                    ->getCollection()
+                                    ->addFieldToFilter('item_id', $data['item_id'])
+                                    ->addFieldToFilter('tax_id', $data['tax_id'])
+                                    ->getFirstItem();
+
+                                if (!$existingItem->getId()) {
                                     Mage::getModel('tax/sales_order_tax_item')->setData($data)->save();
-                                } catch (Zend_Db_Statement_Exception $e) {
-                                    // Ignore duplicate key constraint violations (1062)
-                                    if (!str_contains($e->getMessage(), '1062')) {
-                                        throw $e;
-                                    }
                                 }
                             }
                         }
