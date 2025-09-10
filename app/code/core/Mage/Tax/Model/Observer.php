@@ -121,7 +121,17 @@ class Mage_Tax_Model_Observer
                                     'tax_id'        => $result->getTaxId(),
                                     'tax_percent'   => $quoteItemId['percent'],
                                 ];
-                                Mage::getModel('tax/sales_order_tax_item')->setData($data)->save();
+
+                                // Check if this tax item already exists to prevent duplicates
+                                $existingItem = Mage::getModel('tax/sales_order_tax_item')
+                                    ->getCollection()
+                                    ->addFieldToFilter('item_id', $data['item_id'])
+                                    ->addFieldToFilter('tax_id', $data['tax_id'])
+                                    ->getFirstItem();
+
+                                if (!$existingItem->getId()) {
+                                    Mage::getModel('tax/sales_order_tax_item')->setData($data)->save();
+                                }
                             }
                         }
                     }
