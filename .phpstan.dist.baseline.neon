@@ -2869,25 +2869,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			message: '#^Parameter \#1 \$element of method Mage_Adminhtml_Block_System_Config_Form\:\:_prepareFieldComment\(\) expects Mage_Core_Model_Config_Element, Varien_Simplexml_Element given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
-
-		-
-			message: '#^Parameter \#1 \$element of method Mage_Adminhtml_Block_System_Config_Form\:\:_prepareFieldTooltip\(\) expects Mage_Core_Model_Config_Element, Varien_Simplexml_Element given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
-
-		-
 			message: '#^Parameter \#1 \$element of method Mage_Adminhtml_Block_System_Config_Form\:\:_prepareGroupComment\(\) expects Mage_Core_Model_Config_Element, Varien_Simplexml_Element given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
-
-		-
-			message: '#^Parameter \#1 \$element of method Mage_Adminhtml_Block_System_Config_Form\:\:getScopeLabel\(\) expects Mage_Core_Model_Config_Element, Varien_Simplexml_Element given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
@@ -11947,12 +11929,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '#^Cannot unset offset ''@attributes'' on \(array\{\}\|array\{''\000\*\000_parent''\: Varien_Simplexml_Element\}\)\.$#'
-			identifier: unset.offset
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
 			message: '#^Method Mage_Core_Model_Layout\:\:_translateLayoutNode\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -16258,12 +16234,6 @@ parameters:
 			path: app/code/core/Mage/Install/Block/Locale.php
 
 		-
-			message: '#^Offset ''path'' does not exist on array\{''\000\*\000_parent''\: Varien_Simplexml_Element\}\|array\{false\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: app/code/core/Mage/Install/Model/Config.php
-
-		-
 			message: '#^Property Mage_Install_Model_Config\:\:\$_optionsMapping has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -19291,40 +19261,10 @@ parameters:
 			path: app/code/core/Mage/Paypal/controllers/StandardController.php
 
 		-
-			message: '#^Access to protected property Mage_Paypal_Model_Api_Nvp\:\:\$_setExpressCheckoutResponse\.$#'
-			identifier: property.protected
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Express/Nvp.php
-
-		-
 			message: '#^Method Mage_PaypalUk_Model_Api_Express_Nvp\:\:_setSpecificForNegativeLineItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/PaypalUk/Model/Api/Express/Nvp.php
-
-		-
-			message: '#^Access to protected property Mage_Paypal_Model_Api_Nvp\:\:\$_doCaptureResponse\.$#'
-			identifier: property.protected
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			message: '#^Access to protected property Mage_Paypal_Model_Api_Nvp\:\:\$_getTransactionDetailsResponse\.$#'
-			identifier: property.protected
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			message: '#^Access to protected property Mage_Paypal_Model_Api_Nvp\:\:\$_paymentInformationResponse\.$#'
-			identifier: property.protected
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			message: '#^Access to protected property Mage_Paypal_Model_Api_Nvp\:\:\$_refundTransactionResponse\.$#'
-			identifier: property.protected
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
 
 		-
 			message: '#^Method Mage_PaypalUk_Model_Api_Nvp\:\:_applyCountryWorkarounds\(\) has no return type specified\.$#'
@@ -21977,12 +21917,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon/Collection.php
-
-		-
-			message: '#^Binary operation "\+\=" between string\|null and \-1\|1 results in an error\.$#'
-			identifier: assignOp.invalid
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon/Usage.php
 
 		-
 			message: '#^Method Mage_SalesRule_Model_Resource_Coupon_Usage\:\:_construct\(\) has no return type specified\.$#'
@@ -26613,12 +26547,6 @@ parameters:
 		-
 			message: '#^Method Varien_Io_File\:\:streamReadCsv\(\) has parameter \$enclosure with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Io/File.php
-
-		-
-			message: '#^Parameter \#1 \$name of function posix_getgrnam expects string, int\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Varien/Io/File.php
 
