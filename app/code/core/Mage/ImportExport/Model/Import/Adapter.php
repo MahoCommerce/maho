@@ -6,6 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,7 +15,7 @@ class Mage_ImportExport_Model_Import_Adapter
     /**
      * Adapter factory. Checks for availability, loads and create instance of import adapter object.
      *
-     * @param string $type Adapter type ('csv', 'xml' etc.)
+     * @param string $type Adapter type ('csv', 'xml', 'array' etc.)
      * @param mixed $options OPTIONAL Adapter constructor options
      * @throws Exception
      * @return Mage_ImportExport_Model_Import_Adapter_Abstract
@@ -27,7 +28,7 @@ class Mage_ImportExport_Model_Import_Adapter
         $adapterClass = self::class . '_' . ucfirst(strtolower($type));
 
         if (!class_exists($adapterClass)) {
-            Mage::throwException("'{$type}' file extension is not supported");
+            Mage::throwException("'{$type}' adapter type is not supported");
         }
         $adapter = new $adapterClass($options);
 
@@ -48,5 +49,20 @@ class Mage_ImportExport_Model_Import_Adapter
     public static function findAdapterFor($source)
     {
         return self::factory(pathinfo($source, PATHINFO_EXTENSION), $source);
+    }
+
+    /**
+     * Create adapter instance for array data.
+     *
+     * @param array $data Source data array
+     * @return Mage_ImportExport_Model_Import_Adapter_Abstract
+     */
+    public static function createArrayAdapter($data)
+    {
+        if (!is_array($data)) {
+            Mage::throwException(Mage::helper('importexport')->__('Source data must be an array'));
+        }
+
+        return self::factory('array', $data);
     }
 }

@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -100,14 +100,28 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     }
 
     /**
+     * Public getter for entity adapter.
+     *
+     * @return Mage_ImportExport_Model_Import_Entity_Abstract
+     */
+    public function getEntityAdapter()
+    {
+        return $this->_getEntityAdapter();
+    }
+
+    /**
      * Returns source adapter object.
      *
-     * @param string $sourceFile Full path to source file
+     * @param string|array $source Full path to source file or array data
      * @return Mage_ImportExport_Model_Import_Adapter_Abstract
      */
-    protected function _getSourceAdapter($sourceFile)
+    protected function _getSourceAdapter($source)
     {
-        return Mage_ImportExport_Model_Import_Adapter::findAdapterFor($sourceFile);
+        if (is_array($source)) {
+            return Mage_ImportExport_Model_Import_Adapter::createArrayAdapter($source);
+        }
+
+        return Mage_ImportExport_Model_Import_Adapter::findAdapterFor($source);
     }
 
     /**
@@ -415,14 +429,14 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     /**
      * Validates source file and returns validation result.
      *
-     * @param string $sourceFile Full path to source file
+     * @param string|array $source Full path to source file or array data
      * @return bool
      */
-    public function validateSource($sourceFile)
+    public function validateSource($source)
     {
         $this->addLogComment(Mage::helper('importexport')->__('Begin data validation'));
         $result = $this->_getEntityAdapter()
-            ->setSource($this->_getSourceAdapter($sourceFile))
+            ->setSource($this->_getSourceAdapter($source))
             ->isDataValid();
 
         $messages = $this->getOperationResultMessages($result);

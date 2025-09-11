@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,14 +29,14 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
     /**
      * Current row.
      *
-     * @var array
+     * @var array|null
      */
     protected $_currentRow = null;
 
     /**
      * Current row number.
      *
-     * @var int
+     * @var int|null
      */
     protected $_currentKey = null;
 
@@ -57,13 +57,19 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
     {
         register_shutdown_function([$this, 'destruct']);
 
-        if (!is_string($source)) {
-            Mage::throwException(Mage::helper('importexport')->__('Source file path must be a string'));
+        // Allow arrays for array adapter
+        if (is_array($source)) {
+            $this->_source = 'array(' . count($source) . ' rows)';
+            $this->_handleArraySource($source);
+        } else {
+            if (!is_string($source)) {
+                Mage::throwException(Mage::helper('importexport')->__('Source must be a string file path or array'));
+            }
+            if (!is_readable($source)) {
+                Mage::throwException(Mage::helper('importexport')->__('%s file does not exists or is not readable', $source));
+            }
+            $this->_source = $source;
         }
-        if (!is_readable($source)) {
-            Mage::throwException(Mage::helper('importexport')->__('%s file does not exists or is not readable', $source));
-        }
-        $this->_source = $source;
 
         $this->_init();
 
@@ -91,6 +97,18 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
      */
     protected function _init()
     {
+        return $this;
+    }
+
+    /**
+     * Handle array source data. Override in array adapter.
+     *
+     * @param array $source Array source data
+     * @return $this
+     */
+    protected function _handleArraySource($source)
+    {
+        // Default implementation does nothing - override in array adapter
         return $this;
     }
 
