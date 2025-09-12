@@ -4,6 +4,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 class varienAccordion {
@@ -12,7 +13,7 @@ class varienAccordion {
         this.activeOnlyOne = activeOnlyOne || false;
         this.container = document.getElementById(this.containerId);
         this.items = Array.from(document.querySelectorAll(`#${this.containerId} dt`));
-        this.loader = new varienLoader(true);
+        this.loader = new varienLoader();
 
         let links = Array.from(document.querySelectorAll(`#${this.containerId} dt a`));
         links.forEach((link, index) => {
