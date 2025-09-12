@@ -131,7 +131,7 @@ addressesModel.prototype = {
         this.onItemMouseClick   = this.itemMouseClick.bindAsEventListener(this);
         this.onItemFormFieldChange = this.syncFormData.bindAsEventListener(this);
 
-        this.loader = new varienLoader(true);
+        this.loader = new VarienLoader();
         this.regionsUrl = '<?= $this->getRegionsUrl() ?>';
         this.requiredStateForCountries = <?= $this->helper('directory')->getCountriesWithStatesRequired(true) ?>;
         this.showAllRegions = <?= (string)$this->helper('directory')->getShowNonRequiredState() ? 1 : 0 ?>;

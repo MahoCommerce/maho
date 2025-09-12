@@ -8,36 +8,22 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-class SessionError extends Error {
-    constructor(errorText) {
-        super(`Session Error: ${errorText}`);
-        this.name = 'SessionError';
-        this.errorText = errorText;
-    }
-}
-
 class VarienLoader {
-    constructor(caching = false) {
+    constructor() {
         this.callback = false;
         this.cache = new Map();
-        this.caching = caching;
         this.url = false;
-    }
-
-    getCache(url) {
-        return this.cache.get(url) || false;
     }
 
     load(url, params = {}, callback) {
         this.url = url;
         this.callback = callback;
 
-        if (this.caching) {
-            const cachedTransport = this.getCache(url);
-            if (cachedTransport) {
-                this.processResult(cachedTransport);
-                return;
-            }
+        // Check cache first
+        const cachedTransport = this.cache.get(url);
+        if (cachedTransport) {
+            this.processResult(cachedTransport);
+            return;
         }
 
         if (params.updaterId) {
@@ -89,9 +75,7 @@ class VarienLoader {
     }
 
     processResult(transport) {
-        if (this.caching) {
-            this.cache.set(this.url, transport);
-        }
+        this.cache.set(this.url, transport);
         if (this.callback) {
             this.callback(transport.responseText);
         }
@@ -198,9 +182,7 @@ class VarienUpdater {
     }
 
     updateContent(transport) {
-        // Since mahoFetch already handles session expiration, just update content
         this.container.innerHTML = transport.responseText;
-
         if (this.options.evalScripts) {
             this._evalScripts();
         }
@@ -219,7 +201,3 @@ class VarienUpdater {
         });
     }
 }
-
-// Global constructor for backward compatibility
-window.varienLoader = VarienLoader;
-window.varienUpdater = VarienUpdater;

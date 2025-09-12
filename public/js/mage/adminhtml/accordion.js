@@ -12,7 +12,7 @@ class varienAccordion {
         this.activeOnlyOne = activeOnlyOne || false;
         this.container = document.getElementById(this.containerId);
         this.items = Array.from(document.querySelectorAll(`#${this.containerId} dt`));
-        this.loader = new varienLoader(true);
+        this.loader = new VarienLoader();
 
         let links = Array.from(document.querySelectorAll(`#${this.containerId} dt a`));
         links.forEach((link, index) => {
