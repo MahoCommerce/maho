@@ -8,7 +8,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-class VarienLoader {
+class varienLoader {
     constructor() {
         this.callback = false;
         this.cache = new Map();
@@ -27,7 +27,7 @@ class VarienLoader {
         }
 
         if (params.updaterId) {
-            new VarienUpdater(params.updaterId, url, {
+            new varienUpdater(params.updaterId, url, {
                 evalScripts: true,
                 onComplete: (transport) => this.processResult(transport),
                 onFailure: (transport) => this._processFailure(transport)
@@ -131,7 +131,7 @@ function hideLoader() {
     }
 }
 
-class VarienUpdater {
+class varienUpdater {
     constructor(containerId, url, options = {}) {
         this.container = document.getElementById(containerId);
         this.url = url;
