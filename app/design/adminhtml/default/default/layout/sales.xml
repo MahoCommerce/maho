@@ -60,7 +60,6 @@
     <adminhtml_sales_order_view>
         <reference name="head">
             <action method="addJs"><file>mage/adminhtml/giftmessage.js</file></action>
-            <action method="addJs"><file>mage/adminhtml/giftoptions/tooltip.js</file></action>
         </reference>
         <reference name="content">
             <block type="adminhtml/sales_order_view" name="sales_order_edit"></block>
@@ -500,7 +499,6 @@
             <action method="addJs"><file>mage/adminhtml/product/composite/configure.js</file></action>
             <action method="addJs"><file>varien/product.js</file></action>
             <action method="addJs"><file>varien/product_options.js</file></action>
-            <action method="addJs"><file>mage/adminhtml/giftoptions/tooltip.js</file></action>
             <block type="adminhtml/template" name="optional_zip_countries" as="optional_zip_countries" template="directory/js/optional_zip_countries.phtml" />
         </reference>
         <reference name="js">
