@@ -80,19 +80,11 @@ class GiftMessagesController {
     }
 
     static setupFormValidation(container) {
-        // First try to get the form directly by the container ID
-        let formElement = document.getElementById(container);
-        
-        // If that doesn't work, try the old pattern
-        if (!formElement) {
-            formElement = document.getElementById(this.getFieldId(container, 'form'));
+        const formElement = document.getElementById(container);
+        if (formElement && !formElement.validator) {
+            formElement.validator = new Validation(container);
         }
 
-        if (formElement && !formElement.validator) {
-            const formId = formElement.id || container;
-            formElement.validator = new Validation(formId);
-        }
-        
         return formElement;
     }
 
@@ -215,10 +207,10 @@ class GiftOptionsPopup {
         if (giftOptionsForm.validate()) {
             // Save the form values back to the original fields first
             this.saveFormValues(form);
-            
+
             // Now trigger the server-side save if there's a container form
             this.triggerServerSave();
-            
+
             giftOptionsForm.validator.reset();
             return true; // Allow dialog to close
         }
@@ -252,29 +244,13 @@ class GiftOptionsPopup {
     triggerServerSave() {
         if (!this.currentItemId) return;
 
-        // Look for the gift message form container for this item
         const container = this.getGiftMessageContainer();
         if (container) {
-            // Use the existing GiftMessagesController.saveGiftMessage method
             GiftMessagesController.saveGiftMessage(container);
         }
     }
 
     getGiftMessageContainer() {
-        // The container should match the pattern used by the original implementation
-        // Look for elements that have the gift message form structure
-        const possibleContainers = [
-            `giftmessage_${this.currentItemId}`,
-            `gift_message_${this.currentItemId}`,
-            `item_${this.currentItemId}_giftmessage`,
-        ];
-
-        for (const containerId of possibleContainers) {
-            const container = document.getElementById(containerId);
-            if (container) return containerId;
-        }
-
-        // If we can't find a specific container, look for a form that contains our fields
         const sourceField = document.getElementById(`giftmessage_${this.currentItemId}_message`);
         if (sourceField) {
             const form = sourceField.closest('form');
