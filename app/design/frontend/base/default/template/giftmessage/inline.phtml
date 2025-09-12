@@ -68,27 +68,25 @@
         }
     }
 
-    if (!window.toogleRequired) {
-        var toogleRequired = function (source, objects) {
-            source = document.getElementById(source);
-            if (source && source.value.trim() !== '') {
-                objects.forEach(function(item) {
-                    const element = document.getElementById(item);
-                    if (element) {
-                        element.classList.add('required-entry');
+    function toogleRequired(source, objects) {
+        const sourceElement = document.getElementById(source);
+        if (sourceElement && sourceElement.value.trim() !== '') {
+            objects.forEach(item => {
+                const element = document.getElementById(item);
+                if (element) {
+                    element.classList.add('required-entry');
+                }
+            });
+        } else {
+            objects.forEach(item => {
+                const element = document.getElementById(item);
+                if (element) {
+                    if (typeof shippingMethod !== 'undefined' && shippingMethod.validator) {
+                        shippingMethod.validator.reset(item);
                     }
-                });
-            } else {
-                objects.forEach(function(item) {
-                    const element = document.getElementById(item);
-                    if (element) {
-                        if (typeof shippingMethod !== 'undefined' && shippingMethod.validator) {
-                            shippingMethod.validator.reset(item);
-                        }
-                        element.classList.remove('required-entry');
-                    }
-                });
-            }
+                    element.classList.remove('required-entry');
+                }
+            });
         }
     }
 
