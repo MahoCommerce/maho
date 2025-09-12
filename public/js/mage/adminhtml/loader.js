@@ -8,186 +8,98 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var SessionError = Class.create();
-SessionError.prototype = {
-    initialize: function(errorText) {
+class SessionError extends Error {
+    constructor(errorText) {
+        super(`Session Error: ${errorText}`);
+        this.name = 'SessionError';
         this.errorText = errorText;
-    },
-    toString: function()
-    {
-        return 'Session Error:' + this.errorText;
     }
-};
+}
 
-Ajax.Request.addMethods({
-    initialize: function($super, url, options){
-        $super(options);
-        this.transport = Ajax.getTransport();
-        if (!url.match(new RegExp('[?&]isAjax=true',''))) {
-            url = url.match(new RegExp('\\?',"g")) ? url + '&isAjax=true' : url + '?isAjax=true';
-        }
-        if (Object.isString(this.options.parameters)
-            && this.options.parameters.indexOf('form_key=') == -1
-        ) {
-            this.options.parameters += '&' + Object.toQueryString({
-                form_key: FORM_KEY
-            });
-        } else {
-            if (!this.options.parameters) {
-                this.options.parameters = {
-                    form_key: FORM_KEY
-                };
-            }
-            if (!this.options.parameters.form_key) {
-                this.options.parameters.form_key = FORM_KEY;
-            }
-        }
-
-        this.request(url);
-    },
-    respondToReadyState: function(readyState) {
-        var state = Ajax.Request.Events[readyState], response = new Ajax.Response(this);
-
-        if (state == 'Complete') {
-            try {
-                this._complete = true;
-                if (response.responseText.isJSON()) {
-                    var jsonObject = response.responseText.evalJSON();
-                    if (jsonObject.ajaxExpired && jsonObject.ajaxRedirect) {
-                        window.location.replace(jsonObject.ajaxRedirect);
-                        throw new SessionError('session expired');
-                    }
-                }
-
-                (this.options['on' + response.status]
-                 || this.options['on' + (this.success() ? 'Success' : 'Failure')]
-                 || Prototype.emptyFunction)(response, response.headerJSON);
-            } catch (e) {
-                this.dispatchException(e);
-                if (e instanceof SessionError) {
-                    return;
-                }
-            }
-
-            var contentType = response.getHeader('Content-type');
-            if (this.options.evalJS == 'force'
-                || (this.options.evalJS && this.isSameOrigin() && contentType
-                && contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;.*)?\s*$/i))) {
-                this.evalResponse();
-            }
-        }
-
-        try {
-            (this.options['on' + state] || Prototype.emptyFunction)(response, response.headerJSON);
-            Ajax.Responders.dispatch('on' + state, this, response, response.headerJSON);
-        } catch (e) {
-            this.dispatchException(e);
-        }
-
-        if (state == 'Complete') {
-            // avoid memory leak in MSIE: clean up
-            this.transport.onreadystatechange = Prototype.emptyFunction;
-        }
+class VarienLoader {
+    constructor(caching = false) {
+        this.callback = false;
+        this.cache = new Map();
+        this.caching = caching;
+        this.url = false;
     }
-});
 
-Ajax.Updater.respondToReadyState = Ajax.Request.respondToReadyState;
-//Ajax.Updater = Object.extend(Ajax.Updater, {
-//  initialize: function($super, container, url, options) {
-//    this.container = {
-//      success: (container.success || container),
-//      failure: (container.failure || (container.success ? null : container))
-//    };
-//
-//    options = Object.clone(options);
-//    var onComplete = options.onComplete;
-//    options.onComplete = (function(response, json) {
-//      this.updateContent(response.responseText);
-//      if (Object.isFunction(onComplete)) onComplete(response, json);
-//    }).bind(this);
-//
-//    $super((url.match(new RegExp('\\?',"g")) ? url + '&isAjax=1' : url + '?isAjax=1'), options);
-//  }
-//});
+    getCache(url) {
+        return this.cache.get(url) || false;
+    }
 
-var varienLoader = new Class.create();
-
-varienLoader.prototype = {
-    initialize : function(caching){
-        this.callback= false;
-        this.cache   = $H();
-        this.caching = caching || false;
-        this.url     = false;
-    },
-
-    getCache : function(url){
-        if(this.cache.get(url)){
-            return this.cache.get(url);
-        }
-        return false;
-    },
-
-    load : function(url, params, callback){
-        this.url      = url;
+    load(url, params = {}, callback) {
+        this.url = url;
         this.callback = callback;
 
-        if(this.caching){
-            var transport = this.getCache(url);
-            if(transport){
-                this.processResult(transport);
+        if (this.caching) {
+            const cachedTransport = this.getCache(url);
+            if (cachedTransport) {
+                this.processResult(cachedTransport);
                 return;
             }
         }
 
-        if (typeof(params.updaterId) != 'undefined') {
-            new varienUpdater(params.updaterId, url, {
-                evalScripts : true,
-                onComplete: this.processResult.bind(this),
-                onFailure: this._processFailure.bind(this)
+        if (params.updaterId) {
+            new VarienUpdater(params.updaterId, url, {
+                evalScripts: true,
+                onComplete: (transport) => this.processResult(transport),
+                onFailure: (transport) => this._processFailure(transport)
             });
-        }
-        else {
-            new Ajax.Request(url,{
-                method: 'post',
-                parameters: params || {},
-                onComplete: this.processResult.bind(this),
-                onFailure: this._processFailure.bind(this)
-            });
-        }
-    },
+        } else {
+            const body = params instanceof URLSearchParams ? params.toString() :
+                        typeof params === 'object' ? new URLSearchParams(params).toString() :
+                        params;
 
-    _processFailure : function(transport){
-        location.href = BASE_URL;
-    },
+            (async () => {
+                try {
+                    const result = await mahoFetch(url, {
+                        method: 'POST',
+                        body,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
 
-    processResult : function(transport){
-        if(this.caching){
+                    const transport = {
+                        responseText: typeof result === 'string' ? result : JSON.stringify(result),
+                        status: 200,
+                        ok: true
+                    };
+
+                    this.processResult(transport);
+
+                } catch (error) {
+                    const transport = {
+                        responseText: error.message || '',
+                        status: error.status || 500,
+                        ok: false,
+                        error
+                    };
+
+                    this._processFailure(transport);
+                }
+            })();
+        }
+    }
+
+    _processFailure(transport) {
+        window.location.href = BASE_URL;
+    }
+
+    processResult(transport) {
+        if (this.caching) {
             this.cache.set(this.url, transport);
         }
-        if(this.callback){
+        if (this.callback) {
             this.callback(transport.responseText);
         }
     }
-};
+}
 
-if (!window.varienLoaderHandler)
-    var varienLoaderHandler = new Object();
 
-varienLoaderHandler.handler = {
-    onCreate: function(request) {
-        if(request.options.loaderArea===false){
-            return;
-        }
-        showLoader();
-    },
-    onComplete: function(transport) {
-        if(Ajax.activeRequestCount == 0) {
-            hideLoader();
-        }
-    }
-};
-
-var loaderTimeout = null;
+let loaderTimeout = null;
 
 function showLoader(loaderArea) {
     if (typeof loaderArea === 'string') {
@@ -197,45 +109,117 @@ function showLoader(loaderArea) {
         loaderArea = document.body;
     }
 
-    var loadingMask = $('loading-mask');
-    if(Element.visible(loadingMask)) {
+    const loadingMask = document.getElementById('loading-mask');
+    if (!loadingMask || loadingMask.style.display !== 'none') {
         return;
     }
-    Element.clonePosition(loadingMask, loaderArea, {offsetLeft:-2});
-    Element.show(loadingMask);
-    Element.childElements(loadingMask).invoke('hide');
-    loaderTimeout = setTimeout(function() {
-        Element.childElements(loadingMask).invoke('show');
+
+    // Clone position logic
+    const rect = loaderArea.getBoundingClientRect();
+    loadingMask.style.position = 'absolute';
+    loadingMask.style.left = (rect.left - 2) + 'px';
+    loadingMask.style.top = rect.top + 'px';
+    loadingMask.style.width = rect.width + 'px';
+    loadingMask.style.height = rect.height + 'px';
+
+    loadingMask.style.display = 'block';
+
+    // Hide child elements initially
+    Array.from(loadingMask.children).forEach(child => {
+        child.style.display = 'none';
+    });
+
+    loaderTimeout = setTimeout(() => {
+        Array.from(loadingMask.children).forEach(child => {
+            child.style.display = '';
+        });
     }, typeof window.LOADING_TIMEOUT === 'undefined' ? 200 : window.LOADING_TIMEOUT);
 }
 
 function hideLoader() {
-    Element.hide('loading-mask');
-    if(loaderTimeout) {
+    const loadingMask = document.getElementById('loading-mask');
+    if (loadingMask) {
+        loadingMask.style.display = 'none';
+    }
+    if (loaderTimeout) {
         clearTimeout(loaderTimeout);
         loaderTimeout = null;
     }
 }
 
-/** @deprecated since 20.0.19 */
-function setLoaderPosition() {
-}
+class VarienUpdater {
+    constructor(containerId, url, options = {}) {
+        this.container = document.getElementById(containerId);
+        this.url = url;
+        this.options = options;
 
-/** @deprecated since 20.0.19 */
-function toggleSelectsUnderBlock(block, flag) {
-}
+        if (!this.container) {
+            console.error(`Container element '${containerId}' not found`);
+            return;
+        }
 
-Ajax.Responders.register(varienLoaderHandler.handler);
+        this.load();
+    }
 
-var varienUpdater = Class.create(Ajax.Updater, {
-    updateContent: function($super, responseText) {
-        if (responseText.isJSON()) {
-            var responseJSON = responseText.evalJSON();
-            if (responseJSON.ajaxExpired && responseJSON.ajaxRedirect) {
-                window.location.replace(responseJSON.ajaxRedirect);
+    async load() {
+        try {
+            const result = await mahoFetch(this.url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const transport = {
+                responseText: typeof result === 'string' ? result : JSON.stringify(result),
+                status: 200,
+                ok: true
+            };
+
+            this.updateContent(transport);
+
+            if (this.options.onComplete) {
+                this.options.onComplete(transport);
             }
-        } else {
-            $super(responseText);
+
+        } catch (error) {
+            const transport = {
+                responseText: error.message || '',
+                status: error.status || 500,
+                ok: false,
+                error
+            };
+
+            if (this.options.onFailure) {
+                this.options.onFailure(transport);
+            }
         }
     }
-});
+
+    updateContent(transport) {
+        // Since mahoFetch already handles session expiration, just update content
+        this.container.innerHTML = transport.responseText;
+
+        if (this.options.evalScripts) {
+            this._evalScripts();
+        }
+    }
+
+    _evalScripts() {
+        const scripts = this.container.querySelectorAll('script');
+        scripts.forEach(script => {
+            if (script.src) {
+                const newScript = document.createElement('script');
+                newScript.src = script.src;
+                document.head.appendChild(newScript);
+            } else if (script.textContent) {
+                eval(script.textContent);
+            }
+        });
+    }
+}
+
+// Global constructor for backward compatibility
+window.varienLoader = VarienLoader;
+window.varienUpdater = VarienUpdater;
