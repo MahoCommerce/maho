@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -13,31 +13,11 @@
 ?>
 
 <?php if ($this->getChildHtml()) :?>
-<div id="gift_options_window_mask" class="popup-window-mask" style="display: none;"></div>
-<div id="gift_options_configure_new" class="gift_options-popup product-configure-popup" style="display: none;">
-    <div id="gift_options_form_contents">
-        <div class="entry-edit">
-            <div class="entry-edit-head">
-                <h4 class="icon-head fieldset-legend"><?= Mage::helper('giftmessage')->__('Gift Options for') ?> <span id="gift_options_configure_title"></span></h4>
-            </div>
-            <div class="content">
-                <?= $this->getChildHtml() ?>
-            </div>
-            <div class="buttons-set a-right">
-                <button type="button" class="scalable" id="gift_options_cancel_button"><span><?= Mage::helper('giftmessage')->__('Cancel') ?></span></button>
-                <button type="button" class="scalable" id="gift_options_ok_button"><span><?= Mage::helper('giftmessage')->__('OK') ?></span></button>
-            </div>
-        </div>
-    </div>
-</div>
-<div id="giftoptions_tooltip_window" class="gift-options-tooltip" style="display:none;">
-    <div id="giftoptions_tooltip_window_content">&nbsp;</div>
+<div id="gift_options_form_contents" style="display: none;">
+    <?= $this->getChildHtml() ?>
 </div>
 
 <script type="text/javascript">
-//<![CDATA[
 _giftOptions = new GiftOptionsPopup();
-giftOptionsTooltip.setTooltipWindow('giftoptions_tooltip_window','giftoptions_tooltip_window_content');
-//]]>
 </script>
 <?php endif ?>

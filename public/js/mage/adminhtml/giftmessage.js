@@ -8,250 +8,229 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var giftMessagesController = {
-    toogleRequired: function(source, objects)
-    {
-        if(!$(source).value.blank()) {
-            objects.each(function(item) {
-               $(item).addClassName('required-entry');
-               var label = findFieldLabel($(item));
-               if (label) {
-                   var span = label.down('span');
-                   if (!span) {
-                       Element.insert(label, {bottom: '&nbsp;<span class="required">*</span>'});
-                   }
-               }
-            });
-        } else {
-            objects.each(function(item) {
-                if($(source).formObj && $(source).formObj.validator) {
-                    $(source).formObj.validator.reset(item);
-                }
-                $(item).removeClassName('required-entry');
-                var label = findFieldLabel($(item));
-                if (label) {
-                    var span = label.down('span');
-                    if (span) {
-                        Element.remove(span);
-                    }
-                }
-                // Hide validation advices if exist
-                if ($(item) && $(item).advices) {
-                    $(item).advices.each(function (pair) {
-                        if (pair.value != null) pair.value.hide();
-                    });
-                }
-            });
-        }
-    },
-    toogleGiftMessage: function(container) {
-        if(!$(container).toogleGiftMessage) {
-            $(container).toogleGiftMessage = true;
-            $(this.getFieldId(container, 'edit')).show();
-            $(container).down('.action-link').addClassName('open');
-            $(container).down('.default-text').hide();
-            $(container).down('.close-text').show();
-        } else {
-            $(container).toogleGiftMessage = false;
-            $(this.getFieldId(container, 'message')).formObj = $(this.getFieldId(container, 'form'));
+class GiftMessagesController {
+    static toogleRequired(source, objects) {
+        const sourceElement = document.getElementById(source);
+        const isRequired = sourceElement?.value.trim() !== '';
 
-            if(!$(this.getFieldId(container, 'form')).validator) {
-                $(this.getFieldId(container, 'form')).validator = new Validation(this.getFieldId(container, 'form'));
+        objects.forEach(item => {
+            const element = document.getElementById(item);
+            if (!element) return;
+
+            element.classList.toggle('required-entry', isRequired);
+            const label = this.findFieldLabel(element);
+
+            if (isRequired && label && !label.querySelector('span')) {
+                label.insertAdjacentHTML('beforeend', '&nbsp;<span class="required">*</span>');
+            } else if (!isRequired && label) {
+                if (sourceElement?.formObj?.validator) sourceElement.formObj.validator.reset(item);
+                label.querySelector('span')?.remove();
+                element.advices?.forEach(advice => advice.value?.style && (advice.value.style.display = 'none'));
             }
+        });
+    }
 
-            if(!$(this.getFieldId(container, 'form')).validator.validate()) {
-                return false;
-            }
+    static toogleGiftMessage(container) {
+        const containerElement = document.getElementById(container);
+        if (!containerElement) return false;
 
-            new Ajax.Request($(this.getFieldId(container, 'form')).action, {
-                parameters: Form.serialize($(this.getFieldId(container, 'form')), true),
-                loaderArea: container,
-                onComplete: function(transport) {
+        const isToggling = !containerElement.toogleGiftMessage;
+        containerElement.toogleGiftMessage = isToggling;
 
-                    $(container).down('.action-link').removeClassName('open');
-                    $(container).down('.default-text').show();
-                    $(container).down('.close-text').hide();
-                    $(this.getFieldId(container, 'edit')).hide();
-                    if (transport.responseText.match(/YES/g)) {
-                        $(container).down('.default-text').down('.edit').show();
-                        $(container).down('.default-text').down('.add').hide();
-                    } else {
-                        $(container).down('.default-text').down('.add').show();
-                        $(container).down('.default-text').down('.edit').hide();
-                    }
-
-                }.bind(this)
-            });
+        if (isToggling) {
+            this.showGiftMessageEdit(containerElement, container);
+        } else {
+            return this.submitGiftMessage(containerElement, container);
         }
-
         return false;
-    },
-    saveGiftMessage: function(container) {
-        $(this.getFieldId(container, 'message')).formObj = $(this.getFieldId(container, 'form'));
+    }
 
-        if(!$(this.getFieldId(container, 'form')).validator) {
-            $(this.getFieldId(container, 'form')).validator = new Validation(this.getFieldId(container, 'form'));
+    static showGiftMessageEdit(containerElement, container) {
+        document.getElementById(this.getFieldId(container, 'edit')).style.display = 'block';
+        containerElement.querySelector('.action-link')?.classList.add('open');
+        const defaultText = containerElement.querySelector('.default-text');
+        const closeText = containerElement.querySelector('.close-text');
+        if (defaultText) defaultText.style.display = 'none';
+        if (closeText) closeText.style.display = 'block';
+    }
+
+    static submitGiftMessage(containerElement, container) {
+        const formElement = this.setupFormValidation(container);
+        if (!formElement?.validator?.validate()) return false;
+
+        mahoFetch(formElement.action, { method: 'POST', body: new FormData(formElement) })
+            .then(response => response.text())
+            .then(responseText => this.handleGiftMessageResponse(containerElement, container, responseText));
+        return false;
+    }
+
+    static handleGiftMessageResponse(containerElement, container, responseText) {
+        containerElement.querySelector('.action-link')?.classList.remove('open');
+        const defaultText = containerElement.querySelector('.default-text');
+        const closeText = containerElement.querySelector('.close-text');
+        if (defaultText) defaultText.style.display = 'block';
+        if (closeText) closeText.style.display = 'none';
+        document.getElementById(this.getFieldId(container, 'edit')).style.display = 'none';
+
+        const hasMessage = responseText.includes('YES');
+        const editLink = defaultText?.querySelector('.edit');
+        const addLink = defaultText?.querySelector('.add');
+        if (editLink) editLink.style.display = hasMessage ? 'block' : 'none';
+        if (addLink) addLink.style.display = hasMessage ? 'none' : 'block';
+    }
+
+    static setupFormValidation(container) {
+        const formElement = document.getElementById(container);
+        
+        if (formElement && !formElement.validator) {
+            if (formElement.tagName === 'FORM') {
+                formElement.validator = new Validation(formElement);
+            } else {
+                const form = formElement.querySelector('form');
+                if (form) {
+                    form.validator = new Validation(form);
+                    return form;
+                }
+            }
         }
 
-        if(!$(this.getFieldId(container, 'form')).validator.validate()) {
+        return formElement;
+    }
+
+    static saveGiftMessage(container) {
+        const formElement = this.setupFormValidation(container);
+        if (formElement?.validator?.validate()) {
+            mahoFetch(formElement.action, { method: 'POST', body: new FormData(formElement) });
+        }
+    }
+
+    static getFieldId(container, name) {
+        return `${container}_${name}`;
+    }
+
+    static findFieldLabel(field) {
+        return field.closest('td')?.previousElementSibling?.querySelector('label') || null;
+    }
+}
+
+class GiftOptionsPopup {
+    constructor() {
+        this.bindActionLinks();
+    }
+
+    bindActionLinks() {
+        document.querySelectorAll('.action-link').forEach(el => {
+            el.addEventListener('click', this.showItemGiftOptions.bind(this));
+        });
+    }
+
+    showItemGiftOptions(event) {
+        const itemId = event.target.id.replace('gift_options_link_', '');
+        const productTitle = this.getProductTitle(itemId);
+
+        // Store the current item ID for saving later
+        this.currentItemId = itemId;
+
+        // Get the gift options form content
+        const formContent = this.getGiftOptionsFormContent();
+
+        if (!formContent) {
+            console.warn('Gift options form content not found');
             return;
         }
 
-        new Ajax.Request($(this.getFieldId(container, 'form')).action, {
-            parameters: Form.serialize($(this.getFieldId(container, 'form')), true),
-            loaderArea: container
+        Dialog.confirm(formContent, {
+            title: `Gift Options for ${productTitle}`,
+            width: 600,
+            height: 400,
+            okLabel: 'OK',
+            onOk: () => this.validateAndSubmitForm(),
+            onOpen: (dialog) => this.setupForm(dialog, itemId),
+            className: 'gift-options-dialog'
         });
-    },
-    getFieldId: function(container, name) {
-        return container + '_' + name;
-    }
-};
 
-function findFieldLabel(field) {
-    var tdField = $(field).up('td');
-    if (tdField) {
-       var tdLabel = tdField.previous('td');
-       if (tdLabel) {
-           var label = tdLabel.down('label');
-           if (label) {
-               return label;
-           }
-       }
+        event.preventDefault();
     }
 
-    return false;
-}
+    getProductTitle(itemId) {
+        return document.getElementById(`order_item_${itemId}_title`)?.textContent?.trim() || 'Product';
+    }
 
-
-/********************* GIFT OPTIONS POPUP ***********************/
-var GiftOptionsPopup = Class.create();
-GiftOptionsPopup.prototype = {
-    giftOptionsWindowMask: null,
-    giftOptionsWindow: null,
-
-    initialize: function() {
-        $$('.action-link').each(function (el) {
-            Event.observe(el, 'click', this.showItemGiftOptions.bind(this));
-        }, this);
-
-        // Move giftcard popup to start of body, because soon it will contain FORM tag that can break DOM layout if within other FORM
-        var oldPopupContainer = $('gift_options_configure');
-        if (oldPopupContainer) {
-            oldPopupContainer.remove();
-        }
-
-        var newPopupContainer = $('gift_options_configure_new');
-        $(document.body).insert({top: newPopupContainer});
-        newPopupContainer.id = 'gift_options_configure';
-
-        // Put controls container inside a FORM tag so we can use Validator
-        var form = new Element('form', {action: '#', id: 'gift_options_configuration_form', method: 'post'});
-        var formContents = $('gift_options_form_contents');
+    getGiftOptionsFormContent() {
+        const formContents = document.getElementById('gift_options_form_contents');
         if (formContents) {
-            formContents.parentNode.appendChild(form);
-            form.appendChild(formContents);
+            // Just return the inner HTML content, not the container
+            const formWrapper = document.createElement('form');
+            formWrapper.id = 'gift_options_configuration_form';
+            formWrapper.action = '#';
+            formWrapper.method = 'post';
+            formWrapper.innerHTML = formContents.innerHTML;
+
+            return formWrapper.outerHTML;
         }
-    },
+        return null;
+    }
 
-    showItemGiftOptions : function(event) {
-        var element = Event.element(event).id;
-        var itemId = element.sub('gift_options_link_','');
+    setupForm(dialog, itemId) {
+        this.loadExistingValues(dialog, itemId);
+        dialog.querySelector('input, select, textarea')?.focus();
+    }
 
-        this.giftOptionsWindowMask = $('gift_options_window_mask');
-        this.giftOptionsWindow = $('gift_options_configure');
-        this.giftOptionsWindow.select('select').each(function(el){
-            el.style.visibility = 'visible';
+    loadExistingValues(dialog, itemId) {
+        const dialogForm = dialog.querySelector('form');
+        if (!dialogForm) return;
+
+        ['sender', 'recipient', 'message'].forEach(field => {
+            const sourceField = document.getElementById(`giftmessage_${itemId}_${field}`);
+            const destField = dialogForm.querySelector(`[name="current_item_giftmessage_${field}"]`);
+
+            if (sourceField && destField) {
+                destField.value = sourceField.value;
+            }
         });
+    }
 
-        this.giftOptionsWindowMask.setStyle({'height': $('html-body').getHeight() + 'px'}).show();
-        this.giftOptionsWindow.setStyle({'marginTop': -this.giftOptionsWindow.getHeight()/2 + 'px', 'display': 'block'});
-        this.setTitle(itemId);
+    validateAndSubmitForm() {
+        const form = document.getElementById('gift_options_configuration_form');
+        if (!form) return true; // Allow dialog to close if no form
 
-        Event.observe($('gift_options_cancel_button'), 'click', this.onCloseButton.bind(this));
-        Event.observe($('gift_options_ok_button'), 'click', this.onOkButton.bind(this));
-        Event.stop(event);
-    },
-
-    setTitle : function (itemId) {
-        var productTitleElement = $('order_item_' + itemId + '_title');
-        var productTitle = '';
-        if (productTitleElement) {
-            productTitle = productTitleElement.innerHTML;
-        }
-        $('gift_options_configure_title').update(productTitle);
-    },
-
-    onOkButton : function() {
-        var giftOptionsForm = new varienForm('gift_options_configuration_form');
+        const giftOptionsForm = new varienForm('gift_options_configuration_form');
         giftOptionsForm.canShowError = true;
-        if (!giftOptionsForm.validate()) {
-            return false;
+
+        if (giftOptionsForm.validate()) {
+            // Save the form values back to the original fields first
+            this.saveFormValues(form);
+
+            // Now trigger the server-side save if there's a container form
+            this.triggerServerSave();
+
+            giftOptionsForm.validator.reset();
+            return true; // Allow dialog to close
         }
-        giftOptionsForm.validator.reset();
-        this.closeWindow();
-        return true;
-    },
 
-    onCloseButton : function() {
-        this.closeWindow();
-    },
-
-    closeWindow : function() {
-        this.giftOptionsWindowMask.style.display = 'none';
-        this.giftOptionsWindow.style.display = 'none';
+        return false; // Prevent dialog from closing
     }
-};
 
+    saveFormValues(dialogForm) {
+        if (!this.currentItemId) return;
 
-/********************* GIFT OPTIONS SET ***********************/
-GiftMessageSet = Class.create();
-GiftMessageSet.prototype = {
-    destPrefix: 'current_item_giftmessage_',
-    sourcePrefix: 'giftmessage_',
-    fields: ['sender', 'recipient', 'message'],
-    isObserved: false,
+        ['sender', 'recipient', 'message'].forEach(field => {
+            const destField = dialogForm.querySelector(`[name="current_item_giftmessage_${field}"]`);
+            const sourceField = document.getElementById(`giftmessage_${this.currentItemId}_${field}`);
 
-    initialize: function() {
-        $$('.action-link').each(function (el) {
-            Event.observe(el, 'click', this.setData.bind(this));
-        }, this);
-    },
-
-    setData: function(event) {
-        var element = Event.element(event).id;
-        this.id = element.sub('gift_options_link_','');
-
-        if ($('gift-message-form-data-' + this.id)) {
-            this.fields.each(function(el) {
-                if ($(this.sourcePrefix + this.id + '_' + el) && $(this.destPrefix + el)) {
-                    $(this.destPrefix + el).value = $(this.sourcePrefix + this.id + '_' + el).value;
-                }
-            }, this);
-            $('gift_options_giftmessage').show();
-        } else {
-            $('gift_options_giftmessage').hide();
-        }
-
-        if (!this.isObserved) {
-            Event.observe('gift_options_ok_button', 'click', this.saveData.bind(this));
-            this.isObserved = true;
-        }
-    },
-
-    saveData: function(event){
-        this.fields.each(function(el) {
-            if ($(this.sourcePrefix + this.id + '_' + el) && $(this.destPrefix + el)) {
-                $(this.sourcePrefix + this.id + '_' + el).value = $(this.destPrefix + el).value;
+            if (destField && sourceField) {
+                sourceField.value = destField.value;
             }
-        }, this);
-        if ($(this.sourcePrefix + this.id + '_form')) {
-            $(this.sourcePrefix + this.id + '_form').request();
-        } else if (typeof(order) != 'undefined') {
-            var data = order.serializeData('gift_options_data_' + this.id);
-            if (typeof data?.toObject === 'function') {
-                data = data.toObject();
-            }
-            order.loadArea(['items'], true, data);
+        });
+    }
+
+    triggerServerSave() {
+        if (!this.currentItemId) return;
+
+        const sourceField = document.getElementById(`giftmessage_${this.currentItemId}_message`);
+        const form = sourceField?.closest('form');
+        if (form?.id) {
+            GiftMessagesController.saveGiftMessage(form.id);
         }
     }
-};
+}

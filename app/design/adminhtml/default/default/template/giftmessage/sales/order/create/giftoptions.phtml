@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -21,9 +21,6 @@
                 <div>
                     <strong><a class="action-link" href="#" id="gift_options_link_<?= $_item->getId() ?>"><?= Mage::helper('sales')->__('Gift Options') ?></a></strong><br/>
                 </div>
-                <script type="text/javascript">
-                    giftOptionsTooltip.addTargetLink('gift_options_link_<?= $_item->getId() ?>', <?= $_item->getId() ?>);
-                </script>
                 <div id="gift_options_data_<?= $_item->getId() ?>">
                     <?= $_childHtml ?>
                 </div>
