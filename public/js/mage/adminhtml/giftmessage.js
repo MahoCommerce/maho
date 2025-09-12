@@ -108,32 +108,7 @@ class GiftMessagesController {
 
 class GiftOptionsPopup {
     constructor() {
-        this.initializePopup();
         this.bindActionLinks();
-    }
-
-    initializePopup() {
-        document.getElementById('gift_options_configure')?.remove();
-
-        const newPopupContainer = document.getElementById('gift_options_configure_new');
-        if (newPopupContainer) {
-            document.body.insertBefore(newPopupContainer, document.body.firstChild);
-            newPopupContainer.id = 'gift_options_configure';
-            this.createForm();
-        }
-    }
-
-    createForm() {
-        const formContents = document.getElementById('gift_options_form_contents');
-        if (formContents) {
-            const form = Object.assign(document.createElement('form'), {
-                action: '#',
-                id: 'gift_options_configuration_form',
-                method: 'post'
-            });
-            formContents.parentNode.appendChild(form);
-            form.appendChild(formContents);
-        }
     }
 
     bindActionLinks() {
@@ -144,59 +119,123 @@ class GiftOptionsPopup {
 
     showItemGiftOptions(event) {
         const itemId = event.target.id.replace('gift_options_link_', '');
+        const productTitle = this.getProductTitle(itemId);
 
-        this.giftOptionsWindowMask = document.getElementById('gift_options_window_mask');
-        this.giftOptionsWindow = document.getElementById('gift_options_configure');
+        // Store the current item ID for saving later
+        this.currentItemId = itemId;
 
-        this.giftOptionsWindow?.querySelectorAll('select').forEach(el => el.style.visibility = 'visible');
+        // Get the gift options form content
+        const formContent = this.getGiftOptionsFormContent();
 
-        if (this.giftOptionsWindowMask) {
-            const htmlBody = document.getElementById('html-body') || document.body;
-            Object.assign(this.giftOptionsWindowMask.style, {
-                height: htmlBody.offsetHeight + 'px',
-                display: 'block'
-            });
+        if (!formContent) {
+            console.warn('Gift options form content not found');
+            return;
         }
 
-        if (this.giftOptionsWindow) {
-            Object.assign(this.giftOptionsWindow.style, {
-                marginTop: (-this.giftOptionsWindow.offsetHeight / 2) + 'px',
-                display: 'block'
-            });
-        }
+        Dialog.confirm(formContent, {
+            title: `Gift Options for ${productTitle}`,
+            width: 600,
+            height: 400,
+            okLabel: 'OK',
+            onOk: () => this.validateAndSubmitForm(),
+            onOpen: (dialog) => this.setupForm(dialog, itemId),
+            className: 'gift-options-dialog'
+        });
 
-        this.setTitle(itemId);
-        this.bindButtons();
         event.preventDefault();
     }
 
-    bindButtons() {
-        document.getElementById('gift_options_cancel_button')
-            ?.addEventListener('click', () => this.closeWindow());
-        document.getElementById('gift_options_ok_button')
-            ?.addEventListener('click', this.onOkButton.bind(this));
+    getProductTitle(itemId) {
+        const productTitleElement = document.getElementById(`order_item_${itemId}_title`);
+        return productTitleElement?.textContent?.trim() || 'Product';
     }
 
-    setTitle(itemId) {
-        const productTitle = document.getElementById(`order_item_${itemId}_title`)?.innerHTML || '';
-        const titleElement = document.getElementById('gift_options_configure_title');
-        if (titleElement) titleElement.innerHTML = productTitle;
+    getGiftOptionsFormContent() {
+        const formContents = document.getElementById('gift_options_form_contents');
+        if (formContents) {
+            // Just return the inner HTML content, not the container
+            const formWrapper = document.createElement('form');
+            formWrapper.id = 'gift_options_configuration_form';
+            formWrapper.action = '#';
+            formWrapper.method = 'post';
+            formWrapper.innerHTML = formContents.innerHTML;
+
+            return formWrapper.outerHTML;
+        }
+        return null;
     }
 
-    onOkButton() {
+    setupForm(dialog, itemId) {
+        this.loadExistingValues(dialog, itemId);
+        const firstInput = dialog.querySelector('input, select, textarea');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+
+    loadExistingValues(dialog, itemId) {
+        // Find form fields in the dialog and populate them with existing values
+        const dialogForm = dialog.querySelector('form');
+        if (!dialogForm) return;
+
+        // Load values using the GiftMessageSet pattern
+        const fields = ['sender', 'recipient', 'message'];
+        const sourcePrefix = 'giftmessage_';
+        const destPrefix = 'current_item_giftmessage_';
+
+        fields.forEach(field => {
+            // Look for the source field (where actual data is stored)
+            const sourceField = document.getElementById(`${sourcePrefix}${itemId}_${field}`);
+            // Find the destination field in the dialog
+            const destField = dialogForm.querySelector(`[name="${destPrefix}${field}"]`);
+
+            if (sourceField && destField) {
+                if (sourceField.type === 'checkbox' || sourceField.type === 'radio') {
+                    destField.checked = sourceField.checked;
+                } else {
+                    destField.value = sourceField.value;
+                }
+            }
+        });
+    }
+
+    validateAndSubmitForm() {
+        const form = document.getElementById('gift_options_configuration_form');
+        if (!form) return true; // Allow dialog to close if no form
+
         const giftOptionsForm = new varienForm('gift_options_configuration_form');
         giftOptionsForm.canShowError = true;
+
         if (giftOptionsForm.validate()) {
+            // Save the form values back to the original fields before closing
+            this.saveFormValues(form);
             giftOptionsForm.validator.reset();
-            this.closeWindow();
-            return true;
+            return true; // Allow dialog to close
         }
-        return false;
+
+        return false; // Prevent dialog from closing
     }
 
-    closeWindow() {
-        [this.giftOptionsWindowMask, this.giftOptionsWindow].forEach(element => {
-            if (element) element.style.display = 'none';
+    saveFormValues(dialogForm) {
+        if (!this.currentItemId) return;
+
+        const fields = ['sender', 'recipient', 'message'];
+        const sourcePrefix = 'giftmessage_';
+        const destPrefix = 'current_item_giftmessage_';
+
+        fields.forEach(field => {
+            // Find the dialog field (destination field)
+            const destField = dialogForm.querySelector(`[name="${destPrefix}${field}"]`);
+            // Find the source field (where data should be stored)
+            const sourceField = document.getElementById(`${sourcePrefix}${this.currentItemId}_${field}`);
+
+            if (destField && sourceField) {
+                if (destField.type === 'checkbox' || destField.type === 'radio') {
+                    sourceField.checked = destField.checked;
+                } else {
+                    sourceField.value = destField.value;
+                }
+            }
         });
     }
 }
