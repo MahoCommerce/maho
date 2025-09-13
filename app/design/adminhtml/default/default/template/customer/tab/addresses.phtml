@@ -71,11 +71,7 @@
 
     <!-- Address form template -->
     <div id="address_form_template" class="no-display template">
-    <?php
-        // Set form template elements prefix
-        $this->getForm()->setHtmlIdPrefix($_templatePrefix)
-                ->setFieldNameSuffix('address[' . $_templatePrefix . ']');
-?>
+    <?php $this->getForm()->setHtmlIdPrefix($_templatePrefix)->setFieldNameSuffix('address[' . $_templatePrefix . ']') ?>
     <?= $this->getForm()->getHtml() ?>
     <?= $this->getCancelButtonHtml() ?>
     </div>
