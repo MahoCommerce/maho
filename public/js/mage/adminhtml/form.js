@@ -29,9 +29,7 @@ varienForm.prototype = {
     },
 
     validate : function(){
-        if (typeof varienGlobalEvents !== 'undefined') {
-            varienGlobalEvents.fireEvent('formValidate', this.formId);
-        }
+        varienGlobalEvents?.fireEvent('formValidate', this.formId);
         if(this.validator && this.validator.validate()){
             if(this.validationUrl){
                 this._validate();
@@ -42,9 +40,7 @@ varienForm.prototype = {
     },
 
     submit : function(url){
-        if (typeof varienGlobalEvents !== 'undefined') {
-            varienGlobalEvents.fireEvent('formSubmit', this.formId);
-        }
+        varienGlobalEvents?.fireEvent('formSubmit', this.formId);
         this.errorSections = $H({});
         this.canShowError = true;
         this.submitUrl = url;
@@ -70,9 +66,7 @@ varienForm.prototype = {
     },
 
     _processValidationResult : function(transport){
-        if (typeof varienGlobalEvents !== 'undefined') {
-            varienGlobalEvents.fireEvent('formValidateAjaxComplete', transport);
-        }
+        varienGlobalEvents?.fireEvent('formValidateAjaxComplete', transport);
         var response = transport.responseText.evalJSON();
         if(response.error){
             setMessagesDivHtml(response.message);
@@ -704,6 +698,4 @@ function setPostcodeOptional(zipElement, country) {
     }
 }
 
-if (typeof varienGlobalEvents != 'undefined') {
-    varienGlobalEvents.attachEventHandler("address_country_changed", onAddressCountryChanged);
-}
+varienGlobalEvents?.attachEventHandler("address_country_changed", onAddressCountryChanged);
