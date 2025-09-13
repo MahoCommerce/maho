@@ -149,23 +149,23 @@ class PerPageModel {
     refreshPerPageSelect() {
         if (this.listModeElement.value !== '') {
             if (this.listModeElement.value === 'grid') {
-                this.listElement.parentElement.style.display = 'none';
-                this.listValuesElement.parentElement.style.display = 'none';
+                this.listElement.closest('tr').style.display = 'none';
+                this.listValuesElement.closest('tr').style.display = 'none';
 
-                this.gridElement.parentElement.style.display = '';
-                this.gridValuesElement.parentElement.style.display = '';
+                this.gridElement.closest('tr').style.display = '';
+                this.gridValuesElement.closest('tr').style.display = '';
             } else if (this.listModeElement.value === 'grid-list' || this.listModeElement.value === 'list-grid') {
-                this.listElement.parentElement.style.display = '';
-                this.listValuesElement.parentElement.style.display = '';
+                this.listElement.closest('tr').style.display = '';
+                this.listValuesElement.closest('tr').style.display = '';
 
-                this.gridElement.parentElement.style.display = '';
-                this.gridValuesElement.parentElement.style.display = '';
+                this.gridElement.closest('tr').style.display = '';
+                this.gridValuesElement.closest('tr').style.display = '';
             } else if (this.listModeElement.value === 'list') {
-                this.listElement.parentElement.style.display = '';
-                this.listValuesElement.parentElement.style.display = '';
+                this.listElement.closest('tr').style.display = '';
+                this.listValuesElement.closest('tr').style.display = '';
 
-                this.gridElement.parentElement.style.display = 'none';
-                this.gridValuesElement.parentElement.style.display = 'none';
+                this.gridElement.closest('tr').style.display = 'none';
+                this.gridValuesElement.closest('tr').style.display = 'none';
             }
         }
     }
