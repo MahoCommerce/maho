@@ -124,78 +124,28 @@ class OriginModel {
 
 const originAddress = new OriginModel();
 
-class PerPageModel {
-    constructor() {
-        this.listModeElement = document.getElementById('catalog_frontend_list_mode');
-        if (this.listModeElement) {
-            this.gridValuesElement = document.getElementById('catalog_frontend_grid_per_page_values');
-            this.listValuesElement = document.getElementById('catalog_frontend_list_per_page_values');
-            this.listElement = document.getElementById('catalog_frontend_list_per_page');
-            this.gridElement = document.getElementById('catalog_frontend_grid_per_page');
-
-            this.gridOptions = [];
-            this.listOptions = [];
-
-            this.refreshPerPageSelect();
-            this.bindListModeChange();
-        }
-        this.addValidate();
-    }
-
-    bindListModeChange() {
-        this.listModeElement.addEventListener('change', () => this.refreshPerPageSelect());
-    }
-
-    refreshPerPageSelect() {
-        if (this.listModeElement.value !== '') {
-            if (this.listModeElement.value === 'grid') {
-                this.listElement.closest('tr').style.display = 'none';
-                this.listValuesElement.closest('tr').style.display = 'none';
-
-                this.gridElement.closest('tr').style.display = '';
-                this.gridValuesElement.closest('tr').style.display = '';
-            } else if (this.listModeElement.value === 'grid-list' || this.listModeElement.value === 'list-grid') {
-                this.listElement.closest('tr').style.display = '';
-                this.listValuesElement.closest('tr').style.display = '';
-
-                this.gridElement.closest('tr').style.display = '';
-                this.gridValuesElement.closest('tr').style.display = '';
-            } else if (this.listModeElement.value === 'list') {
-                this.listElement.closest('tr').style.display = '';
-                this.listValuesElement.closest('tr').style.display = '';
-
-                this.gridElement.closest('tr').style.display = 'none';
-                this.gridValuesElement.closest('tr').style.display = 'none';
+// Validation rules for per-page values
+if (typeof Validation !== 'undefined') {
+    Validation.add('validate-per-page-value-list', '<?= $this->jsQuoteEscape($this->__('Please enter a valid value, ex: 10,20,30')) ?>', function(v) {
+        const isEmptyValid = Validation.get('IsEmpty');
+        let isValid = !isEmptyValid.test(v);
+        const values = v.split(',');
+        for (let i = 0; i < values.length; i++) {
+            if (!/^[0-9]+$/.test(values[i])) {
+                isValid = false;
             }
         }
-    }
+        return isValid;
+    });
 
-    addValidate() {
-        if (typeof Validation !== 'undefined') {
-            Validation.add('validate-per-page-value-list', '<?= $this->jsQuoteEscape($this->__('Please enter a valid value, ex: 10,20,30')) ?>', function(v) {
-                const isEmptyValid = Validation.get('IsEmpty');
-                let isValid = !isEmptyValid.test(v);
-                const values = v.split(',');
-                for (let i = 0; i < values.length; i++) {
-                    if (!/^[0-9]+$/.test(values[i])) {
-                        isValid = false;
-                    }
-                }
-                return isValid;
-            });
-
-            Validation.add('validate-per-page-value', '<?= $this->jsQuoteEscape($this->__('Please enter a valid value from list')) ?>', function(v, elm) {
-                const isEmptyValid = Validation.get('IsEmpty');
-                if (isEmptyValid.test(v)) {
-                    return false;
-                }
-                const valuesElement = document.getElementById(elm.id + '_values');
-                const values = valuesElement.value.split(',');
-                return values.indexOf(v) !== -1;
-            });
+    Validation.add('validate-per-page-value', '<?= $this->jsQuoteEscape($this->__('Please enter a valid value from list')) ?>', function(v, elm) {
+        const isEmptyValid = Validation.get('IsEmpty');
+        if (isEmptyValid.test(v)) {
+            return false;
         }
-    }
+        const valuesElement = document.getElementById(elm.id + '_values');
+        const values = valuesElement.value.split(',');
+        return values.indexOf(v) !== -1;
+    });
 }
-
-const perPageSelect = new PerPageModel();
 </script>
