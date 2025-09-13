@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -41,64 +41,65 @@
 </p>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-var varienStore = new Class.create();
-
-varienStore.prototype = {
-    initialize : function(containerId, storeSwitcher, url, useAjax, useConfirm){
-
-        this.containerId    = containerId;
-        this.storeSwitcher  = storeSwitcher
-        this.url            = url;
-        this.useAjax        = useAjax;
-        this.useConfirm     = useConfirm;
-
+class varienStore {
+    constructor(containerId, storeSwitcher, url, useAjax, useConfirm) {
+        this.containerId = containerId;
+        this.storeSwitcher = storeSwitcher;
+        this.url = url;
+        this.useAjax = useAjax;
+        this.useConfirm = useConfirm;
         this.storeSelectorClickCallback = false;
-
-        this.selectorOnChange = this.optionOnChange.bindAsEventListener(this);
-
         this.storesGroup = {};
 
         this.initSwitcher();
-    },
+    }
 
-    optionOnChange : function (event)
-    {
+    optionOnChange(event) {
         if (this.storeSelectorClickCallback) {
             try {
                 this.storeSelectorClickCallback(event, this);
+            } catch (e) {
+                console.error('Store switcher callback error:', e);
             }
-            catch (e) {}
         }
-    },
+    }
 
-    initSwitcher : function()
-    {
-        if ($(this.storeSwitcher)) {
-            this.options = $$('#'+this.containerId+' option');
-            for (var option=0; option<this.options.length; option++) {
-                if (option%2==0) {
-                    Element.addClassName(this.options[option], 'even');
+    initSwitcher() {
+        const switcherElement = document.getElementById(this.storeSwitcher);
+        if (switcherElement) {
+            const options = document.querySelectorAll(`#${this.containerId} option`);
+
+            options.forEach((option, index) => {
+                if (index % 2 === 0) {
+                    option.classList.add('even');
                 }
-                var id = this.options[option].value*1;
-                this.storesGroup[id] = this.options[option].getAttribute('group');
-            }
-            Event.observe(this.storeSwitcher, 'change', this.selectorOnChange);
+                const id = parseInt(option.value, 10);
+                if (!isNaN(id)) {
+                    this.storesGroup[id] = option.getAttribute('group');
+                }
+            });
+
+            switcherElement.addEventListener('change', (event) => {
+                this.optionOnChange(event);
+            });
         }
-    },
+    }
 
-    getContainerId : function()
-    {
+    getContainerId() {
         return this.containerId;
-    },
+    }
 
-    isSameSore: function(checkId, currentId)
-    {
-        return (this.storesGroup[currentId] == this.storesGroup[checkId]);
+    isSameStore(checkId, currentId) {
+        return this.storesGroup[currentId] === this.storesGroup[checkId];
     }
 }
 
-var varienStoreSwitcher = new varienStore('store_switcher_container', 'store_switcher', '<?= $this->getSwitchUrl() ?>', <?= $this->getUseAjax() ?>, <?= $this->getUseConfirm() ?>);
-//]]>
+window.varienStoreSwitcher = new varienStore(
+    'store_switcher_container',
+    'store_switcher',
+    '<?= $this->getSwitchUrl() ?>',
+    <?= $this->getUseAjax() ? 'true' : 'false' ?>,
+    <?= $this->getUseConfirm() ? 'true' : 'false' ?>
+);
 </script>
 <?php endif ?>
