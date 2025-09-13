@@ -5,112 +5,100 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
 <script type="text/javascript">
-//<![CDATA[
-var CountryModel = Class.create();
-CountryModel.prototype = {
-    initialize : function()
-    {
+class CountryModel {
+    constructor() {
         this.reload = false;
         this.bindSpecificCountryRelation();
-    },
-    bindSpecificCountryRelation : function(parentId)
-    {
-        if(parentId) {
-            // todo: fix bug in IE
-            var applyCountryElements = $$('#'+parentId+' .shipping-applicable-country');
+        this.observeNewShippingMethods();
+    }
+
+    bindSpecificCountryRelation(parentId) {
+        let selector = parentId ?
+            `#${parentId} .shipping-applicable-country` :
+            '.shipping-applicable-country';
+
+        const applyCountryElements = document.querySelectorAll(selector);
+
+        applyCountryElements.forEach(element => {
+            element.addEventListener('change', (event) => this.checkSpecificCountry(event));
+            this.initSpecificCountry(element);
+        });
+    }
+
+    initSpecificCountry(element) {
+        if (!element?.id) return;
+
+        const specifCountryElement = document.getElementById(element.id.replace(/sallowspecific/, 'specificcountry'));
+
+        if (!specifCountryElement) return;
+
+        if (element.value == 1) {
+            // If specific country element selected
+            specifCountryElement.disabled = false;
         } else {
-            var applyCountryElements = $$('.shipping-applicable-country');
-        }
-        for(var i=0;i<applyCountryElements.length; i++) {
-            Event.observe(applyCountryElements[i], 'change', this.checkSpecificCountry.bind(this));
-            this.initSpecificCountry(applyCountryElements[i]);
-        }
-
-    },
-    initSpecificCountry : function(element){
-        var applyCountryElement = element;
-        if (applyCountryElement && applyCountryElement.id) {
-            var specifCountryElement  = $(applyCountryElement.id.replace(/sallowspecific/, 'specificcountry'));
-            var showMethodElement  = $(applyCountryElement.id.replace(/sallowspecific/, 'showmethod'));
-            //var specifErrMsgElement  = $(applyCountryElement.id.replace(/sallowspecific/, 'specificerrmsg'));
-            if (specifCountryElement) {
-                if (applyCountryElement.value == 1) {
-                   //if specific country element selected
-                   specifCountryElement.enable();
-                   if (showMethodElement) {
-                       this.showElement(showMethodElement.up(1));
-                   }
-                   //specifErrMsgElement.up(1).show();
-                 } else {
-                   specifCountryElement.disable();
-                   if (showMethodElement) {
-                       this.hideElement(showMethodElement.up(1));
-                   }
-                   //specifErrMsgElement.up(1).hide();
-                }
-            }
-        }
-    },
-
-    checkSpecificCountry : function(event)
-    {
-        var applyCountryElement = Event.element(event);
-        if (applyCountryElement && applyCountryElement.id) {
-            var specifCountryElement  = $(applyCountryElement.id.replace(/sallowspecific/, 'specificcountry'));
-            var showMethodElement  = $(applyCountryElement.id.replace(/sallowspecific/, 'showmethod'));
-            //var specifErrMsgElement  = $(applyCountryElement.id.replace(/sallowspecific/, 'specificerrmsg'));
-            if (specifCountryElement) {
-                if (applyCountryElement.value == 1) {
-                   //if specific country element selected
-                   specifCountryElement.enable();
-                   if (showMethodElement) {
-                       this.showElement(showMethodElement.up(1));
-                   }
-                   //specifErrMsgElement.up(1).show();
-                 } else {
-                    this.unselectSpecificCountry(specifCountryElement);
-                    specifCountryElement.disable();
-                    if (showMethodElement) {
-                        this.hideElement(showMethodElement.up(1));
-                    }
-                    //specifErrMsgElement.up(1).hide();
-                }
-            }
-        }
-    },
-
-    unselectSpecificCountry : function(element)
-    {
-        for (var i=0; i<element.options.length; i++) {
-            if (element.options[i].selected) {
-              element.options[i].selected=false;;
-            }
-        }
-    },
-
-    showElement : function(elm)
-    {
-        if (elm) {
-            if (!elm.down('.shipping-skip-show')) {
-                elm.show();
-            }
-        }
-    },
-
-    hideElement : function(elm)
-    {
-        if (elm) {
-            if (!elm.down('.shipping-skip-hide')) {
-                elm.hide();
-            }
+            specifCountryElement.disabled = true;
         }
     }
 
+    checkSpecificCountry(event) {
+        const applyCountryElement = event.target;
+
+        if (!applyCountryElement?.id) return;
+
+        const specifCountryElement = document.getElementById(applyCountryElement.id.replace(/sallowspecific/, 'specificcountry'));
+
+        if (!specifCountryElement) return;
+
+        if (applyCountryElement.value == 1) {
+            // If specific country element selected
+            specifCountryElement.disabled = false;
+        } else {
+            this.unselectSpecificCountry(specifCountryElement);
+            specifCountryElement.disabled = true;
+        }
+    }
+
+    unselectSpecificCountry(element) {
+        Array.from(element.options).forEach(option => {
+            if (option.selected) {
+                option.selected = false;
+            }
+        });
+    }
+
+    observeNewShippingMethods() {
+        // Track which elements we've already initialized
+        this.initializedElements = new Set();
+
+        // Find and observe all shipping method enable/disable elements
+        document.querySelectorAll('select[id*="carriers_"][id$="_active"]').forEach(activeElement => {
+            activeElement.addEventListener('change', (event) => {
+                // When a shipping method is enabled, initialize its country elements
+                if (event.target.value == '1') {
+                    // Find the corresponding applicable country element
+                    const carrierName = event.target.id.replace('_active', '');
+                    const applicableCountryElement = document.getElementById(carrierName + '_sallowspecific');
+
+                    if (applicableCountryElement) {
+                        // Add event listener if not already added
+                        if (!this.initializedElements.has(applicableCountryElement.id)) {
+                            applicableCountryElement.addEventListener('change', (event) => this.checkSpecificCountry(event));
+                            this.initializedElements.add(applicableCountryElement.id);
+                        }
+
+                        // Initialize the country selection logic
+                        this.initSpecificCountry(applicableCountryElement);
+                    }
+                }
+            });
+        });
+    }
 }
-countryApply = new CountryModel();
-//]]>
+
+const countryApply = new CountryModel();
 </script>
