@@ -59,8 +59,11 @@ class OriginModel {
             const regionElement = document.getElementById(countryElement.id.replace(/country_id/, 'region_id'));
             if (regionElement) {
                 this.regionElement = regionElement;
-                const url = this.regionsUrl + 'parent/' + countryElement.value;
-                this.loadRegions(url);
+                // Load regions if country has a value
+                if (countryElement.value && countryElement.value !== '') {
+                    const url = this.regionsUrl + 'parent/' + countryElement.value;
+                    this.loadRegions(url);
+                }
             }
         }
     }
@@ -78,27 +81,27 @@ class OriginModel {
         }
     }
 
-    async loadRegions(url) {
-        try {
-            const response = await mahoFetch(url);
-            const data = await response.json();
-            this.refreshRegionField(data);
-        } catch (error) {
-            console.error('Error loading regions:', error);
-        }
+    loadRegions(url) {
+        mahoFetch(url)
+            .then(data => {
+                data = JSON.parse(data);
+                this.refreshRegionField(data);
+            })
+            .catch(error => {
+                console.error('Error loading regions:', error);
+            });
     }
 
     refreshRegionField(data) {
         if (data) {
+            const value = this.regionElement.value;
             const disabled = this.regionElement.disabled;
             if (data.length) {
                 let html = `<select name="${this.regionElement.name}" id="${this.regionElement.id}" class="required-entry select" title="${this.regionElement.title}"${disabled ? ' disabled' : ''}>`;
 
                 data.forEach(region => {
                     if (region.label) {
-                        const selected = (this.regionElement.value &&
-                            (this.regionElement.value === region.value || this.regionElement.value === region.label))
-                            ? ' selected' : '';
+                        const selected = (value && (value == region.value || value === region.label)) ? ' selected' : '';
                         html += `<option value="${region.value}"${selected}>${region.label}</option>`;
                     }
                 });
