@@ -9,14 +9,9 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * @see Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection
- * @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection $this
- */
+/** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
-
 var bundleTemplateBox = '<table class="border" cellpadding="0" cellspacing="0">' +
     '    <thead>' +
     '        <tr class="headings">' +
@@ -134,7 +129,7 @@ Bundle.Selection.prototype = {
         data.index = this.itemsCount++;
         data.parentIndex = parentIndex;
 
-        if (option_type.value == 'multi' || option_type.value == 'checkbox') {
+        if (option_type && option_type.value && (option_type.value == 'multi' || option_type.value == 'checkbox')) {
             data.option_type = 'checkbox';
         } else {
             data.option_type = 'radio';
@@ -173,7 +168,7 @@ Bundle.Selection.prototype = {
 
         this.bindScopeCheckbox();
 
-        if (option_type.value == 'multi' || option_type.value == 'checkbox') {
+        if (option_type && option_type.value && (option_type.value == 'multi' || option_type.value == 'checkbox')) {
             /**
              * Hide not needed elements (user defined qty select box)
              */
@@ -347,5 +342,4 @@ Bundle.Selection.prototype = {
 }
 
 bSelection = new Bundle.Selection();
-//]]>
 </script>
