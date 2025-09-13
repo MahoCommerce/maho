@@ -112,11 +112,7 @@ Downloadable.FileUploader = class {
             );
 
             Downloadable.setUploaderObj(type, key, uploader);
-
-            if (typeof varienGlobalEvents !== 'undefined') {
-                varienGlobalEvents.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
-            }
-
+            varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
             new Downloadable.FileList(idName, uploader, fileValue);
         }
     }

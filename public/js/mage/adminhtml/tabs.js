@@ -4,6 +4,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 var varienTabs = new Class.create();
@@ -34,9 +35,7 @@ varienTabs.prototype = {
                     this.tabs[tab].show = function(){
                         this.container.showTabContent(this);
                     };
-                    if(varienGlobalEvents){
-                        varienGlobalEvents.fireEvent('moveTab', {tab:this.tabs[tab]});
-                    }
+                    varienGlobalEvents?.fireEvent('moveTab', {tab:this.tabs[tab]});
                 }
             }
 /*
@@ -55,7 +54,7 @@ varienTabs.prototype = {
         this.displayFirst = activeTabId;
         Event.observe(window,'load',this.moveTabContentInDest.bind(this));
     },
-    
+
     setSkipDisplayFirstTab : function(){
         this.displayFirst = null;
     },
@@ -73,9 +72,7 @@ varienTabs.prototype = {
                     this.tabs[tab].show = function(){
                         this.container.showTabContent(this);
                     };
-                    if(varienGlobalEvents){
-                        varienGlobalEvents.fireEvent('moveTab', {tab:this.tabs[tab]});
-                    }
+                    varienGlobalEvents?.fireEvent('moveTab', {tab:this.tabs[tab]});
                 }
             }
         }
@@ -131,9 +128,7 @@ varienTabs.prototype = {
             }
             this.activeTab = tab;
         }
-        if (varienGlobalEvents) {
-            varienGlobalEvents.fireEvent('showTab', {tab:tab});
-        }
+        varienGlobalEvents?.fireEvent('showTab', {tab:tab});
     },
 
     // the lazy show tab method
@@ -141,10 +136,8 @@ varienTabs.prototype = {
         var tabContentElement = $(this.getTabContentElementId(tab));
         if (tabContentElement) {
             if (this.activeTab != tab) {
-                if (varienGlobalEvents) {
-                    if (varienGlobalEvents.fireEvent('tabChangeBefore', $(this.getTabContentElementId(this.activeTab))).indexOf('cannotchange') != -1) {
-                        return;
-                    };
+                if (varienGlobalEvents?.fireEvent('tabChangeBefore', $(this.getTabContentElementId(this.activeTab)))?.indexOf('cannotchange') != -1) {
+                    return;
                 }
             }
             // wait for ajax request, if defined
@@ -225,8 +218,6 @@ varienTabs.prototype = {
            Element.hide(tabContentElement);
            Element.removeClassName(tab, 'active');
         }
-        if(varienGlobalEvents){
-            varienGlobalEvents.fireEvent('hideTab', {tab:tab});
-        }
+        varienGlobalEvents?.fireEvent('hideTab', {tab:tab});
     }
 };
