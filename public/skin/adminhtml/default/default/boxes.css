@@ -329,9 +329,7 @@ table.form-edit                         { width:100%; }
 .entry-edit fieldset li,
 .entry-edit .fieldset li                { margin:4px 0; }
 .entry-edit fieldset span.form_row,
-.entry-edit .fieldset span.form_row,
-.entry-edit fieldset .field-row .hint,
-.entry-edit .fieldset .field-row .hint  { float:left; color:#999; padding-left:12em; }
+.entry-edit .fieldset span.form_row     { float:left; color:#999; padding-left:12em; }
 .entry-edit .form-buttons               { float:right; margin:2px -3px 2px 0pt; }
 label.inline                            { float:none !important; width:auto !important; }
 .nested-content .entry-edit             { margin-left:2em; }

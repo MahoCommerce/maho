@@ -107,14 +107,6 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
         }
         $html .= '</td>';
 
-        $html .= '<td class="">';
-        if ($element->getHint()) {
-            $html .= '<div class="hint" >';
-            $html .= '<div style="display: none;">' . $element->getHint() . '</div>';
-            $html .= '</div>';
-        }
-        $html .= '</td>';
-
         return $this->_decorateRowHtml($element, $html);
     }
 
