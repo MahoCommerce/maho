@@ -344,8 +344,6 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                 $name  = 'groups[' . $group->getName() . '][fields][' . $fieldPrefix . $element->getName() . '][value]';
                 $label =  Mage::helper($helperName)->__($labelPrefix) . ' '
                     . Mage::helper($helperName)->__((string) $element->label);
-                $hint  = (string) $element->hint ? Mage::helper($helperName)->__((string) $element->hint) : '';
-
                 $helper = Mage::helper('adminhtml/config');
                 $backendClass = $helper->getBackendModelByFieldConfig($element);
                 if ($backendClass) {
@@ -394,7 +392,6 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     'label'                 => $label,
                     'comment'               => $comment,
                     'tooltip'               => $tooltip,
-                    'hint'                  => $hint,
                     'value'                 => $data,
                     'inherit'               => $inherit,
                     'class'                 => $element->frontend_class . $sharedClass . $requiresClass,

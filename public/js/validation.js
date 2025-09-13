@@ -830,6 +830,29 @@ Validation.addAllThese([
             return false;
         }
         return true;
+    }],
+    ['validate-comma-separated-numbers', 'Please enter comma-separated numbers only, ex: 10,20,30', function(v) {
+        const isEmptyValid = Validation.get('IsEmpty');
+        let isValid = !isEmptyValid.test(v);
+        const values = v.split(',');
+        for (let i = 0; i < values.length; i++) {
+            if (!/^[0-9]+$/.test(values[i])) {
+                isValid = false;
+            }
+        }
+        return isValid;
+    }],
+    ['validate-per-page-value', 'Please enter a valid value from list', function(v, elm) {
+        const isEmptyValid = Validation.get('IsEmpty');
+        if (isEmptyValid.test(v)) {
+            return false;
+        }
+        const valuesElement = document.getElementById(elm.id + '_values');
+        if (!valuesElement) {
+            return true; // If companion field doesn't exist, skip validation
+        }
+        const values = valuesElement.value.split(',');
+        return values.indexOf(v) !== -1;
     }]
 ]);
 

@@ -46,12 +46,15 @@
                         <grid_per_page_values translate="label comment">
                             <label>Products per Page on Grid Allowed Values</label>
                             <comment>Comma-separated.</comment>
-                            <validate>validate-per-page-value-list</validate>
+                            <validate>validate-comma-separated-numbers</validate>
                             <!--<source_model>adminhtml/system_config_source_catalog_gridPerPage</source_model>-->
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends>
+                                <list_mode separator=",">grid,grid-list,list-grid</list_mode>
+                            </depends>
                         </grid_per_page_values>
                         <grid_per_page translate="label comment">
                             <label>Products per Page on Grid Default Value</label>
@@ -62,16 +65,22 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends>
+                                <list_mode separator=",">grid,grid-list,list-grid</list_mode>
+                            </depends>
                         </grid_per_page>
                         <list_per_page_values translate="label comment">
                             <label>Products per Page on List Allowed Values</label>
                             <comment>Comma-separated.</comment>
-                            <validate>validate-per-page-value-list</validate>
+                            <validate>validate-comma-separated-numbers</validate>
                             <!--<source_model>adminhtml/system_config_source_catalog_gridPerPage</source_model>-->
                             <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends>
+                                <list_mode separator=",">list,grid-list,list-grid</list_mode>
+                            </depends>
                         </list_per_page_values>
                         <list_per_page translate="label comment">
                             <label>Products per Page on List Default Value</label>
@@ -82,6 +91,9 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends>
+                                <list_mode separator=",">list,grid-list,list-grid</list_mode>
+                            </depends>
                         </list_per_page>
                         <flat_catalog_category translate="label">
                             <label>Use Flat Catalog Category</label>
