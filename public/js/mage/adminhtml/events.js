@@ -8,7 +8,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-class VarienEvents {
+class varienEvents {
     constructor() {
         this.arrEvents = {};
         this.eventPrefix = '';
@@ -124,5 +124,5 @@ class VarienEvents {
     }
 }
 
-const varienGlobalEvents = new VarienEvents();
+const varienGlobalEvents = new varienEvents();
 

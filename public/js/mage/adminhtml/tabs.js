@@ -7,217 +7,248 @@
  * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-var varienTabs = new Class.create();
 
-varienTabs.prototype = {
-    initialize : function(containerId, destElementId,  activeTabId, shadowTabs){
-        this.containerId    = containerId;
-        this.destElementId  = destElementId;
+class varienTabs {
+    constructor(containerId, destElementId, activeTabId, shadowTabs) {
+        this.containerId = containerId;
+        this.destElementId = destElementId;
         this.activeTab = null;
 
-        this.tabOnClick     = this.tabMouseClick.bindAsEventListener(this);
+        this.tabOnClick = this.tabMouseClick.bind(this);
 
-        this.tabs = $$('#'+this.containerId+' li a.tab-item-link');
+        this.tabs = document.querySelectorAll(`#${this.containerId} li a.tab-item-link`);
 
         this.hideAllTabsContent();
-        for (var tab=0; tab<this.tabs.length; tab++) {
-            Event.observe(this.tabs[tab],'click',this.tabOnClick);
+
+        this.tabs.forEach(tab => {
+            tab.addEventListener('click', this.tabOnClick);
+
             // move tab contents to destination element
-            if($(this.destElementId)){
-                var tabContentElement = $(this.getTabContentElementId(this.tabs[tab]));
-                if(tabContentElement && tabContentElement.parentNode.id != this.destElementId){
-                    $(this.destElementId).appendChild(tabContentElement);
+            const destElement = document.getElementById(this.destElementId);
+            if (destElement) {
+                const tabContentElement = document.getElementById(this.getTabContentElementId(tab));
+                if (tabContentElement && tabContentElement.parentNode.id !== this.destElementId) {
+                    destElement.appendChild(tabContentElement);
                     tabContentElement.container = this;
-                    tabContentElement.statusBar = this.tabs[tab];
-                    tabContentElement.tabObject  = this.tabs[tab];
-                    this.tabs[tab].contentMoved = true;
-                    this.tabs[tab].container = this;
-                    this.tabs[tab].show = function(){
+                    tabContentElement.statusBar = tab;
+                    tabContentElement.tabObject = tab;
+                    tab.contentMoved = true;
+                    tab.container = this;
+                    tab.show = function() {
                         this.container.showTabContent(this);
                     };
-                    varienGlobalEvents?.fireEvent('moveTab', {tab:this.tabs[tab]});
+                    varienGlobalEvents?.fireEvent('moveTab', { tab: tab });
                 }
             }
-/*
-            // this code is pretty slow in IE, so lets do it in tabs*.phtml
-            // mark ajax tabs as not loaded
-            if (Element.hasClassName($(this.tabs[tab].id), 'ajax')) {
-                Element.addClassName($(this.tabs[tab].id), 'notloaded');
-            }
-*/
+
             // bind shadow tabs
-            if (this.tabs[tab].id && shadowTabs && shadowTabs[this.tabs[tab].id]) {
-                this.tabs[tab].shadowTabs = shadowTabs[this.tabs[tab].id];
+            if (tab.id && shadowTabs && shadowTabs[tab.id]) {
+                tab.shadowTabs = shadowTabs[tab.id];
             }
-        }
+        });
 
         this.displayFirst = activeTabId;
-        Event.observe(window,'load',this.moveTabContentInDest.bind(this));
-    },
+        window.addEventListener('load', () => this.moveTabContentInDest());
+    }
 
-    setSkipDisplayFirstTab : function(){
+    setSkipDisplayFirstTab() {
         this.displayFirst = null;
-    },
+    }
 
-    moveTabContentInDest : function(){
-        for(var tab=0; tab<this.tabs.length; tab++){
-            if($(this.destElementId) &&  !this.tabs[tab].contentMoved){
-                var tabContentElement = $(this.getTabContentElementId(this.tabs[tab]));
-                if(tabContentElement && tabContentElement.parentNode.id != this.destElementId){
-                    $(this.destElementId).appendChild(tabContentElement);
+    moveTabContentInDest() {
+        this.tabs.forEach(tab => {
+            const destElement = document.getElementById(this.destElementId);
+            if (destElement && !tab.contentMoved) {
+                const tabContentElement = document.getElementById(this.getTabContentElementId(tab));
+                if (tabContentElement && tabContentElement.parentNode.id !== this.destElementId) {
+                    destElement.appendChild(tabContentElement);
                     tabContentElement.container = this;
-                    tabContentElement.statusBar = this.tabs[tab];
-                    tabContentElement.tabObject  = this.tabs[tab];
-                    this.tabs[tab].container = this;
-                    this.tabs[tab].show = function(){
+                    tabContentElement.statusBar = tab;
+                    tabContentElement.tabObject = tab;
+                    tab.container = this;
+                    tab.show = function() {
                         this.container.showTabContent(this);
                     };
-                    varienGlobalEvents?.fireEvent('moveTab', {tab:this.tabs[tab]});
+                    varienGlobalEvents?.fireEvent('moveTab', { tab: tab });
                 }
             }
-        }
+        });
+
         if (this.displayFirst) {
-            this.showTabContent($(this.displayFirst));
+            this.showTabContent(document.getElementById(this.displayFirst));
             this.displayFirst = null;
         }
-    },
+    }
 
-    getTabContentElementId : function(tab){
-        if(tab){
-            return tab.id+'_content';
+    getTabContentElementId(tab) {
+        if (tab) {
+            return tab.id + '_content';
         }
         return false;
-    },
+    }
 
-    tabMouseClick : function(event) {
-        var tab = Event.findElement(event, 'a');
+    tabMouseClick(event) {
+        const tab = event.target.closest('a');
 
         // go directly to specified url or switch tab
-        if ((tab.href.indexOf('#') != tab.href.length-1)
-            && !(Element.hasClassName(tab, 'ajax'))
-        ) {
+        if ((tab.href.indexOf('#') !== tab.href.length - 1) &&
+            !tab.classList.contains('ajax')) {
             location.href = tab.href;
-        }
-        else {
+        } else {
             this.showTabContent(tab);
         }
-        Event.stop(event);
-    },
+        event.preventDefault();
+        event.stopPropagation();
+    }
 
-    hideAllTabsContent : function(){
-        for(var tab in this.tabs){
-            this.hideTabContent(this.tabs[tab]);
-        }
-    },
+    hideAllTabsContent() {
+        this.tabs.forEach(tab => {
+            this.hideTabContent(tab);
+        });
+    }
 
     // show tab, ready or not
-    showTabContentImmediately : function(tab) {
+    showTabContentImmediately(tab) {
         this.hideAllTabsContent();
-        var tabContentElement = $(this.getTabContentElementId(tab));
+        const tabContentElement = document.getElementById(this.getTabContentElementId(tab));
         if (tabContentElement) {
-            Element.show(tabContentElement);
-            Element.addClassName(tab, 'active');
+            tabContentElement.style.display = '';
+            tab.classList.add('active');
+
             // load shadow tabs, if any
             if (tab.shadowTabs && tab.shadowTabs.length) {
-                for (var k in tab.shadowTabs) {
-                    this.loadShadowTab($(tab.shadowTabs[k]));
+                for (const k in tab.shadowTabs) {
+                    this.loadShadowTab(document.getElementById(tab.shadowTabs[k]));
                 }
             }
-            if (!Element.hasClassName(tab, 'ajax only')) {
-                Element.removeClassName(tab, 'notloaded');
+
+            if (!tab.classList.contains('ajax') || !tab.classList.contains('only')) {
+                tab.classList.remove('notloaded');
             }
+
             this.activeTab = tab;
         }
-        varienGlobalEvents?.fireEvent('showTab', {tab:tab});
-    },
+        varienGlobalEvents?.fireEvent('showTab', { tab: tab });
+    }
 
     // the lazy show tab method
-    showTabContent : function(tab) {
-        var tabContentElement = $(this.getTabContentElementId(tab));
+    showTabContent(tab) {
+        const tabContentElement = document.getElementById(this.getTabContentElementId(tab));
         if (tabContentElement) {
-            if (this.activeTab != tab) {
-                if (varienGlobalEvents?.fireEvent('tabChangeBefore', $(this.getTabContentElementId(this.activeTab)))?.indexOf('cannotchange') != -1) {
+            if (this.activeTab !== tab) {
+                const activeTabContentId = this.activeTab ? this.getTabContentElementId(this.activeTab) : null;
+                const activeTabContent = activeTabContentId ? document.getElementById(activeTabContentId) : null;
+                const result = varienGlobalEvents?.fireEvent('tabChangeBefore', activeTabContent);
+                if (result && result.indexOf('cannotchange') !== -1) {
                     return;
                 }
             }
-            // wait for ajax request, if defined
-            var isAjax = Element.hasClassName(tab, 'ajax');
-            var isEmpty = tabContentElement.innerHTML=='' && tab.href.indexOf('#')!=tab.href.length-1;
-            var isNotLoaded = Element.hasClassName(tab, 'notloaded');
 
-            if ( isAjax && (isEmpty || isNotLoaded) )
-            {
-                new Ajax.Request(tab.href, {
-                    parameters: {form_key: FORM_KEY},
-                    evalScripts: true,
-                    onSuccess: function(transport) {
-                        try {
-                            if (transport.responseText.isJSON()) {
-                                var response = transport.responseText.evalJSON();
-                                if (response.error) {
-                                    alert(response.message);
-                                }
-                                if(response.ajaxExpired && response.ajaxRedirect) {
-                                    setLocation(response.ajaxRedirect);
-                                }
+            // wait for ajax request, if defined
+            const isAjax = tab.classList.contains('ajax');
+            const isEmpty = tabContentElement.innerHTML === '' && tab.href.indexOf('#') !== tab.href.length - 1;
+            const isNotLoaded = tab.classList.contains('notloaded');
+
+            if (isAjax && (isEmpty || isNotLoaded)) {
+                const formData = new FormData();
+                formData.append('form_key', window.FORM_KEY || '');
+
+                mahoFetch(tab.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(result => {
+                    if (typeof result === 'object' && result !== null) {
+                        // Response is JSON
+                        if (result.error) {
+                            alert(result.message);
+                        }
+                        if (result.ajaxExpired && result.ajaxRedirect) {
+                            setLocation(result.ajaxRedirect);
+                        }
+                    } else {
+                        // Response is text/HTML
+                        tabContentElement.innerHTML = result;
+
+                        // Execute any scripts in the response
+                        const scripts = tabContentElement.querySelectorAll('script');
+                        scripts.forEach(script => {
+                            const newScript = document.createElement('script');
+                            if (script.src) {
+                                newScript.src = script.src;
                             } else {
-                                $(tabContentElement.id).update(transport.responseText);
-                                this.showTabContentImmediately(tab);
+                                newScript.textContent = script.textContent;
                             }
-                        }
-                        catch (e) {
-                            $(tabContentElement.id).update(transport.responseText);
-                            this.showTabContentImmediately(tab);
-                        }
-                    }.bind(this)
+                            document.head.appendChild(newScript);
+                            document.head.removeChild(newScript);
+                        });
+
+                        this.showTabContentImmediately(tab);
+                    }
+                })
+                .catch(error => {
+                    console.error('Tab load error:', error);
                 });
-            }
-            else {
+            } else {
                 this.showTabContentImmediately(tab);
             }
         }
-    },
+    }
 
-    loadShadowTab : function(tab) {
-        var tabContentElement = $(this.getTabContentElementId(tab));
-        if (tabContentElement && Element.hasClassName(tab, 'ajax') && Element.hasClassName(tab, 'notloaded')) {
-            new Ajax.Request(tab.href, {
-                parameters: {form_key: FORM_KEY},
-                evalScripts: true,
-                onSuccess: function(transport) {
-                    try {
-                        if (transport.responseText.isJSON()) {
-                            var response = transport.responseText.evalJSON();
-                            if (response.error) {
-                                alert(response.message);
-                            }
-                            if(response.ajaxExpired && response.ajaxRedirect) {
-                                setLocation(response.ajaxRedirect);
-                            }
+    loadShadowTab(tab) {
+        const tabContentElement = document.getElementById(this.getTabContentElementId(tab));
+        if (tabContentElement && tab.classList.contains('ajax') && tab.classList.contains('notloaded')) {
+            const formData = new FormData();
+            formData.append('form_key', window.FORM_KEY || '');
+
+            mahoFetch(tab.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(result => {
+                if (typeof result === 'object' && result !== null) {
+                    // Response is JSON
+                    if (result.error) {
+                        alert(result.message);
+                    }
+                    if (result.ajaxExpired && result.ajaxRedirect) {
+                        setLocation(result.ajaxRedirect);
+                    }
+                } else {
+                    // Response is text/HTML
+                    tabContentElement.innerHTML = result;
+
+                    // Execute any scripts in the response
+                    const scripts = tabContentElement.querySelectorAll('script');
+                    scripts.forEach(script => {
+                        const newScript = document.createElement('script');
+                        if (script.src) {
+                            newScript.src = script.src;
                         } else {
-                            $(tabContentElement.id).update(transport.responseText);
-                            if (!Element.hasClassName(tab, 'ajax only')) {
-                                Element.removeClassName(tab, 'notloaded');
-                            }
+                            newScript.textContent = script.textContent;
                         }
+                        document.head.appendChild(newScript);
+                        document.head.removeChild(newScript);
+                    });
+
+                    if (!tab.classList.contains('ajax') || !tab.classList.contains('only')) {
+                        tab.classList.remove('notloaded');
                     }
-                    catch (e) {
-                        $(tabContentElement.id).update(transport.responseText);
-                        if (!Element.hasClassName(tab, 'ajax only')) {
-                            Element.removeClassName(tab, 'notloaded');
-                        }
-                    }
-                }.bind(this)
+                }
+            })
+            .catch(error => {
+                console.error('Shadow tab load error:', error);
             });
         }
-    },
-
-    hideTabContent : function(tab){
-        var tabContentElement = $(this.getTabContentElementId(tab));
-        if($(this.destElementId) && tabContentElement){
-           Element.hide(tabContentElement);
-           Element.removeClassName(tab, 'active');
-        }
-        varienGlobalEvents?.fireEvent('hideTab', {tab:tab});
     }
-};
+
+    hideTabContent(tab) {
+        const tabContentElement = document.getElementById(this.getTabContentElementId(tab));
+        const destElement = document.getElementById(this.destElementId);
+        if (destElement && tabContentElement) {
+            tabContentElement.style.display = 'none';
+            tab.classList.remove('active');
+        }
+        varienGlobalEvents?.fireEvent('hideTab', { tab: tab });
+    }
+}
