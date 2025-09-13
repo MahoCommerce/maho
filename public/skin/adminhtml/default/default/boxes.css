@@ -828,7 +828,7 @@ ul.item-options li { padding-left:.7em; }
 .product-options dd input[type="date"],
 .product-options dd input[type="time"],
 .product-options dd input[type="datetime-local"],
-.product-options dd input.datetime-picker { 
+.product-options dd input.datetime-picker {
   width: auto;
   min-width: 150px;
   padding: 3px 6px;
@@ -1170,10 +1170,7 @@ input.downloads { width:6.5em !important; }
 /* Addresses */
 .address-list                           { width:28em; padding-right:22px; }
 .address-list address                   { width:100%; overflow:hidden; }
-.address-list .btn-edit-address,
-.address-list .btn-remove-address       { position:absolute; top:8px; }
-.address-list .btn-edit-address         { right:8px; }
-.address-list .btn-remove-address       { right:27px; }
+.address-list .btn-remove-address       { position:absolute; top:8px; right: 8px; color: #e41101 }
 .address-list li                        { position:relative; padding:12px 14px; cursor:pointer; border-top:1px solid #e6e6e6; background:url(images/address_list_li.gif) repeat; }
 .address-list li.on                     { background:#e7efef; }
 .address-list li.over                   { background-color:#fcf5dd; }
