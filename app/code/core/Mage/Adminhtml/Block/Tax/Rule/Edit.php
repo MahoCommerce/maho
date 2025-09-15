@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Tax_Rule_Edit extends Mage_Adminhtml_Block_Widget_For
             'class' => 'save',
         ], 10);
 
-        $this->_formScripts[] = " function saveAndContinueEdit(){ editForm.submit($('edit_form').action + 'back/edit/') } ";
+        $this->_formScripts[] = " function saveAndContinueEdit(){ editForm.submit(document.getElementById('edit_form').action + 'back/edit/') } ";
     }
 
     /**
