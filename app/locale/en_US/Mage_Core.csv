@@ -16,7 +16,7 @@
 "Admin User Emails","Admin User Emails"
 "Advanced","Advanced"
 "Advanced Cache Settings","Advanced Cache Settings"
-"After selecting a new media storage location, press the Synchronize button
+"After selecting a new media storage location, press the Synchronize button to transfer all media to that location. Media will not be available in the new location until the synchronization process is complete.","After selecting a new media storage location, press the Synchronize button to transfer all media to that location. Media will not be available in the new location until the synchronization process is complete."
 "Allow Countries","Allow Countries"
 "Allowed file types: ICO, PNG, GIF, JPG, JPEG, APNG. Not all browsers support all these formats!","Allowed file types: ICO, PNG, GIF, JPG, JPEG, APNG. Not all browsers support all these formats!"
 "Allowed IPs (comma separated)","Allowed IPs (comma separated)"
@@ -199,8 +199,6 @@
 "Load on Intent","Load on Intent"
 "Locale","Locale"
 "Locale Options","Locale Options"
-                                location until the synchronization process is complete.","After selecting a new media storage location, press the Synchronize button
-                                location until the synchronization process is complete."
 "Login is Case Sensitive","Login is Case Sensitive"
 "Logo Image","Logo Image"
 "Logo Image Alt","Logo Image Alt"
@@ -393,8 +391,6 @@
 "Title Prefix","Title Prefix"
 "Title Suffix","Title Suffix"
 "Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.","Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again."
-                                to transfer all media to that location. Media will not be available in the new
-                                to transfer all media to that location. Media will not be available in the new
 "Transactional Emails","Transactional Emails"
 "Translate, blocks and other output caches should be disabled for both frontend and admin inline translations.","Translate, blocks and other output caches should be disabled for both frontend and admin inline translations."
 "Translate Inline","Translate Inline"
