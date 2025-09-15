@@ -1259,7 +1259,7 @@ ul.config-tabs a.last span  { background-image:none; }
 
 tr:last-child .with-button.active > .config { border-bottom-color:#d6d6d6; }
 tr:last-child .with-button.active:after { display:none; }
-.config-heading { padding:10px 10px 10px 26px; background:#efefef url(images/icon-enabled.png) no-repeat -999em -999em; border:1px solid #d8d8d8; margin:-1px 0 0; }
+.config-heading { padding:10px 10px 10px 26px; background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="circle-check" data-variant="outline"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>') no-repeat -999em -999em; border:1px solid #d8d8d8; margin:-1px 0 0; }
 .enabled .config-heading { background-position:5px 10px; }
 .config-heading .button-container { float:right; text-align:right; }
 .config-heading .button span { font-size:14px; font-weight:bold; display:block; text-shadow:0 1px 1px #666; text-transform:capitalize; }
@@ -1275,7 +1275,7 @@ tr:last-child .with-button.active:after { display:none; }
 .config-heading .heading a.link-demo:before { content:'|'; display:inline-block; margin-right:8px; color:#888; font-size:12px; }
 .config-heading .heading .heading-intro { display:block; font-size:11px; }
 
-td.label label.enabled { background:url(images/icon-enabled.png) no-repeat 100% 1px; min-height:16px; }
+td.label label.enabled { background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="circle-check" data-variant="outline"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>') no-repeat 100% 1px; min-height:16px; }
 
 /* Advanced nested config */
 .section-config .config-advanced > .entry-edit-head { background:none; padding:0 0 0; border:0; }
