@@ -272,60 +272,6 @@ Product.Gallery = class {
     }
 };
 
-Product.AttributesBridge = {
-    tabsObject: false,
-    bindTabs2Attributes: {},
-    bind: function (tabId, attributesObject) {
-        this.bindTabs2Attributes[tabId] = attributesObject;
-    },
-    getAttributes: function (tabId) {
-        return this.bindTabs2Attributes[tabId];
-    },
-    setTabsObject: function (tabs) {
-        this.tabsObject = tabs;
-    },
-    getTabsObject: function () {
-        return this.tabsObject;
-    },
-    addAttributeRow: function (data) {
-        Object.entries(data).forEach(function (item) {
-            if (this.getTabsObject().activeTab.name != item[0]) {
-                this.getTabsObject().showTabContent(document.getElementById(item[0]));
-            }
-            this.getAttributes(item[0]).addRow(item[1]);
-        }.bind(this));
-    }
-};
-
-Product.Attributes = class {
-    constructor(containerId) {
-        this.config = {};
-        this.containerId = containerId;
-    }
-    setConfig(config) {
-        this.config = config;
-        Product.AttributesBridge.bind(this.getConfig().tab_id, this);
-    }
-    getConfig() {
-        return this.config;
-    }
-    create() {
-        var win = window.open(this.getConfig().url, 'new_attribute',
-            'width=900,height=600,resizable=1,scrollbars=1');
-        win.focus();
-    }
-    addRow(html) {
-        var attributesContainer = document.querySelector('#group_fields' + this.getConfig().group_id + ' .form-list tbody');
-        attributesContainer.insertAdjacentHTML('beforeend', html);
-
-        var childs = Array.from(attributesContainer.children);
-        var element = childs[childs.length - 1].querySelector('input, select, textarea');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
-};
-
 Product.Configurable = class {
     constructor(attributes, links, idPrefix, grid, readonly) {
         this.templatesSyntax = new RegExp('(^|.|\\r|\\n)(\'{{\\s*(\\w+)\\s*}}\')', "");
