@@ -47,7 +47,6 @@ $_showWebsite= $this->isMultiWebsites();
     </table>
 
 <script type="text/javascript">
-//<![CDATA[
 var groupPriceRowTemplate = '<tr>'
     + '<td<?php if (!$_showWebsite): ?> style="display:none"<?php endif ?>>'
     + '<select class="<?= $_htmlClass ?> required-entry" name="<?= $_htmlName ?>[{{index}}][website_id]" id="group_price_row_{{index}}_website">'
@@ -177,9 +176,8 @@ const groupPriceControl = {
 groupPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int)!empty($_item['readonly']) ?>);
 <?php endforeach ?>
 <?php if ($_readonly) : ?>
-$('<?= $_htmlId ?>_container').up('table').select('button')
-    .each(groupPriceControl.disableElement);
+document.getElementById('<?= $_htmlId ?>_container').closest('table').querySelectorAll('button')
+    .forEach(groupPriceControl.disableElement);
 <?php endif ?>
-//]]>
 </script>
 </td></tr>

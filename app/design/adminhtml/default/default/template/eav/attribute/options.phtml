@@ -134,7 +134,7 @@ var attributeOption = {
     totalItems : 0,
     isReadOnly: <?= (int)$this->getReadOnly() ?>,
     add : function(data) {
-        this.template = new Template(this.templateText, this.templateSyntax);
+        this.template = new Template(this.templateText, Template.HANDLEBARS_PATTERN);
         let isNewOption = false;
         if (!data.id) {
             data.id = 'option_' + this.itemCount;

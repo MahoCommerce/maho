@@ -15,7 +15,6 @@
 <?php $items = $this->getChilds($_item); ?>
 <?php $_count = count ($items) ?>
 <?php $_index = 0 ?>
-
 <?php $_prevOptionId = '' ?>
 
 <?php if($this->getOrderOptions() || $_item->getDescription()): ?>
@@ -300,9 +299,9 @@
                         <?php if ($_remainder):?>
                             ... <span id="<?= $_id = 'id' . uniqid()?>"><?= $_remainder ?></span>
                             <script type="text/javascript">
-                            $('<?= $_id ?>').hide();
-                            $('<?= $_id ?>').up().observe('mouseover', function(){$('<?= $_id ?>').show();});
-                            $('<?= $_id ?>').up().observe('mouseout',  function(){$('<?= $_id ?>').hide();});
+                            document.getElementById('<?= $_id ?>').style.display = 'none';
+                            document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});
+                            document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseout',  function(){document.getElementById('<?= $_id ?>').style.display = 'none';});
                             </script>
                         <?php endif ?>
                     <?php endif ?>

@@ -25,11 +25,11 @@
                 <?php $_option = $this->getFormattedOption($_option['value']); ?>
                 <?= $_option['value'] ?><?php if (isset($_option['remainder']) && $_option['remainder']): ?><span id="<?= $_dots = 'dots' . uniqid()?>"> ...</span><span id="<?= $_id = 'id' . uniqid() ?>"><?= $_option['remainder'] ?></span>
                     <script type="text/javascript">
-                    $('<?= $_id ?>').hide();
-                    $('<?= $_id ?>').up().observe('mouseover', function(){$('<?= $_id ?>').show();});
-                    $('<?= $_id ?>').up().observe('mouseover', function(){$('<?= $_dots ?>').hide();});
-                    $('<?= $_id ?>').up().observe('mouseout',  function(){$('<?= $_id ?>').hide();});
-                    $('<?= $_id ?>').up().observe('mouseout',  function(){$('<?= $_dots ?>').show();});
+                    document.getElementById('<?= $_id ?>').style.display = 'none';
+                    document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});
+                    document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_dots ?>').style.display = 'none';});
+                    document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseout',  function(){document.getElementById('<?= $_id ?>').style.display = 'none';});
+                    document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseout',  function(){document.getElementById('<?= $_dots ?>').style.display = '';});
                     </script>
                 <?php endif ?>
             <?php endif ?>

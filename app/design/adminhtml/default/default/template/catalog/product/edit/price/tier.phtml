@@ -17,8 +17,6 @@
 <?php $_showWebsite = $this->isShowWebsiteColumn(); ?>
 <?php $_editWebsite = $this->isAllowChangeWebsite(); ?>
 <?php $_priceValueValidation = $this->getPriceValidation('validate-greater-than-zero'); ?>
-
-
 <?php $_showWebsite = $this->isShowWebsiteColumn(); ?>
 <?php $_showWebsite= $this->isMultiWebsites(); ?>
 <tr>
@@ -51,7 +49,6 @@
     </table>
 
 <script type="text/javascript">
-//<![CDATA[
 var tierPriceRowTemplate = '<tr>'
     + '<td<?php if (!$_showWebsite): ?> style="display:none"<?php endif ?>>'
     + '<select class="<?= $_htmlClass ?> required-entry" name="<?= $_htmlName ?>[{{index}}][website_id]" id="tier_price_row_{{index}}_website">'
@@ -184,9 +181,8 @@ const tierPriceControl = {
 tierPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= $_item['price_qty']*1 ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int)!empty($_item['readonly']) ?>);
 <?php endforeach ?>
 <?php if ($_readonly): ?>
-$('<?= $_htmlId ?>_container').up('table').select('button')
-    .each(tierPriceControl.disableElement);
+document.getElementById('<?= $_htmlId ?>_container').closest('table').querySelectorAll('button')
+    .forEach(tierPriceControl.disableElement);
 <?php endif ?>
-//]]>
 </script>
 </td></tr>
