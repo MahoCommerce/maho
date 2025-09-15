@@ -53,99 +53,124 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
 </div>
 
 <script type="text/javascript">
-//<![CDATA[
-// create row creator
-var arrayRow<?= $_htmlId ?> = {
-    // define row prototypeJS template
-    template : new Template(
-        '<tr id="#{_id}">'
+const arrayRow<?= $_htmlId ?> = {
+    // Define row template using template literals
+    template: function(data) {
+        return `<tr id="${data._id}">
 <?php foreach ($this->_columns as $columnName => $column):?>
-            +'<td>'
-                +'<?= $this->jsQuoteEscape($this->_renderCellTemplate($columnName)) ?>'
-            +'<\/td>'
+            <td><?= $this->jsQuoteEscape($this->_renderCellTemplate($columnName)) ?></td>
 <?php endforeach ?>
 <?php if ($this->_addAfter):?>
-            +'<td><button onclick="" class="scalable add" type="button" id="addAfterBtn#{_id}"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?><\/span><\/span><\/span><\/button><\/td>'
+            <td><button class="scalable add" type="button" id="addAfterBtn${data._id}"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?></span></button></td>
 <?php endif ?>
-            +'<td><button onclick="arrayRow<?= $_htmlId ?>.del(\'#{_id}\')" class="scalable delete" type="button"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?><\/span><\/span><\/span><\/button><\/td>'
-        +'<\/tr>'
-    ),
+            <td><button onclick="arrayRow<?= $_htmlId ?>.del('${data._id}')" class="scalable delete" type="button"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?></span></button></td>
+        </tr>`;
+    },
 
-    rowsCount : 0,
+    rowsCount: 0,
 
-    add : function(templateData, insertAfterId)
-    {
-        // generate default template data
-        if ('' == templateData) {
-            var d = new Date();
-            var templateData = {
+    add: function(templateData, insertAfterId) {
+        // Generate default template data
+        if (!templateData || templateData === '') {
+            const d = new Date();
+            templateData = {
 <?php foreach ($this->_columns as $columnName => $column):?>
-                <?= $columnName ?> : '',
+                <?= $columnName ?>: '',
 <?php endforeach ?>
-                _id : '_' + d.getTime() + '_' + d.getMilliseconds()
+                _id: '_' + d.getTime() + '_' + d.getMilliseconds()
             };
         }
 
-        // insert before last row
-        if ('' == insertAfterId) {
-            Element.insert($('addRow<?= $_htmlId ?>'), {before: this.template.evaluate(templateData)});
+        const htmlContent = this.template(templateData);
+
+        // Insert before last row
+        if (!insertAfterId || insertAfterId === '') {
+            const addRow = document.getElementById('addRow<?= $_htmlId ?>');
+            if (addRow) {
+                addRow.insertAdjacentHTML('beforebegin', htmlContent);
+            }
         }
-        // insert after specified row
+        // Insert after specified row
         else {
-            Element.insert($(insertAfterId), {after: this.template.evaluate(templateData)});
+            const afterRow = document.getElementById(insertAfterId);
+            if (afterRow) {
+                afterRow.insertAdjacentHTML('afterend', htmlContent);
+            }
         }
 
 <?php if ($this->_addAfter):?>
-        Event.observe('addAfterBtn' + templateData._id, 'click', this.add.bind(this, '', templateData._id));
+        const addAfterBtn = document.getElementById('addAfterBtn' + templateData._id);
+        if (addAfterBtn) {
+            addAfterBtn.addEventListener('click', () => this.add('', templateData._id));
+        }
 <?php endif ?>
 
         this.rowsCount += 1;
     },
 
-    del : function(rowId)
-    {
-        $(rowId).remove();
+    del: function(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+        }
         this.rowsCount -= 1;
-        if (0 == this.rowsCount) {
+        if (this.rowsCount === 0) {
             this.showButtonOnly();
         }
     },
 
-    showButtonOnly : function()
-    {
-        $('grid<?= $_htmlId ?>').hide();
-        $('empty<?= $_htmlId ?>').show();
+    showButtonOnly: function() {
+        const grid = document.getElementById('grid<?= $_htmlId ?>');
+        const empty = document.getElementById('empty<?= $_htmlId ?>');
+        if (grid) grid.style.display = 'none';
+        if (empty) empty.style.display = '';
     }
-}
+};
 
-// bind add action to "Add" button in last row
-Event.observe('addToEndBtn<?= $_htmlId ?>', 'click', arrayRow<?= $_htmlId ?>.add.bind(arrayRow<?= $_htmlId ?>, '', ''));
+document.addEventListener('DOMContentLoaded', function() {
+    // Bind add action to "Add" button in last row
+    const addToEndBtn = document.getElementById('addToEndBtn<?= $_htmlId ?>');
+    if (addToEndBtn) {
+        addToEndBtn.addEventListener('click', () => arrayRow<?= $_htmlId ?>.add('', ''));
+    }
 
-// add existing rows
-<?php
-$_addAfterId = "headings{$_htmlId}";
-foreach ($this->getArrayRows() as $_rowId => $_row) {
-    echo "arrayRow{$_htmlId}.add(" . $_row->toJson() . ", '{$_addAfterId}');\n";
-    $_addAfterId = $_rowId;
-}
-?>
+    // Add existing rows
+    <?php
+    $_addAfterId = "headings{$_htmlId}";
+    foreach ($this->getArrayRows() as $_rowId => $_row) {
+        echo "arrayRow{$_htmlId}.add(" . $_row->toJson() . ", '{$_addAfterId}');\n";
+        $_addAfterId = $_rowId;
+    }
+    ?>
 
-// initialize standalone button
-$('empty<?= $_htmlId ?>').hide();
-Event.observe('emptyAddBtn<?= $_htmlId ?>', 'click', function () {
-    $('grid<?= $_htmlId ?>').show();
-    $('empty<?= $_htmlId ?>').hide();
-    arrayRow<?= $_htmlId ?>.add('', '');
+    // Initialize standalone button
+    const emptyDiv = document.getElementById('empty<?= $_htmlId ?>');
+    if (emptyDiv) {
+        emptyDiv.style.display = 'none';
+    }
+
+    const emptyAddBtn = document.getElementById('emptyAddBtn<?= $_htmlId ?>');
+    if (emptyAddBtn) {
+        emptyAddBtn.addEventListener('click', function() {
+            const grid = document.getElementById('grid<?= $_htmlId ?>');
+            const empty = document.getElementById('empty<?= $_htmlId ?>');
+            if (grid) grid.style.display = '';
+            if (empty) empty.style.display = 'none';
+            arrayRow<?= $_htmlId ?>.add('', '');
+        });
+    }
+
+    // If no rows, hide grid and show button only
+    <?php if (!$this->getArrayRows()):?>
+    arrayRow<?= $_htmlId ?>.showButtonOnly();
+    <?php endif ?>
+
+    // Toggle the grid, if element is disabled (depending on scope)
+    <?php if ($this->getElement()->getDisabled()):?>
+    const gridElement = document.getElementById('grid<?= $_htmlId ?>');
+    if (gridElement && typeof toggleValueElements === 'function') {
+        toggleValueElements({checked: true}, gridElement.parentNode);
+    }
+    <?php endif ?>
 });
-
-// if no rows, hide grid and show button only
-<?php if (!$this->getArrayRows()):?>
-arrayRow<?= $_htmlId ?>.showButtonOnly();
-<?php endif ?>
-
-// toggle the grid, if element is disabled (depending on scope)
-<?php if ($this->getElement()->getDisabled()):?>
-toggleValueElements({checked:true}, $('grid<?= $_htmlId ?>').parentNode);
-<?php endif ?>
-//]]>
 </script>

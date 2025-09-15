@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -39,43 +39,50 @@ var firstStepTemplate = '<div class="option-box" id="option_{{id}}">'+
                 '<td>&nbsp;</td>'+
             '</tr></table></div>';
 
-var productOption = {
-    div : $('product_options_container_top'),
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
-    templateText : firstStepTemplate,
-    itemCount : 1,
-    add : function(data) {
+const productOption = {
+    div: document.getElementById('product_options_container_top'),
+    templateSyntax: /(^|.|\r|\n)({{(\w+)}})/,
+    templateText: firstStepTemplate,
+    itemCount: 1,
+    add: function(data) {
         this.template = new Template(this.templateText, this.templateSyntax);
 
-        if(!data.id){
+        if (!data.id) {
             data = {};
-            data.id  = this.itemCount;
+            data.id = this.itemCount;
             data.type = '';
             data.option_id = 0;
         } else {
             this.itemCount = data.item_count;
         }
 
-        Element.insert(this.div, {'after':this.template.evaluate(data)});
+        this.div.insertAdjacentHTML('afterend', this.template.evaluate(data));
 
         //set selected type
         if (data.type) {
-            $A($('<?= $this->getFieldId() ?>_'+data.id+'_type').options).each(function(option){
-                if (option.value==data.type) option.selected = true;
-            });
+            const typeSelect = document.getElementById('<?= $this->getFieldId() ?>_' + data.id + '_type');
+            if (typeSelect) {
+                Array.from(typeSelect.options).forEach(option => {
+                    if (option.value === data.type) option.selected = true;
+                });
+            }
         }
 
         //set selected is_require
         if (data.hasOwnProperty('is_require')) {
-            $A($('<?= $this->getFieldId() ?>_'+data.id+'_is_require').options).each(function(option){
-                if (option.value==data.is_require) option.selected = true;
-            });
+            const requireSelect = document.getElementById('<?= $this->getFieldId() ?>_' + data.id + '_is_require');
+            if (requireSelect) {
+                Array.from(requireSelect.options).forEach(option => {
+                    if (option.value == data.is_require) option.selected = true;
+                });
+            }
         }
 
         if (data.checkboxScopeTitle) {
             //set disabled
-            if ($('<?= $this->getFieldId() ?>_'+data.option_id+'_title') && data.scopeTitleDisabled) {
-                $('<?= $this->getFieldId() ?>_'+data.option_id+'_title').disable();
+            const titleInput = document.getElementById('<?= $this->getFieldId() ?>_' + data.option_id + '_title');
+            if (titleInput && data.scopeTitleDisabled) {
+                titleInput.disabled = true;
             }
         }
 
@@ -83,49 +90,60 @@ var productOption = {
         this.bindRemoveButtons();
         productOptionType.bindSelectInputType();
     },
-    remove : function(event){
-        var element = $(Event.findElement(event, 'div'));
-        if(element){
-            $('product_'+element.readAttribute('id')+'_'+'is_delete').value = '1';
-            element.addClassName('no-display');
-            element.addClassName('ignore-validate');
-            element.hide();
+    remove: function(event) {
+        const element = event.target.closest('div');
+        if (element) {
+            const deleteInput = document.getElementById('product_' + element.id + '_is_delete');
+            if (deleteInput) {
+                deleteInput.value = '1';
+            }
+            element.classList.add('no-display', 'ignore-validate');
+            element.style.display = 'none';
         }
     },
-    bindRemoveButtons : function(){
-        var buttons = $$('div.product-custom-options .delete-product-option');
-        for(var i=0;i<buttons.length;i++){
-            if(!$(buttons[i]).binded){
-                $(buttons[i]).binded = true;
-                Event.observe(buttons[i], 'click', this.remove.bind(this));
+    bindRemoveButtons: function() {
+        const buttons = document.querySelectorAll('div.product-custom-options .delete-product-option');
+        buttons.forEach(button => {
+            if (!button.binded) {
+                button.binded = true;
+                button.addEventListener('click', this.remove.bind(this));
             }
-        }
-        var inputs = $$('div.product-custom-options button', 'div.product-custom-options input', 'div.product-custom-options select', 'div.product-custom-options textarea');
+        });
+
+        const inputs = document.querySelectorAll('div.product-custom-options button, div.product-custom-options input, div.product-custom-options select, div.product-custom-options textarea');
         <?php if ($this->isReadonly()):?>
-        for (var i=0, l = inputs.length; i < l; i ++) {
-            inputs[i].disabled = true;
-            if (inputs[i].tagName.toLowerCase()=='button') {
-                inputs[i].addClassName('disabled');
+        inputs.forEach(input => {
+            input.disabled = true;
+            if (input.tagName.toLowerCase() === 'button') {
+                input.classList.add('disabled');
             }
-        }
+        });
         <?php else: ?>
-            inputs.each(function(el) { Event.observe(el, 'change', el.setHasChanges.bind(el));  } )
-            var inputs = $$('div.product-custom-options button');
-            inputs.each(function(el) { Event.observe(el, 'click', el.setHasChanges.bind(el));  } )
+        const changeInputs = document.querySelectorAll('div.product-custom-options input, div.product-custom-options select, div.product-custom-options textarea');
+        changeInputs.forEach(el => {
+            el.addEventListener('change', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+        });
+        const clickButtons = document.querySelectorAll('div.product-custom-options button');
+        clickButtons.forEach(el => {
+            el.addEventListener('click', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+        });
         <?php endif ?>
     }
 }
 
 
-var productOptionType = {
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
-    loadStepTwo : function(event){
-        var element = $(Event.findElement(event, 'select'));
+const productOptionType = {
+    templateSyntax: /(^|.|\r|\n)({{(\w+)}})/,
+    loadStepTwo: function(event) {
+        const element = event.target.closest('select');
+        if (!element) return;
 
-        var group = '';
-        var previousGroupElm = $(element.readAttribute('id').sub('_type', '_previous_group'));
+        let group = '';
+        let template = '';
+        const elementId = element.id;
+        const previousGroupElm = document.getElementById(elementId.replace('_type', '_previous_group'));
 
-        switch(element.getValue()){
+        switch(element.value) {
             case 'field':
             case 'area':
                 template = OptionTemplateText;
@@ -154,46 +172,49 @@ var productOptionType = {
                 break;
         }
 
-        if (previousGroupElm.getValue() != group) {
-            if ($(element.readAttribute('id')+'_'+previousGroupElm.getValue())) {
-                formElm = $(element.readAttribute('id')+'_'+previousGroupElm.getValue()).descendants();
-                formElm.each(function(elm){
-                    if (elm.tagName == 'input' || elm.tagName == 'select') {
-                        elm.name = '__delete__'+elm.readAttribute('name');
+        if (previousGroupElm && previousGroupElm.value !== group) {
+            const previousGroupElement = document.getElementById(elementId + '_' + previousGroupElm.value);
+            if (previousGroupElement) {
+                const formElements = previousGroupElement.querySelectorAll('input, select');
+                formElements.forEach(elm => {
+                    if (elm.tagName.toLowerCase() === 'input' || elm.tagName.toLowerCase() === 'select') {
+                        elm.name = '__delete__' + elm.name;
                     }
                 });
 
-                $(element.readAttribute('id')+'_'+previousGroupElm.getValue()).addClassName('no-display');
-                $(element.readAttribute('id')+'_'+previousGroupElm.getValue()).addClassName('ignore-validate');
-                $(element.readAttribute('id')+'_'+previousGroupElm.getValue()).hide();
+                previousGroupElement.classList.add('no-display', 'ignore-validate');
+                previousGroupElement.style.display = 'none';
             }
 
             previousGroupElm.value = group;
 
-            if ($(element.readAttribute('id')+'_'+group)) {
-                formElm = $(element.readAttribute('id')+'_'+group).descendants();
-                formElm.each(function(elm){
-                    if (elm.match('input') || elm.match('select')) {
-                        elm.name = elm.readAttribute('name').sub('__delete__', '');
+            const groupElement = document.getElementById(elementId + '_' + group);
+            if (groupElement) {
+                const formElements = groupElement.querySelectorAll('input, select');
+                formElements.forEach(elm => {
+                    if (elm.tagName.toLowerCase() === 'input' || elm.tagName.toLowerCase() === 'select') {
+                        elm.name = elm.name.replace('__delete__', '');
                     }
                 });
-                $(element.readAttribute('id')+'_'+group).removeClassName('no-display');
-                $(element.readAttribute('id')+'_'+group).removeClassName('ignore-validate');
-                $(element.readAttribute('id')+'_'+group).show();
-
+                groupElement.classList.remove('no-display', 'ignore-validate');
+                groupElement.style.display = '';
             } else {
-                template = '<div id="'+element.readAttribute('id')+'_'+group+'" class="grid tier form-list">'+template+'</div><div id="'+element.readAttribute('id')+'_'+group+'_advice"></div>';
+                template = `<div id="${elementId}_${group}" class="grid tier form-list">${template}</div><div id="${elementId}_${group}_advice"></div>`;
                 this.secondTemplate = new Template(template, this.templateSyntax);
 
-                data = {};
+                let data = {};
                 if (!data.option_id) {
                     data = {};
-                    data.option_id = $(element.readAttribute('id').sub('_type', '_id')).getValue();
+                    const idElement = document.getElementById(elementId.replace('_type', '_id'));
+                    data.option_id = idElement ? idElement.value : '';
                 }
 
-                Element.insert(element.readAttribute('id').sub('_type', ''), {'after':this.secondTemplate.evaluate(data)});
+                const targetElement = document.getElementById(elementId.replace('_type', ''));
+                if (targetElement) {
+                    targetElement.insertAdjacentHTML('afterend', this.secondTemplate.evaluate(data));
+                }
 
-                switch(element.getValue()){
+                switch(element.value) {
                     case 'drop_down':
                     case 'radio':
                     case 'checkbox':
@@ -204,9 +225,11 @@ var productOptionType = {
             }
         }
     },
-    addDataToValues : function(data){
+    addDataToValues: function(data) {
+        let template = '';
+        let group = '';
 
-        switch(data.type){
+        switch(data.type) {
             case 'field':
             case 'area':
                 template = OptionTemplateText;
@@ -231,98 +254,123 @@ var productOptionType = {
                 break;
         }
 
-        $('<?= $this->getFieldId() ?>_'+data.id+'_previous_group').value = group;
+        const previousGroupElement = document.getElementById('<?= $this->getFieldId() ?>_' + data.id + '_previous_group');
+        if (previousGroupElement) {
+            previousGroupElement.value = group;
+        }
 
-        template = '<div id="<?= $this->getFieldId() ?>_{{id}}_type_'+group+'" class="grid tier form-list">'+template+'</div><div id="<?= $this->getFieldId() ?>_{{id}}_type_'+group+'_advice"></div>';
+        template = `<div id="<?= $this->getFieldId() ?>_{{id}}_type_${group}" class="grid tier form-list">${template}</div><div id="<?= $this->getFieldId() ?>_{{id}}_type_${group}_advice"></div>`;
 
         this.secondTemplate = new Template(template, this.templateSyntax);
 
-        Element.insert($('<?= $this->getFieldId() ?>_'+data.option_id), {'after':this.secondTemplate.evaluate(data)});
+        const targetElement = document.getElementById('<?= $this->getFieldId() ?>_' + data.option_id);
+        if (targetElement) {
+            targetElement.insertAdjacentHTML('afterend', this.secondTemplate.evaluate(data));
+        }
 
         if (data.checkboxScopePrice) {
             //set disabled
-            if ($('<?= $this->getFieldId() ?>_'+data.option_id+'_price') && data.scopePriceDisabled) {
-                $('<?= $this->getFieldId() ?>_'+data.option_id+'_price').disable();
-                $('<?= $this->getFieldId() ?>_'+data.option_id+'_price_type').disable();
+            const priceElement = document.getElementById('<?= $this->getFieldId() ?>_' + data.option_id + '_price');
+            const priceTypeElement = document.getElementById('<?= $this->getFieldId() ?>_' + data.option_id + '_price_type');
+            if (priceElement && data.scopePriceDisabled) {
+                priceElement.disabled = true;
+            }
+            if (priceTypeElement && data.scopePriceDisabled) {
+                priceTypeElement.disabled = true;
             }
         }
 
-        switch(data.type){
+        switch(data.type) {
             case 'drop_down':
             case 'radio':
             case 'checkbox':
             case 'multiple':
-                data.optionValues.each(function(value) {
-                    selectOptionType.add(value);
-                });
+                if (data.optionValues) {
+                    data.optionValues.forEach(value => {
+                        selectOptionType.add(value);
+                    });
+                }
                 selectOptionType.bindAddButton();
                 break;
         }
 
         if (data.price_type) {
-            $A($('<?= $this->getFieldId() ?>_'+data.option_id+'_price_type').options).each(function(option){
-                if (option.value==data.price_type) option.selected = true;
-            });
-        }
-
-    },
-    bindSelectInputType : function(){
-        var types = $$('.select-product-option-type');
-        for(var i=0;i<types.length;i++){
-            if(!$(types[i]).binded){
-                $(types[i]).binded = true;
-                Event.observe(types[i], 'change', function(event){
-                    productOptionType.loadStepTwo(event);
+            const priceTypeSelect = document.getElementById('<?= $this->getFieldId() ?>_' + data.option_id + '_price_type');
+            if (priceTypeSelect) {
+                Array.from(priceTypeSelect.options).forEach(option => {
+                    if (option.value === data.price_type) option.selected = true;
                 });
             }
         }
+    },
+    bindSelectInputType: function() {
+        const types = document.querySelectorAll('.select-product-option-type');
+        types.forEach(type => {
+            if (!type.binded) {
+                type.binded = true;
+                type.addEventListener('change', event => {
+                    productOptionType.loadStepTwo(event);
+                });
+            }
+        });
     }
 }
 
-var productOptionScope = {
-    addScope : function(event){
-        var element = $(Event.element(event));
-        fieldToDisable = $(element.readAttribute('id').sub('_use_default', ''));
+const productOptionScope = {
+    addScope: function(event) {
+        const element = event.target;
+        const fieldToDisable = document.getElementById(element.id.replace('_use_default', ''));
 
-        if (fieldToDisable.disabled) {
-            if (fieldToDisable.hasClassName('product-option-price')) {//need change to cheking value of element
-                $(fieldToDisable.readAttribute('id')+'_type').enable();
+        if (fieldToDisable) {
+            if (fieldToDisable.disabled) {
+                if (fieldToDisable.classList.contains('product-option-price')) {
+                    const typeElement = document.getElementById(fieldToDisable.id + '_type');
+                    if (typeElement) {
+                        typeElement.disabled = false;
+                    }
+                }
+                fieldToDisable.disabled = false;
+            } else {
+                if (fieldToDisable.classList.contains('product-option-price')) {
+                    const typeElement = document.getElementById(fieldToDisable.id + '_type');
+                    if (typeElement) {
+                        typeElement.disabled = true;
+                    }
+                }
+                fieldToDisable.disabled = true;
             }
-            fieldToDisable.enable();
-        } else {
-            if (fieldToDisable.hasClassName('product-option-price')) {//need change to cheking value of element
-                $(fieldToDisable.readAttribute('id')+'_type').disable();
-            }
-            fieldToDisable.disable();
         }
     },
-    bindScopeCheckbox : function(){
-        var checkboxes = $$('.product-option-scope-checkbox');
-        for (var i=0;i<checkboxes.length;i++) {
-            if (!$(checkboxes[i]).binded) {
-                $(checkboxes[i]).binded = true;
-                Event.observe(checkboxes[i], 'click', this.addScope.bind(this));
+    bindScopeCheckbox: function() {
+        const checkboxes = document.querySelectorAll('.product-option-scope-checkbox');
+        checkboxes.forEach(checkbox => {
+            if (!checkbox.binded) {
+                checkbox.binded = true;
+                checkbox.addEventListener('click', this.addScope.bind(this));
             }
-        }
+        });
     }
 }
 
-if($('option_panel')){
-    $('option_panel').remove();
+const optionPanel = document.getElementById('option_panel');
+if (optionPanel) {
+    optionPanel.remove();
 }
 
-if($('<?= $this->getAddButtonId() ?>')){
-    Event.observe('<?= $this->getAddButtonId() ?>', 'click', productOption.add.bind(productOption));
+const addButton = document.getElementById('<?= $this->getAddButtonId() ?>');
+if (addButton) {
+    addButton.addEventListener('click', productOption.add.bind(productOption));
 }
 
 //validation for selected input type
 Validation.addAllThese([
     ['required-option-select', <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Select type of option')) ?>, function(v, elm) {
-        if (elm.getValue() == '') {
+        if (elm.value === '') {
             return false;
         }
         return true;
-}]]);
+    }]
+]);
 
 //adding data to templates
 <?php foreach ($this->getOptionValues() as $_value): ?>

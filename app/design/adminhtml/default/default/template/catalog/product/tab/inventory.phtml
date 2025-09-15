@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -35,7 +35,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_manage_stock') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_manage_stock" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_manage_stock]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
             <label for="inventory_use_config_manage_stock" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_manage_stock'), $('inventory_use_config_manage_stock').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_manage_stock'), document.getElementById('inventory_use_config_manage_stock').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -58,7 +58,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_min_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_min_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_min_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" <?= $_readonly ?> />
             <label for="inventory_use_config_min_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_min_qty'), $('inventory_use_config_min_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_min_qty'), document.getElementById('inventory_use_config_min_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -69,7 +69,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_min_sale_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_min_sale_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_min_sale_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?> />
             <label for="inventory_use_config_min_sale_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_min_sale_qty'), $('inventory_use_config_min_sale_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_min_sale_qty'), document.getElementById('inventory_use_config_min_sale_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -80,7 +80,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_max_sale_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_max_sale_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_max_sale_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?> />
             <label for="inventory_use_config_max_sale_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_max_sale_qty'), $('inventory_use_config_max_sale_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_max_sale_qty'), document.getElementById('inventory_use_config_max_sale_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -121,7 +121,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_backorders') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_backorders" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_backorders]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?> />
             <label for="inventory_use_config_backorders" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_backorders'), $('inventory_use_config_backorders').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_backorders'), document.getElementById('inventory_use_config_backorders').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
         <tr>
@@ -131,7 +131,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_notify_stock_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_notify_stock_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_notify_stock_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
             <label for="inventory_use_config_notify_stock_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_notify_stock_qty'), $('inventory_use_config_notify_stock_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_notify_stock_qty'), document.getElementById('inventory_use_config_notify_stock_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 <?php endif ?>
@@ -146,7 +146,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_enable_qty_increments') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_enable_qty_increments" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_enable_qty_increments]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
             <label for="inventory_use_config_enable_qty_increments" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_enable_qty_increments'), $('inventory_use_config_enable_qty_increments').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_enable_qty_increments'), document.getElementById('inventory_use_config_enable_qty_increments').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
         <tr>
@@ -156,7 +156,7 @@
                 <?php $_checked = ($this->getFieldValue('use_config_qty_increments') || $this->isNew()) ? 'checked="checked"' : '' ?>
                 <input type="checkbox" id="inventory_use_config_qty_increments" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_qty_increments]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
                 <label for="inventory_use_config_qty_increments" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-                <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements($('inventory_use_config_qty_increments'), $('inventory_use_config_qty_increments').parentNode);</script><?php endif ?></td>
+                <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_qty_increments'), document.getElementById('inventory_use_config_qty_increments').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
         <tr>
@@ -174,77 +174,111 @@
     </fieldset>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-    function changeManageStockOption()
-    {
-        var manageStock = $('inventory_use_config_manage_stock').checked
-            ? $('inventory_manage_stock_default').value
-            : $('inventory_manage_stock').value;
-        var catalogInventoryNotManageStockFields = {
+    function changeManageStockOption() {
+        const manageStockCheckbox = document.getElementById('inventory_use_config_manage_stock');
+        const manageStockSelect = document.getElementById('inventory_manage_stock');
+        const manageStockDefault = document.getElementById('inventory_manage_stock_default');
+
+        const manageStock = manageStockCheckbox.checked
+            ? manageStockDefault.value
+            : manageStockSelect.value;
+
+        const catalogInventoryNotManageStockFields = {
             inventory_min_sale_qty: true,
             inventory_max_sale_qty: true,
             inventory_enable_qty_increments : true,
             inventory_qty_increments: true
         };
 
-        $$('#table_cataloginventory tr').each(function(el) {
-            if (el == $('inventory_manage_stock').up(1)) {
+        const tableRows = document.querySelectorAll('#table_cataloginventory tr');
+        const manageStockRow = manageStockSelect.closest('tr');
+
+        tableRows.forEach(el => {
+            if (el === manageStockRow) {
                 return;
             }
 
-            for (field in catalogInventoryNotManageStockFields) {
-                if ($(field) && ($(field).up(1) == el)) {
-                    return;
+            let skipRow = false;
+            for (const field in catalogInventoryNotManageStockFields) {
+                const fieldElement = document.getElementById(field);
+                if (fieldElement && fieldElement.closest('tr') === el) {
+                    skipRow = true;
+                    break;
                 }
             }
 
-            el[manageStock == 1 ? 'show' : 'hide']();
+            if (!skipRow) {
+                el.style.display = manageStock == 1 ? '' : 'none';
+            }
         });
 
         return true;
     }
 
     function applyEnableQtyIncrements() {
-        var enableQtyIncrements = $('inventory_use_config_enable_qty_increments').checked
-            ? $('inventory_enable_qty_increments_default').value
-            : $('inventory_enable_qty_increments').value;
+        const enableQtyIncrementsCheckbox = document.getElementById('inventory_use_config_enable_qty_increments');
+        const enableQtyIncrementsSelect = document.getElementById('inventory_enable_qty_increments');
+        const enableQtyIncrementsDefault = document.getElementById('inventory_enable_qty_increments_default');
 
-        $('inventory_qty_increments').up('tr')[enableQtyIncrements == 1 ? 'show' : 'hide']();
+        const enableQtyIncrements = enableQtyIncrementsCheckbox.checked
+            ? enableQtyIncrementsDefault.value
+            : enableQtyIncrementsSelect.value;
+
+        const qtyIncrementsRow = document.getElementById('inventory_qty_increments').closest('tr');
+        qtyIncrementsRow.style.display = enableQtyIncrements == 1 ? '' : 'none';
     }
 
     function applyEnableDecimalDivided() {
+        const isQtyDecimalSelect = document.getElementById('inventory_is_qty_decimal');
+        const qtyIncrementsField = document.getElementById('inventory_qty_increments');
+        const minSaleQtyField = document.getElementById('inventory_min_sale_qty');
+
     <?php if (!$this->isVirtual()) : ?>
-        $('inventory_is_decimal_divided').up('tr').hide();
-        <?php endif ?>
-        $('inventory_qty_increments').removeClassName('validate-digits').removeClassName('validate-number');
-        $('inventory_min_sale_qty').removeClassName('validate-digits').removeClassName('validate-number');
-        if ($('inventory_is_qty_decimal').value == 1) {
+        const isDecimalDividedRow = document.getElementById('inventory_is_decimal_divided').closest('tr');
+        isDecimalDividedRow.style.display = 'none';
+    <?php endif ?>
+
+        qtyIncrementsField.classList.remove('validate-digits', 'validate-number');
+        minSaleQtyField.classList.remove('validate-digits', 'validate-number');
+
+        if (isQtyDecimalSelect.value == 1) {
         <?php if (!$this->isVirtual()) : ?>
-            $('inventory_is_decimal_divided').up('tr').show();
-            <?php endif ?>
-            $('inventory_qty_increments').addClassName('validate-number');
-            $('inventory_min_sale_qty').addClassName('validate-number');
+            isDecimalDividedRow.style.display = '';
+        <?php endif ?>
+            qtyIncrementsField.classList.add('validate-number');
+            minSaleQtyField.classList.add('validate-number');
         } else {
-            $('inventory_qty_increments').addClassName('validate-digits');
-            $('inventory_min_sale_qty').addClassName('validate-digits');
+            qtyIncrementsField.classList.add('validate-digits');
+            minSaleQtyField.classList.add('validate-digits');
         }
     }
 
-    Event.observe(window, 'load', function() {
-        if ($('inventory_manage_stock') && $('inventory_use_config_manage_stock')) {
-            Event.observe($('inventory_manage_stock'), 'change', changeManageStockOption);
-            Event.observe($('inventory_use_config_manage_stock'), 'change', changeManageStockOption);
+    document.addEventListener('DOMContentLoaded', function() {
+        const manageStockSelect = document.getElementById('inventory_manage_stock');
+        const manageStockCheckbox = document.getElementById('inventory_use_config_manage_stock');
+
+        if (manageStockSelect && manageStockCheckbox) {
+            manageStockSelect.addEventListener('change', changeManageStockOption);
+            manageStockCheckbox.addEventListener('change', changeManageStockOption);
             changeManageStockOption();
         }
-        if ($('inventory_enable_qty_increments') && $('inventory_use_config_enable_qty_increments')) {
-            Event.observe($('inventory_enable_qty_increments'), 'change', applyEnableQtyIncrements);
-            Event.observe($('inventory_use_config_enable_qty_increments'), 'change', applyEnableQtyIncrements);
+
+        const enableQtyIncrementsSelect = document.getElementById('inventory_enable_qty_increments');
+        const enableQtyIncrementsCheckbox = document.getElementById('inventory_use_config_enable_qty_increments');
+
+        if (enableQtyIncrementsSelect && enableQtyIncrementsCheckbox) {
+            enableQtyIncrementsSelect.addEventListener('change', applyEnableQtyIncrements);
+            enableQtyIncrementsCheckbox.addEventListener('change', applyEnableQtyIncrements);
             applyEnableQtyIncrements();
         }
-        if ($('inventory_is_qty_decimal') && $('inventory_qty_increments') && $('inventory_min_sale_qty')) {
-            Event.observe($('inventory_is_qty_decimal'), 'change', applyEnableDecimalDivided);
+
+        const isQtyDecimalSelect = document.getElementById('inventory_is_qty_decimal');
+        const qtyIncrementsField = document.getElementById('inventory_qty_increments');
+        const minSaleQtyField = document.getElementById('inventory_min_sale_qty');
+
+        if (isQtyDecimalSelect && qtyIncrementsField && minSaleQtyField) {
+            isQtyDecimalSelect.addEventListener('change', applyEnableDecimalDivided);
             applyEnableDecimalDivided();
         }
     });
-//]]>
 </script>

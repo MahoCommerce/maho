@@ -7,28 +7,27 @@
  * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-var varienForm = new Class.create();
-
-varienForm.prototype = {
-    initialize : function(formId, validationUrl){
+class varienForm {
+    constructor(formId, validationUrl) {
         this.formId = formId;
         this.validationUrl = validationUrl;
         this.submitUrl = false;
 
-        if($(this.formId)){
-            this.validator  = new Validation(this.formId, {onElementValidate : this.checkErrors.bind(this)});
+        const formElement = document.getElementById(this.formId);
+        if(formElement){
+            this.validator = new Validation(this.formId, {onElementValidate : this.checkErrors.bind(this)});
         }
-        this.errorSections = $H({});
-    },
+        this.errorSections = new Map();
+    }
 
-    checkErrors : function(result, elm){
+    checkErrors(result, elm) {
         if(!result)
             elm.setHasError(true, this);
         else
             elm.setHasError(false, this);
-    },
+    }
 
-    validate : function(){
+    validate() {
         varienGlobalEvents?.fireEvent('formValidate', this.formId);
         if(this.validator && this.validator.validate()){
             if(this.validationUrl){
@@ -37,11 +36,11 @@ varienForm.prototype = {
             return true;
         }
         return false;
-    },
+    }
 
-    submit : function(url){
+    submit(url) {
         varienGlobalEvents?.fireEvent('formSubmit', this.formId);
-        this.errorSections = $H({});
+        this.errorSections = new Map();
         this.canShowError = true;
         this.submitUrl = url;
         if(this.validator && this.validator.validate()){
@@ -54,87 +53,107 @@ varienForm.prototype = {
             return true;
         }
         return false;
-    },
+    }
 
-    _validate : function(){
-        new Ajax.Request(this.validationUrl,{
-            method: 'post',
-            parameters: $(this.formId).serialize(),
-            onComplete: this._processValidationResult.bind(this),
-            onFailure: this._processFailure.bind(this)
+    _validate() {
+        const formElement = document.getElementById(this.formId);
+        const formData = new FormData(formElement);
+
+        mahoFetch(this.validationUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            this._processValidationResult(data);
+        })
+        .catch(error => {
+            this._processFailure();
         });
-    },
+    }
 
-    _processValidationResult : function(transport){
-        varienGlobalEvents?.fireEvent('formValidateAjaxComplete', transport);
-        var response = transport.responseText.evalJSON();
+    _processValidationResult(response) {
+        varienGlobalEvents?.fireEvent('formValidateAjaxComplete', response);
         if(response.error){
             setMessagesDivHtml(response.message);
         }
         else{
             this._submit();
         }
-    },
-
-    _processFailure : function(transport){
-        location.href = BASE_URL;
-    },
-
-    _submit : function(){
-        var $form = $(this.formId);
-        if(this.submitUrl){
-            $form.action = this.submitUrl;
-        }
-        $form.submit();
     }
-};
+
+    _processFailure() {
+        location.href = BASE_URL;
+    }
+
+    _submit() {
+        const formElement = document.getElementById(this.formId);
+        if(this.submitUrl){
+            formElement.action = this.submitUrl;
+        }
+        formElement.submit();
+    }
+}
 
 /**
  * redeclare Validation.isVisible function
  *
  * use for not visible elements validation
  */
-Validation.isVisible = function(elm){
-    while (elm && elm.tagName != 'BODY') {
-        if (elm.disabled) return false;
-        if ((Element.hasClassName(elm, 'template') && Element.hasClassName(elm, 'no-display'))
-             || Element.hasClassName(elm, 'ignore-validate')){
-            return false;
+if (typeof Validation !== 'undefined') {
+    Validation.isVisible = function(elm){
+        while (elm && elm.tagName !== 'BODY') {
+            if (elm.disabled) return false;
+            if ((elm.classList.contains('template') && elm.classList.contains('no-display'))
+                 || elm.classList.contains('ignore-validate')){
+                return false;
+            }
+            elm = elm.parentNode;
         }
-        elm = elm.parentNode;
-    }
-    return true;
-};
+        return true;
+    };
+}
 
 /**
  *  Additional elements methods
  */
-var varienElementMethods = {
-    setHasChanges : function(element, event){
-        if($(element) && $(element).hasClassName('no-changes')) return;
-        var elm = element;
-        while(elm && elm.tagName != 'BODY') {
-            if(elm.statusBar)
-                Element.addClassName($(elm.statusBar), 'changed');
+const varienElementMethods = {
+    setHasChanges(element, event) {
+        const elem = typeof element === 'string' ? document.getElementById(element) : element;
+        if(elem && elem.classList.contains('no-changes')) return;
+        let elm = elem;
+        while(elm && elm.tagName !== 'BODY') {
+            if(elm.statusBar) {
+                const statusBarElement = typeof elm.statusBar === 'string' ? document.getElementById(elm.statusBar) : elm.statusBar;
+                if (statusBarElement) {
+                    statusBarElement.classList.add('changed');
+                }
+            }
             elm = elm.parentNode;
         }
     },
-    setHasError : function(element, flag, form){
-        var elm = element;
-        while(elm && elm.tagName != 'BODY') {
+    setHasError(element, flag, form) {
+        let elm = element;
+        while(elm && elm.tagName !== 'BODY') {
             if(elm.statusBar){
-                if(form.errorSections.keys().indexOf(elm.statusBar.id)<0)
+                if(!form.errorSections.has(elm.statusBar.id))
                     form.errorSections.set(elm.statusBar.id, flag);
                 if(flag){
-                    Element.addClassName($(elm.statusBar), 'error');
-                    if(form.canShowError && $(elm.statusBar).show){
-                        form.canShowError = false;
-                        $(elm.statusBar).show();
+                    const statusBarElement = typeof elm.statusBar === 'string' ? document.getElementById(elm.statusBar) : elm.statusBar;
+                    if (statusBarElement) {
+                        statusBarElement.classList.add('error');
+                        if(form.canShowError && statusBarElement.show){
+                            form.canShowError = false;
+                            statusBarElement.style.display = '';
+                        }
                     }
                     form.errorSections.set(elm.statusBar.id, flag);
                 }
                 else if(!form.errorSections.get(elm.statusBar.id)){
-                    Element.removeClassName($(elm.statusBar), 'error');
+                    const statusBarElement = typeof elm.statusBar === 'string' ? document.getElementById(elm.statusBar) : elm.statusBar;
+                    if (statusBarElement) {
+                        statusBarElement.classList.remove('error');
+                    }
                 }
             }
             elm = elm.parentNode;
@@ -143,16 +162,21 @@ var varienElementMethods = {
     }
 };
 
-Element.addMethods(varienElementMethods);
+// Add methods to Element prototype for backward compatibility
+if (typeof Element !== 'undefined' && Element.prototype) {
+    Object.assign(Element.prototype, varienElementMethods);
+}
 
 // Global bind changes
-varienWindowOnloadCache = {};
+let varienWindowOnloadCache = {};
 function varienWindowOnload(useCache){
-    var dataElements = $$('input', 'select', 'textarea');
-    for(var i=0; i<dataElements.length;i++){
+    const dataElements = document.querySelectorAll('input, select, textarea');
+    for(let i = 0; i < dataElements.length; i++){
         if(dataElements[i] && dataElements[i].id){
             if ((!useCache) || (!varienWindowOnloadCache[dataElements[i].id])) {
-                Event.observe(dataElements[i], 'change', dataElements[i].setHasChanges.bind(dataElements[i]));
+                dataElements[i].addEventListener('change', function() {
+                    this.setHasChanges();
+                });
                 if (useCache) {
                     varienWindowOnloadCache[dataElements[i].id] = true;
                 }
@@ -160,15 +184,13 @@ function varienWindowOnload(useCache){
         }
     }
 }
-Event.observe(window, 'load', varienWindowOnload);
+window.addEventListener('load', varienWindowOnload);
 
-RegionUpdater = Class.create();
-RegionUpdater.prototype = {
-    initialize: function (countryEl, regionTextEl, regionSelectEl, regions, disableAction, clearRegionValueOnDisable)
-    {
-        this.countryEl = $(countryEl);
-        this.regionTextEl = $(regionTextEl);
-        this.regionSelectEl = $(regionSelectEl);
+class regionUpdater {
+    constructor(countryEl, regionTextEl, regionSelectEl, regions, disableAction, clearRegionValueOnDisable) {
+        this.countryEl = typeof countryEl === 'string' ? document.getElementById(countryEl) : countryEl;
+        this.regionTextEl = typeof regionTextEl === 'string' ? document.getElementById(regionTextEl) : regionTextEl;
+        this.regionSelectEl = typeof regionSelectEl === 'string' ? document.getElementById(regionSelectEl) : regionSelectEl;
 //        // clone for select element (#6924)
 //        this._regionSelectEl = {};
 //        this.tpl = new Template('<select class="#{className}" name="#{name}" id="#{id}">#{innerHTML}</select>');
@@ -187,73 +209,74 @@ RegionUpdater.prototype = {
 
         this.countryEl.changeUpdater = this.update.bind(this);
 
-        Event.observe(this.countryEl, 'change', this.update.bind(this));
-    },
+        this.countryEl.addEventListener('change', this.update.bind(this));
+    }
 
-    _checkRegionRequired: function()
-    {
-        var label, wildCard;
-        var elements = [this.regionTextEl, this.regionSelectEl];
-        var that = this;
-        if (typeof this.config == 'undefined') {
+    _checkRegionRequired() {
+        let label, wildCard;
+        const elements = [this.regionTextEl, this.regionSelectEl];
+        const that = this;
+        if (typeof this.config === 'undefined') {
             return;
         }
-        var regionRequired = this.config.regions_required.indexOf(this.countryEl.value) >= 0;
+        const regionRequired = this.config.regions_required.indexOf(this.countryEl.value) >= 0;
 
-        elements.each(function(currentElement) {
+        elements.forEach(function(currentElement) {
             if(!currentElement) {
                 return;
             }
-            Validation.reset(currentElement);
-            label = $$('label[for="' + currentElement.id + '"]')[0];
+            if (typeof Validation !== 'undefined') {
+                Validation.reset(currentElement);
+            }
+            label = document.querySelector('label[for="' + currentElement.id + '"]');
             if (label) {
-                wildCard = label.down('em') || label.down('span.required');
+                wildCard = label.querySelector('em') || label.querySelector('span.required');
                 if (!wildCard) {
-                    label.insert(' <span class="required">*</span>');
-                    wildCard = label.down('span.required');
+                    label.insertAdjacentHTML('beforeend', ' <span class="required">*</span>');
+                    wildCard = label.querySelector('span.required');
                 }
-                var topElement = label.up('tr') || label.up('li');
+                const topElement = label.closest('tr') || label.closest('li');
                 if (!that.config.show_all_regions && topElement) {
                     if (regionRequired) {
-                        topElement.show();
+                        topElement.style.display = '';
                     } else {
-                        topElement.hide();
+                        topElement.style.display = 'none';
                     }
                 }
             }
 
             if (label && wildCard) {
                 if (!regionRequired) {
-                    wildCard.hide();
+                    wildCard.style.display = 'none';
                 } else {
-                    wildCard.show();
+                    wildCard.style.display = '';
                 }
             }
 
-            if (!regionRequired || !currentElement.visible()) {
-                if (currentElement.hasClassName('required-entry')) {
-                    currentElement.removeClassName('required-entry');
+            const isVisible = currentElement.offsetParent !== null;
+            if (!regionRequired || !isVisible) {
+                if (currentElement.classList.contains('required-entry')) {
+                    currentElement.classList.remove('required-entry');
                 }
-                if ('select' == currentElement.tagName.toLowerCase() &&
-                    currentElement.hasClassName('validate-select')
+                if ('select' === currentElement.tagName.toLowerCase() &&
+                    currentElement.classList.contains('validate-select')
                 ) {
-                    currentElement.removeClassName('validate-select');
+                    currentElement.classList.remove('validate-select');
                 }
             } else {
-                if (!currentElement.hasClassName('required-entry')) {
-                    currentElement.addClassName('required-entry');
+                if (!currentElement.classList.contains('required-entry')) {
+                    currentElement.classList.add('required-entry');
                 }
-                if ('select' == currentElement.tagName.toLowerCase() &&
-                    !currentElement.hasClassName('validate-select')
+                if ('select' === currentElement.tagName.toLowerCase() &&
+                    !currentElement.classList.contains('validate-select')
                 ) {
-                    currentElement.addClassName('validate-select');
+                    currentElement.classList.add('validate-select');
                 }
             }
         });
-    },
+    }
 
-    update: function()
-    {
+    update() {
         if (this.regions[this.countryEl.value]) {
 //            if (!this.regionSelectEl) {
 //                Element.insert(this.regionTextEl, {after : this.tpl.evaluate(this._regionSelectEl)});
@@ -342,17 +365,17 @@ RegionUpdater.prototype = {
         }
         varienGlobalEvents.fireEvent("address_country_changed", this.countryEl);
         this._checkRegionRequired();
-    },
+    }
 
-    setMarkDisplay: function(elem, display){
+    setMarkDisplay(elem, display) {
         if(elem.parentNode.parentNode){
             var marks = Element.select(elem.parentNode.parentNode, '.required');
             if(marks[0]){
                 display ? marks[0].show() : marks[0].hide();
             }
         }
-    },
-    sortSelect : function () {
+    }
+    sortSelect() {
         var elem = this.regionSelectEl;
         var tmpArray = new Array();
         var currentVal = $(elem).value;
@@ -372,16 +395,12 @@ RegionUpdater.prototype = {
         $(elem).value = currentVal;
         return;
     }
-};
+}
 
-regionUpdater = RegionUpdater;
-
-SelectUpdater = Class.create();
-SelectUpdater.prototype = {
-    initialize: function (firstSelect, secondSelect, selectFirstMessage, noValuesMessage, values, selected)
-    {
-        this.first = $(firstSelect);
-        this.second = $(secondSelect);
+class selectUpdater {
+    constructor(firstSelect, secondSelect, selectFirstMessage, noValuesMessage, values, selected) {
+        this.first = document.getElementById(firstSelect);
+        this.second = document.getElementById(secondSelect);
         this.message = selectFirstMessage;
         this.values = values;
         this.noMessage = noValuesMessage;
@@ -389,11 +408,10 @@ SelectUpdater.prototype = {
 
         this.update();
 
-        Event.observe(this.first, 'change', this.update.bind(this));
-    },
+        this.first.addEventListener('change', this.update.bind(this));
+    }
 
-    update: function()
-    {
+    update() {
         this.second.length = 0;
         this.second.value = '';
 
@@ -410,11 +428,10 @@ SelectUpdater.prototype = {
             this.addOption(this.second, '', this.message);
             this.second.disabled = true;
         }
-    },
+    }
 
-    addOption: function(select, value, text)
-    {
-        option = document.createElement('OPTION');
+    addOption(select, value, text) {
+        const option = document.createElement('OPTION');
         option.value = value;
         option.text = text;
 
@@ -434,7 +451,7 @@ SelectUpdater.prototype = {
 /**
  * Custom event that can be dispatched on dependent form elements to trigger an update
  */
-class FormElementDependenceEvent extends Event {
+class formElementDependenceEvent extends Event {
     /**
      * @param {string} [eventName] - the name of the event, defaults to 'update', no other values are currently supported
      */
@@ -446,7 +463,7 @@ class FormElementDependenceEvent extends Event {
 /**
  * Observer that watches for dependent form elements with support for complex conditions
  */
-class FormElementDependenceController {
+class formElementDependenceController {
     static MODE_NOT = 'NOT';
     static MODE_AND = 'AND';
     static MODE_OR  = 'OR';
@@ -477,10 +494,10 @@ class FormElementDependenceController {
      */
     isLogicalOperator(operator) {
         const operators = [
-            FormElementDependenceController.MODE_NOT,
-            FormElementDependenceController.MODE_AND,
-            FormElementDependenceController.MODE_OR,
-            FormElementDependenceController.MODE_XOR,
+            formElementDependenceController.MODE_NOT,
+            formElementDependenceController.MODE_AND,
+            formElementDependenceController.MODE_OR,
+            formElementDependenceController.MODE_XOR,
         ];
         return operators.includes(operator);
     }
@@ -588,7 +605,7 @@ class FormElementDependenceController {
      * @param {Object} condition - key/value pairs of field names and wanted values, or subconditions
      * @param {string} [mode] - logical operation to evaluate with, defaults to "AND"
      */
-    evalCondition(condition, mode = FormElementDependenceController.MODE_AND) {
+    evalCondition(condition, mode = formElementDependenceController.MODE_AND) {
         // If there are no subconditions, evaluate to true
         if (Object.keys(condition).length === 0) {
             return true;
@@ -624,13 +641,13 @@ class FormElementDependenceController {
             }
             results.push(result)
         }
-        if (mode === FormElementDependenceController.MODE_NOT) {
+        if (mode === formElementDependenceController.MODE_NOT) {
             return results.every((value) => value === false);
-        } else if (mode === FormElementDependenceController.MODE_AND) {
+        } else if (mode === formElementDependenceController.MODE_AND) {
             return results.every((value) => value === true);
-        } else if (mode === FormElementDependenceController.MODE_OR) {
+        } else if (mode === formElementDependenceController.MODE_OR) {
             return results.some((value) => value === true);
-        } else if (mode === FormElementDependenceController.MODE_XOR) {
+        } else if (mode === formElementDependenceController.MODE_XOR) {
             return results.filter((value) => value === true).length === 1;
         }
     }
@@ -682,20 +699,22 @@ function onAddressCountryChanged(countryElement) {
 }
 
 function setPostcodeOptional(zipElement, country) {
-    var spanElement = zipElement.up(1).down('label > span.required');
+    var spanElement = zipElement.parentElement?.querySelector('label > span.required');
     if (!spanElement || (typeof optionalZipCountries == 'undefined')) {
         return; // nothing to do (for example in system config)
     }
     if (optionalZipCountries.indexOf(country) != -1) {
         Validation.reset(zipElement);
-        while (zipElement.hasClassName('required-entry')) {
-            zipElement.removeClassName('required-entry');
+        while (zipElement.classList.contains('required-entry')) {
+            zipElement.classList.remove('required-entry');
         }
-        spanElement.hide();
+        spanElement.style.display = 'none';
     } else {
-        zipElement.addClassName('required-entry');
-        spanElement.show();
+        zipElement.classList.add('required-entry');
+        spanElement.style.display = '';
     }
 }
 
 varienGlobalEvents?.attachEventHandler("address_country_changed", onAddressCountryChanged);
+
+// Classes are now global by default with lowercase naming matching original prototypejs

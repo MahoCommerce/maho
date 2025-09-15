@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,40 +36,44 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Adminpass extends Mage_Adminht
     {
         return <<<SCRIPT
 <script type="text/javascript">
-//<![CDATA[
-    $$('#_accountnew_password,#account-send-pass').each(function(elem) {
-        $(elem).on('change', function() {
-            if ($('_accountnew_password').getValue() || $('account-send-pass').checked) {
-                $('{$element->getHtmlId()}_container').show();
-                $('{$element->getHtmlId()}').enable();
+    document.querySelectorAll('#_accountnew_password,#account-send-pass').forEach(function(elem) {
+        elem.addEventListener('change', function() {
+            var newPasswordField = document.getElementById('_accountnew_password');
+            var sendPassField = document.getElementById('account-send-pass');
+            if ((newPasswordField && newPasswordField.value) || (sendPassField && sendPassField.checked)) {
+                document.getElementById('{$element->getHtmlId()}_container').style.display = '';
+                document.getElementById('{$element->getHtmlId()}').disabled = false;
             } else {
-                $('{$element->getHtmlId()}_container').hide();
-                $('{$element->getHtmlId()}').disable();
+                document.getElementById('{$element->getHtmlId()}_container').style.display = 'none';
+                document.getElementById('{$element->getHtmlId()}').disabled = true;
             }
-            if ($('email-passowrd-warning')) {
-                if (!$('_accountnew_password').getValue() || $('account-send-pass').checked) {
-                    $('email-passowrd-warning').hide();
-                } else if ($('_accountnew_password').getValue()) {
-                    $('email-passowrd-warning').show();
+            var warningField = document.getElementById('email-passowrd-warning');
+            if (warningField) {
+                if (!(newPasswordField && newPasswordField.value) || (sendPassField && sendPassField.checked)) {
+                    warningField.style.display = 'none';
+                } else if (newPasswordField && newPasswordField.value) {
+                    warningField.style.display = '';
                 }
             }
         });
-        $(elem).on('focus', function() {
-            $('{$element->getHtmlId()}_container').show();
-            $('{$element->getHtmlId()}').enable();
+        elem.addEventListener('focus', function() {
+            document.getElementById('{$element->getHtmlId()}_container').style.display = '';
+            document.getElementById('{$element->getHtmlId()}').disabled = false;
         });
-        $(elem).on('blur', function() {
-            if (!$('_accountnew_password').getValue() && !$('account-send-pass').checked) {
-                $('{$element->getHtmlId()}_container').hide();
-                $('{$element->getHtmlId()}').disable();
+        elem.addEventListener('blur', function() {
+            var newPasswordField = document.getElementById('_accountnew_password');
+            var sendPassField = document.getElementById('account-send-pass');
+            if (!(newPasswordField && newPasswordField.value) && !(sendPassField && sendPassField.checked)) {
+                document.getElementById('{$element->getHtmlId()}_container').style.display = 'none';
+                document.getElementById('{$element->getHtmlId()}').disabled = true;
             }
         });
-        document.observe("dom:loaded", function() {
-            $('{$element->getHtmlId()}_container').hide();
-            $('{$element->getHtmlId()}').disable();
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('{$element->getHtmlId()}_container').style.display = 'none';
+            document.getElementById('{$element->getHtmlId()}').disabled = true;
         });
     });
-//]]></script>
+</script>
 SCRIPT;
     }
 }

@@ -75,42 +75,65 @@
 
                     function execImportData() {
                         if (importData.length == 0) {
-                            $("updatedRows_img").src = config.styles.message.icon;
-                            $("updatedRows").style.backgroundColor = config.styles.message.bg;
-                            Element.insert($("liFinished"), {before: config.tpl.evaluate({
+                            const updatedRowsImg = document.getElementById("updatedRows_img");
+                            if (updatedRowsImg) {
+                                updatedRowsImg.src = config.styles.message.icon;
+                            }
+                            const updatedRows = document.getElementById("updatedRows");
+                            if (updatedRows) {
+                                updatedRows.style.backgroundColor = config.styles.message.bg;
+                            }
+                            const liFinished = document.getElementById("liFinished");
+                            liFinished.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
                                 style: "background-color:"+config.styles.message.bg,
                                 image: config.styles.message.icon,
                                 text: config.tplSccTxt.evaluate({updated:(countOfUpdated-countOfError)}),
                                 id: "updatedFinish"
-                            })});
+                            }));
 
-                            if ($("liBeforeFinish")) {
-                                Element.insert($("liFinished"), {before: $("liBeforeFinish")});
-                                $("liBeforeFinish").show();
+                            const liBeforeFinish = document.getElementById("liBeforeFinish");
+                            if (liBeforeFinish) {
+                                liFinished.insertAdjacentElement('beforebegin', liBeforeFinish);
+                                liBeforeFinish.style.display = 'block';
                             }
 
-                            new Ajax.Request("<?= $this->getUrl('*/*/batchFinish', ['id' => $batchId]) ?>", {
-                                method: "post",
-                                parameters: {form_key: FORM_KEY},
-                                onComplete: function(transport) {
-                                    if (transport.responseText.isJSON()) {
-                                        var response = transport.responseText.evalJSON();
-                                        if (response.error) {
-                                            Element.insert($("liFinished"), {before: config.tpl.evaluate({
-                                                style: "background-color:"+config.styles.error.bg,
-                                                image: config.styles.error.icon,
-                                                text: response.error.escapeHTML(),
-                                                id: "error-finish"
-                                            })});
-                                        }
-                                    }
+                            const formData = new FormData();
+                            formData.append('form_key', FORM_KEY);
 
-                                    if ($("before-finish-wait-img")) {
-                                        $("before-finish-wait-img").hide();
+                            mahoFetch("<?= $this->getUrl('*/*/batchFinish', ['id' => $batchId]) ?>", {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => {
+                                let responseData = response;
+                                if (typeof response === 'string') {
+                                    try {
+                                        responseData = JSON.parse(response);
+                                    } catch (e) {
+                                        responseData = {};
                                     }
-
-                                    $('liFinished').show();
                                 }
+
+                                if (responseData.error) {
+                                    const liFinished = document.getElementById("liFinished");
+                                    liFinished.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
+                                        style: "background-color:"+config.styles.error.bg,
+                                        image: config.styles.error.icon,
+                                        text: escapeHtml(responseData.error),
+                                        id: "error-finish"
+                                    }));
+                                }
+
+                                const beforeFinishImg = document.getElementById("before-finish-wait-img");
+                                if (beforeFinishImg) {
+                                    beforeFinishImg.style.display = 'none';
+                                }
+
+                                document.getElementById('liFinished').style.display = 'block';
+                            })
+                            .catch(error => {
+                                console.error('Batch finish error:', error);
+                                document.getElementById('liFinished').style.display = 'block';
                             });
                         } else {
                             sendImportData(importData.shift());
@@ -123,38 +146,62 @@
                             config.tplTxt = new Template(config.text);
                             config.tplSccTxt = new Template(config.successText);
                         }
-                        if (!$("updatedRows")) {
-                            Element.insert($("liFinished"), {before: config.tpl.evaluate({
+                        if (!document.getElementById("updatedRows")) {
+                            const liFinished = document.getElementById("liFinished");
+                            liFinished.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
                                 style: "background-color: #FFD;",
                                 image: config.styles.loader,
                                 text: config.tplTxt.evaluate({updated:countOfUpdated, percent:getPercent()}),
                                 id: "updatedRows"
-                            })});
+                            }));
                         }
                         countOfStartedProfiles++;
                         if (!data.form_key) {
                             data.form_key = FORM_KEY;
                         }
 
-                        new Ajax.Request("<?= $this->getUrl('*/*/batchRun') ?>", {
-                          method: "post",
-                          parameters: data,
-                          onSuccess: function(transport) {
+                        const formData = new FormData();
+                        Object.entries(data).forEach(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                value.forEach(item => formData.append(key, item));
+                            } else {
+                                formData.append(key, value);
+                            }
+                        });
+
+                        mahoFetch("<?= $this->getUrl('*/*/batchRun') ?>", {
+                          method: 'POST',
+                          body: formData
+                        })
+                        .then(response => {
                             countOfStartedProfiles --;
                             countOfUpdated += data["rows[]"].length;
-                            if (transport.responseText.isJSON()) {
-                                addProfileRow(transport.responseText.evalJSON());
+
+                            let responseData = response;
+                            if (typeof response === 'object') {
+                                addProfileRow(responseData);
                             } else {
-                                Element.insert($("updatedRows"), {before: config.tpl.evaluate({
-                                    style: "background-color:"+config.styles.error.bg,
-                                    image: config.styles.error.icon,
-                                    text: transport.responseText.escapeHTML(),
-                                    id: "error-" + countOfStartedProfiles
-                                })});
-                                countOfError += data["rows[]"].length;
+                                try {
+                                    responseData = JSON.parse(response);
+                                    addProfileRow(responseData);
+                                } catch (e) {
+                                    const updatedRows = document.getElementById("updatedRows");
+                                    updatedRows.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
+                                        style: "background-color:"+config.styles.error.bg,
+                                        image: config.styles.error.icon,
+                                        text: escapeHtml(response),
+                                        id: "error-" + countOfStartedProfiles
+                                    }));
+                                    countOfError += data["rows[]"].length;
+                                }
                             }
                             execImportData();
-                          }
+                        })
+                        .catch(error => {
+                            countOfStartedProfiles --;
+                            console.error('Batch run error:', error);
+                            countOfError += data["rows[]"].length;
+                            execImportData();
                         });
                     }
 
@@ -165,16 +212,20 @@
                     function addProfileRow(data) {
                         if (data.errors.length > 0) {
                             for (var i=0, length=data.errors.length; i<length; i++) {
-                                Element.insert($("updatedRows"), {before: config.tpl.evaluate({
+                                const updatedRows = document.getElementById("updatedRows");
+                                updatedRows.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
                                     style: "background-color:"+config.styles.error.bg,
                                     image: config.styles.error.icon,
                                     text: data.errors[i],
                                     id: "id-" + (countOfUpdated + i + 1)
-                                })});
+                                }));
                                 countOfError ++;
                             }
                         }
-                        $("updatedRows_status").update(config.tplTxt.evaluate({updated:countOfUpdated, percent:getPercent()}));
+                        const updatedRowsStatus = document.getElementById("updatedRows_status");
+                        if (updatedRowsStatus) {
+                            updatedRowsStatus.innerHTML = config.tplTxt.evaluate({updated:countOfUpdated, percent:getPercent()});
+                        }
                     }
                 </script>
                 <?php $importData = $this->getImportData();?>
@@ -187,6 +238,6 @@
                 <?php endif ?>
             <?php endif ?>
             <?php if ($this->getShowFinished()):?>
-                <script type="text/javascript">$('liFinished').show();</script>
+                <script type="text/javascript">document.getElementById('liFinished').style.display = 'block';</script>
             <?php endif ?>
    <?php endif ?>

@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -134,55 +134,65 @@
 </table>
 
 <script type="text/javascript">
-//<![CDATA[
-var submitButtons = $$('.submit-button');
-var updateButtons = $$('.update-button');
-var enableSubmitButtons = <?= (int) !$this->getDisableSubmitButton() ?>;
-var fields = $$('.qty-input');
+const submitButtons = document.querySelectorAll('.submit-button');
+const updateButtons = document.querySelectorAll('.update-button');
+const enableSubmitButtons = <?= (int) !$this->getDisableSubmitButton() ?>;
+const fields = document.querySelectorAll('.qty-input');
 
-updateButtons.each(function (elem) {elem.disabled=true;elem.addClassName('disabled');});
+updateButtons.forEach(elem => {
+    elem.disabled = true;
+    elem.classList.add('disabled');
+});
 
-for(var i=0;i<fields.length;i++){
-    fields[i].observe('change', checkButtonsRelation)
-    fields[i].baseValue = fields[i].value;
-}
+fields.forEach(field => {
+    field.addEventListener('change', checkButtonsRelation);
+    field.baseValue = field.value;
+});
 
 function checkButtonsRelation() {
-    var hasChanges = false;
-    fields.each(function (elem) {
-        if (elem.baseValue != elem.value) {
+    let hasChanges = false;
+    fields.forEach(elem => {
+        if (elem.baseValue !== elem.value) {
             hasChanges = true;
         }
-    }.bind(this));
+    });
+
     if (hasChanges) {
-        submitButtons.each(function (elem) {elem.disabled=true;elem.addClassName('disabled');});
-        updateButtons.each(function (elem) {elem.disabled=false;elem.removeClassName('disabled');});
-    }
-    else {
+        submitButtons.forEach(elem => {
+            elem.disabled = true;
+            elem.classList.add('disabled');
+        });
+        updateButtons.forEach(elem => {
+            elem.disabled = false;
+            elem.classList.remove('disabled');
+        });
+    } else {
         if (enableSubmitButtons) {
-            submitButtons.each(function (elem) {elem.disabled=false;elem.removeClassName('disabled');});
+            submitButtons.forEach(elem => {
+                elem.disabled = false;
+                elem.classList.remove('disabled');
+            });
         }
-        updateButtons.each(function (elem) {elem.disabled=true;elem.addClassName('disabled');});
+        updateButtons.forEach(elem => {
+            elem.disabled = true;
+            elem.classList.add('disabled');
+        });
     }
 }
 
-var sendEmailCheckbox = $('send_email');
+const sendEmailCheckbox = document.getElementById('send_email');
 if (sendEmailCheckbox) {
-    var notifyCustomerCheckbox = $('notify_customer');
-    var invoiceCommentText = $('invoice_comment_text');
-    Event.observe(sendEmailCheckbox, 'change', bindSendEmail);
+    const notifyCustomerCheckbox = document.getElementById('notify_customer');
+    const invoiceCommentText = document.getElementById('invoice_comment_text');
+    sendEmailCheckbox.addEventListener('change', bindSendEmail);
     bindSendEmail();
 }
-function bindSendEmail()
-{
-    if (sendEmailCheckbox.checked == true) {
+
+function bindSendEmail() {
+    if (sendEmailCheckbox.checked === true) {
         notifyCustomerCheckbox.disabled = false;
-        //invoiceCommentText.disabled = false;
-    }
-    else {
+    } else {
         notifyCustomerCheckbox.disabled = true;
-        //invoiceCommentText.disabled = true;
     }
 }
-//]]>
 </script>

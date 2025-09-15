@@ -8,20 +8,17 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var Product = {};
+const Product = {};
 
-Product.Gallery = Class.create();
-Product.Gallery.prototype = {
-    images: [],
-    file2id: {
-        'no_selection': 0
-    },
-    idIncrement: 1,
-    containerId: '',
-    container: null,
-    imageTypes: {},
-    initialize: function (containerId, imageTypes) {
-        this.containerId = containerId, this.container = $(this.containerId);
+Product.Gallery = class {
+    constructor(containerId, imageTypes) {
+        this.images = [];
+        this.file2id = {
+            'no_selection': 0
+        };
+        this.idIncrement = 1;
+        this.containerId = containerId;
+        this.container = document.getElementById(this.containerId);
         this.imageTypes = imageTypes;
 
         document.addEventListener('uploader:fileSuccess', (event) => {
@@ -31,20 +28,24 @@ Product.Gallery.prototype = {
             }
         });
 
-        this.images = this.getElement('save').value.evalJSON();
-        this.imagesValues = this.getElement('save_image').value.evalJSON();
-        this.template = new Template('<tr id="__id__" class="preview">' + this
-            .getElement('template').innerHTML + '</tr>', new RegExp(
-            '(^|.|\\r|\\n)(__([a-zA-Z0-9_]+)__)', ''));
+        this.images = JSON.parse(this.getElement('save').value);
+        this.imagesValues = JSON.parse(this.getElement('save_image').value);
+        this.template = (vars) => {
+            let html = '<tr id="' + vars.id + '" class="preview">' + this.getElement('template').innerHTML + '</tr>';
+            Object.entries(vars).forEach(([key, value]) => {
+                const regex = new RegExp('__' + key + '__', 'g');
+                html = html.replace(regex, value);
+            });
+            return html;
+        };
         this.fixParentTable();
         this.updateImages();
-        varienGlobalEvents.attachEventHandler('moveTab', this.onImageTabMove
-            .bind(this));
-    },
-    _checkCurrentContainer: function (child) {
-        return $(this.containerId).down('#' + child);
-    },
-    onImageTabMove: function (event) {
+        varienGlobalEvents.attachEventHandler('moveTab', this.onImageTabMove.bind(this));
+    }
+    _checkCurrentContainer(child) {
+        return document.getElementById(this.containerId).querySelector('#' + child);
+    }
+    onImageTabMove(event) {
         var imagesTab = false;
         this.container.ancestors().each(function (parentItem) {
             if (parentItem.tabObject) {
@@ -60,8 +61,8 @@ Product.Gallery.prototype = {
             this.updateImages();
         }
 
-    },
-    fixParentTable: function () {
+    }
+    fixParentTable() {
         this.container.ancestors().each(function (parentItem) {
             if (parentItem.tagName.toLowerCase() == 'td') {
                 parentItem.style.width = '100%';
@@ -71,15 +72,15 @@ Product.Gallery.prototype = {
                 throw $break;
             }
         });
-    },
-    getElement: function (name) {
-        return $(this.containerId + '_' + name);
-    },
-    showUploader: function () {
-        this.getElement('add_images_button').hide();
-        this.getElement('uploader').show();
-    },
-    handleUploadComplete: function (files) {
+    }
+    getElement(name) {
+        return document.getElementById(this.containerId + '_' + name);
+    }
+    showUploader() {
+        this.getElement('add_images_button').style.display = 'none';
+        this.getElement('uploader').style.display = '';
+    }
+    handleUploadComplete(files) {
         files.each(function (item) {
             var response = item.response;
             var newImage = {};
@@ -93,8 +94,8 @@ Product.Gallery.prototype = {
         }.bind(this));
         this.container.setHasChanges();
         this.updateImages();
-    },
-    updateImages: function () {
+    }
+    updateImages() {
         this.getElement('save').value = Object.toJSON(this.images);
         $H(this.imageTypes).each(function (pair) {
             this.getFileElement('no_selection', 'cell-' + pair.key + ' input').checked = true;
@@ -106,12 +107,12 @@ Product.Gallery.prototype = {
             this.updateVisualisation(row.file);
         }.bind(this));
         this.updateUseDefault(false);
-    },
-    onChangeRadio: function (evt) {
+    }
+    onChangeRadio(evt) {
         var element = Event.element(evt);
         element.setHasChanges();
-    },
-    createImageRow: function (image) {
+    }
+    createImageRow(image) {
         var vars = Object.clone(image);
         vars.id = this.prepareId(image.file);
         var html = this.template.evaluate(vars);
@@ -122,14 +123,14 @@ Product.Gallery.prototype = {
         $(vars.id).select('input[type="radio"]').each(function (radio) {
             radio.observe('change', this.onChangeRadio);
         }.bind(this));
-    },
-    prepareId: function (file) {
+    }
+    prepareId(file) {
         if (typeof this.file2id[file] == 'undefined') {
             this.file2id[file] = this.idIncrement++;
         }
         return this.containerId + '-image-' + this.file2id[file];
-    },
-    getNextPosition: function () {
+    }
+    getNextPosition() {
         var maxPosition = 0;
         this.images.each(function (item) {
             if (parseInt(item.position) > maxPosition) {
@@ -137,8 +138,8 @@ Product.Gallery.prototype = {
             }
         });
         return maxPosition + 1;
-    },
-    updateImage: function (file) {
+    }
+    updateImage(file) {
         var index = this.getIndexByFile(file);
 
         var use_default_label = document.getElementById("use_default_label");
@@ -164,14 +165,14 @@ Product.Gallery.prototype = {
         this.getElement('save').value = Object.toJSON(this.images);
         this.updateState(file);
         this.container.setHasChanges();
-    },
-    loadImage: function (file) {
+    }
+    loadImage(file) {
         var image = this.getImageByFile(file);
         this.getFileElement(file, 'cell-image img').src = image.url;
         this.getFileElement(file, 'cell-image img').show();
         this.getFileElement(file, 'cell-image .place-holder').hide();
-    },
-    setProductImages: function (file) {
+    }
+    setProductImages(file) {
         $H(this.imageTypes)
             .each(
                 function (pair) {
@@ -183,8 +184,8 @@ Product.Gallery.prototype = {
                 }.bind(this));
 
         this.getElement('save_image').value = Object.toJSON($H(this.imagesValues));
-    },
-    updateVisualisation: function (file) {
+    }
+    updateVisualisation(file) {
         var image = this.getImageByFile(file);
 
         var use_default_label = document.getElementById("use_default_label");
@@ -209,11 +210,11 @@ Product.Gallery.prototype = {
             }
         }.bind(this));
         this.updateState(file);
-    },
-    updateState: function (file) {
+    }
+    updateState(file) {
         // deprecated
-    },
-    getFileElement: function (file, element) {
+    }
+    getFileElement(file, element) {
         var selector = '#' + this.prepareId(file) + ' .' + element;
         var elems = document.querySelectorAll(selector);
         if (!elems[0]) {
@@ -225,15 +226,15 @@ Product.Gallery.prototype = {
         }
 
         return elems[0];
-    },
-    getImageByFile: function (file) {
+    }
+    getImageByFile(file) {
         if (this.getIndexByFile(file) === null) {
             return false;
         }
 
         return this.images[this.getIndexByFile(file)];
-    },
-    getIndexByFile: function (file) {
+    }
+    getIndexByFile(file) {
         var index;
         this.images.each(function (item, i) {
             if (item.file == file) {
@@ -241,8 +242,8 @@ Product.Gallery.prototype = {
             }
         });
         return index;
-    },
-    updateUseDefault: function (el) {
+    }
+    updateUseDefault(el) {
         var inputs = document.querySelectorAll('#' + this.containerId + '_default td input');
         for (var i=0; i<inputs.length; i++) {
             var input = inputs[i];
@@ -262,10 +263,10 @@ Product.Gallery.prototype = {
         if (arguments.length == 0) {
             this.container.setHasChanges();
         }
-    },
-    handleUploadProgress: function (file) {
-    },
-    handleUploadError: function (fileId) {
+    }
+    handleUploadProgress(file) {
+    }
+    handleUploadError(fileId) {
     }
 };
 
@@ -294,26 +295,24 @@ Product.AttributesBridge = {
     }
 };
 
-Product.Attributes = Class.create();
-Product.Attributes.prototype = {
-    config: {},
-    containerId: null,
-    initialize: function (containerId) {
+Product.Attributes = class {
+    constructor(containerId) {
+        this.config = {};
         this.containerId = containerId;
-    },
-    setConfig: function (config) {
+    }
+    setConfig(config) {
         this.config = config;
         Product.AttributesBridge.bind(this.getConfig().tab_id, this);
-    },
-    getConfig: function () {
+    }
+    getConfig() {
         return this.config;
-    },
-    create: function () {
+    }
+    create() {
         var win = window.open(this.getConfig().url, 'new_attribute',
             'width=900,height=600,resizable=1,scrollbars=1');
         win.focus();
-    },
-    addRow: function (html) {
+    }
+    addRow(html) {
         var attributesContainer = $$('#group_fields' + this.getConfig().group_id + ' .form-list tbody')[0];
         Element.insert(attributesContainer, {
             bottom: html
@@ -329,9 +328,8 @@ Product.Attributes.prototype = {
     }
 };
 
-Product.Configurable = Class.create();
-Product.Configurable.prototype = {
-    initialize: function (attributes, links, idPrefix, grid, readonly) {
+Product.Configurable = class {
+    constructor(attributes, links, idPrefix, grid, readonly) {
         this.templatesSyntax = new RegExp('(^|.|\\r|\\n)(\'{{\\s*(\\w+)\\s*}}\')', "");
         this.attributes = attributes; // Attributes
         this.idPrefix = idPrefix; // Container id prefix
@@ -379,8 +377,8 @@ Product.Configurable.prototype = {
         this.grid.rows.each(function (row) {
             this.rowInit(this.grid, row);
         }.bind(this));
-    },
-    createAttributes: function () {
+    }
+    createAttributes() {
         this.attributes.each(function (attribute, index) {
             var li = $(document.createElement('LI'));
             li.className = 'attribute';
@@ -425,9 +423,9 @@ Product.Configurable.prototype = {
             });
         }
         this.updateSaveInput();
-    },
+    }
 
-    updateLabel: function (event) {
+    updateLabel(event) {
         var li = Event.findElement(event, 'LI');
         var labelEl = li.down('.attribute-label');
         var defEl = li.down('.attribute-use-default-label');
@@ -442,14 +440,14 @@ Product.Configurable.prototype = {
         }
 
         this.updateSaveInput();
-    },
-    updatePositions: function (param) {
+    }
+updatePositions(param) {
         this.container.childElements().each(function (row, index) {
             row.attributeObject.position = index;
         });
         this.updateSaveInput();
-    },
-    addNewProduct: function (productId, attributes) {
+    }
+addNewProduct(productId, attributes) {
         if (this.checkAttributes(attributes)) {
             this.links.set(productId, this.cloneAttributes(attributes));
         } else {
@@ -459,14 +457,14 @@ Product.Configurable.prototype = {
         this.updateGrid();
         this.updateValues();
         this.grid.reload(null);
-    },
-    createEmptyProduct: function () {
+    }
+createEmptyProduct() {
         this.createPopup(this.createEmptyUrl);
-    },
-    createNewProduct: function () {
+    }
+createNewProduct() {
         this.createPopup(this.createNormalUrl);
-    },
-    createPopup: function (url) {
+    }
+createPopup(url) {
         if (this.win && !this.win.closed) {
             this.win.close();
         }
@@ -474,8 +472,8 @@ Product.Configurable.prototype = {
         this.win = window.open(url, '',
             'width=1000,height=700,resizable=1,scrollbars=1');
         this.win.focus();
-    },
-    registerProduct: function (grid, element, checked) {
+    }
+registerProduct(grid, element, checked) {
         if (checked) {
             if (element.linkAttributes) {
                 this.links.set(element.value, element.linkAttributes);
@@ -488,8 +486,8 @@ Product.Configurable.prototype = {
             this.revalidateRow(this.grid, row);
         }.bind(this));
         this.updateValues();
-    },
-    updateProduct: function (productId, attributes) {
+    }
+updateProduct(productId, attributes) {
         var isAssociated = false;
 
         if (typeof this.links.get(productId) != 'undefined') {
@@ -506,15 +504,15 @@ Product.Configurable.prototype = {
         this.updateGrid();
         this.updateValues();
         this.grid.reload(null);
-    },
-    cloneAttributes: function (attributes) {
+    }
+cloneAttributes(attributes) {
         var newObj = [];
         for (var i = 0, length = attributes.length; i < length; i++) {
             newObj[i] = Object.clone(attributes[i]);
         }
         return newObj;
-    },
-    rowClick: function (grid, event) {
+    }
+rowClick(grid, event) {
         var trElement = Event.findElement(event, 'tr');
         var isInput = Event.element(event).tagName.toUpperCase() == 'INPUT';
 
@@ -529,8 +527,8 @@ Product.Configurable.prototype = {
                 grid.setCheckboxChecked(checkbox, checked);
             }
         }
-    },
-    rowInit: function (grid, row) {
+    }
+rowInit(grid, row) {
         var checkbox = $(row).down('.checkbox');
         var input = $(row).down('.value-json');
         if (checkbox && input) {
@@ -545,8 +543,8 @@ Product.Configurable.prototype = {
                 }
             }
         }
-    },
-    revalidateRow: function (grid, row) {
+    }
+revalidateRow(grid, row) {
         var checkbox = $(row).down('.checkbox');
         if (checkbox) {
             if (!checkbox.checked) {
@@ -559,8 +557,8 @@ Product.Configurable.prototype = {
                 }
             }
         }
-    },
-    checkAttributes: function (attributes) {
+    }
+checkAttributes(attributes) {
         var result = true;
         this.links
             .each(function (pair) {
@@ -578,14 +576,14 @@ Product.Configurable.prototype = {
                 }
             });
         return result;
-    },
-    updateGrid: function () {
+    }
+updateGrid() {
         this.grid.reloadParams = {
             'products[]': this.links.keys().size() ? this.links.keys() : [0],
             'new_products[]': this.newProducts
         };
-    },
-    updateValues: function () {
+    }
+updateValues() {
         var uniqueAttributeValues = $H({});
         /* Collect unique attributes */
         this.links.each(function (pair) {
@@ -628,8 +626,8 @@ Product.Configurable.prototype = {
                 }.bind(this));
         this.updateSaveInput();
         this.updateSimpleForm();
-    },
-    createValueRow: function (container, value) {
+    }
+createValueRow(container, value) {
         var templateVariables = $H({});
         if (!this.valueAutoIndex) {
             this.valueAutoIndex = 1;
@@ -683,28 +681,28 @@ Product.Configurable.prototype = {
             }
             Event.observe(useDefaultEl, 'change', this.onValueDefaultUpdate);
         }
-    },
-    updateValuePrice: function (event) {
+    }
+updateValuePrice(event) {
         var li = Event.findElement(event, 'LI');
         li.valueObject.pricing_value = (Event.element(event).value.blank() ? null
             : Event.element(event).value);
         this.updateSimpleForm();
         this.updateSaveInput();
-    },
-    updateValueType: function (event) {
+    }
+updateValueType(event) {
         var li = Event.findElement(event, 'LI');
         li.valueObject.is_percent = (Event.element(event).value.blank() ? null
             : Event.element(event).value);
         this.updateSimpleForm();
         this.updateSaveInput();
-    },
-    updateValueUseDefault: function (event) {
+    }
+updateValueUseDefault(event) {
         var li = Event.findElement(event, 'LI');
         var useDefaultEl = Event.element(event);
         li.valueObject.use_default_value = useDefaultEl.checked;
         this.updateUseDefaultRow(useDefaultEl, li);
-    },
-    updateUseDefaultRow: function (useDefaultEl, li) {
+    }
+updateUseDefaultRow(useDefaultEl, li) {
         var priceField = li.down('.attribute-price');
         var priceTypeField = li.down('.attribute-price-type');
         if (useDefaultEl.checked) {
@@ -716,8 +714,8 @@ Product.Configurable.prototype = {
         }
         this.updateSimpleForm();
         this.updateSaveInput();
-    },
-    updateSaveInput: function () {
+    }
+updateSaveInput() {
         var oldSaveAttributesValue = $(this.idPrefix + 'save_attributes').value;
         var oldSaveLinksValue = $(this.idPrefix + 'save_links').value;
         var newSaveAttributesValue = Object.toJSON(this.attributes);
@@ -729,8 +727,8 @@ Product.Configurable.prototype = {
                 document.getElementById('configurable_save_attributes').setHasChanges();
             } catch (e) {}
         }
-    },
-    initializeAdvicesForSimpleForm: function () {
+    }
+initializeAdvicesForSimpleForm() {
         if ($(this.idPrefix + 'simple_form').advicesInited) {
             return;
         }
@@ -743,8 +741,8 @@ Product.Configurable.prototype = {
             });
         });
         $(this.idPrefix + 'simple_form').advicesInited = true;
-    },
-    quickCreateNewProduct: function () {
+    }
+quickCreateNewProduct() {
         this.initializeAdvicesForSimpleForm();
         $(this.idPrefix + 'simple_form').removeClassName('ignore-validate');
         var validationResult = $(this.idPrefix + 'simple_form').select('input', 'select', 'textarea').collect(function (elm) {
@@ -760,33 +758,44 @@ Product.Configurable.prototype = {
             return;
         }
 
-        var params = Form.serializeElements($(this.idPrefix + 'simple_form').select('input', 'select', 'textarea'), true);
-        params.form_key = FORM_KEY;
-        $('messages').update();
-        new Ajax.Request(this.createQuickUrl, {
-            parameters: params,
-            method: 'post',
-            area: $(this.idPrefix + 'simple_form'),
-            onComplete: this.quickCreateNewProductComplete.bind(this)
+        const formElements = document.getElementById(this.idPrefix + 'simple_form').querySelectorAll('input, select, textarea');
+        const formData = new FormData();
+
+        formElements.forEach(element => {
+            if (element.name && element.value) {
+                formData.append(element.name, element.value);
+            }
         });
-    },
-    quickCreateNewProductComplete: function (transport) {
-        var result = transport.responseText.evalJSON();
+        formData.append('form_key', FORM_KEY);
+
+        document.getElementById('messages').innerHTML = '';
+
+        mahoFetch(this.createQuickUrl, {
+            method: 'POST',
+            body: formData,
+            loaderArea: document.getElementById(this.idPrefix + 'simple_form')
+        })
+        .then(response => {
+            this.quickCreateNewProductComplete({responseText: JSON.stringify(response)});
+        })
+        .catch(error => {
+            console.error('Quick create product error:', error);
+        });
+    }
+quickCreateNewProductComplete(transport) {
+        var result = JSON.parse(transport.responseText);
 
         if (result.error) {
             if (result.error.fields) {
-                $(this.idPrefix + 'simple_form').removeClassName(
-                    'ignore-validate');
-                $H(result.error.fields)
-                    .each(function (pair) {
-                        $('simple_product_' + pair.key).value = pair.value;
-                        $('simple_product_' + pair.key + '_autogenerate').checked = false;
-                        toggleValueElements(
-                            $('simple_product_' + pair.key + '_autogenerate'),
-                            $('simple_product_' + pair.key + '_autogenerate').parentNode);
-                        Validation.ajaxError($('simple_product_' + pair.key), result.error.message);
-                    });
-                $(this.idPrefix + 'simple_form').addClassName('ignore-validate');
+                document.getElementById(this.idPrefix + 'simple_form').classList.remove('ignore-validate');
+                Object.entries(result.error.fields).forEach(([key, value]) => {
+                    document.getElementById('simple_product_' + key).value = value;
+                    document.getElementById('simple_product_' + key + '_autogenerate').checked = false;
+                    const autogenerateEl = document.getElementById('simple_product_' + key + '_autogenerate');
+                    toggleValueElements(autogenerateEl, autogenerateEl.parentNode);
+                    Validation.ajaxError(document.getElementById('simple_product_' + key), result.error.message);
+                });
+                document.getElementById(this.idPrefix + 'simple_form').classList.add('ignore-validate');
             } else {
                 if (result.error.message) {
                     alert(result.error.message);
@@ -796,11 +805,10 @@ Product.Configurable.prototype = {
             }
             return;
         } else if (result.messages) {
-            $('messages').update(result.messages);
+            document.getElementById('messages').innerHTML = result.messages;
         }
 
-        result.attributes
-            .each(function (attribute) {
+        result.attributes.forEach(function (attribute) {
                 var attr = this.getAttributeById(attribute.attribute_id);
                 if (!this.getValueByIndex(attr, attribute.value_index)
                     && result.pricing
@@ -812,9 +820,10 @@ Product.Configurable.prototype = {
                 }
             }.bind(this));
 
-        this.attributes.each(function (attribute) {
-            if ($('simple_product_' + attribute.attribute_code)) {
-                $('simple_product_' + attribute.attribute_code).value = '';
+        this.attributes.forEach(function (attribute) {
+            const simpleProductEl = document.getElementById('simple_product_' + attribute.attribute_code);
+            if (simpleProductEl) {
+                simpleProductEl.value = '';
             }
         }.bind(this));
 
@@ -822,8 +831,8 @@ Product.Configurable.prototype = {
         this.updateGrid();
         this.updateValues();
         this.grid.reload();
-    },
-    checkCreationUniqueAttributes: function () {
+    }
+checkCreationUniqueAttributes() {
         var attributes = [];
         this.attributes
             .each(function (attribute) {
@@ -834,8 +843,8 @@ Product.Configurable.prototype = {
             }.bind(this));
 
         return this.checkAttributes(attributes);
-    },
-    getAttributeByCode: function (attributeCode) {
+    }
+getAttributeByCode(attributeCode) {
         var attribute = null;
         this.attributes.each(function (item) {
             if (item.attribute_code == attributeCode) {
@@ -844,8 +853,8 @@ Product.Configurable.prototype = {
             }
         });
         return attribute;
-    },
-    getAttributeById: function (attributeId) {
+    }
+getAttributeById(attributeId) {
         var attribute = null;
         this.attributes.each(function (item) {
             if (item.attribute_id == attributeId) {
@@ -854,8 +863,8 @@ Product.Configurable.prototype = {
             }
         });
         return attribute;
-    },
-    getValueByIndex: function (attribute, valueIndex) {
+    }
+getValueByIndex(attribute, valueIndex) {
         var result = null;
         attribute.values.each(function (value) {
             if (value.value_index == valueIndex) {
@@ -864,8 +873,8 @@ Product.Configurable.prototype = {
             }
         });
         return result;
-    },
-    showPricing: function (select, attributeCode) {
+    }
+showPricing(select, attributeCode) {
         var attribute = this.getAttributeByCode(attributeCode);
         if (!attribute) {
             return;
@@ -929,8 +938,8 @@ Product.Configurable.prototype = {
             $('simple_product_' + attributeCode + '_pricing_value').value = null;
             $('simple_product_' + attributeCode + '_pricing_type').value = null;
         }
-    },
-    updateSimplePricing: function (evt) {
+    }
+updateSimplePricing(evt) {
         var element = Event.element(evt);
         if (!element.priceField.value.blank()) {
             $('simple_product_' + element.attributeCode + '_pricing_value').value = element.priceField.value;
@@ -939,8 +948,8 @@ Product.Configurable.prototype = {
             $('simple_product_' + element.attributeCode + '_pricing_value').value = null;
             $('simple_product_' + element.attributeCode + '_pricing_type').value = null;
         }
-    },
-    updateSimpleForm: function () {
+    }
+updateSimpleForm() {
         this.attributes.each(function (attribute) {
             if ($('simple_product_' + attribute.attribute_code)) {
                 this.showPricing(
@@ -948,8 +957,8 @@ Product.Configurable.prototype = {
                     attribute.attribute_code);
             }
         }.bind(this));
-    },
-    showNoticeMessage: function () {
+    }
+showNoticeMessage() {
         $('assign_product_warrning').show();
     }
 };
@@ -987,34 +996,40 @@ function initDisableFields(fieldContainer) {
 }
 
 function onCompleteDisableInited() {
-    onInitDisableFieldsList.each(function (item) {
+    onInitDisableFieldsList.forEach(function (item) {
         disableFieldEditMode(item);
     });
 }
 
 function onUrlkeyChanged(urlKey) {
-    urlKey = $(urlKey);
-    var hidden = urlKey.next('input[type=hidden]');
-    var chbx = urlKey.next('input[type=checkbox]');
-    var oldValue = chbx.value;
-    chbx.disabled = (oldValue == urlKey.value);
-    hidden.disabled = chbx.disabled;
+    const urlKeyElement = typeof urlKey === 'string' ? document.getElementById(urlKey) : urlKey;
+    const hidden = urlKeyElement.nextElementSibling.type === 'hidden' ? urlKeyElement.nextElementSibling : null;
+    const chbx = urlKeyElement.parentNode.querySelector('input[type=checkbox]');
+    if (chbx) {
+        const oldValue = chbx.value;
+        chbx.disabled = (oldValue === urlKeyElement.value);
+        if (hidden) {
+            hidden.disabled = chbx.disabled;
+        }
+    }
 }
 
 function onCustomUseParentChanged(element) {
-    var useParent = (element.value == 1) ? true : false;
-    element.up(2).select('input', 'select', 'textarea').each(function (el) {
-        if (element.id != el.id) {
-            el.disabled = useParent;
-        }
-    });
-    element.up(2).select('img').each(function (el) {
-        if (useParent) {
-            el.hide();
-        } else {
-            el.show();
-        }
-    });
+    const useParent = (element.value == 1);
+    let parent = element.parentNode;
+    for (let i = 0; i < 2 && parent; i++) {
+        parent = parent.parentNode;
+    }
+    if (parent) {
+        parent.querySelectorAll('input, select, textarea').forEach(function (el) {
+            if (element.id !== el.id) {
+                el.disabled = useParent;
+            }
+        });
+        parent.querySelectorAll('img').forEach(function (el) {
+            el.style.display = useParent ? 'none' : '';
+        });
+    }
 }
 
-Event.observe(window, 'load', onCompleteDisableInited);
+window.addEventListener('load', onCompleteDisableInited);

@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -67,16 +67,16 @@ var groupPriceRowTemplate = '<tr>'
     + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?></button></td>'
     + '</tr>';
 
-var groupPriceControl = {
+const groupPriceControl = {
     template: new Template(groupPriceRowTemplate, new RegExp('(^|.|\\r|\\n)({{\\s*(\\w+)\\s*}})', '')),
     itemsCount: 0,
-    addItem : function () {
+    addItem: function () {
         <?php if ($_readonly): ?>
         if (arguments.length < 3) {
             return;
         }
         <?php endif ?>
-        var data = {
+        const data = {
             website_id: '<?= $this->getDefaultWebsite() ?>',
             group: '<?= $this->getDefaultCustomerGroup() ?>',
             price: '',
@@ -84,64 +84,91 @@ var groupPriceControl = {
             index: this.itemsCount++
         };
 
-        if(arguments.length >= 3) {
+        if (arguments.length >= 3) {
             data.website_id = arguments[0];
             data.group = arguments[1];
             data.price = arguments[2];
         }
-        if (arguments.length == 4) {
+        if (arguments.length === 4) {
             data.readOnly = arguments[3];
         }
 
-        Element.insert($('<?= $_htmlId ?>_container'), {
-            bottom : this.template.evaluate(data)
-        });
+        const container = document.getElementById('<?= $_htmlId ?>_container');
+        if (container) {
+            container.insertAdjacentHTML('beforeend', this.template.evaluate(data));
+        }
 
-        $('group_price_row_' + data.index + '_cust_group').value = data.group;
-        $('group_price_row_' + data.index + '_website').value    = data.website_id;
+        const custGroupElement = document.getElementById(`group_price_row_${data.index}_cust_group`);
+        const websiteElement = document.getElementById(`group_price_row_${data.index}_website`);
+
+        if (custGroupElement) {
+            custGroupElement.value = data.group;
+        }
+        if (websiteElement) {
+            websiteElement.value = data.website_id;
+        }
 
         <?php if ($this->isShowWebsiteColumn() && !$this->isAllowChangeWebsite()): ?>
-        var websiteElement = $('group_price_row_' + data.index + '_website');
-        var websiteCaption = websiteElement.options[websiteElement.selectedIndex].text;
-
-        websiteElement.insert({after:'<span class="website-name">' + websiteCaption + '</span>'});
-        websiteElement.hide();
+        if (websiteElement) {
+            const websiteCaption = websiteElement.options[websiteElement.selectedIndex].text;
+            websiteElement.insertAdjacentHTML('afterend', `<span class="website-name">${websiteCaption}</span>`);
+            websiteElement.style.display = 'none';
+        }
         <?php endif ?>
 
-        if (data.readOnly == '1') {
-            ['website', 'cust_group', 'price', 'delete', 'is_percent'].each(function(element_suffix) {
-                $('group_price_row_' + data.index + '_' + element_suffix).disabled = true;
+        if (data.readOnly === '1') {
+            ['website', 'cust_group', 'price', 'delete', 'is_percent'].forEach(element_suffix => {
+                const element = document.getElementById(`group_price_row_${data.index}_${element_suffix}`);
+                if (element) {
+                    element.disabled = true;
+                }
             });
-            $('group_price_row_' + data.index + '_delete_button').hide();
+            const deleteButton = document.getElementById(`group_price_row_${data.index}_delete_button`);
+            if (deleteButton) {
+                deleteButton.style.display = 'none';
+            }
         }
 
         <?php if ($_readonly): ?>
-        $('<?= $_htmlId ?>_container').select('input', 'select').each(this.disableElement);
-        $('<?= $_htmlId ?>_container').up('table').select('button').each(this.disableElement);
+        if (container) {
+            const inputs = container.querySelectorAll('input, select');
+            inputs.forEach(this.disableElement);
+            const table = container.closest('table');
+            if (table) {
+                const buttons = table.querySelectorAll('button');
+                buttons.forEach(this.disableElement);
+            }
+        }
         <?php else: ?>
-        $('<?= $_htmlId ?>_container').select('input', 'select').each(function(element) {
-            Event.observe(element, 'change', element.setHasChanges.bind(element));
-        });
-        $('<?= $_htmlId ?>_container').select('button.delete').each(function(element) {
-            Event.observe(element, 'click', element.setHasChanges.bind(element));
-        });
+        if (container) {
+            const inputs = container.querySelectorAll('input, select');
+            inputs.forEach(element => {
+                element.addEventListener('change', element.setHasChanges ? element.setHasChanges.bind(element) : function() {});
+            });
+            const deleteButtons = container.querySelectorAll('button.delete');
+            deleteButtons.forEach(element => {
+                element.addEventListener('click', element.setHasChanges ? element.setHasChanges.bind(element) : function() {});
+            });
+        }
         <?php endif ?>
     },
     disableElement: function(element) {
         element.disabled = true;
-        element.addClassName('disabled');
+        element.classList.add('disabled');
     },
     deleteItem: function(event) {
-        var tr = Event.findElement(event, 'tr');
+        const tr = event.target.closest('tr');
         if (tr) {
-            Element.select(tr, '.delete').each(function(element) {
-                element.value='1';
+            const deleteInputs = tr.querySelectorAll('.delete');
+            deleteInputs.forEach(element => {
+                element.value = '1';
             });
-            Element.select(tr, ['input', 'select']).each(function(element) {
-                element.hide();
+            const inputs = tr.querySelectorAll('input, select');
+            inputs.forEach(element => {
+                element.style.display = 'none';
             });
-            Element.hide(tr);
-            Element.addClassName(tr, 'no-display template');
+            tr.style.display = 'none';
+            tr.classList.add('no-display', 'template');
         }
         return false;
     }

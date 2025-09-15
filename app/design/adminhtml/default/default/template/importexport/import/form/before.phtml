@@ -12,7 +12,6 @@
 /** @var Mage_Adminhtml_Block_Template $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
     /**
      * Name and ID for iframe for data POST-ing.
      *
@@ -26,34 +25,42 @@
      * @param string newActionUrl OPTIONAL Change form action to this if specified
      * @return void
      */
-    varienForm.prototype.postToFrame = function(newActionUrl)
-    {
-        if(this.validate()){
+    varienForm.prototype.postToFrame = function(newActionUrl) {
+        if (this.validate()) {
             // create dynamic frame
-            if (!$(this.ifrElemName)) {
-                $('html-body').insert({
-                    bottom:'<iframe name="' + this.ifrElemName + '" id="' + this.ifrElemName + '" style="display:none;"/>'
-                });
+            if (!document.getElementById(this.ifrElemName)) {
+                const htmlBody = document.getElementById('html-body');
+                if (htmlBody) {
+                    const iframe = document.createElement('iframe');
+                    iframe.name = this.ifrElemName;
+                    iframe.id = this.ifrElemName;
+                    iframe.style.display = 'none';
+                    htmlBody.appendChild(iframe);
+                }
             }
 
             // show mask
-            showLoader();
+            if (typeof showLoader === 'function') {
+                showLoader();
+            }
 
             // temporary set new target and submit form
-            var formElem    = $(this.formId);
-            var oldTarget   = formElem.target;
-            var oldAction   = formElem.action;
+            const formElem = document.getElementById(this.formId);
+            if (formElem) {
+                const oldTarget = formElem.target;
+                const oldAction = formElem.action;
 
-            formElem.target = this.ifrElemName;
+                formElem.target = this.ifrElemName;
 
-            if (newActionUrl) {
-                formElem.action = newActionUrl;
+                if (newActionUrl) {
+                    formElem.action = newActionUrl;
+                }
+                formElem.action += (formElem.action.lastIndexOf('?') !== -1 ? '&' : '?')
+                    + 'form_key=' + encodeURIComponent(formElem.form_key.value);
+                this._submit();
+                formElem.target = oldTarget;
+                formElem.action = oldAction;
             }
-            formElem.action += (formElem.action.lastIndexOf('?') != -1 ? '&' : '?')
-                + 'form_key=' + encodeURIComponent(formElem.form_key.value);
-            this._submit();
-            formElem.target = oldTarget;
-            formElem.action = oldAction;
         }
     };
 
@@ -63,10 +70,14 @@
      * @param object response
      * @return void
      */
-    varienForm.prototype.postToFrameComplete = function(response)
-    {
-        $(this.ifrElemName).remove();
-        hideLoader();
+    varienForm.prototype.postToFrameComplete = function(response) {
+        const iframe = document.getElementById(this.ifrElemName);
+        if (iframe) {
+            iframe.remove();
+        }
+        if (typeof hideLoader === 'function') {
+            hideLoader();
+        }
         this.postToFrameProcessResponse(response);
     };
 
@@ -76,35 +87,59 @@
      * @param object response
      * @return void
      */
-    varienForm.prototype.postToFrameProcessResponse = function(response)
-    {
-        if ('object' != typeof(response)) {
+    varienForm.prototype.postToFrameProcessResponse = function(response) {
+        if (typeof response !== 'object') {
             return alert('<?= $this->jsQuoteEscape($this->__('Invalid response')) ?>');
         }
-        $H(response).each(function(pair) {
-            switch (pair.key) {
+        Object.entries(response).forEach(([key, value]) => {
+            switch (key) {
                 case 'show':
                 case 'clear':
                 case 'hide':
-                    $H(pair.value).each(function(val) {if ($(val.value)) $(val.value)[pair.key]();});
+                    Object.entries(value).forEach(([valKey, valValue]) => {
+                        const el = document.getElementById(valValue);
+                        if (el) {
+                            if (key === 'show') {
+                                el.style.display = '';
+                            } else if (key === 'hide') {
+                                el.style.display = 'none';
+                            } else if (key === 'clear') {
+                                el.innerHTML = '';
+                            }
+                        }
+                    });
                     break;
                 case 'innerHTML':
                 case 'value':
-                    $H(pair.value).each(function(val) {
-                        var el = $(val.key);
+                    Object.entries(value).forEach(([valKey, valValue]) => {
+                        const el = document.getElementById(valKey);
                         if (el) {
-                            el[pair.key] = val.value;
+                            el[key] = valValue;
                             // if element does not visible
-                            el.offsetWidth || el.up('div.entry-edit').show();
+                            if (!el.offsetWidth) {
+                                const entryEdit = el.closest('div.entry-edit');
+                                if (entryEdit) {
+                                    entryEdit.style.display = '';
+                                }
+                            }
                         }
                     });
                     break;
                 case 'removeClassName':
                 case 'addClassName':
-                    $H(pair.value).each(function(val) {if ($(val.key)) $(val.key)[pair.key](val.value);});
+                    Object.entries(value).forEach(([valKey, valValue]) => {
+                        const el = document.getElementById(valKey);
+                        if (el) {
+                            if (key === 'addClassName') {
+                                el.classList.add(valValue);
+                            } else {
+                                el.classList.remove(valValue);
+                            }
+                        }
+                    });
                     break;
                 default:
-                    alert(pair.key + ': ' + pair.value);
+                    alert(key + ': ' + value);
                     break;
             }
         });
@@ -117,11 +152,12 @@
      * @param string sourceFileField
      * @return void
      */
-    varienForm.prototype.startImport = function(newActionUrl, sourceFileField)
-    {
-        $(sourceFileField).removeClassName('required-entry');
-        this.postToFrame(newActionUrl);
-        $(sourceFileField).addClassName('required-entry');
+    varienForm.prototype.startImport = function(newActionUrl, sourceFileField) {
+        const sourceField = document.getElementById(sourceFileField);
+        if (sourceField) {
+            sourceField.classList.remove('required-entry');
+            this.postToFrame(newActionUrl);
+            sourceField.classList.add('required-entry');
+        }
     };
-//]]>
 </script>

@@ -93,13 +93,14 @@ function checkVisibility(element) {
 }
 
 function imagePreview(element){
-    if($(element)){
-        var win = window.open('', 'preview', 'width=400,height=400,resizable=1,scrollbars=1');
+    const el = typeof element === 'string' ? document.getElementById(element) : element;
+    if(el){
+        const win = window.open('', 'preview', 'width=400,height=400,resizable=1,scrollbars=1');
         win.document.open();
-        win.document.write('<body style="padding:0;margin:0"><img src="'+$(element).src+'" id="image_preview"/></body>');
+        win.document.write('<body style="padding:0;margin:0"><img src="'+el.src+'" id="image_preview"/></body>');
         win.document.close();
-        Event.observe(win, 'load', function(){
-            var img = win.document.getElementById('image_preview');
+        win.addEventListener('load', function(){
+            const img = win.document.getElementById('image_preview');
             win.resizeTo(img.width+40, img.height+80);
         });
     }
@@ -117,42 +118,35 @@ function checkByProductPriceType(elem) {
     }
 }
 
-Event.observe(window, 'load', function() {
-    if ($('price_default') && $('price_default').checked) {
-        $('price').disabled = 'disabled';
+window.addEventListener('load', function() {
+    const priceDefault = document.getElementById('price_default');
+    const price = document.getElementById('price');
+    if (priceDefault && priceDefault.checked && price) {
+        price.disabled = true;
     }
 });
 
 function toggleValueElements(checkbox, container, excludedElements, checked){
     if(container && checkbox){
-        var ignoredElements = [checkbox];
+        let ignoredElements = [checkbox];
         if (typeof excludedElements != 'undefined') {
-            if (Object.prototype.toString.call(excludedElements) != '[object Array]') {
+            if (!Array.isArray(excludedElements)) {
                 excludedElements = [excludedElements];
             }
-            for (var i = 0; i < excludedElements.length; i++) {
-                ignoredElements.push(excludedElements[i]);
-            }
+            ignoredElements = ignoredElements.concat(excludedElements);
         }
-        //var elems = container.select('select', 'input');
-        var elems = Element.select(container, ['select', 'input', 'textarea', 'button', 'img']);
-        var isDisabled = (checked != undefined ? checked : checkbox.checked);
-        elems.each(function (elem) {
+        const elems = container.querySelectorAll('select, input, textarea, button, img');
+        const isDisabled = (checked !== undefined ? checked : checkbox.checked);
+        elems.forEach(function (elem) {
             if (checkByProductPriceType(elem)) {
-                var i = ignoredElements.length;
-                while (i-- && elem != ignoredElements[i]);
-                if (i != -1) {
+                if (ignoredElements.includes(elem)) {
                     return;
                 }
 
                 elem.disabled = isDisabled;
-                if (isDisabled) {
-                    elem.addClassName('disabled');
-                } else {
-                    elem.removeClassName('disabled');
-                }
-                if (elem.nodeName.toLowerCase() == 'img') {
-                    isDisabled ? elem.hide() : elem.show();
+                elem.classList.toggle('disabled', isDisabled);
+                if (elem.nodeName.toLowerCase() === 'img') {
+                    elem.style.display = isDisabled ? 'none' : '';
                 }
             }
         });
@@ -163,42 +157,55 @@ function toggleValueElements(checkbox, container, excludedElements, checked){
  * @todo add validation for fields
  */
 function submitAndReloadArea(area, url) {
-    if($(area)) {
-        var fields = $(area).select('input', 'select', 'textarea');
-        var data = Form.serializeElements(fields, true);
-        url = url + (url.match(new RegExp('\\?')) ? '&isAjax=true' : '?isAjax=true');
-        new Ajax.Request(url, {
-            parameters: $H(data),
-            loaderArea: area,
-            onSuccess: function(transport) {
-                try {
-                    if (transport.responseText.isJSON()) {
-                        var response = transport.responseText.evalJSON();
-                        if (response.error) {
-                            alert(response.message);
-                        }
-                        if(response.ajaxExpired && response.ajaxRedirect) {
-                            setLocation(response.ajaxRedirect);
-                        }
-                    } else {
-                        $(area).update(transport.responseText);
-                    }
+    const areaElement = typeof area === 'string' ? document.getElementById(area) : area;
+    if(areaElement) {
+        const fields = areaElement.querySelectorAll('input, select, textarea');
+        const formData = new FormData();
+
+        fields.forEach(field => {
+            if (field.type === 'checkbox' || field.type === 'radio') {
+                if (field.checked) {
+                    formData.append(field.name, field.value);
                 }
-                catch (e) {
-                    $(area).update(transport.responseText);
-                }
+            } else if (field.type !== 'submit' && field.type !== 'button') {
+                formData.append(field.name, field.value);
             }
+        });
+
+        url = url + (url.includes('?') ? '&isAjax=true' : '?isAjax=true');
+
+        mahoFetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(responseText => {
+            try {
+                const response = JSON.parse(responseText);
+                if (response.error) {
+                    alert(response.message);
+                }
+                if(response.ajaxExpired && response.ajaxRedirect) {
+                    setLocation(response.ajaxRedirect);
+                }
+            } catch (e) {
+                areaElement.innerHTML = responseText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     }
 }
 
 function syncOnchangeValue(baseElem, distElem){
-    var compare = {baseElem:baseElem, distElem:distElem};
-    Event.observe(baseElem, 'change', function(){
-        if($(this.baseElem) && $(this.distElem)){
-            $(this.distElem).value = $(this.baseElem).value;
-        }
-    }.bind(compare));
+    const baseElement = typeof baseElem === 'string' ? document.getElementById(baseElem) : baseElem;
+    const distElement = typeof distElem === 'string' ? document.getElementById(distElem) : distElem;
+
+    if (baseElement && distElement) {
+        baseElement.addEventListener('change', function(){
+            distElement.value = baseElement.value;
+        });
+    }
 }
 
 // Insert some content to the cursor position of input element
@@ -220,24 +227,24 @@ function firebugEnabled() {
 
 function disableElement(elem) {
     elem.disabled = true;
-    elem.addClassName('disabled');
+    elem.classList.add('disabled');
 }
 
 function enableElement(elem) {
     elem.disabled = false;
-    elem.removeClassName('disabled');
+    elem.classList.remove('disabled');
 }
 
 function disableElements(search){
-    $$('.' + search).each(disableElement);
+    document.querySelectorAll('.' + search).forEach(disableElement);
 }
 
 function enableElements(search){
-    $$('.' + search).each(enableElement);
+    document.querySelectorAll('.' + search).forEach(enableElement);
 }
 
 /********** Toolbar toggle object to manage normal/floating toolbar toggle during vertical scroll ***********/
-var toolbarToggle = {
+const toolbarToggle = {
     // Properties
     header: null, // Normal toolbar
     headerOffset: null, // Normal toolbar offset - calculated once
@@ -245,7 +252,7 @@ var toolbarToggle = {
     eventsAdded: false, // We're listening to scroll/resize
 
     // Inits object and pushes it into work. Can be used to init/reset(update) object by current DOM.
-    reset: function () {
+    reset() {
         // Maybe we are already using floating toolbar - just remove it to update from html
         if (this.headerCopy) {
             this.headerCopy.remove();
@@ -255,11 +262,11 @@ var toolbarToggle = {
     },
 
     // Creates toolbar and inits all needed properties
-    createToolbar: function () {
+    createToolbar() {
         // Extract header that we will use as toolbar
-        var headers = $$('.content-header');
-        for (var i = headers.length - 1; i >= 0; i--) {
-            if (!headers[i].hasClassName('skip-header')) {
+        const headers = document.querySelectorAll('.content-header');
+        for (let i = headers.length - 1; i >= 0; i--) {
+            if (!headers[i].classList.contains('skip-header')) {
                 this.header = headers[i];
                 break;
             }
@@ -269,57 +276,52 @@ var toolbarToggle = {
         }
 
         // Calculate header offset once - for optimization
-        this.headerOffset = Element.cumulativeOffset(this.header)[1];
+        this.headerOffset = this.header.getBoundingClientRect().top + window.pageYOffset;
 
         // Toolbar buttons
-        var buttons = $$('.content-buttons')[0];
+        const buttons = document.querySelector('.content-buttons');
         if (buttons) {
             // Wrap buttons with 'placeholder' div - to serve as container for buttons
-            Element.insert(buttons, {before: '<div class="content-buttons-placeholder"></div>'});
-            buttons.placeholder = buttons.previous('.content-buttons-placeholder');
+            const placeholder = document.createElement('div');
+            placeholder.className = 'content-buttons-placeholder';
+            buttons.parentNode.insertBefore(placeholder, buttons);
+            buttons.placeholder = placeholder;
             buttons.remove();
-            buttons.placeholder.appendChild(buttons);
+            placeholder.appendChild(buttons);
 
-            this.headerOffset = Element.cumulativeOffset(buttons)[1];
+            this.headerOffset = buttons.getBoundingClientRect().top + window.pageYOffset;
         }
 
         // Create copy of header, that will serve as floating toolbar docked to top of window
-        this.headerCopy = $(document.createElement('div'));
+        this.headerCopy = document.createElement('div');
         this.headerCopy.appendChild(this.header.cloneNode(true));
-        document.body.insertBefore(this.headerCopy, document.body.lastChild);
-        this.headerCopy.addClassName('content-header-floating');
+        document.body.appendChild(this.headerCopy);
+        this.headerCopy.classList.add('content-header-floating');
 
         // Remove duplicated buttons and their container
-        var placeholder = this.headerCopy.down('.content-buttons-placeholder');
+        const placeholder = this.headerCopy.querySelector('.content-buttons-placeholder');
         if (placeholder) {
             placeholder.remove();
         }
     },
 
     // Checks whether object properties are ready and valid
-    ready: function () {
+    ready() {
         // Return definitely boolean value
-        return (this.header && this.headerCopy && this.headerCopy.parentNode) ? true : false;
+        return !!(this.header && this.headerCopy && this.headerCopy.parentNode);
     },
 
     // Updates toolbars for current scroll - shows/hides normal and floating toolbar
-    updateForScroll: function () {
+    updateForScroll() {
         if (!this.ready()) {
             return;
         }
 
-        // scrolling offset calculation via www.quirksmode.org
-        var s;
-        if (self.pageYOffset){
-            s = self.pageYOffset;
-        } else if (document.documentElement && document.documentElement.scrollTop) {
-            s = document.documentElement.scrollTop;
-        } else if (document.body) {
-            s = document.body.scrollTop;
-        }
+        // Get current scroll position
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
         // Show floating or normal toolbar
-        if (s > this.headerOffset) {
+        if (scrollTop > this.headerOffset) {
             // Page offset is more than header offset, switch to floating toolbar
             this.showFloatingToolbar();
         } else {
@@ -329,13 +331,13 @@ var toolbarToggle = {
     },
 
     // Shows normal toolbar (and hides floating one)
-    showNormalToolbar: function () {
+    showNormalToolbar() {
         if (!this.ready()) {
             return;
         }
 
-        var buttons = $$('.content-buttons')[0];
-        if (buttons && buttons.oldParent && buttons.oldParent != buttons.parentNode) {
+        const buttons = document.querySelector('.content-buttons');
+        if (buttons && buttons.oldParent && buttons.oldParent !== buttons.parentNode) {
             buttons.remove();
             if(buttons.oldBefore) {
                 buttons.oldParent.insertBefore(buttons, buttons.oldBefore);
@@ -350,37 +352,37 @@ var toolbarToggle = {
     // Shows floating toolbar (and hides normal one)
     // Notice that buttons could had changed in html by setting new inner html,
     // so our added custom properties (placeholder, oldParent) can be not present in them any more
-    showFloatingToolbar: function () {
+    showFloatingToolbar() {
         if (!this.ready()) {
             return;
         }
 
-        var buttons = $$('.content-buttons')[0];
+        const buttons = document.querySelector('.content-buttons');
 
         if (buttons) {
             // Remember original parent in normal toolbar to which these buttons belong
             if (!buttons.oldParent) {
                 buttons.oldParent = buttons.parentNode;
-                buttons.oldBefore = buttons.previous();
+                buttons.oldBefore = buttons.previousElementSibling;
             }
 
             // Move buttons from normal to floating toolbar
-            if (buttons.oldParent == buttons.parentNode) {
+            if (buttons.oldParent === buttons.parentNode) {
                 // Make static dimensions for placeholder, so it's not collapsed when buttons are removed
                 if (buttons.placeholder) {
-                    var dimensions = buttons.placeholder.getDimensions();
-                    buttons.placeholder.style.width = dimensions.width + 'px';
-                    buttons.placeholder.style.height = dimensions.height + 'px';
+                    const rect = buttons.placeholder.getBoundingClientRect();
+                    buttons.placeholder.style.width = rect.width + 'px';
+                    buttons.placeholder.style.height = rect.height + 'px';
                 }
 
                 // Move to floating
-                var target = this.headerCopy.down('div');
+                const target = this.headerCopy.querySelector('div');
                 if (target) {
-                    buttons.hide();
+                    buttons.style.display = 'none';
                     buttons.remove();
 
                     target.appendChild(buttons);
-                    buttons.show();
+                    buttons.style.display = '';
                 }
             }
         }
@@ -389,36 +391,36 @@ var toolbarToggle = {
     },
 
     // Starts object on window load
-    startOnLoad: function () {
+    startOnLoad() {
         if (!this.funcOnWindowLoad) {
             this.funcOnWindowLoad = this.start.bind(this);
         }
-        Event.observe(window, 'load', this.funcOnWindowLoad);
+        window.addEventListener('load', this.funcOnWindowLoad);
     },
 
     // Removes object start on window load
-    removeOnLoad: function () {
+    removeOnLoad() {
         if (!this.funcOnWindowLoad) {
             return;
         }
-        Event.stopObserving(window, 'load', this.funcOnWindowLoad);
+        window.removeEventListener('load', this.funcOnWindowLoad);
     },
 
     // Starts object by creating toolbar and enabling scroll/resize events
-    start: function () {
+    start() {
         this.reset();
         this.startListening();
     },
 
     // Stops object by removing toolbar and stopping listening to events
-    stop: function () {
+    stop() {
         this.stopListening();
         this.removeOnLoad();
         this.showNormalToolbar();
     },
 
-    // Addes events on scroll/resize
-    startListening: function () {
+    // Adds events on scroll/resize
+    startListening() {
         if (this.eventsAdded) {
             return;
         }
@@ -427,19 +429,19 @@ var toolbarToggle = {
             this.funcUpdateForViewport = this.updateForScroll.bind(this);
         }
 
-        Event.observe(window, 'scroll', this.funcUpdateForViewport);
-        Event.observe(window, 'resize', this.funcUpdateForViewport);
+        window.addEventListener('scroll', this.funcUpdateForViewport);
+        window.addEventListener('resize', this.funcUpdateForViewport);
 
         this.eventsAdded = true;
     },
 
     // Removes listening to events on resize/update
-    stopListening: function () {
+    stopListening() {
         if (!this.eventsAdded) {
             return;
         }
-        Event.stopObserving(window, 'scroll', this.funcUpdateForViewport);
-        Event.stopObserving(window, 'resize', this.funcUpdateForViewport);
+        window.removeEventListener('scroll', this.funcUpdateForViewport);
+        window.removeEventListener('resize', this.funcUpdateForViewport);
 
         this.eventsAdded = false;
     }
@@ -469,104 +471,120 @@ toolbarToggle.startOnLoad();
 
 /** Cookie Reading And Writing **/
 
-var Cookie = {
-    all: function() {
-        var pairs = document.cookie.split(';');
-        var cookies = {};
-        pairs.each(function(item, index) {
-            var pair = item.strip().split('=');
-            cookies[unescape(pair[0])] = unescape(pair[1]);
+const Cookie = {
+    all() {
+        const pairs = document.cookie.split(';');
+        const cookies = {};
+        pairs.forEach(item => {
+            const pair = item.trim().split('=');
+            if (pair.length === 2) {
+                cookies[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+            }
         });
 
         return cookies;
     },
-    read: function(cookieName) {
-        var cookies = this.all();
-        if(cookies[cookieName]) {
-            return cookies[cookieName];
-        }
-        return null;
+    read(cookieName) {
+        const cookies = this.all();
+        return cookies[cookieName] || null;
     },
-    write: function(cookieName, cookieValue, cookieLifeTime) {
-        var expires = '';
+    write(cookieName, cookieValue, cookieLifeTime) {
+        let expires = '';
         if (cookieLifeTime) {
-            var date = new Date();
-            date.setTime(date.getTime()+(cookieLifeTime*1000));
-            expires = '; expires='+date.toUTCString();
+            const date = new Date();
+            date.setTime(date.getTime() + (cookieLifeTime * 1000));
+            expires = '; expires=' + date.toUTCString();
         }
-        var urlPath = '/' + BASE_URL.split('/').slice(3).join('/'); // Get relative path
-        document.cookie = escape(cookieName) + "=" + escape(cookieValue) + expires + "; path=" + urlPath;
+        const urlPath = '/' + BASE_URL.split('/').slice(3).join('/'); // Get relative path
+        document.cookie = encodeURIComponent(cookieName) + "=" + encodeURIComponent(cookieValue) + expires + "; path=" + urlPath;
     },
-    clear: function(cookieName) {
+    clear(cookieName) {
         this.write(cookieName, '', -1);
     }
 };
 
-var Fieldset = {
+const Fieldset = {
     cookiePrefix: 'fh-',
-    applyCollapse: function(containerId) {
-        //var collapsed = Cookie.read(this.cookiePrefix + containerId);
-        //if (collapsed !== null) {
-        //    Cookie.clear(this.cookiePrefix + containerId);
-        //}
-        if ($(containerId + '-state')) {
-            collapsed = $(containerId + '-state').value == 1 ? 0 : 1;
+    applyCollapse(containerId) {
+        const stateElement = document.getElementById(containerId + '-state');
+        const headElement = document.getElementById(containerId + '-head');
+        const containerElement = document.getElementById(containerId);
+
+        let collapsed;
+        if (stateElement) {
+            collapsed = stateElement.value == 1 ? 0 : 1;
         } else {
-            collapsed = $(containerId + '-head').collapsed;
+            collapsed = headElement ? headElement.collapsed : undefined;
         }
-        if (collapsed==1 || collapsed===undefined) {
-           $(containerId + '-head').removeClassName('open');
-           if($(containerId + '-head').up('.section-config')) {
-                $(containerId + '-head').up('.section-config').removeClassName('active');
-           }
-           $(containerId).hide();
+
+        if (collapsed == 1 || collapsed === undefined) {
+            if (headElement) {
+                headElement.classList.remove('open');
+                const sectionConfig = headElement.closest('.section-config');
+                if (sectionConfig) {
+                    sectionConfig.classList.remove('active');
+                }
+            }
+            if (containerElement) {
+                containerElement.style.display = 'none';
+            }
         } else {
-           $(containerId + '-head').addClassName('open');
-           if($(containerId + '-head').up('.section-config')) {
-                $(containerId + '-head').up('.section-config').addClassName('active');
-           }
-           $(containerId).show();
+            if (headElement) {
+                headElement.classList.add('open');
+                const sectionConfig = headElement.closest('.section-config');
+                if (sectionConfig) {
+                    sectionConfig.classList.add('active');
+                }
+            }
+            if (containerElement) {
+                containerElement.style.display = '';
+            }
         }
     },
-    toggleCollapse: function(containerId, saveThroughAjax) {
-        if ($(containerId + '-state')) {
-            collapsed = $(containerId + '-state').value == 1 ? 0 : 1;
+    toggleCollapse(containerId, saveThroughAjax) {
+        const stateElement = document.getElementById(containerId + '-state');
+        const headElement = document.getElementById(containerId + '-head');
+
+        let collapsed;
+        if (stateElement) {
+            collapsed = stateElement.value == 1 ? 0 : 1;
         } else {
-            collapsed = $(containerId + '-head').collapsed;
+            collapsed = headElement ? headElement.collapsed : undefined;
         }
-        //Cookie.read(this.cookiePrefix + containerId);
-        if(collapsed==1 || collapsed===undefined) {
-            //Cookie.write(this.cookiePrefix + containerId,  0, 30*24*60*60);
-            if ($(containerId + '-state')) {
-                $(containerId + '-state').value = 1;
+
+        if(collapsed == 1 || collapsed === undefined) {
+            if (stateElement) {
+                stateElement.value = 1;
             }
-            $(containerId + '-head').collapsed = 0;
+            if (headElement) {
+                headElement.collapsed = 0;
+            }
         } else {
-            //Cookie.clear(this.cookiePrefix + containerId);
-            if ($(containerId + '-state')) {
-                $(containerId + '-state').value = 0;
+            if (stateElement) {
+                stateElement.value = 0;
             }
-            $(containerId + '-head').collapsed = 1;
+            if (headElement) {
+                headElement.collapsed = 1;
+            }
         }
 
         this.applyCollapse(containerId);
-        if (typeof saveThroughAjax != "undefined") {
-            this.saveState(saveThroughAjax, {container: containerId, value: $(containerId + '-state').value});
+        if (typeof saveThroughAjax !== "undefined" && stateElement) {
+            this.saveState(saveThroughAjax, {container: containerId, value: stateElement.value});
         }
     },
-    addToPrefix: function (value) {
+    addToPrefix(value) {
         this.cookiePrefix += value + '-';
     },
-    saveState: function(url, parameters) {
-        new Ajax.Request(url, {
-            method: 'get',
-            parameters: Object.toQueryString(parameters),
-            loaderArea: false
+    saveState(url, parameters) {
+        const params = new URLSearchParams(parameters);
+        mahoFetch(url + '?' + params.toString(), {
+            method: 'GET'
         });
     }
 };
 
-var Base64 = {
+const Base64 = {
     // private property
     _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
      //'+/=', '-_,'

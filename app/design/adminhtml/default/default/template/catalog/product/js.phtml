@@ -5,58 +5,71 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Js $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
-Event.observe(window, 'load', recalculateTax);
-Event.observe(window, 'load', registerTaxRecalcs);
+document.addEventListener('DOMContentLoaded', () => {
+    recalculateTax();
+    registerTaxRecalcs();
+});
 
-function registerTaxRecalcs()
-{
+function registerTaxRecalcs() {
     if (typeof dynamicTaxes == 'undefined') {
         return;
     }
 
-    for (var i=0; i<dynamicTaxes.length; i++) {
-        Event.observe($(dynamicTaxes[i]), 'change', recalculateTax);
+    for (let i = 0; i < dynamicTaxes.length; i++) {
+        const element = document.getElementById(dynamicTaxes[i]);
+        if (element) {
+            element.addEventListener('change', recalculateTax);
+        }
     }
-    Event.observe($('tax_class_id'), 'change', recalculateTax);
+
+    const taxClassElement = document.getElementById('tax_class_id');
+    if (taxClassElement) {
+        taxClassElement.addEventListener('change', recalculateTax);
+    }
 }
 
-var priceFormat = <?= $this->helper('tax')->getPriceFormat($this->getStore()) ?>;
-var taxRates = <?= $this->helper('tax')->getAllRatesByProductClass($this->getStore()) ?>;
+const priceFormat = <?= $this->helper('tax')->getPriceFormat($this->getStore()) ?>;
+const taxRates = <?= $this->helper('tax')->getAllRatesByProductClass($this->getStore()) ?>;
 
-function recalculateTax()
-{
+function recalculateTax() {
     if (typeof dynamicTaxes == 'undefined') {
         return;
     }
 
-    for (var i=0; i<dynamicTaxes.length; i++) {
-        var code = dynamicTaxes[i];
-        var span = $('dynamic-tax-' + code);
-        var input = $(code);
+    for (let i = 0; i < dynamicTaxes.length; i++) {
+        const code = dynamicTaxes[i];
+        const span = document.getElementById('dynamic-tax-' + code);
+        const input = document.getElementById(code);
+
+        if (!input || !span) {
+            continue;
+        }
 
         if (!input.value) {
             span.innerHTML = '';
             continue;
         }
 
-        var rate = 0;
-        var taxClass = $('tax_class_id').options[$('tax_class_id').selectedIndex].value;
-        eval('var value = taxRates.value_' + taxClass);
+        let rate = 0;
+        const taxClassSelect = document.getElementById('tax_class_id');
+        if (taxClassSelect) {
+            const taxClass = taxClassSelect.options[taxClassSelect.selectedIndex].value;
+            const taxRateValue = taxRates['value_' + taxClass];
 
-        if (value != undefined) {
-            rate = value;
+            if (taxRateValue !== undefined) {
+                rate = taxRateValue;
+            }
         }
 
-        var spanValue = '';
-        if (rate != 0) {
+        let spanValue = '';
+        if (rate !== 0) {
             spanValue = ' ' + formatCurrency(input.value/(100+rate)*rate, priceFormat);
         }
         span.innerHTML = spanValue;
@@ -65,17 +78,18 @@ function recalculateTax()
 
 // Bind tab changes
 function bindActiveProductTab(event) {
-    if(event.tab && event.tab.name && $('store_switcher')){
-        $('store_switcher').switchParams = 'active_tab/'+event.tab.name+'/';
+    const storeSwitcher = document.getElementById('store_switcher');
+    if (event.tab && event.tab.name && storeSwitcher) {
+        storeSwitcher.switchParams = 'active_tab/'+event.tab.name+'/';
     }
 }
 varienGlobalEvents.attachEventHandler('showTab', bindActiveProductTab);
 
 // bind active tab
 <?php if($tabsBlock = $this->getLayout()->getBlock('product_tabs')): ?>
-if(<?= $tabsBlock->getJsObjectName() ?> && <?= $tabsBlock->getJsObjectName() ?>.activeTab && $('store_switcher')){
-    $('store_switcher').switchParams = 'active_tab/'+<?= $tabsBlock->getJsObjectName() ?>.activeTab.name+'/';
+const storeSwitcher = document.getElementById('store_switcher');
+if (<?= $tabsBlock->getJsObjectName() ?> && <?= $tabsBlock->getJsObjectName() ?>.activeTab && storeSwitcher) {
+    storeSwitcher.switchParams = 'active_tab/'+<?= $tabsBlock->getJsObjectName() ?>.activeTab.name+'/';
 }
 <?php endif ?>
-//]]>
 </script>

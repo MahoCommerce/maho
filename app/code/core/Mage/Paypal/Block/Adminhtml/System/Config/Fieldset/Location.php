@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,16 +23,16 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
     protected function _getExtraJs($element, $tooltipsExist = false)
     {
         $js = '
-            document.observe("dom:loaded", function() {
-                $$(".with-button button.button").each(function(configureButton) {
+            document.addEventListener("DOMContentLoaded", function() {
+                document.querySelectorAll(".with-button button.button").forEach(function(configureButton) {
                     togglePaypalSolutionConfigureButton(configureButton, true);
                 });
                 var paypalConflictsObject = {
                     "isConflict": false,
                     "ecMissed": false,
                     sharePayflowEnabling: function(enabler, isEvent) {
-                        var ecPayflowEnabler = $$(".paypal-ec-payflow-enabler")[0];
-                        if (typeof ecPayflowEnabler == "undefined") {
+                        var ecPayflowEnabler = document.querySelector(".paypal-ec-payflow-enabler");
+                        if (!ecPayflowEnabler) {
                             return;
                         }
                         var ecPayflowScopeElement = adminSystemConfig.getScopeElement(ecPayflowEnabler);
@@ -52,15 +52,15 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                             && enablerScopeElement.checked != ecPayflowScopeElement.checked
                             && (isEvent || ecPayflowScopeElement.checked)
                         ) {
-                            $(ecPayflowScopeElement).click();
+                            ecPayflowScopeElement.click();
                         }
 
-                        var ecEnabler = $$(".paypal-ec-enabler")[0];
+                        var ecEnabler = document.querySelector(".paypal-ec-enabler");
                         if (ecPayflowEnabler.value != enabler.value && (isEvent || enabler.value == 1)) {
                             ecPayflowEnabler.value = enabler.value;
                             fireEvent(ecPayflowEnabler, "change");
                             if (ecPayflowEnabler.value == 1) {
-                                if (typeof ecEnabler != "undefined") {
+                                if (ecEnabler) {
                                     var ecEnablerScopeElement = adminSystemConfig.getScopeElement(ecEnabler);
                                     ecEnabler.value = 1;
                                     if (ecEnablerScopeElement && ecEnablerScopeElement.checked) {
@@ -70,26 +70,25 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                                 }
                             }
                         }
-                        if (!isEvent && ecPayflowEnabler.value == 1 && typeof ecEnabler != "undefined") {
-                            var ecSolution = $$(".pp-method-express")[0];
-                            if (typeof ecSolution != "undefined" && !$(ecSolution).hasClassName("enabled")) {
-                                ecSolution.addClassName("enabled");
+                        if (!isEvent && ecPayflowEnabler.value == 1 && ecEnabler) {
+                            var ecSolution = document.querySelector(".pp-method-express");
+                            if (ecSolution && !ecSolution.classList.contains("enabled")) {
+                                ecSolution.classList.add("enabled");
                             }
                         }
                     },
                     onChangeEnabler: function(event) {
-                        paypalConflictsObject.checkPaymentConflicts($(Event.element(event)), "change");
+                        paypalConflictsObject.checkPaymentConflicts(event.target, "change");
                     },
                     onClickEnablerScope: function(event) {
-                        paypalConflictsObject.checkPaymentConflicts(
-                            $(adminSystemConfig.getUpTr($(Event.element(event))).select(".paypal-enabler")[0]),
-                            "click"
-                        );
+                        var tr = adminSystemConfig.getUpTr(event.target);
+                        var enabler = tr.querySelector(".paypal-enabler");
+                        paypalConflictsObject.checkPaymentConflicts(enabler, "click");
                     },
                     getSharedElements: function(element) {
                         var sharedElements = [];
                         adminSystemConfig.mapClasses(element, true, function(elementClassName) {
-                            $$("." + elementClassName).each(function(sharedElement) {
+                            document.querySelectorAll("." + elementClassName).forEach(function(sharedElement) {
                                 if (sharedElements.indexOf(sharedElement) == -1) {
                                     sharedElements.push(sharedElement);
                                 }
@@ -105,31 +104,31 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                         var handler = isChange
                             ? paypalConflictsObject.onChangeEnabler
                             : paypalConflictsObject.onClickEnablerScope;
-                        paypalConflictsObject.getSharedElements(element).each(function(sharedElement) {
-                            Event.stopObserving(sharedElement, action, handler);
+                        paypalConflictsObject.getSharedElements(element).forEach(function(sharedElement) {
+                            sharedElement.removeEventListener(action, handler);
                             if (isChange) {
                                 sharedElement.value = element.value;
-                                if ($(sharedElement).requiresObj) {
-                                    $(sharedElement).requiresObj.indicateEnabled();
+                                if (sharedElement.requiresObj) {
+                                    sharedElement.requiresObj.indicateEnabled();
                                 }
                             }
                         });
                         if (isChange) {
                             fireEvent(element, "change");
                         } else {
-                            $(element).click();
+                            element.click();
                         }
-                        paypalConflictsObject.getSharedElements(element).each(function(sharedElement) {
-                            Event.observe(sharedElement, action, handler);
+                        paypalConflictsObject.getSharedElements(element).forEach(function(sharedElement) {
+                            sharedElement.addEventListener(action, handler);
                         });
                     },
                     ecCheckAvailability: function() {
-                        var ecButton = $$(".pp-method-express button.button")[0];
-                        if (typeof ecButton == "undefined") {
+                        var ecButton = document.querySelector(".pp-method-express button.button");
+                        if (!ecButton) {
                             return;
                         }
                         var couldBeConfigured = true;
-                        $$(".paypal-enabler").each(function(enabler) {
+                        document.querySelectorAll(".paypal-enabler").forEach(function(enabler) {
                             if (enabler.enablerObject.ecEnabler || enabler.enablerObject.ecConflicts
                                 || enabler.enablerObject.ecSeparate
                             ) {
@@ -148,11 +147,11 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                     // type could be "initial", "change", "click"
                     checkPaymentConflicts: function(enabler, type) {
                         var isEvent = (type != "initial");
-                        var ecEnabler = $$(".paypal-ec-enabler")[0];
+                        var ecEnabler = document.querySelector(".paypal-ec-enabler");
 
                         if (enabler.value == 0) {
                             if (!enabler.enablerObject.ecIndependent && type == "change") {
-                                if (typeof ecEnabler != "undefined" && ecEnabler.value == 1) {
+                                if (ecEnabler && ecEnabler.value == 1) {
                                     var ecEnablerScopeElement = adminSystemConfig.getScopeElement(ecEnabler);
                                     if (!ecEnablerScopeElement || !ecEnablerScopeElement.checked) {
                                         ecEnabler.value = 0;
@@ -168,9 +167,9 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                         var confirmationApproved = isEvent;
                         var confirmationShowed = false;
                         // check other solutions
-                        $$(".paypal-enabler").each(function(anotherEnabler) {
+                        document.querySelectorAll(".paypal-enabler").forEach(function(anotherEnabler) {
                             var anotherEnablerScopeElement = adminSystemConfig.getScopeElement(anotherEnabler);
-                            if (!confirmationApproved && isEvent || $(anotherEnabler) == enabler
+                            if (!confirmationApproved && isEvent || anotherEnabler == enabler
                                 || anotherEnabler.value == 0
                                 && (!anotherEnablerScopeElement || !anotherEnablerScopeElement.checked)
                             ) {
@@ -199,11 +198,11 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                         });
 
                         if (!enabler.enablerObject.ecIndependent) {
-                            if (!isEvent && (typeof ecEnabler == "undefined" || ecEnabler.value == 0)) {
+                            if (!isEvent && (!ecEnabler || ecEnabler.value == 0)) {
                                 if (!enabler.enablerObject.ecPayflow) {
                                     paypalConflictsObject.ecMissed = true;
                                 }
-                            } else if (isEvent && typeof ecEnabler != "undefined" && confirmationApproved) {
+                            } else if (isEvent && ecEnabler && confirmationApproved) {
                                 var ecEnablerScopeElement = adminSystemConfig.getScopeElement(ecEnabler);
                                 if (ecEnablerScopeElement && ecEnablerScopeElement.checked) {
                                     paypalConflictsObject.checklessEventAction(ecEnablerScopeElement, false);
@@ -224,8 +223,8 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                     },
 
                     handleBmlEnabler: function(event) {
-                        required = Event.element(event);
-                        var bml = $(required).bmlEnabler;
+                        required = event.target;
+                        var bml = required.bmlEnabler;
                         if (required.value == "1") {
                             bml.value = "1";
                         }
@@ -239,14 +238,14 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                         }
                         if (required.value != "1") {
                             bml.value = "0";
-                            $(bml).disable();
+                            bml.disabled = true;
                         }
-                        $(bml).requiresObj.indicateEnabled();
+                        bml.requiresObj.indicateEnabled();
                     }
                 };
 
                 // fill enablers with conflict data
-                $$(".paypal-enabler").each(function(enablerElement) {
+                document.querySelectorAll(".paypal-enabler").forEach(function(enablerElement) {
                     var enablerObj = {
                         ecIndependent: false,
                         ecConflicts: false,
@@ -254,7 +253,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                         ecSeparate: false,
                         ecPayflow: false
                     };
-                    $(enablerElement).classNames().each(function(className) {
+                    Array.from(enablerElement.classList).forEach(function(className) {
                         switch (className) {
                             case "paypal-ec-conflicts":
                                 enablerObj.ecConflicts = true;
@@ -276,16 +275,16 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                     });
                     enablerElement.enablerObject = enablerObj;
 
-                    Event.observe(enablerElement, "change", paypalConflictsObject.onChangeEnabler);
+                    enablerElement.addEventListener("change", paypalConflictsObject.onChangeEnabler);
                     var enablerScopeElement = adminSystemConfig.getScopeElement(enablerElement);
                     if (enablerScopeElement) {
-                        Event.observe(enablerScopeElement, "click", paypalConflictsObject.onClickEnablerScope);
+                        enablerScopeElement.addEventListener("click", paypalConflictsObject.onClickEnablerScope);
                     }
                 });
 
                 // initially uncheck payflow
-                var ecPayflowEnabler = $$(".paypal-ec-payflow-enabler")[0];
-                if (typeof ecPayflowEnabler != "undefined") {
+                var ecPayflowEnabler = document.querySelector(".paypal-ec-payflow-enabler");
+                if (ecPayflowEnabler) {
                     if (ecPayflowEnabler.value == 1) {
                         ecPayflowEnabler.value = 0;
                         fireEvent(ecPayflowEnabler, "change");
@@ -293,21 +292,21 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
 
                     var ecPayflowScopeElement = adminSystemConfig.getScopeElement(ecPayflowEnabler);
                     if (ecPayflowScopeElement && !ecPayflowScopeElement.checked) {
-                        $(ecPayflowScopeElement).click();
+                        ecPayflowScopeElement.click();
                     }
                 }
 
-                $$(".paypal-bml").each(function(bmlEnabler) {
-                    $(bmlEnabler).classNames().each(function(className) {
+                document.querySelectorAll(".paypal-bml").forEach(function(bmlEnabler) {
+                    Array.from(bmlEnabler.classList).forEach(function(className) {
                         if (className.indexOf("requires-") !== -1) {
-                            var required = $(className.replace("requires-", ""));
+                            var required = document.getElementById(className.replace("requires-", ""));
                             required.bmlEnabler = bmlEnabler;
-                            Event.observe(required, "change", paypalConflictsObject.handleBmlEnabler);
+                            required.addEventListener("change", paypalConflictsObject.handleBmlEnabler);
                         }
                     });
                 });
 
-                $$(".paypal-enabler").each(function(enablerElement) {
+                document.querySelectorAll(".paypal-enabler").forEach(function(enablerElement) {
                     paypalConflictsObject.checkPaymentConflicts(enablerElement, "initial");
                     paypalConflictsObject.toggleBmlEnabler(enablerElement);
                 });
@@ -325,16 +324,15 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                     }, 1);
                 }
 
-                $$(".requires").each(function(dependent) {
-                    var $dependent = $(dependent);
-                    if ($dependent.hasClassName("paypal-ec-enabler")) {
-                        $dependent.requiresObj.callback = function(required) {
-                            if ($(required).hasClassName("paypal-enabler") && required.value == 0) {
-                                $dependent.disable();
+                document.querySelectorAll(".requires").forEach(function(dependent) {
+                    if (dependent.classList.contains("paypal-ec-enabler")) {
+                        dependent.requiresObj.callback = function(required) {
+                            if (required.classList.contains("paypal-enabler") && required.value == 0) {
+                                dependent.disabled = true;
                             }
                         }
-                        $dependent.requiresObj.requires.each(function(required) {
-                            $dependent.requiresObj.callback(required);
+                        dependent.requiresObj.requires.forEach(function(required) {
+                            dependent.requiresObj.callback(required);
                         });
                     }
                 });
@@ -343,15 +341,15 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                 configForm.validator.options.onFormValidate = function(result, form) {
                     originalFormValidation(result, form);
                     if (result) {
-                        var ecPayflowEnabler = $$(".paypal-ec-payflow-enabler")[0];
-                        if (typeof ecPayflowEnabler == "undefined") {
+                        var ecPayflowEnabler = document.querySelector(".paypal-ec-payflow-enabler");
+                        if (!ecPayflowEnabler) {
                             return;
                         }
                         var ecPayflowScopeElement = adminSystemConfig.getScopeElement(ecPayflowEnabler);
-                        if ((typeof ecPayflowScopeElement == "undefined" || !ecPayflowScopeElement.checked)
+                        if ((!ecPayflowScopeElement || !ecPayflowScopeElement.checked)
                             && ecPayflowEnabler.value == 1
                         ) {
-                            $$(".paypal-ec-enabler").each(function(ecEnabler) {
+                            document.querySelectorAll(".paypal-ec-enabler").forEach(function(ecEnabler) {
                                 ecEnabler.value = 0;
                             });
                         }

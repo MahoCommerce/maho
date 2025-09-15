@@ -12,7 +12,6 @@
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
 OptionTemplateSelect = '<table class="border" cellpadding="0" cellspacing="0">'+
         '<input type="hidden" class="required-option-select-type-rows" name="validation_{{option_id}}_result" value="" >'+
         '<thead>'+
@@ -53,17 +52,18 @@ OptionTemplateSelectRow = '<tr id="product_option_{{id}}_select_{{select_id}}">'
             '<td class="last"><span title="Delete row"><?= $this->getDeleteButtonHtml() ?></span></td>'+
         '</tr>';
 
-selectOptionType = {
-    div : 'select_option_type_row',
-    itemCount : 0,
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
-    templateText : OptionTemplateSelectRow,
-    add : function(data) {
+const selectOptionType = {
+    div: 'select_option_type_row',
+    itemCount: 0,
+    templateSyntax: /(^|.|\r|\n)({{(\w+)}})/,
+    templateText: OptionTemplateSelectRow,
+    add: function(data) {
         this.template = new Template(this.templateText, this.templateSyntax);
+        let optionId;
 
-        if (data.target || data.srcElement) {//data is Event (work in IE and Firefox)
-            element = $(Event.findElement(data, 'button'));
-            optionId = element.readAttribute('id').sub('add_select_row_button_', '');
+        if (data.target || data.srcElement) { //data is Event (work in IE and Firefox)
+            const element = data.target.closest('button');
+            optionId = element.id.replace('add_select_row_button_', '');
             data = {};
             data.option_type_id = '-1';
             data.select_id = this.itemCount;
@@ -73,91 +73,117 @@ selectOptionType = {
             this.itemCount = data.item_count;
         }
 
-        data.id  = optionId;
+        data.id = optionId;
 
-        Element.insert($(this.div+'_'+data.id), {'bottom':this.template.evaluate(data)});
+        const container = document.getElementById(this.div + '_' + data.id);
+        if (container) {
+            container.insertAdjacentHTML('beforeend', this.template.evaluate(data));
+        }
 
-        var inputs = $$('#product_option_'+data.id+'_select_'+data.select_id+' input', '#product_option_'+data.id+'_select_'+data.select_id+' select', '#product_option_'+data.id+'_select_'+data.select_id+' textarea');
-        inputs.each(function(el) { Event.observe(el, 'change', el.setHasChanges.bind(el)); });
-        var inputs = $$('#product_option_'+data.id+'_select_'+data.select_id+' button');
-        inputs.each(function(el) { Event.observe(el, 'click', el.setHasChanges.bind(el));  });
+        const inputs = document.querySelectorAll(
+            `#product_option_${data.id}_select_${data.select_id} input,` +
+            `#product_option_${data.id}_select_${data.select_id} select,` +
+            `#product_option_${data.id}_select_${data.select_id} textarea`
+        );
+        inputs.forEach(el => {
+            el.addEventListener('change', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+        });
+
+        const buttons = document.querySelectorAll(`#product_option_${data.id}_select_${data.select_id} button`);
+        buttons.forEach(el => {
+            el.addEventListener('click', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+        });
 
         if (data.checkboxScopeTitle) {
             //set disabled
-            if ($('product_option_'+data.id+'_select_'+data.select_id+'_title') && data.scopeTitleDisabled) {
-                $('product_option_'+data.id+'_select_'+data.select_id+'_title').disable();
+            const titleElement = document.getElementById(`product_option_${data.id}_select_${data.select_id}_title`);
+            if (titleElement && data.scopeTitleDisabled) {
+                titleElement.disabled = true;
             }
         }
         if (data.checkboxScopePrice) {
             //set disabled
-            if ($('product_option_'+data.id+'_select_'+data.select_id+'_price') && data.scopePriceDisabled) {
-                $('product_option_'+data.id+'_select_'+data.select_id+'_price').disable();
-                $('product_option_'+data.id+'_select_'+data.select_id+'_price_type').disable();
+            const priceElement = document.getElementById(`product_option_${data.id}_select_${data.select_id}_price`);
+            const priceTypeElement = document.getElementById(`product_option_${data.id}_select_${data.select_id}_price_type`);
+            if (priceElement && data.scopePriceDisabled) {
+                priceElement.disabled = true;
+            }
+            if (priceTypeElement && data.scopePriceDisabled) {
+                priceTypeElement.disabled = true;
             }
         }
 
         if (data.price_type) {
-            $A($('product_option_'+data.id+'_select_'+data.select_id+'_price_type').options).each(function(option){
-                if (option.value==data.price_type) option.selected = true;
-            });
+            const priceTypeSelect = document.getElementById(`product_option_${data.id}_select_${data.select_id}_price_type`);
+            if (priceTypeSelect) {
+                Array.from(priceTypeSelect.options).forEach(option => {
+                    if (option.value === data.price_type) option.selected = true;
+                });
+            }
         }
 
         this.itemCount++;
         this.bindRemoveButtons();
     },
-    remove : function(event){
-        var element = $(Event.findElement(event, 'tr'));
+    remove: function(event) {
+        const element = event.target.closest('tr');
 
-        if(element){
-            $(element.readAttribute('id')+'_is_delete').value = '1';
-            element.addClassName('no-display');
-            element.addClassName('ignore-validate');
-            element.hide();
+        if (element) {
+            const deleteInput = document.getElementById(element.id + '_is_delete');
+            if (deleteInput) {
+                deleteInput.value = '1';
+            }
+            element.classList.add('no-display', 'ignore-validate');
+            element.style.display = 'none';
         }
     },
-    bindRemoveButtons : function(){
-        var buttons = $$('.delete-select-row');
-        for(var i=0;i<buttons.length;i++){
-            if(!$(buttons[i]).binded){
-                $(buttons[i]).binded = true;
-                Event.observe(buttons[i], 'click', this.remove.bind(this));
+    bindRemoveButtons: function() {
+        const buttons = document.querySelectorAll('.delete-select-row');
+        buttons.forEach(button => {
+            if (!button.binded) {
+                button.binded = true;
+                button.addEventListener('click', this.remove.bind(this));
             }
-        }
+        });
     },
-    bindAddButton : function()
-    {
-        var buttons = $$('.add-select-row');
-        for(var i=0;i<buttons.length;i++){
-            if(!$(buttons[i]).binded){
-                $(buttons[i]).binded = true;
-                Event.observe(buttons[i], 'click', this.add.bind(this));
+    bindAddButton: function() {
+        const buttons = document.querySelectorAll('.add-select-row');
+        buttons.forEach(button => {
+            if (!button.binded) {
+                button.binded = true;
+                button.addEventListener('click', this.add.bind(this));
             }
-        }
+        });
     }
 }
 
-if ($('option_panel_type_select')) {
-    $('option_panel_type_select').remove();
+const optionPanelTypeSelect = document.getElementById('option_panel_type_select');
+if (optionPanelTypeSelect) {
+    optionPanelTypeSelect.remove();
 }
 
 selectOptionType.bindRemoveButtons();
 
 Validation.addAllThese([
     ['required-option-select-type-rows', <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Please add rows to option.')) ?>, function(v, elm) {
-            var optionContainerElm = elm.up('div.grid');
-            var selectTypesFlag = false;
-            selectTypeElements = $$('#'+optionContainerElm.id+' .select-type-title');
-            selectTypeElements.each(function(elm){
-                if (elm.id && elm.up('tr').visible()) {
+        const optionContainerElm = elm.closest('div.grid');
+        let selectTypesFlag = false;
+        if (optionContainerElm) {
+            const selectTypeElements = document.querySelectorAll(`#${optionContainerElm.id} .select-type-title`);
+            selectTypeElements.forEach(element => {
+                const row = element.closest('tr');
+                if (element.id && row && row.style.display !== 'none') {
                     selectTypesFlag = true;
                 }
             });
-            elm.advaiceContainer = optionContainerElm.id+'_advice';
+            elm.advaiceContainer = optionContainerElm.id + '_advice';
+        }
         return selectTypesFlag;
-}]]);
+    }]
+]);
 
-if($('add_select_row_button')){
-    Event.observe('add_select_row_button', 'click', selectOptionType.add.bind(selectOptionType));
+const addSelectRowButton = document.getElementById('add_select_row_button');
+if (addSelectRowButton) {
+    addSelectRowButton.addEventListener('click', selectOptionType.add.bind(selectOptionType));
 }
-//]]>
 </script>
