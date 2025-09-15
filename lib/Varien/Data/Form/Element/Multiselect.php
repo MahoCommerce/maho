@@ -115,14 +115,14 @@ class Varien_Data_Form_Element_Multiselect extends Varien_Data_Form_Element_Abst
         $result .= '<script type="text/javascript">' . "\n";
         $result .= '   var ' . $this->getJsObjectName() . ' = {' . "\n";
         $result .= '     selectAll: function() { ' . "\n";
-        $result .= '         var sel = $("' . $this->getHtmlId() . '");' . "\n";
+        $result .= '         var sel = document.getElementById("' . $this->getHtmlId() . '");' . "\n";
         $result .= '         for(var i = 0; i < sel.options.length; i ++) { ' . "\n";
         $result .= '             sel.options[i].selected = true; ' . "\n";
         $result .= '         } ' . "\n";
         $result .= '         return false; ' . "\n";
         $result .= '     },' . "\n";
         $result .= '     deselectAll: function() {' . "\n";
-        $result .= '         var sel = $("' . $this->getHtmlId() . '");' . "\n";
+        $result .= '         var sel = document.getElementById("' . $this->getHtmlId() . '");' . "\n";
         $result .= '         for(var i = 0; i < sel.options.length; i ++) { ' . "\n";
         $result .= '             sel.options[i].selected = false; ' . "\n";
         $result .= '         } ' . "\n";
