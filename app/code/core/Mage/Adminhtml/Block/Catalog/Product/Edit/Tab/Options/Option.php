@@ -6,23 +6,17 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_Adminhtml_Block_Widget
 {
     protected $_product;
-
     protected $_productInstance;
-
     protected $_values;
-
     protected $_itemCount = 1;
 
-    /**
-     * Class constructor
-     */
     public function __construct()
     {
         parent::__construct();
@@ -103,7 +97,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
             'delete_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label' => Mage::helper('catalog')->__('Delete Option'),
+                    'label' => Mage::helper('catalog')->__('Delete'),
                     'class' => 'delete delete-product-option ',
                 ]),
         );

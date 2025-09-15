@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,22 +28,6 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
      * @var Varien_Data_Form_Element_Abstract|null
      */
     protected $_element = null;
-
-    /**
-     * List of customer groups
-     *
-     * @deprecated since 1.7.0.0
-     * @var array|null
-     */
-    protected $_customerGroups = null;
-
-    /**
-     * List of websites
-     *
-     * @deprecated since 1.7.0.0
-     * @var array|null
-     */
-    protected $_websites = null;
 
     /**
      * List of bundle product options
@@ -159,7 +143,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
             'option_delete_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label' => Mage::helper('catalog')->__('Delete Option'),
+                    'label' => Mage::helper('catalog')->__('Delete'),
                     'class' => 'delete delete-product-option',
                     'on_click' => 'bOption.remove(event)',
                 ]),

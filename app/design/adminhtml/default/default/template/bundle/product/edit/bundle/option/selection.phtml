@@ -5,19 +5,14 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * @see Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection
- * @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection $this
- */
+/** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
-
-var bundleTemplateBox = '<table class="border" cellpadding="0" cellspacing="0">' +
+const bundleTemplateBox = '<table class="border" cellpadding="0" cellspacing="0">' +
     '    <thead>' +
     '        <tr class="headings">' +
     '            <th><?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Name')) ?></th>' +
@@ -36,11 +31,11 @@ var bundleTemplateBox = '<table class="border" cellpadding="0" cellspacing="0">'
     '    </tbody>' +
     '</table>';
 
-var bundleTemplateRow ='<td>' +
+const bundleTemplateRow ='<td>' +
                 '    <input type="hidden" id="<?= $this->getFieldId() ?>_id_{{index}}" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][selection_id]" value="{{selection_id}}">' +
                 '    <input type="hidden" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][option_id]" value="{{option_id}}">' +
                 '    <input type="hidden" class="product" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][product_id]" value="{{product_id}}">' +
-                '    <input type="hidden" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][delete]" value="" class="delete">' +
+                '    <input type="hidden" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][delete]" value="{{delete}}" class="delete">' +
                 '    {{name}}<br />' +
                 '   <div  class="nobr">' +
                 '        <strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <a href="<?= $this->getUrl('*/catalog_product/edit', ['store' => $this->getRequest()->getParam('store')]) ?>id/{{product_id}}/">{{sku}}</a>' +
@@ -59,73 +54,100 @@ var bundleTemplateRow ='<td>' +
                 '<td><input class="input-text required-entry validate-greater-zero-based-on-option validate-zero-or-greater" type="text" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][selection_qty]" value="{{selection_qty}}"></td>' +
                 '<td class="qty-box"><?= $this->getQtyTypeSelectHtml() ?></td>' +
                 '<td><input class="input-text required-entry validate-zero-or-greater" type="text" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][position]" value="{{position}}"></td>' +
-                '<td class="a-center"><input onclick="bSelection.checkGroup(event)" type="{{option_type}}" class="default" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][is_default]" value="1" {{checked}}></td>' +
+                '<td class="a-center"><input onclick="window.bSelection.checkGroup(event)" type="{{option_type}}" class="default" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][is_default]" value="1" {{checked}}></td>' +
                 '<td class="last"><span title="Delete Row"><?= $this->getSelectionDeleteButtonHtml() ?></span></td>';
 
-Bundle.Selection = Class.create();
-Bundle.Selection.prototype = {
-    idLabel : '<?= $this->getFieldId() ?>',
-    scopePrice : <?= (int)$this->isUsedWebsitePrice() ?>,
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
-    templateBox : '',
-    templateRow : '',
-    itemsCount : 0,
-    row : null,
-    gridSelection : new Hash(),
+class BundleSelection {
+    constructor() {
+        this.idLabel = '<?= $this->getFieldId() ?>';
+        this.scopePrice = <?= (int)$this->isUsedWebsitePrice() ?>;
+        this.templateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
+        this.templateBox = '';
+        this.templateRow = '';
+        this.itemsCount = 0;
+        this.row = null;
+        this.gridSelection = new Map();
 
-    initialize : function() {
+        this.initialize();
+    }
+
+    initialize() {
         this.templateBox = '<div class="grid tier form-list" id="' + this.idLabel + '_box_{{parentIndex}}">' + bundleTemplateBox + '</div>';
-
         this.templateRow = '<tr class="selection" id="' + this.idLabel + '_row_{{index}}">' + bundleTemplateRow + '</tr>';
-    },
+    }
 
-    showSearch : function(event) {
-        var element = Event.findElement(event, 'div');
-        var parts = element.id.split('_');
+    showSearch(event) {
+        const element = event.target.closest('div');
+        const parts = element.id.split('_');
 
-        var products = new Array();
-
-        var inputs = $A($$('#' + element.id + ' tr.selection input.product'));
-        for (i=0; i<inputs.length; i++) {
+        const products = [];
+        const inputs = document.querySelectorAll('#' + element.id + ' tr.selection input.product');
+        for (let i = 0; i < inputs.length; i++) {
             products.push(inputs[i].value);
         }
 
-        this.gridSelection.set(parts[2], $H({}));
+        this.gridSelection.set(parts[2], new Map());
 
-        new Ajax.Updater(bOption.idLabel + '_search_' + parts[2], '<?= $this->getSelectionSearchUrl() ?>', {
-            method: 'post',
-            parameters : {'index' : parts[2], 'products[]' : products, 'form_key': FORM_KEY},
-            evalScripts : true
+        const formData = new FormData();
+        formData.append('index', parts[2]);
+        products.forEach(product => formData.append('products[]', product));
+        formData.append('form_key', FORM_KEY);
+
+        mahoFetch('<?= $this->getSelectionSearchUrl() ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(html => {
+            document.getElementById(bOption.idLabel + '_search_' + parts[2]).innerHTML = html;
+            const scripts = document.getElementById(bOption.idLabel + '_search_' + parts[2]).querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                newScript.textContent = script.textContent;
+                document.head.appendChild(newScript);
+            });
         });
 
-        if (Event.element(event).tagName.toLowerCase() != 'button') {
-            var button = Event.element(event).up('button');
+        let button;
+        if (event.target.tagName.toLowerCase() !== 'button') {
+            button = event.target.closest('button');
         } else {
-            var button = Event.element(event);
+            button = event.target;
         }
-        button.hide();
-    },
+        button.style.display = 'none';
+    }
 
-    addRow : function (parentIndex, data) {
-        var box = null;
-        if (!(box = $(this.idLabel + '_box_' + parentIndex))) {
+    addRow(parentIndex, data) {
+        let box = document.getElementById(this.idLabel + '_box_' + parentIndex);
+        if (!box) {
             this.addBox(parentIndex);
-            box = $(this.idLabel + '_box_' + parentIndex);
+            box = document.getElementById(this.idLabel + '_box_' + parentIndex);
         } else {
-            box.show();
+            box.style.display = 'block';
         }
 
-        var option_type = $(bOption.idLabel + '_' + parentIndex + '_type');
+        const optionType = document.getElementById(bOption.idLabel + '_' + parentIndex + '_type');
 
         if (!data) {
-            var data = {};
+            data = {};
         }
+
+        // Ensure required fields have default values - explicit initialization
+        data.product_id = data.product_id || '';
+        data.selection_id = data.selection_id || '';
+        data.option_id = data.option_id || '';
+        data.name = data.name || '';
+        data.sku = data.sku || '';
+        data.position = data.position || 0;
+        data.is_default = data.is_default || 0;
+
+        // Always set delete field - critical for form submission
+        data.delete = '0';
 
         if (data.selection_qty) {
             data.selection_qty = parseFloat(data.selection_qty);
         }
 
-        if (data.can_read_price != undefined && !data.can_read_price) {
+        if (data.can_read_price !== undefined && !data.can_read_price) {
             data.selection_price_value = '';
         } else {
             data.selection_price_value = Number(data.selection_price_value).toFixed(2);
@@ -134,7 +156,7 @@ Bundle.Selection.prototype = {
         data.index = this.itemsCount++;
         data.parentIndex = parentIndex;
 
-        if (option_type.value == 'multi' || option_type.value == 'checkbox') {
+        if (optionType && optionType.value && (optionType.value === 'multi' || optionType.value === 'checkbox')) {
             data.option_type = 'checkbox';
         } else {
             data.option_type = 'radio';
@@ -144,28 +166,35 @@ Bundle.Selection.prototype = {
             data.checked = 'checked="checked"';
         }
 
-        this.template = new Template(this.templateRow, this.templateSyntax);
-        var tbody = $$('#' + this.idLabel + '_box_' + parentIndex + ' tbody');
-
-        Element.insert(tbody[0], {'bottom':this.template.evaluate(data)});
-
-        if (typeof data.selection_price_type !== 'undefined') {
-            $A($(this.idLabel + '_'+data.index+'_price_type').options).each(function(option){
-                if (option.value==data.selection_price_type) option.selected = true;
-            });
-        }
+        const html = this.templateRow.replace(/{{(\w+)}}/g, (match, key) => {
+            return data.hasOwnProperty(key) ? data[key] : '';
+        });
+        const tbody = document.querySelector('#' + this.idLabel + '_box_' + parentIndex + ' tbody');
+        tbody.insertAdjacentHTML('beforeend', html);
 
         if (typeof data.selection_price_type !== 'undefined') {
-            $A($(this.idLabel + '_'+data.index+'_can_change_qty').options).each(function(option){
-                if (option.value==data.selection_can_change_qty) option.selected = true;
-            });
+            const priceTypeSelect = document.getElementById(this.idLabel + '_' + data.index + '_price_type');
+            if (priceTypeSelect) {
+                Array.from(priceTypeSelect.options).forEach(option => {
+                    if (option.value === data.selection_price_type) option.selected = true;
+                });
+            }
         }
 
-        var checkbox = $(this.idLabel + '_'+data.index+'_price_scope');
+        if (typeof data.selection_can_change_qty !== 'undefined') {
+            const qtySelect = document.getElementById(this.idLabel + '_' + data.index + '_can_change_qty');
+            if (qtySelect) {
+                Array.from(qtySelect.options).forEach(option => {
+                    if (option.value === data.selection_can_change_qty) option.selected = true;
+                });
+            }
+        }
+
+        const checkbox = document.getElementById(this.idLabel + '_' + data.index + '_price_scope');
         if (checkbox && this.scopePrice) {
             if (data.price_scope === undefined) {
-                checkbox.up().hide();
-            } else if(!data.price_scope) {
+                checkbox.closest('div').style.display = 'none';
+            } else if (!data.price_scope) {
                 checkbox.checked = true;
                 this.addScope(null, checkbox);
             }
@@ -173,179 +202,168 @@ Bundle.Selection.prototype = {
 
         this.bindScopeCheckbox();
 
-        if (option_type.value == 'multi' || option_type.value == 'checkbox') {
-            /**
-             * Hide not needed elements (user defined qty select box)
-             */
-            inputs = $A($$('#' + this.idLabel + '_box_' + data.parentIndex + ' .qty-box'));
-            inputs.each(
-                function(elem){
-                    elem.hide();
-                }
-            );
+        if (optionType && optionType.value && (optionType.value === 'multi' || optionType.value === 'checkbox')) {
+            const qtyBoxes = document.querySelectorAll('#' + this.idLabel + '_box_' + data.parentIndex + ' .qty-box');
+            qtyBoxes.forEach(elem => elem.style.display = 'none');
         }
 
-        if (!$('price_type') || $('price_type').value != '1') {
-            /**
-             * Hide not needed elements (price type select and price input)
-             */
-            inputs = $A($$('#' + this.idLabel + '_box_' + data.parentIndex + ' .price-type-box'));
-            inputs.each(
-                function(elem){
-                    elem.hide();
-                }
-            );
+        const priceTypeElement = document.getElementById('price_type');
+        if (!priceTypeElement || priceTypeElement.value !== '1') {
+            const priceTypeBoxes = document.querySelectorAll('#' + this.idLabel + '_box_' + data.parentIndex + ' .price-type-box');
+            priceTypeBoxes.forEach(elem => elem.style.display = 'none');
         }
 
-        var inputs = $$('#bundle_option_' + data.parentIndex + ' input');
-        inputs.each(function(el) { Event.observe(el, 'change', el.setHasChanges.bind(el));  } )
-        var inputs = $$('#bundle_option_' + data.parentIndex + ' button.delete');
-        inputs.each(function(el) { Event.observe(el, 'click', el.setHasChanges.bind(el));  } )
-    },
+        const inputs = document.querySelectorAll('#bundle_option_' + data.parentIndex + ' input');
+        inputs.forEach(el => {
+            el.addEventListener('change', () => el.setHasChanges?.());
+        });
 
-    bindScopeCheckbox : function(){
-        var checkboxes = $$('.bundle-option-price-scope-checkbox');
-        for (var i=0;i<checkboxes.length;i++) {
-            if (!$(checkboxes[i]).binded) {
-                $(checkboxes[i]).binded = true;
-                Event.observe(checkboxes[i], 'click', this.addScope.bind(this));
+        const deleteButtons = document.querySelectorAll('#bundle_option_' + data.parentIndex + ' button.delete');
+        deleteButtons.forEach(el => {
+            el.addEventListener('click', () => el.setHasChanges?.());
+        });
+    }
+
+    bindScopeCheckbox() {
+        const checkboxes = document.querySelectorAll('.bundle-option-price-scope-checkbox');
+        checkboxes.forEach(checkbox => {
+            if (!checkbox.binded) {
+                checkbox.binded = true;
+                checkbox.addEventListener('click', (event) => this.addScope(event));
             }
-        }
-    },
+        });
+    }
 
-    addScope : function(event, element){
-        if (element == undefined) {
-            element = $(Event.element(event));
+    addScope(event, element) {
+        if (element === undefined) {
+            element = event.target;
         }
-        var priceValue = $(element.id.sub('scope', 'value'));
-        var priceType = $(element.id.sub('scope', 'type'));
+        const priceValue = document.getElementById(element.id.replace('scope', 'value'));
+        const priceType = document.getElementById(element.id.replace('scope', 'type'));
 
         if (element.checked) {
-            priceValue.disable();
-            priceType.disable();
+            priceValue.disabled = true;
+            priceType.disabled = true;
         } else {
-            priceValue.enable();
-            priceType.enable();
+            priceValue.disabled = false;
+            priceType.disabled = false;
         }
-    },
+    }
 
-    addBox : function (parentIndex) {
-        var div = $(bOption.idLabel + '_' + parentIndex)
-        this.template = new Template(this.templateBox, this.templateSyntax);
-        var data = {'parentIndex' : parentIndex};
-        Element.insert(div, {'bottom':this.template.evaluate(data)});
-    },
+    addBox(parentIndex) {
+        const div = document.getElementById(bOption.idLabel + '_' + parentIndex);
+        const html = this.templateBox.replace(/{{parentIndex}}/g, parentIndex);
+        div.insertAdjacentHTML('beforeend', html);
+    }
 
-    remove : function(event) {
-        var element = Event.findElement(event, 'tr');
-        var container = Event.findElement(event, 'div');
+    remove(event) {
+        const element = event.target.closest('tr');
+        const container = event.target.closest('div');
 
         if (element) {
-            Element.select(element, '.delete').each(function(elem){elem.value='1'});
-            Element.select(element, ['input', 'select']).each(function(elem){elem.hide()});
-            Element.removeClassName(element, 'selection');
-            Element.hide(element);
+            element.querySelectorAll('.delete').forEach(elem => elem.value = '1');
+            element.querySelectorAll('input, select').forEach(elem => elem.style.display = 'none');
+            element.classList.remove('selection');
+            element.style.display = 'none';
 
             if (container) {
-                if ($$('#' + container.id + ' tr.selection')) {
-                    if (!$$('#' + container.id + ' tr.selection').length) {
-                        container.hide();
-                    }
+                const selections = container.querySelectorAll('tr.selection');
+                if (selections.length === 0) {
+                    container.style.display = 'none';
                 }
             }
         }
-    },
+    }
 
-    checkGroup : function(event) {
-        var element = Event.element(event);
-        if (element.type == 'radio') {
-            var box = element.up('div');
+    checkGroup(event) {
+        const element = event.target;
+        if (element.type === 'radio') {
+            const box = element.closest('div');
+            const inputs = document.querySelectorAll('div#' + box.id + ' input.default');
 
-            var inputs = $$('div#' + box.id + ' input.default');
-            if (inputs) {
-                for (i=0; i< inputs.length; i++) {
-                    if (inputs[i].name != element.name) {
-                        inputs[i].checked = false;
-                    }
+            inputs.forEach(input => {
+                if (input.name !== element.name) {
+                    input.checked = false;
                 }
-            }
+            });
         }
-    },
+    }
 
-    productGridAddSelected : function(event) {
-        var element = Event.findElement(event, 'button');
-        var parts = element.id.split('_');
+    productGridAddSelected(event) {
+        const element = event.target.closest('button');
+        const parts = element.id.split('_');
 
-        $(bOption.idLabel + '_search_' + parts[2]).innerHTML = '';
-        $(bOption.idLabel + '_' + parts[2] + '_add_button').show();
+        document.getElementById(bOption.idLabel + '_search_' + parts[2]).innerHTML = '';
+        document.getElementById(bOption.idLabel + '_' + parts[2] + '_add_button').style.display = 'block';
 
-        this.gridSelection.get(parts[2]).each(
-            function(pair) {
-                var qty = pair.value.get('qty');
-                var data = {
-                    'name' : pair.value.get('name'),
-                    'selection_price_value' : 0,
-                    'selection_qty' : (qty == '' ? 1 : qty),
-                    'sku' : pair.value.get('sku'),
-                    'position' : 0,
-                    'product_id' : pair.key,
-                    'option_id' : $(bOption.idLabel + '_id_' + parts[2]).value
+        const selections = this.gridSelection.get(parts[2]);
+        if (selections) {
+            selections.forEach((value, key) => {
+                const qty = value.get('qty');
+                const data = {
+                    'name': value.get('name'),
+                    'selection_price_value': 0,
+                    'selection_qty': (qty === '' ? 1 : qty),
+                    'sku': value.get('sku'),
+                    'position': 0,
+                    'product_id': key,
+                    'option_id': document.getElementById(bOption.idLabel + '_id_' + parts[2]).value
                 };
-                bSelection.addRow(parts[2], data);
-            }
-        );
-    },
-
-    productGridRowInit : function(grid, row){
-        var checkbox = $(row).getElementsByClassName('checkbox')[0];
-        var inputs = $(row).getElementsByClassName('input-text');
-        for (var i = 0; i < inputs.length; i++) {
-            inputs[i].checkbox = checkbox;
-            Event.observe(inputs[i], 'keyup', this.productGridRowInputChange.bind(this));
-            Event.observe(inputs[i], 'change', this.productGridRowInputChange.bind(this));
+                window.bSelection.addRow(parts[2], data);
+            });
         }
-    },
+    }
 
-    productGridCheckboxCheck : function(grid, element, checked) {
-        var id = element.up('table').id.split('_')[4];
+    productGridRowInit(grid, row) {
+        const checkbox = row.querySelector('.checkbox');
+        const inputs = row.querySelectorAll('.input-text');
+        inputs.forEach(input => {
+            input.checkbox = checkbox;
+            input.addEventListener('keyup', this.productGridRowInputChange.bind(this));
+            input.addEventListener('change', this.productGridRowInputChange.bind(this));
+        });
+    }
+
+    productGridCheckboxCheck(grid, element, checked) {
+        const id = element.closest('table').id.split('_')[4];
         if (element.value > 0) {
             if (element.checked) {
-                var tr = element.parentNode.parentNode;
-                if (!this.gridSelection.get(id)) {
-                    this.gridSelection.set(id, new Hash());
+                const tr = element.closest('tr');
+                if (!this.gridSelection.has(id)) {
+                    this.gridSelection.set(id, new Map());
                 }
-                this.gridSelection.get(id).set(element.value, $H({}));
-                this.gridSelection.get(id).get(element.value).set('name', tr.select('td.name')[0].innerHTML);
-                this.gridSelection.get(id).get(element.value).set('qty', tr.select('input.qty')[0].value);
-                this.gridSelection.get(id).get(element.value).set('sku', tr.select('td.sku')[0].innerHTML);
+                const selection = new Map();
+                selection.set('name', tr.querySelector('td.name').innerHTML);
+                selection.set('qty', tr.querySelector('input.qty').value);
+                selection.set('sku', tr.querySelector('td.sku').innerHTML);
+                this.gridSelection.get(id).set(element.value, selection);
             } else {
-                this.gridSelection.get(id).unset(element.value);
+                this.gridSelection.get(id).delete(element.value);
             }
         }
-    },
+    }
 
-    productGridRowClick : function(grid, event) {
-        var trElement = Event.findElement(event, 'tr');
-        var isInput = Event.element(event).tagName == 'INPUT';
+    productGridRowClick(grid, event) {
+        const trElement = event.target.closest('tr');
+        const isInput = event.target.tagName === 'INPUT';
         if (trElement) {
-            var checkbox = Element.select(trElement, 'input');
-            if (checkbox[0]) {
-                var checked = isInput ? checkbox[0].checked : !checkbox[0].checked;
-                grid.setCheckboxChecked(checkbox[0], checked);
+            const checkbox = trElement.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                const checked = isInput ? checkbox.checked : !checkbox.checked;
+                grid.setCheckboxChecked(checkbox, checked);
             }
         }
-    },
+    }
 
-    productGridRowInputChange : function(event) {
-        var element = Event.element(event);
+    productGridRowInputChange(event) {
+        const element = event.target;
         if (!element.checkbox.checked) {
             return;
         }
-        var id = element.up('table').id.split('_')[4];
+        const id = element.closest('table').id.split('_')[4];
         this.gridSelection.get(id).get(element.checkbox.value).set('qty', element.value);
     }
 }
 
-bSelection = new Bundle.Selection();
-//]]>
+window.bSelection = new BundleSelection();
 </script>

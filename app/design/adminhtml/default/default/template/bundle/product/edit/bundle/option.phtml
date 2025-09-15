@@ -5,60 +5,65 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option $this */
 ?>
 <script type="text/javascript">
-optionTemplate = '<div id="<?= $this->getFieldId() ?>_{{index}}"  class="option-box"> ' +
-'<div class="option-title"> ' +
-    '<label for="<?= $this->getFieldName() ?>[{{index}}][title]"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Default Title')) ?> <span class="required">*</span></label>' +
-    <?php if ($this->isDefaultStore()): ?>
-    '<input class="input-text required-entry" type="text" name="<?= $this->getFieldName() ?>[{{index}}][title]" id="id_<?= $this->getFieldName() ?>_{{index}}_title" value="{{title}}">' +
-    <?php else: ?>
-    '<input class="input-text required-entry" type="text" name="<?= $this->getFieldName() ?>[{{index}}][default_title]" id="id_<?= $this->getFieldName() ?>_{{index}}_default_title" value="{{default_title}}">' +
-    <?php endif ?>
-'<?= $this->jsQuoteEscape($this->getOptionDeleteButtonHtml()) ?>' +
-'</div>' +
-    '<table class="option-header" cellpadding="0" cellspacing="0">' +
-        '<thead>' +
-            '<tr>' +
-                <?php if (!$this->isDefaultStore()): ?>
-                '<th class="opt-title"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Store View Title')) ?>  <span class="required">*</span></th>' +
-                <?php endif ?>
-                '<th class="opt-type"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Input Type')) ?></th>' +
-                '<th class="opt-req"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Is Required')) ?></th>' +
-                '<th class="opt-order"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Position')) ?></th>' +
-                '<th>&nbsp;</th>' +
-            '</tr>' +
-        '</thead>' +
-        '<tbody>' +
-            '<tr>' +
-                '<input type="hidden" id="<?= $this->getFieldId() ?>_id_{{index}}" name="<?= $this->getFieldName() ?>[{{index}}][option_id]" value="{{option_id}}">' +
-                '<input type="hidden" name="<?= $this->getFieldName() ?>[{{index}}][delete]" value="" class="delete">' +
-                <?php if (!$this->isDefaultStore()): ?>
-                '<td><input class="input-text required-entry" type="text" name="<?= $this->getFieldName() ?>[{{index}}][title]" id="id_<?= $this->getFieldName() ?>_{{index}}_title_store" value="{{title}}"></td>' +
-                <?php endif ?>
-                '<td><?= $this->getTypeSelectHtml() ?></td>' +
-                '<td><?= $this->getRequireSelectHtml() ?></td>' +
-                '<td><input class="input-text validate-zero-or-greater" type="text" name="<?= $this->getFieldName() ?>[{{index}}][position]" value="{{position}}"></td>' +
-                '<td>&nbsp;<?= $this->jsQuoteEscape($this->getAddSelectionButtonHtml()) ?></td>' +
-            '</tr>' +
-        '</tbody>' +
-    '</table>' +
-    '<div id="<?= $this->getFieldId() ?>_search_{{index}}">' +
-    '</div>' +
-'</div>';
+function createOptionTemplate(data) {
+    const typeSelectHtml = `<?= $this->getTypeSelectHtml() ?>`.replace(/\{\{index\}\}/g, data.index);
+    const requireSelectHtml = `<?= $this->getRequireSelectHtml() ?>`.replace(/\{\{index\}\}/g, data.index);
+    const addSelectionButtonHtml = `<?= $this->jsQuoteEscape($this->getAddSelectionButtonHtml()) ?>`.replace(/\{\{index\}\}/g, data.index);
+
+    return `<div id="<?= $this->getFieldId() ?>_${data.index}" class="option-box">
+        <div class="option-title">
+            <label for="<?= $this->getFieldName() ?>[${data.index}][title]"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Default Title')) ?> <span class="required">*</span></label>
+            <?php if ($this->isDefaultStore()): ?>
+            <input class="input-text required-entry" type="text" name="<?= $this->getFieldName() ?>[${data.index}][title]" id="id_<?= $this->getFieldName() ?>_${data.index}_title" value="${data.title || ''}">
+            <?php else: ?>
+            <input class="input-text required-entry" type="text" name="<?= $this->getFieldName() ?>[${data.index}][default_title]" id="id_<?= $this->getFieldName() ?>_${data.index}_default_title" value="${data.default_title || ''}">
+            <?php endif ?>
+            <?= $this->jsQuoteEscape($this->getOptionDeleteButtonHtml()) ?>
+        </div>
+        <table class="option-header" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <?php if (!$this->isDefaultStore()): ?>
+                    <th class="opt-title"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Store View Title')) ?> <span class="required">*</span></th>
+                    <?php endif ?>
+                    <th class="opt-type"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Input Type')) ?></th>
+                    <th class="opt-req"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Is Required')) ?></th>
+                    <th class="opt-order"><?= $this->jsQuoteEscape(Mage::helper('bundle')->__('Position')) ?></th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <input type="hidden" id="<?= $this->getFieldId() ?>_id_${data.index}" name="<?= $this->getFieldName() ?>[${data.index}][option_id]" value="${data.option_id || ''}">
+                    <input type="hidden" name="<?= $this->getFieldName() ?>[${data.index}][delete]" value="" class="delete">
+                    <?php if (!$this->isDefaultStore()): ?>
+                    <td><input class="input-text required-entry" type="text" name="<?= $this->getFieldName() ?>[${data.index}][title]" id="id_<?= $this->getFieldName() ?>_${data.index}_title_store" value="${data.title || ''}"></td>
+                    <?php endif ?>
+                    <td>${typeSelectHtml}</td>
+                    <td>${requireSelectHtml}</td>
+                    <td><input class="input-text validate-zero-or-greater" type="text" name="<?= $this->getFieldName() ?>[${data.index}][position]" value="${data.position || ''}"></td>
+                    <td>&nbsp;${addSelectionButtonHtml}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="<?= $this->getFieldId() ?>_search_${data.index}">
+        </div>
+    </div>`;
+}
 </script>
 
 <?= $this->getSelectionHtml() ?>
 
 <script type="text/javascript">
-
 function changeInputType(oldObject, oType) {
-    var newObject = document.createElement('input');
+    const newObject = document.createElement('input');
     newObject.type = oType;
     if(oldObject.size) newObject.size = oldObject.size;
     if(oldObject.value) newObject.value = oldObject.value;
@@ -66,160 +71,171 @@ function changeInputType(oldObject, oType) {
     if(oldObject.id) newObject.id = oldObject.id;
     if(oldObject.onclick) newObject.onclick = oldObject.onclick;
     if(oldObject.className) newObject.className = oldObject.className;
-    oldObject.parentNode.replaceChild(newObject,oldObject);
+    oldObject.parentNode.replaceChild(newObject, oldObject);
     return newObject;
 }
 
-Bundle.Option = Class.create();
-Bundle.Option.prototype = {
-    idLabel : '<?= $this->getFieldId() ?>',
-    top : '',
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
-    templateText : '',
-    itemsCount : 0,
-    initialize : function(template) {
-        this.templateText = template;
-        this.top = $('product_bundle_container_top');
-    },
+class BundleOption {
+    constructor() {
+        this.idLabel = '<?= $this->getFieldId() ?>';
+        this.top = null;
+        this.itemsCount = 0;
+        this.top = document.getElementById('product_bundle_container_top');
+    }
 
-    add : function(data) {
+    add(data) {
         if (!data) {
             data = {};
-            this.top = $('product_bundle_container_top');
+            this.top = document.getElementById('product_bundle_container_top');
         } else if (data.title) {
-            data.title = data.title.replace('"', "&quot;");
+            data.title = data.title.replace(/"/g, "&quot;");
         }
 
         data.index = this.itemsCount++;
 
-        this.template = new Template(this.templateText, this.templateSyntax);
+        const templateHtml = createOptionTemplate(data);
+        this.top.insertAdjacentHTML('afterend', templateHtml);
+        this.top = document.getElementById(this.idLabel + '_' + data.index);
 
-        Element.insert(this.top, {'after':this.template.evaluate(data)});
-
-        this.top = $(this.idLabel + '_' + data.index);
-
-        //set selected type
+        // Set selected type
         if (data.type) {
-            $A($(this.idLabel + '_'+data.index+'_type').options).each(function(option){
-                if (option.value==data.type) option.selected = true;
-            });
+            const typeSelect = document.getElementById(this.idLabel + '_' + data.index + '_type');
+            if (typeSelect) {
+                Array.from(typeSelect.options).forEach(option => {
+                    if (option.value === data.type) {
+                        option.selected = true;
+                    }
+                });
+            }
         }
 
-        //set selected is_require
+        // Set selected is_require
         if (typeof data.required !== 'undefined') {
-            $A($(this.idLabel + '_'+data.index+'_required').options).each(function(option){
-                if (option.value==data.required) option.selected = true;
-            });
+            const requiredSelect = document.getElementById(this.idLabel + '_' + data.index + '_required');
+            if (requiredSelect) {
+                Array.from(requiredSelect.options).forEach(option => {
+                    if (option.value == data.required) {
+                        option.selected = true;
+                    }
+                });
+            }
         }
-        // rebind change notifications
-        varienWindowOnload(true);
+
+        // Rebind change notifications
+        if (typeof varienWindowOnload === 'function') {
+            varienWindowOnload(true);
+        }
 
         return data.index;
-    },
+    }
 
-    remove : function(event){
-        var element = $(Event.findElement(event, 'div')).parentNode;
-        if(element){
-            Element.select(element, '.delete').each(function(elem){elem.value='1'});
-            Element.select(element, ['input', 'select']).each(function(elem){elem.hide(); elem.className = '';});
-            Element.hide(element);
+    remove(event) {
+        const targetDiv = event.target.closest('div');
+        const element = targetDiv ? targetDiv.parentNode : null;
+        if (element) {
+            element.querySelectorAll('.delete').forEach(elem => {
+                elem.value = '1';
+            });
+            element.querySelectorAll('input, select').forEach(elem => {
+                elem.style.display = 'none';
+                elem.className = '';
+            });
+            element.style.display = 'none';
         }
-    },
+    }
 
-    changeType : function(event) {
-        var element = Event.element(event);
-        parts = element.id.split('_');
-        i = parts[2];
-        if (element.value == 'multi' || element.value == 'checkbox') {
-            inputs = $A($$('#' + bSelection.idLabel + '_box_' + i + ' tr.selection input.default'));
-            inputs.each(
-                function(elem){
-                    //elem.type = "checkbox";
-                    changeInputType(elem, 'checkbox');
-                }
-            );
-            /**
-             * Hide not needed elements (user defined qty select box)
-             */
-            inputs = $A($$('#' + bSelection.idLabel + '_box_' + i + ' .qty-box'));
-            inputs.each(
-                function(elem){
-                    elem.hide();
-                }
-            );
+    changeType(event) {
+        const element = event.target;
+        const parts = element.id.split('_');
+        const i = parts[2];
+
+        if (element.value === 'multi' || element.value === 'checkbox') {
+            const inputs = document.querySelectorAll(`#${window.bSelection.idLabel}_box_${i} tr.selection input.default`);
+            inputs.forEach(elem => {
+                changeInputType(elem, 'checkbox');
+            });
+
+            // Hide not needed elements (user defined qty select box)
+            const qtyBoxes = document.querySelectorAll(`#${window.bSelection.idLabel}_box_${i} .qty-box`);
+            qtyBoxes.forEach(elem => {
+                elem.style.display = 'none';
+            });
 
         } else {
-            inputs = $A($$('#' + bSelection.idLabel + '_box_' + i + ' tr.selection input.default'));
-            have = false;
-            for (j=0; j< inputs.length; j++) {
-                //inputs[j].type = "radio";
-                changeInputType(inputs[j], 'radio');
-                if (inputs[j].checked && have) {
-                    inputs[j].checked = false;
-                } else {
+            const inputs = document.querySelectorAll(`#${window.bSelection.idLabel}_box_${i} tr.selection input.default`);
+            let have = false;
+            inputs.forEach(input => {
+                changeInputType(input, 'radio');
+                if (input.checked && have) {
+                    input.checked = false;
+                } else if (input.checked) {
                     have = true;
                 }
-            }
+            });
 
-            /**
-             * Show user defined select box
-             */
-            inputs = $A($$('#' + bSelection.idLabel + '_box_' + i + ' .qty-box'));
-            inputs.each(
-                function(elem){
-                    elem.show();
-                }
-            );
+            // Show user defined select box
+            const qtyBoxes = document.querySelectorAll(`#${window.bSelection.idLabel}_box_${i} .qty-box`);
+            qtyBoxes.forEach(elem => {
+                elem.style.display = '';
+            });
         }
-    },
+    }
 
-    priceTypeFixed : function() {
-        inputs = $A($$('.price-type-box'));
-        inputs.each(
-            function(elem){
-                elem.show();
-            }
-        );
-    },
+    priceTypeFixed() {
+        const inputs = document.querySelectorAll('.price-type-box');
+        inputs.forEach(elem => {
+            elem.style.display = '';
+        });
+    }
 
-    priceTypeDynamic : function() {
-        inputs = $A($$('.price-type-box'));
-        inputs.each(
-            function(elem){
-                elem.hide();
-            }
-        );
+    priceTypeDynamic() {
+        const inputs = document.querySelectorAll('.price-type-box');
+        inputs.forEach(elem => {
+            elem.style.display = 'none';
+        });
     }
 }
 
-var optionIndex = 0;
-bOption = new Bundle.Option(optionTemplate);
-//adding data to templates
-<?php foreach ($this->getOptions() as $_option): ?>
-    <?php $_option->setDefaultTitle($this->escapeHtml($_option->getDefaultTitle())); ?>
-    <?php $_option->setTitle($this->escapeHtml($_option->getTitle())); ?>
-    optionIndex = bOption.add(<?= $_option->toJson() ?>);
-    <?php if ($_option->getSelections()):?>
-        <?php foreach ($_option->getSelections() as $_selection): ?>
-        <?php $_selection->setName($this->escapeHtml($_selection->getName())); ?>
-        <?php $_selection->setSku($this->escapeHtml($_selection->getSku())); ?>
-        bSelection.addRow(optionIndex, <?= $_selection->toJson() ?>);
-        <?php endforeach ?>
-    <?php endif ?>
-<?php endforeach ?>
-/**
- * Adding event on price type select box of product to hide or show prices for selections
- */
+let optionIndex = 0;
+window.bOption = new BundleOption();
+
+// Adding data to templates
+function initBundleData() {
+    if (typeof window.bSelection === 'undefined') {
+        // bSelection not ready yet, wait and retry
+        setTimeout(initBundleData, 10);
+        return;
+    }
+
+    <?php foreach ($this->getOptions() as $_option): ?>
+        <?php $_option->setDefaultTitle($this->escapeHtml($_option->getDefaultTitle())); ?>
+        <?php $_option->setTitle($this->escapeHtml($_option->getTitle())); ?>
+        optionIndex = window.bOption.add(<?= $_option->toJson() ?>);
+        <?php if ($_option->getSelections()):?>
+            <?php foreach ($_option->getSelections() as $_selection): ?>
+            <?php $_selection->setName($this->escapeHtml($_selection->getName())); ?>
+            <?php $_selection->setSku($this->escapeHtml($_selection->getSku())); ?>
+            <?php $_selection->setDelete('0'); // Ensure delete field exists for existing selections ?>
+            window.bSelection.addRow(optionIndex, <?= $_selection->toJson() ?>);
+            <?php endforeach ?>
+        <?php endif ?>
+    <?php endforeach ?>
+}
+
+// Initialize bundle data when DOM is ready
+initBundleData();
+
+// Adding event on price type select box of product to hide or show prices for selections
 function togglePriceType() {
-    if ($('price_type').value == '1') {
-        bOption.priceTypeFixed();
+    const priceTypeElement = document.getElementById('price_type');
+    if (priceTypeElement && priceTypeElement.value === '1') {
+        window.bOption.priceTypeFixed();
     } else {
-        bOption.priceTypeDynamic();
+        window.bOption.priceTypeDynamic();
     }
 }
 
 togglePriceType();
-
-Event.observe('price_type', 'change', togglePriceType);
-
+const priceTypeElement = document.getElementById('price_type');
+priceTypeElement?.addEventListener('change', togglePriceType);
 </script>
