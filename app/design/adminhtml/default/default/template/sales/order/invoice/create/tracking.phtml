@@ -88,5 +88,5 @@ trackingControl = {
 </table>
 </div>
 <script type="text/javascript">
-trackingControl.template = new Template('<tr>' + document.getElementById('track_row_template').innerHTML.replace(/__index__/g, '#{index}') + '<\/tr>');
+trackingControl.template = new Template('<tr>' + document.getElementById('track_row_template').innerHTML.replace(/__index__/g, '{{index}}') + '<\/tr>', Template.HANDLEBARS_PATTERN);
 </script>

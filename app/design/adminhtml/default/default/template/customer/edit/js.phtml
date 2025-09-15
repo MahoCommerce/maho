@@ -10,7 +10,7 @@
 ?>
 <script type="text/javascript">
 function saveAndContinueEdit(urlTemplate) {
-        var template = new Template(urlTemplate, /(^|.|\r|\n)({{(\w+)}})/);
+        var template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
         var url = template.evaluate({tab_id:customer_info_tabsJsTabs.activeTab.id});
         editForm.submit(url);
 }

@@ -23995,12 +23995,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/permissions/userroles.phtml
 
 		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/adminhtml/default/default/template/promo/form.phtml
-
-		-
 			rawMessage: Variable $options might not be defined.
 			identifier: variable.undefined
 			count: 1

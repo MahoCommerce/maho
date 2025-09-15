@@ -70,7 +70,7 @@ var tierPriceRowTemplate = '<tr>'
     + '</tr>';
 
 const tierPriceControl = {
-    template: new Template(tierPriceRowTemplate, new RegExp('(^|.|\\r|\\n)({{\\s*(\\w+)\\s*}})', "")),
+    template: new Template(tierPriceRowTemplate, Template.HANDLEBARS_PATTERN),
     itemsCount: 0,
     addItem: function () {
         <?php if ($_readonly): ?>

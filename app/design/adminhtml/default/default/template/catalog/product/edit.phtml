@@ -36,7 +36,6 @@
     <div style="display:none"></div>
 </form>
 <script type="text/javascript">
-    const productTemplateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
     const productForm = new varienForm('product_edit_form', '<?= $this->getValidationUrl() ?>');
     productForm._processValidationResult = function(transport) {
         const response = JSON.parse(transport.responseText);
@@ -59,12 +58,12 @@
         }
     };
     function saveAndContinueEdit(urlTemplate) {
-        const template = new Template(urlTemplate, productTemplateSyntax);
+        const template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
         const url = template.evaluate({tab_id: product_info_tabsJsTabs.activeTab.id});
         productForm.submit(url);
     }
     function setSettings(urlTemplate, setElement, typeElement) {
-        const template = new Template(urlTemplate, productTemplateSyntax);
+        const template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
         const setElementObj = document.getElementById(setElement) || document.querySelector(`[name="${setElement}"]`);
         const typeElementObj = document.getElementById(typeElement) || document.querySelector(`[name="${typeElement}"]`);
         const setValue = setElementObj ? setElementObj.value : '';
@@ -88,7 +87,7 @@
         }
 
         if (productForm.validator.validate()) {
-            const template = new Template(urlTemplate, productTemplateSyntax);
+            const template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
             const url = template.evaluate({
                 attributes: btoa(attributes.join(',')).replace(/\//g, '%2F').replace(/=/g, '%3D')
             });

@@ -155,7 +155,7 @@ class ProductConfigure // Maho.Admin.Controller.ProductConfigurePopup
      */
     addListType(type, urls) {
         this.listTypes[type] ??= {};
-        Object.extend(this.listTypes[type], urls);
+        Object.assign(this.listTypes[type], urls);
         return this;
     }
 

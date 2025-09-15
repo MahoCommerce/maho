@@ -142,9 +142,9 @@
 
                     function sendImportData(data) {
                         if (!config.tpl) {
-                            config.tpl = new Template(config.template);
-                            config.tplTxt = new Template(config.text);
-                            config.tplSccTxt = new Template(config.successText);
+                            config.tpl = new Template(config.template.replace(/#{(\w+)}/g, '{{$1}}'), Template.HANDLEBARS_PATTERN);
+                            config.tplTxt = new Template(config.text.replace(/#{(\w+)}/g, '{{$1}}'), Template.HANDLEBARS_PATTERN);
+                            config.tplSccTxt = new Template(config.successText.replace(/#{(\w+)}/g, '{{$1}}'), Template.HANDLEBARS_PATTERN);
                         }
                         if (!document.getElementById("updatedRows")) {
                             const liFinished = document.getElementById("liFinished");

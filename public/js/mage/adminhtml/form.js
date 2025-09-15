@@ -369,30 +369,30 @@ class regionUpdater {
 
     setMarkDisplay(elem, display) {
         if(elem.parentNode.parentNode){
-            var marks = Element.select(elem.parentNode.parentNode, '.required');
+            var marks = elem.parentNode.parentNode.querySelectorAll('.required');
             if(marks[0]){
-                display ? marks[0].show() : marks[0].hide();
+                display ? marks[0].style.display = '' : marks[0].style.display = 'none';
             }
         }
     }
     sortSelect() {
         var elem = this.regionSelectEl;
         var tmpArray = new Array();
-        var currentVal = $(elem).value;
-        for (var i = 0; i < $(elem).options.length; i++) {
+        var currentVal = elem.value;
+        for (var i = 0; i < elem.options.length; i++) {
             if (i == 0) {
                 continue;
             }
             tmpArray[i-1] = new Array();
-            tmpArray[i-1][0] = $(elem).options[i].text;
-            tmpArray[i-1][1] = $(elem).options[i].value;
+            tmpArray[i-1][0] = elem.options[i].text;
+            tmpArray[i-1][1] = elem.options[i].value;
         }
         tmpArray.sort();
         for (var i = 1; i <= tmpArray.length; i++) {
             var op = new Option(tmpArray[i-1][0], tmpArray[i-1][1]);
-            $(elem).options[i] = op;
+            elem.options[i] = op;
         }
-        $(elem).value = currentVal;
+        elem.value = currentVal;
         return;
     }
 }
@@ -689,11 +689,11 @@ class formElementDependenceController {
 function onAddressCountryChanged(countryElement) {
     var zipElementId = countryElement.id.replace(/country_id/, 'postcode');
     // Ajax-request and normal content load compatibility
-    if ($(zipElementId) != undefined) {
-        setPostcodeOptional($(zipElementId), countryElement.value);
+    if (document.getElementById(zipElementId) != undefined) {
+        setPostcodeOptional(document.getElementById(zipElementId), countryElement.value);
     } else {
-        Event.observe(window, "load", function () {
-            setPostcodeOptional($(zipElementId), countryElement.value);
+        window.addEventListener("load", function () {
+            setPostcodeOptional(document.getElementById(zipElementId), countryElement.value);
         });
     }
 }

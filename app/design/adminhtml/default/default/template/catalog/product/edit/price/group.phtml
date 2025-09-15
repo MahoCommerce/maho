@@ -67,7 +67,7 @@ var groupPriceRowTemplate = '<tr>'
     + '</tr>';
 
 const groupPriceControl = {
-    template: new Template(groupPriceRowTemplate, new RegExp('(^|.|\\r|\\n)({{\\s*(\\w+)\\s*}})', '')),
+    template: new Template(groupPriceRowTemplate, Template.HANDLEBARS_PATTERN),
     itemsCount: 0,
     addItem: function () {
         <?php if ($_readonly): ?>

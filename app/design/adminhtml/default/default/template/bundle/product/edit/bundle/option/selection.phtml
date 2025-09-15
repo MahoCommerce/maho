@@ -61,7 +61,6 @@ class BundleSelection {
     constructor() {
         this.idLabel = '<?= $this->getFieldId() ?>';
         this.scopePrice = <?= (int)$this->isUsedWebsitePrice() ?>;
-        this.templateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
         this.templateBox = '';
         this.templateRow = '';
         this.itemsCount = 0;
