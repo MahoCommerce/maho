@@ -97,7 +97,7 @@ function imagePreview(element){
     if(el){
         const win = window.open('', 'preview', 'width=400,height=400,resizable=1,scrollbars=1');
         win.document.open();
-        win.document.write('<body style="padding:0;margin:0"><img src="'+el.src+'" id="image_preview"/></body>');
+        win.document.write('<body style="padding:0;margin:0"><img src="'+escapeHtml(el.src, true)+'" id="image_preview"/></body>');
         win.document.close();
         win.addEventListener('load', function(){
             const img = win.document.getElementById('image_preview');
