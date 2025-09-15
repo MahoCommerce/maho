@@ -65,9 +65,9 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
         $chooserJsObject = $this->getId();
         return '
             function (grid, event) {
-                var trElement = Event.findElement(event, "tr");
-                var ruleName = trElement.down("td").next().innerHTML;
-                var ruleId = trElement.down("td").innerHTML.replace(/^\s+|\s+$/g,"");
+                var trElement = event.target.closest("tr");
+                var ruleName = trElement.querySelector("td").nextElementSibling.innerHTML;
+                var ruleId = trElement.querySelector("td").innerHTML.replace(/^\s+|\s+$/g,"");
                 ' . $chooserJsObject . '.setElementValue(ruleId);
                 ' . $chooserJsObject . '.setElementLabel(ruleName);
                 ' . $chooserJsObject . '.close();

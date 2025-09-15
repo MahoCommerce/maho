@@ -189,7 +189,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
                     if (document.loaded) { //allow load over ajax
                         instantiateChooser();
                     } else {
-                        document.observe("dom:loaded", instantiateChooser);
+                        document.addEventListener("DOMContentLoaded", instantiateChooser);
                     }
                 })();
             //]]></script>

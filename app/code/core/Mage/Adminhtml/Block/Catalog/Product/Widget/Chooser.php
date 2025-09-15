@@ -87,7 +87,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
     {
         if ($this->getUseMassaction()) {
             return "function (grid, element) {
-                $(grid.containerId).fire('product:changed', {element: element});
+                document.getElementById(grid.containerId).dispatchEvent(new CustomEvent('product:changed', {detail: {element: element}}));
             }";
         }
         return '';
@@ -104,9 +104,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
             $chooserJsObject = $this->getId();
             return <<<JS
                 function (grid, event) {
-                    var trElement = Event.findElement(event, "tr");
-                    var productId = trElement.down("td").innerHTML;
-                    var productName = trElement.down("td").next().next().innerHTML;
+                    var trElement = event.target.closest("tr");
+                    var productId = trElement.querySelector("td").innerHTML;
+                    var productName = trElement.querySelector("td").nextElementSibling.nextElementSibling.innerHTML;
                     var optionLabel = productName;
                     var optionValue = "product/" + productId.replace(/^\s+|\s+$/g,"");
                     if (grid.categoryId) {
