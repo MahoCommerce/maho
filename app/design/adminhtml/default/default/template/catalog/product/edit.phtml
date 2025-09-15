@@ -37,8 +37,7 @@
 </form>
 <script type="text/javascript">
     const productForm = new varienForm('product_edit_form', '<?= $this->getValidationUrl() ?>');
-    productForm._processValidationResult = function(transport) {
-        const response = JSON.parse(transport.responseText);
+    productForm._processValidationResult = function(response) {
         if (response.error) {
             if (response.attribute) {
                 const attributeElement = document.getElementById(response.attribute);
