@@ -12,23 +12,21 @@
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Inventory $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
 function toggleValueElementsWithCheckbox(checkbox) {
-    var td = $(checkbox.parentNode);
-    var checkboxes = td.getElementsBySelector('input[type="checkbox"]');
-    var inputs = td.getElementsBySelector('input[type!="checkbox"]', 'select', 'textarea');
-    if (checkboxes.size()>1) {
-        inputs.each(function(input){
+    var td = checkbox.parentNode;
+    var checkboxes = td.querySelectorAll('input[type="checkbox"]');
+    var inputs = [...td.querySelectorAll('input:not([type="checkbox"])'), ...td.querySelectorAll('select'), ...td.querySelectorAll('textarea')];
+    if (checkboxes.length > 1) {
+        inputs.forEach(function(input){
             input.disabled = (!checkbox.checked || checkboxes[0].checked);
             checkboxes[0].disabled = !checkbox.checked;
         });
     } else {
-        inputs.each(function(input){
+        inputs.forEach(function(input){
             input.disabled = !checkbox.checked;
         });
     }
 }
-//]]>
 </script>
 
 <div class="entry-edit">
@@ -44,7 +42,7 @@ function toggleValueElementsWithCheckbox(checkbox) {
                         <option value="1"><?= Mage::helper('catalog')->__('Yes') ?></option>
                         <option value="0"<?php if ($this->getConfigFieldValue('manage_stock') == 0): ?> selected="selected"<?php endif ?>><?= Mage::helper('catalog')->__('No') ?></option>
                     </select>
-                    <input name="<?= $this->getFieldSuffix() ?>[use_config_manage_stock]" type="checkbox" id="inventory_use_config_manage_stock" onclick="toggleValueElements(this, this.parentNode, $('inventory_manage_stock_checkbox'));" value="1" checked="checked" disabled="disabled" />
+                    <input name="<?= $this->getFieldSuffix() ?>[use_config_manage_stock]" type="checkbox" id="inventory_use_config_manage_stock" onclick="toggleValueElements(this, this.parentNode, document.getElementById('inventory_manage_stock_checkbox'));" value="1" checked="checked" disabled="disabled" />
                     <label for="inventory_use_config_manage_stock" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
                     <input type="checkbox" id="inventory_manage_stock_checkbox" onclick="toggleValueElementsWithCheckbox(this)" />
                     <label for="inventory_manage_stock_checkbox" class="normal"><?= Mage::helper('catalog')->__('Change') ?></label>

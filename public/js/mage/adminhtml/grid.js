@@ -120,11 +120,13 @@ class varienGrid {
         }
     }
     rowMouseClick(event) {
-        if (event.button !== 1 && event.type === "mousedown") {
-            return; // Ignore mousedown for any button except middle
-        }
+        // Only handle left clicks and middle clicks
         if (event.button === 2) {
             return; // Ignore right click
+        }
+        // For mousedown events, only handle middle click (button 1)
+        if (event.type === "mousedown" && event.button !== 1) {
+            return;
         }
         if(this.rowClickCallback){
             try{
@@ -503,8 +505,8 @@ class varienGridMassaction {
     }
     onGridRowClick(grid, evt) {
 
-        var tdElement = Event.findElement(evt, 'td');
-        var trElement = Event.findElement(evt, 'tr');
+        var tdElement = evt.target.closest('td');
+        var trElement = evt.target.closest('tr');
 
         if(!tdElement.querySelector('input')) {
             if(tdElement.querySelector('a') || tdElement.querySelector('select')) {
@@ -519,7 +521,7 @@ class varienGridMassaction {
             }
             else{
                 var checkbox = trElement.querySelectorAll('input');
-                var isInput  = Event.element(evt).tagName == 'input';
+                var isInput  = evt.target.tagName.toLowerCase() == 'input';
                 var checked = isInput ? checkbox[0].checked : !checkbox[0].checked;
 
                 if(checked) {
@@ -533,11 +535,14 @@ class varienGridMassaction {
             return;
         }
 
-        if(Event.element(evt).isMassactionCheckbox) {
-           this.setCheckbox(Event.element(evt));
-        } else if (checkbox = this.findCheckbox(evt)) {
-           checkbox.checked = !checkbox.checked;
-           this.setCheckbox(checkbox);
+        if(evt.target.isMassactionCheckbox) {
+           this.setCheckbox(evt.target);
+        } else {
+           var checkbox = this.findCheckbox(evt);
+           if (checkbox) {
+               checkbox.checked = !checkbox.checked;
+               this.setCheckbox(checkbox);
+           }
         }
     }
     onSelectChange(evt) {
@@ -551,10 +556,10 @@ class varienGridMassaction {
         this.validator.reset();
     }
     findCheckbox(evt) {
-        if(['a', 'input', 'select'].indexOf(Event.element(evt).tagName.toLowerCase())!==-1) {
+        if(['a', 'input', 'select'].indexOf(evt.target.tagName.toLowerCase())!==-1) {
             return false;
         }
-        checkbox = false;
+        var checkbox = false;
         const trElement = evt.target.closest('tr');
         const checkboxes = trElement.querySelectorAll('.massaction-checkbox');
         for (const element of checkboxes) {
@@ -729,7 +734,7 @@ class varienGridMassaction {
             && evt.button === 0
             && evt.shiftKey === true
         ) {
-            var currentCheckbox = Event.element(evt);
+            var currentCheckbox = evt.target;
             var lastCheckbox = this.lastChecked.checkbox;
             if (lastCheckbox != currentCheckbox) {
                 var start = this.getCheckboxOrder(lastCheckbox);
@@ -745,9 +750,9 @@ class varienGridMassaction {
         }
 
         this.lastChecked = {
-            left: Event.element(evt).viewportOffset().left,
-            top: Event.element(evt).viewportOffset().top,
-            checkbox: Event.element(evt) // "boundary" checkbox
+            left: evt.target.getBoundingClientRect().left,
+            top: evt.target.getBoundingClientRect().top,
+            checkbox: evt.target // "boundary" checkbox
         };
     }
     getCheckboxOrder(curCheckbox) {
@@ -820,6 +825,7 @@ var varienStringArray = {
         if (typeof haystack != 'string') {
             return 0;
         }
+        var match;
         if (match = haystack.match(new RegExp(',', 'g'))) {
             return match.length + 1;
         } else if (haystack.length != 0) {
@@ -1017,3 +1023,5 @@ class serializerController {
 window.varienGrid = varienGrid;
 window.varienGridMassaction = varienGridMassaction;
 window.serializerController = serializerController;
+window.openGridRow = openGridRow;
+window.shouldOpenGridRowNewTab = shouldOpenGridRowNewTab;

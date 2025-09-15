@@ -264,7 +264,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
         if (!$this->_depends) {
             return '';
         }
-        return "<script>new FormElementDependenceController({$this->_getDependsJson()}, {$this->_getConfigJson()})</script>\n";
+        return "<script>new formElementDependenceController({$this->_getDependsJson()}, {$this->_getConfigJson()})</script>\n";
     }
 
     /**
