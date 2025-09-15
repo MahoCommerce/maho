@@ -998,9 +998,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>After selecting a new media storage location, press the Synchronize button
-                                to transfer all media to that location. Media will not be available in the new
-                                location until the synchronization process is complete.</comment>
+                            <comment>After selecting a new media storage location, press the Synchronize button to transfer all media to that location. Media will not be available in the new location until the synchronization process is complete.</comment>
                         </synchronize>
                     </fields>
                 </media_storage_configuration>
