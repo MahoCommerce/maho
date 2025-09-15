@@ -47,7 +47,7 @@
                 </account>
 
                 <paypal_group_all_in_one translate="label comment paypal_title" module="paypal">
-                    <label><![CDATA[PayPal All-in-One Payment Solutions&nbsp;&nbsp;<i>Accept and process credit cards and PayPal payments.</i>]]></label>
+                    <label><![CDATA[PayPal All-in-One Payment Solutions]]></label>
                     <expanded>1</expanded>
                     <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
