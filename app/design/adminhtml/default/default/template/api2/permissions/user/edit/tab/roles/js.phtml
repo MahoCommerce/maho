@@ -13,10 +13,8 @@
 ?>
 
 <script type="text/javascript">
-//<![CDATA[
 var activeRestRole = getActiveRestRole();
 
-/* Retrieve current active rest role */
 function getActiveRestRole() {
     var role;
     for (const row of api2_roles_sectionJsObject.rows) {
@@ -28,7 +26,6 @@ function getActiveRestRole() {
     return role;
 }
 
-/* Callback function for rest role row click */
 function restRolesRowClick(grid, event) {
     var newRestRole = getActiveRestRole();
     if (newRestRole.value !== activeRestRole.value) {
@@ -42,5 +39,4 @@ function restRolesRowClick(grid, event) {
 }
 
 api2_roles_sectionJsObject.rowClickCallback = restRolesRowClick;
-//]]>
 </script>

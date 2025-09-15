@@ -86,12 +86,12 @@ const selectOptionType = {
             `#product_option_${data.id}_select_${data.select_id} textarea`
         );
         inputs.forEach(el => {
-            el.addEventListener('change', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+            el.addEventListener('change', el.setHasChanges ? () => el.setHasChanges(el) : function() {});
         });
 
         const buttons = document.querySelectorAll(`#product_option_${data.id}_select_${data.select_id} button`);
         buttons.forEach(el => {
-            el.addEventListener('click', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+            el.addEventListener('click', el.setHasChanges ? () => el.setHasChanges(el) : function() {});
         });
 
         if (data.checkboxScopeTitle) {

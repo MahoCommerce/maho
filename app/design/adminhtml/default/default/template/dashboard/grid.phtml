@@ -61,7 +61,7 @@ $numColumns = count($this->getColumns());
     <?php endif ?>
     <?php if($this->getRowInitCallback()): ?>
         <?= $this->getJsObjectName() ?>.initRowCallback = <?= $this->getRowInitCallback() ?>;
-        <?= $this->getJsObjectName() ?>.rows.each(function(row){<?= $this->getRowInitCallback() ?>(<?= $this->getJsObjectName() ?>, row)});
+        <?= $this->getJsObjectName() ?>.rows.forEach(function(row){<?= $this->getRowInitCallback() ?>(<?= $this->getJsObjectName() ?>, row)});
     <?php endif ?>
     <?php if($this->getMassactionBlock()->isAvailable()): ?>
     <?= $this->getMassactionBlock()->getJavaScript() ?>

@@ -121,11 +121,11 @@ const productOption = {
         <?php else: ?>
         const changeInputs = document.querySelectorAll('div.product-custom-options input, div.product-custom-options select, div.product-custom-options textarea');
         changeInputs.forEach(el => {
-            el.addEventListener('change', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+            el.addEventListener('change', el.setHasChanges ? () => el.setHasChanges(el) : function() {});
         });
         const clickButtons = document.querySelectorAll('div.product-custom-options button');
         clickButtons.forEach(el => {
-            el.addEventListener('click', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+            el.addEventListener('click', el.setHasChanges ? () => el.setHasChanges(el) : function() {});
         });
         <?php endif ?>
     }

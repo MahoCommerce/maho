@@ -147,11 +147,11 @@ const tierPriceControl = {
         if (container) {
             const inputs = container.querySelectorAll('input, select');
             inputs.forEach(el => {
-                el.addEventListener('change', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+                el.addEventListener('change', el.setHasChanges ? () => el.setHasChanges(el) : function() {});
             });
             const deleteButtons = container.querySelectorAll('button.delete');
             deleteButtons.forEach(el => {
-                el.addEventListener('click', el.setHasChanges ? el.setHasChanges.bind(el) : function() {});
+                el.addEventListener('click', el.setHasChanges ? () => el.setHasChanges(el) : function() {});
             });
         }
         <?php endif ?>

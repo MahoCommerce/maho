@@ -39,7 +39,7 @@
     const productTemplateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
     const productForm = new varienForm('product_edit_form', '<?= $this->getValidationUrl() ?>');
     productForm._processValidationResult = function(transport) {
-        const response = transport.responseText.evalJSON();
+        const response = JSON.parse(transport.responseText);
         if (response.error) {
             if (response.attribute) {
                 const attributeElement = document.getElementById(response.attribute);

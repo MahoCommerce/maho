@@ -142,11 +142,11 @@ const groupPriceControl = {
         if (container) {
             const inputs = container.querySelectorAll('input, select');
             inputs.forEach(element => {
-                element.addEventListener('change', element.setHasChanges ? element.setHasChanges.bind(element) : function() {});
+                element.addEventListener('change', element.setHasChanges ? () => element.setHasChanges(element) : function() {});
             });
             const deleteButtons = container.querySelectorAll('button.delete');
             deleteButtons.forEach(element => {
-                element.addEventListener('click', element.setHasChanges ? element.setHasChanges.bind(element) : function() {});
+                element.addEventListener('click', element.setHasChanges ? () => element.setHasChanges(element) : function() {});
             });
         }
         <?php endif ?>
