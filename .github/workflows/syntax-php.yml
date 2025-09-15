@@ -34,7 +34,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@v47
         with:
           base_sha: ${{ steps.last-successful-commit.outputs.sha }}
           files: |
