@@ -159,7 +159,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
             'option_delete_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label' => Mage::helper('catalog')->__('Delete Option'),
+                    'label' => Mage::helper('catalog')->__('Delete'),
                     'class' => 'delete delete-product-option',
                     'on_click' => 'bOption.remove(event)',
                 ]),

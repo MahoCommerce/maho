@@ -200,18 +200,30 @@ let optionIndex = 0;
 window.bOption = new BundleOption();
 
 // Adding data to templates
-<?php foreach ($this->getOptions() as $_option): ?>
-    <?php $_option->setDefaultTitle($this->escapeHtml($_option->getDefaultTitle())); ?>
-    <?php $_option->setTitle($this->escapeHtml($_option->getTitle())); ?>
-    optionIndex = window.bOption.add(<?= $_option->toJson() ?>);
-    <?php if ($_option->getSelections()):?>
-        <?php foreach ($_option->getSelections() as $_selection): ?>
-        <?php $_selection->setName($this->escapeHtml($_selection->getName())); ?>
-        <?php $_selection->setSku($this->escapeHtml($_selection->getSku())); ?>
-        window.bSelection.addRow(optionIndex, <?= $_selection->toJson() ?>);
-        <?php endforeach ?>
-    <?php endif ?>
-<?php endforeach ?>
+function initBundleData() {
+    if (typeof window.bSelection === 'undefined') {
+        // bSelection not ready yet, wait and retry
+        setTimeout(initBundleData, 10);
+        return;
+    }
+
+    <?php foreach ($this->getOptions() as $_option): ?>
+        <?php $_option->setDefaultTitle($this->escapeHtml($_option->getDefaultTitle())); ?>
+        <?php $_option->setTitle($this->escapeHtml($_option->getTitle())); ?>
+        optionIndex = window.bOption.add(<?= $_option->toJson() ?>);
+        <?php if ($_option->getSelections()):?>
+            <?php foreach ($_option->getSelections() as $_selection): ?>
+            <?php $_selection->setName($this->escapeHtml($_selection->getName())); ?>
+            <?php $_selection->setSku($this->escapeHtml($_selection->getSku())); ?>
+            <?php $_selection->setDelete('0'); // Ensure delete field exists for existing selections ?>
+            window.bSelection.addRow(optionIndex, <?= $_selection->toJson() ?>);
+            <?php endforeach ?>
+        <?php endif ?>
+    <?php endforeach ?>
+}
+
+// Initialize bundle data when DOM is ready
+initBundleData();
 
 // Adding event on price type select box of product to hide or show prices for selections
 function togglePriceType() {
