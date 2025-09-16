@@ -22,7 +22,7 @@
         serializeInput.id = '<?= $_id ?>';
         try {
             document.getElementById('<?= $formId ?>').appendChild(serializeInput);
-            new SerializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
+            new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
         } catch(e) {
             // Error add serializer
             console.error('Failed to initialize serializer:', e);
@@ -33,7 +33,7 @@
 <input type="hidden" name="<?= $this->getInputElementName() ?>"  value="" id="<?= $_id ?>" />
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
-        new SerializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
+        new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
     });
 </script>
 <?php endif ?>

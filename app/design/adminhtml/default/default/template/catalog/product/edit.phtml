@@ -58,7 +58,8 @@
     };
     function saveAndContinueEdit(urlTemplate) {
         const template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
-        const url = template.evaluate({tab_id: product_info_tabsJsTabs.activeTab.id});
+        const tabId = product_info_tabsJsTabs?.activeTab?.id || 'general';
+        const url = template.evaluate({tab_id: tabId});
         productForm.submit(url);
     }
     function setSettings(urlTemplate, setElement, typeElement) {

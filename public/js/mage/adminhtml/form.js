@@ -22,9 +22,9 @@ class varienForm {
 
     checkErrors(result, elm) {
         if(!result)
-            elm.setHasError(true, this);
+            varienElementMethods.setHasError.call(this, elm, true, this);
         else
-            elm.setHasError(false, this);
+            varienElementMethods.setHasError.call(this, elm, false, this);
     }
 
     validate() {
@@ -118,8 +118,9 @@ if (typeof Validation !== 'undefined') {
  */
 const varienElementMethods = {
     setHasChanges(element, event) {
-        const elem = typeof element === 'string' ? document.getElementById(element) : element;
-        if(elem && elem.classList.contains('no-changes')) return;
+        const elem = (typeof element === 'string') ? document.getElementById(element) :
+                     (element && element.nodeType) ? element : this;
+        if(!elem || !elem.classList || elem.classList.contains('no-changes')) return;
         let elm = elem;
         while(elm && elm.tagName !== 'BODY') {
             if(elm.statusBar) {
