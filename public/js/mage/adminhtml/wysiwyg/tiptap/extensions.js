@@ -6,18 +6,17 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.0';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.0';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.0';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.0';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.0';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.0';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.4';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.4';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.4';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.4';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.4';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.4';
 
 export {
     Editor, Node, Mark, StarterKit, TextAlign,
     Table, TableRow, TableCell, TableHeader, BubbleMenu,
 };
-
 
 const parseDirective = (directiveStr) => {
     const directiveObj = {
@@ -752,7 +751,7 @@ export const MahoDiv = Node.create({
 
 /**
  * Maho Fullscreen Extension
- * 
+ *
  * Provides fullscreen editing capabilities for the Tiptap editor
  */
 export const MahoFullscreen = Extension.create({
@@ -780,7 +779,7 @@ export const MahoFullscreen = Extension.create({
                 if (!wrapper) return false;
 
                 const isFullscreen = wrapper.classList.contains('tiptap-fullscreen');
-                
+
                 if (isFullscreen) {
                     // Exit fullscreen
                     wrapper.classList.remove('tiptap-fullscreen');
@@ -811,7 +810,7 @@ export const MahoFullscreen = Extension.create({
 
                 // Focus back to editor
                 editor.commands.focus();
-                
+
                 return true;
             },
         };
