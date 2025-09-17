@@ -343,9 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Set up form validation
-if (typeof varienForm !== 'undefined') {
-    const configForm = new varienForm('config_edit_form');
-    configForm.validator.options.onFormValidate = configFormHandler.validator.options.onFormValidate;
-}
+const configForm = new varienForm('config_edit_form');
+configForm.validator.options.onFormValidate = configFormHandler.validator.options.onFormValidate;
 </script>

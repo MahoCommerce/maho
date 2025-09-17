@@ -158,6 +158,21 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
             (isset($column['style']) ? ' style="' . $column['style'] . '"' : '') . '/>';
     }
 
+    public function getColumns(): array
+    {
+        return $this->_columns;
+    }
+
+    public function getAddAfter(): bool
+    {
+        return $this->_addAfter;
+    }
+
+    public function getAddButtonLabel(): string
+    {
+        return $this->_addButtonLabel;
+    }
+
     /**
      * Prepare to render
      */

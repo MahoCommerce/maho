@@ -16,7 +16,7 @@
 $_htmlId = $this->getHtmlId() ? $this->getHtmlId() : '_' . uniqid();
 
 $_colspan = 2;
-if (!$this->_addAfter) {
+if (!$this->getAddAfter()) {
     $_colspan -= 1;
 }
 $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
@@ -27,17 +27,17 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
         <tbody>
 
             <tr class="headings" id="headings<?= $_htmlId ?>">
-<?php foreach ($this->_columns as $columnName => $column):?>
+<?php foreach ($this->getColumns() as $columnName => $column):?>
                 <th><?= $column['label'] ?></th>
 <?php endforeach ?>
                 <th <?= $_colspan ?>></th>
             </tr>
 
             <tr id="addRow<?= $_htmlId ?>">
-                <td colspan="<?= count($this->_columns) ?>"></td>
+                <td colspan="<?= count($this->getColumns()) ?>"></td>
                 <td <?= $_colspan ?>>
                     <button style="" onclick="" class="scalable add" type="button" id="addToEndBtn<?= $_htmlId ?>">
-                        <span><?= $this->_addButtonLabel ?></span>
+                        <span><?= $this->getAddButtonLabel() ?></span>
                     </button>
                 </td>
             </tr>
@@ -48,24 +48,23 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
 </div>
 <div id="empty<?= $_htmlId ?>">
     <button style="" onclick="" class="scalable add" type="button" id="emptyAddBtn<?= $_htmlId ?>">
-        <span><?= $this->_addButtonLabel ?></span>
+        <span><?= $this->getAddButtonLabel() ?></span>
     </button>
 </div>
 
 <script type="text/javascript">
 const arrayRow<?= $_htmlId ?> = {
-    // Define row template using template literals
-    template: function(data) {
-        return `<tr id="${data._id}">
-<?php foreach ($this->_columns as $columnName => $column):?>
-            <td><?= $this->jsQuoteEscape($this->_renderCellTemplate($columnName)) ?></td>
+    template: new Template(
+        '<tr id="#{_id}">'
+<?php foreach ($this->getColumns() as $columnName => $column):?>
+            + '<td><?= $this->jsQuoteEscape($this->_renderCellTemplate($columnName)) ?></td>'
 <?php endforeach ?>
-<?php if ($this->_addAfter):?>
-            <td><button class="scalable add" type="button" id="addAfterBtn${data._id}"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?></span></button></td>
+<?php if ($this->getAddAfter()):?>
+            + '<td><button class="scalable add" type="button" id="addAfterBtn#{_id}"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?></span></button></td>'
 <?php endif ?>
-            <td><button onclick="arrayRow<?= $_htmlId ?>.del('${data._id}')" class="scalable delete" type="button"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?></span></button></td>
-        </tr>`;
-    },
+            + '<td><button onclick="arrayRow<?= $_htmlId ?>.del(\'#{_id}\')" class="scalable delete" type="button"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?></span></button></td>'
+            + '</tr>'
+    ),
 
     rowsCount: 0,
 
@@ -74,14 +73,14 @@ const arrayRow<?= $_htmlId ?> = {
         if (!templateData || templateData === '') {
             const d = new Date();
             templateData = {
-<?php foreach ($this->_columns as $columnName => $column):?>
+<?php foreach ($this->getColumns() as $columnName => $column):?>
                 <?= $columnName ?>: '',
 <?php endforeach ?>
                 _id: '_' + d.getTime() + '_' + d.getMilliseconds()
             };
         }
 
-        const htmlContent = this.template(templateData);
+        const htmlContent = this.template.evaluate(templateData);
 
         // Insert before last row
         if (!insertAfterId || insertAfterId === '') {
@@ -98,7 +97,7 @@ const arrayRow<?= $_htmlId ?> = {
             }
         }
 
-<?php if ($this->_addAfter):?>
+<?php if ($this->getAddAfter()):?>
         const addAfterBtn = document.getElementById('addAfterBtn' + templateData._id);
         if (addAfterBtn) {
             addAfterBtn.addEventListener('click', () => this.add('', templateData._id));
