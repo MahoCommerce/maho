@@ -15,11 +15,11 @@
 <?php $formId = $this->getFormId()?>
 <?php if (!empty($formId)) :?>
 <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        const serializeInput = document.createElement('input');
+    window.addEventListener('DOMContentLoaded', function(){
+        var serializeInput  = document.createElement('input');
         serializeInput.type = 'hidden';
         serializeInput.name = '<?= $this->getInputElementName() ?>';
-        serializeInput.id = '<?= $_id ?>';
+        serializeInput.id   = '<?= $_id ?>';
         try {
             document.getElementById('<?= $formId ?>').appendChild(serializeInput);
             new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
@@ -32,8 +32,6 @@
 <?php else: ?>
 <input type="hidden" name="<?= $this->getInputElementName() ?>"  value="" id="<?= $_id ?>" />
 <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
-    });
+    new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
 </script>
 <?php endif ?>
