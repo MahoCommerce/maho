@@ -17553,11 +17553,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Deprecated.php
 
-		-
-			rawMessage: 'Method Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global::getElementOriginalData() has parameter $key with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Global.php
 
 		-
 			rawMessage: 'Method Mage_Paypal_Block_Bml_Banners::setPosition() has no return type specified.'
