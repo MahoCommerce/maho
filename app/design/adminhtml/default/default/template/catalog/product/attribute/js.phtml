@@ -250,11 +250,13 @@ function switchDefaultValueField() {
         break;
     }
 
+    let frontFieldset = document.getElementById('front_fieldset');
+    let previousElement;
+
     switch (currentValue) {
         case 'media_image':
-            const frontFieldset = document.getElementById('front_fieldset');
             if (frontFieldset) {
-                const previousElement = frontFieldset.previousElementSibling;
+                previousElement = frontFieldset.previousElementSibling;
                 if (previousElement) {
                     previousElement.style.display = 'none';
                 }
@@ -270,9 +272,8 @@ function switchDefaultValueField() {
             case '<?= $type ?>':
                 <?php foreach ($fields as $one): ?>
                     <?php if ($one == '_front_fieldset'): ?>
-                        const frontFieldset = document.getElementById('front_fieldset');
                         if (frontFieldset) {
-                            const previousElement = frontFieldset.previousElementSibling;
+                            previousElement = frontFieldset.previousElementSibling;
                             if (previousElement) {
                                 previousElement.style.display = 'none';
                             }
@@ -293,9 +294,8 @@ function switchDefaultValueField() {
         <?php endforeach ?>
 
         default:
-            const frontFieldset = document.getElementById('front_fieldset');
             if (frontFieldset) {
-                const previousElement = frontFieldset.previousElementSibling;
+                previousElement = frontFieldset.previousElementSibling;
                 if (previousElement) {
                     previousElement.style.display = '';
                 }
