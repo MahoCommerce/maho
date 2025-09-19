@@ -183,8 +183,7 @@ $numColumns = count($this->getColumns());
 <?php if($this->canDisplayContainer()): ?>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-    <?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
+    globalThis.<?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';
     <?php if($this->getRowClickCallback()): ?>
         <?= $this->getJsObjectName() ?>.rowClickCallback = <?= $this->getRowClickCallback() ?>;
@@ -200,7 +199,6 @@ $numColumns = count($this->getColumns());
     <?= $this->getMassactionBlock()->getJavaScript() ?>
     <?php endif ?>
     <?= $this->getAdditionalJavaScript() ?>
-//]]>
 </script>
 <?php endif ?>
 <?php endif ?>
