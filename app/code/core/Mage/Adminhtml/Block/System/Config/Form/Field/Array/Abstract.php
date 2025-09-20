@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -134,7 +134,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
     }
 
     /**
-     * Render array cell for prototypeJS template
+     * Render array cell for JavaScript template
      *
      * @param string $columnName
      * @return string
@@ -156,6 +156,21 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
             ($column['size'] ? 'size="' . $column['size'] . '"' : '') . ' class="' .
             ($column['class'] ?? 'input-text') . '"' .
             (isset($column['style']) ? ' style="' . $column['style'] . '"' : '') . '/>';
+    }
+
+    public function getColumns(): array
+    {
+        return $this->_columns;
+    }
+
+    public function getAddAfter(): bool
+    {
+        return $this->_addAfter;
+    }
+
+    public function getAddButtonLabel(): string
+    {
+        return $this->_addButtonLabel;
     }
 
     /**

@@ -21,8 +21,6 @@
     </div>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-
 var pageGroupTemplate = '<div class="options-box page_group_container" id="page_group_container_{{id}}">'+
     '<div class="option-box">'+
         '<div class="option-title">'+
@@ -157,16 +155,17 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
 '</div>'+
 '</div>';
 
-var WidgetInstance = {
+const WidgetInstance = {
     pageGroupTemplate    : pageGroupTemplate,
     pageGroupContainerId : 'page_group_container',
     templatePattern : /(^|.|\r|\n)({{(\w+)}})/,
     count : 0,
-    activePageGroups : $H({}),
+    activePageGroups : new Map(),
     selectedItems : {},
 
-    addPageGroup : function(data) {
-        if (this.pageGroupTemplate && (pageGroupContainer = $(this.pageGroupContainerId))) {
+    addPageGroup(data) {
+        const pageGroupContainer = document.getElementById(this.pageGroupContainerId);
+        if (this.pageGroupTemplate && pageGroupContainer) {
             if (!data.page_id) {
                 data = {};
                 data.page_id = 0;
@@ -174,50 +173,52 @@ var WidgetInstance = {
             }
             data.id = this.count++;
             if (data[data.group + '_entities']) {
-                var selected_entities = data[data.group + '_entities'].split(',');
+                const selected_entities = data[data.group + '_entities'].split(',');
                 if (selected_entities.length > 0) {
-                    for (var i = 0; i < selected_entities.length; i++) {
+                    for (let i = 0; i < selected_entities.length; i++) {
                         this.addProductItemToSelection(data.group + '_ids_' + data.id, selected_entities[i]);
                     }
                 }
             }
-            pageGroupTemplateObj = new Template(this.pageGroupTemplate, this.templatePattern);
-            Element.insert(pageGroupContainer, {'top':pageGroupTemplateObj.evaluate(data)});
+            const processedTemplate = this.evaluateTemplate(this.pageGroupTemplate, data);
+            pageGroupContainer.insertAdjacentHTML('afterbegin', processedTemplate);
             if (data.group) {
-                pageGroup = $(data.group+'_'+data.id);
-                additional = {};
+                const pageGroup = document.getElementById(data.group+'_'+data.id);
+                const additional = {};
                 additional.selectedBlock = data.block;
                 additional.selectedTemplate = data.template;
                 additional.position = data.position;
                 additional.for_value = data.for_value;
                 additional.template = '';
-                if (data.group == 'pages') {
-                    layoutSelect = pageGroup.down('select#layout_handle');
+                if (data.group === 'pages') {
+                    const layoutSelect = pageGroup.querySelector('select#layout_handle');
                     if (layoutSelect) {
-                        for (var i = 0; i < layoutSelect.options.length; i++) {
-                            if (layoutSelect.options[i].value == data.layout_handle) {
+                        for (let i = 0; i < layoutSelect.options.length; i++) {
+                            if (layoutSelect.options[i].value === data.layout_handle) {
                                 layoutSelect.options[i].selected = true;
                                 break;
                             }
                         }
                     }
                 }
-                if ($(this.pageGroupContainerId+'_'+data.id)) {
-                    selectGroupElm = $(this.pageGroupContainerId+'_'+data.id).down('select.page_group_select');
-                    for (var i = 0; i < selectGroupElm.options.length; i++) {
-                        if (selectGroupElm.options[i].value == data.group) {
-                            selectGroupElm.options[i].selected = true;
-                            break;
+                const selectGroupContainer = document.getElementById(this.pageGroupContainerId+'_'+data.id);
+                if (selectGroupContainer) {
+                    const selectGroupElm = selectGroupContainer.querySelector('select.page_group_select');
+                    if (selectGroupElm) {
+                        for (let i = 0; i < selectGroupElm.options.length; i++) {
+                            if (selectGroupElm.options[i].value === data.group) {
+                                selectGroupElm.options[i].selected = true;
+                                break;
+                            }
                         }
                     }
                 }
-                forElm = pageGroup.down('input.for_'+data.for_value);
+                const forElm = pageGroup.querySelector('input.for_'+data.for_value);
                 if (forElm) {
-                    /**
-                    * IE browsers fix: remove default checked attribute in radio form element
-                    * to check others radio form elements in future
-                    */
-                    pageGroup.down('input.for_all').defaultChecked = false;
+                    const forAllElm = pageGroup.querySelector('input.for_all');
+                    if (forAllElm) {
+                        forAllElm.defaultChecked = false;
+                    }
                     forElm.defaultChecked = true;
                     forElm.checked = true;
                     this.togglePageGroupChooser(forElm);
@@ -226,196 +227,222 @@ var WidgetInstance = {
             }
         }
     },
-    removePageGroup : function(element) {
-        container = element.up('div.page_group_container');
+
+    evaluateTemplate(template, data) {
+        return template.replace(/{{(\w+)}}/g, (match, key) => {
+            return data[key] !== undefined ? data[key] : match;
+        });
+    },
+    removePageGroup(element) {
+        const container = element.closest('div.page_group_container');
         if (container) {
             container.remove();
         }
     },
-    addProductItemToSelection: function(groupId, item) {
-        if (undefined == this.selectedItems[groupId]) {
-            this.selectedItems[groupId] = $H({});
+
+    addProductItemToSelection(groupId, item) {
+        if (this.selectedItems[groupId] === undefined) {
+            this.selectedItems[groupId] = new Map();
         }
         if (!isNaN(parseInt(item))) {
             this.selectedItems[groupId].set(item, 1);
         }
     },
-    removeProductItemFromSelection: function(groupId, item) {
-        if (undefined !== this.selectedItems[groupId]) {
-            this.selectedItems[groupId].unset(item);
+
+    removeProductItemFromSelection(groupId, item) {
+        if (this.selectedItems[groupId] !== undefined) {
+            this.selectedItems[groupId].delete(item);
         }
     },
-    showBlockContainer : function(container) {
-        container = $(container);
-        if (container) {
-            container.removeClassName('no-display');
-            container.removeClassName('ignore-validate');
-            container.show();
+    showBlockContainer(container) {
+        const element = typeof container === 'string' ? document.getElementById(container) : container;
+        if (element) {
+            element.classList.remove('no-display');
+            element.classList.remove('ignore-validate');
+            element.style.display = '';
         }
     },
-    hideBlockContainer : function(container) {
-        container = $(container);
-        if (container) {
-            container.addClassName('no-display');
-            container.addClassName('ignore-validate');
-            container.hide();
+
+    hideBlockContainer(container) {
+        const element = typeof container === 'string' ? document.getElementById(container) : container;
+        if (element) {
+            element.classList.add('no-display');
+            element.classList.add('ignore-validate');
+            element.style.display = 'none';
         }
     },
-    displayPageGroup : function(container, additional) {
-        container = $(container);
-        if (!container) {
-//            if (activePageGroupId = this.activePageGroups.get(container.up('div.page_group_container').id)) {
-//                this.hideBlockContainer(activePageGroupId);
-//            }
+    displayPageGroup(container, additional) {
+        const element = typeof container === 'string' ? document.getElementById(container) : container;
+        if (!element) {
+            return;
         }
         if (!additional) {
             additional = {};
         }
-        if (activePageGroupId = this.activePageGroups.get(container.up('div.page_group_container').id)) {
-            this.hideBlockContainer(activePageGroupId);
+        const pageGroupContainer = element.closest('div.page_group_container');
+        if (pageGroupContainer) {
+            const activePageGroupId = this.activePageGroups.get(pageGroupContainer.id);
+            if (activePageGroupId) {
+                this.hideBlockContainer(activePageGroupId);
+            }
+            this.activePageGroups.set(pageGroupContainer.id, element.id);
         }
-        this.activePageGroups.set(container.up('div.page_group_container').id, container.id);
-        this.showBlockContainer(container);
-        blockContainer = container.down('div.block_reference');
-        if (blockContainer && blockContainer.innerHTML == '') {
-            layoutHandle = '';
-            if (layoutHandleField = container.down('input.layout_handle_pattern')) {
+        this.showBlockContainer(element);
+        const blockContainer = element.querySelector('div.block_reference');
+        if (blockContainer && blockContainer.innerHTML === '') {
+            let layoutHandle = '';
+            const layoutHandleField = element.querySelector('input.layout_handle_pattern');
+            if (layoutHandleField) {
                 layoutHandle = layoutHandleField.value;
             }
-            this.loadSelectBoxByType('block_reference', container, layoutHandle, additional);
+            this.loadSelectBoxByType('block_reference', element, layoutHandle, additional);
         }
-        this.loadSelectBoxByType('block_template', container, additional.selectedBlock, additional);
+        this.loadSelectBoxByType('block_template', element, additional.selectedBlock, additional);
     },
-    displayEntityChooser : function(type, chooser, additional) {
+    displayEntityChooser(type, chooser, additional) {
         if (!additional) {
             additional = {};
         }
-        if (type == 'categories') {
+        const chooserElement = document.getElementById(chooser);
+        if (type === 'categories') {
             additional.url = '<?= $this->getCategoriesChooserUrl() ?>';
-            additional.post_parameters = $H({'is_anchor_only':$(chooser).down('input.is_anchor_only').value});
-        } else if (type == 'products') {
+            const isAnchorInput = chooserElement.querySelector('input.is_anchor_only');
+            additional.post_parameters = new Map([['is_anchor_only', isAnchorInput ? isAnchorInput.value : '']]);
+        } else if (type === 'products') {
             additional.url = '<?= $this->getProductsChooserUrl() ?>';
-            additional.post_parameters = $H({'product_type_id':$(chooser).down('input.product_type_id').value});
+            const productTypeInput = chooserElement.querySelector('input.product_type_id');
+            additional.post_parameters = new Map([['product_type_id', productTypeInput ? productTypeInput.value : '']]);
         }
         if (chooser && additional) {
             this.displayChooser(chooser, additional);
         }
     },
-    hideEntityChooser : function(chooser) {
-        chooser = $(chooser).down('div.chooser');
-        if (chooser) {
-            chooser.addClassName('no-display');
-            chooser.hide();
+
+    hideEntityChooser(chooser) {
+        const chooserElement = document.getElementById(chooser);
+        const chooserDiv = chooserElement ? chooserElement.querySelector('div.chooser') : null;
+        if (chooserDiv) {
+            chooserDiv.classList.add('no-display');
+            chooserDiv.style.display = 'none';
         }
     },
-    displayChooser : function(chooser, additional) {
-        chooser = $(chooser).down('div.chooser');
-        entities = chooser.up('div.chooser_container').down('input[type="text"].entities').value;
-        postParameters = $H({selected:entities});
-        url = '';
+    displayChooser(chooser, additional) {
+        const chooserElement = document.getElementById(chooser);
+        const chooserDiv = chooserElement ? chooserElement.querySelector('div.chooser') : null;
+        if (!chooserDiv) return;
+
+        const chooserContainer = chooserDiv.closest('div.chooser_container');
+        const entitiesInput = chooserContainer ? chooserContainer.querySelector('input[type="text"].entities') : null;
+        const entities = entitiesInput ? entitiesInput.value : '';
+
+        const postParameters = new FormData();
+        postParameters.append('selected', entities);
+
+        let url = '';
         if (additional) {
             if (additional.url) url = additional.url;
             if (additional.post_parameters) {
-                additional.post_parameters.each(function(pair){
-                    postParameters.set(pair.key,pair.value);
-                });
+                for (const [key, value] of additional.post_parameters) {
+                    postParameters.append(key, value);
+                }
             }
         }
-        if (chooser && url) {
-            if (chooser.innerHTML == '') {
-                new Ajax.Request(url, {
-                    method: 'post',
-                    parameters: postParameters,
-                    onSuccess: function(transport) {
-                        try {
-                            if (transport.responseText) {
-                                Element.insert(chooser, transport.responseText);
-                                chooser.removeClassName('no-display');
-                                chooser.show();
-                            }
-                        } catch (e) {
-                            alert('<?= $this->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
-                        }
+        if (chooserDiv && url) {
+            if (chooserDiv.innerHTML === '') {
+                mahoFetch(url, {
+                    method: 'POST',
+                    body: postParameters
+                })
+                .then(data => {
+                    if (data) {
+                        chooserDiv.innerHTML = data;
+                        chooserDiv.classList.remove('no-display');
+                        chooserDiv.style.display = '';
                     }
+                })
+                .catch(() => {
+                    alert('<?= $this->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
                 });
             } else {
-                chooser.removeClassName('no-display');
-                chooser.show();
+                chooserDiv.classList.remove('no-display');
+                chooserDiv.style.display = '';
             }
         }
     },
-    checkProduct : function(event) {
-        var elm = event.memo.element,
-            container = event.target.up('div.chooser').up('div.chooser_container'),
-            selectionId = container.id,
-            entitiesElm = container.down('input[type="text"].entities');
+    checkProduct(event) {
+        const elm = event.memo.element;
+        const container = event.target.closest('div.chooser').closest('div.chooser_container');
+        const selectionId = container.id;
+        const entitiesElm = container.querySelector('input[type="text"].entities');
         if (elm.checked) {
             this.addProductItemToSelection(selectionId, elm.value);
         } else {
             this.removeProductItemFromSelection(selectionId, elm.value);
         }
-        if (entitiesElm) {
-            entitiesElm.value = this.selectedItems[selectionId].keys().join(',');
+        if (entitiesElm && this.selectedItems[selectionId]) {
+            entitiesElm.value = Array.from(this.selectedItems[selectionId].keys()).join(',');
         }
     },
-    checkCategory : function(event) {
+    checkCategory(event) {
         const containerEl = event.target.closest('div.chooser_container');
         const inputEl = containerEl.querySelector('input[type=text]');
         inputEl.value = event.detail.selected.map((obj) => obj.id).join(',');
     },
-    togglePageGroupChooser : function(element) {
-        element = $(element);
-        if (element && (chooser = element.up('div.group_container').down('div.chooser_container'))) {
-            if (element.value == 'all') {
-                chooser.addClassName('no-display');
-                chooser.hide();
+
+    togglePageGroupChooser(element) {
+        const chooser = element.closest('div.group_container').querySelector('div.chooser_container');
+        if (element && chooser) {
+            if (element.value === 'all') {
+                chooser.classList.add('no-display');
+                chooser.style.display = 'none';
             } else {
-                chooser.removeClassName('no-display');
-                chooser.show();
+                chooser.classList.remove('no-display');
+                chooser.style.display = '';
             }
         }
     },
-    loadSelectBoxByType : function (type, element, value, additional) {
+    loadSelectBoxByType(type, element, value, additional) {
         if (!additional) {
             additional = {};
         }
-        if (element && (containerElm = element.down('div.'+type))) {
-            url = '';
-            selected = '';
-            parameters = {};
-            if (type == 'block_reference') {
+        const containerElm = element.querySelector('div.'+type);
+        if (element && containerElm) {
+            let url = '';
+            let selected = '';
+            const parameters = new FormData();
+            if (type === 'block_reference') {
                 url = '<?= $this->getBlockChooserUrl() ?>';
                 if (additional.selectedBlock) {
                     selected = additional.selectedBlock;
                 }
-                parameters.layout = value;
-            } else if (type == 'block_template') {
+                parameters.append('layout', value);
+            } else if (type === 'block_template') {
                 url = '<?= $this->getTemplateChooserUrl() ?>';
                 if (additional.selectedTemplate) {
                     selected = additional.selectedTemplate;
                 }
-                parameters.block = value;
+                parameters.append('block', value);
             }
-            parameters.selected = selected;
+            parameters.append('selected', selected);
             if (url) {
-                new Ajax.Request(url, {
-                    method: 'post',
-                    parameters: parameters,
-                    containerElm: containerElm,
-                    onSuccess: function(transport) {
-                        containerElm = transport.request.options.containerElm;
-                        try {
-                            if (transport.responseText) {
-                                containerElm.update(transport.responseText);
-                                formElm = containerElm.down('select, input[type="hidden"]');
-                                if (formElm) {
-                                    formElm.name = element.down('input.container_name').value+'['+formElm.name+']';
-                                }
+                mahoFetch(url, {
+                    method: 'POST',
+                    body: parameters
+                })
+                .then(data => {
+                    if (data) {
+                        containerElm.innerHTML = data;
+                        const formElm = containerElm.querySelector('select, input[type="hidden"]');
+                        if (formElm) {
+                            const containerNameInput = element.querySelector('input.container_name');
+                            if (containerNameInput) {
+                                formElm.name = containerNameInput.value + '[' + formElm.name + ']';
                             }
-                        } catch (e) {
-                            alert('<?= $this->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
                         }
                     }
+                })
+                .catch(() => {
+                    alert('<?= $this->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
                 });
             }
         }
@@ -426,7 +453,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <?php foreach ($this->getPageGroups() as $pageGroup): ?>
         WidgetInstance.addPageGroup(<?= Mage::helper('core')->jsonEncode($pageGroup) ?>);
     <?php endforeach ?>
-    Event.observe(document, 'product:changed', function(event){
+
+    document.addEventListener('product:changed', (event) => {
         WidgetInstance.checkProduct(event);
     });
 
@@ -434,5 +462,4 @@ document.addEventListener('DOMContentLoaded', () => {
         WidgetInstance.checkCategory(event);
     });
 });
-//]]>
 </script>

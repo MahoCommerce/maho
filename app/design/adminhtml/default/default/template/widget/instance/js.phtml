@@ -5,30 +5,61 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Template $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
-function setSettings(urlTemplate, typeElement, packageThemeElement) {
-    if (editForm.validator && editForm.validator.validate()) {
-        typeElement = $F(typeElement).replace(/\//g, '-');
-        packageThemeElement = $F(packageThemeElement).split(/\//g);
+/**
+ * Get the value of a form element by ID or element reference
+ * @param {string|HTMLElement} element
+ * @returns {string}
+ */
+function getElementValue(element) {
+    if (typeof element === 'string') {
+        element = document.getElementById(element);
+    }
+    return element ? element.value : '';
+}
 
-        setLocation(new Template(urlTemplate, /(^|.|\r|\n)({{(\w+)}})/).evaluate({
-            'type': typeElement,
-            'package': packageThemeElement[0],
-            'theme': packageThemeElement[1]
-        }));
+/**
+ * Simple template function to replace placeholders in URL template
+ * @param {string} template
+ * @param {Object} variables
+ * @returns {string}
+ */
+function evaluateTemplate(template, variables) {
+    return template.replace(/{{(\w+)}}/g, (match, key) => {
+        return variables[key] || match;
+    });
+}
+
+function setSettings(urlTemplate, typeElement, packageThemeElement) {
+    const editFormElement = document.getElementById('edit_form');
+
+    if (editFormElement && editForm.validator && editForm.validator.validate()) {
+        const typeValue = getElementValue(typeElement).replace(/\//g, '-');
+        const packageThemeValue = getElementValue(packageThemeElement).split(/\//);
+
+        const url = evaluateTemplate(urlTemplate, {
+            'type': typeValue,
+            'package': packageThemeValue[0] || '',
+            'theme': packageThemeValue[1] || ''
+        });
+
+        window.location.href = url;
     } else {
         return false;
     }
 }
 
 function saveAndContinueEdit() {
-    editForm.submit($('edit_form').action + 'back/edit/');
+    const editFormElement = document.getElementById('edit_form');
+    if (editFormElement) {
+        editFormElement.action = editFormElement.action + 'back/edit/';
+        editFormElement.submit();
+    }
 }
-//]]>
 </script>

@@ -129,7 +129,6 @@ class VarienRulesForm {
             method: 'POST',
             body: formData
         })
-        .then(response => response.text())
         .then(responseText => {
             if (this._processSuccess(responseText)) {
                 chooser.innerHTML = responseText;

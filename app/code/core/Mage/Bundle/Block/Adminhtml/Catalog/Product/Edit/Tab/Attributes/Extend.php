@@ -6,14 +6,12 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * Bundle Extended Attributes Block
- *
- * @package    Mage_Bundle
  *
  * @method bool getCanEditPrice()
  * @method $this setCanEditPrice(bool $true)
@@ -70,18 +68,18 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
         if ($this->getDisableChild() && !$this->getElement()->getReadonly()) {
             $html .= '<script type="text/javascript">
                 function ' . $switchAttributeCode . "_change() {
-                    if ($('" . $switchAttributeCode . "').value == '" . self::DYNAMIC . "') {
-                        if ($('" . $this->getAttribute()->getAttributeCode() . "')) {
-                            $('" . $this->getAttribute()->getAttributeCode() . "').disabled = true;
-                            $('" . $this->getAttribute()->getAttributeCode() . "').value = '';
-                            $('" . $this->getAttribute()->getAttributeCode() . "').removeClassName('required-entry');
+                    if (document.getElementById('" . $switchAttributeCode . "').value == '" . self::DYNAMIC . "') {
+                        if (document.getElementById('" . $this->getAttribute()->getAttributeCode() . "')) {
+                            document.getElementById('" . $this->getAttribute()->getAttributeCode() . "').disabled = true;
+                            document.getElementById('" . $this->getAttribute()->getAttributeCode() . "').value = '';
+                            document.getElementById('" . $this->getAttribute()->getAttributeCode() . "').classList.remove('required-entry');
                         }
 
-                        if ($('dynamic-price-warrning')) {
-                            $('dynamic-price-warrning').show();
+                        if (document.getElementById('dynamic-price-warrning')) {
+                            document.getElementById('dynamic-price-warrning').style.display = '';
                         }
                     } else {
-                        if ($('" . $this->getAttribute()->getAttributeCode() . "')) {";
+                        if (document.getElementById('" . $this->getAttribute()->getAttributeCode() . "')) {";
 
             if ($this->getAttribute()->getAttributeCode() == 'price'
                 && $this->getCanEditPrice() === false
@@ -89,16 +87,16 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
                 && $this->getProduct()->isObjectNew()
             ) {
                 $defaultProductPrice = $this->getDefaultProductPrice() ?: "''";
-                $html .= "$('" . $this->getAttribute()->getAttributeCode() . "').value = " . $defaultProductPrice . ';';
+                $html .= "document.getElementById('" . $this->getAttribute()->getAttributeCode() . "').value = " . $defaultProductPrice . ';';
             } else {
-                $html .= "$('" . $this->getAttribute()->getAttributeCode() . "').disabled = false;
-                          $('" . $this->getAttribute()->getAttributeCode() . "').addClassName('required-entry');";
+                $html .= "document.getElementById('" . $this->getAttribute()->getAttributeCode() . "').disabled = false;
+                          document.getElementById('" . $this->getAttribute()->getAttributeCode() . "').classList.add('required-entry');";
             }
 
             $html .= "}
 
-                        if ($('dynamic-price-warrning')) {
-                            $('dynamic-price-warrning').hide();
+                        if (document.getElementById('dynamic-price-warrning')) {
+                            document.getElementById('dynamic-price-warrning').style.display = 'none';
                         }
                     }
                 }";
@@ -107,7 +105,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
                 && !$this->getCanEditPrice()
                 && !$this->getProduct()->isObjectNew())
             ) {
-                $html .= "$('" . $switchAttributeCode . "').observe('change', " . $switchAttributeCode . '_change);';
+                $html .= "document.getElementById('" . $switchAttributeCode . "').addEventListener('change', " . $switchAttributeCode . '_change);';
             }
             $html .= $switchAttributeCode . '_change();
             </script>';

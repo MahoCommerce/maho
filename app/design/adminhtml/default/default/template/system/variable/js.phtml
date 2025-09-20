@@ -5,28 +5,25 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
 <script type="text/javascript">
-//<![CDATA[
-
 function toggleValueElement(element) {
     var disabled = false;
     if (element.value == 1) {
         // use default value
         disabled = true;
     }
-    $('plain_value').disabled = disabled;
-    $('html_value').disabled = disabled;
+    document.getElementById('plain_value').disabled = disabled;
+    document.getElementById('html_value').disabled = disabled;
     if (disabled) {
-        $('plain_value').addClassName('disabled');
-        $('html_value').addClassName('disabled');
+        document.getElementById('plain_value').classList.add('disabled');
+        document.getElementById('html_value').classList.add('disabled');
     } else {
-        $('plain_value').removeClassName('disabled');
-        $('html_value').removeClassName('disabled');
+        document.getElementById('plain_value').classList.remove('disabled');
+        document.getElementById('html_value').classList.remove('disabled');
     }
 }
-
-//]]>
 </script>

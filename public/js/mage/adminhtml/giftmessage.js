@@ -59,7 +59,6 @@ class GiftMessagesController {
         if (!formElement?.validator?.validate()) return false;
 
         mahoFetch(formElement.action, { method: 'POST', body: new FormData(formElement) })
-            .then(response => response.text())
             .then(responseText => this.handleGiftMessageResponse(containerElement, container, responseText));
         return false;
     }

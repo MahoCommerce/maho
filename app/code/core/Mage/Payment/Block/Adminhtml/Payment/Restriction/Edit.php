@@ -29,7 +29,7 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit extends Mage_Adminht
 
         $this->_formScripts[] = "
             function saveAndContinueEdit(){
-                editForm.submit($('edit_form').action+'back/edit/');
+                editForm.submit(document.getElementById('edit_form').action+'back/edit/');
             }
         ";
     }

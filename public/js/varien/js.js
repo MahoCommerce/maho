@@ -309,17 +309,6 @@ Varien.hideLoading = function() {
         loader.style.display = 'none';
     }
 };
-Varien.GlobalHandlers = {
-    onCreate: function() {
-        Varien.showLoading();
-    },
-
-    onComplete: function() {
-        if(Ajax.activeRequestCount == 0) {
-            Varien.hideLoading();
-        }
-    }
-};
 
 Varien.searchForm = class {
     constructor(form, field, emptyText) {
@@ -736,20 +725,32 @@ function customFormSubmit(url, parametersArray, method) {
     createdForm.form.submit();
 }
 
-function customFormSubmitToParent(url, parametersArray, method) {
-    new Ajax.Request(url, {
-        method: method,
-        parameters: JSON.parse(parametersArray),
-        onSuccess: function (response) {
-            var node = document.createElement('div');
-            node.innerHTML = response.responseText;
-            var responseMessage = node.getElementsByClassName('messages')[0];
-            var pageTitle = window.document.body.getElementsByClassName('page-title')[0];
+async function customFormSubmitToParent(url, parametersArray, method) {
+    try {
+        const params = JSON.parse(parametersArray);
+        const formData = new FormData();
+
+        Object.entries(params).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
+
+        const response = await mahoFetch(url, {
+            method: method.toUpperCase(),
+            body: formData
+        });
+
+        const node = document.createElement('div');
+        node.innerHTML = response;
+        const responseMessage = node.getElementsByClassName('messages')[0];
+        const pageTitle = window.document.body.getElementsByClassName('page-title')[0];
+        if (responseMessage && pageTitle) {
             pageTitle.insertAdjacentHTML('afterend', responseMessage.outerHTML);
-            window.opener.focus();
-            window.opener.location.href = response.transport.responseURL;
         }
-    });
+        window.opener.focus();
+        window.opener.location.href = url;
+    } catch (error) {
+        console.error('Form submit to parent error:', error);
+    }
 }
 
 function buttonDisabler() {

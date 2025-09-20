@@ -18,11 +18,17 @@
 
 <script type="text/javascript">
     function setInterfaceLanguage(evt) {
-        var elem = Event.element(evt);
+        const elem = evt.target;
         if (elem) {
             setLocation('<?= $this->getChangeLocaleUrl() ?>locale/'+elem.value+'/<?= $this->getRefererParamName() ?>/<?= $this->getUrlForReferer() ?>');
         }
     }
-    Event.observe('interface_locale', 'change', setInterfaceLanguage);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const interfaceLocaleElement = document.getElementById('interface_locale');
+        if (interfaceLocaleElement) {
+            interfaceLocaleElement.addEventListener('change', setInterfaceLanguage);
+        }
+    });
     addCopyIcons();
 </script>

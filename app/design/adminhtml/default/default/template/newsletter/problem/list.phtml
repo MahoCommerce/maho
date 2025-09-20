@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -29,51 +29,93 @@
 </div>
 <?php endif ?>
 <script type="text/javascript">
-<!--
-    var problemController = {
-        checkCheckboxes: function(controlCheckbox) {
-            var elements = $('problemGrid').getElementsByClassName('problemCheckbox');
-            elements.each(function(obj){
-                obj.checked = controlCheckbox.checked;
-            });
-        },
-        rowClick: function (e) {
-            if(!Event.element(e).hasClassName('problemCheckbox')) {
-                var elements = Event.findElement(e, 'tr').getElementsByClassName('problemCheckbox');
-                if(elements.length != 1) {
-                    return;
-                }
-                elements[0].checked = !elements[0].checked;
+    const problemController = {
+        checkCheckboxes(controlCheckbox) {
+            const problemGrid = document.getElementById('problemGrid');
+            if (problemGrid) {
+                const elements = problemGrid.getElementsByClassName('problemCheckbox');
+                Array.from(elements).forEach(obj => {
+                    obj.checked = controlCheckbox.checked;
+                });
             }
         },
 
-        unsubscribe: function () {
-            var elements = $$('input.problemCheckbox');
-            var serializedElements = Form.serializeElements(elements, true);
-            serializedElements._unsubscribe = '1';
-            serializedElements.form_key = FORM_KEY;
-            var url = problemGridJsObject.url;
-
-            new Ajax.Updater('problemGrid', url + '?ajax=1',
-                             {parameters:  serializedElements,
-                              evalScripts: true,
-                              onComplete:problemGridJsObject.initGrid.bind(problemGridJsObject)});
+        rowClick(e) {
+            if (!e.target.classList.contains('problemCheckbox')) {
+                const row = e.target.closest('tr');
+                if (row) {
+                    const elements = row.getElementsByClassName('problemCheckbox');
+                    if (elements.length === 1) {
+                        elements[0].checked = !elements[0].checked;
+                    }
+                }
+            }
         },
 
-        deleteSelected: function () {
-            var elements = $$('input.problemCheckbox');
-            var serializedElements = Form.serializeElements(elements, true);
-            serializedElements._delete = '1';
-            serializedElements.form_key = FORM_KEY;
-            var url = problemGridJsObject.url;
+        unsubscribe() {
+            const elements = document.querySelectorAll('input.problemCheckbox');
+            const formData = new FormData();
 
-            new Ajax.Updater('problemGrid', url + '?ajax=1',
-                             {parameters:  serializedElements,
-                              evalScripts: true,
-                              onComplete:problemGridJsObject.initGrid.bind(problemGridJsObject)});
+            elements.forEach(element => {
+                if (element.checked) {
+                    formData.append(element.name, element.value);
+                }
+            });
+
+            formData.append('_unsubscribe', '1');
+            formData.append('form_key', FORM_KEY);
+
+            const url = problemGridJsObject.url;
+
+            mahoFetch(url + '?ajax=1', {
+                method: 'POST',
+                body: formData
+            })
+            .then(data => {
+                const problemGrid = document.getElementById('problemGrid');
+                if (problemGrid) {
+                    problemGrid.innerHTML = data;
+                    if (problemGridJsObject && problemGridJsObject.initGrid) {
+                        problemGridJsObject.initGrid();
+                    }
+                }
+            });
+        },
+
+        deleteSelected() {
+            const elements = document.querySelectorAll('input.problemCheckbox');
+            const formData = new FormData();
+
+            elements.forEach(element => {
+                if (element.checked) {
+                    formData.append(element.name, element.value);
+                }
+            });
+
+            formData.append('_delete', '1');
+            formData.append('form_key', FORM_KEY);
+
+            const url = problemGridJsObject.url;
+
+            mahoFetch(url + '?ajax=1', {
+                method: 'POST',
+                body: formData
+            })
+            .then(data => {
+                const problemGrid = document.getElementById('problemGrid');
+                if (problemGrid) {
+                    problemGrid.innerHTML = data;
+                    if (problemGridJsObject && problemGridJsObject.initGrid) {
+                        problemGridJsObject.initGrid();
+                    }
+                }
+            });
         }
-    }
+    };
 
-    varienGlobalEvents.attachEventHandler('gridRowClick', problemController.rowClick.bind(problemController));
-//-->
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof varienGlobalEvents !== 'undefined') {
+            varienGlobalEvents.attachEventHandler('gridRowClick', problemController.rowClick.bind(problemController));
+        }
+    });
 </script>

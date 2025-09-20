@@ -12,90 +12,119 @@
 /** @var Mage_Adminhtml_Block_Template $this */
 ?>
 <script type="text/javascript">
-<!--
 <?php $myBlock = $this->getLayout()->getBlock('roleUsersGrid'); ?>
 <?php if( is_object($myBlock) && $myBlock->getJsObjectName() ): ?>
-    var checkBoxes = $H(<?= $myBlock->_getUsers(true) ?>);
-    var warning = false;
-    if (checkBoxes.size() > 0) {
+    const checkBoxes = new Map(Object.entries(<?= $myBlock->_getUsers(true) ?>));
+    let warning = false;
+    if (checkBoxes.size > 0) {
         warning = true;
     }
-    $('in_role_user').value = checkBoxes.toQueryString();
+    const roleUserInput = document.getElementById('in_role_user');
+    if (roleUserInput) {
+        roleUserInput.value = new URLSearchParams(checkBoxes).toString();
+    }
 
-    function registerUserRole(grid, element, checked)
-    {
+    function registerUserRole(grid, element, checked) {
         if (checked) {
             checkBoxes.set(element.value, 0);
         } else {
-            checkBoxes.unset(element.value);
+            checkBoxes.delete(element.value);
         }
-        $('in_role_user').value = checkBoxes.toQueryString();
-        grid.reloadParams = {'in_role_user[]':checkBoxes.keys()};
+        const roleUserInput = document.getElementById('in_role_user');
+        if (roleUserInput) {
+            roleUserInput.value = new URLSearchParams(checkBoxes).toString();
+        }
+        grid.reloadParams = {'in_role_user[]': Array.from(checkBoxes.keys())};
     }
 
-    function roleUsersRowClick(grid, event)
-    {
-        var trElement = Event.findElement(event, 'tr');
-        var isInput   = Event.element(event).tagName == 'INPUT';
+    function roleUsersRowClick(grid, event) {
+        const trElement = event.target.closest('tr');
+        const isInput = event.target.tagName === 'INPUT';
         if (trElement) {
-            var checkbox = Element.getElementsBySelector(trElement, 'input');
-            if(checkbox[0]){
-                var checked = isInput ? !checkbox[0].checked : checkbox[0].checked;
+            const checkbox = trElement.querySelector('input');
+            if (checkbox) {
+                const checked = isInput ? !checkbox.checked : checkbox.checked;
                 if (checked) {
-                    if ( confirm('<?= $this->jsQuoteEscape($this->__('Warning!\r\nThis action will remove this user from already assigned role\r\nAre you sure?')) ?>') ) {
-                        checkbox[0].checked = false;
-                        checkBoxes.unset(checkbox[0].value);
-                        varienElementMethods.setHasChanges(checkbox[0]);
+                    if (confirm('<?= $this->jsQuoteEscape($this->__('Warning!\r\nThis action will remove this user from already assigned role\r\nAre you sure?')) ?>')) {
+                        checkbox.checked = false;
+                        checkBoxes.delete(checkbox.value);
+                        if (typeof varienElementMethods !== 'undefined') {
+                            varienElementMethods.setHasChanges(checkbox);
+                        }
                     } else {
-                        checkbox[0].checked = true;
+                        checkbox.checked = true;
                     }
                 } else {
-                    checkbox[0].checked = true;
-                    checkBoxes.set(checkbox[0].value, true);
+                    checkbox.checked = true;
+                    checkBoxes.set(checkbox.value, true);
                 }
 
-                $('in_role_user').value = checkBoxes.toQueryString();
-                grid.reloadParams = {'in_role_user[]':checkBoxes.keys()};
+                const roleUserInput = document.getElementById('in_role_user');
+                if (roleUserInput) {
+                    roleUserInput.value = new URLSearchParams(checkBoxes).toString();
+                }
+                grid.reloadParams = {'in_role_user[]': Array.from(checkBoxes.keys())};
             }
         }
     }
 
-    function roleUsersRowInit(grid, row)
-    {
-        var checkbox = $(row).getElementsByClassName('checkbox')[0];
+    function roleUsersRowInit(grid, row) {
+        const rowElement = typeof row === 'string' ? document.getElementById(row) : row;
+        const checkbox = rowElement ? rowElement.getElementsByClassName('checkbox')[0] : null;
         if (checkbox) {
             if (checkbox.checked) {
                 checkBoxes.set(checkbox.value, checkbox.checked);
             } else {
-                checkBoxes.unset(checkbox.value);
+                checkBoxes.delete(checkbox.value);
             }
 
-            $('in_role_user').value = checkBoxes.toQueryString();
-            grid.reloadParams = {'in_role_user[]':checkBoxes.keys()};
+            const roleUserInput = document.getElementById('in_role_user');
+            if (roleUserInput) {
+                roleUserInput.value = new URLSearchParams(checkBoxes).toString();
+            }
+            grid.reloadParams = {'in_role_user[]': Array.from(checkBoxes.keys())};
         }
     }
 
-    function massSelectUsers(allCheckbox)
-    {
-        if (!allCheckbox.checked && checkBoxes.size() > 0) {
-            if (!confirm('<?= $this->jsQuoteEscape($this->__('Warning!\r\nThis action will remove those users from already assigned roles\r\nAre you sure?')) ?>') ) {
+    function massSelectUsers(allCheckbox) {
+        if (!allCheckbox.checked && checkBoxes.size > 0) {
+            if (!confirm('<?= $this->jsQuoteEscape($this->__('Warning!\r\nThis action will remove those users from already assigned roles\r\nAre you sure?')) ?>')) {
                 allCheckbox.checked = false;
                 return false;
             }
         }
-        <?= $myBlock->getJsObjectName() ?>.rows.each(function(row)
-        {
-            $(row).getElementsByClassName('checkbox')[0].checked = allCheckbox.checked;
-            roleUsersRowInit(<?= $myBlock->getJsObjectName() ?>, row);
-        });
+
+        const gridObject = <?= $myBlock->getJsObjectName() ?>;
+        if (gridObject && gridObject.rows) {
+            gridObject.rows.forEach(row => {
+                const rowElement = typeof row === 'string' ? document.getElementById(row) : row;
+                const checkbox = rowElement ? rowElement.getElementsByClassName('checkbox')[0] : null;
+                if (checkbox) {
+                    checkbox.checked = allCheckbox.checked;
+                    roleUsersRowInit(gridObject, row);
+                }
+            });
+        }
     }
 
-<?= $myBlock->getJsObjectName() ?>.rowClickCallback = roleUsersRowClick;
-<?= $myBlock->getJsObjectName() ?>.initRowCallback = roleUsersRowInit;
-<?= $myBlock->getJsObjectName() ?>.checkboxCheckCallback = registerUserRole;
-<?= $myBlock->getJsObjectName() ?>.checkCheckboxes = massSelectUsers;
-<?= $myBlock->getJsObjectName() ?>.rows.each(function(row){roleUsersRowInit(<?= $myBlock->getJsObjectName() ?>, row)});
-    $('in_role_user_old').value = $('in_role_user').value;
+    const gridObject = <?= $myBlock->getJsObjectName() ?>;
+    if (gridObject) {
+        gridObject.rowClickCallback = roleUsersRowClick;
+        gridObject.initRowCallback = roleUsersRowInit;
+        gridObject.checkboxCheckCallback = registerUserRole;
+        gridObject.checkCheckboxes = massSelectUsers;
+
+        if (gridObject.rows) {
+            gridObject.rows.forEach(row => {
+                roleUsersRowInit(gridObject, row);
+            });
+        }
+    }
+
+    const roleUserOldInput = document.getElementById('in_role_user_old');
+    const roleUserInput = document.getElementById('in_role_user');
+    if (roleUserOldInput && roleUserInput) {
+        roleUserOldInput.value = roleUserInput.value;
+    }
 <?php endif ?>
-//-->
 </script>

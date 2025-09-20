@@ -27,25 +27,29 @@
                 </div>
                 <?= $this->showNoticeMessage($this->__('Please enter another credit card number to complete your purchase.')) ?>
                     <script type="text/javascript">
-                    //<![CDATA[
                     function cancelPaymentAuthorizations(){
-                        new Ajax.Request('<?= $this->getAdminCancelUrl() ?>', {
-                            onSuccess : function(transport) {
-                                try{
-                                    response = eval('(' + transport.responseText + ')');
+                        mahoFetch('<?= $this->getAdminCancelUrl() ?>')
+                        .then(response => {
+                            let responseData = response;
+                            if (typeof response === 'string') {
+                                try {
+                                    responseData = JSON.parse(response);
                                 } catch (e) {
-                                    response = {};
-                                }
-
-                                if (response.success) {
-                                    order.loadArea(['billing_method','totals'], true, []);
-                                } else {
-                                    var msg = response.error_message;
-                                    if (msg) {
-                                        alert(msg);
-                                    }
+                                    responseData = {};
                                 }
                             }
+
+                            if (responseData.success) {
+                                order.loadArea(['billing_method','totals'], true, []);
+                            } else {
+                                const msg = responseData.error_message;
+                                if (msg) {
+                                    alert(msg);
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Cancel payment authorizations error:', error);
                         });
                     }
                     <?php if ($_message = $this->getPartialAuthorizationConfirmationMessage()): ?>
@@ -53,7 +57,6 @@
                         cancelPaymentAuthorizations();
                     }
                     <?php endif ?>
-                    //]]>
                     </script>
         <?php endif ?>
     </div>

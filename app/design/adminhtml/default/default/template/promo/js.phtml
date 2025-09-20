@@ -5,28 +5,27 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Promo_Catalog_Edit_Js $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
 function hideShowSubproductOptions()
 {
-    if ($('rule_sub_is_enable').value == 1) {
-        $('rule_sub_simple_action').up('tr').show();
-        $('rule_sub_discount_amount').up('tr').show();
-        $('rule_sub_discount_amount').addClassName('required-entry validate-not-negative-number');
+    if (document.getElementById('rule_sub_is_enable').value == 1) {
+        document.getElementById('rule_sub_simple_action').closest('tr').style.display = '';
+        document.getElementById('rule_sub_discount_amount').closest('tr').style.display = '';
+        document.getElementById('rule_sub_discount_amount').classList.add('required-entry', 'validate-not-negative-number');
     } else {
-        $('rule_sub_simple_action').up('tr').hide();
-        $('rule_sub_discount_amount').up('tr').hide();
-        $('rule_sub_discount_amount').removeClassName('required-entry').removeClassName('validate-not-negative-number');
+        document.getElementById('rule_sub_simple_action').closest('tr').style.display = 'none';
+        document.getElementById('rule_sub_discount_amount').closest('tr').style.display = 'none';
+        document.getElementById('rule_sub_discount_amount').classList.remove('required-entry', 'validate-not-negative-number');
     }
 
     return true;
 }
 
-document.observe("dom:loaded", hideShowSubproductOptions);
-//]]>
+document.addEventListener('DOMContentLoaded', hideShowSubproductOptions);
 </script>

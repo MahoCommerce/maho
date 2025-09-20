@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -32,17 +32,16 @@
 </div>
 <?php endif ?>
 <script type="text/javascript">
-<!--
     var subscriberController = {
         checkCheckboxes: function(controlCheckbox) {
-            var elements = $('subscriberGrid').getElementsByClassName('subscriberCheckbox');
-            elements.each(function(obj){
+            var elements = document.getElementById('subscriberGrid').getElementsByClassName('subscriberCheckbox');
+            Array.from(elements).forEach(function(obj){
                 obj.checked = controlCheckbox.checked;
             });
         },
         rowClick: function (e) {
-            if(!Event.element(e).hasClassName('subscriberCheckbox')) {
-                var elements = Event.findElement(e, 'tr').getElementsByClassName('subscriberCheckbox');
+            if(!e.target.classList.contains('subscriberCheckbox')) {
+                var elements = e.target.closest('tr').getElementsByClassName('subscriberCheckbox');
                 if(elements.length != 1) {
                     return;
                 }
@@ -50,20 +49,48 @@
             }
         },
         addToQueue: function () {
-            var elements = $('subscriberGrid').getElementsByClassName('subscriberCheckbox');
-            elements.push($('queueList'));
-            var serializedElements = Form.serializeElements(elements, true);
+            var elements = Array.from(document.getElementById('subscriberGrid').getElementsByClassName('subscriberCheckbox'));
+            elements.push(document.getElementById('queueList'));
+            var serializedElements = {};
+            elements.forEach(element => {
+                if (element.name && (element.type !== 'checkbox' || element.checked)) {
+                    if (serializedElements[element.name]) {
+                        if (!Array.isArray(serializedElements[element.name])) {
+                            serializedElements[element.name] = [serializedElements[element.name]];
+                        }
+                        serializedElements[element.name].push(element.value);
+                    } else {
+                        serializedElements[element.name] = element.value;
+                    }
+                }
+            });
             serializedElements.add = 'subscribers';
             serializedElements.form_key = FORM_KEY;
             var url = subscriberGridJsObject.url;
 
-            new Ajax.Updater('subscriberGrid', url + '?ajax=1',
-                             {parameters:  serializedElements,
-                              evalScripts: true,
-                              onComplete:subscriberGridJsObject.initGrid.bind(subscriberGridJsObject)});
+            const formData = new FormData();
+            Object.entries(serializedElements).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    value.forEach(item => formData.append(key, item));
+                } else {
+                    formData.append(key, value);
+                }
+            });
+
+            mahoFetch(url + '?ajax=1', {
+                method: 'POST',
+                body: formData
+            })
+            .then(responseText => {
+                const subscriberGrid = document.getElementById('subscriberGrid');
+                updateElementHtmlAndExecuteScripts(subscriberGrid, responseText);
+                subscriberGridJsObject.initGrid();
+            })
+            .catch(error => {
+                console.error('Add to queue error:', error);
+            });
         }
     }
 
     varienGlobalEvents.attachEventHandler('gridRowClick', subscriberController.rowClick.bind(subscriberController));
-//-->
 </script>

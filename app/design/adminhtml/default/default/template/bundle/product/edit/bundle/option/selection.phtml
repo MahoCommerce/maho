@@ -61,7 +61,6 @@ class BundleSelection {
     constructor() {
         this.idLabel = '<?= $this->getFieldId() ?>';
         this.scopePrice = <?= (int)$this->isUsedWebsitePrice() ?>;
-        this.templateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
         this.templateBox = '';
         this.templateRow = '';
         this.itemsCount = 0;
@@ -215,12 +214,12 @@ class BundleSelection {
 
         const inputs = document.querySelectorAll('#bundle_option_' + data.parentIndex + ' input');
         inputs.forEach(el => {
-            el.addEventListener('change', () => el.setHasChanges?.());
+            el.addEventListener('change', () => el.setHasChanges?.(el));
         });
 
         const deleteButtons = document.querySelectorAll('#bundle_option_' + data.parentIndex + ' button.delete');
         deleteButtons.forEach(el => {
-            el.addEventListener('click', () => el.setHasChanges?.());
+            el.addEventListener('click', () => el.setHasChanges?.(el));
         });
     }
 

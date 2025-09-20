@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -80,28 +80,27 @@
     </fieldset>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-    var productWebsiteCheckboxes = $$('.website-checkbox');
+    const productWebsiteCheckboxes = document.querySelectorAll('.website-checkbox');
 
-    for(var i=0;i<productWebsiteCheckboxes.length;i++){
-        Event.observe(productWebsiteCheckboxes[i], 'click', toggleStoreFromChoosers);
-    }
+    productWebsiteCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('click', toggleStoreFromChoosers);
+    });
 
-    function toggleStoreFromChoosers(event){
-        var element = Event.element(event);
-        var selects = $(element.id+'_data').getElementsBySelector('select');
-        var selectBlocks = $(element.id+'_data').getElementsByClassName('website-'+element.value+'-select');
-        for (var i=0; i<selects.length; i++) {
-            selects[i].disabled=!element.checked;
-        }
-        for (var i=0; i<selectBlocks.length; i++) {
-            if (element.checked) {
-                selectBlocks[i].show();
-            }
-            else {
-                selectBlocks[i].hide();
-            }
+    function toggleStoreFromChoosers(event) {
+        const element = event.target;
+        const dataContainer = document.getElementById(element.id + '_data');
+
+        if (dataContainer) {
+            const selects = dataContainer.querySelectorAll('select');
+            const selectBlocks = dataContainer.querySelectorAll(`.website-${element.value}-select`);
+
+            selects.forEach(select => {
+                select.disabled = !element.checked;
+            });
+
+            selectBlocks.forEach(block => {
+                block.style.display = element.checked ? '' : 'none';
+            });
         }
     }
-//]]>
 </script>

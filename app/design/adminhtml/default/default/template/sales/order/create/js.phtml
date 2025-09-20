@@ -13,7 +13,7 @@
 ?>
 <script type="text/javascript">
     order.sidebarHide();
-    Event.observe(window, 'load',  function() {
+    window.addEventListener('load', function() {
         if (window.productConfigure) {
             productConfigure.addListType('product_to_add', {
                 urlFetch: '<?= $this->getUrl('*/sales_order_create/configureProductToAdd') ?>'

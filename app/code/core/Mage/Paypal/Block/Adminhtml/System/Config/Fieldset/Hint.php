@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,41 +30,40 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Hint extends Mage_Admin
             paypalToggleSolution = function(id, url) {
                 var doScroll = false;
                 Fieldset.toggleCollapse(id, url);
-                if ($(this).hasClassName("open")) {
-                    $$(".with-button button.button").each(function(anotherButton) {
-                        if (anotherButton != this && $(anotherButton).hasClassName("open")) {
-                            $(anotherButton).click();
+                if (this.classList.contains("open")) {
+                    document.querySelectorAll(".with-button button.button").forEach(function(anotherButton) {
+                        if (anotherButton != this && anotherButton.classList.contains("open")) {
+                            anotherButton.click();
                             doScroll = true;
                         }
                     }.bind(this));
                 }
                 if (doScroll) {
-                    var pos = Element.cumulativeOffset($(this));
-                    window.scrollTo(pos[0], pos[1] - 45);
+                    var rect = this.getBoundingClientRect();
+                    var scrollTop = window.pageYOffset + rect.top - 45;
+                    window.scrollTo(0, scrollTop);
                 }
             }
 
             togglePaypalSolutionConfigureButton = function(button, enable) {
-                var $button = $(button);
-                $button.disabled = !enable;
-                if ($button.hasClassName("disabled") && enable) {
-                    $button.removeClassName("disabled");
-                } else if (!$button.hasClassName("disabled") && !enable) {
-                    $button.addClassName("disabled");
+                button.disabled = !enable;
+                if (button.classList.contains("disabled") && enable) {
+                    button.classList.remove("disabled");
+                } else if (!button.classList.contains("disabled") && !enable) {
+                    button.classList.add("disabled");
                 }
             }
 
             // check store-view disabling Express Checkout
-            document.observe("dom:loaded", function() {
-                var ecButton = $$(".pp-method-express button.button")[0];
-                var ecEnabler = $$(".paypal-ec-enabler")[0];
-                if (typeof ecButton == "undefined" || typeof ecEnabler != "undefined") {
+            document.addEventListener("DOMContentLoaded", function() {
+                var ecButton = document.querySelector(".pp-method-express button.button");
+                var ecEnabler = document.querySelector(".paypal-ec-enabler");
+                if (!ecButton || ecEnabler) {
                     return;
                 }
-                var $ecButton = $(ecButton);
-                $$(".with-button button.button").each(function(configureButton) {
+                document.querySelectorAll(".with-button button.button").forEach(function(configureButton) {
                     if (configureButton != ecButton && !configureButton.disabled
-                        && !$(configureButton).hasClassName("paypal-ec-separate")
+                        && !configureButton.classList.contains("paypal-ec-separate")
                     ) {
                         togglePaypalSolutionConfigureButton(ecButton, false);
                     }

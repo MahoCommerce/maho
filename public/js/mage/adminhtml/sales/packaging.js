@@ -91,7 +91,7 @@ class Packaging
         this.createLabelUrl = url;
     }
     setParamsCreateLabelRequest(params) {
-        Object.extend(this.paramsCreateLabelRequest, params);
+        Object.assign(this.paramsCreateLabelRequest, params);
     }
 
     showWindow() {

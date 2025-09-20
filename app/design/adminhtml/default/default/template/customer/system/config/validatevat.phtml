@@ -12,35 +12,48 @@
 /** @var Mage_Adminhtml_Block_Customer_System_Config_Validatevat $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
     function validateVat() {
-        var elem = $('<?= $this->getHtmlId() ?>');
+        var elem = document.getElementById('<?= $this->getHtmlId() ?>');
 
         params = {
-            country: $('general_store_information_merchant_country').value,
-            vat: $('general_store_information_merchant_vat_number').value
+            country: document.getElementById('general_store_information_merchant_country').value,
+            vat: document.getElementById('general_store_information_merchant_vat_number').value
         };
 
-        new Ajax.Request('<?= $this->getAjaxUrl() ?>', {
-            parameters: params,
-            onSuccess: function(response) {
-                result = '<?= $this->jsQuoteEscape($this->__('VAT Number is Invalid')) ?>';
-                try {
-                    response = response.responseText;
-                    if (response == 1) {
-                        result = '<?= $this->jsQuoteEscape($this->__('VAT Number is Valid')) ?>';
-                        elem.removeClassName('fail').addClassName('success')
-                    } else {
-                        elem.removeClassName('success').addClassName('fail')
-                    }
-                } catch (e) {
-                    elem.removeClassName('success').addClassName('fail')
+        const formData = new FormData();
+        Object.entries(params).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
+
+        mahoFetch('<?= $this->getAjaxUrl() ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            let result = '<?= $this->jsQuoteEscape($this->__('VAT Number is Invalid')) ?>';
+            try {
+                const responseText = typeof response === 'string' ? response : JSON.stringify(response);
+                if (responseText == '1') {
+                    result = '<?= $this->jsQuoteEscape($this->__('VAT Number is Valid')) ?>';
+                    elem.classList.remove('fail');
+                    elem.classList.add('success');
+                } else {
+                    elem.classList.remove('success');
+                    elem.classList.add('fail');
                 }
-                $('validation_result').update(result);
+            } catch (e) {
+                elem.classList.remove('success');
+                elem.classList.add('fail');
             }
+            document.getElementById('validation_result').innerHTML = result;
+        })
+        .catch(error => {
+            console.error('VAT validation error:', error);
+            elem.classList.remove('success');
+            elem.classList.add('fail');
+            document.getElementById('validation_result').innerHTML = '<?= $this->jsQuoteEscape($this->__('VAT Number is Invalid')) ?>';
         });
     }
-//]]>
 </script>
 <button onclick="javascript:validateVat(); return false;" class="scalable" type="button" id="<?= $this->getHtmlId() ?>">
     <span id="validation_result"><?= $this->escapeHtml($this->getButtonLabel()) ?></span>

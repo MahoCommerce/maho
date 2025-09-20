@@ -187,7 +187,7 @@
                             <?php $_isCustomPrice = $this->usedCustomPriceForItem($_item) ?>
                             <?php if($_tier = $this->getTierHtml($_item)): ?>
                             <div id="item_tier_block_<?= $_item->getId() ?>"<?php if ($_isCustomPrice): ?> style="display:none"<?php endif ?>>
-                                <a href="#" onclick="$('item_tier_<?= $_item->getId() ?>').toggle();return false;"><?= $this->helper('sales')->__('Tier Pricing') ?></a>
+                                <a href="#" onclick="document.getElementById('item_tier_<?= $_item->getId() ?>').style.display = document.getElementById('item_tier_<?= $_item->getId() ?>').style.display === 'none' ? 'block' : 'none';return false;"><?= $this->helper('sales')->__('Tier Pricing') ?></a>
                                 <div style="display:none" id="item_tier_<?= $_item->getId() ?>"><?= $_tier ?></div>
                             </div>
                             <?php endif ?>

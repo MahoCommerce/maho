@@ -33,7 +33,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit extends Mage_Adminh
 
         $this->_formScripts[] = "
             function saveAndContinueEdit(){
-                editForm.submit($('edit_form').action+'back/edit/');
+                editForm.submit(document.getElementById('edit_form').action+'back/edit/');
             }
         ";
     }

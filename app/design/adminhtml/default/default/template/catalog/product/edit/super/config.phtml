@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -59,7 +59,7 @@
     </div>
     <div class="values-container right">
         <label for="__id___label" class="bold"><?= Mage::helper('catalog')->__('Attribute Name:') ?></label>
-        <input id="__id___label" type="text" <?php if ($this->isAttributesConfigurationReadonly()): ?> disabled="disabled" <?php endif ?> class="input-text attribute-label required-entry template no-display" value="'{{label}}'" readonly="label" />
+        <input id="__id___label" type="text" <?php if ($this->isAttributesConfigurationReadonly()): ?> disabled="disabled" <?php endif ?> class="input-text attribute-label required-entry template no-display" value="{{label}}" readonly="label" />
         <input id="__id___label_use_default" type="checkbox" value="1" " checked="use_default" class="attribute-use-default-label">
         <label for="__id___label_use_default"><?= Mage::helper('catalog')->__('Use default') ?> ('{{store_label}}')</label>
         <ul class="attribute-values">
@@ -74,7 +74,7 @@
 <div class="attribute-values-container-main">
     <div class="attribute-values-container left">
     <?= Mage::helper('catalog')->__('Price:') ?>
-    <input id="__id___pricing" type="text" <?php if ($this->isAttributesPricesReadonly() || $this->getCanEditPrice() === false): ?> disabled="disabled" <?php endif ?> class="input-text attribute-price validate-number template no-display" value="'{{pricing_value}}'"/>
+    <input id="__id___pricing" type="text" <?php if ($this->isAttributesPricesReadonly() || $this->getCanEditPrice() === false): ?> disabled="disabled" <?php endif ?> class="input-text attribute-price validate-number template no-display" value="{{pricing_value}}"/>
 </div>
 <div class="attribute-values-container left">
     &nbsp;<select class="attribute-price-type" id="__id___price_type" <?php if ($this->isAttributesPricesReadonly() || $this->getCanEditPrice() === false): ?> disabled="disabled" <?php endif ?>>

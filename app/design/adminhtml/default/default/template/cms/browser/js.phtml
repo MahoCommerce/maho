@@ -19,4 +19,5 @@
 <script>
 MediabrowserInstance = new Mediabrowser(<?= $this->getFilebrowserSetupObject() ?>);
 MediabrowserInstance.storeId = '<?= $this->getStoreId() ?>';
+MediabrowserInstance.initializeEventListeners();
 </script>

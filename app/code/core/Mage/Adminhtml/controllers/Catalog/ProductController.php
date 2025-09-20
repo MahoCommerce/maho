@@ -842,19 +842,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         $this->renderLayout();
     }
 
-    public function addAttributeAction(): void
-    {
-        $this->_getSession()->addNotice(
-            Mage::helper('catalog')->__('Please click on the Close Window button if it is not closed automatically.'),
-        );
-        $this->loadLayout('popup');
-        $this->_initProduct();
-        $this->_addContent(
-            $this->getLayout()->createBlock('adminhtml/catalog_product_attribute_new_product_created'),
-        );
-        $this->renderLayout();
-    }
-
     public function createdAction(): void
     {
         $this->_getSession()->addNotice(

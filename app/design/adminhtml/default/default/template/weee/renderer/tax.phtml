@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -71,113 +71,163 @@
     </table>
 
 <script type="text/javascript">
-//<![CDATA[
-    if (typeof itemsCount == 'undefined') {
-        var itemsCount = 0;
+    if (typeof itemsCount === 'undefined') {
+        let itemsCount = 0;
     }
-    var weeeTaxControl = {
+
+    const weeeTaxControl = {
         deleteButton: false,
-        addItem : function () {
-            var data = {};
-            data.prefix = '';
-            data.website_id = 0;
-            data.country    = '';
-            data.state      = '';
-            data.price      = '';
-            data.index      = itemsCount++;
-            if(arguments.length == 5) {
-                data.prefix     = arguments[0];
+
+        addItem() {
+            const data = {
+                prefix: '',
+                website_id: 0,
+                country: '',
+                state: '',
+                price: '',
+                index: itemsCount++
+            };
+
+            if (arguments.length === 5) {
+                data.prefix = arguments[0];
                 data.website_id = arguments[1];
-                data.country    = arguments[2];
-                data.state      = arguments[3];
-                data.price      = arguments[4];
-            } else if (arguments.length == 1) {
-                data.prefix     = arguments[0];
+                data.country = arguments[2];
+                data.state = arguments[3];
+                data.price = arguments[4];
+            } else if (arguments.length === 1) {
+                data.prefix = arguments[0];
             }
 
-            var template = new Template('<tr>' + $(data.prefix + '_add_template').innerHTML.replace(/__index__/g, '#{index}').replace(/ disabled="?no-template"?/g, '').replace(/ disabled/g, '').replace(/="'([^']*)'"/g, '="$1"') + '</tr>');
-            Element.insert($(data.prefix + '_container'), {'bottom':template.evaluate(data)});
+            const templateElement = document.getElementById(`${data.prefix}_add_template`);
+            let templateHtml = templateElement.innerHTML
+                .replace(/__index__/g, data.index)
+                .replace(/ disabled="?no-template"?/g, '')
+                .replace(/ disabled/g, '')
+                .replace(/="'([^']*)'"/, '="$1"')
+                .replace(/#{prefix}/g, data.prefix)
+                .replace(/#{price}/g, data.price);
 
-            $(data.prefix + '_weee_tax_row_'+data.index+'_country').value = data.country;
-            $(data.prefix + '_weee_tax_row_'+data.index+'_website').value = data.website_id;
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = templateHtml;
 
-            updater = new RegionUpdater(data.prefix + '_weee_tax_row_'+data.index+'_country', null, data.prefix + '_weee_tax_row_'+data.index+'_state', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, 'disable', true);
+            const container = document.getElementById(`${data.prefix}_container`);
+            container.appendChild(newRow);
+
+            const countrySelect = document.getElementById(`${data.prefix}_weee_tax_row_${data.index}_country`);
+            const websiteSelect = document.getElementById(`${data.prefix}_weee_tax_row_${data.index}_website`);
+
+            if (countrySelect) countrySelect.value = data.country;
+            if (websiteSelect) websiteSelect.value = data.website_id;
+
+            // Initialize region updater
+            const updater = new RegionUpdater(
+                `${data.prefix}_weee_tax_row_${data.index}_country`,
+                null,
+                `${data.prefix}_weee_tax_row_${data.index}_state`,
+                <?= Mage::helper('directory')->getRegionJsonByStore() ?>,
+                'disable',
+                true
+            );
             updater.update();
 
-            $(data.prefix + '_weee_tax_row_'+data.index+'_state').value   = data.state;
+            const stateSelect = document.getElementById(`${data.prefix}_weee_tax_row_${data.index}_state`);
+            if (stateSelect) stateSelect.value = data.state;
         },
 
-        deleteItem : function(prefix, event) {
-            var tr = Event.findElement(event, 'tr');
+        deleteItem(prefix, event) {
+            const tr = event.target.closest('tr');
             if (tr) {
-                Element.select(tr, '.delete').each(function(elem){elem.value='1'});
-                Element.select(tr, ['input', 'select']).each(function(elem){elem.hide()});
-                Element.hide(tr);
-                Element.addClassName(tr, 'no-display template');
+                // Mark delete inputs as 1
+                tr.querySelectorAll('.delete').forEach(elem => {
+                    elem.value = '1';
+                });
+
+                // Hide all inputs and selects
+                tr.querySelectorAll('input, select').forEach(elem => {
+                    elem.style.display = 'none';
+                });
+
+                // Hide the row and add classes
+                tr.style.display = 'none';
+                tr.classList.add('no-display', 'template');
             }
         },
 
-        priceTypeChangeEventObserver : function() {
-            val = $('price_type').options[$('price_type').selectedIndex].value;
-            for (i=0;i<weeeEditorPrefixes.length;i++) {
-                elem = $(weeeEditorPrefixes[i] + '_table');
+        priceTypeChangeEventObserver() {
+            const priceTypeElement = document.getElementById('price_type');
+            if (!priceTypeElement) return;
 
+            const val = priceTypeElement.value;
+
+            for (let i = 0; i < weeeEditorPrefixes.length; i++) {
+                const tableElement = document.getElementById(`${weeeEditorPrefixes[i]}_table`);
+                if (!tableElement) continue;
+
+                const parentElement = tableElement.closest('td');
                 if (val != 1) {
-                    elem.up(1).hide();
+                    if (parentElement) parentElement.style.display = 'none';
                     weeeTaxControl.disableEditElements(weeeEditorPrefixes[i]);
                 } else {
                     weeeTaxControl.enableEditElements(weeeEditorPrefixes[i]);
-                    elem.up(1).show();
+                    if (parentElement) parentElement.style.display = '';
                 }
             }
         },
 
-        bindPriceTypeChangeObserver : function() {
-            if ($('price_type')) {
-                Event.observe($('price_type'), 'change', weeeTaxControl.priceTypeChangeEventObserver);
+        bindPriceTypeChangeObserver() {
+            const priceTypeElement = document.getElementById('price_type');
+            if (priceTypeElement) {
+                priceTypeElement.addEventListener('change', weeeTaxControl.priceTypeChangeEventObserver);
                 weeeTaxControl.priceTypeChangeEventObserver();
             }
         },
 
-        enableEditElements : function (prefix) {
-            nodes = $(prefix + '_container').childNodes;
-            for (a=0;a<nodes.length;a++) {
-                tr = nodes[a];
-                Element.select(tr, ['input', 'select']).each(function(elem){
-                    elem.disabled=weeeEditorState[elem.id];
-                    if (elem.id.indexOf('delete') != -1) {
-                        elem.value = ((typeof weeeEditorDeleted[elem.id] == undefined || !weeeEditorDeleted[elem.id]) ? 0 : 1);
+        enableEditElements(prefix) {
+            const container = document.getElementById(`${prefix}_container`);
+            if (!container) return;
+
+            const nodes = container.children;
+            for (let a = 0; a < nodes.length; a++) {
+                const tr = nodes[a];
+                tr.querySelectorAll('input, select').forEach(elem => {
+                    elem.disabled = weeeEditorState[elem.id] || false;
+                    if (elem.id.includes('delete')) {
+                        elem.value = (typeof weeeEditorDeleted[elem.id] === 'undefined' || !weeeEditorDeleted[elem.id]) ? '0' : '1';
                     }
                 });
             }
         },
 
-        disableEditElements : function (prefix) {
-            nodes = $(prefix + '_container').childNodes;
-            for (b=0;b<nodes.length;b++) {
-                tr = nodes[b];
-                Element.select(tr, ['input', 'select']).each(function(elem){
-                    if (elem.id.indexOf('delete') != -1) {
-                        weeeEditorDeleted[elem.id]=(elem.value?elem.value:0);
-                        elem.value = 1;
+        disableEditElements(prefix) {
+            const container = document.getElementById(`${prefix}_container`);
+            if (!container) return;
+
+            const nodes = container.children;
+            for (let b = 0; b < nodes.length; b++) {
+                const tr = nodes[b];
+                tr.querySelectorAll('input, select').forEach(elem => {
+                    if (elem.id.includes('delete')) {
+                        weeeEditorDeleted[elem.id] = elem.value || '0';
+                        elem.value = '1';
                     }
-                    weeeEditorState[elem.id]=elem.disabled;elem.disabled=true;
+                    weeeEditorState[elem.id] = elem.disabled;
+                    elem.disabled = true;
                 });
             }
         }
-    }
+    };
+
     <?php foreach ($this->getValues() as $_item): ?>
     weeeTaxControl.addItem('<?= $_htmlId ?>', '<?= $_item['website_id'] ?>', '<?= $_item['country'] ?>', '<?= $_item['state'] ?>', '<?= sprintf('%.2f', $_item['value']) ?>');
     <?php endforeach ?>
 
-    if (typeof weeeEditorPrefixes == 'undefined') {
-        var weeeEditorPrefixes = new Array();
-        var weeeEditorState = new Array();
-        var weeeEditorDeleted = new Array();
-        Event.observe(window, 'load', weeeTaxControl.bindPriceTypeChangeObserver);
+    if (typeof weeeEditorPrefixes === 'undefined') {
+        window.weeeEditorPrefixes = [];
+        window.weeeEditorState = {};
+        window.weeeEditorDeleted = {};
+        document.addEventListener('DOMContentLoaded', weeeTaxControl.bindPriceTypeChangeObserver);
     }
     weeeEditorPrefixes.push('<?= $_htmlId ?>');
-//]]>
 </script>
 </td>
 </tr>

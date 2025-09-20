@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Cms_Block_Edit extends Mage_Adminhtml_Block_Widget_Fo
 
         $this->_formScripts[] = "
             function saveAndContinueEdit(){
-                editForm.submit($('edit_form').action+'back/edit/');
+                editForm.submit(document.getElementById('edit_form').action+'back/edit/');
             }
         ";
     }

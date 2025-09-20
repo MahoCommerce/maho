@@ -13,127 +13,144 @@
 ?>
 
 <script type="text/javascript">
-//<![CDATA[
-var profileImportOnly = ['profile_number_of_records', 'profile_decimal_separator'];
-function showOption(select)
-{
-    select = $(select);
-    for (var i = 0, l = select.options.length; i<l; i++) {
-        $$('.'+select.id+'_'+select.options[i].value).each(function (el) {
-            el.style.display = select.selectedIndex==i ? '' : 'none';
+const profileImportOnly = ['profile_number_of_records', 'profile_decimal_separator'];
+
+function getElementById(id) {
+    return document.getElementById(id);
+}
+
+function showOption(select) {
+    const selectElement = typeof select === 'string' ? getElementById(select) : select;
+    if (!selectElement) return;
+
+    for (let i = 0; i < selectElement.options.length; i++) {
+        const elements = document.querySelectorAll(`.${selectElement.id}_${selectElement.options[i].value}`);
+        elements.forEach(el => {
+            el.style.display = selectElement.selectedIndex === i ? '' : 'none';
         });
     }
-
 }
 
-function addFieldMapping()
-{
-    var entityType = $('profile_entity_type').value;
-    Element.insert($('map_container_'+entityType), {bottom: $('map_template_'+entityType).innerHTML});
+function addFieldMapping() {
+    const entityType = getElementById('profile_entity_type').value;
+    const container = getElementById(`map_container_${entityType}`);
+    const template = getElementById(`map_template_${entityType}`);
+    if (container && template) {
+        container.insertAdjacentHTML('beforeend', template.innerHTML);
+    }
 }
 
-function removeFieldMapping(button)
-{
-    Element.remove(button.parentNode);
+function removeFieldMapping(button) {
+    if (button.parentNode) {
+        button.parentNode.remove();
+    }
 }
 
-function setMapFileField(select)
-{
-    select.parentNode.getElementsByTagName('input')[0].value = select.value;
+function setMapFileField(select) {
+    const input = select.parentNode.getElementsByTagName('input')[0];
+    if (input) {
+        input.value = select.value;
+    }
 }
 
-function toggleSelectOption(type, source, target, sourceValue, targetValue, targetText)
-{
-    source = $(source);
-    target = $(target);
+function toggleSelectOption(type, source, target, sourceValue, targetValue, targetText) {
+    const sourceElement = getElementById(source);
+    const targetElement = getElementById(target);
+    if (!sourceElement || !targetElement) return;
 
-    var i, ex, option, present;
-    var selectValue = source.options[source.selectedIndex].value;
+    const selectValue = sourceElement.options[sourceElement.selectedIndex].value;
 
-    if('remove'==type && selectValue==sourceValue || 'add'==type && selectValue!=sourceValue) {
-        for(i=0;i<target.options.length;i++){
-            if(target.options[i].value==targetValue){
-                target.remove(i);
+    if (('remove' === type && selectValue === sourceValue) || ('add' === type && selectValue !== sourceValue)) {
+        for (let i = 0; i < targetElement.options.length; i++) {
+            if (targetElement.options[i].value === targetValue) {
+                targetElement.remove(i);
                 break;
             }
         }
     } else {
-        for(i=0;i<target.options.length;i++){
-            if(target.options[i].value==targetValue){
+        let present = false;
+        for (let i = 0; i < targetElement.options.length; i++) {
+            if (targetElement.options[i].value === targetValue) {
                 present = true;
                 break;
-            } else {
-                present = false;
             }
         }
-        if(!present){
-            option = document.createElement("OPTION");
+        if (!present) {
+            const option = document.createElement('option');
             option.text = targetText;
             option.value = targetValue;
-            try {
-                target.add(option, null); // standards compliant; doesn't work in IE
-            } catch(ex) {
-                target.add(option); // IE only
-            }
+            targetElement.add(option);
         }
     }
-    showOption(target);
+    showOption(targetElement);
 }
 
-function exportUrlField()
-{
-    var urlFieldEl = $('profile_add_url_field').up();
-    var entityType = $('profile_entity_type').value;
-    var direction  = $('profile_direction').value;
-    var storeId    = $('profile_store_id').value;
+function exportUrlField() {
+    const urlFieldEl = getElementById('profile_add_url_field')?.closest('span');
+    const entityType = getElementById('profile_entity_type').value;
+    const direction = getElementById('profile_direction').value;
+    const storeId = getElementById('profile_store_id').value;
 
-    if (entityType == 'product' && direction == 'export' && storeId > 0) {
-        urlFieldEl.show();
-    }
-    else {
-        urlFieldEl.hide();
+    if (urlFieldEl) {
+        if (entityType === 'product' && direction === 'export' && storeId > 0) {
+            urlFieldEl.style.display = '';
+        } else {
+            urlFieldEl.style.display = 'none';
+        }
     }
 }
 
-function changeEntityType()
-{
-    //toggleSelectOption('remove', 'profile_entity_type', 'profile_direction', 'customer', 'import', '<?= $this->jsQuoteEscape($this->__('Import')) ?>');
-    //toggleSelectOption('remove', 'profile_entity_type', 'profile_store_id', 'customer', '0', '<?= $this->jsQuoteEscape($this->__('Default Values')) ?>');
-    //showOption('profile_direction');
+function changeEntityType() {
     changeDirection();
 }
 
-
-function changeDirection()
-{
+function changeDirection() {
     toggleSelectOption('remove', 'profile_direction', 'profile_data_transfer', 'export', 'interactive', '<?= $this->jsQuoteEscape($this->__('Interactive')) ?>');
-    //showOption('profile_data_transfer');
-    if ($('profile_direction').value == 'import') {
-        profileImportOnly.each(function(id){if ($(id))$(id).up(1).show();});
-    }
-    else {
-        profileImportOnly.each(function(id){if ($(id))$(id).up(1).hide();});
+
+    const directionElement = getElementById('profile_direction');
+    if (directionElement && directionElement.value === 'import') {
+        profileImportOnly.forEach(id => {
+            const element = getElementById(id);
+            if (element) {
+                const parentElement = element.closest('span.field-row');
+                if (parentElement) {
+                    parentElement.style.display = '';
+                }
+            }
+        });
+    } else {
+        profileImportOnly.forEach(id => {
+            const element = getElementById(id);
+            if (element) {
+                const parentElement = element.closest('span.field-row');
+                if (parentElement) {
+                    parentElement.style.display = 'none';
+                }
+            }
+        });
     }
     exportUrlField();
 }
 
-function updateRun(select)
-{
-    if ($('file_list') != null){
-        if ($(select).value=='interactive') {
-            $('file_list').show();
+function updateRun(select) {
+    const fileList = getElementById('file_list');
+    const selectElement = typeof select === 'string' ? getElementById(select) : select;
+
+    if (fileList && selectElement) {
+        if (selectElement.value === 'interactive') {
+            fileList.style.display = '';
         } else {
-            $('file_list').hide();
+            fileList.style.display = 'none';
         }
     }
 }
 
-Event.observe(window, 'load', function(){
-    if($('profile_data_transfer')) {
+document.addEventListener('DOMContentLoaded', function() {
+    const profileDataTransfer = getElementById('profile_data_transfer');
+    if (profileDataTransfer) {
         updateRun('profile_data_transfer');
     }
 });
-//]]>
 </script>
 
 <div id="profile-generator" class="entry-edit profile-generator">
@@ -324,7 +341,7 @@ Event.observe(window, 'load', function(){
         <span class="field-row">
             <label for="parse_fieldnames"><?= $this->__("Original Magento attribute names in first row:") ?></label>
             <span class="with-tip">
-                <select id="parse_fieldnames" name="gui_data[parse][fieldnames]" onchange="showFeildMapping();showOption(this)" class="option-control">
+                <select id="parse_fieldnames" name="gui_data[parse][fieldnames]" onchange="showFieldMapping();showOption(this)" class="option-control">
                     <option value="" <?= $this->getSelected('gui_data/parse/fieldnames', false) ?>><?= $this->__("No") ?></option>
                     <option value="true" <?= $this->getSelected('gui_data/parse/fieldnames', true) ?>><?= $this->__("Yes") ?></option>
                 </select>
@@ -338,7 +355,7 @@ Event.observe(window, 'load', function(){
         <div class="profile_direction_export">
             <span class="field-row">
                 <label for="map_only_specified"><?= $this->__("Export:") ?></label>
-                <select id="map_only_specified" name="gui_data[map][only_specified]" onchange="showFeildMapping();showOption(this)">
+                <select id="map_only_specified" name="gui_data[map][only_specified]" onchange="showFieldMapping();showOption(this)">
                     <option value="" <?= $this->getSelected('gui_data/map/only_specified', false) ?>><?= $this->__("All fields") ?></option>
                     <option value="true" <?= $this->getSelected('gui_data/map/only_specified', true) ?>><?= $this->__("Only mapped fields") ?></option>
                 </select>
@@ -513,60 +530,81 @@ Event.observe(window, 'load', function(){
 </div>
 
 <script type="text/javascript">
-//<![CDATA[
-    $$('.option-control').each(showOption);
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.option-control').forEach(showOption);
     changeEntityType();
 
-    function showFeildMapping() {
-        var direction = $('profile_direction').options[$('profile_direction').options.selectedIndex].value;
-        var value = $('parse_fieldnames').options[$('parse_fieldnames').options.selectedIndex].value;
-        var map = $('map_only_specified').options[$('map_only_specified').options.selectedIndex].value;
+    function showFieldMapping() {
+        const directionElement = getElementById('profile_direction');
+        const fieldnamesElement = getElementById('parse_fieldnames');
+        const mapSpecifiedElement = getElementById('map_only_specified');
 
-        if (direction == 'export') {
+        if (!directionElement || !fieldnamesElement) return;
+
+        const direction = directionElement.value;
+        const value = fieldnamesElement.value;
+        const map = mapSpecifiedElement ? mapSpecifiedElement.value : '';
+        const fieldMappingElement = getElementById('__fieldmapping');
+
+        if (direction === 'export') {
             if (map) {
-                Element.show($('__fieldmapping'));
+                if (fieldMappingElement) fieldMappingElement.style.display = '';
             } else {
                 deleteAllAddedMappingFields();
-                Element.hide($('__fieldmapping'));
+                if (fieldMappingElement) fieldMappingElement.style.display = 'none';
             }
         } else {
             if (value) {
-                Element.hide($('__fieldmapping'));
+                if (fieldMappingElement) fieldMappingElement.style.display = 'none';
                 deleteAllAddedMappingFields();
             } else {
-                Element.show($('__fieldmapping'));
-            }
-        }
-
-    }
-
-    function deleteAllAddedMappingFields()
-    {
-        var type = $('profile_entity_type').options[$('profile_entity_type').options.selectedIndex].value;
-
-        var elems = $('map_container_'+type).childElements();
-        if (elems.length > 0) for (var idx in elems) {
-            if (elems[idx] != undefined && elems[idx].tagName != undefined) {
-                elems[idx].remove();
+                if (fieldMappingElement) fieldMappingElement.style.display = '';
             }
         }
     }
-    var direction = $('profile_direction').options[$('profile_direction').options.selectedIndex].value;
-    if (direction == 'import') {
-        if ($('parse_fieldnames').options[$('parse_fieldnames').options.selectedIndex].value) {
-            Element.hide($('__fieldmapping'));
-            deleteAllAddedMappingFields();
-        } else {
-            Element.show($('__fieldmapping'));
-        }
-    } else {
-        var map = $('map_only_specified').options[$('map_only_specified').options.selectedIndex].value;
-        if (map) {
-            Element.show($('__fieldmapping'));
-        } else {
-            deleteAllAddedMappingFields();
-            Element.hide($('__fieldmapping'));
+
+    function deleteAllAddedMappingFields() {
+        const typeElement = getElementById('profile_entity_type');
+        if (!typeElement) return;
+
+        const type = typeElement.value;
+        const container = getElementById(`map_container_${type}`);
+
+        if (container) {
+            const elements = Array.from(container.children);
+            elements.forEach(element => {
+                if (element.tagName) {
+                    element.remove();
+                }
+            });
         }
     }
-//]]>
+
+    // Initial setup
+    const directionElement = getElementById('profile_direction');
+    const fieldnamesElement = getElementById('parse_fieldnames');
+    const mapSpecifiedElement = getElementById('map_only_specified');
+    const fieldMappingElement = getElementById('__fieldmapping');
+
+    if (directionElement && fieldnamesElement) {
+        const direction = directionElement.value;
+
+        if (direction === 'import') {
+            if (fieldnamesElement.value) {
+                if (fieldMappingElement) fieldMappingElement.style.display = 'none';
+                deleteAllAddedMappingFields();
+            } else {
+                if (fieldMappingElement) fieldMappingElement.style.display = '';
+            }
+        } else {
+            const map = mapSpecifiedElement ? mapSpecifiedElement.value : '';
+            if (map) {
+                if (fieldMappingElement) fieldMappingElement.style.display = '';
+            } else {
+                deleteAllAddedMappingFields();
+                if (fieldMappingElement) fieldMappingElement.style.display = 'none';
+            }
+        }
+    }
+});
 </script>

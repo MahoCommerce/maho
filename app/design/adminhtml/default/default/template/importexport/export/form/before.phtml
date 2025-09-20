@@ -62,24 +62,24 @@
     {
         const entityElement = document.getElementById('entity');
         const fileFormatElement = document.getElementById('file_format');
-        
+
         if (entityElement && fileFormatElement) {
             const form = document.getElementById('export_filter_form');
             const oldAction = form.action;
-            
+
             // Add entity and file_format as hidden inputs to the filter form
             const entityInput = document.createElement('input');
             entityInput.type = 'hidden';
             entityInput.name = 'entity';
             entityInput.value = entityElement.value;
             form.appendChild(entityInput);
-            
+
             const fileFormatInput = document.createElement('input');
             fileFormatInput.type = 'hidden';
             fileFormatInput.name = 'file_format';
             fileFormatInput.value = fileFormatElement.value;
             form.appendChild(fileFormatInput);
-            
+
             // Submit the complete form with all filter data
             form.action = '<?= $this->getUrl('*/*/export') ?>';
             form.submit();

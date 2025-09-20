@@ -256,7 +256,8 @@ td:has(input.swatch-option) {
     font-size: 10px;
     background: #e63a3a;
     color: #fff;
-    border-radius: 2px; }
+    border-radius: 4px; }
+  td .swatch-delete svg {height: 14px}
   td:has(input.swatch-option) .swatch-option {
     width: 26px !important;
     height: 26px; }

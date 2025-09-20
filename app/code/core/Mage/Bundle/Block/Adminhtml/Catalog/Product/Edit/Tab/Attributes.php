@@ -6,14 +6,12 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * Bundle product attributes tab
- *
- * @package    Mage_Bundle
  *
  * @method bool getCanEditPrice()
  */
@@ -60,28 +58,26 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Ma
             $tax->setAfterElementHtml(
                 '<script type="text/javascript">'
                 . "
-                //<![CDATA[
                 function changeTaxClassId() {
-                    if ($('price_type').value == '" . Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC . "') {
-                        $('tax_class_id').disabled = true;
-                        $('tax_class_id').value = '0';
-                        $('tax_class_id').removeClassName('required-entry');
-                        if ($('advice-required-entry-tax_class_id')) {
-                            $('advice-required-entry-tax_class_id').remove();
+                    if (document.getElementById('price_type').value == '" . Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC . "') {
+                        document.getElementById('tax_class_id').disabled = true;
+                        document.getElementById('tax_class_id').value = '0';
+                        document.getElementById('tax_class_id').classList.remove('required-entry');
+                        if (document.getElementById('advice-required-entry-tax_class_id')) {
+                            document.getElementById('advice-required-entry-tax_class_id').remove();
                         }
                     } else {
-                        $('tax_class_id').disabled = false;
-                        " . ($tax->getRequired() ? "$('tax_class_id').addClassName('required-entry');" : '') . "
+                        document.getElementById('tax_class_id').disabled = false;
+                        " . ($tax->getRequired() ? "document.getElementById('tax_class_id').classList.add('required-entry');" : '') . "
                     }
                 }
 
-                document.observe('dom:loaded', function() {
-                    if ($('price_type')) {
-                        $('price_type').observe('change', changeTaxClassId);
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (document.getElementById('price_type')) {
+                        document.getElementById('price_type').addEventListener('change', changeTaxClassId);
                         changeTaxClassId();
                     }
                 });
-                //]]>
                 "
                 . '</script>',
             );
@@ -120,25 +116,24 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Ma
                 '<script type="text/javascript">'
                 . "
                 function changePriceTypeMap() {
-                    if ($('price_type').value == " . Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC . ") {
-                        $('msrp_enabled').setValue("
-                        . Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled::MSRP_ENABLE_NO
-                        . ");
-                        $('msrp_enabled').disable();
-                        $('msrp_display_actual_price_type').setValue("
-                        . Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Price::TYPE_USE_CONFIG
-                        . ");
-                        $('msrp_display_actual_price_type').disable();
-                        $('msrp').setValue('');
-                        $('msrp').disable();
+                    if (document.getElementById('price_type').value == " . Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC . ") {
+                        const msrpEnabled = document.getElementById('msrp_enabled');
+                        msrpEnabled.value = " . Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled::MSRP_ENABLE_NO . ";
+                        msrpEnabled.disabled = true;
+                        const msrpDisplayType = document.getElementById('msrp_display_actual_price_type');
+                        msrpDisplayType.value = " . Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Price::TYPE_USE_CONFIG . ";
+                        msrpDisplayType.disabled = true;
+                        const msrp = document.getElementById('msrp');
+                        msrp.value = '';
+                        msrp.disabled = true;
                     } else {
-                        $('msrp_enabled').enable();
-                        $('msrp_display_actual_price_type').enable();
-                        $('msrp').enable();
+                        document.getElementById('msrp_enabled').disabled = false;
+                        document.getElementById('msrp_display_actual_price_type').disabled = false;
+                        document.getElementById('msrp').disabled = false;
                     }
                 }
-                document.observe('dom:loaded', function() {
-                    $('price_type').observe('change', changePriceTypeMap);
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.getElementById('price_type').addEventListener('change', changePriceTypeMap);
                     changePriceTypeMap();
                 });
                 "

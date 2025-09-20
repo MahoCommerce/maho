@@ -43,18 +43,17 @@
         <input type="hidden" name="validate_rating" class="validate-rating" value="" />
     </div>
 <script type="text/javascript">
-//<![CDATA[
     Validation.addAllThese(
     [
            ['validate-rating', '<?= $this->jsQuoteEscape(Mage::helper('rating')->__('Please select one of each ratings above')) ?>', function(v) {
-                var trs = $('product-review-table').getElementsBySelector('tr');
+                var trs = document.getElementById('product-review-table').querySelectorAll('tr');
                 var inputs;
                 var error = 1;
 
                 for( var j=0; j < trs.length; j++ ) {
                     var tr = trs[j];
                     if( j > 0 ) {
-                        inputs = tr.getElementsBySelector('input');
+                        inputs = tr.querySelectorAll('input');
 
                         for( i in inputs ) {
                             if( inputs[i].checked == true ) {
@@ -74,7 +73,6 @@
             }]
     ]
     );
-//]]>
 </script>
 <?php else: ?>
     <?= Mage::helper('rating')->__("Rating isn't Available") ?>

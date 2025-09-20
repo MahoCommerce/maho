@@ -12,7 +12,6 @@
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Date $this */
 ?>
 <script type="text/javascript">
-
 OptionTemplateDate = '<table class="border" cellpadding="0" cellspacing="0">'+
         '<tr class="headings">'+
             <?php if ($this->getCanReadPrice() !== false) : ?>
@@ -33,8 +32,7 @@ OptionTemplateDate = '<table class="border" cellpadding="0" cellspacing="0">'+
         '</tr>'+
     '</table>';
 
-if ($('option_panel_type_date')) {
-    $('option_panel_type_date').remove();
+if (document.getElementById('option_panel_type_date')) {
+    document.getElementById('option_panel_type_date').remove();
 }
-
 </script>

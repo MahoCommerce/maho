@@ -5,31 +5,55 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Usa_Block_Adminhtml_Dhl_Unitofmeasure $this */
 ?>
 <script type="text/javascript">
-    //<![CDATA[
-    function changeDimensions()
-    {
-        var dimensionUnit = '(<?= $this->getInch() ?>)';
-        var dhlintUnitOfMeasureNote = '<?= $this->getDivideOrderWeightNoteLbp() ?>';
-        if ($("carriers_dhlint_unit_of_measure").value == "K") {
-            dimensionUnit = '(<?= $this->getCm() ?>)';
-            dhlintUnitOfMeasureNote = '<?= $this->getDivideOrderWeightNoteKg() ?>';
-        }
-        $$('[for="carriers_dhlint_height"]')[0].innerHTML = '<?= $this->getHeight() ?> ' + dimensionUnit;
-        $$('[for="carriers_dhlint_depth"]')[0].innerHTML = '<?= $this->getDepth() ?> ' + dimensionUnit;
-        $$('[for="carriers_dhlint_width"]')[0].innerHTML = '<?= $this->getWidth() ?> ' + dimensionUnit;
+    function changeDimensions() {
+        const dimensionUnitInch = '(<?= $this->getInch() ?>)';
+        const dimensionUnitCm = '(<?= $this->getCm() ?>)';
+        const weightNoteLbp = '<?= $this->getDivideOrderWeightNoteLbp() ?>';
+        const weightNoteKg = '<?= $this->getDivideOrderWeightNoteKg() ?>';
 
-        $('carriers_dhlint_divide_order_weight').next().down().innerHTML = dhlintUnitOfMeasureNote;
+        const unitOfMeasureElement = document.getElementById('carriers_dhlint_unit_of_measure');
+        const isKilograms = unitOfMeasureElement.value === 'K';
+
+        const dimensionUnit = isKilograms ? dimensionUnitCm : dimensionUnitInch;
+        const dhlintUnitOfMeasureNote = isKilograms ? weightNoteKg : weightNoteLbp;
+
+        // Update dimension labels
+        const heightLabel = document.querySelector('[for="carriers_dhlint_height"]');
+        const depthLabel = document.querySelector('[for="carriers_dhlint_depth"]');
+        const widthLabel = document.querySelector('[for="carriers_dhlint_width"]');
+
+        if (heightLabel) {
+            heightLabel.innerHTML = '<?= $this->getHeight() ?> ' + dimensionUnit;
+        }
+        if (depthLabel) {
+            depthLabel.innerHTML = '<?= $this->getDepth() ?> ' + dimensionUnit;
+        }
+        if (widthLabel) {
+            widthLabel.innerHTML = '<?= $this->getWidth() ?> ' + dimensionUnit;
+        }
+
+        // Update weight note - find the element after carriers_dhlint_divide_order_weight and its first child
+        const divideOrderWeightElement = document.getElementById('carriers_dhlint_divide_order_weight');
+        if (divideOrderWeightElement && divideOrderWeightElement.nextElementSibling) {
+            const noteElement = divideOrderWeightElement.nextElementSibling.querySelector(':first-child');
+            if (noteElement) {
+                noteElement.innerHTML = dhlintUnitOfMeasureNote;
+            }
+        }
     }
-    document.observe("dom:loaded", function() {
-        $("carriers_dhlint_unit_of_measure").observe("change", changeDimensions);
-        changeDimensions();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const unitOfMeasureElement = document.getElementById('carriers_dhlint_unit_of_measure');
+        if (unitOfMeasureElement) {
+            unitOfMeasureElement.addEventListener('change', changeDimensions);
+            changeDimensions();
+        }
     });
-    //]]>
 </script>

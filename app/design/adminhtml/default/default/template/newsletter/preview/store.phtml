@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -37,11 +37,16 @@
     <?php endforeach ?>
 </select>
 <script type="text/javascript">
-//<![CDATA[
-Event.observe($('store_switcher'), 'change', function(event) {
-    var element = Event.element(event);
-    $('preview_store_id').value = element.value;
+document.addEventListener('DOMContentLoaded', () => {
+    const storeSwitcher = document.getElementById('store_switcher');
+    if (storeSwitcher) {
+        storeSwitcher.addEventListener('change', (event) => {
+            const previewStoreIdElement = document.getElementById('preview_store_id');
+            if (previewStoreIdElement) {
+                previewStoreIdElement.value = event.target.value;
+            }
+        });
+    }
 });
-//]]>
 </script>
 <?php endif ?>
