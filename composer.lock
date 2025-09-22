@@ -756,16 +756,16 @@
         },
         {
             "name": "mahocommerce/icons",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/icons.git",
-                "reference": "4ab52632c47fa4c81100fe0be156372c21129e5f"
+                "reference": "f6631c78e6d705364c193cb803dc7acc605d718b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/4ab52632c47fa4c81100fe0be156372c21129e5f",
-                "reference": "4ab52632c47fa4c81100fe0be156372c21129e5f",
+                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/f6631c78e6d705364c193cb803dc7acc605d718b",
+                "reference": "f6631c78e6d705364c193cb803dc7acc605d718b",
                 "shasum": ""
             },
             "type": "library",
@@ -776,9 +776,9 @@
             "description": "A huge package of optimized SVG icons",
             "support": {
                 "issues": "https://github.com/MahoCommerce/icons/issues",
-                "source": "https://github.com/MahoCommerce/icons/tree/1.0.1"
+                "source": "https://github.com/MahoCommerce/icons/tree/1.0.2"
             },
-            "time": "2025-03-05T08:13:16+00:00"
+            "time": "2025-09-16T07:06:08+00:00"
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
