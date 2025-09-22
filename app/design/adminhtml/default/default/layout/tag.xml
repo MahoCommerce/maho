@@ -26,6 +26,10 @@
                         <hidden_input_name>tag_assigned_products</hidden_input_name>
                         <reload_param_name>assigned_products</reload_param_name>
                     </action>
+                    <action method="setData">
+                        <key>form_id</key>
+                        <value>edit_form</value>
+                    </action>
                 </reference>
             </block>
     </adminhtml_tag_assigned>

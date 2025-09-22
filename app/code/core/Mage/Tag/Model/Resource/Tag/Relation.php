@@ -144,9 +144,16 @@ class Mage_Tag_Model_Resource_Tag_Relation extends Mage_Core_Model_Resource_Db_A
     {
         $addedIds = $model->getAddedProductIds();
 
+        // Ensure addedIds is a flat array of integers
+        if (!is_array($addedIds)) {
+            $addedIds = [];
+        } else {
+            $addedIds = array_filter(array_map('intval', $addedIds));
+        }
+
         $bind = [
-            'tag_id'   => $model->getTagId(),
-            'store_id' => $model->getStoreId(),
+            'tag_id'   => (int) $model->getTagId(),
+            'store_id' => (int) $model->getStoreId(),
         ];
         $write = $this->_getWriteAdapter();
 
@@ -177,6 +184,7 @@ class Mage_Tag_Model_Resource_Tag_Relation extends Mage_Core_Model_Resource_Db_A
             $write->delete($this->getMainTable(), [
                 'product_id IN (?)' => $delete,
                 'store_id = ?'      => $model->getStoreId(),
+                'tag_id = ?'        => $model->getTagId(),
             ]);
         }
 

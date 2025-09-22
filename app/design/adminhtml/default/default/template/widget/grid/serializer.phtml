@@ -15,19 +15,14 @@
 <?php $formId = $this->getFormId()?>
 <?php if (!empty($formId)) :?>
 <script type="text/javascript">
-    window.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function() {
         var serializeInput  = document.createElement('input');
         serializeInput.type = 'hidden';
         serializeInput.name = '<?= $this->getInputElementName() ?>';
         serializeInput.id   = '<?= $_id ?>';
-        try {
-            document.getElementById('<?= $formId ?>').appendChild(serializeInput);
-            new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
-        } catch(e) {
-            // Error add serializer
-            console.error('Failed to initialize serializer:', e);
-        }
-    });
+        document.getElementById('<?= $formId ?>').appendChild(serializeInput);
+        new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
+    }, 100);
 </script>
 <?php else: ?>
 <input type="hidden" name="<?= $this->getInputElementName() ?>"  value="" id="<?= $_id ?>" />

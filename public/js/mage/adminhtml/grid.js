@@ -266,6 +266,19 @@ class varienGrid {
         }
     }
     bindFilterFields() {
+        // Use event delegation on document body to catch all filter keypresses
+        // This survives AJAX reloads since body doesn't get replaced
+        if (!document.body._gridFilterDelegated) {
+            document.body.addEventListener('keypress', (event) => {
+                // Check if this is a filter field in our grid
+                if (event.target.matches(`#${this.containerId} .filter input, #${this.containerId} .filter select`)) {
+                    this.filterKeyPress(event);
+                }
+            });
+            document.body._gridFilterDelegated = true;
+        }
+
+        // Also try direct binding as fallback
         const filters = document.querySelectorAll('#' + this.containerId + ' .filter input, #' + this.containerId + ' .filter select');
         for (let i = 0; i < filters.length; i++) {
             filters[i].addEventListener('keypress', this.filterKeyPress.bind(this));
@@ -379,6 +392,11 @@ function openGridRow(grid, evt){
         return;
     }
     if(trElement && trElement.title){
+        // Prevent navigation for # URLs to avoid page jumping
+        if(trElement.title === '#') {
+            evt.preventDefault();
+            return;
+        }
         if (shouldOpenGridRowNewTab(evt)) {
             window.open(trElement.title, '_blank');
         } else {
@@ -930,14 +948,31 @@ class serializerController {
         const tdElement = event.target.closest('td');
         const isInput = event.target.tagName === 'INPUT';
 
+        // Check if this row has checkbox functionality
         if (tdElement) {
-            const checkbox = tdElement.querySelector('input');
+            const checkbox = tdElement.querySelector('input[type="checkbox"]');
             if (checkbox && !checkbox.disabled) {
-                const checked = isInput ? checkbox.checked : !checkbox.checked;
-                this.grid.setCheckboxChecked(checkbox, checked);
+                // If clicking directly on checkbox, let it handle its own state naturally
+                if (isInput) {
+                    return;
+                }
+
+                // If clicking elsewhere in the checkbox cell, use the grid's proper checkbox handling
+                const checkboxCell = checkbox.closest('td');
+                if (tdElement === checkboxCell) {
+                    const newChecked = !checkbox.checked;
+                    this.grid.setCheckboxChecked(checkbox, newChecked);
+                    event.preventDefault();
+                    return;
+                }
             }
         }
-        this.getOldCallback('row_click')(grid, event);
+
+        // For non-checkbox interactions, call the original row click handler
+        const originalCallback = this.getOldCallback('row_click');
+        if (originalCallback && typeof originalCallback === 'function') {
+            originalCallback(grid, event);
+        }
     }
 
     inputChange = (event) => {
