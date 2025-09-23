@@ -164,9 +164,10 @@ function submitCreditMemoOffline() {
 
 (function() {
     const sendEmailCheckbox = document.getElementById('send_email');
-    if (sendEmailCheckbox) {
-        const notifyCustomerCheckbox = document.getElementById('notify_customer');
-        const creditmemoCommentText = document.getElementById('creditmemo_comment_text');
+    const notifyCustomerCheckbox = document.getElementById('notify_customer');
+    const creditmemoCommentText = document.getElementById('creditmemo_comment_text');
+
+    if (sendEmailCheckbox && notifyCustomerCheckbox) {
         sendEmailCheckbox.addEventListener('change', bindSendEmail);
         bindSendEmail();
     }
