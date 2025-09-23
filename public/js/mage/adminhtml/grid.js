@@ -1009,6 +1009,11 @@ class serializerController {
                     input.addEventListener('change', this.inputChange);
                 });
             }
+        } else {
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            if (checkbox && this.gridData.has(checkbox.value)) {
+                checkbox.checked = true;
+            }
         }
         this.getOldCallback('init_row')(grid, row);
     }
