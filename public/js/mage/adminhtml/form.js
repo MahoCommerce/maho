@@ -278,12 +278,8 @@ class regionUpdater {
 
     update() {
         if (this.regions[this.countryEl.value]) {
-//            if (!this.regionSelectEl) {
-//                Element.insert(this.regionTextEl, {after : this.tpl.evaluate(this._regionSelectEl)});
-//                this.regionSelectEl = $(this._regionSelectEl.id);
-//            }
             if (this.lastCountryId != this.countryEl.value) {
-                var i, option, region, def;
+                var i, option, region, def, regionId;
 
                 def = this.regionSelectEl.getAttribute('defaultValue');
                 if (this.regionTextEl) {
@@ -299,7 +295,7 @@ class regionUpdater {
 
                     option = document.createElement('OPTION');
                     option.value = regionId;
-                    option.text = region.name.stripTags();
+                    option.text = stripTags(region.name);
                     option.title = region.name;
 
                     if (this.regionSelectEl.options.add) {
@@ -416,6 +412,7 @@ class selectUpdater {
         this.second.value = '';
 
         if (this.first.value && this.values[this.first.value]) {
+            var optionValue, optionTitle;
             for (optionValue in this.values[this.first.value]) {
                 optionTitle = this.values[this.first.value][optionValue];
 

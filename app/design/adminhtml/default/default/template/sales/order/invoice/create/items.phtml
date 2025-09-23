@@ -180,19 +180,21 @@ function checkButtonsRelation() {
     }
 }
 
-const sendEmailCheckbox = document.getElementById('send_email');
-if (sendEmailCheckbox) {
-    const notifyCustomerCheckbox = document.getElementById('notify_customer');
-    const invoiceCommentText = document.getElementById('invoice_comment_text');
-    sendEmailCheckbox.addEventListener('change', bindSendEmail);
-    bindSendEmail();
-}
-
-function bindSendEmail() {
-    if (sendEmailCheckbox.checked === true) {
-        notifyCustomerCheckbox.disabled = false;
-    } else {
-        notifyCustomerCheckbox.disabled = true;
+(function() {
+    const sendEmailCheckbox = document.getElementById('send_email');
+    if (sendEmailCheckbox) {
+        const notifyCustomerCheckbox = document.getElementById('notify_customer');
+        const invoiceCommentText = document.getElementById('invoice_comment_text');
+        sendEmailCheckbox.addEventListener('change', bindSendEmail);
+        bindSendEmail();
     }
-}
+
+    function bindSendEmail() {
+        if (sendEmailCheckbox.checked === true) {
+            notifyCustomerCheckbox.disabled = false;
+        } else {
+            notifyCustomerCheckbox.disabled = true;
+        }
+    }
+})();
 </script>

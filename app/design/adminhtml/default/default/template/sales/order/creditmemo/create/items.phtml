@@ -162,21 +162,23 @@ function submitCreditMemoOffline() {
     editForm.submit();
 }
 
-const sendEmailCheckbox = document.getElementById('send_email');
-if (sendEmailCheckbox) {
-    const notifyCustomerCheckbox = document.getElementById('notify_customer');
-    const creditmemoCommentText = document.getElementById('creditmemo_comment_text');
-    sendEmailCheckbox.addEventListener('change', bindSendEmail);
-    bindSendEmail();
-}
-
-function bindSendEmail() {
-    if (sendEmailCheckbox.checked === true) {
-        notifyCustomerCheckbox.disabled = false;
-        //creditmemoCommentText.disabled = false;
-    } else {
-        notifyCustomerCheckbox.disabled = true;
-        //creditmemoCommentText.disabled = true;
+(function() {
+    const sendEmailCheckbox = document.getElementById('send_email');
+    if (sendEmailCheckbox) {
+        const notifyCustomerCheckbox = document.getElementById('notify_customer');
+        const creditmemoCommentText = document.getElementById('creditmemo_comment_text');
+        sendEmailCheckbox.addEventListener('change', bindSendEmail);
+        bindSendEmail();
     }
-}
+
+    function bindSendEmail() {
+        if (sendEmailCheckbox.checked === true) {
+            notifyCustomerCheckbox.disabled = false;
+            //creditmemoCommentText.disabled = false;
+        } else {
+            notifyCustomerCheckbox.disabled = true;
+            //creditmemoCommentText.disabled = true;
+        }
+    }
+})();
 </script>

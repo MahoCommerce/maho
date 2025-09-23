@@ -33,18 +33,20 @@
 </div>
 
 <script type="text/javascript">
-const sendEmailCheckbox = document.getElementById('send_confirmation');
-if (sendEmailCheckbox) {
-    sendEmailCheckbox.addEventListener('change', notifyCustomerUpdate);
-    notifyCustomerUpdate();
-}
-
-function notifyCustomerUpdate() {
+(function() {
     const sendEmailCheckbox = document.getElementById('send_confirmation');
-    const notifyCustomerCheckbox = document.getElementById('notify_customer');
-    if (!sendEmailCheckbox || !notifyCustomerCheckbox) {
-        return;
+    if (sendEmailCheckbox) {
+        sendEmailCheckbox.addEventListener('change', notifyCustomerUpdate);
+        notifyCustomerUpdate();
     }
-    notifyCustomerCheckbox.disabled = !sendEmailCheckbox.checked;
-}
+
+    function notifyCustomerUpdate() {
+        const sendEmailCheckbox = document.getElementById('send_confirmation');
+        const notifyCustomerCheckbox = document.getElementById('notify_customer');
+        if (!sendEmailCheckbox || !notifyCustomerCheckbox) {
+            return;
+        }
+        notifyCustomerCheckbox.disabled = !sendEmailCheckbox.checked;
+    }
+})();
 </script>
