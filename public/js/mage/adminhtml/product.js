@@ -8,7 +8,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-const Product = {};
+var Product = Product ?? {};
 
 Product.Gallery = class {
     constructor(containerId, imageTypes) {
