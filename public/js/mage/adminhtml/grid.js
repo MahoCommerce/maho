@@ -946,23 +946,30 @@ class serializerController {
 
     rowClick(grid, event) {
         const tdElement = event.target.closest('td');
+        const trElement = event.target.closest('tr');
         const isInput = event.target.tagName === 'INPUT';
 
         // Check if this row has checkbox functionality
-        if (tdElement) {
-            const checkbox = tdElement.querySelector('input[type="checkbox"]');
+        if (tdElement && trElement) {
+            const checkbox = tdElement.querySelector('input[type="checkbox"]') || trElement.querySelector('input[type="checkbox"]');
+
             if (checkbox && !checkbox.disabled) {
-                // If clicking directly on checkbox, let it handle its own state naturally
-                if (isInput) {
+                // If clicking directly on checkbox, handle the change through registerData
+                if (isInput && event.target === checkbox) {
+                    // The checkbox state has already changed, just register the new state
+                    this.registerData(grid, checkbox, checkbox.checked);
+                    event.stopPropagation();
                     return;
                 }
 
-                // If clicking elsewhere in the checkbox cell, use the grid's proper checkbox handling
+                // If clicking elsewhere in the checkbox cell, toggle the checkbox and register
                 const checkboxCell = checkbox.closest('td');
                 if (tdElement === checkboxCell) {
                     const newChecked = !checkbox.checked;
-                    this.grid.setCheckboxChecked(checkbox, newChecked);
+                    checkbox.checked = newChecked;
+                    this.registerData(grid, checkbox, newChecked);
                     event.preventDefault();
+                    event.stopPropagation();
                     return;
                 }
             }

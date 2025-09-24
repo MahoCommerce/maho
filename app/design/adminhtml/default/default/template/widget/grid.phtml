@@ -195,6 +195,13 @@ $numColumns = count($this->getColumns());
         <?= $this->getJsObjectName() ?>.initRowCallback = <?= $this->getRowInitCallback() ?>;
         <?= $this->getJsObjectName() ?>.initGridRows();
     <?php endif ?>
+
+    // For content that might be loaded dynamically, reinitialize grid after DOM is ready
+    setTimeout(function() {
+        if (<?= $this->getJsObjectName() ?> && <?= $this->getJsObjectName() ?>.initGridAjax) {
+            <?= $this->getJsObjectName() ?>.initGridAjax();
+        }
+    }, 100);
     <?php if($this->getMassactionBlock()->isAvailable()): ?>
     <?= $this->getMassactionBlock()->getJavaScript() ?>
     <?php endif ?>
