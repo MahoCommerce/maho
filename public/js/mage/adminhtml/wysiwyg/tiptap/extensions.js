@@ -6,12 +6,12 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.4';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.4';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.4';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.4';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.4';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.4';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.5';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.5';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.5';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.5';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.5';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.5';
 
 export {
     Editor, Node, Mark, StarterKit, TextAlign,
