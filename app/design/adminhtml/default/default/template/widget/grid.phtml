@@ -196,7 +196,7 @@ $numColumns = count($this->getColumns());
         <?= $this->getJsObjectName() ?>.initGridRows();
     <?php endif ?>
 
-    // For content that might be loaded dynamically, reinitialize grid after DOM is ready
+    // For accordion/dynamically loaded content, reinitialize grid after DOM is ready
     setTimeout(function() {
         if (<?= $this->getJsObjectName() ?> && <?= $this->getJsObjectName() ?>.initGridAjax) {
             <?= $this->getJsObjectName() ?>.initGridAjax();

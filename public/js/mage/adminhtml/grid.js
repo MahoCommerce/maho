@@ -889,8 +889,6 @@ class serializerController {
 
         // Grid
         this.reloadParamName = reloadParamName;
-        this.grid.reloadParams = {};
-        this.grid.reloadParams[this.reloadParamName + '[]'] = this.getDataForReloadParam();
         this.grid.rowClickCallback = this.rowClick.bind(this);
         this.grid.initRowCallback = this.rowInit.bind(this);
         this.grid.checkboxCheckCallback = this.registerData.bind(this);
@@ -935,8 +933,6 @@ class serializerController {
         }
 
         this.hiddenDataHolder.value = this.serializeObject();
-        this.grid.reloadParams = {};
-        this.grid.reloadParams[this.reloadParamName + '[]'] = this.getDataForReloadParam();
         this.getOldCallback('checkbox_check')(grid, element, checked);
     }
 
