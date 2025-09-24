@@ -755,6 +755,7 @@ ul.item-options li { padding-left:.7em; }
 .create-order-sidebar-block table th    { padding:0 3px 0 0; }
 .create-order-sidebar-block select      { width:170px; }
 .create-order-sidebar-block ul          { margin-left:20px; }
+.create-order-sidebar-block svg         { width: 16px; color: #2c464f; }
 .order-choose-address                   { margin:0 0 10px 0;padding:8px 15px;background:#e7efef; } /*Address Selector */
 .order-save-in-address-book             { margin:0 0 0 0;padding:8px 15px;background:#e7efef; } /* Save in Address Book Checkbox */
 .entry-edit .content .form-list         { width:100%; }

@@ -720,8 +720,8 @@ class AdminOrder
         if (this.collectElementsValue) {
             var elems = document.getElementById(this.getAreaId('sidebar')).querySelectorAll('input');
             for (var i=0; i < elems.length; i++) {
-                if (elems[i].getValue()) {
-                    data[elems[i].name] = elems[i].getValue();
+                if (elems[i].value) {
+                    data[elems[i].name] = elems[i].value;
                 }
             }
         }
