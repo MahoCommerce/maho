@@ -144,7 +144,9 @@ Product.Gallery = class {
     updateImage(file) {
         var index = this.getIndexByFile(file);
 
-        var use_default_label = document.getElementById("use_default_label");
+        const use_default_label = document.getElementById("use_default_label");
+        const use_default_position = document.getElementById("use_default_position");
+
         if (use_default_label && use_default_label.checked) {
             this.images[index].label = null;
             this.images[index].label_use_default = true;
@@ -153,7 +155,6 @@ Product.Gallery = class {
             this.images[index].label_use_default = false;
         }
 
-        var use_default_position = document.getElementById("use_default_position");
         if (use_default_position && use_default_position.checked) {
             this.images[index].position = null;
             this.images[index].position_use_default = true;
@@ -190,14 +191,15 @@ Product.Gallery = class {
     updateVisualisation(file) {
         var image = this.getImageByFile(file);
 
-        var use_default_label = document.getElementById("use_default_label");
+        const use_default_label = document.getElementById("use_default_label");
+        const use_default_position = document.getElementById("use_default_position");
+
         if(use_default_label && use_default_label.checked) {
             this.getFileElement(file, 'cell-label input').value = image.label_default;
         } else {
             this.getFileElement(file, 'cell-label input').value = image.label;
         }
 
-        var use_default_position = document.getElementById("use_default_position");
         if(use_default_position && use_default_position.checked) {
             this.getFileElement(file, 'cell-position input').value = image.position_default;
         } else {
