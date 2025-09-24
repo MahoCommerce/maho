@@ -186,7 +186,7 @@ function varienWindowOnload(useCache){
 }
 window.addEventListener('load', varienWindowOnload);
 
-class regionUpdater {
+class RegionUpdater {
     constructor(countryEl, regionTextEl, regionSelectEl, regions, disableAction, clearRegionValueOnDisable) {
         this.countryEl = typeof countryEl === 'string' ? document.getElementById(countryEl) : countryEl;
         this.regionTextEl = typeof regionTextEl === 'string' ? document.getElementById(regionTextEl) : regionTextEl;
