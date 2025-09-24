@@ -392,11 +392,17 @@ export const MahoImage = Image.extend({
                     onOk: (dialog) => {
                         //  Parse out the directive and alt text
                         let match;
+                        const returnValue = dialog.returnValue || '';
 
-                        match = dialog.returnValue.match(/src="({{.*?}})"/);
+                        if (!returnValue) {
+                            console.error('No return value from media browser dialog');
+                            return;
+                        }
+
+                        match = returnValue.match(/src="({{.*?}})"/);
                         const directiveObj = parseDirective(match?.[1]);
 
-                        match = dialog.returnValue.match(/alt="(.*?)"/);
+                        match = returnValue.match(/alt="(.*?)"/);
                         const alt = unescapeHtml(match?.[1]);
 
                         // Keep some attributes of old image
@@ -616,15 +622,23 @@ export const MahoSlideshow = Node.create({
 
                         const addSlide = (isInitialAdd = false) => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
-                                onOk: (dialog) => {
+                                ok: false, // Disable OK button - use Insert File button or double-click instead
+                                onClose: (dialog) => {
+                                    // Handle the actual image insertion after the dialog closes with returnValue
+                                    const returnValue = dialog.returnValue || '';
+
+                                    if (!returnValue) {
+                                        // Dialog was cancelled or no image selected
+                                        return;
+                                    }
+
                                     //  Parse out the directive and alt text
                                     let match;
-
-                                    match = dialog.returnValue.match(/src="({{.*?}})"/);
+                                    match = returnValue.match(/src="({{.*?}})"/);
                                     const src = match?.[1];
                                     const directiveObj = parseDirective(src);
 
-                                    match = dialog.returnValue.match(/alt="(.*?)"/);
+                                    match = returnValue.match(/alt="(.*?)"/);
                                     const alt = unescapeHtml(match?.[1]);
 
                                     if (src) {
