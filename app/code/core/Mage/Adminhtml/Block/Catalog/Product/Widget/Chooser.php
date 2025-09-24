@@ -108,7 +108,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
                     var productId = trElement.querySelector("td").innerHTML;
                     var productName = trElement.querySelector("td").nextElementSibling.nextElementSibling.innerHTML;
                     var optionLabel = productName;
-                    var optionValue = "product/" + productId.replace(/^\s+|\s+$/g,"");
+                    var optionValue = "product/" + productId.trim();
                     if (grid.categoryId) {
                         optionValue += "/" + grid.categoryId;
                     }

@@ -67,7 +67,7 @@ class Mage_Adminhtml_Block_Cms_Block_Widget_Chooser extends Mage_Adminhtml_Block
         return '
             function (grid, event) {
                 var trElement = event.target.closest("tr");
-                var blockId = trElement.querySelector("td").innerHTML.replace(/^\s+|\s+$/g,"");
+                var blockId = trElement.querySelector("td").innerHTML.trim();
                 var blockTitle = trElement.querySelector("td").nextElementSibling.innerHTML;
                 ' . $chooserJsObject . '.setElementValue(blockId);
                 ' . $chooserJsObject . '.setElementLabel(blockTitle);
