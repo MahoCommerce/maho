@@ -173,26 +173,24 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
             . $this->quoteEscape($this->getLabel() ?: Mage::helper('widget')->__('Not Selected'))
             . '</label>
             <div id="' . $chooserId . 'advice-container" class="hidden"></div>
-            <script type="text/javascript">//<![CDATA[
-                (function() {
-                    var instantiateChooser = function() {
-                        window.' . $chooserId . ' = new WysiwygWidget.chooser(
-                            "' . $chooserId . '",
-                            "' . $this->getSourceUrl() . '",
-                            ' . $configJson . '
-                        );
-                        if (document.getElementById("' . $chooserId . 'value")) {
-                            document.getElementById("' . $chooserId . 'value").advaiceContainer = "' . $chooserId . 'advice-container";
-                        }
+            <script type="text/javascript">
+                var instantiateChooser = function() {
+                    window.' . $chooserId . ' = new WysiwygWidget.chooser(
+                        "' . $chooserId . '",
+                        "' . $this->getSourceUrl() . '",
+                        ' . $configJson . '
+                    );
+                    if (document.getElementById("' . $chooserId . 'value")) {
+                        document.getElementById("' . $chooserId . 'value").advaiceContainer = "' . $chooserId . 'advice-container";
                     }
+                };
 
-                    if (document.loaded) { //allow load over ajax
-                        instantiateChooser();
-                    } else {
-                        document.addEventListener("DOMContentLoaded", instantiateChooser);
-                    }
-                })();
-            //]]></script>
+                if (document.loaded || document.readyState === "complete" || document.readyState === "interactive") {
+                    instantiateChooser();
+                } else {
+                    document.addEventListener("DOMContentLoaded", instantiateChooser);
+                }
+            </script>
         ';
     }
 }
