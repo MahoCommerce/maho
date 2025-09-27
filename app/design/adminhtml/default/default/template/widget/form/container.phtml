@@ -10,12 +10,16 @@
  */
 
 /** @var Mage_Adminhtml_Block_Widget_Form_Container $this */
+$headerHtml = $this->getHeaderHtml();
+$headerButtons = $this->getButtonsHtml('header');
 ?>
 <?= $this->getFormInitScripts() ?>
-<div class="content-header">
-    <?= $this->getHeaderHtml() ?>
-    <p class="form-buttons"><?= $this->getButtonsHtml('header') ?></p>
-</div>
+<?php if ($this->getHeaderText() || $headerButtons): ?>
+    <div class="content-header">
+        <?= $headerHtml ?>
+        <p class="form-buttons"><?= $headerButtons ?></p>
+    </div>
+<?php endif ?>
 <?= $this->getFormHtml() ?>
 <?php if ($this->hasFooterButtons()): ?>
     <div class="content-footer">
