@@ -1451,15 +1451,6 @@ ul.super-product-attributes { padding-left:15px; }
 /* Links */
 .link-feed { background:url(images/icon_feed.gif) no-repeat left 2px; padding-left:18px; }
 
-#page-help-link {
-    line-height:26px;
-    padding-left:20px;
-    color:#ebebff;
-    background:url(images/fam_help.gif) no-repeat 0 50%;
-    }
-#page-help-link:link, #page-help-link:visited { text-decoration:none; }
-#page-help-link:hover { color:white; }
-
 /* CMS
 *******************************************************************************/
 .breadcrumbs { margin: 0 0 10px; }
