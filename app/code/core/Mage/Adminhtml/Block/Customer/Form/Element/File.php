@@ -114,7 +114,7 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends Varien_Data_Form_E
             $image = [
                 'alt'   => Mage::helper('adminhtml')->__('Download'),
                 'title' => Mage::helper('adminhtml')->__('Download'),
-                'src'   => Mage::getDesign()->getSkinUrl('images/fam_bullet_disk.gif'),
+                'src'   => 'data:image/svg+xml,' . rawurlencode(Mage::helper('core')->getIconSvg('download')),
                 'class' => 'v-middle',
             ];
             $url = $this->_getPreviewUrl();

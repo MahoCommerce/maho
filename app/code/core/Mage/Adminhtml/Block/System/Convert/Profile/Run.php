@@ -143,26 +143,26 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Run extends Mage_Adminhtml_Blo
         foreach ($this->getProfile()->getExceptions() as $e) {
             switch ($e->getLevel()) {
                 case Varien_Convert_Exception::FATAL:
-                    $img = 'error_msg_icon.gif';
+                    $iconSvg = Mage::helper('core')->getIconSvg('alert-circle');
                     $liStyle = 'background-color:#FBB; ';
                     break;
                 case Varien_Convert_Exception::ERROR:
-                    $img = 'error_msg_icon.gif';
+                    $iconSvg = Mage::helper('core')->getIconSvg('alert-circle');
                     $liStyle = 'background-color:#FDD; ';
                     break;
                 case Varien_Convert_Exception::WARNING:
-                    $img = 'fam_bullet_error.gif';
+                    $iconSvg = Mage::helper('core')->getIconSvg('alert-triangle');
                     $liStyle = 'background-color:#FFD; ';
                     break;
                 case Varien_Convert_Exception::NOTICE:
                 default:
-                    $img = 'fam_bullet_success.gif';
+                    $iconSvg = Mage::helper('core')->getIconSvg('circle-check');
                     $liStyle = 'background-color:#DDF; ';
                     break;
             }
             $exceptions[] = [
                 'style'     => $liStyle,
-                'src'       => Mage::getDesign()->getSkinUrl('images/' . $img),
+                'src'       => 'data:image/svg+xml,' . rawurlencode($iconSvg),
                 'message'   => $e->getMessage(),
                 'position' => $e->getPosition(),
             ];

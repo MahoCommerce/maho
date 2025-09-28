@@ -265,9 +265,14 @@ ul.tabs a.active span,
 ul.tabs a:hover.active span     { background:#fff; font-weight:bold; }
 ul.tabs a.subitem               { padding-left:2.2em; }
 ul.tabs span.changed,
-ul.tabs span.error              { float:right; background:0; padding:0; }
-ul.tabs a.changed span.changed  { background:url(images/fam_bullet_disk.gif) 0 0 no-repeat !important; width:16px; height:16px; }
-ul.tabs a.error span.error      { background:url(images/fam_bullet_error.gif) 0 0 no-repeat !important; width:16px; height:16px; }
+ul.tabs span.error,
+ul.tabs-horiz span.changed,
+ul.tabs-horiz span.error        { float:right; background:0; padding:0; display:none; margin-left:8px; }
+ul.tabs a.changed span.changed,
+ul.tabs-horiz a.changed span.changed  { width:12px; height:12px; display:block; color:#090 !important; }
+ul.tabs a.error span.error,
+ul.tabs-horiz a.error span.error      { width:12px; height:12px; display:block; color:#c40; }
+ul.tabs a.changed span.changed svg, ul.tabs a.error span.error svg {width: 20px}
 ul.tabs a.changed               { font-style:italic; }
 
 /* Horizontal Tabs */
