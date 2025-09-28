@@ -51,11 +51,11 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Run extends Mage_Adminhtml_Blo
                     [
                         'styles' => [
                             'error' => [
-                                'icon' => Mage::getDesign()->getSkinUrl('images/error_msg_icon.gif'),
+                                'icon' => 'data:image/svg+xml,' . rawurlencode(Mage::helper('core')->getIconSvg('exclamation-circle')),
                                 'bg'   => '#FDD',
                             ],
                             'message' => [
-                                'icon' => Mage::getDesign()->getSkinUrl('images/fam_bullet_success.gif'),
+                                'icon' => 'data:image/svg+xml,' . rawurlencode(Mage::helper('core')->getIconSvg('circle-check')),
                                 'bg'   => '#DDF',
                             ],
                             'loader'  => Mage::getDesign()->getSkinUrl('images/loading.svg'),

@@ -13,8 +13,9 @@
 ?>
 <style type="text/css" >
     ul { list-style-type:none; padding:0; margin:0; }
-    li { margin-left:0; border:1px solid #ccc; margin:2px; padding:2px 2px 2px 2px; font:normal 12px sans-serif; }
+    li { margin-left:0; border:1px solid #ccc; margin:2px; padding:2px 2px 2px 2px; font:normal 12px sans-serif; display: flex; align-items: center; }
     img { margin-right:5px; }
+    svg { margin-right:5px; }
 </style>
 <script type="text/javascript">
     var FORM_KEY = "<?= $this->getFormKey() ?>";
@@ -22,14 +23,14 @@
     <ul>
         <li>
         <?php if ($this->getProfile()->getId()):?>
-            <img src="<?= $this->getSkinUrl('images/note_msg_icon.gif') ?>" class="v-middle" style="margin-right:5px"/>
+            <?= $this->getIconSvg('bulb') ?>
             <?= $this->__("Starting profile execution, please wait...") ?>
             </li>
             <li style="background-color:#FFD;">
             <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' data-name='alert-triangle' data-variant='outline'><path d='M12 9v4'/><path d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/><path d='M12 16h.01'/></svg>" class="v-middle" style="margin-right:5px"/>
             <?= $this->__("Warning: Please do not close the window during importing/exporting data") ?>
         <?php else: ?>
-            <img src="<?= $this->getSkinUrl('images/error_msg_icon.gif') ?>" class="v-middle" style="margin-right:5px"/>
+            <?= $this->getIconSvg('exclamation-circle') ?>
             <?= $this->__("No profile loaded...") ?>
         <?php endif ?>
         </li>
@@ -54,7 +55,7 @@
             </li>
         <?php endif ?>
             <li id="liFinished" style="display:none;">
-            <img src="<?php echo $this->getSkinUrl('images/note_msg_icon.gif');?>" class="v-middle" style="margin-right:5px"/>
+            <?= $this->getIconSvg('bulb') ?>
             <?php echo $this->__("Finished profile execution.");?>
             </li>
             </ul>
