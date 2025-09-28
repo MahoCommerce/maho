@@ -123,7 +123,7 @@ class TranslateInline {
 
         const content = `
             <form id="translate-inline-form">
-                ${fragments.join('\\n')}
+                ${fragments.join('')}
             </form>
             <p class="a-center accent">Please refresh the page to see your changes after submitting this form.</p>
         `
