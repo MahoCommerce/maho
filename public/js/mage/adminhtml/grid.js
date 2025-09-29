@@ -246,7 +246,7 @@ class varienGrid {
             if(this.massaction && this.massaction.checkedString) {
                 exportUrl = this._addVarToUrl(exportUrl, this.massaction.formFieldNameInternal, this.massaction.checkedString);
             }
-            location.href = exportUrl;
+            location.href = xssFilter(exportUrl);
         }
     }
     bindFilterFields() {
