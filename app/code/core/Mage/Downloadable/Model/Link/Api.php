@@ -47,11 +47,6 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
             $result = $uploader->save($tmpPath);
-
-            if (isset($result['file'])) {
-                $fullPath = rtrim($tmpPath, DS) . DS . ltrim($result['file'], DS);
-                Mage::helper('core/file_storage_database')->saveFile($fullPath);
-            }
         } catch (Exception $e) {
             if ($e->getMessage() != '') {
                 $this->_fault('upload_failed', $e->getMessage());
@@ -156,10 +151,6 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
                 Mage_Downloadable_Model_Link::getBasePath(),
                 $item->getLinkFile(),
             );
-
-            if ($item->getLinkFile() && !is_file($file)) {
-                Mage::helper('core/file_storage_database')->saveFileToFilesystem($file);
-            }
 
             if ($item->getLinkFile() && is_file($file)) {
                 $name = Mage::helper('downloadable/file')->getFileFromPathFile($item->getLinkFile());

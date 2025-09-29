@@ -38,15 +38,6 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      */
     public function getDirsCollection($path)
     {
-        if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
-            $subDirectories = Mage::getModel('core/file_storage_directory_database')->getSubdirectories($path);
-            foreach ($subDirectories as $directory) {
-                $fullPath = rtrim($path, DS) . DS . $directory['name'];
-                if (!file_exists($fullPath)) {
-                    mkdir($fullPath, 0777, true);
-                }
-            }
-        }
 
         $conditions = ['reg_exp' => [], 'plain' => []];
 
@@ -88,14 +79,6 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      */
     public function getFilesCollection($path, $type = null)
     {
-        if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
-            $files = Mage::getModel('core/file_storage_database')->getDirectoryFiles($path);
-
-            $fileStorageModel = Mage::getModel('core/file_storage_file');
-            foreach ($files as $file) {
-                $fileStorageModel->saveFile($file);
-            }
-        }
 
         $collection = $this->getCollection($path)
             ->setCollectDirs(false)
@@ -187,10 +170,6 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
 
         $io = new Varien_Io_File();
         if ($io->mkdir($newPath)) {
-            if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
-                $relativePath = Mage::helper('core/file_storage_database')->getMediaRelativePath($newPath);
-                Mage::getModel('core/file_storage_directory_database')->createRecursive($relativePath);
-            }
 
             return [
                 'name'          => $name,
@@ -227,9 +206,6 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
             throw new Exception('Detected malicious path or filename input.');
         }
 
-        if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
-            Mage::getModel('core/file_storage_directory_database')->deleteDirectory($path);
-        }
         if (!$io->rmdir($path, true)) {
             Mage::throwException(Mage::helper('cms')->__('Cannot delete directory %s.', $io->getFilteredPath($path)));
         }
@@ -249,12 +225,10 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
     {
         $io = new Varien_Io_File();
         $io->rm($target);
-        Mage::helper('core/file_storage_database')->deleteFile($target);
 
         $thumb = $this->getThumbnailPath($target, true);
         if ($thumb) {
             $io->rm($thumb);
-            Mage::helper('core/file_storage_database')->deleteFile($thumb);
         }
         return $this;
     }

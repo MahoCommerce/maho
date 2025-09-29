@@ -42,7 +42,7 @@ class Mage_Core_Model_Resource_File_Storage_File
     public function getMediaBaseDirectory()
     {
         if (is_null($this->_mediaBaseDirectory)) {
-            $this->_mediaBaseDirectory = Mage::helper('core/file_storage_database')->getMediaBaseDir();
+            $this->_mediaBaseDirectory = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA);
         }
 
         return $this->_mediaBaseDirectory;
@@ -157,7 +157,7 @@ class Mage_Core_Model_Resource_File_Storage_File
         $path = (strlen($dir['path']))
             ? $dir['path'] . DS . $dir['name']
             : $dir['name'];
-        $path = Mage::helper('core/file_storage_database')->getMediaBaseDir() . DS . str_replace('/', DS, $path);
+        $path = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . str_replace('/', DS, $path);
 
         if (!file_exists($path) || !is_dir($path)) {
             if (!@mkdir($path, 0777, true)) {

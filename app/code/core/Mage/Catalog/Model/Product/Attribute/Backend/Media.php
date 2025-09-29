@@ -323,17 +323,10 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
                 'path' => $distanationDirectory,
             ]);
 
-            /** @var Mage_Core_Helper_File_Storage_Database $storageHelper */
-            $storageHelper = Mage::helper('core/file_storage_database');
             if ($move) {
                 $ioAdapter->mv($file, $this->_getConfig()->getTmpMediaPath($fileName));
-
-                //If this is used, filesystem should be configured properly
-                $storageHelper->saveFile($this->_getConfig()->getTmpMediaShortUrl($fileName));
             } else {
                 $ioAdapter->cp($file, $this->_getConfig()->getTmpMediaPath($fileName));
-
-                $storageHelper->saveFile($this->_getConfig()->getTmpMediaShortUrl($fileName));
                 $ioAdapter->chmod($this->_getConfig()->getTmpMediaPath($fileName), 0777);
             }
         } catch (Exception $e) {
@@ -590,23 +583,10 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         }
         $destFile = $this->_getUniqueFileName($file, $ioObject->dirsep());
 
-        /** @var Mage_Core_Helper_File_Storage_Database $storageHelper */
-        $storageHelper = Mage::helper('core/file_storage_database');
-
-        if ($storageHelper->checkDbUsage()) {
-            $storageHelper->renameFile(
-                $this->_getConfig()->getTmpMediaShortUrl($file),
-                $this->_getConfig()->getMediaShortUrl($destFile),
-            );
-
-            $ioObject->rm($this->_getConfig()->getTmpMediaPath($file));
-            $ioObject->rm($this->_getConfig()->getMediaPath($destFile));
-        } else {
-            $ioObject->mv(
-                $this->_getConfig()->getTmpMediaPath($file),
-                $this->_getConfig()->getMediaPath($destFile),
-            );
-        }
+        $ioObject->mv(
+            $this->_getConfig()->getTmpMediaPath($file),
+            $this->_getConfig()->getMediaPath($destFile),
+        );
 
         return str_replace($ioObject->dirsep(), '/', $destFile);
     }
@@ -620,16 +600,8 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      */
     protected function _getUniqueFileName($file, $dirsep)
     {
-        if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
-            $destFile = Mage::helper('core/file_storage_database')
-                ->getUniqueFilename(
-                    Mage::getSingleton('catalog/product_media_config')->getBaseMediaUrlAddition(),
-                    $file,
-                );
-        } else {
-            $destFile = dirname($file) . $dirsep
-                . Mage_Core_Model_File_Uploader::getNewFileName($this->_getConfig()->getMediaPath($file));
-        }
+        $destFile = dirname($file) . $dirsep
+            . Mage_Core_Model_File_Uploader::getNewFileName($this->_getConfig()->getMediaPath($file));
 
         return $destFile;
     }
@@ -654,20 +626,10 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
                 throw new Exception();
             }
 
-            if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
-                Mage::helper('core/file_storage_database')
-                    ->copyFile(
-                        $this->_getConfig()->getMediaShortUrl($file),
-                        $this->_getConfig()->getMediaShortUrl($destFile),
-                    );
-
-                $ioObject->rm($this->_getConfig()->getMediaPath($destFile));
-            } else {
-                $ioObject->cp(
-                    $this->_getConfig()->getMediaPath($file),
-                    $this->_getConfig()->getMediaPath($destFile),
-                );
-            }
+            $ioObject->cp(
+                $this->_getConfig()->getMediaPath($file),
+                $this->_getConfig()->getMediaPath($destFile),
+            );
         } catch (Exception $e) {
             $file = $this->_getConfig()->getMediaPath($file);
             $io = new Varien_Io_File();

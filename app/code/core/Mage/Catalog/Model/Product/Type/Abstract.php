@@ -420,13 +420,11 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
                             }
                             Mage::throwException(Mage::helper('catalog')->__('File upload failed'));
                         }
-                        Mage::helper('core/file_storage_database')->saveFile($dst);
                         break;
                     case 'move_uploaded_file':
                         $src = $queueOptions['src_name'];
                         $dst = $queueOptions['dst_name'];
                         move_uploaded_file($src, $dst);
-                        Mage::helper('core/file_storage_database')->saveFile($dst);
                         break;
                     default:
                         break;

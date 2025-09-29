@@ -188,8 +188,6 @@ namespace PHPSTORM_META {
         'core_resource/entity_abstract' => \Mage_Core_Model_Resource_Entity_Abstract::class,
         'core_resource/entity_table' => \Mage_Core_Model_Resource_Entity_Table::class,
         'core_resource/file_storage_abstract' => \Mage_Core_Model_Resource_File_Storage_Abstract::class,
-        'core_resource/file_storage_database' => \Mage_Core_Model_Resource_File_Storage_Database::class,
-        'core_resource/file_storage_directory_database' => \Mage_Core_Model_Resource_File_Storage_Directory_Database::class,
         'core_resource/file_storage_file' => \Mage_Core_Model_Resource_File_Storage_File::class,
         'core_resource/flag' => \Mage_Core_Model_Resource_Flag::class,
         'core_resource/helper_abstract' => \Mage_Core_Model_Resource_Helper_Abstract::class,

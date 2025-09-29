@@ -81,9 +81,6 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
                 Mage_Downloadable_Model_Sample::getBasePath(),
                 $item->getSampleFile(),
             );
-            if ($item->getSampleFile() && !is_file($file)) {
-                Mage::helper('core/file_storage_database')->saveFileToFilesystem($file);
-            }
             if ($item->getSampleFile() && is_file($file)) {
                 $url = $this->getUrl('*/downloadable_product_edit/link', [
                     'id' => $item->getId(),

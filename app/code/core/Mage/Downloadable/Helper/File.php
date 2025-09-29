@@ -99,11 +99,6 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         $destFile = dirname($file) . $ioObject->dirsep()
                   . Mage_Core_Model_File_Uploader::getNewFileName($this->getFilePath($basePath, $file));
 
-        Mage::helper('core/file_storage_database')->copyFile(
-            $this->getFilePath($baseTmpPath, $file),
-            $this->getFilePath($basePath, $destFile),
-        );
-
         $result = $ioObject->mv(
             $this->getFilePath($baseTmpPath, $file),
             $this->getFilePath($basePath, $destFile),

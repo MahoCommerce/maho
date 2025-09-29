@@ -295,7 +295,6 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         imagefill($newImage, 0, 0, $backgroundColor);
         imagepng($newImage, Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . $destPath);
         imagedestroy($newImage);
-        Mage::helper('core/file_storage_database')->saveFile($destPath);
 
         return $destPath;
     }
@@ -351,7 +350,6 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             $image = Maho::getImageManager()->read($sourceFilePath);
             $image->resize($width, $height);
             $image->save($destPath);
-            Mage::helper('core/file_storage_database')->saveFile($destPath);
         }
 
         return substr($destPath, strlen($baseDir) + 1);
@@ -365,8 +363,6 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         $directory = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . self::SWATCH_CACHE_DIR;
         $io = new Varien_Io_File();
         $io->rmdir($directory, true);
-
-        Mage::helper('core/file_storage_database')->deleteFolder($directory);
     }
 
     /**

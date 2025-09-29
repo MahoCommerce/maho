@@ -375,13 +375,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
         $fileFullPath = null;
         foreach ($checkPaths as $path) {
-            if (!is_file($path)) {
-                if (!Mage::helper('core/file_storage_database')->saveFileToFilesystem($fileFullPath)) {
-                    continue;
-                }
+            if (is_file($path)) {
+                $fileFullPath = $path;
+                break;
             }
-            $fileFullPath = $path;
-            break;
         }
 
         if ($fileFullPath === null) {
@@ -706,7 +703,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $orderFileFullPath = Mage::getBaseDir() . $value['order_path'];
             $dir = pathinfo($orderFileFullPath, PATHINFO_DIRNAME);
             $this->_createWriteableDir($dir);
-            Mage::helper('core/file_storage_database')->copyFile($quoteFileFullPath, $orderFileFullPath);
             @copy($quoteFileFullPath, $orderFileFullPath);
         } catch (Exception $e) {
             return $this;

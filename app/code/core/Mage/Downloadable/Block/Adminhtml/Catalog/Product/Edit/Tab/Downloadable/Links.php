@@ -166,9 +166,6 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     Mage_Downloadable_Model_Link::getBasePath(),
                     $item->getLinkFile(),
                 );
-                if (!is_file($file)) {
-                    Mage::helper('core/file_storage_database')->saveFileToFilesystem($file);
-                }
                 if (is_file($file)) {
                     $url = $this->getUrl('*/downloadable_product_edit/link', [
                         'id' => $item->getId(),

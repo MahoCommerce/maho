@@ -11527,36 +11527,6 @@ parameters:
 			path: app/code/core/Mage/Core/Helper/EnvironmentConfigLoader.php
 
 		-
-			rawMessage: 'Method Mage_Core_Helper_File_Storage_Database::copyFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Helper/File/Storage/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Helper_File_Storage_Database::deleteFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Helper/File/Storage/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Helper_File_Storage_Database::deleteFolder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Helper/File/Storage/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Helper_File_Storage_Database::renameFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Helper/File/Storage/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Helper_File_Storage_Database::saveFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Helper/File/Storage/Database.php
-
-		-
 			rawMessage: 'Method Mage_Core_Helper_Security::validateAgainstBlockMethodBlacklist() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11869,30 +11839,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
 
 		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
-			count: 2
-			path: app/code/core/Mage/Core/Model/File/Storage.php
-
-		-
-			rawMessage: Result of || is always false.
-			identifier: booleanOr.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Core/Model/File/Storage.php
-
-		-
-			rawMessage: 'Parameter #1 $params of method Mage_Core_Model_File_Storage_Database_Abstract::__construct() expects array, string|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/File/Storage/Database.php
-
-		-
-			rawMessage: 'Parameter #1 $params of method Mage_Core_Model_File_Storage_Database_Abstract::__construct() expects array, string|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/File/Storage/Directory/Database.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_File_Storage_File::removeLockedFile() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12203,36 +12149,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_Database::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/File/Storage/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_Database::deleteFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/File/Storage/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_Database::deleteFolder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/File/Storage/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_Directory_Database::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/File/Storage/Directory/Database.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_Directory_Database::deleteDirectory() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/File/Storage/Directory/Database.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_File::removeLockedFile() has no return type specified.'

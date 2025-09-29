@@ -971,35 +971,6 @@
                             <show_in_store>0</show_in_store>
                             <validate>validate-digits validate-zero-or-greater</validate>
                         </image_quality>
-                        <media_storage translate="label">
-                            <label>Media Storage</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_storage_media_storage</source_model>
-                            <sort_order>100</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </media_storage>
-                        <media_database translate="label">
-                            <label>Select Media Database</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_storage_media_database</source_model>
-                            <backend_model>adminhtml/system_config_backend_storage_media_database</backend_model>
-                            <sort_order>200</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><media_storage>1</media_storage></depends>
-                        </media_database>
-                        <synchronize translate="label comment">
-                            <frontend_type>button</frontend_type>
-                            <frontend_model>adminhtml/system_config_system_storage_media_synchronize</frontend_model>
-                            <sort_order>300</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <comment>After selecting a new media storage location, press the Synchronize button to transfer all media to that location. Media will not be available in the new location until the synchronization process is complete.</comment>
-                        </synchronize>
                     </fields>
                 </media_storage_configuration>
             </groups>

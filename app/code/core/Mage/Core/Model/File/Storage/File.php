@@ -227,7 +227,7 @@ class Mage_Core_Model_File_Storage_File extends Mage_Core_Model_File_Storage_Abs
     /**
      * Save file to storage
      *
-     * @param  array|Mage_Core_Model_File_Storage_Database $file
+     * @param  array $file
      * @param  bool $overwrite
      * @return bool
      */
