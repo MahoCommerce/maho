@@ -219,22 +219,6 @@ class varienGrid {
             location.href = url;
         }
     }
-    /*_processComplete : function(transport){
-        console.log(transport);
-        if (transport && transport.responseText){
-            try{
-                response = eval('(' + transport.responseText + ')');
-            }
-            catch (e) {
-                response = {};
-            }
-        }
-        if (response.ajaxExpired && response.ajaxRedirect) {
-            location.href = response.ajaxRedirect;
-            return false;
-        }
-        this.initGrid();
-    }*/
     _processFailure() {
         location.href = BASE_URL;
     }
@@ -243,7 +227,7 @@ class varienGrid {
         const re = new RegExp('\\/' + varName + '\\/.*?\\/');
         const parts = url.split(/\?/);
         url = parts[0].replace(re, '/');
-        url += varName + '/' + varValue + '/';
+        url += encodeURIComponent(varName) + '/' + encodeURIComponent(varValue) + '/';
         if(parts.length > 1) {
             url += '?' + parts[1];
         }
