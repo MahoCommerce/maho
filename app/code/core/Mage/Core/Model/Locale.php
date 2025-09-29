@@ -604,7 +604,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      * Create DateTime object with date converted to store timezone and store Locale
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store Information about store
-     * @param   string|int|DateTime|null $date date in UTC
+     * @param   string|int|DateTime|DateTimeImmutable|null $date date in UTC
      * @param   bool $includeTime flag for including time to date
      * @param   string|null $format Format for date parsing/output:
      *                              - null: Use locale default format (returns DateTime)
@@ -613,7 +613,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      *                                * type="datetime-local": YYYY-MM-DDTHH:mm (e.g., "2024-12-25T14:30")
      *                              - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
      */
-    public function storeDate(mixed $store = null, string|int|DateTime|null $date = null, bool $includeTime = false, ?string $format = null): DateTime|string|null
+    public function storeDate(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null, bool $includeTime = false, ?string $format = null): DateTime|string|null
     {
         // Special handling for HTML5 format output when format is 'html5'
         if ($format === 'html5') {
@@ -623,7 +623,7 @@ class Mage_Core_Model_Locale extends Varien_Object
 
             try {
                 $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-                $dateObj = new DateTime($date);
+                $dateObj = $date instanceof DateTimeInterface ? DateTime::createFromInterface($date) : new DateTime($date);
                 $dateObj->setTimezone(new DateTimeZone($timezone));
                 if (!$includeTime) {
                     $dateObj->setTime(0, 0, 0);
@@ -644,6 +644,9 @@ class Mage_Core_Model_Locale extends Varien_Object
 
         if ($date instanceof DateTime) {
             // Date is already a DateTime object, use as-is
+        } elseif ($date instanceof DateTimeImmutable) {
+            // Convert DateTimeImmutable to DateTime
+            $date = DateTime::createFromInterface($date);
         } elseif ($format && !is_numeric($date)) {
             $date = DateTime::createFromFormat($format, $date) ?: new DateTime($date ?: 'now');
         } elseif (is_numeric($date)) {
@@ -667,7 +670,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      * or in format which was passed as parameter.
      *
      * @param mixed $store Information about store
-     * @param string|int|DateTime|null $date date in store's timezone
+     * @param string|int|DateTime|DateTimeImmutable|null $date date in store's timezone
      * @param bool $includeTime flag for including time to date
      * @param null|string $format Format for date parsing/output:
      *                             - null: Use locale default format (returns DateTime)
@@ -676,7 +679,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      *                               * Returns: YYYY-MM-DD HH:mm:ss (MySQL datetime format)
      *                             - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
      */
-    public function utcDate(mixed $store, string|int|DateTime|null $date = null, bool $includeTime = false, ?string $format = null): DateTime|string|null
+    public function utcDate(mixed $store, string|int|DateTime|DateTimeImmutable|null $date = null, bool $includeTime = false, ?string $format = null): DateTime|string|null
     {
         // Special handling for HTML5 native input formats
         if ($format === 'html5' && is_string($date)) {
