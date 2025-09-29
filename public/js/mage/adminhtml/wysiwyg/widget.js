@@ -22,21 +22,36 @@ const widgetTools = {
         targetEl.append(...fragment.children);
     },
 
-    async openDialog(widgetUrl, opts) {
+    async openDialog(widgetUrl, opts = {}) {
         if (document.getElementById(this.dialogWindowId)) {
             return;
         }
         try {
             const result = await mahoFetch(widgetUrl);
 
-            this.dialogWindow = Dialog.info(result, {
+            const dialogOptions = {
                 id: this.dialogWindowId,
                 title: 'Insert Widget...',
                 className: 'magento',
                 windowClassName: 'popup-window',
                 width: 950,
-                ...opts,
-            });
+                ...opts, // TipTap options come first
+            };
+
+            // Only add default onOk if not already provided
+            if (!dialogOptions.onOk) {
+                dialogOptions.onOk = async () => {
+                    // Call insertWidget but skip dialog close since OK button handles it
+                    try {
+                        await wWidget.insertWidget(true); // Skip dialog close
+                        return true; // Let the OK button close the dialog
+                    } catch(error) {
+                        return false; // Keep dialog open on error
+                    }
+                };
+            }
+
+            this.dialogWindow = Dialog.info(result, dialogOptions);
         } catch (error) {
             alert(error.message);
         }
@@ -191,7 +206,7 @@ WysiwygWidget.Widget = class {
         }
     }
 
-    async insertWidget() {
+    async insertWidget(skipDialogClose = false) {
         const widgetOptionsForm = new varienForm(this.formEl);
         if (widgetOptionsForm.validator && !widgetOptionsForm.validator.validate()) {
             return;
@@ -212,16 +227,21 @@ WysiwygWidget.Widget = class {
                 body: formData,
             })
 
-            // Close the dialog, and send directive as dialog.returnValue
-            Dialog.close(directive);
+            // Close the dialog, and send directive as dialog.returnValue (unless told to skip)
+            if (!skipDialogClose) {
+                Dialog.close(directive);
+            }
 
             const textareaElm = document.getElementById(this.widgetTargetId);
             if (textareaElm?.checkVisibility()) {
                 updateElementAtCursor(textareaElm, directive);
             }
+
+            return directive; // Return directive for TipTap usage
         } catch(error) {
             console.error(error);
             alert(error.message);
+            throw error; // Re-throw for TipTap error handling
         }
     }
 };

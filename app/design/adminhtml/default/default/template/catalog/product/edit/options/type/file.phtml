@@ -5,14 +5,13 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_File $this */
 ?>
 <script type="text/javascript">
-
 OptionTemplateFile = '<table class="border" cellpadding="0" cellspacing="0">'+
         '<tr class="headings">'+
             <?php if ($this->getCanReadPrice() !== false) : ?>
@@ -41,8 +40,7 @@ OptionTemplateFile = '<table class="border" cellpadding="0" cellspacing="0">'+
         '</tr>'+
     '</table>';
 
-if ($('option_panel_type_file')) {
-    $('option_panel_type_file').remove();
+if (document.getElementById('option_panel_type_file')) {
+    document.getElementById('option_panel_type_file').remove();
 }
-
 </script>

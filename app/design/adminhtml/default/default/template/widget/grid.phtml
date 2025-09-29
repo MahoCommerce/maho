@@ -183,8 +183,7 @@ $numColumns = count($this->getColumns());
 <?php if($this->canDisplayContainer()): ?>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-    <?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
+    globalThis.<?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';
     <?php if($this->getRowClickCallback()): ?>
         <?= $this->getJsObjectName() ?>.rowClickCallback = <?= $this->getRowClickCallback() ?>;
@@ -196,11 +195,17 @@ $numColumns = count($this->getColumns());
         <?= $this->getJsObjectName() ?>.initRowCallback = <?= $this->getRowInitCallback() ?>;
         <?= $this->getJsObjectName() ?>.initGridRows();
     <?php endif ?>
+
+    // For accordion/dynamically loaded content, reinitialize grid after DOM is ready
+    setTimeout(function() {
+        if (<?= $this->getJsObjectName() ?> && <?= $this->getJsObjectName() ?>.initGridAjax) {
+            <?= $this->getJsObjectName() ?>.initGridAjax();
+        }
+    }, 100);
     <?php if($this->getMassactionBlock()->isAvailable()): ?>
     <?= $this->getMassactionBlock()->getJavaScript() ?>
     <?php endif ?>
     <?= $this->getAdditionalJavaScript() ?>
-//]]>
 </script>
 <?php endif ?>
 <?php endif ?>

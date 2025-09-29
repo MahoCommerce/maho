@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -29,17 +29,28 @@
     <?= $this->getGridHtml() ?>
 </div>
 <script type="text/javascript">
-//<![CDATA[
     function filterFormSubmit() {
-        var filters = $$('#filter_form input', '#filter_form select');
-        var elements = [];
-        for(var i in filters){
-            if(filters[i].value && filters[i].value.length && !filters[i].disabled) elements.push(filters[i]);
-        }
-        var validator  = new Validation('filter_form');
-        if (validator.validate()) {
-            setLocation('<?= $this->getFilterUrl() ?>filter/'+btoa(Form.serializeElements(elements))+'/');
+        const filterForm = document.getElementById('filter_form');
+        if (!filterForm) return;
+
+        const filters = filterForm.querySelectorAll('input, select');
+        const elements = [];
+
+        filters.forEach(filter => {
+            if (filter.value && filter.value.length && !filter.disabled) {
+                elements.push(filter);
+            }
+        });
+
+        if (filterForm.checkValidity()) {
+            const formData = new FormData();
+            elements.forEach(element => {
+                formData.append(element.name, element.value);
+            });
+
+            const params = new URLSearchParams(formData).toString();
+            const encodedParams = btoa(params);
+            setLocation('<?= $this->getFilterUrl() ?>filter/' + encodedParams + '/');
         }
     }
-//]]>
 </script>

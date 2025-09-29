@@ -74,12 +74,12 @@
                             <?php endif ?>
                         </th>
                     </tr>
-                    <tr class="no-display template" id="row-template">    
+                    <tr class="no-display template" id="row-template">
                         <?php if ($this->isConfigurableSwatchesEnabled()): ?>
                         <td style="position:relative">
                             <input type="hidden" disabled class="swatch-value" name="option[swatch][{{id}}]" value="{{swatch}}" />
-                            <input type="color" class="input-color-html5 validate-hex-color-hash {{swatch_class}}" value="{{swatch}}" />    
-                            <span class="swatch-delete" data-msg-delete="<?= $this->escapeHtml($this->__('Are you sure to delete this fallback color?')) ?>">X</span>
+                            <input type="color" class="input-color-html5 validate-hex-color-hash {{swatch_class}}" value="{{swatch}}" />
+                            <span class="swatch-delete" data-msg-delete="<?= $this->escapeHtml($this->__('Are you sure to delete this fallback color?')) ?>"><?= $this->getIconSvg('x') ?></span>
                         </td>
                         <?php endif ?>
                         <?php foreach ($this->getStores() as $_store): ?>
@@ -110,7 +110,7 @@ var templateText =
             '<td style="position:relative">'+
                 '<input type="hidden" disabled class="swatch-value" name="option[swatch][{{id}}]" value="{{swatch}}" />'+
                 '<input type="color" class="swatch-option input-color-html5 validate-hex-color-hash {{swatch_class}}" value="{{swatch}}" />'+
-                '<span class="swatch-delete" data-msg-delete="<?= $this->jsQuoteEscape($this->__('Are you sure to delete this fallback color?')) ?>">X</span>'+
+                '<span class="swatch-delete" data-msg-delete="<?= $this->jsQuoteEscape($this->__('Are you sure to delete this fallback color?')) ?>"><?= $this->getIconSvg('x') ?></span>'+
             '</td>'+
         <?php endif ?>
 <?php foreach ($this->getStores() as $_store): ?>
@@ -128,13 +128,12 @@ var templateText =
 
 var attributeOption = {
     table : document.getElementById('attribute-options-table'),
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
     templateText : templateText,
     itemCount : 0,
     totalItems : 0,
     isReadOnly: <?= (int)$this->getReadOnly() ?>,
     add : function(data) {
-        this.template = new Template(this.templateText, this.templateSyntax);
+        this.template = new Template(this.templateText, Template.HANDLEBARS_PATTERN);
         let isNewOption = false;
         if (!data.id) {
             data.id = 'option_' + this.itemCount;
@@ -184,7 +183,9 @@ var attributeOption = {
         }
     },
     swatchremove : function(event){
-        if (!confirm(event.target.getAttribute('data-msg-delete'))) {
+        const deleteButton = event.target.closest('.swatch-delete');
+        const message = deleteButton ? deleteButton.getAttribute('data-msg-delete') : 'Are you sure you want to delete this swatch?';
+        if (!confirm(message)) {
             return;
         }
         let element = event.target.closest('tr');

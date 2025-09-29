@@ -59,7 +59,6 @@ class GiftMessagesController {
         if (!formElement?.validator?.validate()) return false;
 
         mahoFetch(formElement.action, { method: 'POST', body: new FormData(formElement) })
-            .then(response => response.text())
             .then(responseText => this.handleGiftMessageResponse(containerElement, container, responseText));
         return false;
     }
@@ -181,7 +180,7 @@ class GiftOptionsPopup {
         if (!dialogForm) return;
 
         ['sender', 'recipient', 'message'].forEach(field => {
-            const sourceField = document.getElementById(`giftmessage_${itemId}_${field}`);
+            const sourceField = document.querySelector(`[name="giftmessage[${itemId}][${field}]"]`);
             const destField = dialogForm.querySelector(`[name="current_item_giftmessage_${field}"]`);
 
             if (sourceField && destField) {
@@ -216,7 +215,7 @@ class GiftOptionsPopup {
 
         ['sender', 'recipient', 'message'].forEach(field => {
             const destField = dialogForm.querySelector(`[name="current_item_giftmessage_${field}"]`);
-            const sourceField = document.getElementById(`giftmessage_${this.currentItemId}_${field}`);
+            const sourceField = document.querySelector(`[name="giftmessage[${this.currentItemId}][${field}]"]`);
 
             if (destField && sourceField) {
                 sourceField.value = destField.value;
@@ -227,7 +226,7 @@ class GiftOptionsPopup {
     triggerServerSave() {
         if (!this.currentItemId) return;
 
-        const sourceField = document.getElementById(`giftmessage_${this.currentItemId}_message`);
+        const sourceField = document.querySelector(`[name="giftmessage[${this.currentItemId}][message]"]`);
         const form = sourceField?.closest('form');
         if (form?.id) {
             GiftMessagesController.saveGiftMessage(form.id);

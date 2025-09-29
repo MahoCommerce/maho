@@ -6,7 +6,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -54,15 +54,15 @@ class Varien_Data_Tree_Node extends Varien_Object
      * Data tree node constructor
      *
      * @param array $data
-     * @param string $idFeild
+     * @param string $idField
      * @param Varien_Data_Tree $tree
      * @param Varien_Data_Tree_Node $parent
      */
-    public function __construct($data, $idFeild, $tree, $parent = null)
+    public function __construct($data, $idField, $tree, $parent = null)
     {
         $this->setTree($tree);
         $this->setParent($parent);
-        $this->setIdField($idFeild);
+        $this->setIdField($idField);
         $this->setData($data);
         $this->_childNodes = new Varien_Data_Tree_Node_Collection($this);
     }

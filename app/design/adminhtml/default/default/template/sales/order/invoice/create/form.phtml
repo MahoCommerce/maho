@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -84,10 +84,9 @@
     </div>
 </form>
 <script type="text/javascript">
-//<![CDATA[
-    var createShipment = $('invoice_do_shipment');
+    var createShipment = document.getElementById('invoice_do_shipment');
     if (createShipment) {
-        createShipment.observe('click', function(e){
+        createShipment.addEventListener('click', function(e){
             if (createShipment.checked) {
                 document.getElementById('tracking').style.display = 'block';
             } else {
@@ -98,11 +97,10 @@
 
     /*forced creating of shipment*/
     var forcedShipmentCreate = <?= $this->getForcedShipmentCreate() ?>;
-    var shipmentElement = $('invoice_do_shipment');
+    var shipmentElement = document.getElementById('invoice_do_shipment');
     if (forcedShipmentCreate && shipmentElement) {
         shipmentElement.checked = true;
         shipmentElement.disabled = true;
         document.getElementById('tracking').style.display = 'block';
     }
-//]]>
 </script>

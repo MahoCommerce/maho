@@ -515,7 +515,7 @@ class AdminOrder
         }
 
         // processing non composite product
-        if (confLink.readAttribute('disabled')) {
+        if (confLink.getAttribute('disabled')) {
             const checked = isInputCheckbox ? checkbox.checked : !checkbox.checked;
             grid.setCheckboxChecked(checkbox, checked);
             return;
@@ -718,10 +718,10 @@ class AdminOrder
 
         const data = {};
         if (this.collectElementsValue) {
-            var elems = $(this.getAreaId('sidebar')).select('input');
+            var elems = document.getElementById(this.getAreaId('sidebar')).querySelectorAll('input');
             for (var i=0; i < elems.length; i++) {
-                if (elems[i].getValue()) {
-                    data[elems[i].name] = elems[i].getValue();
+                if (elems[i].value) {
+                    data[elems[i].name] = elems[i].value;
                 }
             }
         }
@@ -761,7 +761,11 @@ class AdminOrder
             if (typeof value === 'boolean') {
                 params[name] = value ? 1 : 0;
             }
-            fields.push(new Element('input', {type: 'hidden', name, value}));
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            fields.push(input);
         }
 
         // add additional fields before triggered submit
@@ -798,7 +802,7 @@ class AdminOrder
             }
         }
 
-        Object.extend(fieldsPrepare, this.productConfigureAddFields);
+        Object.assign(fieldsPrepare, this.productConfigureAddFields);
         this.productConfigureSubmit('quote_items', area, fieldsPrepare);
         this.orderItemChanged = false;
     }
@@ -839,7 +843,11 @@ class AdminOrder
         // create fields
         const fields = [];
         for (const [name, value] of Object.entries(params)) {
-            fields.push(new Element('input', {type: 'hidden', name, value}));
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            fields.push(input);
         }
         productConfigure.addFields(fields);
 

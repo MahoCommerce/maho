@@ -6,15 +6,13 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * Form element dependencies mapper
  * Assumes that one element may depend on other element values with the ability to create complex conditions
- *
- * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_Block_Abstract
 {
@@ -264,7 +262,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
         if (!$this->_depends) {
             return '';
         }
-        return "<script>new FormElementDependenceController({$this->_getDependsJson()}, {$this->_getConfigJson()})</script>\n";
+        return "<script>new formElementDependenceController({$this->_getDependsJson()}, {$this->_getConfigJson()})</script>\n";
     }
 
     /**

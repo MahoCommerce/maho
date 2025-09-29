@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,12 +33,12 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Import extends Varien_Data_F
 
         $html .= <<<EndHTML
         <script type="text/javascript">
-        Event.observe($('carriers_tablerate_condition_name'), 'change', checkConditionName.bind(this));
+        document.getElementById('carriers_tablerate_condition_name').addEventListener('change', checkConditionName);
         function checkConditionName(event)
         {
-            var conditionNameElement = Event.element(event);
+            var conditionNameElement = event.target;
             if (conditionNameElement && conditionNameElement.id) {
-                $('time_condition').value = '_' + conditionNameElement.value + '/' + Math.random();
+                document.getElementById('time_condition').value = '_' + conditionNameElement.value + '/' + Math.random();
             }
         }
         </script>

@@ -6,18 +6,17 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.0';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.0';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.0';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.0';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.0';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.0';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.5';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.5';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.5';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.5';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.5';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.5';
 
 export {
     Editor, Node, Mark, StarterKit, TextAlign,
     Table, TableRow, TableCell, TableHeader, BubbleMenu,
 };
-
 
 const parseDirective = (directiveStr) => {
     const directiveObj = {
@@ -216,16 +215,38 @@ export const MahoWidgetBlock = Node.create({
                 const { from, to } = state.selection;
                 const type = getWidgetTypeForSelection(state);
 
+                console.log('TipTap calling widgetTools.openDialog with:', this.options.widgetUrl);
+                console.log('TipTap options being passed:', {
+                    onOpen: () => {
+                        widgetTools.initOptionValues(node?.attrs.directiveObj.params);
+                    },
+                    onOk: async () => {
+                        console.log('TipTap onOk called');
+                        // ... rest of onOk
+                    }
+                });
                 widgetTools.openDialog(this.options.widgetUrl, {
                     onOpen: () => {
                         widgetTools.initOptionValues(node?.attrs.directiveObj.params);
                     },
-                    onOk: (dialog) => {
-                        const directiveObj = parseDirective(dialog.returnValue);
-                        editor.commands.insertContentAt({ from, to }, {
-                            type,
-                            attrs: { directiveObj },
-                        });
+                    onOk: async () => {
+                        console.log('TipTap onOk called');
+                        try {
+                            // Get directive from insertWidget method
+                            const directive = await window.wWidget.insertWidget();
+                            console.log('TipTap directive received:', directive);
+                            if (directive) {
+                                const directiveObj = parseDirective(directive);
+                                editor.commands.insertContentAt({ from, to }, {
+                                    type,
+                                    attrs: { directiveObj },
+                                });
+                            }
+                            return true; // Allow dialog to close
+                        } catch(error) {
+                            console.log('TipTap onOk error:', error);
+                            return false; // Prevent dialog close on error
+                        }
                     },
                 });
             },
@@ -393,11 +414,17 @@ export const MahoImage = Image.extend({
                     onOk: (dialog) => {
                         //  Parse out the directive and alt text
                         let match;
+                        const returnValue = dialog.returnValue || '';
 
-                        match = dialog.returnValue.match(/src="({{.*?}})"/);
+                        if (!returnValue) {
+                            console.error('No return value from media browser dialog');
+                            return;
+                        }
+
+                        match = returnValue.match(/src="({{.*?}})"/);
                         const directiveObj = parseDirective(match?.[1]);
 
-                        match = dialog.returnValue.match(/alt="(.*?)"/);
+                        match = returnValue.match(/alt="(.*?)"/);
                         const alt = unescapeHtml(match?.[1]);
 
                         // Keep some attributes of old image
@@ -617,15 +644,23 @@ export const MahoSlideshow = Node.create({
 
                         const addSlide = (isInitialAdd = false) => {
                             MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
-                                onOk: (dialog) => {
+                                ok: false, // Disable OK button - use Insert File button or double-click instead
+                                onClose: (dialog) => {
+                                    // Handle the actual image insertion after the dialog closes with returnValue
+                                    const returnValue = dialog.returnValue || '';
+
+                                    if (!returnValue) {
+                                        // Dialog was cancelled or no image selected
+                                        return;
+                                    }
+
                                     //  Parse out the directive and alt text
                                     let match;
-
-                                    match = dialog.returnValue.match(/src="({{.*?}})"/);
+                                    match = returnValue.match(/src="({{.*?}})"/);
                                     const src = match?.[1];
                                     const directiveObj = parseDirective(src);
 
-                                    match = dialog.returnValue.match(/alt="(.*?)"/);
+                                    match = returnValue.match(/alt="(.*?)"/);
                                     const alt = unescapeHtml(match?.[1]);
 
                                     if (src) {
@@ -752,7 +787,7 @@ export const MahoDiv = Node.create({
 
 /**
  * Maho Fullscreen Extension
- * 
+ *
  * Provides fullscreen editing capabilities for the Tiptap editor
  */
 export const MahoFullscreen = Extension.create({
@@ -780,7 +815,7 @@ export const MahoFullscreen = Extension.create({
                 if (!wrapper) return false;
 
                 const isFullscreen = wrapper.classList.contains('tiptap-fullscreen');
-                
+
                 if (isFullscreen) {
                     // Exit fullscreen
                     wrapper.classList.remove('tiptap-fullscreen');
@@ -811,7 +846,7 @@ export const MahoFullscreen = Extension.create({
 
                 // Focus back to editor
                 editor.commands.focus();
-                
+
                 return true;
             },
         };

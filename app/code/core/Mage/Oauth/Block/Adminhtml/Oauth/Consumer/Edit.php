@@ -6,7 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -49,7 +49,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit extends Mage_Adminhtml_Bloc
         ], 100);
 
         $this->_formScripts[] = 'function saveAndContinueEdit()' .
-        "{editForm.submit($('edit_form').action + 'back/edit/')}";
+        "{editForm.submit(document.getElementById('edit_form').action + 'back/edit/')}";
 
         $this->_updateButton('save', 'label', $this->__('Save'));
         $this->_updateButton('save', 'id', 'save_button');

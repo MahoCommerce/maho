@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -29,15 +29,16 @@
 <script type="text/javascript">
 var attributesForm = new varienForm('attributes_edit_form', '<?= $this->getValidationUrl() ?>');
 attributesForm._processValidationResult = function(transport) {
-    var response = transport.responseText.evalJSON();
+    var response = JSON.parse(transport.responseText);
 
     if (response.error){
-        if (response.attribute && $(response.attribute)) {
-            $(response.attribute).setHasError(true, attributesForm);
-            Validation.ajaxError($(response.attribute), response.message);
-            $(response.attribute).focus();
-        } else if ($('messages')) {
-            $('messages').innerHTML = '<ul class="messages"><li class="error-msg"><ul><li>' + response.message + '</li></ul></li></ul>';
+        if (response.attribute && document.getElementById(response.attribute)) {
+            const attributeElement = document.getElementById(response.attribute);
+            attributeElement.setHasError(true, attributesForm);
+            Validation.ajaxError(attributeElement, response.message);
+            attributeElement.focus();
+        } else if (document.getElementById('messages')) {
+            document.getElementById('messages').innerHTML = '<ul class="messages"><li class="error-msg"><ul><li>' + response.message + '</li></ul></li></ul>';
         }
     } else {
         attributesForm._submit();

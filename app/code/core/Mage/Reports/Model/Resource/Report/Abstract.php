@@ -495,8 +495,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         if ($date === null) {
             return null;
         }
-        $dateUtc = new DateTime($date);
-        $dateUtc->setTimezone(new DateTimeZone('Etc/UTC'));
-        return $dateUtc;
+
+        return Mage::app()->getLocale()->utcDate(0, $date, true);
     }
 }

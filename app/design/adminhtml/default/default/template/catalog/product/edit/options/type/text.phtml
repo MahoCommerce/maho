@@ -12,7 +12,6 @@
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Text $this */
 ?>
 <script type="text/javascript">
-//<![CDATA[
 OptionTemplateText = '<table class="border" cellpadding="0" cellspacing="0">'+
         '<tr class="headings">'+
             <?php if ($this->getCanReadPrice() !== false) : ?>
@@ -35,8 +34,7 @@ OptionTemplateText = '<table class="border" cellpadding="0" cellspacing="0">'+
         '</tr>'+
     '</table>';
 
-if ($('option_panel_type_text')) {
-    $('option_panel_type_text').remove();
+if (document.getElementById('option_panel_type_text')) {
+    document.getElementById('option_panel_type_text').remove();
 }
-//]]>
 </script>

@@ -71,17 +71,23 @@ class Mediabrowser {
         this.imageQuality = setup.imageQuality;
     }
 
-    static {
+    initializeEventListeners() {
+        // Only initialize once
+        if (this.eventListenersInitialized) {
+            return;
+        }
+        this.eventListenersInitialized = true;
+
         document.addEventListener('uploader:filesAdded', (event) => {
-            MediabrowserInstance.deselectFiles();
+            this.deselectFiles();
         });
         document.addEventListener('uploader:beforeUpload', (event) => {
             event.detail.instance.uploaderConfig.target = setRouteParams(event.detail.instance.uploaderConfig.target, {
-                node: MediabrowserInstance.currentNode.id,
+                node: this.currentNode.id,
             });
         });
         document.addEventListener('uploader:success', (event) => {
-            MediabrowserInstance.handleUploadComplete(event.detail.files);
+            this.handleUploadComplete(event.detail.files);
         });
     }
 

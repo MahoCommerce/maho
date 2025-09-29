@@ -179,7 +179,7 @@ class MahoTree {
                 typeof event.originalEvent === 'DragEvent',
                 event.target.tagName === 'INPUT' && ['checkbox', 'radio'].includes(event.target.type),
             ];
-            if (!shouldUpdate.any(Boolean)) {
+            if (!shouldUpdate.some(Boolean)) {
                 return;
             }
             if (this.selectableOpts.mode === 'nested') {
@@ -250,7 +250,7 @@ class MahoTree {
                 if (children.every((el) => el.checked)) {
                     parent.checked = true;
                     parent.indeterminate = false;
-                } else if (children.all((el) => !el.checked)) {
+                } else if (children.every((el) => !el.checked)) {
                     parent.checked = false;
                     parent.indeterminate = false;
                 } else {

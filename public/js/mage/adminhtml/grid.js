@@ -4,12 +4,11 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-var varienGrid = new Class.create();
-
-varienGrid.prototype = {
-    initialize : function(containerId, url, pageVar, sortVar, dirVar, filterVar){
+class varienGrid {
+    constructor(containerId, url, pageVar, sortVar, dirVar, filterVar) {
         this.containerId = containerId;
         this.url = url;
         this.pageVar = pageVar || false;
@@ -27,40 +26,41 @@ varienGrid.prototype = {
 
         this.reloadParams = false;
 
-        this.trOnMouseOver  = this.rowMouseOver.bindAsEventListener(this);
-        this.trOnMouseOut   = this.rowMouseOut.bindAsEventListener(this);
-        this.trOnClick      = this.rowMouseClick.bindAsEventListener(this);
-        this.trOnDblClick   = this.rowMouseDblClick.bindAsEventListener(this);
-        this.trOnKeyPress   = this.keyPress.bindAsEventListener(this);
+        this.trOnMouseOver  = this.rowMouseOver.bind(this);
+        this.trOnMouseOut   = this.rowMouseOut.bind(this);
+        this.trOnClick      = this.rowMouseClick.bind(this);
+        this.trOnDblClick   = this.rowMouseDblClick.bind(this);
+        this.trOnKeyPress   = this.keyPress.bind(this);
 
-        this.thLinkOnClick      = this.doSort.bindAsEventListener(this);
+        this.thLinkOnClick      = this.doSort.bind(this);
         this.initGrid();
-    },
-    initGrid : function(){
+    }
+    initGrid() {
         if(this.preInitCallback){
             this.preInitCallback(this);
         }
-        if($(this.containerId+this.tableSufix)){
-            this.rows = $$('#'+this.containerId+this.tableSufix+' tbody tr');
-            for (var row=0; row<this.rows.length; row++) {
-                if(row%2==0){
-                    Element.addClassName(this.rows[row], 'even');
-                }else{
-                    Element.addClassName(this.rows[row], 'odd');
+        const tableElement = document.getElementById(this.containerId + this.tableSufix);
+        if(tableElement){
+            this.rows = tableElement.querySelectorAll('tbody tr');
+            for (let row = 0; row < this.rows.length; row++) {
+                if(row % 2 === 0){
+                    this.rows[row].classList.add('even');
+                } else {
+                    this.rows[row].classList.add('odd');
                 }
 
-                Event.observe(this.rows[row],'mouseover',this.trOnMouseOver);
-                Event.observe(this.rows[row],'mouseout',this.trOnMouseOut);
-                Event.observe(this.rows[row],'mousedown',this.trOnClick);
-                Event.observe(this.rows[row],'click',this.trOnClick);
-                Event.observe(this.rows[row],'dblclick',this.trOnDblClick);
+                this.rows[row].addEventListener('mouseover', this.trOnMouseOver);
+                this.rows[row].addEventListener('mouseout', this.trOnMouseOut);
+                this.rows[row].addEventListener('mousedown', this.trOnClick);
+                this.rows[row].addEventListener('click', this.trOnClick);
+                this.rows[row].addEventListener('dblclick', this.trOnDblClick);
             }
         }
         if(this.sortVar && this.dirVar){
-            var columns = $$('#'+this.containerId+this.tableSufix+' thead a');
+            const columns = document.querySelectorAll('#' + this.containerId + this.tableSufix + ' thead a');
 
-            for(var col=0; col<columns.length; col++){
-                Event.observe(columns[col],'click',this.thLinkOnClick);
+            for(let col = 0; col < columns.length; col++){
+                columns[col].addEventListener('click', this.thLinkOnClick);
             }
         }
         this.bindFilterFields();
@@ -75,14 +75,15 @@ varienGrid.prototype = {
                 }
             }
         }
-    },
-    initGridAjax: function () {
+    }
+    initGridAjax() {
         this.initGrid();
         this.initGridRows();
-    },
-    initGridRows: function() {
+    }
+
+    initGridRows() {
         if(this.initRowCallback){
-            for (var row=0; row<this.rows.length; row++) {
+            for (let row = 0; row < this.rows.length; row++) {
                 try {
                     this.initRowCallback(this, this.rows[row]);
                 } catch (e) {
@@ -92,34 +93,40 @@ varienGrid.prototype = {
                 }
             }
         }
-    },
-    getContainerId : function(){
+    }
+
+    getContainerId() {
         return this.containerId;
-    },
-    rowMouseOver : function(event){
-        var element = Event.findElement(event, 'tr');
+    }
+    rowMouseOver(event) {
+        const element = event.target.closest('tr');
 
-        if (!element.title) return;
+        if (!element || !element.title) return;
 
-        Element.addClassName(element, 'on-mouse');
+        element.classList.add('on-mouse');
 
-        if (!Element.hasClassName('pointer')
+        if (!element.classList.contains('pointer')
             && (this.rowClickCallback !== openGridRow || element.title)) {
             if (element.title) {
-                Element.addClassName(element, 'pointer');
+                element.classList.add('pointer');
             }
         }
-    },
-    rowMouseOut : function(event){
-        var element = Event.findElement(event, 'tr');
-        Element.removeClassName(element, 'on-mouse');
-    },
-    rowMouseClick : function(event){
-        if (event.button != 1 && event.type == "mousedown") {
-            return; // Ignore mousedown for any button except middle
+    }
+
+    rowMouseOut(event) {
+        const element = event.target.closest('tr');
+        if (element) {
+            element.classList.remove('on-mouse');
         }
-        if (event.button == 2) {
+    }
+    rowMouseClick(event) {
+        // Only handle left clicks and middle clicks
+        if (event.button === 2) {
             return; // Ignore right click
+        }
+        // For mousedown events, only handle middle click (button 1)
+        if (event.type === "mousedown" && event.button !== 1) {
+            return;
         }
         if(this.rowClickCallback){
             try{
@@ -127,31 +134,39 @@ varienGrid.prototype = {
             }
             catch(e){}
         }
-        varienGlobalEvents.fireEvent('gridRowClick', event);
-    },
-    rowMouseDblClick : function(event){
-        varienGlobalEvents.fireEvent('gridRowDblClick', event);
-    },
-    keyPress : function(event){
+        if (typeof varienGlobalEvents !== 'undefined' && varienGlobalEvents.fireEvent) {
+            varienGlobalEvents.fireEvent('gridRowClick', event);
+        }
+    }
 
-    },
-    doSort : function(event){
-        var element = Event.findElement(event, 'a');
+    rowMouseDblClick(event) {
+        if (typeof varienGlobalEvents !== 'undefined' && varienGlobalEvents.fireEvent) {
+            varienGlobalEvents.fireEvent('gridRowDblClick', event);
+        }
+    }
 
-        if(element.name && element.title){
+    keyPress(event) {
+        // Empty implementation
+    }
+    doSort(event) {
+        const element = event.target.closest('a');
+
+        if(element && element.name && element.title){
             this.addVarToUrl(this.sortVar, element.name);
             this.addVarToUrl(this.dirVar, element.title);
             this.reload(this.url);
         }
-        Event.stop(event);
+        event.preventDefault();
+        event.stopPropagation();
         return false;
-    },
-    loadByElement : function(element){
+    }
+
+    loadByElement(element) {
         if(element && element.name){
             this.reload(this.addVarToUrl(element.name, element.value));
         }
-    },
-    reload : function(url){
+    }
+    reload(url) {
         if (!this.reloadParams) {
             this.reloadParams = {form_key: FORM_KEY};
         }
@@ -159,44 +174,51 @@ varienGrid.prototype = {
             this.reloadParams.form_key = FORM_KEY;
         }
         url = url || this.url;
-        if(this.useAjax){
-            new Ajax.Request(url + (url.match(new RegExp('\\?')) ? '&ajax=true' : '?ajax=true' ), {
-                loaderArea: this.containerId,
-                parameters: this.reloadParams || {},
-                evalScripts: true,
-                onFailure: this._processFailure.bind(this),
-                onComplete: this.initGridAjax.bind(this),
-                onSuccess: function(transport) {
-                    try {
-                        var responseText = transport.responseText.replace(/>\s+</g, '><');
+        if(this.useAjax && this.useAjax !== '0' && this.useAjax !== 'false'){
+            const ajaxUrl = url + (url.includes('?') ? '&ajax=true' : '?ajax=true');
+            const formData = new FormData();
 
-                        if (transport.responseText.isJSON()) {
-                            var response = transport.responseText.evalJSON();
-                            if (response.error) {
-                                alert(response.message);
-                            }
-                            if(response.ajaxExpired && response.ajaxRedirect) {
-                                setLocation(response.ajaxRedirect);
-                            }
-                        } else {
-                            $(this.containerId).update(responseText);
-                        }
-                    } catch (e) {
-                        $(this.containerId).update(responseText);
+            Object.entries(this.reloadParams || {}).forEach(([key, value]) => {
+                formData.append(key, value);
+            });
+
+            mahoFetch(ajaxUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(responseText => {
+                try {
+                    responseText = responseText.replace(/>\s+</g, '><');
+                    const response = JSON.parse(responseText);
+                    if (response.error) {
+                        alert(response.message);
                     }
-                }.bind(this)
+                    if(response.ajaxExpired && response.ajaxRedirect) {
+                        setLocation(response.ajaxRedirect);
+                        return;
+                    }
+                } catch (e) {
+                    const containerElement = document.getElementById(this.containerId);
+                    if (containerElement) {
+                        containerElement.innerHTML = responseText;
+                    }
+                }
+                this.initGridAjax();
+            })
+            .catch(error => {
+                this._processFailure();
             });
             return;
         }
         else{
             if(this.reloadParams){
-                $H(this.reloadParams).each(function(pair){
-                    url = this.addVarToUrl(pair.key, pair.value);
-                }.bind(this));
+                Object.entries(this.reloadParams).forEach(([key, value]) => {
+                    url = this.addVarToUrl(key, value);
+                });
             }
             location.href = url;
         }
-    },
+    }
     /*_processComplete : function(transport){
         console.log(transport);
         if (transport && transport.responseText){
@@ -212,99 +234,151 @@ varienGrid.prototype = {
             return false;
         }
         this.initGrid();
-    },*/
-    _processFailure : function(transport){
+    }*/
+    _processFailure() {
         location.href = BASE_URL;
-    },
-    _addVarToUrl : function(url, varName, varValue){
-        var re = new RegExp('\/('+varName+'\/.*?\/)');
-        var parts = url.split(new RegExp('\\?'));
+    }
+
+    _addVarToUrl(url, varName, varValue) {
+        const re = new RegExp('\\/' + varName + '\\/.*?\\/');
+        const parts = url.split(/\?/);
         url = parts[0].replace(re, '/');
-        url+= varName+'/'+varValue+'/';
-        if(parts.size()>1) {
-            url+= '?' + parts[1];
+        url += varName + '/' + varValue + '/';
+        if(parts.length > 1) {
+            url += '?' + parts[1];
         }
         return url;
-    },
-    addVarToUrl : function(varName, varValue){
+    }
+
+    addVarToUrl(varName, varValue) {
         this.url = this._addVarToUrl(this.url, varName, varValue);
         return this.url;
-    },
-    doExport : function(){
-        if($(this.containerId+'_export')){
-            var exportUrl = $(this.containerId+'_export').value;
+    }
+
+    doExport() {
+        const exportElement = document.getElementById(this.containerId + '_export');
+        if(exportElement){
+            let exportUrl = exportElement.value;
             if(this.massaction && this.massaction.checkedString) {
                 exportUrl = this._addVarToUrl(exportUrl, this.massaction.formFieldNameInternal, this.massaction.checkedString);
             }
             location.href = exportUrl;
         }
-    },
-    bindFilterFields : function(){
-        var filters = $$('#'+this.containerId+' .filter input', '#'+this.containerId+' .filter select');
-        for (var i=0; i<filters.length; i++) {
-            Event.observe(filters[i],'keypress',this.filterKeyPress.bind(this));
+    }
+    bindFilterFields() {
+        // Use event delegation on document body to catch all filter keypresses
+        // This survives AJAX reloads since body doesn't get replaced
+        if (!document.body._gridFilterDelegated) {
+            document.body.addEventListener('keypress', (event) => {
+                // Check if this is a filter field in our grid
+                if (event.target.matches(`#${this.containerId} .filter input, #${this.containerId} .filter select`)) {
+                    this.filterKeyPress(event);
+                }
+            });
+            document.body._gridFilterDelegated = true;
         }
-    },
-    bindFieldsChange : function(){
-        if (!$(this.containerId)) {
+
+        // Also try direct binding as fallback
+        const filters = document.querySelectorAll('#' + this.containerId + ' .filter input, #' + this.containerId + ' .filter select');
+        for (let i = 0; i < filters.length; i++) {
+            filters[i].addEventListener('keypress', this.filterKeyPress.bind(this));
+        }
+    }
+
+    bindFieldsChange() {
+        const containerElement = document.getElementById(this.containerId);
+        if (!containerElement) {
             return;
         }
-//        var dataElements = $(this.containerId+this.tableSufix).down('.data tbody').select('input', 'select');
-        var dataElements = $(this.containerId+this.tableSufix).down('tbody').select('input', 'select');
-        for(var i=0; i<dataElements.length;i++){
-            Event.observe(dataElements[i], 'change', dataElements[i].setHasChanges.bind(dataElements[i]));
+        const tableElement = document.getElementById(this.containerId + this.tableSufix);
+        if (tableElement) {
+            const tbody = tableElement.querySelector('tbody');
+            if (tbody) {
+                const dataElements = tbody.querySelectorAll('input, select');
+                for(let i = 0; i < dataElements.length; i++){
+                    dataElements[i].addEventListener('change', function() {
+                        if (this.setHasChanges) {
+                            this.setHasChanges();
+                        }
+                    });
+                }
+            }
         }
-    },
-    filterKeyPress : function(event){
-        if(event.keyCode==Event.KEY_RETURN){
+    }
+
+    filterKeyPress(event) {
+        if(event.keyCode === 13){ // Enter key
             this.doFilter();
         }
-    },
-    doFilter : function(){
-        var filters = $$('#'+this.containerId+' .filter input', '#'+this.containerId+' .filter select');
-        var elements = [];
-        for(var i in filters){
-            if(filters[i].value && filters[i].value.length) elements.push(filters[i]);
+    }
+
+    doFilter() {
+        const filters = document.querySelectorAll('#' + this.containerId + ' .filter input, #' + this.containerId + ' .filter select');
+        const elements = [];
+        for(let i = 0; i < filters.length; i++){
+            if(filters[i].value && filters[i].value.length) {
+                elements.push(filters[i]);
+            }
         }
         if (!this.doFilterCallback || (this.doFilterCallback && this.doFilterCallback())) {
             this.addVarToUrl(this.pageVar, 1);
-            this.reload(this.addVarToUrl(this.filterVar, btoa(Form.serializeElements(elements))));
+            // Serialize elements manually since we don't have prototypejs Form.serializeElements
+            const formData = new FormData();
+            elements.forEach(element => {
+                formData.append(element.name, element.value);
+            });
+            const serialized = new URLSearchParams(formData).toString();
+            this.reload(this.addVarToUrl(this.filterVar, btoa(serialized)));
         }
-    },
-    resetFilter : function(){
+    }
+
+    resetFilter() {
         this.addVarToUrl(this.pageVar, 1);
         this.reload(this.addVarToUrl(this.filterVar, ''));
-    },
-    checkCheckboxes : function(element){
-        elements = Element.select($(this.containerId), 'input[name="'+element.name+'"]');
-        for(var i=0; i<elements.length;i++){
-            this.setCheckboxChecked(elements[i], element.checked);
+    }
+    checkCheckboxes(element) {
+        const containerElement = document.getElementById(this.containerId);
+        if (containerElement) {
+            const elements = containerElement.querySelectorAll('input[name="' + element.name + '"]');
+            for(let i = 0; i < elements.length; i++){
+                this.setCheckboxChecked(elements[i], element.checked);
+            }
         }
-    },
-    setCheckboxChecked : function(element, checked){
+    }
+
+    setCheckboxChecked(element, checked) {
         element.checked = checked;
-        element.setHasChanges({});
-        if(this.checkboxCheckCallback){
-            this.checkboxCheckCallback(this,element,checked);
+        if (element.setHasChanges) {
+            element.setHasChanges({});
         }
-    },
-    inputPage : function(event, maxNum){
-        var element = Event.element(event);
-        var keyCode = event.keyCode || event.which;
-        if(keyCode==Event.KEY_RETURN){
+        if(this.checkboxCheckCallback){
+            this.checkboxCheckCallback(this, element, checked);
+        }
+    }
+
+    inputPage(event, maxNum) {
+        const element = event.target;
+        const keyCode = event.keyCode || event.which;
+        if(keyCode === 13){ // Enter key
             this.setPage(element.value);
         }
-        /*if(keyCode>47 && keyCode<58){
+    }
 
-        }
-        else{
-             Event.stop(event);
-        }*/
-    },
-    setPage : function(pageNumber){
+    setPage(pageNumber) {
         this.reload(this.addVarToUrl(this.pageVar, pageNumber));
     }
-};
+
+    inputPage(event, lastPage) {
+        if (event.keyCode === 13) { // Enter key
+            const pageNumber = parseInt(event.target.value);
+            if (pageNumber > 0 && pageNumber <= lastPage) {
+                this.setPage(pageNumber);
+            }
+            event.preventDefault();
+            return false;
+        }
+    }
+}
 
 function shouldOpenGridRowNewTab(evt){
     return evt.ctrlKey // Windows ctrl + click
@@ -313,11 +387,16 @@ function shouldOpenGridRowNewTab(evt){
 }
 
 function openGridRow(grid, evt){
-    var trElement = Event.findElement(evt, 'tr');
-    if(['a', 'input', 'select', 'option'].indexOf(Event.element(evt).tagName.toLowerCase())!=-1) {
+    const trElement = evt.target.closest('tr');
+    if(['a', 'input', 'select', 'option'].indexOf(evt.target.tagName.toLowerCase()) !== -1) {
         return;
     }
-    if(trElement.title){
+    if(trElement && trElement.title){
+        // Prevent navigation for # URLs to avoid page jumping
+        if(trElement.title === '#') {
+            evt.preventDefault();
+            return;
+        }
         if (shouldOpenGridRowNewTab(evt)) {
             window.open(trElement.title, '_blank');
         } else {
@@ -326,20 +405,21 @@ function openGridRow(grid, evt){
     }
 }
 
-var varienGridMassaction = Class.create();
-varienGridMassaction.prototype = {
-    /* Predefined vars */
-    checkedValues: $H({}),
-    checkedString: '',
-    oldCallbacks: {},
-    errorText:'',
-    items: {},
-    gridIds: [],
-    useSelectAll: false,
-    currentItem: false,
-    lastChecked: { left: false, top: false, checkbox: false },
-    fieldTemplate: new Template('<input type="hidden" name="#{name}" value="#{value}" />'),
-    initialize: function (containerId, grid, checkedValues, formFieldNameInternal, formFieldName) {
+class varienGridMassaction {
+    constructor(containerId, grid, checkedValues, formFieldNameInternal, formFieldName) {
+        /* Predefined vars */
+        this.checkedValues = new Map();
+        this.checkedString = '';
+        this.oldCallbacks = {};
+        this.errorText = '';
+        this.items = {};
+        this.gridIds = [];
+        this.useSelectAll = false;
+        this.currentItem = false;
+        this.lastChecked = { left: false, top: false, checkbox: false };
+        this.fieldTemplate = (data) => `<input type="hidden" name="${data.name}" value="${data.value}" />`;
+
+        // Initialize
         this.setOldCallback('row_click', grid.rowClickCallback);
         this.setOldCallback('init',      grid.initCallback);
         this.setOldCallback('init_row',  grid.initRowCallback);
@@ -361,27 +441,28 @@ varienGridMassaction.prototype = {
         this.grid.rowClickCallback  = this.onGridRowClick.bind(this);
         this.initCheckboxes();
         this.checkCheckboxes();
-    },
-    setUseAjax: function(flag) {
+    }
+    setUseAjax(flag) {
         this.useAjax = flag;
-    },
-    setUseSelectAll: function(flag) {
+    }
+
+    setUseSelectAll(flag) {
         this.useSelectAll = flag;
-    },
-    initMassactionElements: function() {
-        this.container      = $(this.containerId);
-        this.count          = $(this.containerId + '-count');
-        this.formHiddens    = $(this.containerId + '-form-hiddens');
-        this.formAdditional = $(this.containerId + '-form-additional');
-        this.select         = $(this.containerId + '-select');
+    }
+    initMassactionElements() {
+        this.container      = document.getElementById(this.containerId);
+        this.count          = document.getElementById(this.containerId + '-count');
+        this.formHiddens    = document.getElementById(this.containerId + '-form-hiddens');
+        this.formAdditional = document.getElementById(this.containerId + '-form-additional');
+        this.select         = document.getElementById(this.containerId + '-select');
         this.form           = this.prepareForm();
         this.validator      = new Validation(this.form);
-        this.select.observe('change', this.onSelectChange.bindAsEventListener(this));
+        this.select.addEventListener('change', this.onSelectChange.bind(this));
         this.lastChecked    = { left: false, top: false, checkbox: false };
         this.initMassSelect();
-    },
-    prepareForm: function() {
-        var form = $(this.containerId + '-form'), formPlace = null,
+    }
+    prepareForm() {
+        var form = document.getElementById(this.containerId + '-form'), formPlace = null,
             formElement = this.formHiddens || this.formAdditional;
 
         if (!formElement) {
@@ -400,53 +481,53 @@ varienGridMassaction.prototype = {
         }
 
         return form;
-    },
-    setGridIds: function(gridIds) {
+    }
+    setGridIds(gridIds) {
         this.gridIds = gridIds;
         this.updateCount();
-    },
-    getGridIds: function() {
+    }
+    getGridIds() {
         return this.gridIds;
-    },
-    setItems: function(items) {
+    }
+    setItems(items) {
         this.items = items;
         this.updateCount();
-    },
-    getItems: function() {
+    }
+    getItems() {
         return this.items;
-    },
-    getItem: function(itemId) {
+    }
+    getItem(itemId) {
         if(this.items[itemId]) {
             return this.items[itemId];
         }
         return false;
-    },
-    getOldCallback: function (callbackName) {
-        return this.oldCallbacks[callbackName] ? this.oldCallbacks[callbackName] : Prototype.emptyFunction;
-    },
-    setOldCallback: function (callbackName, callback) {
+    }
+    getOldCallback(callbackName) {
+        return this.oldCallbacks[callbackName] ? this.oldCallbacks[callbackName] : function() {};
+    }
+    setOldCallback(callbackName, callback) {
         this.oldCallbacks[callbackName] = callback;
-    },
-    onGridPreInit: function(grid) {
+    }
+    onGridPreInit(grid) {
         this.initMassactionElements();
         this.getOldCallback('pre_init')(grid);
-    },
-    onGridInit: function(grid) {
+    }
+    onGridInit(grid) {
         this.initCheckboxes();
         this.checkCheckboxes();
         this.updateCount();
         this.getOldCallback('init')(grid);
-    },
-    onGridRowInit: function(grid, row) {
+    }
+    onGridRowInit(grid, row) {
         this.getOldCallback('init_row')(grid, row);
-    },
-    onGridRowClick: function(grid, evt) {
+    }
+    onGridRowClick(grid, evt) {
 
-        var tdElement = Event.findElement(evt, 'td');
-        var trElement = Event.findElement(evt, 'tr');
+        var tdElement = evt.target.closest('td');
+        var trElement = evt.target.closest('tr');
 
-        if(!$(tdElement).down('input')) {
-            if($(tdElement).down('a') || $(tdElement).down('select')) {
+        if(!tdElement.querySelector('input')) {
+            if(tdElement.querySelector('a') || tdElement.querySelector('select')) {
                 return;
             }
             if (trElement.title) {
@@ -457,8 +538,8 @@ varienGridMassaction.prototype = {
                 }
             }
             else{
-                var checkbox = Element.select(trElement, 'input');
-                var isInput  = Event.element(evt).tagName == 'input';
+                var checkbox = trElement.querySelectorAll('input');
+                var isInput  = evt.target.tagName.toLowerCase() == 'input';
                 var checked = isInput ? checkbox[0].checked : !checkbox[0].checked;
 
                 if(checked) {
@@ -472,125 +553,130 @@ varienGridMassaction.prototype = {
             return;
         }
 
-        if(Event.element(evt).isMassactionCheckbox) {
-           this.setCheckbox(Event.element(evt));
-        } else if (checkbox = this.findCheckbox(evt)) {
-           checkbox.checked = !checkbox.checked;
-           this.setCheckbox(checkbox);
+        if(evt.target.isMassactionCheckbox) {
+           this.setCheckbox(evt.target);
+        } else {
+           var checkbox = this.findCheckbox(evt);
+           if (checkbox) {
+               checkbox.checked = !checkbox.checked;
+               this.setCheckbox(checkbox);
+           }
         }
-    },
-    onSelectChange: function(evt) {
+    }
+    onSelectChange(evt) {
         var item = this.getSelectedItem();
         if(item) {
-            this.formAdditional.update($(this.containerId + '-item-' + item.id + '-block').innerHTML);
+            this.formAdditional.innerHTML = document.getElementById(this.containerId + '-item-' + item.id + '-block').innerHTML;
         } else {
-            this.formAdditional.update('');
+            this.formAdditional.innerHTML = '';
         }
 
         this.validator.reset();
-    },
-    findCheckbox: function(evt) {
-        if(['a', 'input', 'select'].indexOf(Event.element(evt).tagName.toLowerCase())!==-1) {
+    }
+    findCheckbox(evt) {
+        if(['a', 'input', 'select'].indexOf(evt.target.tagName.toLowerCase())!==-1) {
             return false;
         }
-        checkbox = false;
-        Event.findElement(evt, 'tr').select('.massaction-checkbox').each(function(element){
+        var checkbox = false;
+        const trElement = evt.target.closest('tr');
+        const checkboxes = trElement.querySelectorAll('.massaction-checkbox');
+        for (const element of checkboxes) {
             if(element.isMassactionCheckbox) {
                 checkbox = element;
+                break;
             }
-        }.bind(this));
+        }
         return checkbox;
-    },
-    initCheckboxes: function() {
-        this.getCheckboxes().each(function(checkbox) {
+    }
+    initCheckboxes() {
+        this.getCheckboxes().forEach(function(checkbox) {
            checkbox.isMassactionCheckbox = true;
         }.bind(this));
-    },
-    checkCheckboxes: function() {
-        this.getCheckboxes().each(function(checkbox) {
+    }
+    checkCheckboxes() {
+        this.getCheckboxes().forEach(function(checkbox) {
             checkbox.checked = varienStringArray.has(checkbox.value, this.checkedString);
         }.bind(this));
-    },
-    selectAll: function() {
+    }
+    selectAll() {
         this.setCheckedValues((this.useSelectAll ? this.getGridIds() : this.getCheckboxesValuesAsString()));
         this.checkCheckboxes();
         this.updateCount();
         this.clearLastChecked();
         return false;
-    },
-    unselectAll: function() {
+    }
+    unselectAll() {
         this.setCheckedValues('');
         this.checkCheckboxes();
         this.updateCount();
         this.clearLastChecked();
         return false;
-    },
-    selectVisible: function() {
+    }
+    selectVisible() {
         this.setCheckedValues(this.getCheckboxesValuesAsString());
         this.checkCheckboxes();
         this.updateCount();
         this.clearLastChecked();
         return false;
-    },
-    unselectVisible: function() {
-        this.getCheckboxesValues().each(function(key){
+    }
+    unselectVisible() {
+        this.getCheckboxesValues().forEach(function(key){
             this.checkedString = varienStringArray.remove(key, this.checkedString);
         }.bind(this));
         this.checkCheckboxes();
         this.updateCount();
         this.clearLastChecked();
         return false;
-    },
-    setCheckedValues: function(values) {
+    }
+    setCheckedValues(values) {
         this.checkedString = values;
-    },
-    getCheckedValues: function() {
+    }
+    getCheckedValues() {
         return this.checkedString;
-    },
-    getCheckboxes: function() {
+    }
+    getCheckboxes() {
         var result = [];
-        this.grid.rows.each(function(row){
-            var checkboxes = row.select('.massaction-checkbox');
-            checkboxes.each(function(checkbox){
+        this.grid.rows.forEach(function(row){
+            var checkboxes = row.querySelectorAll('.massaction-checkbox');
+            checkboxes.forEach(function(checkbox){
                 result.push(checkbox);
             });
         });
         return result;
-    },
-    getCheckboxesValues: function() {
+    }
+    getCheckboxesValues() {
         var result = [];
-        this.getCheckboxes().each(function(checkbox) {
+        this.getCheckboxes().forEach(function(checkbox) {
             result.push(checkbox.value);
         }.bind(this));
         return result;
-    },
-    getCheckboxesValuesAsString: function()
-    {
+    }
+    getCheckboxesValuesAsString() {
         return this.getCheckboxesValues().join(',');
-    },
-    setCheckbox: function(checkbox) {
+    }
+    setCheckbox(checkbox) {
         if(checkbox.checked) {
             this.checkedString = varienStringArray.add(checkbox.value, this.checkedString);
         } else {
             this.checkedString = varienStringArray.remove(checkbox.value, this.checkedString);
         }
         this.updateCount();
-    },
-    updateCount: function() {
-        this.count.update(varienStringArray.count(this.checkedString));
+    }
+    updateCount() {
+        this.count.innerHTML = varienStringArray.count(this.checkedString);
         if(!this.grid.reloadParams) {
             this.grid.reloadParams = {};
         }
         this.grid.reloadParams[this.formFieldNameInternal] = this.checkedString;
-    },
-    getSelectedItem: function() {
+    }
+    getSelectedItem() {
         if(this.getItem(this.select.value)) {
             return this.getItem(this.select.value);
         } else {
             return false;
         }
-    },
-    apply: function() {
+    }
+    apply() {
         if(varienStringArray.count(this.checkedString) == 0) {
                 alert(this.errorText);
                 return;
@@ -609,57 +695,64 @@ varienGridMassaction.prototype = {
             return;
         }
 
-        this.formHiddens.update('');
-        new Insertion.Bottom(this.formHiddens, this.fieldTemplate.evaluate({name: fieldName, value: this.checkedString}));
-        new Insertion.Bottom(this.formHiddens, this.fieldTemplate.evaluate({name: 'massaction_prepare_key', value: fieldName}));
+        this.formHiddens.innerHTML = '';
+        this.formHiddens.insertAdjacentHTML('beforeend', this.fieldTemplate({name: fieldName, value: this.checkedString}));
+        this.formHiddens.insertAdjacentHTML('beforeend', this.fieldTemplate({name: 'massaction_prepare_key', value: fieldName}));
 
         if(!this.validator.validate()) {
             return;
         }
 
         if(this.useAjax && item.url) {
-            new Ajax.Request(item.url, {
-                'method': 'post',
-                'parameters': this.form.serialize(true),
-                'onComplete': this.onMassactionComplete.bind(this)
+            const formData = new FormData(this.form);
+
+            mahoFetch(item.url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                this.onMassactionComplete({responseText: typeof response === 'object' ? JSON.stringify(response) : response});
+            })
+            .catch(error => {
+                console.error('Mass action error:', error);
             });
         } else if(item.url) {
             this.form.action = item.url;
             this.form.submit();
         }
-    },
-    onMassactionComplete: function(transport) {
+    }
+    onMassactionComplete(transport) {
         if(this.currentItem.complete) {
             try {
-                var listener = this.getListener(this.currentItem.complete) || Prototype.emptyFunction;
+                var listener = this.getListener(this.currentItem.complete) || function() {};
                 listener(this.grid, this, transport);
             } catch (e) {}
        }
-    },
-    getListener: function(strValue) {
+    }
+    getListener(strValue) {
         return eval(strValue);
-    },
-    initMassSelect: function() {
-        $$('input[class~="massaction-checkbox"]').each(
-            function(element) {
-                element.observe('click', this.massSelect.bind(this));
-            }.bind(this)
-            );
-    },
-    clearLastChecked: function() {
+    }
+    initMassSelect() {
+        document.querySelectorAll('input[class~="massaction-checkbox"]').forEach(
+            (element) => {
+                element.addEventListener('click', this.massSelect.bind(this));
+            }
+        );
+    }
+    clearLastChecked() {
         this.lastChecked = {
             left: false,
             top: false,
             checkbox: false
         };
-    },
-    massSelect: function(evt) {
+    }
+    massSelect(evt) {
         if(this.lastChecked.left !== false
             && this.lastChecked.top !== false
             && evt.button === 0
             && evt.shiftKey === true
         ) {
-            var currentCheckbox = Event.element(evt);
+            var currentCheckbox = evt.target;
             var lastCheckbox = this.lastChecked.checkbox;
             if (lastCheckbox != currentCheckbox) {
                 var start = this.getCheckboxOrder(lastCheckbox);
@@ -675,22 +768,22 @@ varienGridMassaction.prototype = {
         }
 
         this.lastChecked = {
-            left: Event.element(evt).viewportOffset().left,
-            top: Event.element(evt).viewportOffset().top,
-            checkbox: Event.element(evt) // "boundary" checkbox
+            left: evt.target.getBoundingClientRect().left,
+            top: evt.target.getBoundingClientRect().top,
+            checkbox: evt.target // "boundary" checkbox
         };
-    },
-    getCheckboxOrder: function(curCheckbox) {
+    }
+    getCheckboxOrder(curCheckbox) {
         var order = false;
-        this.getCheckboxes().each(function(checkbox, key){
+        this.getCheckboxes().forEach(function(checkbox, key){
             if (curCheckbox == checkbox) {
                 order = key;
             }
         });
         return order;
-    },
-    selectCheckboxRange: function(start, finish, isChecked){
-        this.getCheckboxes().each((function(checkbox, key){
+    }
+    selectCheckboxRange(start, finish, isChecked) {
+        this.getCheckboxes().forEach((function(checkbox, key){
             if (key >= start && key <= finish) {
                 checkbox.checked = isChecked;
                 this.setCheckbox(checkbox);
@@ -700,12 +793,17 @@ varienGridMassaction.prototype = {
 };
 
 var varienGridAction = {
-    execute: function(select) {
-        if(!select.value || !select.value.isJSON()) {
+    execute(select) {
+        if(!select.value) {
             return;
         }
 
-        var config = select.value.evalJSON();
+        let config;
+        try {
+            config = JSON.parse(select.value);
+        } catch (e) {
+            return;
+        }
         if(config.confirm && !window.confirm(config.confirm)) {
             select.options[0].selected = true;
             return;
@@ -722,33 +820,30 @@ var varienGridAction = {
 };
 
 var varienStringArray = {
-    remove: function(str, haystack)
-    {
+    remove(str, haystack) {
         haystack = ',' + haystack + ',';
         haystack = haystack.replace(new RegExp(',' + str + ',', 'g'), ',');
         return this.trimComma(haystack);
     },
-    add: function(str, haystack)
-    {
+    add(str, haystack) {
         haystack = ',' + haystack + ',';
         if (haystack.search(new RegExp(',' + str + ',', 'g'), haystack) === -1) {
             haystack += str + ',';
         }
         return this.trimComma(haystack);
     },
-    has: function(str, haystack)
-    {
+    has(str, haystack) {
         haystack = ',' + haystack + ',';
         if (haystack.search(new RegExp(',' + str + ',', 'g'), haystack) === -1) {
             return false;
         }
         return true;
     },
-    count: function(haystack)
-    {
+    count(haystack) {
         if (typeof haystack != 'string') {
             return 0;
         }
+        var match;
         if (match = haystack.match(new RegExp(',', 'g'))) {
             return match.length + 1;
         } else if (haystack.length != 0) {
@@ -756,35 +851,33 @@ var varienStringArray = {
         }
         return 0;
     },
-    each: function(haystack, fnc)
-    {
+    each(haystack, fnc) {
         var haystack = haystack.split(',');
         for (var i=0; i<haystack.length; i++) {
             fnc(haystack[i]);
         }
     },
-    trimComma: function(string)
-    {
+    trimComma(string) {
         string = string.replace(new RegExp('^(,+)','i'), '');
         string = string.replace(new RegExp('(,+)$','i'), '');
         return string;
     }
 };
 
-var serializerController = Class.create();
-serializerController.prototype = {
-    oldCallbacks: {},
-    initialize: function(hiddenDataHolder, predefinedData, inputsToManage, grid, reloadParamName){
-        //Grid inputs
+class serializerController {
+    constructor(hiddenDataHolder, predefinedData, inputsToManage, grid, reloadParamName) {
+        this.oldCallbacks = {};
+
+        // Grid inputs
         this.tabIndex = 1000;
-        this.inputsToManage       = inputsToManage;
+        this.inputsToManage = inputsToManage;
         this.multidimensionalMode = inputsToManage.length > 0;
 
-        //Hash with grid data
-        this.gridData             = this.getGridDataHash(predefinedData);
+        // Map with grid data
+        this.gridData = this.getGridDataHash(predefinedData);
 
-        //Hidden input data holder
-        this.hiddenDataHolder     = $(hiddenDataHolder);
+        // Hidden input data holder
+        this.hiddenDataHolder = document.getElementById(hiddenDataHolder);
         this.hiddenDataHolder.value = this.serializeObject();
 
         this.grid = grid;
@@ -794,123 +887,184 @@ serializerController.prototype = {
         this.setOldCallback('init_row', this.grid.initRowCallback);
         this.setOldCallback('checkbox_check', this.grid.checkboxCheckCallback);
 
-        //Grid
+        // Grid
         this.reloadParamName = reloadParamName;
-        this.grid.reloadParams = {};
-        this.grid.reloadParams[this.reloadParamName+'[]'] = this.getDataForReloadParam();
         this.grid.rowClickCallback = this.rowClick.bind(this);
         this.grid.initRowCallback = this.rowInit.bind(this);
         this.grid.checkboxCheckCallback = this.registerData.bind(this);
-        this.grid.rows.each(this.eachRow.bind(this));
-    },
-    setOldCallback: function (callbackName, callback) {
+
+        if (this.grid.rows) {
+            this.grid.rows.forEach(row => this.eachRow(row));
+        }
+    }
+
+    setOldCallback(callbackName, callback) {
         this.oldCallbacks[callbackName] = callback;
-    },
-    getOldCallback: function (callbackName) {
-        return this.oldCallbacks[callbackName] ? this.oldCallbacks[callbackName] : Prototype.emptyFunction;
-    },
-    registerData : function(grid, element, checked) {
-        if(this.multidimensionalMode){
-            if(checked){
-                 if(element.inputElements) {
-                     this.gridData.set(element.value, {});
-                     for(var i = 0; i < element.inputElements.length; i++) {
-                         element.inputElements[i].disabled = false;
-                         this.gridData.get(element.value)[element.inputElements[i].name] = element.inputElements[i].value;
-                     }
-                 }
-            }
-            else{
-                if(element.inputElements){
-                    for(var i = 0; i < element.inputElements.length; i++) {
+    }
+
+    getOldCallback(callbackName) {
+        return this.oldCallbacks[callbackName] || (() => {});
+    }
+
+    registerData(grid, element, checked) {
+        if (this.multidimensionalMode) {
+            if (checked) {
+                if (element.inputElements) {
+                    this.gridData.set(element.value, {});
+                    for (let i = 0; i < element.inputElements.length; i++) {
+                        element.inputElements[i].disabled = false;
+                        this.gridData.get(element.value)[element.inputElements[i].name] = element.inputElements[i].value;
+                    }
+                }
+            } else {
+                if (element.inputElements) {
+                    for (let i = 0; i < element.inputElements.length; i++) {
                         element.inputElements[i].disabled = true;
                     }
                 }
-                this.gridData.unset(element.value);
+                this.gridData.delete(element.value);
             }
-        }
-        else{
-            if(checked){
+        } else {
+            if (checked) {
                 this.gridData.set(element.value, element.value);
-            }
-            else{
-                this.gridData.unset(element.value);
+            } else {
+                this.gridData.delete(element.value);
             }
         }
 
         this.hiddenDataHolder.value = this.serializeObject();
-        this.grid.reloadParams = {};
-        this.grid.reloadParams[this.reloadParamName+'[]'] = this.getDataForReloadParam();
         this.getOldCallback('checkbox_check')(grid, element, checked);
-    },
-    eachRow : function(row) {
+    }
+
+    eachRow(row) {
         this.rowInit(this.grid, row);
-    },
-    rowClick : function(grid, event) {
-        var tdElement = Event.findElement(event, 'td');
-        var isInput   = Event.element(event).tagName == 'INPUT';
-        if(tdElement){
-            var checkbox = Element.select(tdElement, 'input');
-            if(checkbox[0] && !checkbox[0].disabled){
-                var checked = isInput ? checkbox[0].checked : !checkbox[0].checked;
-                this.grid.setCheckboxChecked(checkbox[0], checked);
-            }
-        }
-        this.getOldCallback('row_click')(grid, event);
-    },
-    inputChange : function(event) {
-        var element = Event.element(event);
-        if(element && element.checkboxElement && element.checkboxElement.checked){
-            this.gridData.get(element.checkboxElement.value)[element.name] = element.value;
-            this.hiddenDataHolder.value = this.serializeObject();
-        }
-    },
-    rowInit : function(grid, row) {
-        if(this.multidimensionalMode){
-            var checkbox = $(row).select('.checkbox')[0];
-            var selectors = this.inputsToManage.map(function (name) { return ['input[name="' + name + '"]', 'select[name="' + name + '"]']; });
-            var inputs = $(row).select.apply($(row), selectors.flatten());
-            if(checkbox && inputs.length > 0) {
-                checkbox.inputElements = inputs;
-                for(var i = 0; i < inputs.length; i++) {
-                    inputs[i].checkboxElement = checkbox;
-                    if(this.gridData.get(checkbox.value) && this.gridData.get(checkbox.value)[inputs[i].name]) {
-                        inputs[i].value = this.gridData.get(checkbox.value)[inputs[i].name];
-                    }
-                    inputs[i].disabled = !checkbox.checked;
-                    inputs[i].tabIndex = this.tabIndex++;
-                    Event.observe(inputs[i],'keyup', this.inputChange.bind(this));
-                    Event.observe(inputs[i],'change', this.inputChange.bind(this));
+    }
+
+    rowClick(grid, event) {
+        const tdElement = event.target.closest('td');
+        const trElement = event.target.closest('tr');
+        const isInput = event.target.tagName === 'INPUT';
+
+        // Check if this row has checkbox functionality
+        if (tdElement && trElement) {
+            const checkbox = tdElement.querySelector('input[type="checkbox"]') || trElement.querySelector('input[type="checkbox"]');
+
+            if (checkbox && !checkbox.disabled) {
+                // If clicking directly on checkbox, handle the change through registerData
+                if (isInput && event.target === checkbox) {
+                    // The checkbox state has already changed, just register the new state
+                    this.registerData(grid, checkbox, checkbox.checked);
+                    event.stopPropagation();
+                    return;
+                }
+
+                // If clicking elsewhere in the checkbox cell, toggle the checkbox and register
+                const checkboxCell = checkbox.closest('td');
+                if (tdElement === checkboxCell) {
+                    const newChecked = !checkbox.checked;
+                    checkbox.checked = newChecked;
+                    this.registerData(grid, checkbox, newChecked);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
                 }
             }
         }
-        this.getOldCallback('init_row')(grid, row);
-    },
 
-    //Stuff methods
-    getGridDataHash: function (_object){
-        return $H(this.multidimensionalMode ? _object : this.convertArrayToObject(_object));
-    },
-    getDataForReloadParam: function(){
-        return this.multidimensionalMode ? this.gridData.keys() : this.gridData.values();
-    },
-    serializeObject: function(){
-        if(this.multidimensionalMode){
-            var clone = this.gridData.clone();
-            clone.each(function(pair) {
-                clone.set(pair.key, btoa(Object.toQueryString(pair.value)));
-            });
-            return clone.toQueryString();
+        // For non-checkbox interactions, call the original row click handler
+        const originalCallback = this.getOldCallback('row_click');
+        if (originalCallback && typeof originalCallback === 'function') {
+            originalCallback(grid, event);
         }
-        else{
-            return this.gridData.values().join('&');
-        }
-    },
-    convertArrayToObject: function (_array){
-        var _object = {};
-        for(var i = 0, l = _array.length; i < l; i++){
-            _object[_array[i]] = _array[i];
-        }
-        return _object;
     }
-};
+
+    inputChange = (event) => {
+        const element = event.target;
+        if (element && element.checkboxElement && element.checkboxElement.checked) {
+            this.gridData.get(element.checkboxElement.value)[element.name] = element.value;
+            this.hiddenDataHolder.value = this.serializeObject();
+        }
+    }
+
+    rowInit(grid, row) {
+        if (this.multidimensionalMode) {
+            const checkbox = row.querySelector('.checkbox');
+            const selectors = this.inputsToManage.map(name =>
+                [`input[name="${name}"]`, `select[name="${name}"]`]
+            ).flat();
+
+            const inputs = [];
+            selectors.forEach(selector => {
+                inputs.push(...row.querySelectorAll(selector));
+            });
+
+            if (checkbox && inputs.length > 0) {
+                checkbox.inputElements = inputs;
+
+                inputs.forEach(input => {
+                    input.checkboxElement = checkbox;
+                    if (this.gridData.get(checkbox.value) && this.gridData.get(checkbox.value)[input.name]) {
+                        input.value = this.gridData.get(checkbox.value)[input.name];
+                    }
+                    input.disabled = !checkbox.checked;
+                    input.tabIndex = this.tabIndex++;
+                    input.addEventListener('keyup', this.inputChange);
+                    input.addEventListener('change', this.inputChange);
+                });
+            }
+        } else {
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            if (checkbox && this.gridData.has(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        }
+        this.getOldCallback('init_row')(grid, row);
+    }
+
+    // Utility methods
+    getGridDataHash(object) {
+        return new Map(Object.entries(
+            this.multidimensionalMode ? object : this.convertArrayToObject(object)
+        ));
+    }
+
+    getDataForReloadParam() {
+        return this.multidimensionalMode ? Array.from(this.gridData.keys()) : Array.from(this.gridData.values());
+    }
+
+    serializeObject() {
+        if (this.multidimensionalMode) {
+            const pairs = [];
+            this.gridData.forEach((value, key) => {
+                const encodedValue = btoa(this.objectToQueryString(value));
+                pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(encodedValue)}`);
+            });
+            return pairs.join('&');
+        } else {
+            return Array.from(this.gridData.values()).join('&');
+        }
+    }
+
+    convertArrayToObject(array) {
+        const object = {};
+        for (let i = 0, l = array.length; i < l; i++) {
+            object[array[i]] = array[i];
+        }
+        return object;
+    }
+
+    objectToQueryString(obj) {
+        const pairs = [];
+        for (const [key, value] of Object.entries(obj)) {
+            pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+        }
+        return pairs.join('&');
+    }
+}
+
+// Backward compatibility aliases - make them global
+window.varienGrid = varienGrid;
+window.varienGridMassaction = varienGridMassaction;
+window.serializerController = serializerController;
+window.openGridRow = openGridRow;
+window.shouldOpenGridRowNewTab = shouldOpenGridRowNewTab;

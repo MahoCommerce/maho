@@ -5,11 +5,12 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form $this */
 ?>
-<?php /** @var Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form $this */ ?>
 <?php $_shippingRateGroups = $this->getShippingRates(); ?>
 <?php if ($_shippingRateGroups): ?>
     <div id="order-shipping-method-choose" style="display:none">
@@ -62,14 +63,13 @@
                     (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                 <?php endif ?>
             </strong>
-            <!--input type="text" class="input-text" style="width:70px"/-->
             <br/>
-            <a href="#" onclick="$('order-shipping-method-info').hide();$('order-shipping-method-choose').show();return false">
+            <a href="#" onclick="document.getElementById('order-shipping-method-info').style.display = 'none';document.getElementById('order-shipping-method-choose').style.display = 'block';return false">
                 <?= Mage::helper('sales')->__('Click to change shipping method') ?>
             </a>
         </div>
     <?php else: ?>
-        <script type="text/javascript">$('order-shipping-method-choose').show();</script>
+        <script type="text/javascript">document.getElementById('order-shipping-method-choose').style.display = 'block';</script>
     <?php endif ?>
 <?php elseif($this->getIsRateRequest()): ?>
     <strong><?= Mage::helper('sales')->__('Sorry, no quotes are available for this order at this time.') ?></strong>

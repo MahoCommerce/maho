@@ -40,27 +40,34 @@
 </div>
 
 <script type="text/javascript">
-//<![CDATA[
-var previewForm = $('preview_form');
-var previewIframe = $('preview_iframe');
+const previewForm = document.getElementById('preview_form');
+const previewIframe = document.getElementById('preview_iframe');
 
 function preview() {
-    previewForm.writeAttribute('target', previewIframe.readAttribute('id'));
-    blockPreview();
-    previewForm.submit();
+    if (previewForm && previewIframe) {
+        previewForm.setAttribute('target', previewIframe.id);
+        blockPreview();
+        previewForm.submit();
+    }
 }
 
 function blockPreview() {
-    showLoader($('preview'));
+    const previewElement = document.getElementById('preview');
+    if (previewElement && typeof showLoader === 'function') {
+        showLoader(previewElement);
+    }
 }
 
 function unBlockPreview() {
-    hideLoader();
+    if (typeof hideLoader === 'function') {
+        hideLoader();
+    }
 }
 
-Event.observe(window, 'load', preview);
-Event.observe(previewIframe, 'load', unBlockPreview);
-//]]>
+window.addEventListener('load', preview);
+if (previewIframe) {
+    previewIframe.addEventListener('load', unBlockPreview);
+}
 </script>
 </body>
 </html>

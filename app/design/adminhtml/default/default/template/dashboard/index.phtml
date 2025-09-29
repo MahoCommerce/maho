@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -20,57 +20,85 @@ function changeDiagramsPeriod(periodObj) {
 <?php foreach ($this->getChild('diagrams')->getTabsIds() as $tabId): ?>
     ajaxBlockParam = 'block/tab_<?= $tabId ?>/';
     ajaxBlockUrl = '<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => '', 'period' => '']) ?>' + ajaxBlockParam + periodParam;
-    new Ajax.Request(ajaxBlockUrl, {
-        parameters: {isAjax: 'true', form_key: FORM_KEY},
-        onSuccess: function(transport) {
-            tabContentElementId = '<?= $this->getChild('diagrams')->getId() ?>_<?= $tabId ?>_content';
-            try {
-                if (transport.responseText.isJSON()) {
-                    var response = transport.responseText.evalJSON()
-                    if (response.error) {
-                        alert(response.message);
+    const formData_<?= $tabId ?> = new FormData();
+    formData_<?= $tabId ?>.append('isAjax', 'true');
+    formData_<?= $tabId ?>.append('form_key', FORM_KEY);
+
+    mahoFetch(ajaxBlockUrl, {
+        method: 'POST',
+        body: formData_<?= $tabId ?>
+    })
+    .then(response => {
+        tabContentElementId = '<?= $this->getChild('diagrams')->getId() ?>_<?= $tabId ?>_content';
+        try {
+            let responseData = response;
+            if (typeof response === 'string') {
+                try {
+                    responseData = JSON.parse(response);
+                    if (responseData.error) {
+                        alert(responseData.message);
                     }
-                    if(response.ajaxExpired && response.ajaxRedirect) {
-                        setLocation(response.ajaxRedirect);
+                    if(responseData.ajaxExpired && responseData.ajaxRedirect) {
+                        setLocation(responseData.ajaxRedirect);
                     }
-                } else {
-                    $(tabContentElementId).update(transport.responseText);
+                } catch (e) {
+                    document.getElementById(tabContentElementId).innerHTML = response;
                 }
-            }
-            catch (e) {
-                $(tabContentElementId).update(transport.responseText);
+            } else {
+                document.getElementById(tabContentElementId).innerHTML = response;
             }
         }
+        catch (e) {
+            document.getElementById(tabContentElementId).innerHTML = response;
+        }
+    })
+    .catch(error => {
+        console.error('Ajax block error:', error);
     });
 <?php endforeach ?>
     ajaxBlockUrl = '<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => 'totals', 'period' => '']) ?>' + periodParam;
-    new Ajax.Request(ajaxBlockUrl, {
-        parameters: {isAjax: 'true', form_key: FORM_KEY},
-        onSuccess: function(transport) {
-            tabContentElementId = 'dashboard_diagram_totals';
-            try {
-                if (transport.responseText.isJSON()) {
-                    var response = transport.responseText.evalJSON()
-                    if (response.error) {
-                        alert(response.message);
+    const formData2 = new FormData();
+    formData2.append('isAjax', 'true');
+    formData2.append('form_key', FORM_KEY);
+
+    mahoFetch(ajaxBlockUrl, {
+        method: 'POST',
+        body: formData2
+    })
+    .then(response => {
+        tabContentElementId = 'dashboard_diagram_totals';
+        try {
+            let responseData = response;
+            if (typeof response === 'string') {
+                try {
+                    responseData = JSON.parse(response);
+                    if (responseData.error) {
+                        alert(responseData.message);
                     }
-                    if(response.ajaxExpired && response.ajaxRedirect) {
-                        setLocation(response.ajaxRedirect);
+                    if(responseData.ajaxExpired && responseData.ajaxRedirect) {
+                        setLocation(responseData.ajaxRedirect);
                     }
-                } else {
-                    $(tabContentElementId).replace(transport.responseText);
+                } catch (e) {
+                    document.getElementById(tabContentElementId).outerHTML = response;
                 }
-            }
-            catch (e) {
-                $(tabContentElementId).replace(transport.responseText);
+            } else {
+                document.getElementById(tabContentElementId).outerHTML = response;
             }
         }
+        catch (e) {
+            document.getElementById(tabContentElementId).outerHTML = response;
+        }
+    })
+    .catch(error => {
+        console.error('Ajax block totals error:', error);
     });
 }
 
 function toggleCal(id) {
-    $('dashboard_'+id+'_cal_div').toggle();
-    $('dashboard_'+id+'_range_div').toggle();
+    const calDiv = document.getElementById('dashboard_'+id+'_cal_div');
+    const rangeDiv = document.getElementById('dashboard_'+id+'_range_div');
+    calDiv.style.display = calDiv.style.display === 'none' ? 'block' : 'none';
+    rangeDiv.style.display = rangeDiv.style.display === 'none' ? 'block' : 'none';
 }
 //]]>
 </script>

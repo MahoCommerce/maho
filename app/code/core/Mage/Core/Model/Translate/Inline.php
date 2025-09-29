@@ -236,7 +236,7 @@ class Mage_Core_Model_Translate_Inline
             $urlPrefix . '/ajax/translate',
             ['_secure' => Mage::app()->isCurrentlySecure()],
         );
-        $trigImg = Mage::getDesign()->getSkinUrl('images/fam_book_open.png');
+        $trigImg = 'data:image/svg+xml,' . rawurlencode(Mage::helper('core')->getIconSvg('book'));
 
         ob_start(); ?>
 <script type="text/javascript" src="<?= $baseJsUrl ?>maho-dialog.js"></script>
@@ -244,7 +244,7 @@ class Mage_Core_Model_Translate_Inline
 <script type="text/javascript" src="<?= $baseJsUrl ?>mage/translate_inline.js"></script>
 <link rel="stylesheet" type="text/css" href="<?= $baseJsUrl ?>mage/translate_inline.css"/>
 
-<div id="translate-inline-trig"><img src="<?= $trigImg ?>" alt="[TR]"/></div>
+<div id="translate-inline-trig"><img src="<?= $trigImg ?>" alt="[TR]" style="background: white; padding: 4px; border: 2px solid #ccc; border-radius: 3px; cursor: pointer;"/></div>
 <script type="text/javascript">
     new TranslateInline('translate-inline-trig', '<?= $ajaxUrl ?>', '<?= Mage::getDesign()->getArea() ?>');
 </script>

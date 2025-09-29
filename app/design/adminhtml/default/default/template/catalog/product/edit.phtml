@@ -36,52 +36,60 @@
     <div style="display:none"></div>
 </form>
 <script type="text/javascript">
-//<![CDATA[
-    var productTemplateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
-    var productForm = new varienForm('product_edit_form', '<?= $this->getValidationUrl() ?>');
-    productForm._processValidationResult = function(transport) {
-        var response = transport.responseText.evalJSON();
-        if (response.error){
-            if (response.attribute && $(response.attribute)) {
-                $(response.attribute).setHasError(true, productForm);
-                Validation.ajaxError($(response.attribute), response.message);
-                $(response.attribute).focus();
+    const productForm = new varienForm('product_edit_form', '<?= $this->getValidationUrl() ?>');
+    productForm._processValidationResult = function(response) {
+        if (response.error) {
+            if (response.attribute) {
+                const attributeElement = document.getElementById(response.attribute);
+                if (attributeElement) {
+                    attributeElement.setHasError(true, productForm);
+                    Validation.ajaxError(attributeElement, response.message);
+                    attributeElement.focus();
+                }
+            } else {
+                const messagesElement = document.getElementById('messages');
+                if (messagesElement) {
+                    messagesElement.innerHTML = `<ul class="messages"><li class="error-msg"><ul><li>${response.message}</li></ul></li></ul>`;
+                }
             }
-            else if ($('messages')) {
-                $('messages').innerHTML = '<ul class="messages"><li class="error-msg"><ul><li>' + response.message + '</li></ul></li></ul>';
-            }
-        }
-        else{
+        } else {
             productForm._submit();
         }
     };
     function saveAndContinueEdit(urlTemplate) {
-        var template = new Template(urlTemplate, productTemplateSyntax);
-        var url = template.evaluate({tab_id:product_info_tabsJsTabs.activeTab.id});
+        const template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
+        const tabId = product_info_tabsJsTabs?.activeTab?.id || 'general';
+        const url = template.evaluate({tab_id: tabId});
         productForm.submit(url);
     }
     function setSettings(urlTemplate, setElement, typeElement) {
-        var template = new Template(urlTemplate, productTemplateSyntax);
-        setLocation(template.evaluate({attribute_set:$F(setElement),type:$F(typeElement)}));
+        const template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
+        const setElementObj = document.getElementById(setElement) || document.querySelector(`[name="${setElement}"]`);
+        const typeElementObj = document.getElementById(typeElement) || document.querySelector(`[name="${typeElement}"]`);
+        const setValue = setElementObj ? setElementObj.value : '';
+        const typeValue = typeElementObj ? typeElementObj.value : '';
+        setLocation(template.evaluate({attribute_set: setValue, type: typeValue}));
     }
 
-     function setSuperSettings(urlTemplate, attributesClass, validateField) {
-        var attributesFields = $$('.' + attributesClass);
-        var attributes = Form.serializeElements(attributesFields, true).attribute;
-        if(typeof attributes == 'string') {
-            attributes = [attributes];
-        }
+    function setSuperSettings(urlTemplate, attributesClass, validateField) {
+        const attributesFields = document.querySelectorAll('.' + attributesClass);
+        let attributes = [];
 
-        if(!attributes) {
-            $(validateField).value = 'no-attributes';
-        } else {
-            $(validateField).value = 'has-attributes';
+        attributesFields.forEach(field => {
+            if (field.checked && field.value) {
+                attributes.push(field.value);
+            }
+        });
+
+        const validateFieldElement = document.getElementById(validateField);
+        if (validateFieldElement) {
+            validateFieldElement.value = attributes.length ? 'has-attributes' : 'no-attributes';
         }
 
         if (productForm.validator.validate()) {
-            var template = new Template(urlTemplate, productTemplateSyntax);
-            var url = template.evaluate({
-                attributes: btoa(attributes.join(',')).replace(new RegExp('/','g'),'%2F').replace(new RegExp('=','g'),'%3D')
+            const template = new Template(urlTemplate, Template.HANDLEBARS_PATTERN);
+            const url = template.evaluate({
+                attributes: btoa(attributes.join(',')).replace(/\//g, '%2F').replace(/=/g, '%3D')
             });
             setLocation(url);
         }
@@ -95,20 +103,20 @@
         return 1;
     }
 
-Event.observe(window, 'load', function() {
-    var objName = '<?= $this->getSelectedTabId() ?>';
+document.addEventListener('DOMContentLoaded', function() {
+    const objName = '<?= $this->getSelectedTabId() ?>';
     if (objName) {
-        obj = $(objName);
-        //IE fix (bubbling event model)
-        product_info_tabsJsTabs.setSkipDisplayFirstTab();
-        product_info_tabsJsTabs.showTabContent(obj);
+        const obj = document.getElementById(objName);
+        if (obj) {
+            //IE fix (bubbling event model)
+            product_info_tabsJsTabs.setSkipDisplayFirstTab();
+            product_info_tabsJsTabs.showTabContent(obj);
+        }
     }
-    Product.AttributesBridge.setTabsObject(product_info_tabsJsTabs);
 });
 
 Validation.addAllThese([
     ['validate-super-product-attributes', '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Please select one or more attributes.')) ?>', function(v) {
                 return (v != "no-attributes");
             }]]);
-//]]>
 </script>

@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -13,8 +13,9 @@
 ?>
 <style type="text/css" >
     ul { list-style-type:none; padding:0; margin:0; }
-    li { margin-left:0; border:1px solid #ccc; margin:2px; padding:2px 2px 2px 2px; font:normal 12px sans-serif; }
+    li { margin-left:0; border:1px solid #ccc; margin:2px; padding:2px 2px 2px 2px; font:normal 12px sans-serif; display: flex; align-items: center; }
     img { margin-right:5px; }
+    svg { margin-right:5px; }
 </style>
 <script type="text/javascript">
     var FORM_KEY = "<?= $this->getFormKey() ?>";
@@ -22,14 +23,14 @@
     <ul>
         <li>
         <?php if ($this->getProfile()->getId()):?>
-            <img src="<?= $this->getSkinUrl('images/note_msg_icon.gif') ?>" class="v-middle" style="margin-right:5px"/>
+            <?= $this->getIconSvg('bulb') ?>
             <?= $this->__("Starting profile execution, please wait...") ?>
             </li>
             <li style="background-color:#FFD;">
-            <img src="<?= $this->getSkinUrl('images/fam_bullet_error.gif') ?>" class="v-middle" style="margin-right:5px"/>
+            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' data-name='alert-triangle' data-variant='outline'><path d='M12 9v4'/><path d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/><path d='M12 16h.01'/></svg>" class="v-middle" style="margin-right:5px"/>
             <?= $this->__("Warning: Please do not close the window during importing/exporting data") ?>
         <?php else: ?>
-            <img src="<?= $this->getSkinUrl('images/error_msg_icon.gif') ?>" class="v-middle" style="margin-right:5px"/>
+            <?= $this->getIconSvg('exclamation-circle') ?>
             <?= $this->__("No profile loaded...") ?>
         <?php endif ?>
         </li>
@@ -48,13 +49,13 @@
         <?php endforeach ?>
         <?php if($this->getProfile()->getEntityType() == 'product' && $this->getProfile()->getDirection() == 'import'):?>
             <li id="liBeforeFinish" style="background-color:#FFD; display:none;">
-                <img src="<?php echo $this->getSkinUrl('images/fam_bullet_error.gif');?>" class="v-middle" style="margin-right:5px"/>
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' data-name='alert-triangle' data-variant='outline'><path d='M12 9v4'/><path d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/><path d='M12 16h.01'/></svg>" class="v-middle" style="margin-right:5px"/>
                 <?php echo $this->__("Please wait while the indexes are being refreshed.");?>
                 <img id="before-finish-wait-img" src="<?php echo $this->getSkinUrl('images/rule-ajax-loader.gif');?>" class="v-middle" style="margin-right:5px"/>
             </li>
         <?php endif ?>
             <li id="liFinished" style="display:none;">
-            <img src="<?php echo $this->getSkinUrl('images/note_msg_icon.gif');?>" class="v-middle" style="margin-right:5px"/>
+            <?= $this->getIconSvg('bulb') ?>
             <?php echo $this->__("Finished profile execution.");?>
             </li>
             </ul>
@@ -75,42 +76,65 @@
 
                     function execImportData() {
                         if (importData.length == 0) {
-                            $("updatedRows_img").src = config.styles.message.icon;
-                            $("updatedRows").style.backgroundColor = config.styles.message.bg;
-                            Element.insert($("liFinished"), {before: config.tpl.evaluate({
+                            const updatedRowsImg = document.getElementById("updatedRows_img");
+                            if (updatedRowsImg) {
+                                updatedRowsImg.src = config.styles.message.icon;
+                            }
+                            const updatedRows = document.getElementById("updatedRows");
+                            if (updatedRows) {
+                                updatedRows.style.backgroundColor = config.styles.message.bg;
+                            }
+                            const liFinished = document.getElementById("liFinished");
+                            liFinished.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
                                 style: "background-color:"+config.styles.message.bg,
                                 image: config.styles.message.icon,
                                 text: config.tplSccTxt.evaluate({updated:(countOfUpdated-countOfError)}),
                                 id: "updatedFinish"
-                            })});
+                            }));
 
-                            if ($("liBeforeFinish")) {
-                                Element.insert($("liFinished"), {before: $("liBeforeFinish")});
-                                $("liBeforeFinish").show();
+                            const liBeforeFinish = document.getElementById("liBeforeFinish");
+                            if (liBeforeFinish) {
+                                liFinished.insertAdjacentElement('beforebegin', liBeforeFinish);
+                                liBeforeFinish.style.display = 'block';
                             }
 
-                            new Ajax.Request("<?= $this->getUrl('*/*/batchFinish', ['id' => $batchId]) ?>", {
-                                method: "post",
-                                parameters: {form_key: FORM_KEY},
-                                onComplete: function(transport) {
-                                    if (transport.responseText.isJSON()) {
-                                        var response = transport.responseText.evalJSON();
-                                        if (response.error) {
-                                            Element.insert($("liFinished"), {before: config.tpl.evaluate({
-                                                style: "background-color:"+config.styles.error.bg,
-                                                image: config.styles.error.icon,
-                                                text: response.error.escapeHTML(),
-                                                id: "error-finish"
-                                            })});
-                                        }
-                                    }
+                            const formData = new FormData();
+                            formData.append('form_key', FORM_KEY);
 
-                                    if ($("before-finish-wait-img")) {
-                                        $("before-finish-wait-img").hide();
+                            mahoFetch("<?= $this->getUrl('*/*/batchFinish', ['id' => $batchId]) ?>", {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => {
+                                let responseData = response;
+                                if (typeof response === 'string') {
+                                    try {
+                                        responseData = JSON.parse(response);
+                                    } catch (e) {
+                                        responseData = {};
                                     }
-
-                                    $('liFinished').show();
                                 }
+
+                                if (responseData.error) {
+                                    const liFinished = document.getElementById("liFinished");
+                                    liFinished.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
+                                        style: "background-color:"+config.styles.error.bg,
+                                        image: config.styles.error.icon,
+                                        text: escapeHtml(responseData.error),
+                                        id: "error-finish"
+                                    }));
+                                }
+
+                                const beforeFinishImg = document.getElementById("before-finish-wait-img");
+                                if (beforeFinishImg) {
+                                    beforeFinishImg.style.display = 'none';
+                                }
+
+                                document.getElementById('liFinished').style.display = 'block';
+                            })
+                            .catch(error => {
+                                console.error('Batch finish error:', error);
+                                document.getElementById('liFinished').style.display = 'block';
                             });
                         } else {
                             sendImportData(importData.shift());
@@ -119,42 +143,66 @@
 
                     function sendImportData(data) {
                         if (!config.tpl) {
-                            config.tpl = new Template(config.template);
-                            config.tplTxt = new Template(config.text);
-                            config.tplSccTxt = new Template(config.successText);
+                            config.tpl = new Template(config.template.replace(/#{(\w+)}/g, '{{$1}}'), Template.HANDLEBARS_PATTERN);
+                            config.tplTxt = new Template(config.text.replace(/#{(\w+)}/g, '{{$1}}'), Template.HANDLEBARS_PATTERN);
+                            config.tplSccTxt = new Template(config.successText.replace(/#{(\w+)}/g, '{{$1}}'), Template.HANDLEBARS_PATTERN);
                         }
-                        if (!$("updatedRows")) {
-                            Element.insert($("liFinished"), {before: config.tpl.evaluate({
+                        if (!document.getElementById("updatedRows")) {
+                            const liFinished = document.getElementById("liFinished");
+                            liFinished.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
                                 style: "background-color: #FFD;",
                                 image: config.styles.loader,
                                 text: config.tplTxt.evaluate({updated:countOfUpdated, percent:getPercent()}),
                                 id: "updatedRows"
-                            })});
+                            }));
                         }
                         countOfStartedProfiles++;
                         if (!data.form_key) {
                             data.form_key = FORM_KEY;
                         }
 
-                        new Ajax.Request("<?= $this->getUrl('*/*/batchRun') ?>", {
-                          method: "post",
-                          parameters: data,
-                          onSuccess: function(transport) {
+                        const formData = new FormData();
+                        Object.entries(data).forEach(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                value.forEach(item => formData.append(key, item));
+                            } else {
+                                formData.append(key, value);
+                            }
+                        });
+
+                        mahoFetch("<?= $this->getUrl('*/*/batchRun') ?>", {
+                          method: 'POST',
+                          body: formData
+                        })
+                        .then(response => {
                             countOfStartedProfiles --;
                             countOfUpdated += data["rows[]"].length;
-                            if (transport.responseText.isJSON()) {
-                                addProfileRow(transport.responseText.evalJSON());
+
+                            let responseData = response;
+                            if (typeof response === 'object') {
+                                addProfileRow(responseData);
                             } else {
-                                Element.insert($("updatedRows"), {before: config.tpl.evaluate({
-                                    style: "background-color:"+config.styles.error.bg,
-                                    image: config.styles.error.icon,
-                                    text: transport.responseText.escapeHTML(),
-                                    id: "error-" + countOfStartedProfiles
-                                })});
-                                countOfError += data["rows[]"].length;
+                                try {
+                                    responseData = JSON.parse(response);
+                                    addProfileRow(responseData);
+                                } catch (e) {
+                                    const updatedRows = document.getElementById("updatedRows");
+                                    updatedRows.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
+                                        style: "background-color:"+config.styles.error.bg,
+                                        image: config.styles.error.icon,
+                                        text: escapeHtml(response),
+                                        id: "error-" + countOfStartedProfiles
+                                    }));
+                                    countOfError += data["rows[]"].length;
+                                }
                             }
                             execImportData();
-                          }
+                        })
+                        .catch(error => {
+                            countOfStartedProfiles --;
+                            console.error('Batch run error:', error);
+                            countOfError += data["rows[]"].length;
+                            execImportData();
                         });
                     }
 
@@ -165,16 +213,20 @@
                     function addProfileRow(data) {
                         if (data.errors.length > 0) {
                             for (var i=0, length=data.errors.length; i<length; i++) {
-                                Element.insert($("updatedRows"), {before: config.tpl.evaluate({
+                                const updatedRows = document.getElementById("updatedRows");
+                                updatedRows.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
                                     style: "background-color:"+config.styles.error.bg,
                                     image: config.styles.error.icon,
                                     text: data.errors[i],
                                     id: "id-" + (countOfUpdated + i + 1)
-                                })});
+                                }));
                                 countOfError ++;
                             }
                         }
-                        $("updatedRows_status").update(config.tplTxt.evaluate({updated:countOfUpdated, percent:getPercent()}));
+                        const updatedRowsStatus = document.getElementById("updatedRows_status");
+                        if (updatedRowsStatus) {
+                            updatedRowsStatus.innerHTML = config.tplTxt.evaluate({updated:countOfUpdated, percent:getPercent()});
+                        }
                     }
                 </script>
                 <?php $importData = $this->getImportData();?>
@@ -187,6 +239,6 @@
                 <?php endif ?>
             <?php endif ?>
             <?php if ($this->getShowFinished()):?>
-                <script type="text/javascript">$('liFinished').show();</script>
+                <script type="text/javascript">document.getElementById('liFinished').style.display = 'block';</script>
             <?php endif ?>
    <?php endif ?>

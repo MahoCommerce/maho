@@ -6,14 +6,12 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * Base widget class
- *
- * @package    Mage_Adminhtml
  *
  * @method $this setHeaderCss(string $value)
  * @method $this setTitle(string $value)
@@ -81,13 +79,5 @@ class Mage_Adminhtml_Block_Widget extends Mage_Adminhtml_Block_Template
                 'id'        => $id,
             ])
             ->toHtml();
-    }
-
-    /**
-     * @return string
-     */
-    public function getGlobalIcon()
-    {
-        return '<img src="' . $this->getSkinUrl('images/fam_link.gif') . '" alt="' . $this->__('Global Attribute') . '" title="' . $this->__('This attribute shares the same value in all the stores') . '" class="attribute-global"/>';
     }
 }

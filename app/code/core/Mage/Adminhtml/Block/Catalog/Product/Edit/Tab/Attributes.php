@@ -63,23 +63,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Attributes extends Mage_Admi
                 }
             }
 
-            // Add new attribute button if it is not an image tab
-            if (!$form->getElement('media_gallery')
-                && Mage::getSingleton('admin/session')->isAllowed('catalog/attributes/attributes')
-            ) {
-                $headerBar = $this->getLayout()->createBlock('adminhtml/catalog_product_edit_tab_attributes_create');
-
-                $headerBar->getConfig()
-                    ->setTabId('group_' . $group->getId())
-                    ->setGroupId($group->getId())
-                    ->setStoreId($form->getDataObject()->getStoreId())
-                    ->setAttributeSetId($form->getDataObject()->getAttributeSetId())
-                    ->setTypeId($form->getDataObject()->getTypeId())
-                    ->setProductId($form->getDataObject()->getId());
-
-                $fieldset->setHeaderBar($headerBar->toHtml());
-            }
-
             if ($form->getElement('meta_description')) {
                 $form->getElement('meta_description')->setOnkeyup('checkMaxLength(this, 255);');
             }

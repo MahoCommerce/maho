@@ -6,7 +6,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -115,14 +115,14 @@ class Varien_Data_Form_Element_Multiselect extends Varien_Data_Form_Element_Abst
         $result .= '<script type="text/javascript">' . "\n";
         $result .= '   var ' . $this->getJsObjectName() . ' = {' . "\n";
         $result .= '     selectAll: function() { ' . "\n";
-        $result .= '         var sel = $("' . $this->getHtmlId() . '");' . "\n";
+        $result .= '         var sel = document.getElementById("' . $this->getHtmlId() . '");' . "\n";
         $result .= '         for(var i = 0; i < sel.options.length; i ++) { ' . "\n";
         $result .= '             sel.options[i].selected = true; ' . "\n";
         $result .= '         } ' . "\n";
         $result .= '         return false; ' . "\n";
         $result .= '     },' . "\n";
         $result .= '     deselectAll: function() {' . "\n";
-        $result .= '         var sel = $("' . $this->getHtmlId() . '");' . "\n";
+        $result .= '         var sel = document.getElementById("' . $this->getHtmlId() . '");' . "\n";
         $result .= '         for(var i = 0; i < sel.options.length; i ++) { ' . "\n";
         $result .= '             sel.options[i].selected = false; ' . "\n";
         $result .= '         } ' . "\n";

@@ -5,17 +5,21 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Widget_Form_Container $this */
+$headerHtml = $this->getHeaderHtml();
+$headerButtons = $this->getButtonsHtml('header');
 ?>
 <?= $this->getFormInitScripts() ?>
-<div class="content-header">
-    <?= $this->getHeaderHtml() ?>
-    <p class="form-buttons"><?= $this->getButtonsHtml('header') ?></p>
-</div>
+<?php if ($this->getHeaderText() || $headerButtons): ?>
+    <div class="content-header">
+        <?= $headerHtml ?>
+        <p class="form-buttons"><?= $headerButtons ?></p>
+    </div>
+<?php endif ?>
 <?= $this->getFormHtml() ?>
 <?php if ($this->hasFooterButtons()): ?>
     <div class="content-footer">

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Helper_Sortby_Available extends Vari
     {
         $htmlId = 'use_config_' . $this->getHtmlId();
         return 'toggleValueElements(this, this.parentNode.parentNode);'
-            . "if (!this.checked) toggleValueElements($('$htmlId'), $('$htmlId').parentNode);";
+            . "if (!this.checked) toggleValueElements(document.getElementById('$htmlId'), document.getElementById('$htmlId').parentNode);";
     }
 
     /**
@@ -52,7 +52,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Helper_Sortby_Available extends Vari
         $html .= ' onclick="toggleValueElements(this, this.parentNode);" class="checkbox" type="checkbox" />';
         $html .= ' <label for="' . $htmlId . '" class="normal">'
             . Mage::helper('adminhtml')->__('Use All Available Attributes') . '</label>';
-        $html .= '<script type="text/javascript">toggleValueElements($(\'' . $htmlId . '\'), $(\'' . $htmlId
+        $html .= '<script type="text/javascript">toggleValueElements(document.getElementById(\'' . $htmlId . '\'), document.getElementById(\'' . $htmlId
             . '\').parentNode);</script>';
 
         return $html;
