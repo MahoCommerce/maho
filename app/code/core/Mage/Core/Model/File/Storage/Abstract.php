@@ -6,6 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,9 +27,7 @@ abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abs
     public function getMediaBaseDirectory()
     {
         if ($this->_mediaBaseDirectory === null) {
-            /** @var Mage_Core_Helper_File_Storage_Database $helper */
-            $helper = Mage::helper('core/file_storage_database');
-            $this->_mediaBaseDirectory = $helper->getMediaBaseDir();
+            $this->_mediaBaseDirectory = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA);
         }
 
         return $this->_mediaBaseDirectory;

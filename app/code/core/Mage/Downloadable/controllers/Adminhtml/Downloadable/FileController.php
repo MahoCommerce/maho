@@ -37,11 +37,6 @@ class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Admin
             $uploader->setFilesDispersion(true);
             $result = $uploader->save($tmpPath);
 
-            if (isset($result['file'])) {
-                $fullPath = rtrim($tmpPath, DS) . DS . ltrim($result['file'], DS);
-                Mage::helper('core/file_storage_database')->saveFile($fullPath);
-            }
-
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);

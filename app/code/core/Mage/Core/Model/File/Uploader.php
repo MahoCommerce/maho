@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,17 +38,6 @@ class Mage_Core_Model_File_Uploader extends Varien_File_Uploader
         if (empty($result['path']) || empty($result['file'])) {
             return $this;
         }
-
-        /** @var Mage_Core_Helper_File_Storage $helper */
-        $helper = Mage::helper('core/file_storage');
-
-        if ($helper->isInternalStorage() || $this->skipDbProcessing()) {
-            return $this;
-        }
-
-        /** @var Mage_Core_Helper_File_Storage_Database $dbHelper */
-        $dbHelper = Mage::helper('core/file_storage_database');
-        $this->_result['file'] = $dbHelper->saveUploadedFile($result);
 
         return $this;
     }

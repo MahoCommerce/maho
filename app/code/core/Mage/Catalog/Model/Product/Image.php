@@ -520,7 +520,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $filename = $this->getNewFile();
         @mkdir(dirname($filename), recursive: true);
         $this->getImage()->save($filename);
-        Mage::helper('core/file_storage_database')->saveFile($filename);
         return $this;
     }
 
@@ -647,19 +646,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $io = new Varien_Io_File();
         $io->rmdir($directory, true);
 
-        Mage::helper('core/file_storage_database')->deleteFolder($directory);
     }
 
     /**
-     * First check this file on FS
-     * If it doesn't exist - try to download it from DB
+     * Check if file exists on filesystem
      */
     protected function _fileExists(string $filename): bool
     {
-        if (file_exists($filename)) {
-            return true;
-        } else {
-            return Mage::helper('core/file_storage_database')->saveFileToFilesystem($filename);
-        }
+        return file_exists($filename);
     }
 }

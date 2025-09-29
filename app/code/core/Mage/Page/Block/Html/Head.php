@@ -577,9 +577,6 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      */
     protected function _isFile($filename)
     {
-        if (Mage::helper('core/file_storage_database')->checkDbUsage() && !is_file($filename)) {
-            Mage::helper('core/file_storage_database')->saveFileToFilesystem($filename);
-        }
         return is_file($filename);
     }
 
