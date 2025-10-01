@@ -1,0 +1,24 @@
+<script type="text/javascript">
+function toggleCouponFields(generateCoupon) {
+    const couponFields = ['coupon_sales_rule_id', 'coupon_prefix', 'coupon_expires_days'];
+    const display = generateCoupon == '1' ? '' : 'none';
+
+    couponFields.forEach(function(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            const row = field.closest('tr');
+            if (row) {
+                row.style.display = display;
+            }
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const generateCouponField = document.getElementById('generate_coupon');
+    if (generateCouponField) {
+        toggleCouponFields(generateCouponField.value);
+    }
+});
+</script>
