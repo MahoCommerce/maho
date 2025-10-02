@@ -12334,12 +12334,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Template.php
 
 		-
-			rawMessage: 'Parameter #1 $options of class Zend_Translate constructor expects array|Zend_Config|Zend_Translate_Adapter, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate.php
-
-		-
 			rawMessage: 'Parameter #2 $scope of method Mage_Core_Model_Translate::_addData() expects string, false given.'
 			identifier: argument.type
 			count: 1

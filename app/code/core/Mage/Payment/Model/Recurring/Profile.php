@@ -592,8 +592,6 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
     /**
      * Generate explanations for specified schedule parameters
      *
-     * TODO: utilize Zend_Translate_Plural or similar stuff to render proper declensions with numerals.
-     *
      * @param string $periodKey
      * @param string $frequencyKey
      * @param string $cyclesKey
