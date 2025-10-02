@@ -62,10 +62,14 @@ class Mage_Rss_Model_Rss
             // Add channel metadata
             $this->addTextElement($dom, $channel, 'title', $feed['title'] ?? '');
             $this->addTextElement($dom, $channel, 'link', $feed['link'] ?? '');
-            $this->addTextElement($dom, $channel, 'description', $feed['description'] ?? '');
+            $this->addTextElement($dom, $channel, 'description', $feed['description'] ?? '', true);
 
             if (!empty($feed['language'])) {
-                $this->addTextElement($dom, $channel, 'language', $feed['language']);
+                // Convert locale code (en_US) to ISO-639 language code (en)
+                $language = strpos($feed['language'], '_') !== false
+                    ? substr($feed['language'], 0, strpos($feed['language'], '_'))
+                    : $feed['language'];
+                $this->addTextElement($dom, $channel, 'language', $language);
             }
 
             // Add items
@@ -81,10 +85,14 @@ class Mage_Rss_Model_Rss
         }
     }
 
-    private function addTextElement(DOMDocument $dom, DOMElement $parent, string $name, string $value): void
+    private function addTextElement(DOMDocument $dom, DOMElement $parent, string $name, string $value, bool $useCdata = false): void
     {
         $element = $dom->createElement($name);
-        $element->appendChild($dom->createTextNode($value));
+        if ($useCdata) {
+            $element->appendChild($dom->createCDATASection($value));
+        } else {
+            $element->appendChild($dom->createTextNode($value));
+        }
         $parent->appendChild($element);
     }
 
@@ -105,7 +113,7 @@ class Mage_Rss_Model_Rss
         }
 
         if (!empty($entry['description'])) {
-            $this->addTextElement($dom, $item, 'description', $entry['description']);
+            $this->addTextElement($dom, $item, 'description', $entry['description'], true);
         }
 
         // Optional fields
@@ -113,8 +121,10 @@ class Mage_Rss_Model_Rss
             $this->addTextElement($dom, $item, 'author', $entry['author']);
         }
 
-        if (!empty($entry['guid'])) {
-            $this->addTextElement($dom, $item, 'guid', $entry['guid']);
+        // Add guid (use explicit guid or fallback to link)
+        $guid = $entry['guid'] ?? $entry['link'] ?? '';
+        if (!empty($guid)) {
+            $this->addTextElement($dom, $item, 'guid', $guid);
         }
 
         if (!empty($entry['pubDate'])) {

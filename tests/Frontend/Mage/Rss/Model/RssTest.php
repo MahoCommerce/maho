@@ -154,3 +154,50 @@ it('supports optional item fields', function () {
     expect($item->getElementsByTagName('guid')->item(0)->textContent)->toBe('unique-id-123');
     expect($item->getElementsByTagName('pubDate')->item(0)->textContent)->toBe('Mon, 01 Jan 2025 00:00:00 GMT');
 });
+
+it('converts locale codes to ISO-639 language codes', function () {
+    $rss = Mage::getModel('rss/rss');
+
+    $rss->_addHeader([
+        'title' => 'Test Feed',
+        'description' => 'Test Description',
+        'link' => 'https://example.com',
+        'language' => 'en_US', // Locale code
+    ]);
+
+    $xml = $rss->createRssXml();
+
+    $dom = new DOMDocument();
+    $dom->loadXML($xml);
+
+    $language = $dom->getElementsByTagName('language')->item(0);
+    expect($language->textContent)->toBe('en'); // Should be converted to ISO-639 code
+});
+
+it('automatically generates guid from link if not provided', function () {
+    $rss = Mage::getModel('rss/rss');
+
+    $rss->_addHeader([
+        'title' => 'Test Feed',
+        'description' => 'Test Description',
+        'link' => 'https://example.com',
+    ]);
+
+    $rss->_addEntry([
+        'title' => 'Item without explicit guid',
+        'link' => 'https://example.com/item1',
+        'description' => 'Description',
+    ]);
+
+    $xml = $rss->createRssXml();
+
+    $dom = new DOMDocument();
+    $dom->loadXML($xml);
+
+    $item = $dom->getElementsByTagName('item')->item(0);
+    $guid = $item->getElementsByTagName('guid')->item(0);
+
+    // Should use link as guid
+    expect($guid)->not->toBeNull();
+    expect($guid->textContent)->toBe('https://example.com/item1');
+});
