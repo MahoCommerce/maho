@@ -49,6 +49,7 @@ $jsVarName = 'opFile' . rand();
         <?php if ($option->getImageSizeY() > 0): ?>
         <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image height')?>: <strong><?= $option->getImageSizeY() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
         <?php endif ?>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum file size')?>: <strong><?= $this->getMaxFileSizeMb() ?> MB</strong></p>
     </div>
 </dd>
 
