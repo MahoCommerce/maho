@@ -479,13 +479,6 @@
                 <admin_user_create></admin_user_create>
             </additional_notification_emails>
         </general>
-        <validators>
-            <custom_layout>
-                <disallowed_block>
-                    <Mage_Core_Block_Template_Zend/>
-                </disallowed_block>
-            </custom_layout>
-        </validators>
     </default>
     <stores>
         <default>

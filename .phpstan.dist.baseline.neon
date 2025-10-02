@@ -8524,15 +8524,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type.php
 
 		-
-			rawMessage: '''
-				Call to deprecated method setDestination() of class Zend_File_Transfer_Adapter_Abstract:
-				Will be changed to be a filter!!!
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Type_Abstract::_removeNotApplicableAttributes() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12341,12 +12332,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Template.php
-
-		-
-			rawMessage: 'Parameter #1 $options of class Zend_Translate constructor expects array|Zend_Config|Zend_Translate_Adapter, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate.php
 
 		-
 			rawMessage: 'Parameter #2 $scope of method Mage_Core_Model_Translate::_addData() expects string, false given.'
@@ -20043,12 +20028,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Rss/Model/Observer.php
-
-		-
-			rawMessage: Property Mage_Rss_Model_Rss::$_feedArray has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Rss/Model/Rss.php
 
 		-
 			rawMessage: 'Method Mage_Rss_IndexController::_showWishlistRss() has no return type specified.'
