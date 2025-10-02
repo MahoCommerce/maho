@@ -155,22 +155,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $processingParams = $this->_getProcessingParams();
         $file = $processingParams->getFilesPrefix() . 'options_' . $option->getId() . '_file';
 
-        // Check if file exceeds post_max_size (happens when file is VERY large - entire POST is discarded)
-        // This must be checked FIRST before accessing $_FILES
-        // When post_max_size is exceeded, PHP discards the entire POST body, so $_FILES and $_POST are empty
-        // But CONTENT_LENGTH still reflects the size of the request that was sent
-        if (isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > $this->_getUploadMaxFilesize()) {
-            // Additional check: ensure $_FILES is empty or missing our specific file
-            // This confirms POST was discarded vs user just not selecting a file
-            if (empty($_FILES) || !isset($_FILES[$file])) {
-                $this->setIsValid(false);
-                $value = $this->_bytesToMbytes($this->_getUploadMaxFilesize());
-                Mage::throwException(
-                    Mage::helper('catalog')->__('The file you uploaded is larger than %s Megabytes allowed by server', $value),
-                );
-            }
-        }
-
         // Check for PHP file upload errors
         if (isset($_FILES[$file]) && $_FILES[$file]['error'] !== UPLOAD_ERR_OK) {
             $this->setIsValid(false);
@@ -206,8 +190,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             switch ($this->getProcessMode()) {
                 case Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL:
                     Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
-                    // exception thrown
-                    // no break
+                    // exception thrown, no break
                 default:
                     $this->setUserValue(null);
                     break;
@@ -225,10 +208,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $fileInfo = $_FILES[$file];
             $fileInfo['title'] = $fileInfo['name'];
             $fileExtension = strtolower(pathinfo($fileInfo['name'], PATHINFO_EXTENSION));
-
-            /**
-             * Option Validations
-             */
 
             // File extension validation
             $_allowed = $this->_parseExtensionsString($option->getFileExtension());
@@ -261,7 +240,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 }
 
                 $uploader->setAllowedExtensions($_allowed);
-            }// Validate image dimensions
+            }
+
+            // Validate image dimensions
             if ($option->getImageSizeX() > 0 || $option->getImageSizeY() > 0) {
                 $this->validateImageDimensions($fileInfo['tmp_name'], $fileExtension, $_allowed);
             }
@@ -270,9 +251,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $uploader->setAllowRenameFiles(false);
             $uploader->setFilesDispersion(false);
 
-            /**
-             * Prepare file path
-             */
+            // Prepare file path
             $this->_initFilesystem();
 
             $fileName = Mage_Core_Model_File_Uploader::getCorrectFileName($fileInfo['name']);
