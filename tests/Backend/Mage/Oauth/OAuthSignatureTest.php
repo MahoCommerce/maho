@@ -34,7 +34,7 @@ describe('OAuth 1.0 Signature Validation', function () {
             'GET',
             'http://photos.example.net/photos',
             $consumerSecret,
-            $tokenSecret
+            $tokenSecret,
         );
 
         // Expected signature from RFC 5849 Appendix A.1
@@ -108,7 +108,7 @@ function calculateHmacSignature(
     string $method,
     string $url,
     string $consumerSecret,
-    ?string $tokenSecret
+    ?string $tokenSecret,
 ): string {
     $normalizedUrl = normalizeUrl($url);
     $baseString = getBaseSignatureString($params, $method, $normalizedUrl);
