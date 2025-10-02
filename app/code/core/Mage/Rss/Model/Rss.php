@@ -66,7 +66,7 @@ class Mage_Rss_Model_Rss
 
             if (!empty($feed['language'])) {
                 // Convert locale code (en_US) to ISO-639 language code (en)
-                $language = strpos($feed['language'], '_') !== false
+                $language = str_contains($feed['language'], '_')
                     ? substr($feed['language'], 0, strpos($feed['language'], '_'))
                     : $feed['language'];
                 $this->addTextElement($dom, $channel, 'language', $language);
