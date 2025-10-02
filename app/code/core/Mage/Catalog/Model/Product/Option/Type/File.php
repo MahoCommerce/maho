@@ -261,9 +261,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 }
 
                 $uploader->setAllowedExtensions($_allowed);
-            }
-
-            // Validate image dimensions upfront
+            }// Validate image dimensions
             if ($option->getImageSizeX() > 0 || $option->getImageSizeY() > 0) {
                 $this->validateImageDimensions($fileInfo['tmp_name'], $fileExtension, $_allowed);
             }
