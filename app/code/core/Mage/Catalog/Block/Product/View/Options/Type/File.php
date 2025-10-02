@@ -40,4 +40,13 @@ class Mage_Catalog_Block_Product_View_Options_Type_File extends Mage_Catalog_Blo
 
         return empty($result['allowed']) ? '' : implode(', ', $result['allowed']);
     }
+
+    public function getMaxFileSizeMb(): int
+    {
+        $uploadMaxFilesize = ini_parse_quantity(ini_get('upload_max_filesize'));
+        $postMaxSize = ini_parse_quantity(ini_get('post_max_size'));
+        $maxBytes = min($uploadMaxFilesize, $postMaxSize);
+
+        return (int) ($maxBytes / (1024 * 1024));
+    }
 }
