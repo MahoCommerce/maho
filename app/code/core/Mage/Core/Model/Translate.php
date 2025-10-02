@@ -35,13 +35,6 @@ class Mage_Core_Model_Translate
     protected $_locale;
 
     /**
-     * Translation object
-     *
-     * @var Zend_Translate|null
-     */
-    protected $_translate;
-
-    /**
      * Translator configuration array
      *
      * @var array
@@ -349,19 +342,6 @@ class Mage_Core_Model_Translate
     public function getResource()
     {
         return Mage::getResourceSingleton('core/translate');
-    }
-
-    /**
-     * Retrieve translation object
-     *
-     * @return Zend_Translate
-     */
-    public function getTranslate()
-    {
-        if (is_null($this->_translate)) {
-            $this->_translate = new Zend_Translate('array', $this->getData(), $this->getLocale());
-        }
-        return $this->_translate;
     }
 
     /**
