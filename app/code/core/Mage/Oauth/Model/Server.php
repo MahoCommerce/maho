@@ -506,9 +506,7 @@ class Mage_Oauth_Model_Server
      */
     protected function _validateSignature()
     {
-        $util = new Zend_Oauth_Http_Utility();
-
-        $calculatedSign = $util->sign(
+        $calculatedSign = $this->_sign(
             array_merge($this->_params, $this->_protocolParams),
             $this->_protocolParams['oauth_signature_method'],
             $this->_consumer->getSecret(),
@@ -520,6 +518,233 @@ class Mage_Oauth_Model_Server
         if (!hash_equals($calculatedSign, $this->_protocolParams['oauth_signature'])) {
             $this->_throwException('', self::ERR_SIGNATURE_INVALID);
         }
+    }
+
+    /**
+     * Sign OAuth request parameters
+     *
+     * @param array $params All request parameters (including oauth_* parameters)
+     * @param string $signatureMethod Signature method (HMAC-SHA1, RSA-SHA1, or PLAINTEXT)
+     * @param string $consumerSecret Consumer secret key
+     * @param string|null $tokenSecret Token secret key (optional)
+     * @param string|null $method HTTP method (GET, POST, etc.)
+     * @param string|null $url Request URL
+     * @return string Generated signature
+     */
+    protected function _sign(
+        array $params,
+        string $signatureMethod,
+        string $consumerSecret,
+        ?string $tokenSecret = null,
+        ?string $method = null,
+        ?string $url = null,
+    ): string {
+        $parts = explode('-', $signatureMethod);
+        $methodType = strtoupper($parts[0]);
+        $hashAlgo = $parts[1] ?? null;
+
+        return match ($methodType) {
+            'HMAC' => $this->_signHmac($params, $consumerSecret, $tokenSecret, $method, $url, $hashAlgo),
+            'RSA' => $this->_signRsa($params, $consumerSecret, $method, $url, $hashAlgo),
+            'PLAINTEXT' => $this->_signPlaintext($consumerSecret, $tokenSecret),
+            default => throw new Exception("Unsupported signature method: {$signatureMethod}"),
+        };
+    }
+
+    /**
+     * Sign using HMAC-SHA1 method
+     *
+     * @param array $params Request parameters
+     * @param string $consumerSecret Consumer secret
+     * @param string|null $tokenSecret Token secret
+     * @param string|null $method HTTP method
+     * @param string|null $url Request URL
+     * @param string|null $hashAlgo Hash algorithm (e.g., 'SHA1')
+     * @return string Base64-encoded signature
+     */
+    protected function _signHmac(
+        array $params,
+        string $consumerSecret,
+        ?string $tokenSecret,
+        ?string $method,
+        ?string $url,
+        ?string $hashAlgo,
+    ): string {
+        $key = $this->_assembleSignatureKey($consumerSecret, $tokenSecret);
+        $baseString = $this->_getBaseSignatureString($params, $method, $url);
+        $algo = strtolower($hashAlgo ?? 'sha1');
+
+        $binaryHash = hash_hmac($algo, $baseString, $key, true);
+        return base64_encode($binaryHash);
+    }
+
+    /**
+     * Sign using RSA-SHA1 method
+     *
+     * @param array $params Request parameters
+     * @param string $privateKey PEM-encoded private key
+     * @param string|null $method HTTP method
+     * @param string|null $url Request URL
+     * @param string|null $hashAlgo Hash algorithm (e.g., 'SHA1')
+     * @return string Base64-encoded signature
+     */
+    protected function _signRsa(
+        array $params,
+        string $privateKey,
+        ?string $method,
+        ?string $url,
+        ?string $hashAlgo,
+    ): string {
+        $baseString = $this->_getBaseSignatureString($params, $method, $url);
+        $algo = constant('OPENSSL_ALGO_' . strtoupper($hashAlgo ?? 'SHA1'));
+
+        $signature = '';
+        $success = openssl_sign($baseString, $signature, $privateKey, $algo);
+
+        if (!$success) {
+            $this->_throwException('RSA signature generation failed', self::ERR_SIGNATURE_INVALID);
+        }
+
+        return base64_encode($signature);
+    }
+
+    /**
+     * Sign using PLAINTEXT method
+     *
+     * @param string $consumerSecret Consumer secret
+     * @param string|null $tokenSecret Token secret
+     * @return string Signature (consumer_secret&token_secret)
+     */
+    protected function _signPlaintext(string $consumerSecret, ?string $tokenSecret): string
+    {
+        if ($tokenSecret === null || $tokenSecret === '') {
+            return $consumerSecret . '&';
+        }
+
+        return $consumerSecret . '&' . $tokenSecret;
+    }
+
+    /**
+     * Assemble signing key from consumer and token secrets
+     *
+     * @param string $consumerSecret Consumer secret
+     * @param string|null $tokenSecret Token secret
+     * @return string Encoded key (consumer_secret&token_secret)
+     */
+    protected function _assembleSignatureKey(string $consumerSecret, ?string $tokenSecret): string
+    {
+        $parts = [$this->_urlEncode($consumerSecret)];
+
+        if ($tokenSecret !== null) {
+            $parts[] = $this->_urlEncode($tokenSecret);
+        }
+
+        return implode('&', $parts);
+    }
+
+    /**
+     * Generate base signature string for OAuth
+     *
+     * @param array $params Request parameters
+     * @param string|null $method HTTP method
+     * @param string|null $url Request URL
+     * @return string Base signature string (METHOD&URL&PARAMS)
+     */
+    protected function _getBaseSignatureString(array $params, ?string $method, ?string $url): string
+    {
+        // Remove oauth_signature before encoding
+        unset($params['oauth_signature']);
+
+        // Encode all parameters
+        $encodedParams = [];
+        foreach ($params as $key => $value) {
+            $encodedParams[$this->_urlEncode($key)] = $this->_urlEncode($value);
+        }
+
+        $baseStrings = [];
+
+        if ($method !== null) {
+            $baseStrings[] = strtoupper($method);
+        }
+
+        if ($url !== null) {
+            $baseStrings[] = $this->_urlEncode($this->_normalizeUrl($url));
+        }
+
+        $baseStrings[] = $this->_urlEncode($this->_toByteValueOrderedQueryString($encodedParams));
+
+        return implode('&', $baseStrings);
+    }
+
+    /**
+     * Normalize URL for OAuth signature base string
+     *
+     * @param string $url URL to normalize
+     * @return string Normalized URL
+     */
+    protected function _normalizeUrl(string $url): string
+    {
+        $parts = parse_url($url);
+
+        $scheme = strtolower($parts['scheme'] ?? 'http');
+        $host = strtolower($parts['host'] ?? '');
+        $port = $parts['port'] ?? null;
+        $path = $parts['path'] ?? '/';
+
+        // Remove default ports
+        if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)) {
+            $port = null;
+        }
+
+        $normalized = $scheme . '://' . $host;
+
+        if ($port !== null) {
+            $normalized .= ':' . $port;
+        }
+
+        $normalized .= $path;
+
+        return $normalized;
+    }
+
+    /**
+     * Convert parameters to byte-value ordered query string
+     *
+     * @param array $params Encoded parameters
+     * @return string Query string
+     */
+    protected function _toByteValueOrderedQueryString(array $params): string
+    {
+        $pairs = [];
+
+        // Sort by key using natural comparison
+        uksort($params, 'strnatcmp');
+
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                natsort($value);
+                foreach ($value as $duplicateValue) {
+                    $pairs[] = $key . '=' . $duplicateValue;
+                }
+            } else {
+                $pairs[] = $key . '=' . $value;
+            }
+        }
+
+        return implode('&', $pairs);
+    }
+
+    /**
+     * URL encode a value per RFC 3986
+     *
+     * @param string $value Value to encode
+     * @return string Encoded value
+     */
+    protected function _urlEncode(string $value): string
+    {
+        $encoded = rawurlencode($value);
+        // RFC 3986 specifies that ~ should not be encoded
+        return str_replace('%7E', '~', $encoded);
     }
 
     /**
