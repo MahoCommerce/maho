@@ -831,7 +831,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param string $filePath Path to uploaded file
      * @throws Exception
      */
-    public function validateImageDimensions($filePath): void
+    public function validateImageDimensions(string $filePath): void
     {
         $option = $this->getOption();
         $dimensions = [];
@@ -887,7 +887,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param string $filePath Path to uploaded file
      * @throws Exception
      */
-    public function validateForbiddenExtensions($filePath): void
+    public function validateForbiddenExtensions(string $filePath): void
     {
         $option = $this->getOption();
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
