@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
 uses(Tests\MahoFrontendTestCase::class);
 
 it('generates valid RSS 2.0 XML', function () {
