@@ -191,6 +191,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 case Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL:
                     Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
                     // exception thrown, no break
+                    // no break
                 default:
                     $this->setUserValue(null);
                     break;
@@ -242,11 +243,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 $uploader->setAllowedExtensions($_allowed);
             }
 
-            // Validate image dimensions
-            if ($option->getImageSizeX() > 0 || $option->getImageSizeY() > 0) {
-                $this->validateImageDimensions($fileInfo['tmp_name'], $fileExtension, $_allowed);
-            }
-
             // Disable file renaming and file dispersion - we handle the file name ourselves
             $uploader->setAllowRenameFiles(false);
             $uploader->setFilesDispersion(false);
@@ -274,10 +270,22 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $_width = 0;
             $_height = 0;
             if (is_readable($fileInfo['tmp_name'])) {
-                $_imageSize = getimagesize($fileInfo['tmp_name']);
+                $_imageSize = @getimagesize($fileInfo['tmp_name']);
                 if ($_imageSize) {
                     $_width = $_imageSize[0];
                     $_height = $_imageSize[1];
+
+                    // Validate image dimensions if limits are set
+                    if ($option->getImageSizeX() > 0 && $_width > $option->getImageSizeX()) {
+                        Mage::throwException(
+                            Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY()),
+                        );
+                    }
+                    if ($option->getImageSizeY() > 0 && $_height > $option->getImageSizeY()) {
+                        Mage::throwException(
+                            Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY()),
+                        );
+                    }
                 }
             }
 
@@ -799,80 +807,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         return ini_parse_quantity($_bytes);
     }
 
-    /**
-     * Simple convert bytes to Megabytes
-     *
-     * @param int $bytes
-     * @return float
-     */
-    protected function _bytesToMbytes($bytes)
+    protected function _bytesToMbytes(int $bytes): int
     {
-        return round($bytes / (1024 * 1024));
+        return (int) ($bytes / (1024 * 1024));
     }
-
-    /**
-     * Validate callback for image dimensions
-     *
-     * @param string $filePath Path to uploaded file
-     * @param string $fileExtension Original file extension
-     * @param array|null $allowedExtensions Allowed extensions list (if any)
-     * @throws Exception
-     */
-    public function validateImageDimensions(string $filePath, string $fileExtension, ?array $allowedExtensions = null): void
-    {
-        $option = $this->getOption();
-        $dimensions = [];
-
-        if ($option->getImageSizeX() > 0) {
-            $dimensions['maxwidth'] = $option->getImageSizeX();
-        }
-        if ($option->getImageSizeY() > 0) {
-            $dimensions['maxheight'] = $option->getImageSizeY();
-        }
-
-        if (empty($dimensions)) {
-            return;
-        }
-
-        // Only validate image dimensions if the file extension suggests it's an image
-        $imageExtensions = ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'tiff', 'tif', 'webp'];
-
-        // Replicate original Zend logic:
-        // Only validate if extension is in image extensions list
-        // AND (if allowed list exists, extension must be in allowed list)
-        $shouldValidate = in_array($fileExtension, $imageExtensions);
-        if ($shouldValidate && $allowedExtensions !== null) {
-            $shouldValidate = in_array($fileExtension, array_map('strtolower', $allowedExtensions));
-        }
-
-        if (!$shouldValidate) {
-            return;
-        }
-
-        if (!is_readable($filePath)) {
-            throw new Exception(
-                Mage::helper('catalog')->__('Unable to read uploaded file for validation.'),
-            );
-        }
-
-        $imageInfo = @getimagesize($filePath);
-        if ($imageInfo === false) {
-            return; // Not an image file, skip dimension validation
-        }
-
-        [$width, $height] = $imageInfo;
-
-        if (isset($dimensions['maxwidth']) && $width > $dimensions['maxwidth']) {
-            throw new Exception(
-                Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY()),
-            );
-        }
-
-        if (isset($dimensions['maxheight']) && $height > $dimensions['maxheight']) {
-            throw new Exception(
-                Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY()),
-            );
-        }
-    }
-
 }

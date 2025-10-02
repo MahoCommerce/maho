@@ -743,7 +743,6 @@
 "Unable to find an attribute to delete.","Unable to find an attribute to delete."
 "Unable to find a search term to delete.","Unable to find a search term to delete."
 "Unable to get the product ID.","Unable to get the product ID."
-"Unable to read uploaded file for validation.","Unable to read uploaded file for validation."
 "Unassigned Attributes","Unassigned Attributes"
 "Unknown attribute: %s.","Unknown attribute: %s."
 "Unknown EAV indexer type ""%s"".","Unknown EAV indexer type ""%s""."
