@@ -398,23 +398,28 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
             if (isset($queueOptions['operation']) && $operation = $queueOptions['operation']) {
                 switch ($operation) {
                     case 'receive_uploaded_file':
-                        $src = $queueOptions['src_name'] ?? '';
                         $dst = $queueOptions['dst_name'] ?? '';
-                        /** @var Zend_File_Transfer_Adapter_Http $uploader */
+                        /** @var Mage_Core_Model_File_Uploader $uploader */
                         $uploader = $queueOptions['uploader'] ?? null;
 
+                        if (empty($dst) || !$uploader) {
+                            if (isset($queueOptions['option'])) {
+                                $queueOptions['option']->setIsValid(false);
+                            }
+                            Mage::throwException(Mage::helper('catalog')->__('File upload failed'));
+                        }
+
                         $path = dirname($dst);
+                        $fileName = basename($dst);
+
                         $io = new Varien_Io_File();
                         if (!$io->isWriteable($path) && !$io->mkdir($path, 0777, true)) {
                             Mage::throwException(Mage::helper('catalog')->__("Cannot create writeable directory '%s'.", $path));
                         }
 
-                        $uploader->setDestination($path);
+                        $result = $uploader->save($path, $fileName);
 
-                        if (empty($src) || empty($dst) || !$uploader->receive($src)) {
-                            /**
-                             * @todo: show invalid option
-                             */
+                        if (!$result) {
                             if (isset($queueOptions['option'])) {
                                 $queueOptions['option']->setIsValid(false);
                             }
