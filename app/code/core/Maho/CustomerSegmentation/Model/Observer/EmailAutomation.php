@@ -221,7 +221,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         $customer = $observer->getEvent()->getCustomer();
 
         if ($customer->getId()) {
-            $this->cleanupCustomerSequences($customer->getId());
+            $this->cleanupCustomerSequences((int) $customer->getId());
         }
     }
 
