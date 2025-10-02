@@ -1,66 +1,124 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Rss_Model_Rss
 {
-    protected $_feedArray = [];
+    protected array $_feedArray = [];
 
-    /**
-     * @param array $data
-     * @return $this
-     */
-    public function _addHeader($data = [])
+    public function _addHeader(array $data = []): self
     {
         $this->_feedArray = $data;
         return $this;
     }
 
-    /**
-     * @param array $entries
-     * @return $this
-     */
-    public function _addEntries($entries)
+    public function _addEntries(array $entries): self
     {
         $this->_feedArray['entries'] = $entries;
         return $this;
     }
 
-    /**
-     * @param array $entry
-     * @return $this
-     */
-    public function _addEntry($entry)
+    public function _addEntry(array $entry): self
     {
         $this->_feedArray['entries'][] = $entry;
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getFeedArray()
+    public function getFeedArray(): array
     {
         return $this->_feedArray;
     }
 
     /**
-     * @return string
+     * Generate RSS 2.0 XML from feed array
      */
-    public function createRssXml()
+    public function createRssXml(): string
     {
         try {
-            $rssFeedFromArray = Zend_Feed::importArray($this->getFeedArray(), 'rss');
-            return $rssFeedFromArray->saveXml();
+            $feed = $this->getFeedArray();
+
+            $dom = new DOMDocument('1.0', $feed['charset'] ?? 'UTF-8');
+            $dom->formatOutput = true;
+
+            // Create root <rss> element
+            $rss = $dom->createElement('rss');
+            $rss->setAttribute('version', '2.0');
+            $dom->appendChild($rss);
+
+            // Create <channel> element
+            $channel = $dom->createElement('channel');
+            $rss->appendChild($channel);
+
+            // Add channel metadata
+            $this->addTextElement($dom, $channel, 'title', $feed['title'] ?? '');
+            $this->addTextElement($dom, $channel, 'link', $feed['link'] ?? '');
+            $this->addTextElement($dom, $channel, 'description', $feed['description'] ?? '');
+
+            if (!empty($feed['language'])) {
+                $this->addTextElement($dom, $channel, 'language', $feed['language']);
+            }
+
+            // Add items
+            if (!empty($feed['entries']) && is_array($feed['entries'])) {
+                foreach ($feed['entries'] as $entry) {
+                    $this->addItem($dom, $channel, $entry);
+                }
+            }
+
+            return $dom->saveXML();
         } catch (Exception $e) {
             return Mage::helper('rss')->__('Error in processing xml. %s', $e->getMessage());
+        }
+    }
+
+    private function addTextElement(DOMDocument $dom, DOMElement $parent, string $name, string $value): void
+    {
+        $element = $dom->createElement($name);
+        $element->appendChild($dom->createTextNode($value));
+        $parent->appendChild($element);
+    }
+
+    /**
+     * Add an RSS item to the channel
+     */
+    private function addItem(DOMDocument $dom, DOMElement $channel, array $entry): void
+    {
+        $item = $dom->createElement('item');
+        $channel->appendChild($item);
+
+        if (!empty($entry['title'])) {
+            $this->addTextElement($dom, $item, 'title', $entry['title']);
+        }
+
+        if (!empty($entry['link'])) {
+            $this->addTextElement($dom, $item, 'link', $entry['link']);
+        }
+
+        if (!empty($entry['description'])) {
+            $this->addTextElement($dom, $item, 'description', $entry['description']);
+        }
+
+        // Optional fields
+        if (!empty($entry['author'])) {
+            $this->addTextElement($dom, $item, 'author', $entry['author']);
+        }
+
+        if (!empty($entry['guid'])) {
+            $this->addTextElement($dom, $item, 'guid', $entry['guid']);
+        }
+
+        if (!empty($entry['pubDate'])) {
+            $this->addTextElement($dom, $item, 'pubDate', $entry['pubDate']);
         }
     }
 }
