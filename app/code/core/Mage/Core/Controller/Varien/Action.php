@@ -503,7 +503,11 @@ abstract class Mage_Core_Controller_Varien_Action
 
         Mage::app()->loadArea($this->getLayout()->getArea());
 
-        if ($this->getFlag('', self::FLAG_NO_COOKIES_REDIRECT)
+        // Only redirect to noCookies page if:
+        // 1. The flag is true (cookies missing was detected)
+        // 2. The flag was NOT explicitly set to false (which means "skip cookie check")
+        // 3. Browser capabilities check is enabled
+        if ($this->getFlag('', self::FLAG_NO_COOKIES_REDIRECT) === true
             && Mage::getStoreConfig('web/browser_capabilities/cookies')
         ) {
             $this->_forward('noCookies', 'index', 'core');

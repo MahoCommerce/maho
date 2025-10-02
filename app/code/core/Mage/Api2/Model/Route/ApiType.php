@@ -38,4 +38,30 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
     ) {
         parent::__construct([Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => str_replace('.php', '', basename(getenv('SCRIPT_FILENAME'))) . '/:api_type']);
     }
+
+    /**
+     * Matches a Request with parts defined by a map. Assigns and
+     * returns an array of variables on a successful match.
+     *
+     * @param Mage_Api2_Model_Request $request Request to get the named path info arguments
+     * @param bool $partial OPTIONAL Partial path matching (default: false)
+     * @return array|false An array of assigned values or false on a mismatch
+     */
+    #[\Override]
+    public function match($request, $partial = false)
+    {
+        // First try normal PATH_INFO matching
+        $result = parent::match($request, $partial);
+
+        // If no match and 'type' query parameter exists, use it as fallback
+        if (!$result && ($apiType = $request->getQuery('type'))) {
+            if (in_array($apiType, Mage_Api2_Model_Server::getApiTypes())) {
+                // Set matched path to empty string to avoid null in Router.php line 92
+                $this->setMatchedPath('');
+                return ['api_type' => $apiType];
+            }
+        }
+
+        return $result;
+    }
 }

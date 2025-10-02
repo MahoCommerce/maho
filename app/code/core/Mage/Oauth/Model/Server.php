@@ -633,11 +633,10 @@ class Mage_Oauth_Model_Server
      */
     protected function _assembleSignatureKey(string $consumerSecret, ?string $tokenSecret): string
     {
-        $parts = [$this->_urlEncode($consumerSecret)];
-
-        if ($tokenSecret !== null) {
-            $parts[] = $this->_urlEncode($tokenSecret);
-        }
+        $parts = [
+            $this->_urlEncode($consumerSecret),
+            $tokenSecret !== null ? $this->_urlEncode($tokenSecret) : '',
+        ];
 
         return implode('&', $parts);
     }
@@ -671,7 +670,8 @@ class Mage_Oauth_Model_Server
             $baseStrings[] = $this->_urlEncode($this->_normalizeUrl($url));
         }
 
-        $baseStrings[] = $this->_urlEncode($this->_toByteValueOrderedQueryString($encodedParams));
+        $queryString = $this->_toByteValueOrderedQueryString($encodedParams);
+        $baseStrings[] = $this->_urlEncode($queryString);
 
         return implode('&', $baseStrings);
     }

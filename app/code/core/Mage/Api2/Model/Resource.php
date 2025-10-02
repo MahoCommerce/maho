@@ -698,7 +698,9 @@ abstract class Mage_Api2_Model_Resource
     final protected function _applyCollectionModifiers(Varien_Data_Collection_Db $collection)
     {
         $pageNumber = $this->getRequest()->getPageNumber();
-        if ($pageNumber != abs($pageNumber)) {
+        if ($pageNumber === null) {
+            $pageNumber = 1;
+        } elseif ($pageNumber != abs($pageNumber)) {
             $this->_critical(self::RESOURCE_COLLECTION_PAGING_ERROR);
         }
 
