@@ -5430,11 +5430,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/GroupController.php
 
-		-
-			rawMessage: 'Parameter #1 $content of method Zend_Controller_Response_Abstract::setBody() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Customer/System/Config/ValidatevatController.php
 
 		-
 			rawMessage: 'Parameter #2 $timestamp of function date expects int|null, array|bool given.'
@@ -5442,11 +5437,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
 
-		-
-			rawMessage: 'Parameter #2 $value of method Zend_Controller_Response_Abstract::setHeader() expects string, array|bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_IndexController::_getDeniedIframe() has no return type specified.'
@@ -6533,42 +6523,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Response.php
-
-		-
-			rawMessage: 'Parameter #1 $request (Mage_Api2_Model_Request) of method Mage_Api2_Model_Route_Abstract::match() should be compatible with parameter $path (string) of method Zend_Controller_Router_Route::match()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/Abstract.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $defaults.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $locale.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $reqs.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $route.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $translator.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
 
 		-
 			rawMessage: 'Method Mage_Api2_Model_Server::internalCall() has no return type specified.'
@@ -10852,12 +10806,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
 
 		-
-			rawMessage: 'Parameter #2 $loginUrl of method Mage_Customer_Model_Session::authenticate() expects bool|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Sales_Model_Service_Order::register().'
 			identifier: method.notFound
 			count: 1
@@ -11259,53 +11207,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Core/Block/Text.php
 
-		-
-			rawMessage: 'Parameter #2 $value of method Zend_Controller_Response_Abstract::setHeader() expects string, int|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Front/Action.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Request_Http::$_controllerModule has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Request_Http::$_directFrontNames has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Request_Http::$_requestString has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Request_Http::$_requestedRouteName has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Request_Http::$_route has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Request_Http::$_routingInfo has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Request_Http::$_storeCode has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
 
 		-
 			rawMessage: Constructor of class Mage_Core_Controller_Varien_Action has an unused parameter $invokeArgs.
@@ -11349,23 +11250,8 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
-		-
-			rawMessage: 'Parameter #2 $value of method Zend_Controller_Response_Abstract::setHeader() expects string, int|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
-		-
-			rawMessage: 'Property Mage_Core_Controller_Varien_Action::$_request (Mage_Core_Controller_Request_Http) does not accept Zend_Controller_Request_Abstract.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
-		-
-			rawMessage: 'Property Mage_Core_Controller_Varien_Action::$_response (Mage_Core_Controller_Response_Http) does not accept Zend_Controller_Response_Abstract.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
 		-
 			rawMessage: Property Mage_Core_Controller_Varien_Exception::$_defaultActionName has no type specified.
@@ -12399,11 +12285,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Core/Model/Translate/Inline.php
 
-		-
-			rawMessage: 'Method Mage_Core_Model_Url::getRequest() should return Mage_Core_Controller_Request_Http but returns Zend_Controller_Request_Http.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Url.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Url_Rewrite::setTags() invoked with 2 parameters, 1 required.'
@@ -13215,11 +13096,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Setup.php
 
-		-
-			rawMessage: 'Parameter #1 $url of method Mage_Core_Controller_Response_Http::setRedirect() expects string, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Session.php
 
 		-
 			rawMessage: 'Method Mage_Customer_AccountController::_addSessionError() has no return type specified.'
@@ -15032,18 +14908,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/Product/EditController.php
-
-		-
-			rawMessage: 'Parameter #2 $loginUrl of method Mage_Customer_Model_Session::authenticate() expects bool|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Downloadable/controllers/CustomerController.php
-
-		-
-			rawMessage: Dead catch - Mage_Core_Exception is never thrown in the try block.
-			identifier: catch.neverThrown
-			count: 2
-			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Model_Session::setBeforeAuthUrl() invoked with 2 parameters, 1 required.'
@@ -18655,11 +18519,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Observer.php
 
-		-
-			rawMessage: 'Parameter #1 $spec of method Zend_Controller_Response_Abstract::getBody() expects bool, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Observer.php
 
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_addTransaction() has no return type specified.'
@@ -21717,12 +21576,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/controllers/DownloadController.php
-
-		-
-			rawMessage: 'Parameter #2 $loginUrl of method Mage_Customer_Model_Session::authenticate() expects bool|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/controllers/OrderController.php
 
 		-
 			rawMessage: 'Parameter #1 $select of method Varien_Db_Adapter_Interface::updateFromSelect() expects Varien_Db_Select, Zend_Db_Select given.'

@@ -37,7 +37,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
     public function validateAction(): void
     {
         $result = $this->_validate();
-        $this->getResponse()->setBody((int) $result->getIsValid());
+        $this->getResponse()->setBody((string) (int) $result->getIsValid());
     }
 
     /**

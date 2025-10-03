@@ -271,11 +271,8 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
 
     /**
      * Authenticate controller action by login customer
-     *
-     * @param   bool $loginUrl
-     * @return  bool
      */
-    public function authenticate(Mage_Core_Controller_Varien_Action $action, $loginUrl = null)
+    public function authenticate(Mage_Core_Controller_Varien_Action $action, string|null $loginUrl = null): bool
     {
         if ($this->isLoggedIn()) {
             return true;

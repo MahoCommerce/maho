@@ -382,11 +382,8 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
 
     /**
      * Check if requested path starts with one of the admin front names
-     *
-     * @param Zend_Controller_Request_Http $request
-     * @return bool
      */
-    protected function _isAdminFrontNameMatched($request)
+    protected function _isAdminFrontNameMatched(Mage_Core_Controller_Request_Http $request): bool
     {
         return Mage::helper('adminhtml')->isAdminFrontNameMatched($request->getPathInfo());
     }

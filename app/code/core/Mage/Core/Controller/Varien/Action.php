@@ -11,8 +11,6 @@
  */
 
 /**
- * Custom Zend_Controller_Action class (formally)
- *
  * Allows dispatching before and after events for each controller action
  */
 abstract class Mage_Core_Controller_Varien_Action
@@ -109,7 +107,7 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     protected $_removeDefaultTitle = false;
 
-    public function __construct(Zend_Controller_Request_Abstract $request, Zend_Controller_Response_Abstract $response, array $invokeArgs = [])
+    public function __construct(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response, array $invokeArgs = [])
     {
         $this->_request = $request;
         $this->_response = $response;
@@ -1058,7 +1056,7 @@ abstract class Mage_Core_Controller_Varien_Action
             ->setHeader('Pragma', 'public', true)
             ->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0', true)
             ->setHeader('Content-type', $contentType, true)
-            ->setHeader('Content-Length', is_null($contentLength) ? strlen($content) : $contentLength, true)
+            ->setHeader('Content-Length', (string) (is_null($contentLength) ? strlen($content) : $contentLength), true)
             ->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"', true)
             ->setHeader('Last-Modified', date('r'), true);
 

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -74,7 +74,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
      * @param null $filterBlock deprecated
      * @return $this
      */
-    public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
     {
         return $this;
     }

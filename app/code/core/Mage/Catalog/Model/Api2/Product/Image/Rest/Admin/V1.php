@@ -211,7 +211,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
         $apiTypeRoute = Mage::getModel('api2/route_apiType');
 
         $chain = $apiTypeRoute->chain(
-            new Zend_Controller_Router_Route($this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType())),
+            $this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType()),
         );
         $params = [
             'api_type' => $this->getRequest()->getApiType(),
