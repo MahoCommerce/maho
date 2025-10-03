@@ -166,7 +166,7 @@ class Mage_Api2_Model_Multicall
         $apiTypeRoute = Mage::getModel('api2/route_apiType');
 
         $chain = $apiTypeRoute->chain(
-            new Zend_Controller_Router_Route($this->_getConfig()->getMainRoute($subresourceName)),
+            $this->_getConfig()->getMainRoute($subresourceName),
         );
         $params = [];
         $params['api_type'] = 'rest';

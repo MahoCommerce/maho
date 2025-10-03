@@ -34,7 +34,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
     /**
      * @param string $resource
      * @param string $resourceType
-     * @throws Zend_Controller_Response_Exception
+     * @throws Exception
      */
     protected function _processDownload($resource, $resourceType)
     {

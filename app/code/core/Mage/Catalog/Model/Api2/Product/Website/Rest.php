@@ -215,7 +215,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Website_Rest extends Mage_Catalog
         $apiTypeRoute = Mage::getModel('api2/route_apiType');
 
         $chain = $apiTypeRoute->chain(
-            new Zend_Controller_Router_Route($this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType())),
+            $this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType()),
         );
         $params = [
             'api_type' => $this->getRequest()->getApiType(),

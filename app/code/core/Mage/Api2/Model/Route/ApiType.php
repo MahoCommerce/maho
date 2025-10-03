@@ -45,10 +45,10 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
      *
      * @param Mage_Api2_Model_Request $request Request to get the named path info arguments
      * @param bool $partial OPTIONAL Partial path matching (default: false)
-     * @return array|false An array of assigned values or false on a mismatch
+     * @return array<string, mixed>|false An array of assigned values or false on a mismatch
      */
     #[\Override]
-    public function match($request, $partial = false)
+    public function match($request, bool $partial = false): array|false
     {
         // First try normal PATH_INFO matching
         $result = parent::match($request, $partial);

@@ -16,11 +16,9 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
      * Modify request and set to no-route action
      * If store is admin and specified different admin front name,
      * change store to default (Possible when enabled Store Code in URL)
-     *
-     * @return bool
      */
     #[\Override]
-    public function match(Mage_Core_Controller_Request_Http $request)
+    public function match(Mage_Core_Controller_Request_Http $request): bool
     {
         $noRoute        = explode('/', $this->_getNoRouteConfig());
         $moduleName     = isset($noRoute[0]) && $noRoute[0] ? $noRoute[0] : 'core';

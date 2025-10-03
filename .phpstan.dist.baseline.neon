@@ -14941,12 +14941,6 @@ parameters:
 			path: app/code/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/Product/EditController.php
 
 		-
-			rawMessage: Dead catch - Mage_Core_Exception is never thrown in the try block.
-			identifier: catch.neverThrown
-			count: 2
-			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Session::setBeforeAuthUrl() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -26925,13 +26919,13 @@ parameters:
 			path: lib/Varien/Simplexml/Element.php
 
 		-
-			rawMessage: 'Parameter #1 $request (Mage_Api2_Model_Request) of method Mage_Api2_Model_Route_Abstract::match() should be compatible with parameter $path (string) of method Zend_Controller_Router_Route::match()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/Abstract.php
-
-		-
 			rawMessage: 'Call to internal method Symfony\Component\HttpFoundation\Request::get() from outside its root namespace Symfony.'
 			identifier: method.internal
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Request/Http.php
+
+		-
+			rawMessage: 'Parameter #1 $request (Mage_Api2_Model_Request) of method Mage_Api2_Model_Route_Abstract::match() should be compatible with parameter $path (string) of method Mage_Api2_Model_Route_Base::match()'
+			identifier: method.childParameterType
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Route/Abstract.php

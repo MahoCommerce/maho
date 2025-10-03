@@ -870,7 +870,7 @@ class Mage_Oauth_Model_Server
      *
      * @param Mage_Core_Controller_Response_Http|null $response OPTIONAL If NULL - will use internal getter
      * @return string
-     * @throws Zend_Controller_Response_Exception
+     * @throws Exception
      */
     public function reportProblem(Exception $e, ?Mage_Core_Controller_Response_Http $response = null)
     {
