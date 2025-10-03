@@ -224,7 +224,30 @@ class Mage_Core_Controller_Request_Http
 
     public function getParam(string|int|null $key, mixed $default = null): mixed
     {
-        return $this->_params[$key] ?? $this->symfonyRequest->get($key, $default);
+        // First check internal params
+        if (isset($this->_params[$key])) {
+            return $this->_params[$key];
+        }
+
+        // Convert key to string for Symfony parameter bags
+        $stringKey = (string) $key;
+
+        // Then check POST parameters
+        if ($this->symfonyRequest->request->has($stringKey)) {
+            return $this->symfonyRequest->request->get($stringKey);
+        }
+
+        // Then check GET parameters
+        if ($this->symfonyRequest->query->has($stringKey)) {
+            return $this->symfonyRequest->query->get($stringKey);
+        }
+
+        // Finally check route attributes
+        if ($this->symfonyRequest->attributes->has($stringKey)) {
+            return $this->symfonyRequest->attributes->get($stringKey);
+        }
+
+        return $default;
     }
 
     public function getUserParams(): array

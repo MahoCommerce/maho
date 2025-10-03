@@ -59,13 +59,20 @@ abstract class Mage_Api2_Model_Route_Abstract extends Mage_Api2_Model_Route_Base
      * Matches a Request with parts defined by a map. Assigns and
      * returns an array of variables on a successful match.
      *
-     * @param Mage_Api2_Model_Request $request
+     * @param string|Mage_Api2_Model_Request $path Path string or Request object to match
      * @param bool $partial Partial path matching
      * @return array<string, mixed>|false An array of assigned values or false on a mismatch
      */
     #[\Override]
-    public function match($request, bool $partial = false): array|false
+    public function match($path, bool $partial = false): array|false
     {
-        return parent::match(ltrim($request->getPathInfo(), $this->_urlDelimiter), $partial);
+        // Handle both string paths and Request objects
+        if ($path instanceof Mage_Api2_Model_Request) {
+            $pathString = ltrim($path->getPathInfo(), $this->_urlDelimiter);
+        } else {
+            $pathString = $path;
+        }
+
+        return parent::match($pathString, $partial);
     }
 }
