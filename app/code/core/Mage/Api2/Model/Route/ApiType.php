@@ -19,28 +19,6 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
     public const API_ROUTE = 'api/:api_type';
 
     /**
-     * Constructor - sets default route pattern
-     *
-     * When instantiated via Mage::getModel('api2/route_apiType'), Mage passes an empty array.
-     * We need to provide the default 'api/:api_type' pattern, otherwise parent gets empty string.
-     *
-     * @param array<string, mixed> $arguments Optional configuration array
-     */
-    public function __construct(array $arguments = [])
-    {
-        // If config array provided (tests), use it; otherwise use default route
-        if (isset($arguments[self::PARAM_ROUTE])) {
-            parent::__construct($arguments);
-        } else {
-            parent::__construct([
-                self::PARAM_ROUTE => 'api/:api_type',
-                self::PARAM_DEFAULTS => [],
-                self::PARAM_REQS => [],
-            ]);
-        }
-    }
-
-    /**
      * Matches a Request with parts defined by a map. Assigns and
      * returns an array of variables on a successful match.
      *
