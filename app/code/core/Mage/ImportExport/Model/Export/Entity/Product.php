@@ -950,9 +950,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                     }
                     if (!empty($rowMultiselects[$productId][$storeId])) {
                         foreach (array_keys($rowMultiselects[$productId][$storeId]) as $attrKey) {
-                            if (isset($rowMultiselects[$productId][$storeId][$attrKey])) {
-                                $dataRow[$attrKey] = array_shift($rowMultiselects[$productId][$storeId][$attrKey]);
-                            }
+                            $dataRow[$attrKey] = array_shift($rowMultiselects[$productId][$storeId][$attrKey]);
                         }
                     }
 
@@ -1028,9 +1026,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                             }
                             if (!empty($rowMultiselects[$productId][$storeId])) {
                                 foreach (array_keys($rowMultiselects[$productId][$storeId]) as $attrKey) {
-                                    if (isset($rowMultiselects[$productId][$storeId][$attrKey])) {
-                                        $dataRow[$attrKey] = array_shift($rowMultiselects[$productId][$storeId][$attrKey]);
-                                    }
+                                    $dataRow[$attrKey] = array_shift($rowMultiselects[$productId][$storeId][$attrKey]);
                                 }
                             }
                             $writer->writeRow($dataRow);
