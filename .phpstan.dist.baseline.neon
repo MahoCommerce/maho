@@ -26917,15 +26917,3 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Varien/Simplexml/Element.php
-
-		-
-			rawMessage: 'Call to internal method Symfony\Component\HttpFoundation\Request::get() from outside its root namespace Symfony.'
-			identifier: method.internal
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Request/Http.php
-
-		-
-			rawMessage: 'Parameter #1 $request (Mage_Api2_Model_Request) of method Mage_Api2_Model_Route_Abstract::match() should be compatible with parameter $path (string) of method Mage_Api2_Model_Route_Base::match()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/Abstract.php
