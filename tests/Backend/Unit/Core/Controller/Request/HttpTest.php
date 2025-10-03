@@ -104,8 +104,8 @@ describe('Mage_Core_Controller_Request_Http', function () {
                 'group_id' => '1',
                 'addresses' => [
                     ['street' => '123 Main St', 'city' => 'New York'],
-                    ['street' => '456 Oak Ave', 'city' => 'Boston']
-                ]
+                    ['street' => '456 Oak Ave', 'city' => 'Boston'],
+                ],
             ]);
 
             $accountData = $this->request->getParam('account');
@@ -123,7 +123,7 @@ describe('Mage_Core_Controller_Request_Http', function () {
             $this->symfonyRequest->query->set('filters', [
                 'status' => 'active',
                 'category' => ['electronics', 'books'],
-                'price' => ['min' => '10', 'max' => '100']
+                'price' => ['min' => '10', 'max' => '100'],
             ]);
 
             $filters = $this->request->getParam('filters');
@@ -141,9 +141,9 @@ describe('Mage_Core_Controller_Request_Http', function () {
             $this->symfonyRequest->request->set('deep_array', [
                 'level1' => [
                     'level2' => [
-                        'level3' => 'deep_value'
-                    ]
-                ]
+                        'level3' => 'deep_value',
+                    ],
+                ],
             ]);
 
             expect($this->request->getParam('scalar_param'))->toBe('simple_value');
@@ -163,7 +163,7 @@ describe('Mage_Core_Controller_Request_Http', function () {
         it('preserves array structure when setting internal params', function () {
             $complexArray = [
                 'nested' => ['data' => 'value'],
-                'list' => [1, 2, 3]
+                'list' => [1, 2, 3],
             ];
 
             $this->request->setParam('complex', $complexArray);
@@ -177,7 +177,7 @@ describe('Mage_Core_Controller_Request_Http', function () {
             $this->symfonyRequest->request->set('indexed_array', [
                 0 => 'first',
                 1 => 'second',
-                2 => 'third'
+                2 => 'third',
             ]);
 
             $result = $this->request->getParam('indexed_array');
@@ -191,7 +191,7 @@ describe('Mage_Core_Controller_Request_Http', function () {
             $this->symfonyRequest->request->set('mixed_keys', [
                 'string_key' => 'value1',
                 123 => 'value2',
-                'nested' => ['inner' => 'value3']
+                'nested' => ['inner' => 'value3'],
             ]);
 
             $result = $this->request->getParam('mixed_keys');

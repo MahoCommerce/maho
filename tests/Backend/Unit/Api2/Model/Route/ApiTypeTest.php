@@ -213,7 +213,7 @@ describe('Mage_Api2_Model_Route_ApiType', function () {
                 Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
                 Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [
                     'format' => 'json',
-                    'version' => 'v1'
+                    'version' => 'v1',
                 ],
                 Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
             ]);
@@ -232,7 +232,7 @@ describe('Mage_Api2_Model_Route_ApiType', function () {
             $route = new Mage_Api2_Model_Route_ApiType([
                 Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
                 Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [
-                    'format' => 'xml'
+                    'format' => 'xml',
                 ],
                 Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
             ]);
@@ -253,7 +253,7 @@ describe('Mage_Api2_Model_Route_ApiType', function () {
                 Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
                 Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [],
                 Mage_Api2_Model_Route_Abstract::PARAM_REQS => [
-                    'api_type' => 'rest|soap' // Only allow rest or soap
+                    'api_type' => 'rest|soap', // Only allow rest or soap
                 ],
             ]);
 
@@ -277,14 +277,14 @@ describe('Mage_Api2_Model_Route_ApiType', function () {
                 Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => 'api/:api_type',
                 Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => [
                     'module' => 'api',
-                    'controller' => 'index'
+                    'controller' => 'index',
                 ],
                 Mage_Api2_Model_Route_Abstract::PARAM_REQS => [],
             ]);
 
             $resourceRoute = new Mage_Api2_Model_Route_Base(
                 ':resource/:id',
-                ['action' => 'view']
+                ['action' => 'view'],
             );
 
             $chain = $route->chain($resourceRoute);
@@ -310,7 +310,7 @@ describe('Mage_Api2_Model_Route_ApiType', function () {
             ]);
 
             $subresourceRoute = new Mage_Api2_Model_Route_Base(
-                'customers/:customer_id/addresses/:address_id'
+                'customers/:customer_id/addresses/:address_id',
             );
 
             $chain = $apiRoute->chain($subresourceRoute);
