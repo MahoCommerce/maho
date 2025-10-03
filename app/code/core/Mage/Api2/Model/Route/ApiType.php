@@ -19,28 +19,23 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
     public const API_ROUTE = 'api/:api_type';
 
     /**
-     * Prepares the route for mapping by splitting (exploding) it
-     * to a corresponding atomic parts. These parts are assigned
-     * a position which is later used for matching and preparing values.
+     * Constructor - sets default route pattern
      *
-     * @param string|array<string, mixed> $route Map used to match with later submitted URL path, or array of parameters
-     * @param array<string, mixed> $defaults Defaults for map variables with keys as variable names
-     * @param array<string, string> $reqs Regular expression requirements for variables (keys as variable names)
+     * When instantiated via Mage::getModel('api2/route_apiType'), Mage passes an empty array.
+     * We need to provide the default 'api/:api_type' pattern, otherwise parent gets empty string.
+     *
+     * @param array<string, mixed> $arguments Optional configuration array
      */
-    public function __construct(
-        $route,
-        $defaults = [],
-        $reqs = [],
-    ) {
-        // If $route is an array (array format constructor), use it directly
-        if (is_array($route)) {
-            parent::__construct($route);
+    public function __construct(array $arguments = [])
+    {
+        // If config array provided (tests), use it; otherwise use default route
+        if (isset($arguments[self::PARAM_ROUTE])) {
+            parent::__construct($arguments);
         } else {
-            // If $route is a string, construct the arguments array
             parent::__construct([
-                Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => $route,
-                Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => $defaults,
-                Mage_Api2_Model_Route_Abstract::PARAM_REQS => $reqs,
+                self::PARAM_ROUTE => 'api/:api_type',
+                self::PARAM_DEFAULTS => [],
+                self::PARAM_REQS => [],
             ]);
         }
     }
