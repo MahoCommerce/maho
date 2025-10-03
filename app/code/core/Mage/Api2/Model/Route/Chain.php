@@ -55,30 +55,37 @@ class Mage_Api2_Model_Route_Chain extends Mage_Api2_Model_Route_Base
      *
      * Matches first route, then matches remainder against second route.
      *
-     * @param string $path Path to match
+     * @param string|Mage_Api2_Model_Request $path Path string or Request object to match
      * @param bool $partial Allow partial matching
      * @return array<string, mixed>|false
      */
     #[\Override]
-    public function match(string $path, bool $partial = false): array|false
+    public function match($path, bool $partial = false): array|false
     {
+        // Handle both string paths and Request objects
+        if ($path instanceof Mage_Api2_Model_Request) {
+            $pathString = ltrim($path->getPathInfo(), '/');
+        } else {
+            $pathString = $path;
+        }
+
         // Special handling when separator is '/' - use normal partial matching
         if ($this->_separator === '/') {
-            $result1 = $this->_route1->match($path, true);
+            $result1 = $this->_route1->match($pathString, true);
             if ($result1 === false) {
                 return false;
             }
 
             $matchedPath1 = $this->_route1->getMatchedPath();
             if ($matchedPath1) {
-                $remainder = substr($path, strlen($matchedPath1));
+                $remainder = substr($pathString, strlen($matchedPath1));
                 if (str_starts_with($remainder, '/')) {
                     $pathRemainder = substr($remainder, 1);
                 } else {
                     $pathRemainder = $remainder;
                 }
             } else {
-                $pathRemainder = $path;
+                $pathRemainder = $pathString;
             }
 
             $result2 = $this->_route2->match($pathRemainder, $partial);
@@ -102,12 +109,12 @@ class Mage_Api2_Model_Route_Chain extends Mage_Api2_Model_Route_Base
         // For non-'/' separators, try to find the separator and split there
         if ($this->_separator !== '') {
             // Find all occurrences of the separator
-            $separatorPos = strpos($path, $this->_separator);
+            $separatorPos = strpos($pathString, $this->_separator);
 
             // Try different split points
             while ($separatorPos !== false) {
-                $firstPart = substr($path, 0, $separatorPos);
-                $secondPart = substr($path, $separatorPos + strlen($this->_separator));
+                $firstPart = substr($pathString, 0, $separatorPos);
+                $secondPart = substr($pathString, $separatorPos + strlen($this->_separator));
 
                 // Try to match the first part
                 $result1 = $this->_route1->match($firstPart);
@@ -133,14 +140,14 @@ class Mage_Api2_Model_Route_Chain extends Mage_Api2_Model_Route_Base
                 }
 
                 // Try next occurrence
-                $separatorPos = strpos($path, $this->_separator, $separatorPos + 1);
+                $separatorPos = strpos($pathString, $this->_separator, $separatorPos + 1);
             }
         } else {
             // Empty separator - concatenated routes
             // Try all possible split points
-            for ($i = 0; $i <= strlen($path); $i++) {
-                $firstPart = substr($path, 0, $i);
-                $secondPart = substr($path, $i);
+            for ($i = 0; $i <= strlen($pathString); $i++) {
+                $firstPart = substr($pathString, 0, $i);
+                $secondPart = substr($pathString, $i);
 
                 $result1 = $this->_route1->match($firstPart);
                 if ($result1 !== false) {

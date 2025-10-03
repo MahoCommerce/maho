@@ -236,12 +236,14 @@ class Mage_Core_Controller_Request_Http
 
         // Then check POST parameters
         if ($this->symfonyRequest->request->has($stringKey)) {
-            return $this->symfonyRequest->request->get($stringKey);
+            // Use all() to support array values
+            return $this->symfonyRequest->request->all()[$stringKey];
         }
 
         // Then check GET parameters
         if ($this->symfonyRequest->query->has($stringKey)) {
-            return $this->symfonyRequest->query->get($stringKey);
+            // Use all() to support array values
+            return $this->symfonyRequest->query->all()[$stringKey];
         }
 
         // Finally check route attributes

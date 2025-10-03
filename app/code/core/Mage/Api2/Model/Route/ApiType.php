@@ -36,7 +36,17 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
         $translator = null,
         $locale = null,
     ) {
-        parent::__construct([Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => str_replace('.php', '', basename(getenv('SCRIPT_FILENAME'))) . '/:api_type']);
+        // If $route is an array (array format constructor), use it directly
+        if (is_array($route)) {
+            parent::__construct($route);
+        } else {
+            // If $route is a string, construct the arguments array
+            parent::__construct([
+                Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => $route,
+                Mage_Api2_Model_Route_Abstract::PARAM_DEFAULTS => $defaults,
+                Mage_Api2_Model_Route_Abstract::PARAM_REQS => $reqs,
+            ]);
+        }
     }
 
     /**
@@ -54,11 +64,13 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
         $result = parent::match($path, $partial);
 
         // If no match and 'type' query parameter exists from Request object, use it as fallback
-        if (!$result && $path instanceof Mage_Api2_Model_Request && ($apiType = $path->getQuery('type'))) {
-            if (in_array($apiType, Mage_Api2_Model_Server::getApiTypes())) {
+        if (!$result && $path instanceof Mage_Api2_Model_Request) {
+            $apiType = $path->getParam('type');
+            if ($apiType && in_array($apiType, Mage_Api2_Model_Server::getApiTypes())) {
                 // Set matched path to empty string to avoid null in Router.php line 92
                 $this->setMatchedPath('');
-                return ['api_type' => $apiType];
+                // Merge with defaults
+                return ['api_type' => $apiType] + $this->getDefaults();
             }
         }
 

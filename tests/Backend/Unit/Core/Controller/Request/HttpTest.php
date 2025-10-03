@@ -94,6 +94,112 @@ describe('Mage_Core_Controller_Request_Http', function () {
             expect($this->request->getUserParam('existing'))->toBe('old'); // existing not overwritten
             expect($this->request->getUserParam('new'))->toBe('value');
         });
+
+        it('handles array parameters from POST data', function () {
+            // Simulate complex form data with nested arrays (like customer account data)
+            $this->symfonyRequest->request->set('account', [
+                'firstname' => 'John',
+                'lastname' => 'Doe',
+                'email' => 'john@example.com',
+                'group_id' => '1',
+                'addresses' => [
+                    ['street' => '123 Main St', 'city' => 'New York'],
+                    ['street' => '456 Oak Ave', 'city' => 'Boston']
+                ]
+            ]);
+
+            $accountData = $this->request->getParam('account');
+            expect($accountData)->toBeArray();
+            expect($accountData['firstname'])->toBe('John');
+            expect($accountData['lastname'])->toBe('Doe');
+            expect($accountData['email'])->toBe('john@example.com');
+            expect($accountData['addresses'])->toBeArray();
+            expect($accountData['addresses'])->toHaveCount(2);
+            expect($accountData['addresses'][0]['city'])->toBe('New York');
+        });
+
+        it('handles array parameters from GET data', function () {
+            // Simulate array parameters in query string (like filters)
+            $this->symfonyRequest->query->set('filters', [
+                'status' => 'active',
+                'category' => ['electronics', 'books'],
+                'price' => ['min' => '10', 'max' => '100']
+            ]);
+
+            $filters = $this->request->getParam('filters');
+            expect($filters)->toBeArray();
+            expect($filters['status'])->toBe('active');
+            expect($filters['category'])->toBeArray();
+            expect($filters['category'])->toContain('electronics');
+            expect($filters['price']['min'])->toBe('10');
+        });
+
+        it('handles mixed scalar and array parameters', function () {
+            // Mix of scalar and array values
+            $this->symfonyRequest->request->set('scalar_param', 'simple_value');
+            $this->symfonyRequest->request->set('array_param', ['key' => 'value']);
+            $this->symfonyRequest->request->set('deep_array', [
+                'level1' => [
+                    'level2' => [
+                        'level3' => 'deep_value'
+                    ]
+                ]
+            ]);
+
+            expect($this->request->getParam('scalar_param'))->toBe('simple_value');
+            expect($this->request->getParam('array_param'))->toBeArray();
+            expect($this->request->getParam('array_param')['key'])->toBe('value');
+            expect($this->request->getParam('deep_array')['level1']['level2']['level3'])->toBe('deep_value');
+        });
+
+        it('handles empty arrays correctly', function () {
+            $this->symfonyRequest->request->set('empty_array', []);
+
+            $result = $this->request->getParam('empty_array');
+            expect($result)->toBeArray();
+            expect($result)->toBe([]);
+        });
+
+        it('preserves array structure when setting internal params', function () {
+            $complexArray = [
+                'nested' => ['data' => 'value'],
+                'list' => [1, 2, 3]
+            ];
+
+            $this->request->setParam('complex', $complexArray);
+
+            $retrieved = $this->request->getParam('complex');
+            expect($retrieved)->toBeArray();
+            expect($retrieved)->toBe($complexArray);
+        });
+
+        it('handles arrays with numeric keys', function () {
+            $this->symfonyRequest->request->set('indexed_array', [
+                0 => 'first',
+                1 => 'second',
+                2 => 'third'
+            ]);
+
+            $result = $this->request->getParam('indexed_array');
+            expect($result)->toBeArray();
+            expect($result[0])->toBe('first');
+            expect($result[1])->toBe('second');
+            expect($result[2])->toBe('third');
+        });
+
+        it('handles arrays with mixed key types', function () {
+            $this->symfonyRequest->request->set('mixed_keys', [
+                'string_key' => 'value1',
+                123 => 'value2',
+                'nested' => ['inner' => 'value3']
+            ]);
+
+            $result = $this->request->getParam('mixed_keys');
+            expect($result)->toBeArray();
+            expect($result['string_key'])->toBe('value1');
+            expect($result[123])->toBe('value2');
+            expect($result['nested']['inner'])->toBe('value3');
+        });
     });
 
     describe('Symfony Request Compatibility', function () {
