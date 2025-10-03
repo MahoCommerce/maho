@@ -35,13 +35,13 @@ class Mage_Api2_Model_Route_Chain extends Mage_Api2_Model_Route_Base
      * Create a chain of two routes
      *
      * @param Mage_Api2_Model_Route_Base $route1 First route
+     * @param string $separator Separator between routes
      * @param Mage_Api2_Model_Route_Base $route2 Second route
-     * @param string $separator Separator between routes (default: '/')
      */
     public function __construct(
         Mage_Api2_Model_Route_Base $route1,
+        string $separator,
         Mage_Api2_Model_Route_Base $route2,
-        string $separator = '/',
     ) {
         $this->_route1 = $route1;
         $this->_route2 = $route2;
@@ -62,30 +62,103 @@ class Mage_Api2_Model_Route_Chain extends Mage_Api2_Model_Route_Base
     #[\Override]
     public function match(string $path, bool $partial = false): array|false
     {
-        // Match first route
-        $result1 = $this->_route1->match($path, true);
-        if ($result1 === false) {
-            return false;
+        // Special handling when separator is '/' - use normal partial matching
+        if ($this->_separator === '/') {
+            $result1 = $this->_route1->match($path, true);
+            if ($result1 === false) {
+                return false;
+            }
+
+            $matchedPath1 = $this->_route1->getMatchedPath();
+            if ($matchedPath1) {
+                $remainder = substr($path, strlen($matchedPath1));
+                if (str_starts_with($remainder, '/')) {
+                    $pathRemainder = substr($remainder, 1);
+                } else {
+                    $pathRemainder = $remainder;
+                }
+            } else {
+                $pathRemainder = $path;
+            }
+
+            $result2 = $this->_route2->match($pathRemainder, $partial);
+            if ($result2 === false) {
+                return false;
+            }
+
+            // Set combined matched path
+            $matchedPath2 = $this->_route2->getMatchedPath();
+            if ($matchedPath1 && $matchedPath2) {
+                $this->setMatchedPath($matchedPath1 . '/' . $matchedPath2);
+            } elseif ($matchedPath1) {
+                $this->setMatchedPath($matchedPath1);
+            } elseif ($matchedPath2) {
+                $this->setMatchedPath($matchedPath2);
+            }
+
+            return $result2 + $result1;
         }
 
-        // Get matched path and calculate remainder
-        $matchedPath = $this->_route1->getMatchedPath();
-        if ($matchedPath) {
-            $pathRemainder = ltrim(substr($path, strlen($matchedPath)), $this->_separator);
+        // For non-'/' separators, try to find the separator and split there
+        if ($this->_separator !== '') {
+            // Find all occurrences of the separator
+            $separatorPos = strpos($path, $this->_separator);
+
+            // Try different split points
+            while ($separatorPos !== false) {
+                $firstPart = substr($path, 0, $separatorPos);
+                $secondPart = substr($path, $separatorPos + strlen($this->_separator));
+
+                // Try to match the first part
+                $result1 = $this->_route1->match($firstPart);
+                if ($result1 !== false) {
+                    // First part matched, try second part
+                    $result2 = $this->_route2->match($secondPart, $partial);
+                    if ($result2 !== false) {
+                        // Both matched!
+                        $matchedPath1 = $this->_route1->getMatchedPath();
+                        $matchedPath2 = $this->_route2->getMatchedPath();
+
+                        if ($matchedPath1 && $matchedPath2) {
+                            $this->setMatchedPath($matchedPath1 . $this->_separator . $matchedPath2);
+                        } elseif ($matchedPath1) {
+                            $this->setMatchedPath($matchedPath1);
+                        } elseif ($matchedPath2) {
+                            $this->setMatchedPath($matchedPath2);
+                        }
+
+                        // Combine results - second route values override first
+                        return $result2 + $result1;
+                    }
+                }
+
+                // Try next occurrence
+                $separatorPos = strpos($path, $this->_separator, $separatorPos + 1);
+            }
         } else {
-            $pathRemainder = $path;
+            // Empty separator - concatenated routes
+            // Try all possible split points
+            for ($i = 0; $i <= strlen($path); $i++) {
+                $firstPart = substr($path, 0, $i);
+                $secondPart = substr($path, $i);
+
+                $result1 = $this->_route1->match($firstPart);
+                if ($result1 !== false) {
+                    $result2 = $this->_route2->match($secondPart, $partial);
+                    if ($result2 !== false) {
+                        // Both matched!
+                        $matchedPath1 = $this->_route1->getMatchedPath();
+                        $matchedPath2 = $this->_route2->getMatchedPath();
+
+                        $this->setMatchedPath($matchedPath1 . $matchedPath2);
+
+                        return $result2 + $result1;
+                    }
+                }
+            }
         }
 
-        // Match remainder against second route
-        $result2 = $this->_route2->match($pathRemainder, $partial);
-        if ($result2 === false) {
-            return false;
-        }
-
-        // Combine results
-        $this->setMatchedPath($matchedPath . $this->_separator . $this->_route2->getMatchedPath());
-
-        return $result1 + $result2;
+        return false;
     }
 
     /**
@@ -120,5 +193,17 @@ class Mage_Api2_Model_Route_Chain extends Mage_Api2_Model_Route_Base
     public function getDefaults(): array
     {
         return $this->_route1->getDefaults() + $this->_route2->getDefaults();
+    }
+
+    /**
+     * Get specific default value from either route
+     *
+     * @param string $name Name of the default
+     */
+    #[\Override]
+    public function getDefault(string $name): mixed
+    {
+        $defaults = $this->getDefaults();
+        return $defaults[$name] ?? null;
     }
 }

@@ -275,7 +275,7 @@ class Mage_Api2_Model_Route_Base
             $route = new Mage_Api2_Model_Route_Base($route);
         }
 
-        return new Mage_Api2_Model_Route_Chain($this, $route, $separator);
+        return new Mage_Api2_Model_Route_Chain($this, $separator, $route);
     }
 
     /**

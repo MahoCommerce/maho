@@ -60,12 +60,12 @@ describe('Mage_Api2_Model_Route_Chain', function () {
 
     describe('Route Chaining with Variables', function () {
         it('chains routes with overlapping variable names', function () {
-            $route1 = new Mage_Api2_Model_Route_Base('v:version', ['id' => 'default1']);
+            $route1 = new Mage_Api2_Model_Route_Base('v/:version', ['id' => 'default1']);
             $route2 = new Mage_Api2_Model_Route_Base('items/:id', ['id' => 'default2']);
 
             $chain = new Mage_Api2_Model_Route_Chain($route1, '/', $route2);
 
-            $result = $chain->match('v1/items/123');
+            $result = $chain->match('v/1/items/123');
             expect($result)->toBeArray();
             expect($result['version'])->toBe('1');
             expect($result['id'])->toBe('123'); // Second route should override
