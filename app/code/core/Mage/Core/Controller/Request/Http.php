@@ -122,10 +122,12 @@ class Mage_Core_Controller_Request_Http
      */
     protected string|false|null $_rawBody = null;
 
-    public function __construct(string|null $uri = null)
+    public function __construct(string|SymfonyRequest|null $uri = null)
     {
-        // Create Symfony Request from globals or URI
-        if ($uri !== null) {
+        // Accept either a SymfonyRequest object or create one from URI/globals
+        if ($uri instanceof SymfonyRequest) {
+            $this->symfonyRequest = $uri;
+        } elseif ($uri !== null) {
             // Parse URI and create request
             $parsedUrl = parse_url($uri);
             $this->symfonyRequest = SymfonyRequest::create($uri);
@@ -268,7 +270,7 @@ class Mage_Core_Controller_Request_Http
 
     public function setParams(array $array): self
     {
-        $this->_params = $array + $this->_params;
+        $this->_params = $this->_params + $array;
         return $this;
     }
 
@@ -389,9 +391,9 @@ class Mage_Core_Controller_Request_Http
     public function getCookie(string|null $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
-            return $_COOKIE;
+            return $this->symfonyRequest->cookies->all();
         }
-        return $_COOKIE[$key] ?? $default;
+        return $this->symfonyRequest->cookies->get($key, $default);
     }
 
     public function getServer(string|null $key = null, mixed $default = null): mixed
@@ -620,12 +622,34 @@ class Mage_Core_Controller_Request_Http
 
     public function getHeader(string $header): string|false
     {
-        // Symfony uses a different format for headers
+        // First try to get from Symfony headers object
+        $value = $this->symfonyRequest->headers->get($header);
+        if ($value !== null) {
+            return $value;
+        }
+
+        // Fall back to server variables for backwards compatibility
         $header = str_replace('-', '_', strtoupper($header));
         if (!str_starts_with($header, 'HTTP_')) {
             $header = 'HTTP_' . $header;
         }
         return $this->symfonyRequest->server->get($header, false);
+    }
+
+    /**
+     * Get all headers
+     */
+    public function getHeaders(): array
+    {
+        return $this->symfonyRequest->headers->all();
+    }
+
+    /**
+     * Get host from request
+     */
+    public function getHost(): string
+    {
+        return $this->symfonyRequest->getHost();
     }
 
     public function getScheme(): string
@@ -664,6 +688,15 @@ class Mage_Core_Controller_Request_Http
 
     // ========== Maho-specific Methods ==========
 
+    /**
+     * Set original path info
+     */
+    public function setOriginalPathInfo(string $pathInfo): self
+    {
+        $this->_originalPathInfo = $pathInfo;
+        return $this;
+    }
+
     public function getOriginalPathInfo(): string
     {
         if (empty($this->_originalPathInfo)) {
@@ -675,6 +708,15 @@ class Mage_Core_Controller_Request_Http
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
+    /**
+     * Set store code from path
+     */
+    public function setStoreCodeFromPath(string $storeCode): self
+    {
+        $this->_storeCode = $storeCode;
+        return $this;
+    }
+
     public function getStoreCodeFromPath(): ?string
     {
         if (!$this->_storeCode) {
@@ -854,6 +896,14 @@ class Mage_Core_Controller_Request_Http
     }
 
     /**
+     * Get routing info
+     */
+    public function getRoutingInfo(): array
+    {
+        return $this->_routingInfo;
+    }
+
+    /**
      * Collect properties changed by _forward in protected storage
      * before _forward was called first time.
      */
@@ -872,6 +922,15 @@ class Mage_Core_Controller_Request_Http
     }
 
     /**
+     * Set before forward info
+     */
+    public function setBeforeForwardInfo(array $info): self
+    {
+        $this->_beforeForwardInfo = $info;
+        return $this;
+    }
+
+    /**
      * Retrieve property's value which was before _forward call.
      * If property was not changed during _forward call null will be returned.
      * If passed name will be null whole state array will be returned.
@@ -885,6 +944,15 @@ class Mage_Core_Controller_Request_Http
         }
 
         return null;
+    }
+
+    /**
+     * Set _isStraight flag value
+     */
+    public function setIsStraight(bool $flag): self
+    {
+        $this->_isStraight = $flag;
+        return $this;
     }
 
     /**
