@@ -6524,27 +6524,8 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Response.php
 
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $defaults.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
 		-
 			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $locale.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $reqs.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $route.
 			identifier: constructor.unusedParameter
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
