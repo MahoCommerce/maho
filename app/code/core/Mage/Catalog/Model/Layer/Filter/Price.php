@@ -357,7 +357,7 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
      * @return $this
      */
     #[\Override]
-    public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
     {
         /**
          * Filter must be string: $fromPrice-$toPrice

@@ -58,7 +58,7 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
      * @return $this
      */
     #[\Override]
-    public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
     {
         parent::apply($request, $filterBlock);
 

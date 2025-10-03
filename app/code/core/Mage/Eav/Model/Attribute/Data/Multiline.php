@@ -18,7 +18,7 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
      * @return array|string
      */
     #[\Override]
-    public function extractValue(Zend_Controller_Request_Http $request)
+    public function extractValue(Mage_Core_Controller_Request_Http $request)
     {
         $value = $this->_getRequestValue($request);
         if (!is_array($value)) {

@@ -62,7 +62,7 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
      * @return  Mage_Catalog_Model_Layer_Filter_Attribute
      */
     #[\Override]
-    public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
     {
         $filter = $request->getParam($this->_requestVar);
         if (is_array($filter)) {

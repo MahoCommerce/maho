@@ -793,7 +793,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                 ->setHttpResponseCode(200)
                 ->setHeader('Pragma', 'public', true)
                 ->setHeader('Content-type', $contentType, true)
-                ->setHeader('Content-Length', $contentLength)
+                ->setHeader('Content-Length', (string) $contentLength)
                 ->setHeader('Last-Modified', date('r', $contentModify))
                 ->clearBody();
             $this->getResponse()->sendHeaders();

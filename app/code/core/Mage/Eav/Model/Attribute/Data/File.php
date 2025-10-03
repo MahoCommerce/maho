@@ -25,7 +25,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
      * @return false|array|string
      */
     #[\Override]
-    public function extractValue(Zend_Controller_Request_Http $request)
+    public function extractValue(Mage_Core_Controller_Request_Http $request)
     {
         if ($this->getIsAjaxRequest()) {
             return false;

@@ -18,7 +18,7 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
      * @return array|string|false
      */
     #[\Override]
-    public function extractValue(Zend_Controller_Request_Http $request)
+    public function extractValue(Mage_Core_Controller_Request_Http $request)
     {
         $value = $this->_getRequestValue($request);
         return $value ? $this->_applyInputFilter($value) : false;

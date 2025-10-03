@@ -18,7 +18,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
      * @return array|string
      */
     #[\Override]
-    public function extractValue(Zend_Controller_Request_Http $request)
+    public function extractValue(Mage_Core_Controller_Request_Http $request)
     {
         $value = $this->_getRequestValue($request);
         return $this->_applyInputFilter($value);

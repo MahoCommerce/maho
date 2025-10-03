@@ -71,11 +71,9 @@ class Mage_Api2_Model_Request_Internal extends Mage_Api2_Model_Request
 
     /**
      * Override parent method for request emulation during internal call
-     *
-     * @return string
      */
     #[\Override]
-    public function getMethod()
+    public function getMethod(): string
     {
         $method = $this->_method;
         if (!$method) {

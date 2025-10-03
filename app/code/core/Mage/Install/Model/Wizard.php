@@ -52,7 +52,7 @@ class Mage_Install_Model_Wizard
      *
      * @return  Varien_Object | false
      */
-    public function getStepByRequest(Zend_Controller_Request_Abstract $request)
+    public function getStepByRequest(Mage_Core_Controller_Request_Http $request)
     {
         foreach ($this->_steps as $step) {
             if ($step->getController() == $request->getControllerName()

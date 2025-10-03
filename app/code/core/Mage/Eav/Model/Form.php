@@ -305,10 +305,8 @@ abstract class Mage_Eav_Model_Form
 
     /**
      * Prepare request with data and returns it
-     *
-     * @return Zend_Controller_Request_Http
      */
-    public function prepareRequest(array $data)
+    public function prepareRequest(array $data): Mage_Core_Controller_Request_Http
     {
         $request = clone Mage::app()->getRequest();
         $request->setParamSources();
@@ -323,9 +321,8 @@ abstract class Mage_Eav_Model_Form
      *
      * @param string $scope the request scope
      * @param bool $scopeOnly search value only in scope or search value in global too
-     * @return array
      */
-    public function extractData(Zend_Controller_Request_Http $request, $scope = null, $scopeOnly = true)
+    public function extractData(Mage_Core_Controller_Request_Http $request, $scope = null, $scopeOnly = true): array
     {
         $data = [];
         foreach ($this->getAttributes() as $attribute) {

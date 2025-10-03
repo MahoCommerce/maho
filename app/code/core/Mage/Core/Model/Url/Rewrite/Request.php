@@ -57,7 +57,7 @@ class Mage_Core_Model_Url_Rewrite_Request
     /**
      * Constructor
      * Arguments:
-     *   request  - Zend_Controller_Request_Http
+     *   request  - Mage_Core_Controller_Request_Http
      *   config   - Mage_Core_Model_Config
      *   factory  - Mage_Core_Model_Factory
      *   routers  - array

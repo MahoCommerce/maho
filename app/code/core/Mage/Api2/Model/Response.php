@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api2_Model_Response extends Zend_Controller_Response_Http
+class Mage_Api2_Model_Response extends Mage_Core_Controller_Response_Http
 {
     /**
      * Character set which must be used in response
@@ -34,7 +34,7 @@ class Mage_Api2_Model_Response extends Zend_Controller_Response_Http
      * Set header appropriate to specified MIME type
      *
      * @param string $mimeType MIME type
-     * @return $this
+     * @return Mage_Core_Controller_Response_Http
      */
     public function setMimeType($mimeType)
     {

@@ -62,7 +62,7 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
      * @return  Mage_Catalog_Model_Layer_Filter_Category
      */
     #[\Override]
-    public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
     {
         $filter = (int) $request->getParam($this->getRequestVar());
         if (!$filter) {

@@ -10,20 +10,267 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+
+/**
+ * HTTP Response class wrapping Symfony Response
+ *
+ * Provides compatibility layer for Mage_Core_Controller_Response_Http while using Symfony HttpFoundation
+ */
+class Mage_Core_Controller_Response_Http
 {
     /**
-     * Transport object for observers to perform
-     * @var Varien_Object
+     * Symfony Response instance
      */
-    protected static $_transportObject = null;
+    protected SymfonyResponse $symfonyResponse;
 
     /**
-     * Fixes CGI only one Status header allowed bug
-     * @link  http://bugs.php.net/bug.php?id=36705
+     * Transport object for observers to perform
      */
-    #[\Override]
-    public function sendHeaders()
+    protected static ?Varien_Object $_transportObject = null;
+
+    /**
+     * Array of headers
+     */
+    protected array $_headers = [];
+
+    /**
+     * Array of raw headers
+     */
+    protected array $_headersRaw = [];
+
+    /**
+     * HTTP response code
+     */
+    protected int $_httpResponseCode = 200;
+
+    /**
+     * Flag; is this response a redirect?
+     */
+    protected bool $_isRedirect = false;
+
+    /**
+     * Whether or not to render exceptions
+     */
+    protected bool $_renderExceptions = false;
+
+    /**
+     * Array of exceptions
+     */
+    protected array $_exceptions = [];
+
+    /**
+     * Body content
+     */
+    protected array $_body = [];
+
+    /**
+     * Exception thrown by action controller
+     */
+    public bool $headersSentThrowsException = true;
+
+    public function __construct()
+    {
+        $this->symfonyResponse = new SymfonyResponse();
+    }
+
+    /**
+     * Get the Symfony Response instance (for internal use)
+     */
+    public function getSymfonyResponse(): SymfonyResponse
+    {
+        return $this->symfonyResponse;
+    }
+
+    /**
+     * Set a header
+     */
+    public function setHeader(string $name, string $value, bool $replace = false): self
+    {
+        $this->canSendHeaders(true);
+        $name = $this->_normalizeHeader($name);
+
+        if ($replace) {
+            foreach ($this->_headers as $key => $header) {
+                if ($name == $header['name']) {
+                    unset($this->_headers[$key]);
+                }
+            }
+        }
+
+        $this->_headers[] = [
+            'name' => $name,
+            'value' => $value,
+            'replace' => $replace,
+        ];
+
+        $this->symfonyResponse->headers->set($name, $value, $replace);
+
+        return $this;
+    }
+
+    /**
+     * Set redirect URL
+     *
+     * Sets Location header and response code. Forces replacement of any prior
+     * redirects.
+     */
+    public function setRedirect(string $url, int $code = 302): self
+    {
+        /**
+         * Use single transport object instance
+         */
+        if (self::$_transportObject === null) {
+            self::$_transportObject = new Varien_Object();
+        }
+        self::$_transportObject->setUrl($url);
+        self::$_transportObject->setCode($code);
+        Mage::dispatchEvent(
+            'controller_response_redirect',
+            ['response' => $this, 'transport' => self::$_transportObject],
+        );
+
+        $this->canSendHeaders(true);
+        $this->setHeader('Location', self::$_transportObject->getUrl(), true)
+             ->setHttpResponseCode(self::$_transportObject->getCode());
+
+        $this->symfonyResponse->setStatusCode(self::$_transportObject->getCode());
+        $this->_isRedirect = true;
+
+        return $this;
+    }
+
+    /**
+     * Is this a redirect?
+     */
+    public function isRedirect(): bool
+    {
+        return $this->_isRedirect;
+    }
+
+    /**
+     * Return array of headers; see {@link $_headers} for format
+     */
+    public function getHeaders(): array
+    {
+        return $this->_headers;
+    }
+
+    /**
+     * Clear headers
+     */
+    public function clearHeaders(): self
+    {
+        $this->_headers = [];
+        $this->symfonyResponse->headers = new \Symfony\Component\HttpFoundation\ResponseHeaderBag();
+        return $this;
+    }
+
+    /**
+     * Clear header by name
+     */
+    public function clearHeader(string $name): self
+    {
+        $name = $this->_normalizeHeader($name);
+        foreach ($this->_headers as $key => $header) {
+            if ($name == $header['name']) {
+                unset($this->_headers[$key]);
+            }
+        }
+        $this->symfonyResponse->headers->remove($name);
+        return $this;
+    }
+
+    /**
+     * Set raw HTTP header
+     */
+    public function setRawHeader(string $value): self
+    {
+        $this->canSendHeaders(true);
+        $this->_headersRaw[] = $value;
+        return $this;
+    }
+
+    /**
+     * Get all header values as an array
+     */
+    public function getRawHeaders(): array
+    {
+        return $this->_headersRaw;
+    }
+
+    /**
+     * Clear all raw headers
+     */
+    public function clearRawHeaders(): self
+    {
+        $this->_headersRaw = [];
+        return $this;
+    }
+
+    /**
+     * Clear a specific raw header
+     */
+    public function clearRawHeader(string $headerRaw): self
+    {
+        $key = array_search($headerRaw, $this->_headersRaw);
+        if ($key !== false) {
+            unset($this->_headersRaw[$key]);
+        }
+        return $this;
+    }
+
+    /**
+     * Clear all headers, normal and raw
+     */
+    public function clearAllHeaders(): self
+    {
+        return $this->clearHeaders()
+                    ->clearRawHeaders();
+    }
+
+    /**
+     * Set HTTP response code to use with headers
+     */
+    public function setHttpResponseCode(int $code): self
+    {
+        if ((100 > $code) || (599 < $code)) {
+            throw new Exception('Invalid HTTP response code');
+        }
+
+        $this->_httpResponseCode = $code;
+        $this->symfonyResponse->setStatusCode($code);
+        return $this;
+    }
+
+    /**
+     * Retrieve HTTP response code
+     */
+    public function getHttpResponseCode(): int
+    {
+        return $this->_httpResponseCode;
+    }
+
+    /**
+     * Can we send headers?
+     */
+    public function canSendHeaders(bool $throw = false): bool
+    {
+        $ok = headers_sent($file, $line);
+        if ($ok && $throw && $this->headersSentThrowsException) {
+            throw new Exception('Cannot send headers; headers already sent in ' . $file . ', line ' . $line);
+        }
+
+        return !$ok;
+    }
+
+    /**
+     * Send all headers
+     *
+     * Sends any headers specified. If an {@link setHttpResponseCode() HTTP response code}
+     * has been specified, it is sent with the first header.
+     */
+    public function sendHeaders(): self
     {
         if (!$this->canSendHeaders()) {
             Mage::log('HEADERS ALREADY SENT: ' . mageDebugBacktrace(true, true, true));
@@ -52,11 +299,305 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
             }
         }
 
-        return parent::sendHeaders();
+        $httpCodeSent = false;
+
+        foreach ($this->_headersRaw as $header) {
+            if (!$httpCodeSent && $this->_httpResponseCode) {
+                header($header, true, $this->_httpResponseCode);
+                $httpCodeSent = true;
+            } else {
+                header($header);
+            }
+        }
+
+        foreach ($this->_headers as $header) {
+            if (!$httpCodeSent && $this->_httpResponseCode) {
+                header($header['name'] . ': ' . $header['value'], $header['replace'], $this->_httpResponseCode);
+                $httpCodeSent = true;
+            } else {
+                header($header['name'] . ': ' . $header['value'], $header['replace']);
+            }
+        }
+
+        if (!$httpCodeSent) {
+            header('HTTP/1.1 ' . $this->_httpResponseCode);
+        }
+
+        return $this;
     }
 
-    #[\Override]
-    public function sendResponse()
+    /**
+     * Set body content
+     */
+    public function setBody(string $content, string|null $name = null): self
+    {
+        if (is_null($name)) {
+            $name = 'default';
+        }
+
+        $this->_body[$name] = $content;
+        $this->symfonyResponse->setContent($this->outputBody());
+        return $this;
+    }
+
+    /**
+     * Append content to the body content
+     */
+    public function appendBody(string $content, string|null $name = null): self
+    {
+        if (is_null($name)) {
+            $name = 'default';
+        }
+
+        if (isset($this->_body[$name])) {
+            $this->_body[$name] .= $content;
+        } else {
+            $this->_body[$name] = $content;
+        }
+
+        $this->symfonyResponse->setContent($this->outputBody());
+        return $this;
+    }
+
+    /**
+     * Clear body content
+     */
+    public function clearBody(string|null $name = null): self
+    {
+        if (!is_null($name)) {
+            if (isset($this->_body[$name])) {
+                unset($this->_body[$name]);
+            }
+        } else {
+            $this->_body = [];
+        }
+
+        $this->symfonyResponse->setContent($this->outputBody());
+        return $this;
+    }
+
+    /**
+     * Return the body content
+     */
+    public function getBody(bool|string $spec = false): string|array
+    {
+        if (false === $spec) {
+            return $this->outputBody();
+        } elseif (true === $spec) {
+            return $this->_body;
+        } elseif (isset($this->_body[$spec])) {
+            return $this->_body[$spec];
+        }
+
+        return '';
+    }
+
+    /**
+     * Append content to a body segment
+     */
+    public function append(string $name, string $content): self
+    {
+        if (isset($this->_body[$name])) {
+            $this->_body[$name] .= $content;
+        } else {
+            $this->_body[$name] = $content;
+        }
+
+        $this->symfonyResponse->setContent($this->outputBody());
+        return $this;
+    }
+
+    /**
+     * Prepend content to a body segment
+     */
+    public function prepend(string $name, string $content): self
+    {
+        if (isset($this->_body[$name])) {
+            $this->_body[$name] = $content . $this->_body[$name];
+        } else {
+            $this->_body[$name] = $content;
+        }
+
+        $this->symfonyResponse->setContent($this->outputBody());
+        return $this;
+    }
+
+    /**
+     * Insert content before a named segment
+     */
+    public function insert(string $name, string $content, string|null $parent = null, bool $before = false): self
+    {
+        if (isset($this->_body[$name])) {
+            $this->_body[$name] = $content;
+        } else {
+            $tmp = [];
+            $inserted = false;
+
+            foreach ($this->_body as $key => $value) {
+                if ($key == $parent) {
+                    if ($before) {
+                        $tmp[$name] = $content;
+                        $tmp[$key] = $value;
+                    } else {
+                        $tmp[$key] = $value;
+                        $tmp[$name] = $content;
+                    }
+                    $inserted = true;
+                } else {
+                    $tmp[$key] = $value;
+                }
+            }
+
+            if (!$inserted) {
+                $tmp[$name] = $content;
+            }
+
+            $this->_body = $tmp;
+        }
+
+        $this->symfonyResponse->setContent($this->outputBody());
+        return $this;
+    }
+
+    /**
+     * Echo the body segments
+     */
+    public function outputBody(): string
+    {
+        $content = '';
+        foreach ($this->_body as $segment) {
+            $content .= $segment;
+        }
+        return $content;
+    }
+
+    /**
+     * Register an exception with the response
+     */
+    public function setException(Throwable $e): self
+    {
+        $this->_exceptions[] = $e;
+        return $this;
+    }
+
+    /**
+     * Retrieve the exception stack
+     */
+    public function getException(): array
+    {
+        return $this->_exceptions;
+    }
+
+    /**
+     * Has an exception been registered with the response?
+     */
+    public function isException(): bool
+    {
+        return !empty($this->_exceptions);
+    }
+
+    /**
+     * Does the response object contain an exception of a given type?
+     */
+    public function hasExceptionOfType(string $type): bool
+    {
+        foreach ($this->_exceptions as $e) {
+            if ($e instanceof $type) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Does the response object contain an exception with a given message?
+     */
+    public function hasExceptionOfMessage(string $message): bool
+    {
+        foreach ($this->_exceptions as $e) {
+            if ($message == $e->getMessage()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Does the response object contain an exception with a given code?
+     */
+    public function hasExceptionOfCode(int $code): bool
+    {
+        $code = (int) $code;
+        foreach ($this->_exceptions as $e) {
+            if ($code == $e->getCode()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieve first exception of given type
+     */
+    public function getExceptionByType(string $type): false|Throwable
+    {
+        foreach ($this->_exceptions as $e) {
+            if ($e instanceof $type) {
+                return $e;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieve first exception with a given message
+     */
+    public function getExceptionByMessage(string $message): false|Throwable
+    {
+        foreach ($this->_exceptions as $e) {
+            if ($message == $e->getMessage()) {
+                return $e;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieve first exception with a given code
+     */
+    public function getExceptionByCode(int $code): false|Throwable
+    {
+        $code = (int) $code;
+        foreach ($this->_exceptions as $e) {
+            if ($code == $e->getCode()) {
+                return $e;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Flag; are exceptions being rendered?
+     */
+    public function renderExceptions(bool|null $flag = null): bool
+    {
+        if (null !== $flag) {
+            $this->_renderExceptions = (bool) $flag;
+        }
+
+        return $this->_renderExceptions;
+    }
+
+    /**
+     * Send the response, including all headers
+     */
+    public function sendResponse(): void
     {
         Mage::dispatchEvent('http_response_send_before', ['response' => $this]);
 
@@ -68,29 +609,40 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
             $this->setBody($processedBody);
         }
 
-        parent::sendResponse();
+        $this->sendHeaders();
+
+        if ($this->isException() && $this->renderExceptions()) {
+            $exceptions = '';
+            foreach ($this->getException() as $e) {
+                $exceptions .= $e->__toString() . "\n";
+            }
+            echo $exceptions;
+            return;
+        }
+
+        echo $this->outputBody();
     }
 
     /**
-     * Additionally check for session messages in several domains case
+     * Magic __toString functionality
      */
     #[\Override]
-    public function setRedirect($url, $code = 302)
+    public function __toString(): string
     {
-        /**
-         * Use single transport object instance
-         */
-        if (self::$_transportObject === null) {
-            self::$_transportObject = new Varien_Object();
-        }
-        self::$_transportObject->setUrl($url);
-        self::$_transportObject->setCode($code);
-        Mage::dispatchEvent(
-            'controller_response_redirect',
-            ['response' => $this, 'transport' => self::$_transportObject],
-        );
+        ob_start();
+        $this->sendResponse();
+        return ob_get_clean();
+    }
 
-        return parent::setRedirect(self::$_transportObject->getUrl(), self::$_transportObject->getCode());
+    /**
+     * Normalize a header name
+     */
+    protected function _normalizeHeader(string $name): string
+    {
+        $filtered = str_replace(['-', '_'], ' ', (string) $name);
+        $filtered = ucwords(strtolower($filtered));
+        $filtered = str_replace(' ', '-', $filtered);
+        return $filtered;
     }
 
     /**

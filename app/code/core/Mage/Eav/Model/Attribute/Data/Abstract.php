@@ -342,7 +342,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      *
      * @return mixed
      */
-    protected function _getRequestValue(Zend_Controller_Request_Http $request)
+    protected function _getRequestValue(Mage_Core_Controller_Request_Http $request)
     {
         $attrCode  = $this->getAttribute()->getAttributeCode();
         if ($this->_requestScope) {
@@ -372,7 +372,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      *
      * @return array|string
      */
-    abstract public function extractValue(Zend_Controller_Request_Http $request);
+    abstract public function extractValue(Mage_Core_Controller_Request_Http $request);
 
     /**
      * Validate data

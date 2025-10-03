@@ -74,7 +74,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
      * @param null $filterBlock deprecated
      * @return $this
      */
-    public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
+    public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
     {
         return $this;
     }
