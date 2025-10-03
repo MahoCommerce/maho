@@ -65,13 +65,32 @@ class Mage_Core_Controller_Response_Http
     protected array $_body = [];
 
     /**
+     * Body segment order
+     */
+    protected array $_bodyOrder = [];
+
+    /**
+     * Output callback
+     */
+    protected mixed $_outputCallback = null;
+
+    /**
      * Exception thrown by action controller
      */
-    public bool $headersSentThrowsException = true;
+    public bool $headersSentThrowsException = false;
 
-    public function __construct()
+    public function __construct(SymfonyResponse|null $symfonyResponse = null)
     {
-        $this->symfonyResponse = new SymfonyResponse();
+        if ($symfonyResponse) {
+            $this->symfonyResponse = $symfonyResponse;
+            // Sync content and code
+            $this->setBody($symfonyResponse->getContent() ?: '');
+            $this->_httpResponseCode = $symfonyResponse->getStatusCode();
+        } else {
+            $this->symfonyResponse = new SymfonyResponse();
+            // Set default protocol version to 1.1
+            $this->symfonyResponse->setProtocolVersion('1.1');
+        }
     }
 
     /**
@@ -85,7 +104,7 @@ class Mage_Core_Controller_Response_Http
     /**
      * Set a header
      */
-    public function setHeader(string $name, string $value, bool $replace = false): self
+    public function setHeader(string $name, string $value, bool $replace = true): self
     {
         $this->canSendHeaders(true);
         $name = $this->_normalizeHeader($name);
@@ -137,6 +156,16 @@ class Mage_Core_Controller_Response_Http
         $this->symfonyResponse->setStatusCode(self::$_transportObject->getCode());
         $this->_isRedirect = true;
 
+        return $this;
+    }
+
+    /**
+     * Set redirect URL without exit
+     */
+    public function setRedirectUrl(string $url): self
+    {
+        $this->setHeader('Location', $url, true);
+        $this->_isRedirect = true;
         return $this;
     }
 
@@ -360,6 +389,26 @@ class Mage_Core_Controller_Response_Http
     }
 
     /**
+     * Prepend content to body
+     */
+    public function prependBody(string $content, string|null $name = null): self
+    {
+        if (is_null($name)) {
+            $name = 'default';
+        }
+
+        if (!isset($this->_body[$name])) {
+            $this->_body[$name] = $content;
+        } else {
+            $this->_body[$name] = $content . $this->_body[$name];
+        }
+
+        $this->symfonyResponse->setContent($this->outputBody());
+
+        return $this;
+    }
+
+    /**
      * Clear body content
      */
     public function clearBody(string|null $name = null): self
@@ -460,14 +509,52 @@ class Mage_Core_Controller_Response_Http
     }
 
     /**
+     * Set body segment output order
+     */
+    public function setOutputOrder(array $order): self
+    {
+        $this->_bodyOrder = $order;
+        return $this;
+    }
+
+    /**
+     * Set output callback
+     */
+    public function setOutputCallback(mixed $callback): self
+    {
+        $this->_outputCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * Get output callback
+     */
+    public function getOutputCallback(): mixed
+    {
+        return $this->_outputCallback;
+    }
+
+    /**
      * Echo the body segments
      */
     public function outputBody(): string
     {
         $content = '';
-        foreach ($this->_body as $segment) {
-            $content .= $segment;
+
+        // If order is specified, use it
+        if (!empty($this->_bodyOrder)) {
+            foreach ($this->_bodyOrder as $key) {
+                if (isset($this->_body[$key])) {
+                    $content .= $this->_body[$key];
+                }
+            }
+        } else {
+            // Otherwise use natural order
+            foreach ($this->_body as $segment) {
+                $content .= $segment;
+            }
         }
+
         return $content;
     }
 
@@ -486,6 +573,22 @@ class Mage_Core_Controller_Response_Http
     public function getException(): array
     {
         return $this->_exceptions;
+    }
+
+    /**
+     * Retrieve the exception stack (alias)
+     */
+    public function getExceptions(): array
+    {
+        return $this->_exceptions;
+    }
+
+    /**
+     * Has an exception been registered with the response? (alias for isException)
+     */
+    public function hasExceptions(): bool
+    {
+        return !empty($this->_exceptions);
     }
 
     /**
@@ -643,6 +746,76 @@ class Mage_Core_Controller_Response_Http
         $filtered = ucwords(strtolower($filtered));
         $filtered = str_replace(' ', '-', $filtered);
         return $filtered;
+    }
+
+    /**
+     * Set cookie
+     */
+    public function setCookie(
+        string $name,
+        string $value = '',
+        int $lifetime = 0,
+        string $path = '/',
+        string|null $domain = null,
+        bool $secure = false,
+        bool $httponly = false
+    ): self {
+        // Set expiry time
+        if ($lifetime > 0) {
+            $expire = time() + $lifetime;
+        } else {
+            $expire = 0;
+        }
+
+        // Build cookie header
+        $cookieHeader = $name . '=' . urlencode($value);
+        if ($expire > 0) {
+            $cookieHeader .= '; expires=' . gmdate('D, d-M-Y H:i:s', $expire) . ' GMT';
+        }
+        if (!empty($path)) {
+            $cookieHeader .= '; path=' . $path;
+        }
+        if (!empty($domain)) {
+            $cookieHeader .= '; domain=' . $domain;
+        }
+        if ($secure) {
+            $cookieHeader .= '; Secure';
+        }
+        if ($httponly) {
+            $cookieHeader .= '; HttpOnly';
+        }
+
+        $this->setHeader('Set-Cookie', $cookieHeader, false);
+
+        return $this;
+    }
+
+    /**
+     * Clear cookie (set with past expiry)
+     */
+    public function clearCookie(string $name, string $path = '/', string|null $domain = null): self
+    {
+        // Set cookie with past expiry time
+        $cookieHeader = $name . '=deleted';
+        $cookieHeader .= '; expires=' . gmdate('D, d-M-Y H:i:s', time() - 3600) . ' GMT';
+        if (!empty($path)) {
+            $cookieHeader .= '; path=' . $path;
+        }
+        if (!empty($domain)) {
+            $cookieHeader .= '; domain=' . $domain;
+        }
+
+        $this->setHeader('Set-Cookie', $cookieHeader, false);
+
+        return $this;
+    }
+
+    /**
+     * Check if response has been sent
+     */
+    public function isSent(): bool
+    {
+        return headers_sent();
     }
 
     /**
