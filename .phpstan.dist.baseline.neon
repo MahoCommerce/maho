@@ -6525,18 +6525,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Response.php
 
 		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $locale.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
-			rawMessage: Constructor of class Mage_Api2_Model_Route_ApiType has an unused parameter $translator.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
-
-		-
 			rawMessage: 'Method Mage_Api2_Model_Server::internalCall() has no return type specified.'
 			identifier: missingType.return
 			count: 1

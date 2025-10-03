@@ -23,18 +23,14 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
      * to a corresponding atomic parts. These parts are assigned
      * a position which is later used for matching and preparing values.
      *
-     * @param string $route Map used to match with later submitted URL path
-     * @param array $defaults Defaults for map variables with keys as variable names
-     * @param array $reqs Regular expression requirements for variables (keys as variable names)
-     * @param mixed $translator Translator to use for this instance (unused, kept for compatibility)
-     * @param mixed $locale
+     * @param string|array<string, mixed> $route Map used to match with later submitted URL path, or array of parameters
+     * @param array<string, mixed> $defaults Defaults for map variables with keys as variable names
+     * @param array<string, string> $reqs Regular expression requirements for variables (keys as variable names)
      */
     public function __construct(
         $route,
         $defaults = [],
         $reqs = [],
-        $translator = null,
-        $locale = null,
     ) {
         // If $route is an array (array format constructor), use it directly
         if (is_array($route)) {
