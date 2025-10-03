@@ -758,7 +758,7 @@ class Mage_Core_Controller_Response_Http
         string $path = '/',
         string|null $domain = null,
         bool $secure = false,
-        bool $httponly = false
+        bool $httponly = false,
     ): self {
         // Set expiry time
         if ($lifetime > 0) {
