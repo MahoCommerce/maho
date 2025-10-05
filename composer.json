@@ -63,9 +63,9 @@
         "symfony/var-dumper": "^7.3"
     },
     "replace": {
-        "magento-hackathon/magento-composer-installer": "*",
-        "openmage/magento-lts": "*",
-        "paragonie/random_compat": "*",
+        "magento-hackathon/magento-composer-installer": "^99.99",
+        "openmage/magento-lts": "^99.99",
+        "paragonie/random_compat": "^99.99",
         "symfony/polyfill-ctype": "*",
         "symfony/polyfill-mbstring": "*",
         "symfony/polyfill-intl-grapheme": "*",
