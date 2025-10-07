@@ -36,8 +36,13 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
         if (!$result && $path instanceof Mage_Api2_Model_Request) {
             $apiType = $path->getParam('type');
             if ($apiType && in_array($apiType, Mage_Api2_Model_Server::getApiTypes())) {
-                // Set matched path to empty string to avoid null in Router.php line 92
-                $this->setMatchedPath('');
+                // When using query parameter, check if path starts with /api_type and trim it
+                $pathInfo = $path->getPathInfo();
+                if (str_starts_with($pathInfo, '/' . $apiType)) {
+                    $this->setMatchedPath($apiType);
+                } else {
+                    $this->setMatchedPath('');
+                }
                 // Merge with defaults
                 return ['api_type' => $apiType] + $this->getDefaults();
             }

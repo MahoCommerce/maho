@@ -79,13 +79,18 @@ class Mage_Core_Controller_Response_Http
      */
     public bool $headersSentThrowsException = false;
 
-    public function __construct(SymfonyResponse|null $symfonyResponse = null)
+    public function __construct(array|SymfonyResponse|null $args = null)
     {
-        if ($symfonyResponse) {
-            $this->symfonyResponse = $symfonyResponse;
+        // Handle both array (Mage factory) and SymfonyResponse (direct instantiation) arguments
+        if ($args instanceof SymfonyResponse) {
+            $this->symfonyResponse = $args;
             // Sync content and code
-            $this->setBody($symfonyResponse->getContent() ?: '');
-            $this->_httpResponseCode = $symfonyResponse->getStatusCode();
+            $this->setBody($args->getContent() ?: '');
+            $this->_httpResponseCode = $args->getStatusCode();
+        } elseif (is_array($args) && isset($args[0]) && $args[0] instanceof SymfonyResponse) {
+            $this->symfonyResponse = $args[0];
+            $this->setBody($args[0]->getContent() ?: '');
+            $this->_httpResponseCode = $args[0]->getStatusCode();
         } else {
             $this->symfonyResponse = new SymfonyResponse();
             // Set default protocol version to 1.1
