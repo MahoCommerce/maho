@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,8 +32,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Range extends Mage_Adminhtm
             return $this->getData('value', $index);
         }
         $value = $this->getData('value');
-        if ((isset($value['from']) && strlen($value['from']) > 0)
-            || (isset($value['to']) && strlen($value['to']) > 0)
+        if ((isset($value['from']) && (string) $value['from'] !== '')
+            || (isset($value['to']) && (string) $value['to'] !== '')
         ) {
             return $value;
         }

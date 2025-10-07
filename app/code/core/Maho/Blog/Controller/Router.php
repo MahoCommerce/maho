@@ -18,7 +18,7 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
     }
 
     #[\Override]
-    public function match(Zend_Controller_Request_Http $request): bool
+    public function match(Mage_Core_Controller_Request_Http $request): bool
     {
         if (!Mage::isInstalled() || !Mage::helper('blog')->isEnabled()) {
             return false;

@@ -137,7 +137,7 @@ class Mage_Oauth_Model_Server
     /**
      * Request object
      *
-     * @var Mage_Core_Controller_Request_Http|Zend_Controller_Request_Http
+     * @var Mage_Core_Controller_Request_Http|Mage_Core_Controller_Request_Http
      */
     protected $_request;
 
@@ -151,7 +151,7 @@ class Mage_Oauth_Model_Server
     /**
      * Response object
      *
-     * @var Zend_Controller_Response_Http
+     * @var Mage_Core_Controller_Response_Http
      */
     protected $_response = null;
 
@@ -165,13 +165,13 @@ class Mage_Oauth_Model_Server
     /**
      * Internal constructor not depended on params
      *
-     * @param Zend_Controller_Request_Http $request OPTIONAL Request object (If not specified - use singleton)
+     * @param Mage_Core_Controller_Request_Http $request OPTIONAL Request object (If not specified - use singleton)
      * @throws Exception
      */
     public function __construct($request = null)
     {
         if (is_object($request)) {
-            if (!$request instanceof Zend_Controller_Request_Http) {
+            if (!$request instanceof Mage_Core_Controller_Request_Http) {
                 throw new Exception('Invalid request object passed');
             }
             $this->_request = $request;
@@ -256,7 +256,7 @@ class Mage_Oauth_Model_Server
     /**
      * Retrieve response object
      *
-     * @return Zend_Controller_Response_Http
+     * @return Mage_Core_Controller_Response_Http
      */
     protected function _getResponse()
     {
@@ -868,11 +868,11 @@ class Mage_Oauth_Model_Server
     /**
      * Create response string for problem during request and set HTTP error code
      *
-     * @param Zend_Controller_Response_Http|null $response OPTIONAL If NULL - will use internal getter
+     * @param Mage_Core_Controller_Response_Http|null $response OPTIONAL If NULL - will use internal getter
      * @return string
-     * @throws Zend_Controller_Response_Exception
+     * @throws Exception
      */
-    public function reportProblem(Exception $e, ?Zend_Controller_Response_Http $response = null)
+    public function reportProblem(Exception $e, ?Mage_Core_Controller_Response_Http $response = null)
     {
         $eMsg = $e->getMessage();
 
@@ -908,7 +908,7 @@ class Mage_Oauth_Model_Server
      *
      * @return $this
      */
-    public function setResponse(Zend_Controller_Response_Http $response)
+    public function setResponse(Mage_Core_Controller_Response_Http $response)
     {
         $this->_response = $response;
 

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -121,9 +121,9 @@ class Mage_Catalog_Model_Api2_Product_Category_Rest_Admin_V1 extends Mage_Catalo
         /** @var Mage_Api2_Model_Route_ApiType $apiTypeRoute */
         $apiTypeRoute = Mage::getModel('api2/route_apiType');
 
-        $chain = $apiTypeRoute->chain(new Zend_Controller_Router_Route(
+        $chain = $apiTypeRoute->chain(
             $this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType()),
-        ));
+        );
         $params = [
             'api_type' => $this->getRequest()->getApiType(),
             'id' => $this->getRequest()->getParam('id'),

@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api2_Model_Request extends Zend_Controller_Request_Http
+class Mage_Api2_Model_Request extends Mage_Core_Controller_Request_Http
 {
     /**
      * Character set which must be used in request

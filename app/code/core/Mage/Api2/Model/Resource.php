@@ -862,7 +862,7 @@ abstract class Mage_Api2_Model_Resource
         $apiTypeRoute = Mage::getModel('api2/route_apiType');
 
         $chain = $apiTypeRoute->chain(
-            new Zend_Controller_Router_Route($this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType())),
+            $this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType()),
         );
         $params = [
             'api_type' => $this->getRequest()->getApiType(),

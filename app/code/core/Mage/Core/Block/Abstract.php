@@ -112,7 +112,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Request object
      *
-     * @var Zend_Controller_Request_Http
+     * @var Mage_Core_Controller_Request_Http
      */
     protected $_request;
 
