@@ -131,7 +131,7 @@ class Mage_Core_Model_Url extends Varien_Object
     /**
      * Controller request object
      *
-     * @var Zend_Controller_Request_Http
+     * @var Mage_Core_Controller_Request_Http
      */
     protected $_request;
 
@@ -275,7 +275,7 @@ class Mage_Core_Model_Url extends Varien_Object
      *
      * @return $this
      */
-    public function setRequest(Zend_Controller_Request_Http $request)
+    public function setRequest(Mage_Core_Controller_Request_Http $request)
     {
         $this->_request = $request;
         return $this;

@@ -10,114 +10,470 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+
 /**
- * Custom Zend_Controller_Request_Http class (formally)
+ * HTTP Request class wrapping Symfony Request
  *
- * Allows dispatching before and after events for each controller action
+ * Provides compatibility layer for Mage_Core_Controller_Request_Http while using Symfony HttpFoundation
  */
-class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
+class Mage_Core_Controller_Request_Http
 {
     public const XML_NODE_DIRECT_FRONT_NAMES = 'global/request/direct_front_name';
     public const DEFAULT_HTTP_PORT = 80;
     public const DEFAULT_HTTPS_PORT = 443;
+    public const SCHEME_HTTP = 'http';
+    public const SCHEME_HTTPS = 'https';
+
+    /**
+     * Symfony Request instance
+     */
+    protected SymfonyRequest $symfonyRequest;
 
     /**
      * ORIGINAL_PATH_INFO
-     * @var string
      */
-    protected $_originalPathInfo = '';
-    protected $_storeCode       = null;
-    protected $_requestString   = '';
+    protected string $_originalPathInfo = '';
+    protected ?string $_storeCode = null;
+    protected string $_requestString = '';
 
     /**
      * Path info array used before applying rewrite from config
-     *
-     * @var null|array
      */
-    protected $_rewritedPathInfo = null;
-    protected $_requestedRouteName = null;
-    protected $_routingInfo = [];
-
-    protected $_route;
-
-    protected $_directFrontNames = null;
-    protected $_controllerModule = null;
+    protected ?array $_rewritedPathInfo = null;
+    protected ?string $_requestedRouteName = null;
+    protected array $_routingInfo = [];
+    protected ?string $_route = null;
+    protected ?array $_directFrontNames = null;
+    protected ?string $_controllerModule = null;
 
     /**
-     * Streight request flag.
+     * Straight request flag.
      * If flag is determined no additional logic is applicable
-     *
-     * @var bool $_isStraight
      */
-    protected $_isStraight = false;
+    protected bool $_isStraight = false;
 
     /**
      * Request's original information before forward.
-     *
-     * @var array
      */
-    protected $_beforeForwardInfo = [];
+    protected array $_beforeForwardInfo = [];
 
     /**
      * Flag for recognizing if request internally forwarded
-     *
-     * @var bool
      */
-    protected $_internallyForwarded = false;
+    protected bool $_internallyForwarded = false;
 
     /**
-     * Returns ORIGINAL_PATH_INFO.
-     * This value is calculated instead of reading PATH_INFO
-     * directly from $_SERVER due to cross-platform differences.
-     *
-     * @return string 'something.html'|'/'|'/path0'|'/path0/path1/'|'/path0/path1/path2'|etc
+     * Has the action been dispatched?
      */
-    public function getOriginalPathInfo()
+    protected bool $_dispatched = false;
+
+    /**
+     * Module/Controller/Action info
+     */
+    protected ?string $_module = null;
+    protected ?string $_controller = null;
+    protected ?string $_action = null;
+
+    /**
+     * Keys for retrieving MCA from params
+     */
+    protected string $_moduleKey = 'module';
+    protected string $_controllerKey = 'controller';
+    protected string $_actionKey = 'action';
+
+    /**
+     * Request parameters
+     */
+    protected array $_params = [];
+
+    /**
+     * Aliases
+     */
+    protected array $_aliases = [];
+
+    /**
+     * PATH_INFO
+     */
+    protected string $_pathInfo = '';
+
+    /**
+     * Base URL
+     */
+    protected ?string $_baseUrl = null;
+
+    /**
+     * Base path
+     */
+    protected ?string $_basePath = null;
+
+    /**
+     * REQUEST_URI
+     */
+    protected ?string $_requestUri = null;
+
+    /**
+     * Allowed parameter sources
+     */
+    protected array $_paramSources = ['_GET', '_POST'];
+
+    /**
+     * Raw request body
+     */
+    protected string|false|null $_rawBody = null;
+
+    public function __construct(string|SymfonyRequest|null $uri = null)
     {
-        if (empty($this->_originalPathInfo)) {
-            $this->setPathInfo();
+        // Accept either a SymfonyRequest object or create one from URI/globals
+        if ($uri instanceof SymfonyRequest) {
+            $this->symfonyRequest = $uri;
+        } elseif ($uri !== null) {
+            // Parse URI and create request
+            $parsedUrl = parse_url($uri);
+            $this->symfonyRequest = SymfonyRequest::create($uri);
+        } else {
+            $this->symfonyRequest = SymfonyRequest::createFromGlobals();
         }
-        return $this->_originalPathInfo;
     }
 
     /**
-     * @return string|null
-     * @throws Mage_Core_Model_Store_Exception
+     * Get the Symfony Request instance (for internal use)
      */
-    public function getStoreCodeFromPath()
+    public function getSymfonyRequest(): SymfonyRequest
     {
-        if (!$this->_storeCode) {
-            // get store view code
-            if ($this->_canBeStoreCodeInUrl()) {
-                $p = explode('/', trim($this->getPathInfo(), '/'));
-                $storeCode = $p[0];
+        return $this->symfonyRequest;
+    }
 
-                $stores = Mage::app()->getStores(true, true);
+    // ========== Mage_Core_Controller_Request_Http Methods ==========
 
-                if ($storeCode !== '' && isset($stores[$storeCode])) {
-                    array_shift($p);
-                    $this->setPathInfo(implode('/', $p));
-                    $this->_storeCode = $storeCode;
-                    Mage::app()->setCurrentStore($storeCode);
-                } else {
-                    $this->_storeCode = Mage::app()->getStore()->getCode();
-                }
-            } else {
-                $this->_storeCode = Mage::app()->getStore()->getCode();
+    public function getModuleName(): ?string
+    {
+        if ($this->_module === null) {
+            $this->_module = $this->getParam($this->getModuleKey());
+        }
+        return $this->_module;
+    }
+
+    public function setModuleName(string|null $value): self
+    {
+        $this->_module = $value;
+        return $this;
+    }
+
+    public function getControllerName(): ?string
+    {
+        if ($this->_controller === null) {
+            $this->_controller = $this->getParam($this->getControllerKey());
+        }
+        return $this->_controller;
+    }
+
+    public function setControllerName(string|null $value): self
+    {
+        $this->_controller = $value;
+        return $this;
+    }
+
+    public function getActionName(): ?string
+    {
+        if ($this->_action === null) {
+            $this->_action = $this->getParam($this->getActionKey());
+        }
+        return $this->_action;
+    }
+
+    public function setActionName(string|null $value): self
+    {
+        $this->_action = $value;
+        if ($value === null) {
+            $this->setParam($this->getActionKey(), $value);
+        }
+        return $this;
+    }
+
+    public function getModuleKey(): string
+    {
+        return $this->_moduleKey;
+    }
+
+    public function setModuleKey(string $key): self
+    {
+        $this->_moduleKey = (string) $key;
+        return $this;
+    }
+
+    public function getControllerKey(): string
+    {
+        return $this->_controllerKey;
+    }
+
+    public function setControllerKey(string $key): self
+    {
+        $this->_controllerKey = (string) $key;
+        return $this;
+    }
+
+    public function getActionKey(): string
+    {
+        return $this->_actionKey;
+    }
+
+    public function setActionKey(string $key): self
+    {
+        $this->_actionKey = (string) $key;
+        return $this;
+    }
+
+    public function getParam(string|int|null $key, mixed $default = null): mixed
+    {
+        // First check internal params
+        if (isset($this->_params[$key])) {
+            return $this->_params[$key];
+        }
+
+        // Convert key to string for Symfony parameter bags
+        $stringKey = (string) $key;
+
+        // Then check POST parameters
+        if ($this->symfonyRequest->request->has($stringKey)) {
+            // Use all() to support array values
+            return $this->symfonyRequest->request->all()[$stringKey];
+        }
+
+        // Then check GET parameters
+        if ($this->symfonyRequest->query->has($stringKey)) {
+            // Use all() to support array values
+            return $this->symfonyRequest->query->all()[$stringKey];
+        }
+
+        // Finally check route attributes
+        if ($this->symfonyRequest->attributes->has($stringKey)) {
+            return $this->symfonyRequest->attributes->get($stringKey);
+        }
+
+        return $default;
+    }
+
+    public function getUserParams(): array
+    {
+        return $this->_params;
+    }
+
+    public function getUserParam(string|int $key, mixed $default = null): mixed
+    {
+        return $this->_params[$key] ?? $default;
+    }
+
+    public function setParam(string|int $key, mixed $value): self
+    {
+        $this->_params[$key] = $value;
+        return $this;
+    }
+
+    public function setParams(array $array): self
+    {
+        $this->_params = $this->_params + $array;
+        return $this;
+    }
+
+    public function getParams(): array
+    {
+        $params = $this->_params;
+        foreach ($this->_paramSources as $source) {
+            if (isset($GLOBALS[$source]) && is_array($GLOBALS[$source])) {
+                $params += $GLOBALS[$source];
             }
         }
-        return $this->_storeCode;
+        return $params;
     }
 
-    /**
-     * Set the PATH_INFO string
-     * Set the ORIGINAL_PATH_INFO string
-     *
-     * @param string|null $pathInfo
-     * @return Zend_Controller_Request_Http
-     */
-    #[\Override]
-    public function setPathInfo($pathInfo = null)
+    public function clearParams(): self
+    {
+        $this->_params = [];
+        return $this;
+    }
+
+    public function setDispatched(bool $flag = true): self
+    {
+        $this->_dispatched = (bool) $flag;
+        return $this;
+    }
+
+    public function isDispatched(): bool
+    {
+        return $this->_dispatched;
+    }
+
+    // ========== Mage_Core_Controller_Request_Http Methods ==========
+
+    public function __get(string $key): mixed
+    {
+        if (isset($this->_params[$key])) {
+            return $this->_params[$key];
+        } elseif (isset($_GET[$key])) {
+            return $_GET[$key];
+        } elseif (isset($_POST[$key])) {
+            return $_POST[$key];
+        } elseif (isset($_COOKIE[$key])) {
+            return $_COOKIE[$key];
+        } elseif (isset($_SERVER[$key])) {
+            return $_SERVER[$key];
+        } elseif (isset($_ENV[$key])) {
+            return $_ENV[$key];
+        }
+        return null;
+    }
+
+    public function get(string $key): mixed
+    {
+        return $this->__get($key);
+    }
+
+    public function __set(string $key, mixed $value): void
+    {
+        throw new Exception('Setting values via the overloading operator is prohibited; use setPost(), setQuery(), or setParam()');
+    }
+
+    public function set(string $key, mixed $value): void
+    {
+        throw new Exception('Setting values via set() is prohibited; use setPost(), setQuery(), or setParam()');
+    }
+
+    public function __isset(string $key): bool
+    {
+        return isset($this->_params[$key])
+            || isset($_GET[$key])
+            || isset($_POST[$key])
+            || isset($_COOKIE[$key])
+            || isset($_SERVER[$key])
+            || isset($_ENV[$key]);
+    }
+
+    public function has(string $key): bool
+    {
+        return $this->__isset($key);
+    }
+
+    public function setQuery(array|string $spec, mixed $value = null): self
+    {
+        if (is_array($spec)) {
+            $_GET = $spec;
+        } else {
+            $_GET[$spec] = $value;
+        }
+        return $this;
+    }
+
+    public function getQuery(string|null $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $_GET;
+        }
+        return $_GET[$key] ?? $default;
+    }
+
+    public function setPost(array|string $spec, mixed $value = null): self
+    {
+        if (is_array($spec)) {
+            $_POST = $spec;
+        } else {
+            $_POST[$spec] = $value;
+        }
+        return $this;
+    }
+
+    public function getPost(string|null $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $_POST;
+        }
+        return $_POST[$key] ?? $default;
+    }
+
+    public function getCookie(string|null $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $this->symfonyRequest->cookies->all();
+        }
+        return $this->symfonyRequest->cookies->get($key, $default);
+    }
+
+    public function getServer(string|null $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $_SERVER;
+        }
+        return $_SERVER[$key] ?? $default;
+    }
+
+    public function getEnv(string|null $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $_ENV;
+        }
+        return $_ENV[$key] ?? $default;
+    }
+
+    public function setRequestUri(string|null $requestUri = null): self
+    {
+        if ($requestUri === null) {
+            $requestUri = $this->symfonyRequest->getRequestUri();
+        }
+        $this->_requestUri = $requestUri;
+        return $this;
+    }
+
+    public function getRequestUri(): ?string
+    {
+        if ($this->_requestUri === null) {
+            $this->_requestUri = $this->symfonyRequest->getRequestUri();
+        }
+        return $this->_requestUri;
+    }
+
+    public function setBaseUrl(string|null $baseUrl = null): self
+    {
+        if ($baseUrl === null) {
+            $baseUrl = $this->symfonyRequest->getBaseUrl();
+        }
+        $this->_baseUrl = $baseUrl;
+        return $this;
+    }
+
+    public function getBaseUrl(bool $raw = false): string
+    {
+        if ($this->_baseUrl === null) {
+            $this->_baseUrl = $this->symfonyRequest->getBaseUrl();
+        }
+        $url = $this->_baseUrl;
+        $url = str_replace('\\', '/', $url);
+        return $url;
+    }
+
+    public function setBasePath(string|null $basePath = null): self
+    {
+        if ($basePath === null) {
+            $basePath = $this->symfonyRequest->getBasePath();
+        }
+        $this->_basePath = $basePath;
+        return $this;
+    }
+
+    public function getBasePath(): string
+    {
+        if ($this->_basePath === null) {
+            $this->_basePath = $this->symfonyRequest->getBasePath();
+        }
+        $path = $this->_basePath;
+        if (empty($path)) {
+            $path = '/';
+        } else {
+            $path = str_replace('\\', '/', $path);
+        }
+        return $path;
+    }
+
+    public function setPathInfo(string|null $pathInfo = null): self
     {
         if ($pathInfo === null) {
             $requestUri = $this->getRequestUri();
@@ -137,9 +493,9 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
             if ($baseUrl && $pathInfo && (stripos($pathInfo, '/') !== 0)) {
                 $pathInfo = '';
                 $this->setActionName('noRoute');
-            } elseif ($baseUrl !== null && !$pathInfo) {
+            } elseif ($baseUrl && !$pathInfo) {
                 $pathInfo = '';
-            } elseif ($baseUrl === null) {
+            } elseif (!$baseUrl) {
                 $pathInfo = $requestUri;
             }
 
@@ -166,14 +522,233 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
         return $this;
     }
 
+    public function getPathInfo(): string
+    {
+        if ($this->_pathInfo === '') {
+            $this->setPathInfo();
+        }
+        return $this->_pathInfo;
+    }
+
+    public function setParamSources(array $paramSources = []): self
+    {
+        $this->_paramSources = $paramSources;
+        return $this;
+    }
+
+    public function getParamSources(): array
+    {
+        return $this->_paramSources;
+    }
+
+    public function setAlias(string $name, string $target): self
+    {
+        $this->_aliases[$name] = $target;
+        return $this;
+    }
+
+    public function getAlias(string $name): ?string
+    {
+        $aliases = $this->getAliases();
+        return $aliases[$name] ?? null;
+    }
+
+    public function getAliases(): array
+    {
+        return $this->_routingInfo['aliases'] ?? $this->_aliases;
+    }
+
+    public function getMethod(): string
+    {
+        return $this->symfonyRequest->getMethod();
+    }
+
+    public function isPost(): bool
+    {
+        return $this->symfonyRequest->isMethod('POST');
+    }
+
+    public function isGet(): bool
+    {
+        return $this->symfonyRequest->isMethod('GET');
+    }
+
+    public function isPut(): bool
+    {
+        return $this->symfonyRequest->isMethod('PUT');
+    }
+
+    public function isDelete(): bool
+    {
+        return $this->symfonyRequest->isMethod('DELETE');
+    }
+
+    public function isHead(): bool
+    {
+        return $this->symfonyRequest->isMethod('HEAD');
+    }
+
+    public function isOptions(): bool
+    {
+        return $this->symfonyRequest->isMethod('OPTIONS');
+    }
+
+    public function isPatch(): bool
+    {
+        return $this->symfonyRequest->isMethod('PATCH');
+    }
+
+    public function isXmlHttpRequest(): bool
+    {
+        return $this->symfonyRequest->isXmlHttpRequest();
+    }
+
+    public function isFlashRequest(): bool
+    {
+        $header = strtolower($this->getHeader('USER_AGENT'));
+        return str_contains($header, ' flash');
+    }
+
+    public function isSecure(): bool
+    {
+        return $this->symfonyRequest->isSecure();
+    }
+
+    public function getRawBody(): string|false
+    {
+        if ($this->_rawBody === null) {
+            $this->_rawBody = $this->symfonyRequest->getContent();
+        }
+        return $this->_rawBody;
+    }
+
+    public function getHeader(string $header): string|false
+    {
+        // First try to get from Symfony headers object
+        $value = $this->symfonyRequest->headers->get($header);
+        if ($value !== null) {
+            return $value;
+        }
+
+        // Fall back to server variables for backwards compatibility
+        $header = str_replace('-', '_', strtoupper($header));
+        if (!str_starts_with($header, 'HTTP_')) {
+            $header = 'HTTP_' . $header;
+        }
+        return $this->symfonyRequest->server->get($header, false);
+    }
+
+    /**
+     * Get all headers
+     */
+    public function getHeaders(): array
+    {
+        return $this->symfonyRequest->headers->all();
+    }
+
+    /**
+     * Get host from request
+     */
+    public function getHost(): string
+    {
+        return $this->symfonyRequest->getHost();
+    }
+
+    public function getScheme(): string
+    {
+        return $this->getServer('HTTPS') == 'on'
+          || $this->getServer('HTTP_X_FORWARDED_PROTO') == 'https'
+          || (Mage::isInstalled() && Mage::app()->isCurrentlySecure()) ?
+            self::SCHEME_HTTPS :
+            self::SCHEME_HTTP;
+    }
+
+    public function getHttpHost(bool $trimPort = true): false|string
+    {
+        if (!isset($_SERVER['HTTP_HOST'])) {
+            return false;
+        }
+        $host = $_SERVER['HTTP_HOST'];
+        if ($trimPort) {
+            $hostParts = explode(':', $_SERVER['HTTP_HOST']);
+            $host = $hostParts[0];
+        }
+
+        if (str_contains($host, ',') || str_contains($host, ';')) {
+            $response = new Mage_Core_Controller_Response_Http();
+            $response->setHttpResponseCode(400)->sendHeaders();
+            exit();
+        }
+
+        return $host;
+    }
+
+    public function getClientIp(bool $checkProxy = true): ?string
+    {
+        return $this->symfonyRequest->getClientIp();
+    }
+
+    // ========== Maho-specific Methods ==========
+
+    /**
+     * Set original path info
+     */
+    public function setOriginalPathInfo(string $pathInfo): self
+    {
+        $this->_originalPathInfo = $pathInfo;
+        return $this;
+    }
+
+    public function getOriginalPathInfo(): string
+    {
+        if (empty($this->_originalPathInfo)) {
+            $this->setPathInfo();
+        }
+        return $this->_originalPathInfo;
+    }
+
+    /**
+     * @throws Mage_Core_Model_Store_Exception
+     */
+    /**
+     * Set store code from path
+     */
+    public function setStoreCodeFromPath(string $storeCode): self
+    {
+        $this->_storeCode = $storeCode;
+        return $this;
+    }
+
+    public function getStoreCodeFromPath(): ?string
+    {
+        if (!$this->_storeCode) {
+            // get store view code
+            if ($this->_canBeStoreCodeInUrl()) {
+                $p = explode('/', trim($this->getPathInfo(), '/'));
+                $storeCode = $p[0];
+
+                $stores = Mage::app()->getStores(true, true);
+
+                if ($storeCode !== '' && isset($stores[$storeCode])) {
+                    array_shift($p);
+                    $this->setPathInfo(implode('/', $p));
+                    $this->_storeCode = $storeCode;
+                    Mage::app()->setCurrentStore($storeCode);
+                } else {
+                    $this->_storeCode = Mage::app()->getStore()->getCode();
+                }
+            } else {
+                $this->_storeCode = Mage::app()->getStore()->getCode();
+            }
+        }
+        return $this->_storeCode;
+    }
+
     /**
      * Specify new path info
      * It happen when occur rewrite based on configuration
-     *
-     * @param   string $pathInfo
-     * @return  Mage_Core_Controller_Request_Http
      */
-    public function rewritePathInfo($pathInfo)
+    public function rewritePathInfo(string $pathInfo): self
     {
         if (($pathInfo != $this->getPathInfo()) && ($this->_rewritedPathInfo === null)) {
             $this->_rewritedPathInfo = explode('/', trim($this->getPathInfo(), '/'));
@@ -184,10 +759,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Check if can be store code as part of url
-     *
-     * @return bool
      */
-    protected function _canBeStoreCodeInUrl()
+    protected function _canBeStoreCodeInUrl(): bool
     {
         return Mage::isInstalled() && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL);
     }
@@ -195,11 +768,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
     /**
      * Check if code declared as direct access frontend name
      * this mean what this url can be used without store code
-     *
-     * @param   string $code
-     * @return  bool
      */
-    public function isDirectAccessFrontendName($code)
+    public function isDirectAccessFrontendName(string $code): bool
     {
         $names = $this->getDirectFrontNames();
         return isset($names[$code]);
@@ -207,10 +777,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Get list of front names available with access without store code
-     *
-     * @return array
      */
-    public function getDirectFrontNames()
+    public function getDirectFrontNames(): array
     {
         if (is_null($this->_directFrontNames)) {
             $names = Mage::getConfig()->getNode(self::XML_NODE_DIRECT_FRONT_NAMES);
@@ -223,56 +791,19 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
         return $this->_directFrontNames;
     }
 
-    /**
-     * @return Zend_Controller_Request_Http
-     */
-    public function getOriginalRequest()
+    public function getOriginalRequest(): self
     {
-        $request = new Zend_Controller_Request_Http();
+        $request = new self();
         $request->setPathInfo($this->getOriginalPathInfo());
         return $request;
     }
 
-    /**
-     * @return string
-     */
-    public function getRequestString()
+    public function getRequestString(): string
     {
         return $this->_requestString;
     }
 
-    /**
-     * @return string
-     */
-    #[\Override]
-    public function getBasePath()
-    {
-        $path = parent::getBasePath();
-        if (empty($path)) {
-            $path = '/';
-        } else {
-            $path = str_replace('\\', '/', $path);
-        }
-        return $path;
-    }
-
-    /**
-     * @param bool $raw
-     * @return string
-     */
-    #[\Override]
-    public function getBaseUrl($raw = false)
-    {
-        $url = parent::getBaseUrl($raw);
-        $url = str_replace('\\', '/', $url);
-        return $url;
-    }
-
-    /**
-     * @param string $route
-     * @return $this
-     */
-    public function setRouteName($route)
+    public function setRouteName(string $route): self
     {
         $this->_route = $route;
         $router = Mage::app()->getFrontController()->getRouterByRoute($route);
@@ -286,81 +817,15 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getRouteName()
+    public function getRouteName(): ?string
     {
         return $this->_route;
     }
 
     /**
-     * Get the request URI scheme
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getScheme()
-    {
-        return $this->getServer('HTTPS') == 'on'
-          || $this->getServer('HTTP_X_FORWARDED_PROTO') == 'https'
-          || (Mage::isInstalled() && Mage::app()->isCurrentlySecure()) ?
-            self::SCHEME_HTTPS :
-            self::SCHEME_HTTP;
-    }
-
-    /**
-     * Retrieve HTTP HOST
-     *
-     * @param bool $trimPort
-     * @return false|string
-     */
-    #[\Override]
-    public function getHttpHost($trimPort = true)
-    {
-        if (!isset($_SERVER['HTTP_HOST'])) {
-            return false;
-        }
-        $host = $_SERVER['HTTP_HOST'];
-        if ($trimPort) {
-            $hostParts = explode(':', $_SERVER['HTTP_HOST']);
-            $host =  $hostParts[0];
-        }
-
-        if (str_contains($host, ',') || str_contains($host, ';')) {
-            $response = new Zend_Controller_Response_Http();
-            $response->setHttpResponseCode(400)->sendHeaders();
-            exit();
-        }
-
-        return $host;
-    }
-
-    /**
-     * Set a member of the $_POST superglobal
-     *
-     * @param string|array $key
-     * @param mixed $value
-     * @return $this
-     */
-    #[\Override]
-    public function setPost($key, $value = null)
-    {
-        if (is_array($key)) {
-            $_POST = $key;
-        } else {
-            $_POST[$key] = $value;
-        }
-        return $this;
-    }
-
-    /**
      * Specify module name where was found currently used controller
-     *
-     * @param   string $module
-     * @return  Mage_Core_Controller_Request_Http
      */
-    public function setControllerModule($module)
+    public function setControllerModule(string $module): self
     {
         $this->_controllerModule = $module;
         return $this;
@@ -368,77 +833,16 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Get module name of currently used controller
-     *
-     * @return  string
      */
-    public function getControllerModule()
+    public function getControllerModule(): ?string
     {
         return $this->_controllerModule;
     }
 
     /**
-     * Retrieve the module name
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getModuleName()
-    {
-        return $this->_module;
-    }
-    /**
-     * Retrieve the controller name
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getControllerName()
-    {
-        return $this->_controller;
-    }
-    /**
-     * Retrieve the action name
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getActionName()
-    {
-        return $this->_action;
-    }
-
-    /**
-     * Retrieve an alias
-     *
-     * Retrieve the actual key represented by the alias $name.
-     *
-     * @param string $name
-     * @return string|null Returns null when no alias exists
-     */
-    #[\Override]
-    public function getAlias($name)
-    {
-        $aliases = $this->getAliases();
-        return $aliases[$name] ?? null;
-    }
-
-    /**
-     * Retrieve the list of all aliases
-     *
-     * @return array
-     */
-    #[\Override]
-    public function getAliases()
-    {
-        return $this->_routingInfo['aliases'] ?? parent::getAliases();
-    }
-
-    /**
      * Get route name used in request (ignore rewrite)
-     *
-     * @return string
      */
-    public function getRequestedRouteName()
+    public function getRequestedRouteName(): ?string
     {
         if (isset($this->_routingInfo['requested_route'])) {
             return $this->_routingInfo['requested_route'];
@@ -458,10 +862,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Get controller name used in request (ignore rewrite)
-     *
-     * @return string
      */
-    public function getRequestedControllerName()
+    public function getRequestedControllerName(): ?string
     {
         if (isset($this->_routingInfo['requested_controller'])) {
             return $this->_routingInfo['requested_controller'];
@@ -474,10 +876,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Get action name used in request (ignore rewrite)
-     *
-     * @return string
      */
-    public function getRequestedActionName()
+    public function getRequestedActionName(): ?string
     {
         if (isset($this->_routingInfo['requested_action'])) {
             return $this->_routingInfo['requested_action'];
@@ -490,25 +890,26 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Set routing info data
-     *
-     * @param array $data
-     * @return $this
      */
-    public function setRoutingInfo($data)
+    public function setRoutingInfo(array $data): self
     {
-        if (is_array($data)) {
-            $this->_routingInfo = $data;
-        }
+        $this->_routingInfo = $data;
         return $this;
+    }
+
+    /**
+     * Get routing info
+     */
+    public function getRoutingInfo(): array
+    {
+        return $this->_routingInfo;
     }
 
     /**
      * Collect properties changed by _forward in protected storage
      * before _forward was called first time.
-     *
-     * @return $this
      */
-    public function initForward()
+    public function initForward(): self
     {
         if (empty($this->_beforeForwardInfo)) {
             $this->_beforeForwardInfo = [
@@ -523,14 +924,20 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
     }
 
     /**
+     * Set before forward info
+     */
+    public function setBeforeForwardInfo(array $info): self
+    {
+        $this->_beforeForwardInfo = $info;
+        return $this;
+    }
+
+    /**
      * Retrieve property's value which was before _forward call.
      * If property was not changed during _forward call null will be returned.
      * If passed name will be null whole state array will be returned.
-     *
-     * @param string $name
-     * @return array|string|null
      */
-    public function getBeforeForwardInfo($name = null)
+    public function getBeforeForwardInfo(string|null $name = null): array|string|null
     {
         if (is_null($name)) {
             return $this->_beforeForwardInfo;
@@ -542,12 +949,18 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
     }
 
     /**
-     * Specify/get _isStraight flag value
-     *
-     * @param bool $flag
-     * @return bool
+     * Set _isStraight flag value
      */
-    public function isStraight($flag = null)
+    public function setIsStraight(bool $flag): self
+    {
+        $this->_isStraight = $flag;
+        return $this;
+    }
+
+    /**
+     * Specify/get _isStraight flag value
+     */
+    public function isStraight(bool|null $flag = null): bool
     {
         if ($flag !== null) {
             $this->_isStraight = $flag;
@@ -557,10 +970,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Check is Request from AJAX
-     *
-     * @return bool
      */
-    public function isAjax()
+    public function isAjax(): bool
     {
         if ($this->isXmlHttpRequest()) {
             return true;
@@ -573,11 +984,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Define that request was forwarded internally
-     *
-     * @param bool $flag
-     * @return $this
      */
-    public function setInternallyForwarded($flag = true)
+    public function setInternallyForwarded(bool $flag = true): self
     {
         $this->_internallyForwarded = (bool) $flag;
         return $this;
@@ -585,10 +993,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     /**
      * Checks if request was forwarded internally
-     *
-     * @return bool
      */
-    public function getInternallyForwarded()
+    public function getInternallyForwarded(): bool
     {
         return $this->_internallyForwarded;
     }

@@ -19,46 +19,32 @@ class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract imple
     public const API_ROUTE = 'api/:api_type';
 
     /**
-     * Prepares the route for mapping by splitting (exploding) it
-     * to a corresponding atomic parts. These parts are assigned
-     * a position which is later used for matching and preparing values.
-     *
-     * @param string $route Map used to match with later submitted URL path
-     * @param array $defaults Defaults for map variables with keys as variable names
-     * @param array $reqs Regular expression requirements for variables (keys as variable names)
-     * @param mixed $translator Translator to use for this instance (unused, kept for compatibility)
-     * @param mixed $locale
-     */
-    public function __construct(
-        $route,
-        $defaults = [],
-        $reqs = [],
-        $translator = null,
-        $locale = null,
-    ) {
-        parent::__construct([Mage_Api2_Model_Route_Abstract::PARAM_ROUTE => str_replace('.php', '', basename(getenv('SCRIPT_FILENAME'))) . '/:api_type']);
-    }
-
-    /**
      * Matches a Request with parts defined by a map. Assigns and
      * returns an array of variables on a successful match.
      *
-     * @param Mage_Api2_Model_Request $request Request to get the named path info arguments
+     * @param string|Mage_Api2_Model_Request $path Path string or Request object to match
      * @param bool $partial OPTIONAL Partial path matching (default: false)
-     * @return array|false An array of assigned values or false on a mismatch
+     * @return array<string, mixed>|false An array of assigned values or false on a mismatch
      */
     #[\Override]
-    public function match($request, $partial = false)
+    public function match($path, bool $partial = false): array|false
     {
         // First try normal PATH_INFO matching
-        $result = parent::match($request, $partial);
+        $result = parent::match($path, $partial);
 
-        // If no match and 'type' query parameter exists, use it as fallback
-        if (!$result && ($apiType = $request->getQuery('type'))) {
-            if (in_array($apiType, Mage_Api2_Model_Server::getApiTypes())) {
-                // Set matched path to empty string to avoid null in Router.php line 92
-                $this->setMatchedPath('');
-                return ['api_type' => $apiType];
+        // If no match and 'type' query parameter exists from Request object, use it as fallback
+        if (!$result && $path instanceof Mage_Api2_Model_Request) {
+            $apiType = $path->getParam('type');
+            if ($apiType && in_array($apiType, Mage_Api2_Model_Server::getApiTypes())) {
+                // When using query parameter, check if path starts with /api_type and trim it
+                $pathInfo = $path->getPathInfo();
+                if (str_starts_with($pathInfo, '/' . $apiType)) {
+                    $this->setMatchedPath($apiType);
+                } else {
+                    $this->setMatchedPath('');
+                }
+                // Merge with defaults
+                return ['api_type' => $apiType] + $this->getDefaults();
             }
         }
 
