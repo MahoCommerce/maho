@@ -1527,7 +1527,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $costArr = [];
         $priceArr = [];
         $errorTitle = '';
-        if (strlen($rateResponse) > 0) {
+        if ($rateResponse !== '') {
             $rateResponseData = json_decode($rateResponse, true);
             if (@$rateResponseData['RateResponse']['Response']['ResponseStatus']['Description'] === 'Success') {
                 $arr = $rateResponseData['RateResponse']['RatedShipment'] ?? [];

@@ -153,7 +153,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
     protected function _dispatch(&$resource, $fields)
     {
         foreach ($fields as $name => $validator) {
-            if (is_string($validator) && strlen($validator) > 0 && array_key_exists($name, $resource)) {
+            if (is_string($validator) && $validator !== '' && array_key_exists($name, $resource)) {
                 $call = 'validate' . $validator;
                 $this->$call($resource[$name]);
             }
@@ -233,7 +233,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
      */
     public function validateUrl(&$var): void
     {
-        if (is_string($var) && strlen($var) > 0) {
+        if (is_string($var) && $var !== '') {
             $urlregex = "/^(https?|ftp)\:\/\/([a-z0-9+\!\*\(\)\,\;\?\&\=\$\_\.\-]+(\:[a-z0-9+\!\*\(\)\,\;\?\&\=\$\_\.\-]+)?@)?[a-z0-9\+\$\_\-]+(\.[a-z0-9+\$\_\-]+)*(\:[0-9]{2,5})?(\/([a-z0-9+\$\_\-]\.?)+)*\/?(\?[a-z\+\&\$\_\.\-][a-z0-9\;\:\@\/\&\%\=\+\$\_\.\-]*)?(#[a-z\_\.\-][a-z0-9\+\$\_\.\-]*)?$/i";
             if (!preg_match($urlregex, $var)) {
                 throw new Exception('url_not_valid');
