@@ -47,6 +47,24 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tabs extends Mage_A
             ]);
         }
 
+        // Add Email Automation tab
+        $this->addTab('email_automation', [
+            'label'     => Mage::helper('customersegmentation')->__('Email Automation'),
+            'title'     => Mage::helper('customersegmentation')->__('Email Automation Settings'),
+            'content'   => $this->getLayout()->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailAutomation')->toHtml(),
+        ]);
+
+        // Add Email Sequences tab (only for existing segments)
+        if ($segment && $segment->getId()) {
+            $sequenceCount = $segment->getEmailSequences()->getSize();
+            $this->addTab('email_sequences', [
+                'label'     => Mage::helper('customersegmentation')->__('Email Sequences') . ($sequenceCount ? ' (' . $sequenceCount . ')' : ''),
+                'title'     => Mage::helper('customersegmentation')->__('Manage Email Sequences'),
+                'url'       => $this->getUrl('*/*/sequencesGrid', ['_current' => true]),
+                'class'     => 'ajax',
+            ]);
+        }
+
         return parent::_beforeToHtml();
     }
 }

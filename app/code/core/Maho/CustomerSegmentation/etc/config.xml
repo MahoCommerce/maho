@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Maho_CustomerSegmentation>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </Maho_CustomerSegmentation>
     </modules>
     <global>
@@ -20,6 +20,12 @@
                     <segment_customer>
                         <table>customer_segment_customer</table>
                     </segment_customer>
+                    <emailSequence>
+                        <table>customer_segment_email_sequence</table>
+                    </emailSequence>
+                    <sequenceProgress>
+                        <table>customer_segment_sequence_progress</table>
+                    </sequenceProgress>
                 </entities>
             </customersegmentation_resource>
         </models>
@@ -30,6 +36,11 @@
                     <class>Mage_Core_Model_Resource_Setup</class>
                 </setup>
             </maho_customersegmentation_setup>
+            <customersegmentation_resource>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </customersegmentation_resource>
         </resources>
         <blocks>
             <customersegmentation>
@@ -50,6 +61,38 @@
                     </customersegmentation_add_condition>
                 </observers>
             </salesrule_rule_condition_combine>
+            <customer_segment_refresh_after>
+                <observers>
+                    <customersegmentation_email_automation>
+                        <class>customersegmentation/observer_emailAutomation</class>
+                        <method>onSegmentRefreshAfter</method>
+                    </customersegmentation_email_automation>
+                </observers>
+            </customer_segment_refresh_after>
+            <newsletter_subscriber_save_after>
+                <observers>
+                    <customersegmentation_subscriber_change>
+                        <class>customersegmentation/observer_emailAutomation</class>
+                        <method>onNewsletterSubscriberSaveAfter</method>
+                    </customersegmentation_subscriber_change>
+                </observers>
+            </newsletter_subscriber_save_after>
+            <customer_delete_after>
+                <observers>
+                    <customersegmentation_customer_delete>
+                        <class>customersegmentation/observer_emailAutomation</class>
+                        <method>onCustomerDeleteAfter</method>
+                    </customersegmentation_customer_delete>
+                </observers>
+            </customer_delete_after>
+            <customer_segmentation_process_scheduled_emails>
+                <observers>
+                    <customersegmentation_process_emails>
+                        <class>customersegmentation/observer_emailAutomation</class>
+                        <method>processScheduledEmails</method>
+                    </customersegmentation_process_emails>
+                </observers>
+            </customer_segmentation_process_scheduled_emails>
         </events>
     </global>
     <admin>
@@ -91,6 +134,38 @@
                     <model>customersegmentation/cron::refreshSegments</model>
                 </run>
             </customersegmentation_refresh_segments>
+            <customersegmentation_process_emails>
+                <schedule>
+                    <cron_expr>*/5 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>customersegmentation/cron::processScheduledEmails</model>
+                </run>
+            </customersegmentation_process_emails>
+            <customersegmentation_cleanup_progress>
+                <schedule>
+                    <cron_expr>0 2 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>customersegmentation/cron::cleanupOldProgress</model>
+                </run>
+            </customersegmentation_cleanup_progress>
+            <customersegmentation_cleanup_coupons>
+                <schedule>
+                    <cron_expr>0 3 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>customersegmentation/cron::cleanupExpiredCoupons</model>
+                </run>
+            </customersegmentation_cleanup_coupons>
+            <customersegmentation_automation_report>
+                <schedule>
+                    <cron_expr>0 4 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>customersegmentation/cron::generateAutomationReport</model>
+                </run>
+            </customersegmentation_automation_report>
         </jobs>
     </crontab>
     <default>
@@ -99,5 +174,12 @@
                 <cron_schedule>0 5 * * *</cron_schedule>
             </customer_segments>
         </customer>
+        <customer_segmentation>
+            <email_automation>
+                <enabled>1</enabled>
+                <cleanup_days>90</cleanup_days>
+                <coupon_cleanup_days>30</coupon_cleanup_days>
+            </email_automation>
+        </customer_segmentation>
     </default>
 </config>
