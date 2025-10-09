@@ -10,15 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
 class Mage_Admin_Helper_Rules_Fallback extends Mage_Core_Helper_Abstract
 {
     /**
      * Fallback to resource parent node
-     * @param string $resourceId
-     *
-     * @return string
      */
-    protected function _getParentResourceId($resourceId)
+    protected function _getParentResourceId(string $resourceId): string
     {
         $resourcePathInfo = explode('/', $resourceId);
         array_pop($resourcePathInfo);
@@ -47,10 +46,10 @@ class Mage_Admin_Helper_Rules_Fallback extends Mage_Core_Helper_Abstract
      * @return string The resolved permission value for the resource (either explicit, inherited, or default)
      */
     public function fallbackResourcePermissions(
-        &$resources,
-        $resourceId,
-        $defaultValue = Mage_Admin_Model_Rules::RULE_PERMISSION_DENIED,
-    ) {
+        array &$resources,
+        string $resourceId,
+        string $defaultValue = Mage_Admin_Model_Rules::RULE_PERMISSION_DENIED,
+    ): string {
         if (empty($resourceId)) {
             return $defaultValue;
         }
