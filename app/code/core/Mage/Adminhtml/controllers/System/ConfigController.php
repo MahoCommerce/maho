@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -266,13 +266,16 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
             $session = Mage::getSingleton('admin/session');
             $resourceLookup = "admin/system/config/{$section}";
             if ($session->getData('acl') instanceof Mage_Admin_Model_Acl) {
-                $resourceId = $session->getData('acl')->get($resourceLookup)->getResourceId();
+                /** @var Mage_Admin_Model_Acl $acl */
+                $acl = $session->getData('acl');
+                $resource = $acl->getResource($resourceLookup);
+                $resourceId = $resource->getResourceId();
                 if (!$session->isAllowed($resourceId)) {
                     throw new Exception('');
                 }
                 return true;
             }
-        } catch (Zend_Acl_Exception $e) {
+        } catch (\Laminas\Permissions\Acl\Exception\ExceptionInterface $e) {
             $this->norouteAction();
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             return false;

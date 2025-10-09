@@ -6,18 +6,16 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @property Mage_Admin_Model_Acl_Role_Registry $_roleRegistry
- *
- * @method Mage_Admin_Model_Resource_Acl _getResource()
- * @method Mage_Admin_Model_Resource_Acl getResource()
- */
-class Mage_Admin_Model_Acl extends Zend_Acl
+declare(strict_types=1);
+
+class Mage_Admin_Model_Acl extends \Laminas\Permissions\Acl\Acl
 {
+    protected ?Mage_Admin_Model_Acl_Role_Registry $_roleRegistry = null;
+
     /**
      * All the group roles are prepended by G
      *
@@ -50,11 +48,9 @@ class Mage_Admin_Model_Acl extends Zend_Acl
 
     /**
      * Get role registry object or create one
-     *
-     * @return Mage_Admin_Model_Acl_Role_Registry
      */
     #[\Override]
-    protected function _getRoleRegistry()
+    protected function getRoleRegistry(): Mage_Admin_Model_Acl_Role_Registry
     {
         if ($this->_roleRegistry === null) {
             $this->_roleRegistry = Mage::getModel('admin/acl_role_registry');
@@ -64,14 +60,12 @@ class Mage_Admin_Model_Acl extends Zend_Acl
 
     /**
      * Add parent to role object
-     *
-     * @param Zend_Acl_Role|string $role
-     * @param Zend_Acl_Role|string $parent
-     * @return $this
      */
-    public function addRoleParent($role, $parent)
-    {
-        $this->_getRoleRegistry()->addParent($role, $parent);
+    public function addRoleParent(
+        \Laminas\Permissions\Acl\Role\RoleInterface|string $role,
+        \Laminas\Permissions\Acl\Role\RoleInterface|string $parent,
+    ): self {
+        $this->getRoleRegistry()->addParent($role, $parent);
         return $this;
     }
 }

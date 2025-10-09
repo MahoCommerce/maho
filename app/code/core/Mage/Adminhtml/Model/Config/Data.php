@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -256,9 +257,10 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
             $session = Mage::getSingleton('admin/session');
             $resourceLookup = "admin/system/config/{$section}";
             if ($session->getData('acl') instanceof Mage_Admin_Model_Acl) {
-                return $session->isAllowed(
-                    $session->getData('acl')->get($resourceLookup)->getResourceId(),
-                );
+                /** @var Mage_Admin_Model_Acl $acl */
+                $acl = $session->getData('acl');
+                $resource = $acl->getResource($resourceLookup);
+                return $session->isAllowed($resource->getResourceId());
             }
         } catch (Exception $e) {
             return false;

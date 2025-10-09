@@ -5430,13 +5430,11 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/GroupController.php
 
-
 		-
 			rawMessage: 'Parameter #2 $timestamp of function date expects int|null, array|bool given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
-
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_IndexController::_getDeniedIframe() has no return type specified.'
@@ -5973,12 +5971,6 @@ parameters:
 			path: app/code/core/Mage/Api/Helper/Data.php
 
 		-
-			rawMessage: 'Method Mage_Api_Model_Acl::_getRoleRegistry() should return Mage_Api_Model_Acl_Role_Registry but returns Zend_Acl_Role_Registry.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Api/Model/Acl.php
-
-		-
 			rawMessage: 'Method Mage_Api_Model_Acl_Assert_Ip::_isCleanIP() should return bool|null but return statement is missing.'
 			identifier: return.missing
 			count: 1
@@ -6283,30 +6275,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Api2/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #1 $roleId (int) of method Mage_Api2_Model_Acl::addRole() should be compatible with parameter $role (string|Zend_Acl_Role_Interface) of method Zend_Acl::addRole()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Acl.php
-
-		-
-			rawMessage: 'Parameter #1 $roles of method Zend_Acl::allow() expects array|string|Zend_Acl_Role_Interface|null, int given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Api2/Model/Acl.php
-
-		-
-			rawMessage: 'Parameter #1 $role of method Zend_Acl::hasRole() expects string|Zend_Acl_Role_Interface, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Acl/Global.php
-
-		-
-			rawMessage: 'Parameter #1 $role of method Zend_Acl::isAllowed() expects string|Zend_Acl_Role_Interface|null, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Acl/Global.php
 
 		-
 			rawMessage: 'Method Mage_Api2_Model_Acl_Global_Role::setCreatedAt() invoked with 1 parameter, 0 required.'
@@ -11207,7 +11175,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Core/Block/Text.php
 
-
 		-
 			rawMessage: Constructor of class Mage_Core_Controller_Varien_Action has an unused parameter $invokeArgs.
 			identifier: constructor.unusedParameter
@@ -11249,9 +11216,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
-
-
-
 
 		-
 			rawMessage: Property Mage_Core_Controller_Varien_Exception::$_defaultActionName has no type specified.
@@ -12285,7 +12249,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Core/Model/Translate/Inline.php
 
-
 		-
 			rawMessage: 'Method Mage_Core_Model_Url_Rewrite::setTags() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
@@ -13095,7 +13058,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Setup.php
-
 
 		-
 			rawMessage: 'Method Mage_Customer_AccountController::_addSessionError() has no return type specified.'
@@ -17318,7 +17280,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Deprecated.php
 
-
 		-
 			rawMessage: 'Method Mage_Paypal_Block_Bml_Banners::setPosition() has no return type specified.'
 			identifier: missingType.return
@@ -18518,7 +18479,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Observer.php
-
 
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_addTransaction() has no return type specified.'
