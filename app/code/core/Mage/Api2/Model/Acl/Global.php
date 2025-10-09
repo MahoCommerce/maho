@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,12 +32,12 @@ class Mage_Api2_Model_Acl_Global
             ['resource_type' => $resourceType, 'operation' => $operation],
         );
 
-        if (!$aclInstance->hasRole($apiUser->getRole())) {
+        if (!$aclInstance->hasRole((string) $apiUser->getRole())) {
             throw new Mage_Api2_Exception('Role not found', Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
         }
-        if (!$aclInstance->has($resourceType)) {
+        if (!$aclInstance->hasResource($resourceType)) {
             throw new Mage_Api2_Exception('Resource not found', Mage_Api2_Model_Server::HTTP_NOT_FOUND);
         }
-        return $aclInstance->isAllowed($apiUser->getRole(), $resourceType, $operation);
+        return $aclInstance->isAllowed((string) $apiUser->getRole(), $resourceType, $operation);
     }
 }

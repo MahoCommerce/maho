@@ -60,7 +60,8 @@
         "symfony/polyfill-php84": "^1.31",
         "symfony/polyfill-php85": "^1.32",
         "symfony/validator": "^7.3",
-        "symfony/var-dumper": "^7.3"
+        "symfony/var-dumper": "^7.3",
+        "laminas/laminas-permissions-acl": "^2.17"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

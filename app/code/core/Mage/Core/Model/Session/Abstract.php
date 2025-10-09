@@ -837,7 +837,10 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     public function setValidatorSessionRenewTimestamp(?int $timestamp = null): void
     {
-        $this->getSymfonySession()->getMetadataBag()->stampNew($this->getCookie()->getLifetime());
+        $session = $this->getSymfonySession();
+        if ($session !== null) {
+            $session->getMetadataBag()->stampNew($this->getCookie()->getLifetime());
+        }
     }
 
     /**
@@ -877,11 +880,14 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             return false;
         }
 
-        $metadataBag = $this->getSymfonySession()->getMetadataBag();
+        $session = $this->getSymfonySession();
+        if ($session !== null) {
+            $metadataBag = $session->getMetadataBag();
 
-        if ($this->useValidateSessionPasswordTimestamp()) {
-            if ($metadataBag->getLastUsed() < ($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP] ?? 0)) {
-                return false;
+            if ($this->useValidateSessionPasswordTimestamp()) {
+                if ($metadataBag->getLastUsed() < ($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP] ?? 0)) {
+                    return false;
+                }
             }
         }
 
