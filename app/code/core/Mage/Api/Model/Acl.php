@@ -60,7 +60,8 @@ class Mage_Api_Model_Acl extends \Laminas\Permissions\Acl\Acl
     /**
      * Get role registry object or create one
      */
-    protected function _getRoleRegistry(): Mage_Api_Model_Acl_Role_Registry
+    #[\Override]
+    protected function getRoleRegistry(): Mage_Api_Model_Acl_Role_Registry
     {
         if ($this->_roleRegistry === null) {
             $this->_roleRegistry = Mage::getModel('api/acl_role_registry');
@@ -75,7 +76,7 @@ class Mage_Api_Model_Acl extends \Laminas\Permissions\Acl\Acl
         \Laminas\Permissions\Acl\Role\RoleInterface|string $role,
         array|\Laminas\Permissions\Acl\Role\RoleInterface|string $parent,
     ): self {
-        $this->_getRoleRegistry()->addParent($role, $parent);
+        $this->getRoleRegistry()->addParent($role, $parent);
         return $this;
     }
 }
