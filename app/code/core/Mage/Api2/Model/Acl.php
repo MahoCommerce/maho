@@ -6,39 +6,18 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api2_Model_Acl extends Zend_Acl
+declare(strict_types=1);
+
+class Mage_Api2_Model_Acl extends \Laminas\Permissions\Acl\Acl
 {
-    /**
-     * REST ACL roles collection
-     *
-     * @var Mage_Api2_Model_Resource_Acl_Global_Role_Collection
-     */
-    protected $_rolesCollection;
-
-    /**
-     * API2 config model instance
-     *
-     * @var Mage_Api2_Model_Config
-     */
-    protected $_config;
-
-    /**
-     * Resource type of request
-     *
-     * @var string
-     */
-    protected $_resourceType;
-
-    /**
-     * Operation of request
-     *
-     * @var string
-     */
-    protected $_operation;
+    protected ?Mage_Api2_Model_Resource_Acl_Global_Role_Collection $_rolesCollection = null;
+    protected ?Mage_Api2_Model_Config $_config = null;
+    protected string $_resourceType;
+    protected string $_operation;
 
     /**
      * @param array $options
@@ -61,10 +40,8 @@ class Mage_Api2_Model_Acl extends Zend_Acl
 
     /**
      * Retrieve REST ACL roles collection
-     *
-     * @return Mage_Api2_Model_Resource_Acl_Global_Role_Collection
      */
-    protected function _getRolesCollection()
+    protected function _getRolesCollection(): Mage_Api2_Model_Resource_Acl_Global_Role_Collection
     {
         if ($this->_rolesCollection === null) {
             $this->_rolesCollection = Mage::getResourceModel('api2/acl_global_role_collection');
@@ -74,10 +51,8 @@ class Mage_Api2_Model_Acl extends Zend_Acl
 
     /**
      * Retrieve API2 config model instance
-     *
-     * @return Mage_Api2_Model_Config
      */
-    protected function _getConfig()
+    protected function _getConfig(): Mage_Api2_Model_Config
     {
         if ($this->_config === null) {
             $this->_config = Mage::getModel('api2/config');
@@ -87,10 +62,8 @@ class Mage_Api2_Model_Acl extends Zend_Acl
 
     /**
      * Retrieve resources types and set into ACL
-     *
-     * @return $this
      */
-    protected function _setResources()
+    protected function _setResources(): self
     {
         foreach ($this->_getConfig()->getResourcesTypes() as $type) {
             $this->addResource($type);
@@ -100,10 +73,8 @@ class Mage_Api2_Model_Acl extends Zend_Acl
 
     /**
      * Retrieve roles from DB and set into ACL
-     *
-     * @return $this
      */
-    protected function _setRoles()
+    protected function _setRoles(): self
     {
         /** @var Mage_Api2_Model_Acl_Global_Role $role */
         foreach ($this->_getRolesCollection() as $role) {
@@ -114,10 +85,8 @@ class Mage_Api2_Model_Acl extends Zend_Acl
 
     /**
      * Retrieve rules data from DB and inject it into ACL
-     *
-     * @return $this
      */
-    protected function _setRules()
+    protected function _setRules(): self
     {
         /** @var Mage_Api2_Model_Resource_Acl_Global_Rule_Collection $rulesCollection */
         $rulesCollection = Mage::getResourceModel('api2/acl_global_rule_collection');
@@ -138,9 +107,9 @@ class Mage_Api2_Model_Acl extends Zend_Acl
                     }
                 }
 
-                $this->allow($rule->getRoleId());
+                $this->allow((string) $rule->getRoleId());
             } else {
-                $this->allow($rule->getRoleId(), $rule->getResourceId(), $rule->getPrivilege());
+                $this->allow((string) $rule->getRoleId(), $rule->getResourceId(), $rule->getPrivilege());
             }
         }
         return $this;
@@ -150,9 +119,8 @@ class Mage_Api2_Model_Acl extends Zend_Acl
      * Adds a Role having an identifier unique to the registry
      * OVERRIDE to allow numeric roles identifiers
      *
-     * @param int $roleId Role identifier
-     * @param Zend_Acl_Role_Interface|string|array $parents
-     * @return Zend_Acl Provides a fluent interface
+     * @param \Laminas\Permissions\Acl\Role\RoleInterface|string|int $roleId
+     * @param \Laminas\Permissions\Acl\Role\RoleInterface|string|array|null $parents
      */
     #[\Override]
     public function addRole($roleId, $parents = null)

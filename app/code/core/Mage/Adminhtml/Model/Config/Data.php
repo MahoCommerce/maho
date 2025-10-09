@@ -256,9 +256,10 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
             $session = Mage::getSingleton('admin/session');
             $resourceLookup = "admin/system/config/{$section}";
             if ($session->getData('acl') instanceof Mage_Admin_Model_Acl) {
-                return $session->isAllowed(
-                    $session->getData('acl')->get($resourceLookup)->getResourceId(),
-                );
+                /** @var Mage_Admin_Model_Acl $acl */
+                $acl = $session->getData('acl');
+                $resource = $acl->getResource($resourceLookup);
+                return $session->isAllowed($resource->getResourceId());
             }
         } catch (Exception $e) {
             return false;
