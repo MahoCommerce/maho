@@ -34,7 +34,6 @@ spl_autoload_register(function ($class) {
         'Varien_Db_Ddl_Table' => \Maho\Db\Ddl\Table::class,
         'Varien_Db_Statement_Parameter' => \Maho\Db\Statement\Parameter::class,
         'Varien_Db_Statement_Pdo_Mysql' => \Maho\Db\Statement\Pdo\Mysql::class,
-        'Zend_Db_Exception' => \Maho\Db\Exception::class,
     ];
 
     if (isset($aliases[$class])) {
