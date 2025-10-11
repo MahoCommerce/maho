@@ -13,8 +13,6 @@
 "Begin import of ""%s"" with ""%s"" behavior","Begin import of ""%s"" with ""%s"" behavior"
 "Can not determine attribute filter type","Can not determine attribute filter type"
 "Can not find required columns: %s","Can not find required columns: %s"
-"Cannot get autoincrement value","Cannot get autoincrement value"
-"Cannot get autoincrement value for %s","Cannot get autoincrement value for %s"
 "Cannot get table status for %s","Cannot get table status for %s"
 "Categories","Categories"
 "Check Data","Check Data"
