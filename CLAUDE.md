@@ -79,11 +79,53 @@ app/design/
 └── install/        # Installer theme
 ```
 
-### Database Access Pattern
+### Database Access Pattern (Doctrine DBAL)
+Maho uses Doctrine DBAL 4.0 for database abstraction, wrapped in Varien compatibility layer.
+
+**Basic Pattern:**
 - Models extend `Mage_Core_Model_Abstract`
 - Resource models handle database operations
 - Collections for querying multiple records
-- Uses Zend_Db adapters for database abstraction
+
+**Query Building:**
+```php
+// Using Varien_Db_Select (wraps Doctrine QueryBuilder)
+$adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+$select = $adapter->select()
+    ->from(['p' => 'catalog_product'], ['entity_id', 'sku'])
+    ->where('status = ?', 1)
+    ->order('created_at DESC');
+
+// Raw SQL expressions - use Varien_Db_Expr to prevent quoting
+$select->columns([
+    'total' => new Varien_Db_Expr('COUNT(*)'),
+    'sum' => new Varien_Db_Expr('SUM(price)')
+]);
+```
+
+**Direct Queries:**
+```php
+// Read query
+$result = $adapter->fetchAll($select);
+
+// Write operations
+$adapter->insert('table_name', ['column' => 'value']);
+$adapter->update('table_name', ['column' => 'new_value'], 'id = 1');
+$adapter->delete('table_name', 'id = 1');
+```
+
+**Transactions:**
+```php
+// Nested transactions are safe (counted internally)
+$adapter->beginTransaction();
+try {
+    // operations
+    $adapter->commit();
+} catch (Exception $e) {
+    $adapter->rollBack();
+    throw $e;
+}
+```
 
 ### Event System
 Maho uses an event-driven architecture:
