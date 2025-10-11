@@ -102,7 +102,7 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
             ->where('price_table.website_id = ?', $this->getWebsiteId())
             ->where('price_table.attribute_id = ?', $attribute->getId());
 
-        return $this->_getReadAdapter()->fetchOne($select) * $this->getRate();
+        return (float) $this->_getReadAdapter()->fetchOne($select) * $this->getRate();
     }
 
     /**

@@ -424,7 +424,8 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
         $select = $adapter->select()
             ->from($this->_reviewEntityTable, ['entity_id'])
             ->where('entity_code = :entity_code');
-        return $adapter->fetchOne($select, [':entity_code' => $entityCode]);
+        $result = $adapter->fetchOne($select, [':entity_code' => $entityCode]);
+        return $result ? (int) $result : false;
     }
 
     /**

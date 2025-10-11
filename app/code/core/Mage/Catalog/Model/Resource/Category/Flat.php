@@ -967,6 +967,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     $write->delete($this->getMainStoreTable($storeId), $where);
                 }
             }
+            unset($row);
         }
 
         return $this;
@@ -1035,6 +1036,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     }
                 }
             }
+            unset($row);
 
             // remove
             foreach ($remStores as $storeId => $categoryIds) {
@@ -1051,6 +1053,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                         ->setStoreId($storeId);
                     $this->_synchronize($data);
                 }
+                unset($row);
             }
         }
 
@@ -1367,7 +1370,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
         $select = $this->_getReadAdapter()->select()
             ->from($this->getMainStoreTable($this->getStoreId()), 'entity_id')
             ->where('entity_id=?', $id);
-        return $this->_getReadAdapter()->fetchOne($select);
+        return (bool) $this->_getReadAdapter()->fetchOne($select);
     }
 
     /**

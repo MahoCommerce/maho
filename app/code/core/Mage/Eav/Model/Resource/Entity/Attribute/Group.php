@@ -36,7 +36,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
             ->where('attribute_set_id = :attribute_set_id')
             ->where('attribute_group_name = :attribute_group_name');
 
-        return $adapter->fetchRow($select, $bind) > 0;
+        return (bool) $adapter->fetchRow($select, $bind);
     }
 
     /**

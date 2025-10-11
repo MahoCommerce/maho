@@ -19,8 +19,8 @@ interface Mage_Catalog_Model_Product_Condition_Interface
     public function applyToCollection($collection);
 
     /**
-     * @param Varien_Db_Adapter_Pdo_Mysql $dbAdapter
-     * @return string|Varien_Db_Select
+     * @param Maho\Db\Adapter\AdapterInterface $dbAdapter
+     * @return string|Maho\Db\Select
      */
     public function getIdsSelect($dbAdapter);
 }

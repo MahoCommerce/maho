@@ -323,7 +323,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if (!is_null($lowerPrice)) {
             $select->where("$priceExpression >= " . $this->_getComparingValue($lowerPrice, $filter));
         }
-        $offset = $this->_getReadAdapter()->fetchOne($select);
+        $offset = (int) $this->_getReadAdapter()->fetchOne($select);
         if (!$offset) {
             return false;
         }
@@ -351,7 +351,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if (!is_null($upperPrice)) {
             $select->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
-        $offset = $this->_getReadAdapter()->fetchOne($select);
+        $offset = (int) $this->_getReadAdapter()->fetchOne($select);
         if (!$offset) {
             return false;
         }

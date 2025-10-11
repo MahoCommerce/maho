@@ -8992,12 +8992,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
 
 		-
-			rawMessage: 'Parameter #2 $newOptionId of method Mage_Catalog_Model_Product_Option_Value::duplicate() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option_Value::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9312,12 +9306,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Aggregation::_construct() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Aggregation.php
-
-		-
-			rawMessage: 'Parameter #1 $aggregationId of method Mage_CatalogIndex_Model_Resource_Aggregation::_saveTagRelations() expects int, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Aggregation.php
 
@@ -15124,7 +15112,7 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Source/Table.php
 
 		-
-			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Maho\Db\Adapter\Pdo\Mysql|false given.'
+			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Maho\Db\Adapter\AdapterInterface|false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Collection.php
@@ -19056,12 +19044,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Rating_Model_Resource_Rating_Option::aggregateEntityByRatingId() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Rating_Model_Rating_Option::setVoteId() expects int, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
 

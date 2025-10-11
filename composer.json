@@ -39,7 +39,6 @@
         "altcha-org/altcha": "^1.1.0",
         "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
-        "cweagans/composer-patches": "^1.7",
         "dompdf/dompdf": "^3.1",
         "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^3.11",
@@ -109,20 +108,12 @@
             "Tests\\": "tests/"
         }
     },
-    "extra": {
-        "patches": {
-            "shardj/zf1-future": {
-                "OM-2047 - Pass delimiter char to preg_quote": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/cff368fa23f790288f6913ffae20120b6fec45db/OM-2047.patch"
-            }
-        }
-    },
     "scripts": {
         "test": "php tests/pest-with-test-db.php"
     },
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "cweagans/composer-patches": true,
             "magento-hackathon/magento-composer-installer": false,
             "mahocommerce/maho-composer-plugin": true,
             "pestphp/pest-plugin": true

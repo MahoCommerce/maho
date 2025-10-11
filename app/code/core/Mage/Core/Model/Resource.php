@@ -31,7 +31,7 @@ class Mage_Core_Model_Resource
     /**
      * Instances of actual connections
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql[]|false
+     * @var array<Maho\Db\Adapter\AdapterInterface>|false
      */
     protected $_connections        = [];
 
@@ -60,7 +60,7 @@ class Mage_Core_Model_Resource
      * Creates a connection to resource whenever needed
      *
      * @param string $name
-     * @return Varien_Db_Adapter_Pdo_Mysql|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     public function getConnection($name)
     {
@@ -181,7 +181,7 @@ class Mage_Core_Model_Resource
      * Retrieve default connection name by required connection name
      *
      * @param string $requiredConnectionName
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     protected function _getDefaultConnection($requiredConnectionName)
     {
