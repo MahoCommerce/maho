@@ -28,14 +28,14 @@ class Mysql
      *
      * @var \Doctrine\DBAL\Result
      */
-    protected $_result;
+    protected \Doctrine\DBAL\Result $_result;
 
     /**
      * The adapter that created this statement
      *
      * @var \Maho\Db\Adapter\Pdo\Mysql
      */
-    protected $_adapter;
+    protected \Maho\Db\Adapter\Pdo\Mysql $_adapter;
 
     /**
      * Constructor

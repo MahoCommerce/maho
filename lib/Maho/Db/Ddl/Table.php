@@ -73,21 +73,21 @@ class Table
      *
      * @var string|null
      */
-    protected $_tableName;
+    protected ?string $_tableName = null;
 
     /**
      * Schema name
      *
      * @var string
      */
-    protected $_schemaName;
+    protected ?string $_schemaName = null;
 
     /**
      * Comment for Table
      *
      * @var string
      */
-    protected $_tableComment;
+    protected ?string $_tableComment = null;
 
     /**
      * Column descriptions for a table
@@ -112,7 +112,7 @@ class Table
      *
      * @var array
      */
-    protected $_columns         = [];
+    protected array $_columns = [];
 
     /**
      * Index descriptions for a table
@@ -135,7 +135,7 @@ class Table
      *
      * @var array
      */
-    protected $_indexes         = [];
+    protected array $_indexes = [];
 
     /**
      * Foreign key descriptions for a table
@@ -156,14 +156,14 @@ class Table
      *
      * @var array
      */
-    protected $_foreignKeys     = [];
+    protected array $_foreignKeys = [];
 
     /**
      * Additional table options
      *
      * @var array
      */
-    protected $_options         = [
+    protected array $_options = [
         'type'          => 'INNODB',
         'charset'       => 'utf8',
         'collate'       => 'utf8_general_ci',

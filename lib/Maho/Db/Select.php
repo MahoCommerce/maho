@@ -73,14 +73,14 @@ class Select
      *
      * @var Adapter\Pdo\Mysql
      */
-    protected $_adapter;
+    protected Adapter\Pdo\Mysql $_adapter;
 
     /**
      * The component parts of a SELECT statement
      *
      * @var array
      */
-    protected $_parts = [
+    protected array $_parts = [
         self::DISTINCT     => false,
         self::COLUMNS      => [],
         self::FROM         => [],
@@ -100,7 +100,7 @@ class Select
      *
      * @var array
      */
-    protected $_tableCols = [];
+    protected array $_tableCols = [];
 
     /**
      * Class constructor
