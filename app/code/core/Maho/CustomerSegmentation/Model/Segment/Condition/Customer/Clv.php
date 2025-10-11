@@ -52,7 +52,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
 
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         return $this->getSubfilterSql('e.entity_id', true, $websiteId);
     }

@@ -115,7 +115,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -133,7 +133,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         };
     }
 
-    protected function buildProductWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductWishlistCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
@@ -144,7 +144,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildProductNameWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductNameWishlistCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
@@ -157,7 +157,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildProductSkuWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductSkuWishlistCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
@@ -169,7 +169,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildCategoryWishlistCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildCategoryWishlistCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
@@ -181,7 +181,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildWishlistItemsCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildWishlistItemsCountCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
@@ -193,7 +193,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildAddedAtCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildAddedAtCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
@@ -204,7 +204,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildDaysSinceAddedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildDaysSinceAddedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
@@ -216,7 +216,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildWishlistSharedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildWishlistSharedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['w' => $this->getWishlistTable()], ['customer_id'])

@@ -145,7 +145,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -178,7 +178,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
         };
     }
 
-    protected function buildProductAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string
+    protected function buildProductAttributeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $attributeCode, string $operator, mixed $value): string
     {
         $productResource = Mage::getResourceSingleton('catalog/product');
         $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
@@ -212,7 +212,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildOrderItemFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildOrderItemFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['oi' => $this->getOrderItemTable()], [])
