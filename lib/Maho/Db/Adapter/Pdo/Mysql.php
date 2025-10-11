@@ -156,18 +156,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     protected $_logAllQueries       = false;
 
     /**
-     * Path to SQL debug data log
-     *
-     * @var string
+     * Log file name for SQL debug data
      */
-    protected $_debugFile           = 'var/debug/pdo_mysql.log';
-
-    /**
-     * Io File Adapter
-     *
-     * @var \Varien_Io_File
-     */
-    protected $_debugIoAdapter;
+    protected string $_debugFile    = 'pdo_mysql.log';
 
     /**
      * Debug timer start value
@@ -1790,27 +1781,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         throw $e;
     }
 
-    /**
-     * Debug write to file process
-     *
-     * @param string $str
-     */
-    protected function _debugWriteToFile($str): void
+    protected function _debugWriteToFile(string $str): void
     {
-        $str = '## ' . date(self::TIMESTAMP_FORMAT) . "\r\n" . $str;
-        if (!$this->_debugIoAdapter) {
-            $this->_debugIoAdapter = new \Varien_Io_File();
-            $dir = \Mage::getBaseDir() . DS . $this->_debugIoAdapter->dirname($this->_debugFile);
-            $this->_debugIoAdapter->checkAndCreateFolder($dir);
-            $this->_debugIoAdapter->open(['path' => $dir]);
-            $this->_debugFile = basename($this->_debugFile);
-        }
-
-        $this->_debugIoAdapter->streamOpen($this->_debugFile, 'a');
-        $this->_debugIoAdapter->streamLock();
-        $this->_debugIoAdapter->streamWrite($str);
-        $this->_debugIoAdapter->streamUnlock();
-        $this->_debugIoAdapter->streamClose();
+        \Mage::log($str, \Mage::LOG_DEBUG, $this->_debugFile);
     }
 
     /**
