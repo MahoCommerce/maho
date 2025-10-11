@@ -6,7 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,7 +31,7 @@ class Mage_Oauth_Model_Resource_Nonce extends Mage_Core_Model_Resource_Db_Abstra
 
             return $adapter->delete(
                 $this->getMainTable(),
-                $adapter->quoteInto('timestamp <= ?', time() - $minutes * 60, Zend_Db::INT_TYPE),
+                $adapter->quoteInto('timestamp <= ?', time() - $minutes * 60),
             );
         } else {
             return 0;

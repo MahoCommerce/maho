@@ -30,7 +30,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
         $collection->getSelect()
             ->group('IFNULL(main_table.action_group_id, main_table.activity_id)')
             ->columns([
-                'activity_count' => new Zend_Db_Expr('COUNT(*)'),
+                'activity_count' => new Varien_Db_Expr('COUNT(*)'),
             ]);
 
         $this->setCollection($collection);

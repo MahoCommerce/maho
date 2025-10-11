@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -150,7 +150,7 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
      *
      * @return $this
      */
-    protected function _applyStoresFilterToSelect(Zend_Db_Select $select)
+    protected function _applyStoresFilterToSelect(Varien_Db_Select $select)
     {
         $nullCheck = false;
         $storeIds  = $this->_storesIds;
@@ -270,7 +270,7 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
     {
         $this->_renderFilters();
         $select = clone $this->getSelect();
-        $select->reset(Zend_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::ORDER);
         return $this->getConnection()->select()->from($select, 'COUNT(*)');
     }
 

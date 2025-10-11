@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -369,15 +369,15 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * Retrieve attribute expression by specified column
      *
      * @param string $field
-     * @return string|Zend_Db_Expr
+     * @return string|Varien_Db_Expr
      */
     protected function _prepareOrderExpression($field)
     {
-        foreach ($this->getSelect()->getPart(Zend_Db_Select::COLUMNS) as $columnEntry) {
+        foreach ($this->getSelect()->getPart(Varien_Db_Select::COLUMNS) as $columnEntry) {
             if ($columnEntry[2] != $field) {
                 continue;
             }
-            if ($columnEntry[1] instanceof Zend_Db_Expr) {
+            if ($columnEntry[1] instanceof Varien_Db_Expr) {
                 return $columnEntry[1];
             }
         }
@@ -723,7 +723,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     /**
      * Join a table
      *
-     * @param array|string|Zend_Db_Expr $table
+     * @param array|string|Varien_Db_Expr $table
      * @param string $bind
      * @param string|array $fields
      * @param string|array|null $cond
@@ -878,10 +878,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     protected function _getAllIdsSelect($limit = null, $offset = null)
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Zend_Db_Select::ORDER);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Zend_Db_Select::COLUMNS);
+        $idsSelect->reset(Varien_Db_Select::ORDER);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $idsSelect->reset(Varien_Db_Select::COLUMNS);
         $idsSelect->columns('e.' . $this->getEntity()->getIdFieldName());
         $idsSelect->limit($limit, $offset);
 
@@ -910,11 +910,11 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     public function getAllIdsSql()
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Zend_Db_Select::ORDER);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Zend_Db_Select::COLUMNS);
-        $idsSelect->reset(Zend_Db_Select::GROUP);
+        $idsSelect->reset(Varien_Db_Select::ORDER);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $idsSelect->reset(Varien_Db_Select::COLUMNS);
+        $idsSelect->reset(Varien_Db_Select::GROUP);
         $idsSelect->columns('e.' . $this->getEntity()->getIdFieldName());
 
         return $idsSelect;

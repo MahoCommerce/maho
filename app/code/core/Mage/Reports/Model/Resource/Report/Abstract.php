@@ -99,7 +99,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * @param string $table
      * @param string|null $from
      * @param string|null $to
-     * @param Zend_Db_Select|string|null $subSelect
+     * @param Varien_Db_Select|string|null $subSelect
      * @param bool $doNotUseTruncate
      * @return Mage_Reports_Model_Resource_Report_Abstract
      */
@@ -191,7 +191,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * from select statement with single date column
      *
      *
-     * @param Zend_Db_Select|string $select
+     * @param Varien_Db_Select|string $select
      * @param string $periodColumn
      * @return string|false
      */

@@ -207,7 +207,7 @@ abstract class Mage_Core_Model_Resource_Abstract
         foreach (array_keys($fields) as $field) {
             if ($object->hasData($field)) {
                 $fieldValue = $object->getData($field);
-                if ($fieldValue instanceof Zend_Db_Expr) {
+                if ($fieldValue instanceof Varien_Db_Expr) {
                     $data[$field] = $fieldValue;
                 } else {
                     if ($fieldValue !== null) {

@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,17 +24,17 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Abstract extends Mage
     }
 
     /**
-     * Add attribute join condition to select and return Zend_Db_Expr
+     * Add attribute join condition to select and return Varien_Db_Expr
      * attribute value definition
      * If $condition is not empty apply limitation for select
      *
      * @param Varien_Db_Select $select
      * @param string $attrCode               the attribute code
-     * @param string|Zend_Db_Expr $entity    the entity field or expression for condition
-     * @param string|Zend_Db_Expr $store     the store field or expression for condition
-     * @param string|Zend_Db_Expr $condition the limitation condition
+     * @param string|Varien_Db_Expr $entity    the entity field or expression for condition
+     * @param string|Varien_Db_Expr $store     the store field or expression for condition
+     * @param string|Varien_Db_Expr $condition the limitation condition
      * @param bool $required                 if required or has condition used INNER join, else - LEFT
-     * @return Zend_Db_Expr                  the attribute value expression
+     * @return Varien_Db_Expr                  the attribute value expression
      */
     protected function _addAttributeToSelect($select, $attrCode, $entity, $store, $condition = null, $required = false)
     {
@@ -51,7 +52,7 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Abstract extends Mage
                     . " AND {$alias}.store_id = 0",
                 [],
             );
-            $expression = new Zend_Db_Expr("{$alias}.value");
+            $expression = new Varien_Db_Expr("{$alias}.value");
         } else {
             $dAlias = 'tad_' . $attrCode;
             $sAlias = 'tas_' . $attrCode;
@@ -92,7 +93,7 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Abstract extends Mage
      *
      * @param Varien_Db_Select $select              the select object
      * @param bool $store                           add default store join
-     * @param string|Zend_Db_Expr $joinCondition    the limitation for website_id
+     * @param string|Varien_Db_Expr $joinCondition    the limitation for website_id
      * @return Mage_Catalog_Model_Resource_Product_Indexer_Abstract
      */
     protected function _addWebsiteJoinToSelect($select, $store = true, $joinCondition = null)
@@ -128,8 +129,8 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Abstract extends Mage
      * Joined table has alias pw
      *
      * @param Varien_Db_Select $select          the select object
-     * @param string|Zend_Db_Expr $website      the limitation of website_id
-     * @param string|Zend_Db_Expr $product      the limitation of product_id
+     * @param string|Varien_Db_Expr $website      the limitation of website_id
+     * @param string|Varien_Db_Expr $product      the limitation of product_id
      * @return Mage_Catalog_Model_Resource_Product_Indexer_Abstract
      */
     protected function _addProductWebsiteJoinToSelect($select, $website, $product)

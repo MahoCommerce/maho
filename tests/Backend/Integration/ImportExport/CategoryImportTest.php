@@ -63,7 +63,7 @@ it('creates new categories with parent_id', function () {
     // Check electronics category was created
     expect($electronics)->not->toBeNull()
         ->and($electronics->getName())->toBe('Electronics')
-        ->and($electronics->getIsActive())->toBe('1');
+        ->and($electronics->getIsActive())->toBe(1);
 
     // Check phones subcategory was created with correct parent
     $phones = findCategoryByUrlKey('phones');
@@ -97,7 +97,7 @@ it('updates existing categories', function () {
     // Reload category and check it was updated
     $category->load($category->getId());
     expect($category->getName())->toBe('Updated Name')
-        ->and($category->getIsActive())->toBe('1');
+        ->and($category->getIsActive())->toBe(1);
 });
 
 it('handles multi-store data correctly', function () {

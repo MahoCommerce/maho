@@ -690,6 +690,7 @@
 "The file was only partially uploaded. Please try again.","The file was only partially uploaded. Please try again."
 "The file you uploaded is larger than %s Megabytes allowed by server","The file you uploaded is larger than %s Megabytes allowed by server"
 "The filters must be an array.","The filters must be an array."
+"The Flat Catalog module has a limit of %2$d filterable and/or sortable attributes. Currently there are %1$d of them. Please reduce the number of filterable/sortable attributes in order to use this module","The Flat Catalog module has a limit of %2$d filterable and/or sortable attributes. Currently there are %1$d of them. Please reduce the number of filterable/sortable attributes in order to use this module"
 "The following file extensions are not allowed for security reasons: %s","The following file extensions are not allowed for security reasons: %s"
 "The From Date value should be less than or equal to the To Date value.","The From Date value should be less than or equal to the To Date value."
 "The image contents is not valid base64 data.","The image contents is not valid base64 data."

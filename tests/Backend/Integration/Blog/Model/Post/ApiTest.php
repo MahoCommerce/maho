@@ -78,7 +78,7 @@ describe('Blog Post SOAP API', function () {
         $postInfo = $this->api->info((int) $testPost->getId());
 
         expect($postInfo)->toBeArray();
-        expect($postInfo['post_id'])->toBe($testPost->getId());
+        expect($postInfo['post_id'])->toBe((int) $testPost->getId());
         expect($postInfo['title'])->toBe('API Test Post 1');
         expect($postInfo['content'])->toBe('Content for API test post 1');
         expect($postInfo['url_key'])->toBe('api-test-post-1');

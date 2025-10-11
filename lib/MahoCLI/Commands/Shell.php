@@ -124,46 +124,23 @@ class Shell extends BaseMahoCommand
         $shell = new \Psy\Shell($config);
         $shell->setScopeVariables([
             'db' => function () use ($resource) {
-                // Always get fresh connection to avoid timeout issues
+                // Get database connection
                 $conn = $resource->getConnection('core_read');
-                // Reconnect if connection was lost
-                if (!$conn->isConnected()) {
-                    $conn->closeConnection();
-                    $conn->getConnection();
+                if (!$conn) {
+                    throw new \RuntimeException('Failed to get database connection');
                 }
                 return $conn;
             },
             // Add some helpful shortcuts
             'getModel' => function ($modelClass) {
-                // Ensure DB connection is fresh
-                $resource = Mage::getSingleton('core/resource');
-                $conn = $resource->getConnection('core_read');
-                if (!$conn->isConnected()) {
-                    $conn->closeConnection();
-                    $conn->getConnection();
-                }
                 return Mage::getModel($modelClass);
             },
             'getCollection' => function ($modelClass) {
-                // Ensure DB connection is fresh
-                $resource = Mage::getSingleton('core/resource');
-                $conn = $resource->getConnection('core_read');
-                if (!$conn->isConnected()) {
-                    $conn->closeConnection();
-                    $conn->getConnection();
-                }
                 return Mage::getModel($modelClass)->getCollection();
             },
             'reconnect' => function () {
-                // Helper function to manually reconnect
-                $resource = Mage::getSingleton('core/resource');
-                $connections = ['core_read', 'core_write'];
-                foreach ($connections as $connName) {
-                    $conn = $resource->getConnection($connName);
-                    $conn->closeConnection();
-                    $conn->getConnection();
-                }
-                echo "Database connections refreshed.\n";
+                // Note: Connection management is handled automatically by Doctrine DBAL
+                echo "Note: Connection lifecycle is managed automatically by Doctrine DBAL.\n";
             },
         ]);
 

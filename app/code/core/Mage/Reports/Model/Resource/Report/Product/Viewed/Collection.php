@@ -76,7 +76,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
      *
      * @param mixed $from
      * @param mixed $to
-     * @return Zend_Db_Select
+     * @return Varien_Db_Select
      */
     protected function _makeBoundarySelect($from, $to)
     {
@@ -120,7 +120,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
 
             //exclude removed products
             $subSelect = $this->getConnection()->select();
-            $subSelect->from(['existed_products' => $this->getTable('catalog/product')], new Zend_Db_Expr('1)'));
+            $subSelect->from(['existed_products' => $this->getTable('catalog/product')], new Varien_Db_Expr('1)'));
 
             $select->exists($subSelect, $mainTable . '.product_id = existed_products.entity_id')
                 ->group('product_id')
@@ -289,7 +289,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
                     $query = $helper->getQueryUsingAnalyticFunction($union);
                     $unionParts[] = '(' . $query . ')';
                 }
-                $this->getSelect()->reset()->union($unionParts, Zend_Db_Select::SQL_UNION_ALL);
+                $this->getSelect()->reset()->union($unionParts, Varien_Db_Select::SQL_UNION_ALL);
             }
 
             if ($this->isTotals()) {

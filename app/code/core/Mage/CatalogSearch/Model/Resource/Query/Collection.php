@@ -6,7 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,7 +67,7 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
 
         $ifSynonymFor = $this->getConnection()
             ->getIfNullSql('synonym_for', 'query_text');
-        $this->getSelect()->reset(Zend_Db_Select::FROM)->distinct(true)
+        $this->getSelect()->reset(Varien_Db_Select::FROM)->distinct(true)
             ->from(
                 ['main_table' => $this->getTable('catalogsearch/search_query')],
                 ['query'      => $ifSynonymFor, 'num_results'],
@@ -92,12 +92,12 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
      */
     public function setPopularQueryFilter($storeIds = null)
     {
-        $ifSynonymFor = new Zend_Db_Expr($this->getConnection()
+        $ifSynonymFor = new Varien_Db_Expr($this->getConnection()
             ->getCheckSql("synonym_for IS NOT NULL AND synonym_for != ''", 'synonym_for', 'query_text'));
 
         $this->getSelect()
-            ->reset(Zend_Db_Select::FROM)
-            ->reset(Zend_Db_Select::COLUMNS)
+            ->reset(Varien_Db_Select::FROM)
+            ->reset(Varien_Db_Select::COLUMNS)
             ->distinct(true)
             ->from(
                 ['main_table' => $this->getTable('catalogsearch/search_query')],

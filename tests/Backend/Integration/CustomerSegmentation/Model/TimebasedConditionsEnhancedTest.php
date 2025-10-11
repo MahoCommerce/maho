@@ -233,7 +233,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
             ]);
 
             $matchedCustomers = $segment->getMatchingCustomerIds();
-            expect($matchedCustomers)->toContain((string) $todayCustomer->getId());
+            expect($matchedCustomers)->toContain((int) $todayCustomer->getId());
         });
 
         test('handles date precision correctly', function () {

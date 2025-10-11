@@ -62,12 +62,12 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
         $select = $this->getConnection()->select()
             ->from(['qlt' => $this->getTable('newsletter/queue_link')], 'COUNT(qlt.queue_link_id)')
             ->where('qlt.queue_id = main_table.queue_id');
-        $totalExpr = new Zend_Db_Expr(sprintf('(%s)', $select->assemble()));
+        $totalExpr = new Varien_Db_Expr(sprintf('(%s)', $select->assemble()));
         $select = $this->getConnection()->select()
             ->from(['qls' => $this->getTable('newsletter/queue_link')], 'COUNT(qls.queue_link_id)')
             ->where('qls.queue_id = main_table.queue_id')
             ->where('qls.letter_sent_at IS NOT NULL');
-        $sentExpr  = new Zend_Db_Expr(sprintf('(%s)', $select->assemble()));
+        $sentExpr  = new Varien_Db_Expr(sprintf('(%s)', $select->assemble()));
 
         $this->getSelect()->columns([
             'subscribers_sent'  => $sentExpr,
@@ -126,7 +126,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
         $select = $this->getConnection()->select()
             ->from(
                 $this->getTable('newsletter/queue_link'),
-                ['queue_id', 'total' => new Zend_Db_Expr('COUNT(queue_link_id)')],
+                ['queue_id', 'total' => new Varien_Db_Expr('COUNT(queue_link_id)')],
             )
             ->group('queue_id')
             ->having($this->_getConditionSql('total', $condition));

@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -88,7 +88,7 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
             "table_customer_middlename.{$middlenameField}",
             "table_customer_lastname.{$lastnameField}",
         ], ' ');
-        $this->getSelect()->reset(Zend_Db_Select::COLUMNS)
+        $this->getSelect()->reset(Varien_Db_Select::COLUMNS)
             ->joinInner(
                 ['table_customer_lastname' => $lastnameAttr->getBackend()->getTable()],
                 implode(' AND ', $lastnameCondition),
@@ -112,14 +112,14 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
     public function getSelectCountSql()
     {
         $countSelect = clone $this->_select;
-        $countSelect->reset(Zend_Db_Select::ORDER);
-        $countSelect->reset(Zend_Db_Select::GROUP);
-        $countSelect->reset(Zend_Db_Select::HAVING);
-        $countSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Zend_Db_Select::COLUMNS);
+        $countSelect->reset(Varien_Db_Select::ORDER);
+        $countSelect->reset(Varien_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::HAVING);
+        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $countSelect->reset(Varien_Db_Select::COLUMNS);
 
-        $countSelect->columns(new Zend_Db_Expr('COUNT(DISTINCT detail.customer_id)'));
+        $countSelect->columns(new Varien_Db_Expr('COUNT(DISTINCT detail.customer_id)'));
 
         return  $countSelect;
     }

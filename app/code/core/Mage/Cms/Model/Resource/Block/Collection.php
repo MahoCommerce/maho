@@ -66,7 +66,7 @@ class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_
     {
         $countSelect = parent::getSelectCountSql();
 
-        $countSelect->reset(Zend_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::GROUP);
 
         return $countSelect;
     }

@@ -202,8 +202,8 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
         $countSelect = parent::getSelectCountSql();
 
         if ($this->_allowDisableGrouping) {
-            $countSelect->reset(Zend_Db_Select::COLUMNS);
-            $countSelect->reset(Zend_Db_Select::GROUP);
+            $countSelect->reset(Varien_Db_Select::COLUMNS);
+            $countSelect->reset(Varien_Db_Select::GROUP);
             $countSelect->columns('COUNT(DISTINCT ' . $this->getCountAttribute() . ')');
         }
         return $countSelect;
@@ -325,7 +325,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
             parent::_renderOrders();
 
             $orders = $this->getSelect()
-                ->getPart(Zend_Db_Select::ORDER);
+                ->getPart(Varien_Db_Select::ORDER);
 
             $appliedOrders = [];
             foreach ($orders as $order) {
@@ -334,7 +334,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
 
             foreach ($this->_orders as $field => $direction) {
                 if (empty($appliedOrders[$field])) {
-                    $this->_select->order(new Zend_Db_Expr($field . ' ' . $direction));
+                    $this->_select->order(new Varien_Db_Expr($field . ' ' . $direction));
                 }
             }
         }

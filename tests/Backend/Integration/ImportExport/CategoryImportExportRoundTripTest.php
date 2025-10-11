@@ -91,9 +91,9 @@ it('preserves data integrity in export-import round trip', function () {
         ->and($restoredPhones->getName())->toBe('Test RT Phones')
         ->and($restoredClothing->getName())->toBe('Test RT Clothing');
 
-    expect($restoredElectronics->getIsActive())->toBe('1')
-        ->and($restoredPhones->getIsActive())->toBe('1')
-        ->and($restoredClothing->getIsActive())->toBe('0');
+    expect($restoredElectronics->getIsActive())->toBe(1)
+        ->and($restoredPhones->getIsActive())->toBe(1)
+        ->and($restoredClothing->getIsActive())->toBe(0);
 });
 
 it('handles hierarchical categories correctly', function () {
@@ -177,8 +177,8 @@ it('handles multiple categories with different properties', function () {
 
     expect($activeRestored)->not->toBeNull()
         ->and($inactiveRestored)->not->toBeNull()
-        ->and($activeRestored->getIsActive())->toBe('1')
-        ->and($inactiveRestored->getIsActive())->toBe('0');
+        ->and($activeRestored->getIsActive())->toBe(1)
+        ->and($inactiveRestored->getIsActive())->toBe(0);
 });
 
 it('handles store-specific category data', function () {

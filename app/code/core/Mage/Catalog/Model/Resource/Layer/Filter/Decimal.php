@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,8 +63,8 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_R
         $adapter    = $this->_getReadAdapter();
 
         $select->columns([
-            'min_value' => new Zend_Db_Expr('MIN(decimal_index.value)'),
-            'max_value' => new Zend_Db_Expr('MAX(decimal_index.value)'),
+            'min_value' => new Varien_Db_Expr('MIN(decimal_index.value)'),
+            'max_value' => new Varien_Db_Expr('MAX(decimal_index.value)'),
         ]);
 
         $result     = $adapter->fetchRow($select);
@@ -86,10 +86,10 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_R
         // clone select from collection with filters
         $select = clone $collection->getSelect();
         // reset columns, order and limitation conditions
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Varien_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::LIMIT_COUNT);
+        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
 
         $attributeId = $filter->getAttributeModel()->getId();
         $storeId     = $collection->getStoreId();
@@ -117,8 +117,8 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_R
         $select     = $this->_getSelect($filter);
         $adapter    = $this->_getReadAdapter();
 
-        $countExpr  = new Zend_Db_Expr('COUNT(*)');
-        $rangeExpr  = new Zend_Db_Expr("FLOOR(decimal_index.value / {$range}) + 1");
+        $countExpr  = new Varien_Db_Expr('COUNT(*)');
+        $rangeExpr  = new Varien_Db_Expr("FLOOR(decimal_index.value / {$range}) + 1");
 
         $select->columns([
             'decimal_range' => $rangeExpr,

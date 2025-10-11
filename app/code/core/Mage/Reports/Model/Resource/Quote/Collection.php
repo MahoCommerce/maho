@@ -93,23 +93,23 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
             ->from(
                 ['oi' => $this->getTable('sales/order_item')],
                 [
-                    'orders' => new Zend_Db_Expr('COUNT(1)'),
+                    'orders' => new Varien_Db_Expr('COUNT(1)'),
                     'product_id'],
             )
             ->group('oi.product_id');
 
         $this->getSelect()
             ->useStraightJoin(true)
-            ->reset(Zend_Db_Select::COLUMNS)
+            ->reset(Varien_Db_Select::COLUMNS)
             ->joinInner(
                 ['quote_items' => $this->getTable('sales/quote_item')],
                 'quote_items.quote_id = main_table.entity_id',
-                null,
+                [],
             )
             ->joinInner(
                 ['e' => $this->getTable('catalog/product')],
                 'e.entity_id = quote_items.product_id',
-                null,
+                [],
             )
             ->joinInner(
                 ['product_name' => $productAttrNameTable],
@@ -119,15 +119,15 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
             ->joinInner(
                 ['product_price' => $productAttrPriceTable],
                 "product_price.entity_id = e.entity_id AND product_price.attribute_id = {$productAttrPriceId}",
-                ['price' => new Zend_Db_Expr('product_price.value * main_table.base_to_global_rate')],
+                ['price' => new Varien_Db_Expr('product_price.value * main_table.base_to_global_rate')],
             )
             ->joinLeft(
-                ['order_items' => new Zend_Db_Expr(sprintf('(%s)', $ordersSubSelect))],
+                ['order_items' => new Varien_Db_Expr(sprintf('(%s)', $ordersSubSelect))],
                 'order_items.product_id = e.entity_id',
                 [],
             )
             ->columns('e.*')
-            ->columns(['carts' => new Zend_Db_Expr('COUNT(quote_items.item_id)')])
+            ->columns(['carts' => new Varien_Db_Expr('COUNT(quote_items.item_id)')])
             ->columns('order_items.orders')
             ->where('main_table.is_active = ?', 1)
             ->group('quote_items.product_id');
@@ -249,14 +249,12 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
                 $this->getSelect()->where(
                     $this->_joinedFields['subtotal'] . ' >= ?',
                     $filter['subtotal']['from'],
-                    Zend_Db::FLOAT_TYPE,
                 );
             }
             if (isset($filter['subtotal']['to'])) {
                 $this->getSelect()->where(
                     $this->_joinedFields['subtotal'] . ' <= ?',
                     $filter['subtotal']['to'],
-                    Zend_Db::FLOAT_TYPE,
                 );
             }
         }
@@ -273,11 +271,11 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
     public function getSelectCountSql()
     {
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Zend_Db_Select::ORDER);
-        $countSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Zend_Db_Select::COLUMNS);
-        $countSelect->reset(Zend_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::ORDER);
+        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $countSelect->reset(Varien_Db_Select::COLUMNS);
+        $countSelect->reset(Varien_Db_Select::GROUP);
         $countSelect->resetJoinLeft();
 
         if ($this->_selectCountSqlType == self::SELECT_COUNT_SQL_TYPE_CART) {

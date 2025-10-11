@@ -36,14 +36,13 @@ class Mage_Oauth_Model_Resource_Token extends Mage_Core_Model_Resource_Db_Abstra
         $where   = $adapter->quoteInto(
             'authorized = 1 AND consumer_id = ?',
             $exceptToken->getConsumerId(),
-            Zend_Db::INT_TYPE,
         );
-        $where .= $adapter->quoteInto(' AND entity_id <> ?', $exceptToken->getId(), Zend_Db::INT_TYPE);
+        $where .= $adapter->quoteInto(' AND entity_id <> ?', $exceptToken->getId());
 
         if ($exceptToken->getCustomerId()) {
-            $where .= $adapter->quoteInto(' AND customer_id = ?', $exceptToken->getCustomerId(), Zend_Db::INT_TYPE);
+            $where .= $adapter->quoteInto(' AND customer_id = ?', $exceptToken->getCustomerId());
         } elseif ($exceptToken->getAdminId()) {
-            $where .= $adapter->quoteInto(' AND admin_id = ?', $exceptToken->getAdminId(), Zend_Db::INT_TYPE);
+            $where .= $adapter->quoteInto(' AND admin_id = ?', $exceptToken->getAdminId());
         } else {
             Mage::throwException('Invalid token to except');
         }
