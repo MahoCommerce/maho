@@ -70,22 +70,16 @@ class Table
 
     /**
      * Name of table
-     *
-     * @var string|null
      */
     protected ?string $_tableName = null;
 
     /**
      * Schema name
-     *
-     * @var string
      */
     protected ?string $_schemaName = null;
 
     /**
      * Comment for Table
-     *
-     * @var string
      */
     protected ?string $_tableComment = null;
 
@@ -109,8 +103,6 @@ class Table
      * PRIMARY_POSITION => integer; position of column in primary key
      * IDENTITY         => integer; true if column is auto-generated with unique values
      * COMMENT          => string; column description
-     *
-     * @var array
      */
     protected array $_columns = [];
 
@@ -132,8 +124,6 @@ class Table
      * NAME             => string; The column name
      * SIZE             => int|null; Length of index column (always null if index is unique)
      * POSITION         => int; Position in index
-     *
-     * @var array
      */
     protected array $_indexes = [];
 
@@ -153,15 +143,11 @@ class Table
      *
      * Valid Integrity Actions:
      * CASCADE | SET NULL | NONE | RESTRICT | SET DEFAULT
-     *
-     * @var array
      */
     protected array $_foreignKeys = [];
 
     /**
      * Additional table options
-     *
-     * @var array
      */
     protected array $_options = [
         'type'          => 'INNODB',

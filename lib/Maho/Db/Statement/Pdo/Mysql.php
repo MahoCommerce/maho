@@ -25,15 +25,11 @@ class Mysql
 {
     /**
      * Doctrine DBAL Result object
-     *
-     * @var \Doctrine\DBAL\Result
      */
     protected \Doctrine\DBAL\Result $_result;
 
     /**
      * The adapter that created this statement
-     *
-     * @var \Maho\Db\Adapter\Pdo\Mysql
      */
     protected \Maho\Db\Adapter\Pdo\Mysql $_adapter;
 

@@ -70,15 +70,11 @@ class Select
 
     /**
      * The adapter that created this Select object
-     *
-     * @var Adapter\Pdo\Mysql
      */
     protected Adapter\Pdo\Mysql $_adapter;
 
     /**
      * The component parts of a SELECT statement
-     *
-     * @var array
      */
     protected array $_parts = [
         self::DISTINCT     => false,
@@ -97,8 +93,6 @@ class Select
 
     /**
      * Tracks which columns are being select from each table and join
-     *
-     * @var array
      */
     protected array $_tableCols = [];
 
