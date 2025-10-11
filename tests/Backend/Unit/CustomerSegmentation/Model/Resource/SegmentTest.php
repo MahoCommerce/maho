@@ -94,6 +94,6 @@ describe('Customer Segment Resource Model', function () {
         // Test website-specific segment retrieval
         $website1SegmentIds = $this->resource->getActiveSegmentIds(1);
         expect($website1SegmentIds)->toBeArray();
-        expect($website1SegmentIds)->toContain($segment1->getId());
+        expect($website1SegmentIds)->toContain((int) $segment1->getId());
     });
 });

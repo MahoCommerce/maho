@@ -118,10 +118,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
             case 'days_inactive':
                 $logTable = $resource->getTableName('log/customer');
                 $orderTable = $resource->getTableName('sales/order');
+                $customerTable = $resource->getTableName('customer/entity');
 
                 // Get the most recent activity (login or order), using registration date as fallback
                 $select = $adapter->select()
-                    ->from(['c' => $resource->getTableName('customer/entity')], ['entity_id'])
+                    ->from(['c' => $customerTable], ['entity_id'])
                     ->joinLeft(
                         ['l' => $logTable],
                         'c.entity_id = l.customer_id',
@@ -179,6 +180,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
             case 'days_without_purchase':
                 $orderTable = $resource->getTableName('sales/order');
+                $customerTable = $resource->getTableName('customer/entity');
 
                 // Get customers who haven't purchased in X days
                 $lastOrderSelect = $adapter->select()
@@ -198,7 +200,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 // Also include customers with no orders if operator allows
                 if (in_array($operator, ['>=', '>'])) {
                     $noOrderSelect = $adapter->select()
-                        ->from(['c' => $resource->getTableName('customer/entity')], ['entity_id'])
+                        ->from(['c' => $customerTable], ['entity_id'])
                         ->joinLeft(
                             ['o' => $orderTable],
                             'c.entity_id = o.customer_id AND o.state NOT IN ("canceled")',

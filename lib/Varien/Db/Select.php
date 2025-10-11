@@ -139,6 +139,15 @@ class Varien_Db_Select
      */
     public function from($name, $cols = '*', $schema = null)
     {
+        // Allow empty array for selecting expressions without a table (e.g., SELECT 1)
+        if (is_array($name) && empty($name)) {
+            // Just add the columns without a table
+            if ($cols) {
+                $this->columns($cols);
+            }
+            return $this;
+        }
+
         return $this->joinInner($name, null, $cols, $schema);
     }
 

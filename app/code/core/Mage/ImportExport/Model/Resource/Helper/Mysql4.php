@@ -48,10 +48,34 @@ class Mage_ImportExport_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Res
         $adapter = $this->_getReadAdapter();
         $this->setInformationSchemaStatsExpiry();
         $entityStatus = $adapter->showTableStatus($tableName);
-        if (empty($entityStatus['Auto_increment'])) {
-            Mage::throwException(Mage::helper('importexport')->__('Cannot get autoincrement value'));
+
+        if (empty($entityStatus) || !is_array($entityStatus)) {
+            Mage::throwException(Mage::helper('importexport')->__('Cannot get table status for %s', $tableName));
         }
-        return $entityStatus['Auto_increment'];
+
+        // Handle both Auto_increment and auto_increment cases (PDO/Doctrine DBAL may differ)
+        // Also handle case where all keys might be lowercase
+        $autoIncrement = null;
+        $keyFound = false;
+        foreach ($entityStatus as $key => $value) {
+            if (strtolower($key) === 'auto_increment') {
+                $autoIncrement = $value;
+                $keyFound = true;
+                break;
+            }
+        }
+
+        if (!$keyFound) {
+            Mage::throwException(Mage::helper('importexport')->__('Auto_increment column not found for table %s', $tableName));
+        }
+
+        // If auto_increment is NULL (table has no AUTO_INCREMENT column) or 0 (empty table), return 1
+        // Otherwise return the actual value
+        if ($autoIncrement === null || $autoIncrement === 'NULL') {
+            return 1;
+        }
+
+        return $autoIncrement > 0 ? (int) $autoIncrement : 1;
     }
 
     /**
