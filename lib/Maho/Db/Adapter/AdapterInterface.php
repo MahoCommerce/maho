@@ -169,12 +169,8 @@ interface AdapterInterface
 
     /**
      * Create \Maho\Db\Ddl\Table object by data from describe table
-     *
-     * @param string $tableName
-     * @param string $newTableName
-     * @return \Maho\Db\Ddl\Table
      */
-    public function createTableByDdl($tableName, $newTableName);
+    public function createTableByDdl(string $tableName, string $newTableName): \Maho\Db\Ddl\Table;
 
     /**
      * Modify the column definition by data from describe table

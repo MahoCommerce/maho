@@ -2256,13 +2256,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Create \Maho\Db\Ddl\Table object by data from describe table
-     *
-     * @param $tableName
-     * @param $newTableName
-     * @return \Maho\Db\Ddl\Table
      */
     #[\Override]
-    public function createTableByDdl($tableName, $newTableName)
+    public function createTableByDdl(string $tableName, string $newTableName): \Maho\Db\Ddl\Table
     {
         $describe = $this->describeTable($tableName);
         $table = $this->newTable($newTableName)
