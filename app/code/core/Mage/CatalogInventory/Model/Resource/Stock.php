@@ -305,7 +305,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
         $conditionalDate = $adapter->getCheckSql($condition, $currentDbTime, 'NULL');
 
         $value  = [
-            'low_stock_date' => new Zend_Db_Expr($conditionalDate),
+            'low_stock_date' => new Varien_Db_Expr($conditionalDate),
         ];
 
         $select = $adapter->select()
@@ -353,12 +353,12 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
 
         $where = [];
         foreach ($conditions as $k => $part) {
-            $where[$k] = implode(' ' . Zend_Db_Select::SQL_AND . ' ', $part);
+            $where[$k] = implode(' ' . Varien_Db_Select::SQL_AND . ' ', $part);
         }
 
         $where = $adapter->prepareSqlCondition('invtr.low_stock_date', ['notnull' => true])
-            . ' ' . Zend_Db_Select::SQL_AND . ' (('
-            . implode(') ' . Zend_Db_Select::SQL_OR . ' (', $where)
+            . ' ' . Varien_Db_Select::SQL_AND . ' (('
+            . implode(') ' . Varien_Db_Select::SQL_OR . ' (', $where)
             . '))';
 
         $collection->joinTable(

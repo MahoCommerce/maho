@@ -74,13 +74,13 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         }
 
         // reset columns, order and limitation conditions
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Varien_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::LIMIT_COUNT);
+        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
 
         // remove join with main table
-        $fromPart = $select->getPart(Zend_Db_Select::FROM);
+        $fromPart = $select->getPart(Varien_Db_Select::FROM);
         if (!isset($fromPart[Mage_Catalog_Model_Resource_Product_Collection::INDEX_TABLE_ALIAS])
             || !isset($fromPart[Mage_Catalog_Model_Resource_Product_Collection::MAIN_TABLE_ALIAS])
         ) {
@@ -90,27 +90,27 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         // processing FROM part
         $priceIndexJoinPart = $fromPart[Mage_Catalog_Model_Resource_Product_Collection::INDEX_TABLE_ALIAS];
         $priceIndexJoinConditions = explode('AND', $priceIndexJoinPart['joinCondition']);
-        $priceIndexJoinPart['joinType'] = Zend_Db_Select::FROM;
+        $priceIndexJoinPart['joinType'] = Varien_Db_Select::FROM;
         $priceIndexJoinPart['joinCondition'] = null;
         $fromPart[Mage_Catalog_Model_Resource_Product_Collection::MAIN_TABLE_ALIAS] = $priceIndexJoinPart;
         unset($fromPart[Mage_Catalog_Model_Resource_Product_Collection::INDEX_TABLE_ALIAS]);
-        $select->setPart(Zend_Db_Select::FROM, $fromPart);
+        $select->setPart(Varien_Db_Select::FROM, $fromPart);
         foreach ($fromPart as $key => $fromJoinItem) {
             $fromPart[$key]['joinCondition'] = $this->_replaceTableAlias($fromJoinItem['joinCondition']);
         }
-        $select->setPart(Zend_Db_Select::FROM, $fromPart);
+        $select->setPart(Varien_Db_Select::FROM, $fromPart);
 
         // processing WHERE part
-        $wherePart = $select->getPart(Zend_Db_Select::WHERE);
+        $wherePart = $select->getPart(Varien_Db_Select::WHERE);
         $excludedWherePart = Mage_Catalog_Model_Resource_Product_Collection::MAIN_TABLE_ALIAS . '.status';
         foreach ($wherePart as $key => $wherePartItem) {
             if (str_contains($wherePartItem, $excludedWherePart)) {
-                $wherePart[$key] = new Zend_Db_Expr('1=1');
+                $wherePart[$key] = new Varien_Db_Expr('1=1');
                 continue;
             }
             $wherePart[$key] = $this->_replaceTableAlias($wherePartItem);
         }
-        $select->setPart(Zend_Db_Select::WHERE, $wherePart);
+        $select->setPart(Varien_Db_Select::WHERE, $wherePart);
         $excludeJoinPart = Mage_Catalog_Model_Resource_Product_Collection::MAIN_TABLE_ALIAS . '.entity_id';
         foreach ($priceIndexJoinConditions as $condition) {
             if (str_contains($condition, $excludeJoinPart)) {
@@ -217,11 +217,11 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
      *
      * @param Mage_Catalog_Model_Layer_Filter_Price $filter
      * @param Varien_Db_Select $select
-     * @return Zend_Db_Expr
+     * @return Varien_Db_Expr
      */
     protected function _getFullPriceExpression($filter, $select)
     {
-        return new Zend_Db_Expr('ROUND((' . $this->_getPriceExpression($filter, $select) . ') * '
+        return new Varien_Db_Expr('ROUND((' . $this->_getPriceExpression($filter, $select) . ') * '
             . $filter->getLayer()->getProductCollection()->getCurrencyRate() . ', 2)');
     }
 
@@ -244,9 +244,9 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if ($range == 0) {
             $range = 1;
         }
-        $countExpr = new Zend_Db_Expr('COUNT(*)');
-        $rangeExpr = new Zend_Db_Expr("FLOOR(({$priceExpression}) / {$range}) + 1");
-        $rangeOrderExpr = new Zend_Db_Expr("FLOOR(({$priceExpression}) / {$range}) + 1 ASC");
+        $countExpr = new Varien_Db_Expr('COUNT(*)');
+        $rangeExpr = new Varien_Db_Expr("FLOOR(({$priceExpression}) / {$range}) + 1");
+        $rangeOrderExpr = new Varien_Db_Expr("FLOOR(({$priceExpression}) / {$range}) + 1 ASC");
 
         $select->columns([
             'range' => $rangeExpr,
@@ -301,7 +301,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if (!is_null($upperPrice)) {
             $select->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
-        $select->order(new Zend_Db_Expr("$priceExpression ASC"))->limit($limit, $offset);
+        $select->order(new Varien_Db_Expr("$priceExpression ASC"))->limit($limit, $offset);
 
         return $this->_getReadAdapter()->fetchCol($select);
     }
@@ -364,7 +364,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if (!is_null($upperPrice)) {
             $pricesSelect->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
-        $pricesSelect->order(new Zend_Db_Expr("$priceExpression DESC"))->limit($rightIndex - $offset + 1, $offset - 1);
+        $pricesSelect->order(new Varien_Db_Expr("$priceExpression DESC"))->limit($rightIndex - $offset + 1, $offset - 1);
 
         return array_reverse($this->_getReadAdapter()->fetchCol($pricesSelect));
     }

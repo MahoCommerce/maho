@@ -81,13 +81,13 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 'store_id'               => 'source_table.store_id',
                 'product_id'             => 'order_item.product_id',
                 'product_type_id'        => 'product.type_id',
-                'product_name'           => new Zend_Db_Expr(
+                'product_name'           => new Varien_Db_Expr(
                     sprintf(
                         'MIN(%s)',
                         $adapter->getIfNullSql('product_name.value', 'product_default_name.value'),
                     ),
                 ),
-                'product_price'          => new Zend_Db_Expr(
+                'product_price'          => new Varien_Db_Expr(
                     sprintf(
                         '%s',
                         $helper->prepareColumn(
@@ -98,11 +98,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                                     0,
                                 ),
                             ),
-                            $select->getPart(Zend_Db_Select::GROUP),
+                            $select->getPart(Varien_Db_Select::GROUP),
                         ),
                     ),
                 ),
-                'qty_ordered'            => new Zend_Db_Expr('SUM(order_item.qty_ordered)'),
+                'qty_ordered'            => new Varien_Db_Expr('SUM(order_item.qty_ordered)'),
             ];
 
             $select
@@ -237,11 +237,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
 
         $columns = [
             'period'            => 'period',
-            'store_id'          => new Zend_Db_Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
+            'store_id'          => new Varien_Db_Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
             'product_id'        => 'product_id',
             'product_type_id'   => 'product_type_id',
-            'product_name'      => new Zend_Db_Expr('MIN(product_name)'),
-            'product_price'     => new Zend_Db_Expr(
+            'product_name'      => new Varien_Db_Expr('MIN(product_name)'),
+            'product_price'     => new Varien_Db_Expr(
                 sprintf(
                     '%s',
                     $helper->prepareColumn(
@@ -249,11 +249,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                             'MIN(%s)',
                             $adapter->getIfNullSql('product_default_price.value', 0),
                         ),
-                        $select->getPart(Zend_Db_Select::GROUP),
+                        $select->getPart(Varien_Db_Select::GROUP),
                     ),
                 ),
             ),
-            'qty_ordered'       => new Zend_Db_Expr('SUM(qty_ordered)'),
+            'qty_ordered'       => new Varien_Db_Expr('SUM(qty_ordered)'),
         ];
 
         $select->from($this->getMainTable(), $columns)

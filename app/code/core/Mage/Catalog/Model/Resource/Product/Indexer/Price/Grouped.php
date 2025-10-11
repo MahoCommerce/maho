@@ -87,12 +87,12 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Grouped extends Mage_Cat
                 [
                     'tax_class_id' => $this->_getReadAdapter()
                         ->getCheckSql('MIN(i.tax_class_id) IS NULL', '0', 'MIN(i.tax_class_id)'),
-                    'price'        => new Zend_Db_Expr('NULL'),
-                    'final_price'  => new Zend_Db_Expr('NULL'),
-                    'min_price'    => new Zend_Db_Expr('MIN(' . $minCheckSql . ')'),
-                    'max_price'    => new Zend_Db_Expr('MAX(' . $maxCheckSql . ')'),
-                    'tier_price'   => new Zend_Db_Expr('NULL'),
-                    'group_price'  => new Zend_Db_Expr('NULL'),
+                    'price'        => new Varien_Db_Expr('NULL'),
+                    'final_price'  => new Varien_Db_Expr('NULL'),
+                    'min_price'    => new Varien_Db_Expr('MIN(' . $minCheckSql . ')'),
+                    'max_price'    => new Varien_Db_Expr('MAX(' . $maxCheckSql . ')'),
+                    'tier_price'   => new Varien_Db_Expr('NULL'),
+                    'group_price'  => new Varien_Db_Expr('NULL'),
                 ],
             )
             ->group(['e.entity_id', 'cg.customer_group_id', 'cw.website_id'])
@@ -110,9 +110,9 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Grouped extends Mage_Cat
          */
         Mage::dispatchEvent('catalog_product_prepare_index_select', [
             'select'        => $select,
-            'entity_field'  => new Zend_Db_Expr('e.entity_id'),
-            'website_field' => new Zend_Db_Expr('cw.website_id'),
-            'store_field'   => new Zend_Db_Expr('cs.store_id'),
+            'entity_field'  => new Varien_Db_Expr('e.entity_id'),
+            'website_field' => new Varien_Db_Expr('cw.website_id'),
+            'store_field'   => new Varien_Db_Expr('cs.store_id'),
         ]);
 
         $query = $select->insertFromSelect($table);

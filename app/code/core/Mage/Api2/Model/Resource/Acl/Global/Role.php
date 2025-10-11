@@ -46,7 +46,7 @@ class Mage_Api2_Model_Resource_Acl_Global_Role extends Mage_Core_Model_Resource_
         $read = $this->_getReadAdapter();
         $select = $read->select()
             ->from($this->getTable('api2/acl_user'), 'admin_id')
-            ->where('admin_id = ?', $adminId, Zend_Db::INT_TYPE);
+            ->where('admin_id = ?', $adminId);
 
         $write = $this->_getWriteAdapter();
         $table = $this->getTable('api2/acl_user');

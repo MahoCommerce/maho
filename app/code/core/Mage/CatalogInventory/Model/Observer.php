@@ -753,7 +753,7 @@ class Mage_CatalogInventory_Model_Observer
         $stockCollection = Mage::getModel('cataloginventory/stock_item')->getCollection()
             ->addFieldToFilter('product_id', ['in' => $productIds])
             ->addFieldToFilter('manage_stock', ['eq' => 1]);
-        $stockCollection->getSelect()->reset(Zend_Db_Select::COLUMNS)->columns(['product_id']);
+        $stockCollection->getSelect()->reset(Varien_Db_Select::COLUMNS)->columns(['product_id']);
         $productIds = $stockCollection->getColumnValues('product_id');
 
         if (count($productIds)) {
@@ -928,11 +928,11 @@ class Mage_CatalogInventory_Model_Observer
             return $this;
         }
 
-        if (!($entityField instanceof Zend_Db_Expr)) {
-            $entityField = new Zend_Db_Expr($entityField);
+        if (!($entityField instanceof Varien_Db_Expr)) {
+            $entityField = new Varien_Db_Expr($entityField);
         }
-        if (!($websiteField instanceof Zend_Db_Expr)) {
-            $websiteField = new Zend_Db_Expr($websiteField);
+        if (!($websiteField instanceof Varien_Db_Expr)) {
+            $websiteField = new Varien_Db_Expr($websiteField);
         }
 
         Mage::getResourceSingleton('cataloginventory/stock_status')

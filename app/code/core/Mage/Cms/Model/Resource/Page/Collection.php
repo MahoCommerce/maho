@@ -170,7 +170,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
     {
         $countSelect = parent::getSelectCountSql();
 
-        $countSelect->reset(Zend_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::GROUP);
 
         return $countSelect;
     }

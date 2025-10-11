@@ -15,7 +15,7 @@ class Mage_Core_Model_Resource_Iterator extends Varien_Object
     /**
      * Walk over records fetched from query one by one using callback function
      *
-     * @param Zend_Db_Statement_Interface|Zend_Db_Select|string $query
+     * @param Varien_Db_Statement_Pdo_Mysql|Varien_Db_Select|string $query
      * @param array|string $callbacks
      * @param Varien_Db_Adapter_Interface $adapter
      * @return $this
@@ -39,25 +39,25 @@ class Mage_Core_Model_Resource_Iterator extends Varien_Object
     }
 
     /**
-     * Fetch Zend statement instance
+     * Fetch statement instance
      *
-     * @param Zend_Db_Statement_Interface|Zend_Db_Select|string $query
-     * @param Zend_Db_Adapter_Abstract $conn
-     * @return Zend_Db_Statement_Interface
+     * @param Varien_Db_Statement_Pdo_Mysql|Varien_Db_Select|string $query
+     * @param Varien_Db_Adapter_Interface $conn
+     * @return Varien_Db_Statement_Pdo_Mysql
      * @throws Mage_Core_Exception
      */
     protected function _getStatement($query, $conn = null)
     {
-        if ($query instanceof Zend_Db_Statement_Interface) {
+        if ($query instanceof Varien_Db_Statement_Pdo_Mysql) {
             return $query;
         }
 
-        if ($query instanceof Zend_Db_Select) {
+        if ($query instanceof Varien_Db_Select) {
             return $query->query();
         }
 
         if (is_string($query)) {
-            if (!$conn instanceof Zend_Db_Adapter_Abstract) {
+            if (!$conn instanceof Varien_Db_Adapter_Interface) {
                 Mage::throwException(Mage::helper('core')->__('Invalid connection'));
             }
             return $conn->query($query);

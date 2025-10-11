@@ -15,7 +15,7 @@ class Mage_Sales_Model_Resource_Report_Invoiced_Collection_Order extends Mage_Sa
     /**
      * Period format
      *
-     * @var Zend_Db_Expr
+     * @var Varien_Db_Expr
      */
     protected $_periodFormat;
 

@@ -202,18 +202,18 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                         )
                         ->reset(Varien_Db_Select::COLUMNS)
                         ->columns([
-                            new Zend_Db_Expr((string) $store->getWebsiteId()),
+                            new Varien_Db_Expr((string) $store->getWebsiteId()),
                             'cg.customer_group_id',
                             'p.entity_id',
-                            new Zend_Db_Expr($rule->getId()),
-                            new Zend_Db_Expr((string) $fromTime),
-                            new Zend_Db_Expr((string) $toTime),
-                            new Zend_Db_Expr("'" . $actionOperator . "'"),
-                            new Zend_Db_Expr((string) $actionAmount),
-                            new Zend_Db_Expr((string) $actionStop),
-                            new Zend_Db_Expr((string) $sortOrder),
-                            new Zend_Db_Expr("'" . $subActionOperator . "'"),
-                            new Zend_Db_Expr((string) $subActionAmount),
+                            new Varien_Db_Expr($rule->getId()),
+                            new Varien_Db_Expr((string) $fromTime),
+                            new Varien_Db_Expr((string) $toTime),
+                            new Varien_Db_Expr("'" . $actionOperator . "'"),
+                            new Varien_Db_Expr((string) $actionAmount),
+                            new Varien_Db_Expr((string) $actionStop),
+                            new Varien_Db_Expr((string) $sortOrder),
+                            new Varien_Db_Expr("'" . $subActionOperator . "'"),
+                            new Varien_Db_Expr((string) $subActionAmount),
                         ]);
 
                     if (count($productIds) > 0) {
@@ -416,7 +416,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * @param int|null $productId
      * @param int|null $websiteId
      *
-     * @return Zend_Db_Statement_Interface
+     * @return Varien_Db_Statement_Pdo_Mysql
      */
     protected function _getRuleProductsStmt($fromDate, $toDate, $productId = null, $websiteId = null)
     {

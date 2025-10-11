@@ -51,7 +51,7 @@ class Mage_Review_Model_Resource_Review_Summary extends Mage_Core_Model_Resource
             ->from(
                 $this->getMainTable(),
                 [
-                    'primary_id' => new Zend_Db_Expr('MAX(primary_id)'),
+                    'primary_id' => new Varien_Db_Expr('MAX(primary_id)'),
                     'store_id',
                     'entity_pk_value',
                 ],

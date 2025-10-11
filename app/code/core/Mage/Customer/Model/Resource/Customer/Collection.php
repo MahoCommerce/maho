@@ -35,7 +35,7 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
         $this->getSelect()
             ->from(
                 ['email' => $this->getEntity()->getEntityTable()],
-                ['email_count' => new Zend_Db_Expr('COUNT(email.entity_id)')],
+                ['email_count' => new Varien_Db_Expr('COUNT(email.entity_id)')],
             )
             ->where('email.entity_id = e.entity_id')
             ->group('email.email');

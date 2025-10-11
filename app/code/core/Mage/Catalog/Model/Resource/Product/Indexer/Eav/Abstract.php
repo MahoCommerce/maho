@@ -133,7 +133,7 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
         $idxTable   = $this->getIdxTable();
 
         $select = $write->select()
-            ->from($idxTable, null);
+            ->from($idxTable, []);
 
         $condition = $write->quoteInto('=?', Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE);
         $this->_addAttributeToSelect(
@@ -185,9 +185,9 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
          */
         Mage::dispatchEvent('prepare_catalog_product_index_select', [
             'select'        => $select,
-            'entity_field'  => new Zend_Db_Expr('l.parent_id'),
-            'website_field' => new Zend_Db_Expr('cs.website_id'),
-            'store_field'   => new Zend_Db_Expr('cs.store_id'),
+            'entity_field'  => new Varien_Db_Expr('l.parent_id'),
+            'website_field' => new Varien_Db_Expr('cs.website_id'),
+            'store_field'   => new Varien_Db_Expr('cs.store_id'),
         ]);
 
         $query = $write->insertFromSelect($select, $idxTable, [], Varien_Db_Adapter_Interface::INSERT_IGNORE);

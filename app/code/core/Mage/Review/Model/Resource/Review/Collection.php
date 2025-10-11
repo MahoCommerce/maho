@@ -234,7 +234,7 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
         $this->_select->joinLeft(
             ['r' => $this->_reviewTable],
             'main_table.entity_pk_value = r.entity_pk_value',
-            ['total_reviews' => new Zend_Db_Expr('COUNT(r.review_id)')],
+            ['total_reviews' => new Varien_Db_Expr('COUNT(r.review_id)')],
         )
         ->group('main_table.review_id');
 

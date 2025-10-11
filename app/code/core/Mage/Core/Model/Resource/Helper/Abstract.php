@@ -144,7 +144,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      *
      * @param string $value
      * @param array $options
-     * @return Zend_Db_Expr
+     * @return Varien_Db_Expr
      *
      * @see escapeLikeValue()
      */
@@ -157,14 +157,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      * @param string $field
      * @param string $value
      * @param array $options
-     * @return Zend_Db_Expr
+     * @return Varien_Db_Expr
      *
      * @see escapeLikeValue()
      */
     public function getCILike($field, $value, $options = [])
     {
         $quotedField = $this->_getReadAdapter()->quoteIdentifier($field);
-        return new Zend_Db_Expr($quotedField . ' LIKE ' . $this->addLikeEscape($value, $options));
+        return new Varien_Db_Expr($quotedField . ' LIKE ' . $this->addLikeEscape($value, $options));
     }
 
     /**

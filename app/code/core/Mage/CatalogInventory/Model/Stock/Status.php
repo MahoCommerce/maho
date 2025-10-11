@@ -487,8 +487,8 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     /**
      * Add stock status limitation to catalog product price index select object
      *
-     * @param string|Zend_Db_Expr $entityField
-     * @param string|Zend_Db_Expr $websiteField
+     * @param string|Varien_Db_Expr $entityField
+     * @param string|Varien_Db_Expr $websiteField
      * @return $this
      */
     public function prepareCatalogProductIndexSelect(Varien_Db_Select $select, $entityField, $websiteField)

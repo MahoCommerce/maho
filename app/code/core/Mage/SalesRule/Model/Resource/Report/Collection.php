@@ -15,7 +15,7 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
     /**
      * Period format for report (day, month, year)
      *
-     * @var Zend_Db_Expr
+     * @var Varien_Db_Expr
      */
     protected $_periodFormat;
 

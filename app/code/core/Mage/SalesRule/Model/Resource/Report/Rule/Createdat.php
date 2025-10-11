@@ -133,7 +133,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
 
             $columns = [
                 'period'                  => 'period',
-                'store_id'                => new Zend_Db_Expr('0'),
+                'store_id'                => new Varien_Db_Expr('0'),
                 'order_status'            => 'order_status',
                 'coupon_code'             => 'coupon_code',
                 'rule_name'               => 'rule_name',

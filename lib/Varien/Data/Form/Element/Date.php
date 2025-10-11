@@ -72,6 +72,13 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             $this->_value = '';
             return $this;
         }
+
+        // Handle MySQL zero dates and invalid dates
+        if (is_string($value) && preg_match('/^0000-00-00/', $value)) {
+            $this->_value = '';
+            return $this;
+        }
+
         if ($value instanceof DateTime) {
             $this->_value = $value;
             return $this;
@@ -98,9 +105,25 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             if ($format && $format !== Mage_Core_Model_Locale::DATETIME_FORMAT) {
                 // Convert ICU format to PHP format if needed (backward compatibility)
                 $phpFormat = str_replace(['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss'], ['Y', 'm', 'd', 'H', 'i', 's'], $format);
-                $this->_value = DateTime::createFromFormat($phpFormat, $value) ?: new DateTime($value);
+                $dateTime = DateTime::createFromFormat($phpFormat, $value);
+                if ($dateTime === false) {
+                    // Try standard DateTime parsing as fallback
+                    $dateTime = new DateTime($value);
+                }
+                // Validate that the resulting date has a valid year
+                if ($dateTime->format('Y') < 1) {
+                    $this->_value = '';
+                    return $this;
+                }
+                $this->_value = $dateTime;
             } else {
-                $this->_value = new DateTime($value);
+                $dateTime = new DateTime($value);
+                // Validate that the resulting date has a valid year
+                if ($dateTime->format('Y') < 1) {
+                    $this->_value = '';
+                    return $this;
+                }
+                $this->_value = $dateTime;
             }
         } catch (Exception $e) {
             $this->_value = '';
@@ -158,10 +181,13 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
         // Convert the value to ISO format for native date input
         $isoValue = '';
         if ($this->_value instanceof DateTime) {
-            if ($this->getTime()) {
-                $isoValue = $this->_value->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
-            } else {
-                $isoValue = $this->_value->format(Mage_Core_Model_Locale::DATE_FORMAT);
+            // Validate that the date has a valid year (not from MySQL zero date)
+            if ($this->_value->format('Y') >= 1) {
+                if ($this->getTime()) {
+                    $isoValue = $this->_value->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
+                } else {
+                    $isoValue = $this->_value->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                }
             }
         }
 

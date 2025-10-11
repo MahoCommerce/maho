@@ -28,11 +28,11 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * @param string $column
      * @param string $groupAliasName OPTIONAL
      * @param string $orderBy OPTIONAL
-     * @return Zend_Db_Expr
+     * @return Varien_Db_Expr
      */
     public function prepareColumn($column, $groupAliasName = null, $orderBy = null)
     {
-        return new Zend_Db_Expr((string) $column);
+        return new Varien_Db_Expr((string) $column);
     }
 
     /**
@@ -78,7 +78,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      */
     protected function _prepareOrder(Varien_Db_Select $select, $autoReset = false)
     {
-        $selectOrders = $select->getPart(Zend_Db_Select::ORDER);
+        $selectOrders = $select->getPart(Varien_Db_Select::ORDER);
         if (!$selectOrders) {
             return [];
         }
@@ -97,7 +97,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         }
 
         if ($autoReset) {
-            $select->reset(Zend_Db_Select::ORDER);
+            $select->reset(Varien_Db_Select::ORDER);
         }
 
         return $orders;
@@ -137,7 +137,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      */
     protected function _prepareGroup(Varien_Db_Select $select, $autoReset = false)
     {
-        $selectGroups = $select->getPart(Zend_Db_Select::GROUP);
+        $selectGroups = $select->getPart(Varien_Db_Select::GROUP);
         if (!$selectGroups) {
             return [];
         }
@@ -148,7 +148,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         }
 
         if ($autoReset) {
-            $select->reset(Zend_Db_Select::GROUP);
+            $select->reset(Varien_Db_Select::GROUP);
         }
 
         return $groups;
@@ -159,17 +159,17 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * @param bool $autoReset
      * @return array
-     * @throws Zend_Db_Exception
+     * @throws Mage_Core_Exception
      */
     protected function _prepareHaving(Varien_Db_Select $select, $autoReset = false)
     {
-        $selectHavings = $select->getPart(Zend_Db_Select::HAVING);
+        $selectHavings = $select->getPart(Varien_Db_Select::HAVING);
         if (!$selectHavings) {
             return [];
         }
 
         $havings = [];
-        $columns = $select->getPart(Zend_Db_Select::COLUMNS);
+        $columns = $select->getPart(Varien_Db_Select::COLUMNS);
         foreach ($columns as $columnEntry) {
             $correlationName = (string) $columnEntry[1];
             $column          = $columnEntry[2];
@@ -184,14 +184,14 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
                          */
                         $havings[] = str_replace($correlationName, $column, $having);
                     } else {
-                        throw new Zend_Db_Exception(sprintf("Can't prepare expression without column alias: '%s'", $correlationName));
+                        throw new Mage_Core_Exception(sprintf("Can't prepare expression without column alias: '%s'", $correlationName));
                     }
                 }
             }
         }
 
         if ($autoReset) {
-            $select->reset(Zend_Db_Select::HAVING);
+            $select->reset(Varien_Db_Select::HAVING);
         }
 
         return $havings;
@@ -229,33 +229,33 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * @param string $groupByCondition
      * @return array
-     * @throws Zend_Db_Exception
+     * @throws Mage_Core_Exception
      */
     public function prepareColumnsList(Varien_Db_Select $select, $groupByCondition = null)
     {
-        if (!count($select->getPart(Zend_Db_Select::FROM))) {
-            return $select->getPart(Zend_Db_Select::COLUMNS);
+        if (!count($select->getPart(Varien_Db_Select::FROM))) {
+            return $select->getPart(Varien_Db_Select::COLUMNS);
         }
 
-        $columns          = $select->getPart(Zend_Db_Select::COLUMNS);
-        $tables           = $select->getPart(Zend_Db_Select::FROM);
+        $columns          = $select->getPart(Varien_Db_Select::COLUMNS);
+        $tables           = $select->getPart(Varien_Db_Select::FROM);
         $preparedColumns  = [];
 
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
-            if ($column instanceof Zend_Db_Expr) {
+            if ($column instanceof Varien_Db_Expr) {
                 if ($alias !== null) {
                     if (preg_match('/(^|[^a-zA-Z_])^(SELECT)?(SUM|MIN|MAX|AVG|COUNT)\s*\(/i', (string) $column, $matches)) {
                         $column = $this->prepareColumn($column, $groupByCondition);
                     }
                     $preparedColumns[strtoupper($alias)] = [null, $column, $alias];
                 } else {
-                    throw new Zend_Db_Exception("Can't prepare expression without alias");
+                    throw new Mage_Core_Exception("Can't prepare expression without alias");
                 }
             } else {
-                if ($column == Zend_Db_Select::SQL_WILDCARD) {
-                    if ($tables[$correlationName]['tableName'] instanceof Zend_Db_Expr) {
-                        throw new Zend_Db_Exception("Can't prepare expression when tableName is instance of Zend_Db_Expr");
+                if ($column == Varien_Db_Select::SQL_WILDCARD) {
+                    if ($tables[$correlationName]['tableName'] instanceof Varien_Db_Expr) {
+                        throw new Mage_Core_Exception("Can't prepare expression when tableName is instance of Varien_Db_Expr");
                     }
                     $tableColumns = $this->_getReadAdapter()->describeTable($tables[$correlationName]['tableName']);
                     foreach (array_keys($tableColumns) as $col) {
@@ -297,7 +297,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
             $separator = sprintf(" SEPARATOR '%s'", $groupConcatDelimiter);
         }
 
-        $select->columns([$fieldAlias => new Zend_Db_Expr(sprintf('GROUP_CONCAT(%s%s)', $fieldExpr, $separator))]);
+        $select->columns([$fieldAlias => new Varien_Db_Expr(sprintf('GROUP_CONCAT(%s%s)', $fieldExpr, $separator))]);
 
         return $select;
     }
@@ -305,14 +305,14 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Returns expression of days passed from $startDate to $endDate
      *
-     * @param  string|Zend_Db_Expr $startDate
-     * @param  string|Zend_Db_Expr $endDate
-     * @return Zend_Db_Expr
+     * @param  string|Varien_Db_Expr $startDate
+     * @param  string|Varien_Db_Expr $endDate
+     * @return Varien_Db_Expr
      */
     public function getDateDiff($startDate, $endDate)
     {
         $dateDiff = '(TO_DAYS(' . $endDate . ') - TO_DAYS(' . $startDate . '))';
-        return new Zend_Db_Expr($dateDiff);
+        return new Varien_Db_Expr($dateDiff);
     }
 
     /**
@@ -322,7 +322,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * @param string $value
      * @param array $options
-     * @return Zend_Db_Expr
+     * @return Varien_Db_Expr
      *
      * @see escapeLikeValue()
      */
@@ -330,6 +330,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     public function addLikeEscape($value, $options = [])
     {
         $value = $this->escapeLikeValue($value, $options);
-        return new Zend_Db_Expr($this->_getReadAdapter()->quote($value));
+        return new Varien_Db_Expr($this->_getReadAdapter()->quote($value));
     }
 }

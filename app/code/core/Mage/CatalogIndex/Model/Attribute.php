@@ -47,7 +47,7 @@ class Mage_CatalogIndex_Model_Attribute extends Mage_Core_Model_Abstract
 
     /**
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Select $entityFilter
+     * @param Varien_Db_Select $entityFilter
      * @return array
      */
     public function getCount($attribute, $entityFilter)

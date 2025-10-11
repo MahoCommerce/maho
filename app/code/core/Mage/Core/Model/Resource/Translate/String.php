@@ -31,7 +31,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
             $result = $this->_getReadAdapter()->fetchRow($select, ['tr_string' => $value]);
             $object->setData($result);
             $this->_afterLoad($object);
-            return $result;
+            return $this;
         } else {
             return parent::load($object, $value, $field);
         }

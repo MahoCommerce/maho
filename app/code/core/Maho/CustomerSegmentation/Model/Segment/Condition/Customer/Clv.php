@@ -121,13 +121,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                     ->group('o.customer_id');
 
                 $select = $adapter->select()
-                    ->from(['sales' => new Zend_Db_Expr("({$salesSelect})")], ['customer_id'])
+                    ->from(['sales' => new Varien_Db_Expr("({$salesSelect})")], ['customer_id'])
                     ->joinLeft(
-                        ['refunds' => new Zend_Db_Expr("({$refundsSelect})")],
+                        ['refunds' => new Varien_Db_Expr("({$refundsSelect})")],
                         'sales.customer_id = refunds.customer_id',
                         [],
                     )
-                    ->columns(['total' => new Zend_Db_Expr('COALESCE(sales.amount, 0) - COALESCE(refunds.amount, 0)')]);
+                    ->columns(['total' => new Varien_Db_Expr('COALESCE(sales.amount, 0) - COALESCE(refunds.amount, 0)')]);
                 break;
 
             case 'lifetime_refunds':
@@ -157,13 +157,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
 
         // Standard condition building
         $clvSelect = $adapter->select()
-            ->from(['clv' => new Zend_Db_Expr("({$select})")], ['customer_id'])
+            ->from(['clv' => new Varien_Db_Expr("({$select})")], ['customer_id'])
             ->where($this->buildSqlCondition($adapter, 'clv.total', $operator, $value));
 
         if ($requireValid) {
-            return $adapter->quoteInto("{$fieldName} IN (?)", new Zend_Db_Expr((string) $clvSelect));
+            return $adapter->quoteInto("{$fieldName} IN (?)", new Varien_Db_Expr((string) $clvSelect));
         } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Zend_Db_Expr((string) $clvSelect));
+            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Varien_Db_Expr((string) $clvSelect));
         }
     }
 

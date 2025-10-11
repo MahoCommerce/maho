@@ -13,7 +13,7 @@
 class Mage_Tax_Model_Resource_Report_Collection extends Mage_Sales_Model_Resource_Report_Collection_Abstract
 {
     /**
-     * @var Zend_Db_Expr
+     * @var Varien_Db_Expr
      */
     protected $_periodFormat;
 

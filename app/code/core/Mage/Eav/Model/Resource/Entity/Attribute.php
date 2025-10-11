@@ -98,7 +98,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
                 ':attribute_group_id' => $object->getAttributeGroupId(),
             ];
             $select = $adapter->select()
-                ->from($this->getTable('eav/entity_attribute'), new Zend_Db_Expr('MAX(sort_order)'))
+                ->from($this->getTable('eav/entity_attribute'), new Varien_Db_Expr('MAX(sort_order)'))
                 ->where('attribute_set_id = :attribute_set_id')
                 ->where('attribute_group_id = :attribute_group_id');
 

@@ -69,7 +69,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
         $derivedSelect = $this->getReadConnection()->select()
             ->from(
                 $this->getTable('reports/event'),
-                ['event_id' => new Zend_Db_Expr('MAX(event_id)'), 'object_id'],
+                ['event_id' => new Varien_Db_Expr('MAX(event_id)'), 'object_id'],
             )
             ->where('event_type_id = ?', (int) $eventTypeId)
             ->where('subject_id = ?', (int) $eventSubjectId)
@@ -86,7 +86,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
 
         $collection->getSelect()
             ->joinInner(
-                ['evt' => new Zend_Db_Expr("({$derivedSelect})")],
+                ['evt' => new Varien_Db_Expr("({$derivedSelect})")],
                 "{$idFieldName} = evt.object_id",
                 [],
             )

@@ -25,7 +25,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
     protected function _prepareCollection(): self
     {
         $collection = Mage::getResourceModel('directory/region_collection');
-        $collection->getSelect()->reset(Zend_Db_Select::ORDER);
+        $collection->getSelect()->reset(Varien_Db_Select::ORDER);
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }

@@ -15,14 +15,14 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Read connection
      *
-     * @var string|Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract
+     * @var string|Varien_Db_Adapter_Interface
      */
     protected $_read;
 
     /**
      * Write connection
      *
-     * @var string|Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract
+     * @var string|Varien_Db_Adapter_Interface
      */
     protected $_write;
 
@@ -155,8 +155,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Set connections for entity operations
      *
-     * @param Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract|string $read
-     * @param Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract|string|null $write
+     * @param Varien_Db_Adapter_Interface|string $read
+     * @param Varien_Db_Adapter_Interface|string|null $write
      * @return $this
      */
     public function setConnection($read, $write = null)
@@ -986,7 +986,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _prepareLoadSelect(array $selects)
     {
-        return $this->_getReadAdapter()->select()->union($selects, Zend_Db_Select::SQL_UNION_ALL);
+        return $this->_getReadAdapter()->select()->union($selects, Varien_Db_Select::SQL_UNION_ALL);
     }
 
     /**
@@ -994,7 +994,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param   Varien_Object $object
      * @param   mixed $rowId
-     * @return  Zend_Db_Select
+     * @return  Varien_Db_Select
      */
     protected function _getLoadRowSelect($object, $rowId)
     {

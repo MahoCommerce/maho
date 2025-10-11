@@ -177,7 +177,7 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
         $adapter    = $this->_getReadAdapter();
         $ifNullDefaultTitle = $adapter->getIfNullSql('st.title', 's.title');
         $select = $adapter->select()
-            ->from(['m' => $this->getMainTable()], null)
+            ->from(['m' => $this->getMainTable()], [])
             ->join(
                 ['s' => $this->getTable('downloadable/link_title')],
                 's.link_id=m.link_id AND s.store_id=0',

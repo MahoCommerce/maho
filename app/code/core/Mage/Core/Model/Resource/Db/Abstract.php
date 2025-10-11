@@ -633,7 +633,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
                 ->from($this->getMainTable());
 
             foreach ($fields as $unique) {
-                $select->reset(Zend_Db_Select::WHERE);
+                $select->reset(Varien_Db_Select::WHERE);
 
                 if (is_array($unique['field'])) {
                     foreach ($unique['field'] as $field) {

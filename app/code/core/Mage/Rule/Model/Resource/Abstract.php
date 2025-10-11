@@ -45,14 +45,14 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     {
         $fromDate = $object->getFromDate();
         if ($fromDate instanceof DateTime) {
-            $object->setFromDate($fromDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $object->setFromDate($fromDate->format(Mage_Core_Model_Locale::DATE_FORMAT));
         } elseif (!is_string($fromDate) || empty($fromDate)) {
             $object->setFromDate(null);
         }
 
         $toDate = $object->getToDate();
         if ($toDate instanceof DateTime) {
-            $object->setToDate($toDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $object->setToDate($toDate->format(Mage_Core_Model_Locale::DATE_FORMAT));
         } elseif (!is_string($toDate) || empty($toDate)) {
             $object->setToDate(null);
         }
@@ -73,7 +73,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
         $select = $this->_getReadAdapter()->select();
         $select->from(
             ['p' => $this->getTable('catalog/product')],
-            [new Zend_Db_Expr('DISTINCT p.entity_id')],
+            [new Varien_Db_Expr('DISTINCT p.entity_id')],
         )
             ->joinInner(
                 ['cpf' => $this->getTable('catalog/product_flat') . '_' . $storeId],

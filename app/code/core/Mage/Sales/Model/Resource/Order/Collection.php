@@ -60,7 +60,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
     {
         $countSelect = parent::getSelectCountSql();
         $countSelect->resetJoinLeft();
-        $countSelect->reset(Zend_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::GROUP);
         return $countSelect;
     }
 

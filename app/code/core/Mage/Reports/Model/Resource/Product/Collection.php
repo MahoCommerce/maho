@@ -171,12 +171,12 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         }
 
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Zend_Db_Select::ORDER);
-        $countSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Zend_Db_Select::COLUMNS);
-        $countSelect->reset(Zend_Db_Select::GROUP);
-        $countSelect->reset(Zend_Db_Select::HAVING);
+        $countSelect->reset(Varien_Db_Select::ORDER);
+        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $countSelect->reset(Varien_Db_Select::COLUMNS);
+        $countSelect->reset(Varien_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::HAVING);
         $countSelect->columns('count(DISTINCT e.entity_id)');
 
         return $countSelect;

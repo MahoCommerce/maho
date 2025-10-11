@@ -70,16 +70,16 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
 
     /**
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Select $entitySelect
+     * @param Varien_Db_Select $entitySelect
      * @return float|int
      */
     public function getMaxValue($attribute, $entitySelect)
     {
         $select = clone $entitySelect;
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Varien_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::LIMIT_COUNT);
+        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
 
         $response = new Varien_Object();
         $response->setAdditionalCalculations([]);
@@ -108,16 +108,16 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
     /**
      * @param int $range
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Select $entitySelect
+     * @param Varien_Db_Select $entitySelect
      * @return array
      */
     public function getCount($range, $attribute, $entitySelect)
     {
         $select = clone $entitySelect;
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Varien_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::LIMIT_COUNT);
+        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
 
         $select->join(['price_table' => $this->getMainTable()], 'price_table.entity_id=e.entity_id', []);
         $response = new Varien_Object();

@@ -46,7 +46,7 @@ class Mage_Tax_Model_Resource_Calculation_Rule extends Mage_Core_Model_Resource_
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
-            ->from(['main' => $this->getTable('tax/tax_calculation')], null)
+            ->from(['main' => $this->getTable('tax/tax_calculation')], [])
             ->joinLeft(
                 ['d' => $this->getTable('tax/tax_calculation_rule')],
                 'd.tax_calculation_rule_id = main.tax_calculation_rule_id',

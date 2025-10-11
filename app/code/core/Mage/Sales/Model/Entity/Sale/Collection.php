@@ -31,9 +31,9 @@ class Mage_Sales_Model_Entity_Sale_Collection extends Varien_Object implements I
     protected $_entity;
 
     /**
-     * Collection's Zend_Db_Select object
+     * Collection's Varien_Db_Select object
      *
-     * @var Zend_Db_Select
+     * @var Varien_Db_Select
      */
     protected $_select;
 
@@ -138,7 +138,7 @@ class Mage_Sales_Model_Entity_Sale_Collection extends Varien_Object implements I
     /**
      * Get zend db select instance
      *
-     * @return Zend_Db_Select
+     * @return Varien_Db_Select
      */
     public function getSelect()
     {

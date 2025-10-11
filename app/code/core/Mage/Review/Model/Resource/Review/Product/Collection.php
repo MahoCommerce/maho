@@ -124,7 +124,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      *
      * @return $this
      */
-    protected function _applyStoresFilterToSelect(?Zend_Db_Select $select = null)
+    protected function _applyStoresFilterToSelect(?Varien_Db_Select $select = null)
     {
         $adapter = $this->getConnection();
         $storesIds = $this->_storesIds;
@@ -283,10 +283,10 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
     public function getAllIds($limit = null, $offset = null)
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Zend_Db_Select::ORDER);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Zend_Db_Select::COLUMNS);
+        $idsSelect->reset(Varien_Db_Select::ORDER);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $idsSelect->reset(Varien_Db_Select::COLUMNS);
         $idsSelect->columns('rt.review_id');
         return $this->getConnection()->fetchCol($idsSelect);
     }
@@ -300,9 +300,9 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
     public function getSelectCountSql()
     {
         $select = parent::getSelectCountSql();
-        $select->reset(Zend_Db_Select::COLUMNS)
+        $select->reset(Varien_Db_Select::COLUMNS)
             ->columns('COUNT(e.entity_id)')
-            ->reset(Zend_Db_Select::HAVING);
+            ->reset(Varien_Db_Select::HAVING);
 
         return $select;
     }
@@ -365,7 +365,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
             case 'type':
                 if ($condition == 1) {
                     $conditionParts = [
-                        $this->_getConditionSql('rdt.customer_id', ['is' => new Zend_Db_Expr('NULL')]),
+                        $this->_getConditionSql('rdt.customer_id', ['is' => new Varien_Db_Expr('NULL')]),
                         $this->_getConditionSql('rdt.store_id', ['eq' => Mage_Core_Model_App::ADMIN_STORE_ID]),
                     ];
                     $conditionSql = implode(' AND ', $conditionParts);
@@ -373,7 +373,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
                     $conditionSql = $this->_getConditionSql('rdt.customer_id', ['gt' => 0]);
                 } else {
                     $conditionParts = [
-                        $this->_getConditionSql('rdt.customer_id', ['is' => new Zend_Db_Expr('NULL')]),
+                        $this->_getConditionSql('rdt.customer_id', ['is' => new Varien_Db_Expr('NULL')]),
                         $this->_getConditionSql('rdt.store_id', ['neq' => Mage_Core_Model_App::ADMIN_STORE_ID]),
                     ];
                     $conditionSql = implode(' AND ', $conditionParts);

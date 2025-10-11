@@ -23,7 +23,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Option extends Mage_Core_Model_Re
      *
      * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Expr $valueExpr
+     * @param Varien_Db_Expr $valueExpr
      * @return $this
      */
     public function addOptionValueToCollection($collection, $attribute, $valueExpr)

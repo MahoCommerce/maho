@@ -123,12 +123,12 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         /**
          * Reset all columns, because result will group only by 'created_at' field
          */
-        $this->getSelect()->reset(Zend_Db_Select::COLUMNS);
+        $this->getSelect()->reset(Varien_Db_Select::COLUMNS);
 
         $expression = $this->_getSalesAmountExpression();
         if ($isFilter == 0) {
             $this->getSelect()->columns([
-                'revenue' => new Zend_Db_Expr(
+                'revenue' => new Varien_Db_Expr(
                     sprintf(
                         'SUM((%s) * %s)',
                         $expression,
@@ -138,7 +138,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
             ]);
         } else {
             $this->getSelect()->columns([
-                'revenue' => new Zend_Db_Expr(sprintf('SUM(%s)', $expression)),
+                'revenue' => new Varien_Db_Expr(sprintf('SUM(%s)', $expression)),
             ]);
         }
 
@@ -153,14 +153,14 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
 
         $this->getSelect()
             ->columns([
-                'quantity' => new Zend_Db_Expr('COUNT(main_table.entity_id)'),
+                'quantity' => new Varien_Db_Expr('COUNT(main_table.entity_id)'),
                 'range' => $tzRangeOffsetExpression,
             ])
             ->where('main_table.state NOT IN (?)', [
                 Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
                 Mage_Sales_Model_Order::STATE_NEW])
-            ->order('range ' . Zend_Db_Select::SQL_ASC)
-            ->group($tzRangeOffsetExpression);
+            ->order('range ' . Varien_Db_Select::SQL_ASC)
+            ->group(new Varien_Db_Expr($tzRangeOffsetExpression));
 
         $this->addFieldToFilter('created_at', $dateRange);
 
@@ -181,19 +181,19 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         /**
          * Reset all columns, because result will group only by 'created_at' field
          */
-        $this->getSelect()->reset(Zend_Db_Select::COLUMNS);
+        $this->getSelect()->reset(Varien_Db_Select::COLUMNS);
         $rangePeriod = $this->_getRangeExpressionForAttribute($range, 'main_table.period');
 
         $tableName = $this->getConnection()->quoteIdentifier('main_table.period');
         $rangePeriod2 = str_replace($tableName, "MIN($tableName)", $rangePeriod);
 
         $this->getSelect()->columns([
-            'revenue'  => new Zend_Db_Expr('SUM(main_table.total_revenue_amount)'),
-            'quantity' => new Zend_Db_Expr('SUM(main_table.orders_count)'),
+            'revenue'  => new Varien_Db_Expr('SUM(main_table.total_revenue_amount)'),
+            'quantity' => new Varien_Db_Expr('SUM(main_table.orders_count)'),
             'range' => $rangePeriod2,
         ])
         ->order('range')
-        ->group($rangePeriod);
+        ->group(new Varien_Db_Expr($rangePeriod));
 
         $this->getSelect()->where(
             $this->_getConditionSql('main_table.period', $this->getDateRange($range, $customStart, $customEnd)),
@@ -214,7 +214,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * Get range expression
      *
      * @param string $range
-     * @return Zend_Db_Expr
+     * @return Varien_Db_Expr
      */
     protected function _getRangeExpression($range)
     {
@@ -409,17 +409,17 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
             $rateExp = $adapter->getIfNullSql('main_table.base_to_global_rate', 0);
             $this->getSelect()->columns(
                 [
-                    'revenue'  => new Zend_Db_Expr(sprintf('SUM((%s) * %s)', $revenueExp, $rateExp)),
-                    'tax'      => new Zend_Db_Expr(sprintf('SUM((%s) * %s)', $taxExp, $rateExp)),
-                    'shipping' => new Zend_Db_Expr(sprintf('SUM((%s) * %s)', $shippingExp, $rateExp)),
+                    'revenue'  => new Varien_Db_Expr(sprintf('SUM((%s) * %s)', $revenueExp, $rateExp)),
+                    'tax'      => new Varien_Db_Expr(sprintf('SUM((%s) * %s)', $taxExp, $rateExp)),
+                    'shipping' => new Varien_Db_Expr(sprintf('SUM((%s) * %s)', $shippingExp, $rateExp)),
                 ],
             );
         } else {
             $this->getSelect()->columns(
                 [
-                    'revenue'  => new Zend_Db_Expr(sprintf('SUM(%s)', $revenueExp)),
-                    'tax'      => new Zend_Db_Expr(sprintf('SUM(%s)', $taxExp)),
-                    'shipping' => new Zend_Db_Expr(sprintf('SUM(%s)', $shippingExp)),
+                    'revenue'  => new Varien_Db_Expr(sprintf('SUM(%s)', $revenueExp)),
+                    'tax'      => new Varien_Db_Expr(sprintf('SUM(%s)', $taxExp)),
+                    'shipping' => new Varien_Db_Expr(sprintf('SUM(%s)', $shippingExp)),
                 ],
             );
         }
@@ -489,7 +489,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
                 '0',
             );
             $this->getSelect()->columns([
-                'lifetime' => new Zend_Db_Expr('SUM(main_table.total_revenue_amount)'),
+                'lifetime' => new Varien_Db_Expr('SUM(main_table.total_revenue_amount)'),
                 'average'  => $averageExpr,
             ]);
 
@@ -512,8 +512,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
 
             $this->getSelect()
                 ->columns([
-                    'lifetime' => new Zend_Db_Expr("SUM({$expr})"),
-                    'average'  => new Zend_Db_Expr("AVG({$expr})"),
+                    'lifetime' => new Varien_Db_Expr("SUM({$expr})"),
+                    'average'  => new Varien_Db_Expr("AVG({$expr})"),
                 ])
                 ->where('main_table.status NOT IN(?)', $statuses)
                 ->where('main_table.state NOT IN(?)', [
@@ -561,27 +561,27 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         $baseTotalInvocedCost = $adapter->getIfNullSql('main_table.base_total_invoiced_cost', 0);
         if ($storeIds) {
             $this->getSelect()->columns([
-                'subtotal'  => new Zend_Db_Expr('SUM(main_table.base_subtotal)'),
-                'tax'       => new Zend_Db_Expr('SUM(main_table.base_tax_amount)'),
-                'shipping'  => new Zend_Db_Expr('SUM(main_table.base_shipping_amount)'),
-                'discount'  => new Zend_Db_Expr('SUM(main_table.base_discount_amount)'),
-                'total'     => new Zend_Db_Expr('SUM(main_table.base_grand_total)'),
-                'invoiced'  => new Zend_Db_Expr('SUM(main_table.base_total_paid)'),
-                'refunded'  => new Zend_Db_Expr('SUM(main_table.base_total_refunded)'),
-                'profit'    => new Zend_Db_Expr("SUM($baseSubtotalInvoiced) "
+                'subtotal'  => new Varien_Db_Expr('SUM(main_table.base_subtotal)'),
+                'tax'       => new Varien_Db_Expr('SUM(main_table.base_tax_amount)'),
+                'shipping'  => new Varien_Db_Expr('SUM(main_table.base_shipping_amount)'),
+                'discount'  => new Varien_Db_Expr('SUM(main_table.base_discount_amount)'),
+                'total'     => new Varien_Db_Expr('SUM(main_table.base_grand_total)'),
+                'invoiced'  => new Varien_Db_Expr('SUM(main_table.base_total_paid)'),
+                'refunded'  => new Varien_Db_Expr('SUM(main_table.base_total_refunded)'),
+                'profit'    => new Varien_Db_Expr("SUM($baseSubtotalInvoiced) "
                                 . "+ SUM({$baseDiscountRefunded}) - SUM({$baseSubtotalRefunded}) "
                                 . "- SUM({$baseDiscountInvoiced}) - SUM({$baseTotalInvocedCost})"),
             ]);
         } else {
             $this->getSelect()->columns([
-                'subtotal'  => new Zend_Db_Expr('SUM(main_table.base_subtotal * main_table.base_to_global_rate)'),
-                'tax'       => new Zend_Db_Expr('SUM(main_table.base_tax_amount * main_table.base_to_global_rate)'),
-                'shipping'  => new Zend_Db_Expr('SUM(main_table.base_shipping_amount * main_table.base_to_global_rate)'),
-                'discount'  => new Zend_Db_Expr('SUM(main_table.base_discount_amount * main_table.base_to_global_rate)'),
-                'total'     => new Zend_Db_Expr('SUM(main_table.base_grand_total * main_table.base_to_global_rate)'),
-                'invoiced'  => new Zend_Db_Expr('SUM(main_table.base_total_paid * main_table.base_to_global_rate)'),
-                'refunded'  => new Zend_Db_Expr('SUM(main_table.base_total_refunded * main_table.base_to_global_rate)'),
-                'profit'    => new Zend_Db_Expr("SUM({$baseSubtotalInvoiced} *  main_table.base_to_global_rate) "
+                'subtotal'  => new Varien_Db_Expr('SUM(main_table.base_subtotal * main_table.base_to_global_rate)'),
+                'tax'       => new Varien_Db_Expr('SUM(main_table.base_tax_amount * main_table.base_to_global_rate)'),
+                'shipping'  => new Varien_Db_Expr('SUM(main_table.base_shipping_amount * main_table.base_to_global_rate)'),
+                'discount'  => new Varien_Db_Expr('SUM(main_table.base_discount_amount * main_table.base_to_global_rate)'),
+                'total'     => new Varien_Db_Expr('SUM(main_table.base_grand_total * main_table.base_to_global_rate)'),
+                'invoiced'  => new Varien_Db_Expr('SUM(main_table.base_total_paid * main_table.base_to_global_rate)'),
+                'refunded'  => new Varien_Db_Expr('SUM(main_table.base_total_refunded * main_table.base_to_global_rate)'),
+                'profit'    => new Varien_Db_Expr("SUM({$baseSubtotalInvoiced} *  main_table.base_to_global_rate) "
                                 . "+ SUM({$baseDiscountRefunded} * main_table.base_to_global_rate) "
                                 . "- SUM({$baseSubtotalRefunded} * main_table.base_to_global_rate) "
                                 . "- SUM({$baseDiscountInvoiced} * main_table.base_to_global_rate) "
@@ -751,12 +751,12 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     public function getSelectCountSql()
     {
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Zend_Db_Select::ORDER);
-        $countSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Zend_Db_Select::COLUMNS);
-        $countSelect->reset(Zend_Db_Select::GROUP);
-        $countSelect->reset(Zend_Db_Select::HAVING);
+        $countSelect->reset(Varien_Db_Select::ORDER);
+        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $countSelect->reset(Varien_Db_Select::COLUMNS);
+        $countSelect->reset(Varien_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::HAVING);
         $countSelect->columns('COUNT(DISTINCT main_table.entity_id)');
 
         return $countSelect;

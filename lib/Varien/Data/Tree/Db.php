@@ -26,7 +26,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     /**
      * DB connection
      *
-     * @var Zend_Db_Adapter_Abstract
+     * @var Varien_Db_Adapter_Interface
      */
     protected $_conn;
 
@@ -40,7 +40,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     /**
      * SQL select object
      *
-     * @var Zend_Db_Select
+     * @var Varien_Db_Select
      */
     protected $_select;
 
@@ -64,7 +64,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      *      Varien_Data_Tree_Db::ORDER_FIELD    => string
      * )
      *
-     * @param Zend_Db_Adapter_Abstract $connection
+     * @param Varien_Db_Adapter_Interface $connection
      * @param string $table
      * @param array $fields
      */
@@ -97,7 +97,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     }
 
     /**
-     * @return Zend_Db_Select
+     * @return Varien_Db_Select
      */
     public function getDbSelect()
     {
@@ -105,7 +105,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     }
 
     /**
-     * @param Zend_Db_Select $select
+     * @param Varien_Db_Select $select
      */
     public function setDbSelect($select): void
     {
@@ -170,19 +170,18 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @param Varien_Data_Tree_Node $parentNode
      * @param Varien_Data_Tree_Node|null $prevNode
      * @return Varien_Data_Tree_Node
-     * @throws Zend_Db_Adapter_Exception
      */
     #[\Override]
     public function appendChild($data, $parentNode, $prevNode = null)
     {
         $orderSelect = $this->_conn->select();
-        $orderSelect->from($this->_table, new Zend_Db_Expr('MAX(' . $this->_conn->quoteIdentifier($this->_orderField) . ')'))
+        $orderSelect->from($this->_table, new Varien_Db_Expr('MAX(' . $this->_conn->quoteIdentifier($this->_orderField) . ')'))
             ->where($this->_conn->quoteIdentifier($this->_parentField) . '=' . $parentNode->getId());
 
         $order = $this->_conn->fetchOne($orderSelect);
         $data[$this->_parentField] = $parentNode->getId();
         $data[$this->_levelField] = $parentNode->getData($this->_levelField) + 1;
-        $data[$this->_orderField] = $order + 1;
+        $data[$this->_orderField] = (int) $order + 1;
 
         $this->_conn->insert($this->_table, $data);
         $data[$this->_idField] = $this->_conn->lastInsertId();
@@ -213,14 +212,14 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
 
         // For reorder new node branch
         $dataReorderNew = [
-            $this->_orderField => new Zend_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '+1'),
+            $this->_orderField => new Varien_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '+1'),
         ];
         $conditionReorderNew = $this->_conn->quoteIdentifier($this->_parentField) . '=' . $parentNode->getId() .
                             ' AND ' . $this->_conn->quoteIdentifier($this->_orderField) . '>=' . $data[$this->_orderField];
 
         // For reorder old node branch
         $dataReorderOld = [
-            $this->_orderField => new Zend_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
+            $this->_orderField => new Varien_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
         ];
         $conditionReorderOld = $this->_conn->quoteIdentifier($this->_parentField) . '=' . $node->getData($this->_parentField) .
                             ' AND ' . $this->_conn->quoteIdentifier($this->_orderField) . '>' . $node->getData($this->_orderField);
@@ -245,7 +244,6 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @param int $parentId
      * @param int $parentLevel
      * @return $this
-     * @throws Zend_Db_Adapter_Exception
      */
     protected function _updateChildLevels($parentId, $parentLevel)
     {
@@ -297,7 +295,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     {
         // For reorder old node branch
         $dataReorderOld = [
-            $this->_orderField => new Zend_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
+            $this->_orderField => new Varien_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
         ];
         $conditionReorderOld = $this->_conn->quoteIdentifier($this->_parentField) . '=' . $node->getData($this->_parentField) .
                             ' AND ' . $this->_conn->quoteIdentifier($this->_orderField) . '>' . $node->getData($this->_orderField);

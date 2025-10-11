@@ -123,8 +123,8 @@ class Mage_Downloadable_Model_Resource_Indexer_Price extends Mage_Catalog_Model_
             ->where('dl.value = ?', 1)
             ->group(['i.entity_id', 'i.customer_group_id', 'i.website_id'])
             ->columns([
-                'min_price' => new Zend_Db_Expr('MIN(' . $ifPrice . ')'),
-                'max_price' => new Zend_Db_Expr('SUM(' . $ifPrice . ')'),
+                'min_price' => new Varien_Db_Expr('MIN(' . $ifPrice . ')'),
+                'max_price' => new Varien_Db_Expr('SUM(' . $ifPrice . ')'),
             ]);
 
         $query = $select->insertFromSelect($table);
@@ -141,10 +141,10 @@ class Mage_Downloadable_Model_Resource_Indexer_Price extends Mage_Catalog_Model_
                 [],
             )
             ->columns([
-                'min_price'   => new Zend_Db_Expr('i.min_price + id.min_price'),
-                'max_price'   => new Zend_Db_Expr('i.max_price + id.max_price'),
-                'tier_price'  => new Zend_Db_Expr($ifTierPrice),
-                'group_price' => new Zend_Db_Expr($ifGroupPrice),
+                'min_price'   => new Varien_Db_Expr('i.min_price + id.min_price'),
+                'max_price'   => new Varien_Db_Expr('i.max_price + id.max_price'),
+                'tier_price'  => new Varien_Db_Expr($ifTierPrice),
+                'group_price' => new Varien_Db_Expr($ifGroupPrice),
             ]);
 
         $query = $select->crossUpdateFromSelect(['i' => $this->_getDefaultFinalPriceTable()]);

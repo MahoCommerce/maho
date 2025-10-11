@@ -82,7 +82,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Abstract $object
-     * @return Zend_Db_Select
+     * @return Varien_Db_Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -120,7 +120,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * Perform actions after object save
      *
      * @return $this
-     * @throws Zend_Db_Adapter_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -231,7 +231,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
             ->from(
                 $this->_reviewTable,
                 [
-                    'review_count' => new Zend_Db_Expr('COUNT(*)'),
+                    'review_count' => new Varien_Db_Expr('COUNT(*)'),
                 ],
             )
             ->where('entity_id = ?', $object->getEntityId())
@@ -272,7 +272,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
             ->from(
                 $this->_reviewTable,
                 [
-                    'review_count' => new Zend_Db_Expr('COUNT(*)'),
+                    'review_count' => new Varien_Db_Expr('COUNT(*)'),
                 ],
             )
             ->where("{$this->_reviewTable}.entity_pk_value = :pk_value");

@@ -72,7 +72,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
             ['cisi' => 'cataloginventory/stock_item'],
             'product_id=entity_id',
             [
-                'is_saleable' => new Zend_Db_Expr($stockExpr),
+                'is_saleable' => new Varien_Db_Expr($stockExpr),
                 'inventory_in_stock' => 'is_in_stock',
             ],
             null,
@@ -95,9 +95,9 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
         if (!$object->isObjectNew() && $object->getQtyCorrection()) {
             $qty = abs($object->getQtyCorrection());
             if ($object->getQtyCorrection() < 0) {
-                $data['qty'] = new Zend_Db_Expr('qty-' . $qty);
+                $data['qty'] = new Varien_Db_Expr('qty-' . $qty);
             } else {
-                $data['qty'] = new Zend_Db_Expr('qty+' . $object->getQtyCorrection());
+                $data['qty'] = new Varien_Db_Expr('qty+' . $object->getQtyCorrection());
             }
         }
         return $data;

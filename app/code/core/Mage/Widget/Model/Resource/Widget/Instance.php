@@ -32,7 +32,7 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
 
     /**
      * @param Mage_Widget_Model_Widget_Instance $object
-     * @throws Zend_Db_Adapter_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

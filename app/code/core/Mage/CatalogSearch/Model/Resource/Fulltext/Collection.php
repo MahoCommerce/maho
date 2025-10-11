@@ -192,12 +192,12 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog
         /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql4 $resourceHelper */
         $resourceHelper = Mage::getResourceHelper('catalogsearch');
         $this->_select->order(
-            new Zend_Db_Expr(
+            new Varien_Db_Expr(
                 $resourceHelper->getFieldOrderExpression(
                     'e.' . $this->getResource()->getIdFieldName(),
                     $foundIds,
                 )
-                . ' ' . Zend_Db_Select::SQL_ASC,
+                . ' ' . Varien_Db_Select::SQL_ASC,
             ),
         );
 

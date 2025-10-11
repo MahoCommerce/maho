@@ -150,7 +150,7 @@ if ($connection->tableColumnExists($rulesTable, 'website_ids')) {
             ['cw' => $websitesTable],
             $connection->prepareSqlCondition(
                 'sr.website_ids',
-                ['finset' =>  new Zend_Db_Expr('cw.website_id')],
+                ['finset' =>  new Varien_Db_Expr('cw.website_id')],
             ),
             [],
         );
@@ -168,7 +168,7 @@ if ($connection->tableColumnExists($rulesTable, 'customer_group_ids')) {
             ['cg' => $customerGroupsTable],
             $connection->prepareSqlCondition(
                 'sr.customer_group_ids',
-                ['finset' =>  new Zend_Db_Expr('cg.customer_group_id')],
+                ['finset' =>  new Varien_Db_Expr('cg.customer_group_id')],
             ),
             [],
         );

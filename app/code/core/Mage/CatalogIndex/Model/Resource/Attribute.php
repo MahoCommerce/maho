@@ -41,16 +41,16 @@ class Mage_CatalogIndex_Model_Resource_Attribute extends Mage_CatalogIndex_Model
 
     /**
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Select $entitySelect
+     * @param Varien_Db_Select $entitySelect
      * @return array
      */
     public function getCount($attribute, $entitySelect)
     {
         $select = clone $entitySelect;
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Varien_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::LIMIT_COUNT);
+        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
 
         $fields = ['count' => 'COUNT(index.entity_id)', 'index.value'];
 

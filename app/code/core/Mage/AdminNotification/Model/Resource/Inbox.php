@@ -58,7 +58,7 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
         $select = $adapter->select()
             ->from($this->getMainTable(), [
                 'severity'     => 'severity',
-                'count_notice' => new Zend_Db_Expr('COUNT(' . $this->getIdFieldName() . ')')])
+                'count_notice' => new Varien_Db_Expr('COUNT(' . $this->getIdFieldName() . ')')])
             ->group('severity')
             ->where('is_remove=?', 0)
             ->where('is_read=?', 0);

@@ -258,8 +258,8 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             ->from(
                 ['main_table' => $this->getMainStoreTable($storeId)],
                 ['entity_id',
-                    new Zend_Db_Expr('main_table.' . $_conn->quoteIdentifier('name')),
-                    new Zend_Db_Expr('main_table.' . $_conn->quoteIdentifier('path')),
+                    new Varien_Db_Expr('main_table.' . $_conn->quoteIdentifier('name')),
+                    new Varien_Db_Expr('main_table.' . $_conn->quoteIdentifier('path')),
                     'is_active',
                     'is_anchor'],
             )

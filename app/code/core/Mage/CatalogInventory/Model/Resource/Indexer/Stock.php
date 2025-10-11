@@ -179,9 +179,10 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
         $select = $adapter->select()
             ->from($this->getTable('catalog/product'), ['entity_id', 'type_id'])
             ->where('entity_id IN(?)', $processIds);
-        $query  = $select->query(Zend_Db::FETCH_ASSOC);
+        $result = $select->query();
         $byType = [];
-        while ($row = $query->fetch()) {
+        // Fetch as associative array (default fetch mode)
+        while ($row = $result->fetch()) {
             $byType[$row['type_id']][] = $row['entity_id'];
         }
 

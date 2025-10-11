@@ -113,7 +113,7 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
      * @param string $field
      * @param mixed $value
      * @param Mage_Cms_Model_Block $object
-     * @return Zend_Db_Select
+     * @return Varien_Db_Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

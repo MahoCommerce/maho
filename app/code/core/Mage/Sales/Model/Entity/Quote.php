@@ -26,7 +26,7 @@ class Mage_Sales_Model_Entity_Quote extends Mage_Eav_Model_Entity_Abstract
      *
      * @param   Varien_Object|Mage_Sales_Model_Quote $object
      * @param   int $rowId
-     * @return  Zend_Db_Select
+     * @return  Varien_Db_Select
      */
     #[\Override]
     protected function _getLoadRowSelect($object, $rowId)

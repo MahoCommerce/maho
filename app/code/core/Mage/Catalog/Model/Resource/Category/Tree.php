@@ -561,7 +561,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      *
      * @param bool $sorted
      * @param array $optionalAttributes
-     * @return Zend_Db_Select
+     * @return Varien_Db_Select
      */
     protected function _createCollectionDataSelect($sorted = true, $optionalAttributes = [])
     {
@@ -614,7 +614,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
 
         $subConcat = $this->_conn->getConcatSql(['e.path', $this->_conn->quote('/%')]);
         $subSelect = $this->_conn->select()
-            ->from(['see' => $categoriesTable], null)
+            ->from(['see' => $categoriesTable], [])
             ->joinLeft(
                 ['scp' => $categoriesProductsTable],
                 'see.entity_id=scp.category_id',

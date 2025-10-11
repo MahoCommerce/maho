@@ -159,7 +159,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Grouped extends Mage_Im
             if ($linksData['attr_product_ids']) {
                 $savedData = $connection->fetchPairs($connection->select()
                     ->from($mainTable, [
-                        new Zend_Db_Expr('CONCAT_WS(" ", product_id, linked_product_id)'), 'link_id',
+                        new Varien_Db_Expr('CONCAT_WS(" ", product_id, linked_product_id)'), 'link_id',
                     ])
                     ->where(
                         'product_id IN (?) AND link_type_id = ' . $groupedLinkId,

@@ -16,7 +16,10 @@ class Mage_Dataflow_Model_Convert_Adapter_Db_Table extends Mage_Dataflow_Model_C
     public function getResource()
     {
         if (!$this->_resource) {
-            $this->_resource = Zend_Db::factory($this->getVar('type'), $this->getVars());
+            // Create Varien database adapter with provided configuration
+            $config = $this->getVars();
+            $config['type'] = $this->getVar('type', 'Pdo_Mysql');
+            $this->_resource = new Varien_Db_Adapter_Pdo_Mysql($config);
         }
         return $this->_resource;
     }

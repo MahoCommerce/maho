@@ -164,7 +164,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 $select = $adapter->select()
                     ->from(['o' => $orderTable], [
                         'customer_id',
-                        'days' => new Zend_Db_Expr('DATEDIFF(MAX(o.created_at), MIN(o.created_at)) / GREATEST(COUNT(*) - 1, 1)'),
+                        'days' => new Varien_Db_Expr('DATEDIFF(MAX(o.created_at), MIN(o.created_at)) / GREATEST(COUNT(*) - 1, 1)'),
                     ])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
@@ -192,7 +192,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 }
 
                 $select = $adapter->select()
-                    ->from(['lo' => new Zend_Db_Expr("({$lastOrderSelect})")], ['customer_id'])
+                    ->from(['lo' => new Varien_Db_Expr("({$lastOrderSelect})")], ['customer_id'])
                     ->where("DATEDIFF('{$now}', lo.last_order) {$operator} {$value}");
 
                 // Also include customers with no orders if operator allows
@@ -208,7 +208,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
                     $unionSelect = $adapter->select()->union([$select, $noOrderSelect]);
                     $select = $adapter->select()
-                        ->from(['u' => new Zend_Db_Expr("({$unionSelect})")], ['customer_id']);
+                        ->from(['u' => new Varien_Db_Expr("({$unionSelect})")], ['customer_id']);
                 }
                 break;
 
@@ -218,12 +218,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
         // Build the final condition
         $customerIds = $adapter->select()
-            ->from(['timedata' => new Zend_Db_Expr("({$select})")], ['customer_id']);
+            ->from(['timedata' => new Varien_Db_Expr("({$select})")], ['customer_id']);
 
         if ($requireValid) {
-            return $adapter->quoteInto("{$fieldName} IN (?)", new Zend_Db_Expr((string) $customerIds));
+            return $adapter->quoteInto("{$fieldName} IN (?)", new Varien_Db_Expr((string) $customerIds));
         } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Zend_Db_Expr((string) $customerIds));
+            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Varien_Db_Expr((string) $customerIds));
         }
     }
 

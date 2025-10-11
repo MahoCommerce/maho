@@ -263,7 +263,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute extends Ma
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
             ->distinct(true)
-            ->from(['e' => $this->getTable('catalog/product')], null)
+            ->from(['e' => $this->getTable('catalog/product')], [])
             ->join(
                 ['a' => $this->getMainTable()],
                 'e.entity_id = a.product_id',

@@ -99,10 +99,10 @@ abstract class Mage_Sales_Model_Resource_Collection_Abstract extends Mage_Core_M
     protected function _getAllIdsSelect($limit = null, $offset = null)
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Zend_Db_Select::ORDER);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Zend_Db_Select::COLUMNS);
+        $idsSelect->reset(Varien_Db_Select::ORDER);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $idsSelect->reset(Varien_Db_Select::COLUMNS);
         $idsSelect->columns($this->getResource()->getIdFieldName(), 'main_table');
         $idsSelect->limit($limit, $offset);
         return $idsSelect;

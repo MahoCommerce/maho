@@ -44,7 +44,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
      * @param string $field
      * @param mixed $value
      * @param Varien_Object $object
-     * @return  Zend_Db_Select
+     * @return  Varien_Db_Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -149,7 +149,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
     public function unassignState($status, $state)
     {
         $select = $this->_getWriteAdapter()->select()
-            ->from($this->_stateTable, ['qty' => new Zend_Db_Expr('COUNT(*)')])
+            ->from($this->_stateTable, ['qty' => new Varien_Db_Expr('COUNT(*)')])
             ->where('state = ?', $state);
 
         if ($this->_getWriteAdapter()->fetchOne($select) == 1) {

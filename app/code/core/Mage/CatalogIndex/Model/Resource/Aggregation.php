@@ -184,7 +184,7 @@ class Mage_CatalogIndex_Model_Resource_Aggregation extends Mage_Core_Model_Resou
         $newTags = array_diff($tags, array_keys($tagIds));
         if (!empty($newTags)) {
             $this->_addTags($newTags);
-            $select->reset(Zend_Db_Select::WHERE)
+            $select->reset(Varien_Db_Select::WHERE)
                 ->where('tags.tag_code IN (?)', $newTags);
             $newTags = $this->_getReadAdapter()->fetchPairs($select);
             $tagIds = array_merge($tagIds, $newTags);

@@ -17,7 +17,7 @@ class Mage_Bundle_Model_Resource_Bundle extends Mage_CatalogIndex_Model_Resource
      *
      * @param int $productId
      * @param array $columns
-     * @return Zend_Db_Select
+     * @return Varien_Db_Select
      */
     protected function _getSelect($productId, $columns = [])
     {

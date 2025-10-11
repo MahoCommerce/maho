@@ -15,14 +15,14 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     /**
      * DB read connection
      *
-     * @var Zend_Db_Adapter_Abstract
+     * @var Varien_Db_Adapter_Interface
      */
     protected $_read;
 
     /**
      * DB write connection
      *
-     * @var Zend_Db_Adapter_Abstract
+     * @var Varien_Db_Adapter_Interface
      */
     protected $_write;
 

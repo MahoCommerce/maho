@@ -81,7 +81,7 @@ class Mage_Catalog_Model_Resource_Product_Status extends Mage_Core_Model_Resourc
      * @param int $value
      * @return $this
      * @throws Mage_Core_Exception
-     * @throws Zend_Db_Adapter_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     public function updateProductStatus($productId, $storeId, $value)
     {

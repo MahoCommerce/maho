@@ -153,7 +153,8 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
             $stmt = $from->query($select);
             $data = [];
             $counter = 0;
-            while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            // Fetch as numeric array (mode 3)
+            while ($row = $stmt->fetch(3)) {
                 $data[] = $row;
                 $counter++;
                 if ($counter > 2000) {

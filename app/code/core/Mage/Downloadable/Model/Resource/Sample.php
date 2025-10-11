@@ -107,7 +107,7 @@ class Mage_Downloadable_Model_Resource_Sample extends Mage_Core_Model_Resource_D
         $adapter = $this->_getReadAdapter();
         $ifNullDefaultTitle = $adapter->getIfNullSql('st.title', 'd.title');
         $select = $adapter->select()
-            ->from(['m' => $this->getMainTable()], null)
+            ->from(['m' => $this->getMainTable()], [])
             ->join(
                 ['d' => $this->getTable('downloadable/sample_title')],
                 'd.sample_id=m.sample_id AND d.store_id=0',

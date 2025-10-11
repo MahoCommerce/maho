@@ -95,14 +95,12 @@ class Mage_CatalogSearch_Model_Resource_Advanced extends Mage_Core_Model_Resourc
             $conditions[] = $adapter->quoteInto(
                 'price_index.min_price %s * %s >= ?',
                 $value['from'],
-                Zend_Db::FLOAT_TYPE,
             );
         }
         if ((string) $value['to'] !== '') {
             $conditions[] = $adapter->quoteInto(
                 'price_index.min_price %s * %s <= ?',
                 $value['to'],
-                Zend_Db::FLOAT_TYPE,
             );
         }
 

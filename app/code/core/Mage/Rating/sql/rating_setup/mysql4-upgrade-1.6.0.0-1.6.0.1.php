@@ -31,7 +31,7 @@ $installer->getConnection()->changeColumn(
 $installer->getConnection()->update(
     $installer->getTable('rating/rating_option_vote'),
     [
-        'remote_ip_long' => new Zend_Db_Expr('UNHEX(HEX(CAST(remote_ip_long as UNSIGNED INT)))'),
+        'remote_ip_long' => new Varien_Db_Expr('UNHEX(HEX(CAST(remote_ip_long as UNSIGNED INT)))'),
     ],
 );
 

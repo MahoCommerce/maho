@@ -174,7 +174,7 @@ class Mage_Index_Model_Observer
             }
 
             if (!empty($eventList)) {
-                $where = new Zend_Db_Expr(
+                $where = new Varien_Db_Expr(
                     sprintf(
                         'event_id in (%s)',
                         implode(',', $eventList),

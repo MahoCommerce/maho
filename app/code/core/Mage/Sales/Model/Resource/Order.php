@@ -67,7 +67,7 @@ class Mage_Sales_Model_Resource_Order extends Mage_Sales_Model_Resource_Order_Ab
             $adapter->quote(' '),
             $ifnullLast,
         ]);
-        $concatAddress = new Zend_Db_Expr("TRIM(REPLACE($concatAddress,'  ', ' '))");
+        $concatAddress = new Varien_Db_Expr("TRIM(REPLACE($concatAddress,'  ', ' '))");
 
         $this->addVirtualGridColumn(
             'billing_name',
@@ -99,7 +99,7 @@ class Mage_Sales_Model_Resource_Order extends Mage_Sales_Model_Resource_Order_Ab
         $select  = $adapter->select()
             ->from(
                 ['o' => $this->getTable('sales/order_item')],
-                ['o.product_type', new Zend_Db_Expr('COUNT(*)')],
+                ['o.product_type', new Varien_Db_Expr('COUNT(*)')],
             )
             ->joinInner(
                 ['p' => $this->getTable('catalog/product')],

@@ -58,10 +58,10 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
         // clone select from collection with filters
         $select = clone $filter->getLayer()->getProductCollection()->getSelect();
         // reset columns, order and limitation conditions
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Varien_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::LIMIT_COUNT);
+        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
 
         $connection = $this->_getReadAdapter();
         $attribute  = $filter->getAttributeModel();
@@ -76,7 +76,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
             ->join(
                 [$tableAlias => $this->getMainTable()],
                 implode(' AND ', $conditions),
-                ['value', 'count' => new Zend_Db_Expr("COUNT({$tableAlias}.entity_id)")],
+                ['value', 'count' => new Varien_Db_Expr("COUNT({$tableAlias}.entity_id)")],
             )
             ->group("{$tableAlias}.value");
 

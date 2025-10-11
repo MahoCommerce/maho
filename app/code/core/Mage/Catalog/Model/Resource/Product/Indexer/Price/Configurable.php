@@ -160,7 +160,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Configurable extends Mag
         $roundExpr = "ROUND(i.price * ({$priceExpression} / 100), 4)";
         $roundPriceExpr = $write->getCheckSql("{$percentExpr} = 1", $roundExpr, $priceExpression);
         $priceColumn = $write->getCheckSql("{$priceExpression} IS NULL", '0', $roundPriceExpr);
-        $priceColumn = new Zend_Db_Expr("SUM({$priceColumn})");
+        $priceColumn = new Varien_Db_Expr("SUM({$priceColumn})");
 
         $tierPrice = $priceExpression;
         $tierRoundPriceExp = $write->getCheckSql("{$percentExpr} = 1", $roundExpr, $tierPrice);
@@ -206,8 +206,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Configurable extends Mag
                 [],
             );
         $select->columns([
-            'min_price'   => new Zend_Db_Expr('i.min_price + io.min_price'),
-            'max_price'   => new Zend_Db_Expr('i.max_price + io.max_price'),
+            'min_price'   => new Varien_Db_Expr('i.min_price + io.min_price'),
+            'max_price'   => new Varien_Db_Expr('i.max_price + io.max_price'),
             'tier_price'  => $write->getCheckSql('i.tier_price IS NOT NULL', 'i.tier_price + io.tier_price', 'NULL'),
             'group_price' => $write->getCheckSql(
                 'i.group_price IS NOT NULL',

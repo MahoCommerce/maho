@@ -80,7 +80,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
             // inject
             $where = [
                 $adapter->quoteIdentifier($this->getIdFieldName()) . '!=?' => $id,
-                new Zend_Db_Expr('parent_id IS NULL'),
+                new Varien_Db_Expr('parent_id IS NULL'),
                 'payment_id = ?'    => (int) $paymentId,
                 'order_id = ?'      => (int) $orderId,
                 'parent_txn_id = ?' => $txnId,
@@ -197,7 +197,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      * @param int $orderId
      * @param int $paymentId
      * @param string $txnId
-     * @param string|array|Zend_Db_Expr $columns
+     * @param string|array|Varien_Db_Expr $columns
      * @return Varien_Db_Select
      */
     private function _getLoadByUniqueKeySelect($orderId, $paymentId, $txnId, $columns = '*')

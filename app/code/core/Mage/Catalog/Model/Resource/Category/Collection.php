@@ -15,6 +15,8 @@
  *
  * @package    Mage_Catalog
  *
+ * @property Varien_Db_Adapter_Interface $_conn
+ *
  * @method Mage_Catalog_Model_Category getFirstItem()
  * @method Mage_Catalog_Model_Category getItemById(string $value)
  * @method Mage_Catalog_Model_Category[] getItems()
@@ -249,7 +251,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
                 $select = $this->_conn->select();
                 $select->from(
                     ['main_table' => $this->_productTable],
-                    ['category_id', new Zend_Db_Expr('COUNT(main_table.product_id)')],
+                    ['category_id', new Varien_Db_Expr('COUNT(main_table.product_id)')],
                 )
                     ->where($this->_conn->quoteInto('main_table.category_id IN(?)', $regularIds))
                     ->group('main_table.category_id');
@@ -283,7 +285,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
                     $select = $this->_conn->select();
                     $select->from(
                         ['main_table' => $this->_productTable],
-                        new Zend_Db_Expr('COUNT(DISTINCT main_table.product_id)'),
+                        new Varien_Db_Expr('COUNT(DISTINCT main_table.product_id)'),
                     )
                         ->joinInner(
                             ['e' => $this->getTable('catalog/category')],

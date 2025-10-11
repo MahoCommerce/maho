@@ -372,18 +372,18 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
     {
         $countSelect = clone $this->getSelect();
 
-        $countSelect->reset(Zend_Db_Select::COLUMNS);
-        $countSelect->reset(Zend_Db_Select::ORDER);
-        $countSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Zend_Db_Select::GROUP);
+        $countSelect->reset(Varien_Db_Select::COLUMNS);
+        $countSelect->reset(Varien_Db_Select::ORDER);
+        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
+        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $countSelect->reset(Varien_Db_Select::GROUP);
 
         if ($this->getFlag('group_tag')) {
             $field = 'relation.tag_id';
         } else {
             $field = 'e.entity_id';
         }
-        $expr = new Zend_Db_Expr('COUNT('
+        $expr = new Varien_Db_Expr('COUNT('
             . ($this->getFlag('distinct') ? 'DISTINCT ' : '')
             . $field . ')');
 
@@ -404,7 +404,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
             parent::_renderOrders();
 
             $orders = $this->getSelect()
-                ->getPart(Zend_Db_Select::ORDER);
+                ->getPart(Varien_Db_Select::ORDER);
 
             $appliedOrders = [];
             foreach ($orders as $order) {
@@ -413,7 +413,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
 
             foreach ($this->_orders as $field => $direction) {
                 if (empty($appliedOrders[$field])) {
-                    $this->_select->order(new Zend_Db_Expr($field . ' ' . $direction));
+                    $this->_select->order(new Varien_Db_Expr($field . ' ' . $direction));
                 }
             }
         }

@@ -40,8 +40,8 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
                 ['r' => $this->getTable('review/review')],
                 'e.entity_id = r.entity_pk_value',
                 [
-                    'review_cnt'    => new Zend_Db_Expr(sprintf('(%s)', $subSelect)),
-                    'last_created'  => new Zend_Db_Expr('MAX(r.created_at)'),
+                    'review_cnt'    => new Varien_Db_Expr(sprintf('(%s)', $subSelect)),
+                    'last_created'  => new Varien_Db_Expr('MAX(r.created_at)'),
                 ],
             )
             ->group('e.entity_id');
@@ -61,8 +61,8 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
                 ['table_rating' => $this->getTable('rating/rating_vote_aggregated')],
                 implode(' AND ', $joinCondition),
                 [
-                    'avg_rating'          => new Zend_Db_Expr("$sumPercentField / $countRatingId"),
-                    'avg_rating_approved' => new Zend_Db_Expr("$sumPercentApproved / $countRatingId"),
+                    'avg_rating'          => new Varien_Db_Expr("$sumPercentField / $countRatingId"),
+                    'avg_rating_approved' => new Varien_Db_Expr("$sumPercentApproved / $countRatingId"),
                 ],
             );
 
@@ -91,12 +91,12 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
         $this->_renderFilters();
 
         $select = clone $this->getSelect();
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $select->reset(Zend_Db_Select::COLUMNS);
+        $select->reset(Varien_Db_Select::ORDER);
+        $select->reset(Varien_Db_Select::LIMIT_COUNT);
+        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $select->reset(Varien_Db_Select::COLUMNS);
         $select->resetJoinLeft();
-        $select->columns(new Zend_Db_Expr('1'));
+        $select->columns(new Varien_Db_Expr('1'));
 
         $countSelect = clone $select;
         $countSelect->reset();

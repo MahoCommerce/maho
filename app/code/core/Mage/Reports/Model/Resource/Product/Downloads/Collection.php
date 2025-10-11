@@ -33,8 +33,8 @@ class Mage_Reports_Model_Resource_Product_Downloads_Collection extends Mage_Cata
                 ['d' =>  $this->getTable('downloadable/link_purchased_item')],
                 'e.entity_id = d.product_id',
                 [
-                    'purchases' => new Zend_Db_Expr('SUM(d.number_of_downloads_bought)'),
-                    'downloads' => new Zend_Db_Expr('SUM(d.number_of_downloads_used)'),
+                    'purchases' => new Varien_Db_Expr('SUM(d.number_of_downloads_bought)'),
+                    'downloads' => new Varien_Db_Expr('SUM(d.number_of_downloads_used)'),
                 ],
             )
             ->joinInner(
