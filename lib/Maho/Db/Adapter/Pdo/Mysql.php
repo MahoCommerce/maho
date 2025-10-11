@@ -45,15 +45,20 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @var array
      */
     protected $_numericDataTypes = [
-        'INT' => 0,        // Zend_Db::INT_TYPE
-        'SMALLINT' => 0,   // Zend_Db::INT_TYPE
-        'BIGINT' => 5,     // Zend_Db::BIGINT_TYPE
-        'FLOAT' => 2,      // \Zend_Db::FLOAT_TYPE
-        'DECIMAL' => 2,    // \Zend_Db::FLOAT_TYPE
-        'NUMERIC' => 2,    // \Zend_Db::FLOAT_TYPE
-        'DOUBLE' => 2,     // \Zend_Db::FLOAT_TYPE
-        'REAL' => 2,       // \Zend_Db::FLOAT_TYPE
+        'INT' => self::INT_TYPE,
+        'SMALLINT' => self::INT_TYPE,
+        'BIGINT' => self::BIGINT_TYPE,
+        'FLOAT' => self::FLOAT_TYPE,
+        'DECIMAL' => self::FLOAT_TYPE,
+        'NUMERIC' => self::FLOAT_TYPE,
+        'DOUBLE' => self::FLOAT_TYPE,
+        'REAL' => self::FLOAT_TYPE,
     ];
+
+    // Numeric data type constants
+    public const INT_TYPE = 0;
+    public const BIGINT_TYPE = 5;
+    public const FLOAT_TYPE = 2;
 
     public const DEBUG_CONNECT         = 0;
     public const DEBUG_TRANSACTION     = 1;
@@ -1845,7 +1850,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         // Handle numeric types
         if ($type !== null
             && array_key_exists($type = strtoupper($type), $this->_numericDataTypes)
-            && $this->_numericDataTypes[$type] == \Zend_Db::FLOAT_TYPE
+            && $this->_numericDataTypes[$type] == self::FLOAT_TYPE
         ) {
             $value = $this->_convertFloat($value);
             $quoteValue = sprintf('%F', $value);

@@ -11,6 +11,7 @@
 /**
  * Compatibility stub for Zend_Db constants and factory method
  * Provides constants used throughout the codebase for type hinting and fetch modes
+ * @deprecated since 25.11
  */
 class Zend_Db
 {
