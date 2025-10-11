@@ -145,7 +145,7 @@ $select = $connection->select()
         ['cw' => $websitesTable],
         $connection->prepareSqlCondition(
             'sr.website_ids',
-            ['finset' =>  new Varien_Db_Expr('cw.website_id')],
+            ['finset' =>  new Maho\Db\Expr('cw.website_id')],
         ),
         [],
     );
@@ -162,7 +162,7 @@ $select = $connection->select()
         ['cg' => $customerGroupsTable],
         $connection->prepareSqlCondition(
             'sr.customer_group_ids',
-            ['finset' =>  new Varien_Db_Expr('cg.customer_group_id')],
+            ['finset' =>  new Maho\Db\Expr('cg.customer_group_id')],
         ),
         [],
     );

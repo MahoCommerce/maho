@@ -43,7 +43,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
     public function addSearchFilter($query)
     {
         $this->_searchQuery = $query;
-        $this->addFieldToFilter('entity_id', ['in' => new Varien_Db_Expr($this->_getSearchEntityIdsSql($query))]);
+        $this->addFieldToFilter('entity_id', ['in' => new Maho\Db\Expr($this->_getSearchEntityIdsSql($query))]);
         return $this;
     }
 

@@ -292,8 +292,8 @@ class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abst
     protected function _getEntitySummaryData($object)
     {
         $adapter     = $this->_getReadAdapter();
-        $sumColumn   = new Varien_Db_Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
-        $countColumn = new Varien_Db_Expr('COUNT(*)');
+        $sumColumn   = new Maho\Db\Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
+        $countColumn = new Maho\Db\Expr('COUNT(*)');
 
         $select = $adapter->select()
             ->from(
@@ -349,8 +349,8 @@ class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abst
     {
         $adapter = $this->_getReadAdapter();
 
-        $sumColumn      = new Varien_Db_Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
-        $countColumn    = new Varien_Db_Expr('COUNT(*)');
+        $sumColumn      = new Maho\Db\Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
+        $countColumn    = new Maho\Db\Expr('COUNT(*)');
         $select = $adapter->select()
             ->from(
                 ['rating_vote' => $this->getTable('rating/rating_option_vote')],

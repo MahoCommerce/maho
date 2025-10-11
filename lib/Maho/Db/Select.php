@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
@@ -15,10 +17,13 @@
  *
  * Standalone implementation that generates SQL without depending on Zend Framework.
  *
- * @property Varien_Db_Adapter_Interface $_adapter
- * @method Varien_Db_Adapter_Interface getAdapter()
+ * @property Adapter\AdapterInterface $_adapter
+ * @method Adapter\AdapterInterface getAdapter()
  */
-class Varien_Db_Select
+
+namespace Maho\Db;
+
+class Select
 {
     // Query part constants
     public const DISTINCT       = 'distinct';
@@ -66,7 +71,7 @@ class Varien_Db_Select
     /**
      * The adapter that created this Select object
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql
+     * @var Adapter\Pdo\Mysql
      */
     protected $_adapter;
 
@@ -100,7 +105,7 @@ class Varien_Db_Select
     /**
      * Class constructor
      *
-     * @param Varien_Db_Adapter_Pdo_Mysql $adapter
+     * @param Adapter\Pdo\Mysql $adapter
      */
     public function __construct($adapter)
     {
@@ -110,7 +115,7 @@ class Varien_Db_Select
     /**
      * Get the adapter
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Adapter\Pdo\Mysql
      */
     public function getAdapter()
     {
@@ -132,7 +137,7 @@ class Varien_Db_Select
     /**
      * Adds a FROM table and optional columns to the query.
      *
-     * @param  array|string|Varien_Db_Expr $name The table name or array of table => alias.
+     * @param  array|string|Expr $name The table name or array of table => alias.
      * @param  array|string $cols The columns to select from the table.
      * @param  string $schema The schema name to specify, if any.
      * @return $this
@@ -154,7 +159,7 @@ class Varien_Db_Select
     /**
      * Adds a JOIN table and columns to the query.
      *
-     * @param  array|string|Varien_Db_Expr $name The table name.
+     * @param  array|string|Expr $name The table name.
      * @param  string $cond Join on this condition.
      * @param  array|string $cols The columns to select from the joined table.
      * @param  string $schema The schema name to specify, if any.
@@ -168,7 +173,7 @@ class Varien_Db_Select
     /**
      * Add an INNER JOIN table and columns to the query
      *
-     * @param  array|string|Varien_Db_Expr $name The table name.
+     * @param  array|string|Expr $name The table name.
      * @param  string|null $cond Join on this condition (null for CROSS join).
      * @param  array|string $cols The columns to select from the joined table.
      * @param  string $schema The schema name to specify, if any.
@@ -186,7 +191,7 @@ class Varien_Db_Select
     /**
      * Add a LEFT OUTER JOIN table and columns to the query
      *
-     * @param  array|string|Varien_Db_Expr $name The table name.
+     * @param  array|string|Expr $name The table name.
      * @param  string $cond Join on this condition.
      * @param  array|string $cols The columns to select from the joined table.
      * @param  string $schema The schema name to specify, if any.
@@ -200,7 +205,7 @@ class Varien_Db_Select
     /**
      * Add a RIGHT OUTER JOIN table and columns to the query
      *
-     * @param  array|string|Varien_Db_Expr $name The table name.
+     * @param  array|string|Expr $name The table name.
      * @param  string $cond Join on this condition.
      * @param  array|string $cols The columns to select from the joined table.
      * @param  string $schema The schema name to specify, if any.
@@ -214,7 +219,7 @@ class Varien_Db_Select
     /**
      * Add a FULL OUTER JOIN table and columns to the query
      *
-     * @param  array|string|Varien_Db_Expr $name The table name.
+     * @param  array|string|Expr $name The table name.
      * @param  string $cond Join on this condition.
      * @param  array|string $cols The columns to select from the joined table.
      * @param  string $schema The schema name to specify, if any.
@@ -228,7 +233,7 @@ class Varien_Db_Select
     /**
      * Add a CROSS JOIN table and columns to the query
      *
-     * @param  array|string|Varien_Db_Expr $name The table name.
+     * @param  array|string|Expr $name The table name.
      * @param  array|string $cols The columns to select from the joined table.
      * @param  string $schema The schema name to specify, if any.
      * @return $this
@@ -241,7 +246,7 @@ class Varien_Db_Select
     /**
      * Add a NATURAL JOIN table and columns to the query
      *
-     * @param  array|string|Varien_Db_Expr $name The table name.
+     * @param  array|string|Expr $name The table name.
      * @param  array|string $cols The columns to select from the joined table.
      * @param  string $schema The schema name to specify, if any.
      * @return $this
@@ -255,7 +260,7 @@ class Varien_Db_Select
      * Populate the {@link $_parts} 'join' key
      *
      * @param  string $type Type of join
-     * @param  array|string|Varien_Db_Expr $name Table name
+     * @param  array|string|Expr $name Table name
      * @param  string|null $cond Join on this condition (null for CROSS/NATURAL joins)
      * @param  array|string $cols The columns to select from the joined table
      * @param  string $schema The database name to specify, if any.
@@ -316,7 +321,7 @@ class Varien_Db_Select
     /**
      * Generate a unique correlation name
      *
-     * @param string|array $name A qualified identifier.
+     * @param string|array|Expr|Select $name A qualified identifier.
      * @return string A unique correlation name.
      */
     protected function _uniqueCorrelation($name)
@@ -325,8 +330,8 @@ class Varien_Db_Select
             $name = end($name);
         }
 
-        // Extract just the table name if it includes a Varien_Db_Expr
-        if ($name instanceof Varien_Db_Expr) {
+        // Extract just the table name if it includes a Expr or Select (subquery)
+        if ($name instanceof Expr || $name instanceof Select) {
             $name = (string) $name;
         }
 
@@ -380,13 +385,13 @@ class Varien_Db_Select
                     $currentCorrelationName = $m[1];
                     $col = $m[2];
                 }
-                // Check if it's a SQL function (contains parentheses) - wrap in Varien_Db_Expr
+                // Check if it's a SQL function (contains parentheses) - wrap in Expr
                 if (str_contains($col, '(') && str_contains($col, ')')) {
-                    $col = new Varien_Db_Expr($col);
+                    $col = new Expr($col);
                 }
-            } elseif ($col instanceof Varien_Db_Select) {
-                // Convert Varien_Db_Select to Varien_Db_Expr
-                $col = new Varien_Db_Expr(sprintf('(%s)', $col->assemble()));
+            } elseif ($col instanceof Select) {
+                // Convert Select to Expr
+                $col = new Expr(sprintf('(%s)', $col->assemble()));
             }
 
             $columnValues[] = [$currentCorrelationName, $col, is_string($alias) ? $alias : null];
@@ -555,7 +560,7 @@ class Varien_Db_Select
 
         // force 'ASC' or 'DESC' on each order spec, default is ASC.
         foreach ($spec as $val) {
-            if ($val instanceof Varien_Db_Expr) {
+            if ($val instanceof Expr) {
                 $expr = $val->__toString();
                 if (empty($expr)) {
                     continue;
@@ -680,9 +685,9 @@ class Varien_Db_Select
         }
 
         foreach ($cols as $alias => $col) {
-            if ($col instanceof Varien_Db_Select) {
+            if ($col instanceof Select) {
                 // Convert subselects to expressions
-                $cols[$alias] = new Varien_Db_Expr(sprintf('(%s)', $col->assemble()));
+                $cols[$alias] = new Expr(sprintf('(%s)', $col->assemble()));
             }
         }
 
@@ -757,7 +762,7 @@ class Varien_Db_Select
      */
     public function insertFromSelect($tableName, $fields = [], $onDuplicate = true)
     {
-        $mode = $onDuplicate ? Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE : false;
+        $mode = $onDuplicate ? Adapter\AdapterInterface::INSERT_ON_DUPLICATE : false;
         return $this->getAdapter()->insertFromSelect($this, $tableName, $fields, $mode);
     }
 
@@ -771,7 +776,7 @@ class Varien_Db_Select
     public function insertIgnoreFromSelect($tableName, $fields = [])
     {
         return $this->getAdapter()
-            ->insertFromSelect($this, $tableName, $fields, Varien_Db_Adapter_Interface::INSERT_IGNORE);
+            ->insertFromSelect($this, $tableName, $fields, Adapter\AdapterInterface::INSERT_IGNORE);
     }
 
     /**
@@ -800,7 +805,7 @@ class Varien_Db_Select
     /**
      * Add EXISTS clause
      *
-     * @param  Varien_Db_Select $select
+     * @param  Select $select
      * @param  string           $joinCondition
      * @param  bool             $isExists
      * @return $this
@@ -813,7 +818,7 @@ class Varien_Db_Select
             $exists = 'NOT EXISTS (%s)';
         }
         $select->reset(self::COLUMNS)
-            ->columns([new Varien_Db_Expr('1')])
+            ->columns([new Expr('1')])
             ->where($joinCondition);
 
         $exists = sprintf($exists, $select->assemble());
@@ -834,7 +839,7 @@ class Varien_Db_Select
                 $useJoin = false;
                 foreach ($this->_parts[self::COLUMNS] as $columnEntry) {
                     [$correlationName, $column] = $columnEntry;
-                    if ($column instanceof Varien_Db_Expr) {
+                    if ($column instanceof Expr) {
                         if ($this->_findTableInCond($tableId, $column)
                             || $this->_findTableInCond($tableProp['tableName'], $column)
                         ) {
@@ -923,7 +928,7 @@ class Varien_Db_Select
      * Find table name in condition (where, column)
      *
      * @param string $table
-     * @param string $cond
+     * @param string|Expr $cond
      * @return bool
      */
     protected function _findTableInCond($table, $cond)
@@ -989,7 +994,7 @@ class Varien_Db_Select
         } else {
             foreach ($this->_parts[self::COLUMNS] as $columnEntry) {
                 [$correlationName, $column, $alias] = $columnEntry;
-                if ($column instanceof Varien_Db_Expr) {
+                if ($column instanceof Expr) {
                     $columns[] = $this->_adapter->quoteColumnAs($column, $alias, true);
                 } elseif ($column == self::SQL_WILDCARD) {
                     $columns[] = ($correlationName ? $this->_adapter->quoteIdentifier($correlationName) . '.' : '') . self::SQL_WILDCARD;
@@ -1051,7 +1056,7 @@ class Varien_Db_Select
         if ($this->_parts[self::GROUP]) {
             $group = [];
             foreach ($this->_parts[self::GROUP] as $term) {
-                if ($term instanceof Varien_Db_Expr) {
+                if ($term instanceof Expr) {
                     $group[] = $term->__toString();
                 } else {
                     $group[] = $this->_adapter->quoteIdentifier($term, true);
@@ -1069,7 +1074,7 @@ class Varien_Db_Select
         if ($this->_parts[self::ORDER]) {
             $order = [];
             foreach ($this->_parts[self::ORDER] as $term) {
-                if ($term instanceof Varien_Db_Expr) {
+                if ($term instanceof Expr) {
                     $order[] = $term->__toString();
                 } elseif (is_array($term)) {
                     // Check if the order field is a SQL expression (contains parentheses = function call)
@@ -1094,7 +1099,7 @@ class Varien_Db_Select
                 $parts = [];
                 foreach ($this->_parts[self::UNION] as $union) {
                     $target = $union['target'];
-                    if ($target instanceof Varien_Db_Select) {
+                    if ($target instanceof Select) {
                         $target = $target->assemble();
                     }
                     $parts[] = $target;
@@ -1110,7 +1115,7 @@ class Varien_Db_Select
                 if ($this->_parts[self::ORDER]) {
                     $order = [];
                     foreach ($this->_parts[self::ORDER] as $term) {
-                        if ($term instanceof Varien_Db_Expr) {
+                        if ($term instanceof Expr) {
                             $order[] = $term->__toString();
                         } elseif (is_array($term)) {
                             if (str_contains($term[0], '(') && str_contains($term[0], ')')) {
@@ -1127,7 +1132,7 @@ class Varien_Db_Select
                 $parts = [$sql];
                 foreach ($this->_parts[self::UNION] as $union) {
                     $target = $union['target'];
-                    if ($target instanceof Varien_Db_Select) {
+                    if ($target instanceof Select) {
                         $target = $target->assemble();
                     }
                     $parts[] = ($union['type'] === self::SQL_UNION_ALL ? 'UNION ALL' : 'UNION') . ' ' . $target;
@@ -1171,7 +1176,7 @@ class Varien_Db_Select
     /**
      * Adds a UNION clause to the query
      *
-     * @param array $select Array of Varien_Db_Select objects to union
+     * @param array $select Array of Select objects to union
      * @param string $type Union type (default: UNION, or UNION ALL)
      * @return $this
      */
@@ -1185,13 +1190,13 @@ class Varien_Db_Select
             throw new Exception('No selects provided for union');
         }
 
-        // If this select is empty, use the first select as the base (only if it's a Varien_Db_Select)
+        // If this select is empty, use the first select as the base (only if it's a Select)
         $isEmptySelect = empty($this->_parts[self::FROM]) && empty($this->_parts[self::COLUMNS]);
         if ($isEmptySelect && count($select) > 0) {
             $firstSelect = $select[0];
-            // Only use the first select as base if it's a Varien_Db_Select object
+            // Only use the first select as base if it's a Select object
             // If it's a string (raw SQL), we need to keep this select empty and add all as unions
-            if ($firstSelect instanceof Varien_Db_Select) {
+            if ($firstSelect instanceof Select) {
                 // Take the first select and make it the base query
                 array_shift($select);
                 // Copy all parts EXCEPT union from the first select
@@ -1218,7 +1223,7 @@ class Varien_Db_Select
      * Executes the current select object and returns the result statement
      *
      * @param array $bind Optional bind parameters
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @return Statement\Pdo\Mysql
      */
     public function query($bind = [])
     {

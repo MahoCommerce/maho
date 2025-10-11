@@ -150,7 +150,7 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
      *
      * @return $this
      */
-    protected function _applyStoresFilterToSelect(Varien_Db_Select $select)
+    protected function _applyStoresFilterToSelect(\Maho\Db\Select $select)
     {
         $nullCheck = false;
         $storeIds  = $this->_storesIds;

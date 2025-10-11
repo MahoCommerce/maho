@@ -288,14 +288,14 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
         $levelDisposition = $newLevel - $node->getLevel();
 
         $data = [
-            $this->_levelField => new Varien_Db_Expr("{$this->_levelField} + '{$levelDisposition}'"),
-            $this->_pathField  => new Varien_Db_Expr("CONCAT('$newPath', RIGHT($this->_pathField, LENGTH($this->_pathField) - {$oldPathLength}))"),
+            $this->_levelField => new Maho\Db\Expr("{$this->_levelField} + '{$levelDisposition}'"),
+            $this->_pathField  => new Maho\Db\Expr("CONCAT('$newPath', RIGHT($this->_pathField, LENGTH($this->_pathField) - {$oldPathLength}))"),
         ];
         $condition = $this->_conn->quoteInto("$this->_pathField REGEXP ?", "^$oldPath(/|$)");
 
         $this->_conn->beginTransaction();
 
-        $reorderData = [$this->_orderField => new Varien_Db_Expr("$this->_orderField + 1")];
+        $reorderData = [$this->_orderField => new Maho\Db\Expr("$this->_orderField + 1")];
         try {
             if ($prevNode && $prevNode->getId()) {
                 $reorderCondition = "{$this->_orderField} > {$prevNode->getData($this->_orderField)}";
@@ -303,7 +303,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
             } else {
                 $reorderCondition = $this->_conn->quoteInto("{$this->_pathField} REGEXP ?", "^{$newParent->getData($this->_pathField)}/[0-9]+$");
                 $select = $this->_conn->select()
-                    ->from($this->_table, new Varien_Db_Expr("MIN({$this->_orderField})"))
+                    ->from($this->_table, new Maho\Db\Expr("MIN({$this->_orderField})"))
                     ->where($reorderCondition);
 
                 $position = (int) $this->_conn->fetchOne($select);

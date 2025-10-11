@@ -107,11 +107,11 @@ class Mage_Eav_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Hel
     /**
      * Retrieve 'cast to int' expression
      *
-     * @param string|Varien_Db_Expr $expression
-     * @return Varien_Db_Expr
+     * @param string|Maho\Db\Expr $expression
+     * @return Maho\Db\Expr
      */
     public function getCastToIntExpression($expression)
     {
-        return new Varien_Db_Expr("CAST($expression AS SIGNED)");
+        return new Maho\Db\Expr("CAST($expression AS SIGNED)");
     }
 }

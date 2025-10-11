@@ -192,7 +192,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog
         /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql4 $resourceHelper */
         $resourceHelper = Mage::getResourceHelper('catalogsearch');
         $this->_select->order(
-            new Varien_Db_Expr(
+            new Maho\Db\Expr(
                 $resourceHelper->getFieldOrderExpression(
                     'e.' . $this->getResource()->getIdFieldName(),
                     $foundIds,

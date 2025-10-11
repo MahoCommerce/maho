@@ -1,16 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-interface Varien_Db_Adapter_Interface
+namespace Maho\Db\Adapter;
+
+interface AdapterInterface
 {
     public const INDEX_TYPE_PRIMARY    = 'primary';
     public const INDEX_TYPE_UNIQUE     = 'unique';
@@ -45,21 +49,21 @@ interface Varien_Db_Adapter_Interface
     /**
      * Begin new DB transaction for connection
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Pdo\Mysql
      */
     public function beginTransaction();
 
     /**
      * Commit DB transaction
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Pdo\Mysql
      */
     public function commit();
 
     /**
      * Roll-back DB transaction
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Pdo\Mysql
      */
     public function rollBack();
 
@@ -68,25 +72,25 @@ interface Varien_Db_Adapter_Interface
      *
      * @param string $tableName the table name
      * @param string $schemaName the database or schema name
-     * @return Varien_Db_Ddl_Table
+     * @return \Maho\Db\Ddl\Table
      */
     public function newTable($tableName = null, $schemaName = null);
 
     /**
      * Create table from DDL object
      *
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @throws \Maho\Db\Exception
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
-    public function createTable(Varien_Db_Ddl_Table $table);
+    public function createTable(\Maho\Db\Ddl\Table $table);
 
     /**
      * Create temporary table from DDL object
      *
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @throws \Maho\Db\Exception
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
-    public function createTemporaryTable(Varien_Db_Ddl_Table $table);
+    public function createTemporaryTable(\Maho\Db\Ddl\Table $table);
 
     /**
      * Drop table from database
@@ -111,7 +115,7 @@ interface Varien_Db_Adapter_Interface
      *
      * @param string $tableName
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function truncateTable($tableName, $schemaName = null);
 
@@ -164,11 +168,11 @@ interface Varien_Db_Adapter_Interface
     public function describeTable($tableName, $schemaName = null);
 
     /**
-     * Create Varien_Db_Ddl_Table object by data from describe table
+     * Create \Maho\Db\Ddl\Table object by data from describe table
      *
-     * @param $tableName
-     * @param $newTableName
-     * @return Varien_Db_Ddl_Table
+     * @param string $tableName
+     * @param string $newTableName
+     * @return \Maho\Db\Ddl\Table
      */
     public function createTableByDdl($tableName, $newTableName);
 
@@ -180,7 +184,7 @@ interface Varien_Db_Adapter_Interface
      * @param array|string $definition
      * @param boolean $flushData
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Pdo\Mysql
      */
     public function modifyColumnByDdl($tableName, $columnName, $definition, $flushData = false, $schemaName = null);
 
@@ -200,7 +204,7 @@ interface Varien_Db_Adapter_Interface
      * @param array $tablePairs array('oldName' => 'Name1', 'newName' => 'Name2')
      *
      * @return boolean
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     public function renameTablesBatch(array $tablePairs);
 
@@ -214,7 +218,7 @@ interface Varien_Db_Adapter_Interface
      * @param string $columnName
      * @param array|string $definition  string specific or universal array DB Server definition
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function addColumn($tableName, $columnName, $definition, $schemaName = null);
 
@@ -229,7 +233,7 @@ interface Varien_Db_Adapter_Interface
      * @param array|string $definition
      * @param boolean $flushData        flush table statistic
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function changeColumn(
         $tableName,
@@ -248,7 +252,7 @@ interface Varien_Db_Adapter_Interface
      * @param array|string $definition
      * @param boolean $flushData
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function modifyColumn($tableName, $columnName, $definition, $flushData = false, $schemaName = null);
 
@@ -280,7 +284,7 @@ interface Varien_Db_Adapter_Interface
      * @param string|array $fields  the table column name or array of ones
      * @param string $indexType     the index type
      * @param string $schemaName
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     public function addIndex($tableName, $indexName, $fields, $indexType = self::INDEX_TYPE_INDEX, $schemaName = null);
 
@@ -290,7 +294,7 @@ interface Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $keyName
      * @param string $schemaName
-     * @return bool|Varien_Db_Statement_Pdo_Mysql
+     * @return bool|\Maho\Db\Statement\Pdo\Mysql
      */
     public function dropIndex($tableName, $keyName, $schemaName = null);
 
@@ -332,7 +336,7 @@ interface Varien_Db_Adapter_Interface
      * @param boolean $purge            trying remove invalid data
      * @param string $schemaName
      * @param string $refSchemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function addForeignKey(
         $fkName,
@@ -353,7 +357,7 @@ interface Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $fkName
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function dropForeignKey($tableName, $fkName, $schemaName = null);
 
@@ -383,9 +387,9 @@ interface Varien_Db_Adapter_Interface
     public function getForeignKeys($tableName, $schemaName = null);
 
     /**
-     * Creates and returns a new Varien_Db_Select object for this adapter.
+     * Creates and returns a new \Maho\Db\Select object for this adapter.
      *
-     * @return Varien_Db_Select
+     * @return \Maho\Db\Select
      */
     public function select();
 
@@ -467,9 +471,9 @@ interface Varien_Db_Adapter_Interface
      * Prepares and executes an SQL statement with bound data.
      *
      * @param  mixed  $sql  The SQL statement with placeholders.
-     *                      May be a string or Varien_Db_Select.
+     *                      May be a string or \Maho\Db\Select.
      * @param  mixed  $bind An array of data or data itself to bind to the placeholders.
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     public function query($sql, $bind = []);
 
@@ -477,7 +481,7 @@ interface Varien_Db_Adapter_Interface
      * Executes a SQL statement(s)
      *
      * @param string $sql
-     * @return Varien_Db_Adapter_Interface
+     * @return array
      */
     public function multiQuery($sql);
 
@@ -485,7 +489,7 @@ interface Varien_Db_Adapter_Interface
      * Fetches all SQL result rows as a sequential array.
      * Uses the current fetchMode for the adapter.
      *
-     * @param string|Varien_Db_Select $sql  An SQL SELECT statement.
+     * @param string|\Maho\Db\Select $sql  An SQL SELECT statement.
      * @param mixed                 $bind Data to bind into SELECT placeholders.
      * @param mixed                 $fetchMode Override current fetch mode.
      * @return array
@@ -496,7 +500,7 @@ interface Varien_Db_Adapter_Interface
      * Fetches the first row of the SQL result.
      * Uses the current fetchMode for the adapter.
      *
-     * @param string|Varien_Db_Select $sql An SQL SELECT statement.
+     * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @param mixed                 $fetchMode Override current fetch mode.
      * @return array
@@ -512,7 +516,7 @@ interface Varien_Db_Adapter_Interface
      * rows with duplicate values in the first column will
      * overwrite previous data.
      *
-     * @param string|Varien_Db_Select $sql An SQL SELECT statement.
+     * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return array
      */
@@ -523,7 +527,7 @@ interface Varien_Db_Adapter_Interface
      *
      * The first column in each row is used as the array key.
      *
-     * @param string|Varien_Db_Select $sql An SQL SELECT statement.
+     * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return array
      */
@@ -535,7 +539,7 @@ interface Varien_Db_Adapter_Interface
      * The first column is the key, the second column is the
      * value.
      *
-     * @param string|Varien_Db_Select $sql An SQL SELECT statement.
+     * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return array
      */
@@ -544,7 +548,7 @@ interface Varien_Db_Adapter_Interface
     /**
      * Fetches the first column of the first row of the SQL result.
      *
-     * @param string|Varien_Db_Select $sql An SQL SELECT statement.
+     * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return string
      */
@@ -556,7 +560,7 @@ interface Varien_Db_Adapter_Interface
      * If an array is passed as the value, the array values are quoted
      * and then returned as a comma-separated string.
      *
-     * @param Varien_Db_Select|Varien_Db_Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
+     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
      * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @return string An SQL-safe quoted value (or string of separated values).
      */
@@ -576,7 +580,7 @@ interface Varien_Db_Adapter_Interface
      * </code>
      *
      * @param string  $text  The text with a placeholder.
-     * @param Varien_Db_Select|Varien_Db_Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
+     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
      * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @param integer $count OPTIONAL count of placeholders to replace
      * @return string An SQL-safe quoted value placed into the original text.
@@ -601,7 +605,7 @@ interface Varien_Db_Adapter_Interface
      * The actual quote character surrounding the identifiers may vary depending on
      * the adapter.
      *
-     * @param string|array|Varien_Db_Expr $ident The identifier.
+     * @param string|array|\Maho\Db\Expr $ident The identifier.
      * @param boolean $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier.
      */
@@ -610,8 +614,8 @@ interface Varien_Db_Adapter_Interface
     /**
      * Quote a column identifier and alias.
      *
-     * @param string|array|Varien_Db_Expr $ident The identifier or expression.
-     * @param string $alias An alias for the column.
+     * @param string|array|\Maho\Db\Expr $ident The identifier or expression.
+     * @param string|null $alias An alias for the column.
      * @param boolean $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier and alias.
      */
@@ -620,7 +624,7 @@ interface Varien_Db_Adapter_Interface
     /**
      * Quote a table identifier and alias.
      *
-     * @param string|array|Varien_Db_Expr $ident The identifier or expression.
+     * @param string|array|\Maho\Db\Expr $ident The identifier or expression.
      * @param string $alias An alias for the table.
      * @param boolean $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier and alias.
@@ -630,39 +634,39 @@ interface Varien_Db_Adapter_Interface
     /**
      * Format Date to internal database date format
      *
-     * @param int|string|DateTime $date
+     * @param int|string|\DateTime $date
      * @param boolean $includeTime
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function formatDate($date, $includeTime = true);
 
     /**
      * Run additional environment before setup
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function startSetup();
 
     /**
      * Run additional environment after setup
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function endSetup();
 
-    public function setCacheAdapter(Mage_Core_Model_Cache $adapter): self;
+    public function setCacheAdapter(\Mage_Core_Model_Cache $adapter): self;
 
     /**
      * Allow DDL caching
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function allowDdlCache();
 
     /**
      * Disallow DDL caching
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function disallowDdlCache();
 
@@ -672,7 +676,7 @@ interface Varien_Db_Adapter_Interface
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function resetDdlCache($tableName = null, $schemaName = null);
 
@@ -681,7 +685,8 @@ interface Varien_Db_Adapter_Interface
      *
      * @param string $tableCacheKey
      * @param int $ddlType
-     * @return Varien_Db_Adapter_Interface
+     * @param mixed $data
+     * @return AdapterInterface
      */
     public function saveDdlCache($tableCacheKey, $ddlType, $data);
 
@@ -742,9 +747,9 @@ interface Varien_Db_Adapter_Interface
      * Generate fragment of SQL, that check condition and return true or false value
      *
      * @param string $condition     expression
-     * @param string $true          true value
-     * @param string $false         false value
-     * @return Varien_Db_Expr
+     * @param string|\Maho\Db\Expr $true          true value
+     * @param string|\Maho\Db\Expr $false         false value
+     * @return \Maho\Db\Expr
      */
     public function getCheckSql($condition, $true, $false);
 
@@ -756,7 +761,7 @@ interface Varien_Db_Adapter_Interface
      * @param array $casesResults Cases and results
      * @param string $defaultValue value to use if value doesn't confirm to any cases
      *
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getCaseSql($valueName, $casesResults, $defaultValue = null);
 
@@ -764,8 +769,8 @@ interface Varien_Db_Adapter_Interface
      * Returns valid IFNULL expression
      *
      * @param string $expression
-     * @param string $value OPTIONAL. Applies when $expression is NULL
-     * @return Varien_Db_Expr
+     * @param string|int $value OPTIONAL. Applies when $expression is NULL
+     * @return \Maho\Db\Expr
      */
     public function getIfNullSql($expression, $value = '0');
 
@@ -774,7 +779,7 @@ interface Varien_Db_Adapter_Interface
      * All arguments in data must be quoted
      *
      * @param string $separator concatenate with separator
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getConcatSql(array $data, $separator = null);
 
@@ -789,7 +794,7 @@ interface Varien_Db_Adapter_Interface
      * The string argument must be quoted
      *
      * @param string $string
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getLengthSql($string);
 
@@ -798,7 +803,7 @@ interface Varien_Db_Adapter_Interface
      * (minimum-valued) argument
      * All arguments in data must be quoted
      *
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getLeastSql(array $data);
 
@@ -807,7 +812,7 @@ interface Varien_Db_Adapter_Interface
      * (maximum-valued) argument
      * All arguments in data must be quoted
      *
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getGreatestSql(array $data);
 
@@ -816,10 +821,10 @@ interface Varien_Db_Adapter_Interface
      *
      * @see INTERVAL_ constants for $unit
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
-     * @param int $interval
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
+     * @param int|string $interval
      * @param string $unit
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getDateAddSql($date, $interval, $unit);
 
@@ -828,10 +833,10 @@ interface Varien_Db_Adapter_Interface
      *
      * @see INTERVAL_ constants for $unit
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      * @param int|string $interval
      * @param string $unit
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getDateSubSql($date, $interval, $unit);
 
@@ -847,35 +852,35 @@ interface Varien_Db_Adapter_Interface
      * %m   Month, numeric (00..12)
      * %Y   Year, numeric, four digits
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      * @param string $format
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getDateFormatSql($date, $format);
 
     /**
      * Extract the date part of a date or datetime expression
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
-     * @return Varien_Db_Expr
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
+     * @return \Maho\Db\Expr
      */
     public function getDatePartSql($date);
 
     /**
      * Prepare substring sql function
      *
-     * @param Varien_Db_Expr|string $stringExpression quoted field name or SQL statement
-     * @param int|string|Varien_Db_Expr $pos
-     * @param int|string|Varien_Db_Expr|null $len
-     * @return Varien_Db_Expr
+     * @param \Maho\Db\Expr|string $stringExpression quoted field name or SQL statement
+     * @param int|string|\Maho\Db\Expr $pos
+     * @param int|string|\Maho\Db\Expr|null $len
+     * @return \Maho\Db\Expr
      */
     public function getSubstringSql($stringExpression, $pos, $len = null);
 
     /**
      * Prepare standard deviation sql function
      *
-     * @param Varien_Db_Expr|string $expressionField   quoted field name or SQL statement
-     * @return Varien_Db_Expr
+     * @param \Maho\Db\Expr|string $expressionField   quoted field name or SQL statement
+     * @return \Maho\Db\Expr
      */
     public function getStandardDeviationSql($expressionField);
 
@@ -884,9 +889,9 @@ interface Varien_Db_Adapter_Interface
      *
      * @see INTERVAL_ constants for $unit
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      * @param string $unit
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     public function getDateExtractSql($date, $unit);
 
@@ -927,7 +932,7 @@ interface Varien_Db_Adapter_Interface
      *
      * @param string $tableName
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function disableTableKeys($tableName, $schemaName = null);
 
@@ -936,7 +941,7 @@ interface Varien_Db_Adapter_Interface
      *
      * @param string $tableName
      * @param string $schemaName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function enableTableKeys($tableName, $schemaName = null);
 
@@ -947,7 +952,7 @@ interface Varien_Db_Adapter_Interface
      * @param bool|int $mode
      * @return string
      */
-    public function insertFromSelect(Varien_Db_Select $select, $table, array $fields = [], $mode = false);
+    public function insertFromSelect(\Maho\Db\Select $select, $table, array $fields = [], $mode = false);
 
     /**
      * Get insert queries in array for insert by range with step parameter
@@ -956,7 +961,7 @@ interface Varien_Db_Adapter_Interface
      * @param int $stepCount
      * @return array
      */
-    public function selectsByRange($rangeField, Varien_Db_Select $select, $stepCount = 100);
+    public function selectsByRange($rangeField, \Maho\Db\Select $select, $stepCount = 100);
 
     /**
      * Get update table query using select object for join and update
@@ -964,7 +969,7 @@ interface Varien_Db_Adapter_Interface
      * @param string|array $table
      * @return string
      */
-    public function updateFromSelect(Varien_Db_Select $select, $table);
+    public function updateFromSelect(\Maho\Db\Select $select, $table);
 
     /**
      * Get delete from select object query
@@ -972,7 +977,7 @@ interface Varien_Db_Adapter_Interface
      * @param string $table the table name or alias used in select
      * @return string|int
      */
-    public function deleteFromSelect(Varien_Db_Select $select, $table);
+    public function deleteFromSelect(\Maho\Db\Select $select, $table);
 
     /**
      * Return array of table(s) checksum as table name - checksum pairs
@@ -995,9 +1000,9 @@ interface Varien_Db_Adapter_Interface
      * Possible using integer field for optimization
      *
      * @param string $field
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
-    public function orderRand(Varien_Db_Select $select, $field = null);
+    public function orderRand(\Maho\Db\Select $select, $field = null);
 
     /**
      * Render SQL FOR UPDATE clause
@@ -1020,7 +1025,7 @@ interface Varien_Db_Adapter_Interface
      * Converts fetched blob into raw binary PHP data.
      * Some DB drivers return blobs as hex-coded strings, so we need to process them.
      *
-     * @mixed $value
+     * @param mixed $value
      * @return mixed
      */
     public function decodeVarbinary($value);
@@ -1037,7 +1042,7 @@ interface Varien_Db_Adapter_Interface
      * Drop trigger
      *
      * @param string $triggerName
-     * @return Varien_Db_Adapter_Interface
+     * @return AdapterInterface
      */
     public function dropTrigger($triggerName);
 
@@ -1051,7 +1056,7 @@ interface Varien_Db_Adapter_Interface
     /**
      * Convert date format to unix time
      *
-     * @param string|Varien_Db_Expr $date
+     * @param string|\Maho\Db\Expr $date
      * @return mixed
      */
     public function getUnixTimestamp($date);
@@ -1059,7 +1064,7 @@ interface Varien_Db_Adapter_Interface
     /**
      * Convert unix time to date format
      *
-     * @param int|Varien_Db_Expr $timestamp
+     * @param int|\Maho\Db\Expr $timestamp
      * @return mixed
      */
     public function fromUnixtime($timestamp);
@@ -1070,7 +1075,7 @@ interface Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $increment
      * @param null|string $schemaName
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     public function changeTableAutoIncrement($tableName, $increment, $schemaName = null);
 
@@ -1081,7 +1086,7 @@ interface Varien_Db_Adapter_Interface
      * @param bool $temporary
      * @return mixed
      */
-    public function createTableFromSelect($tableName, Varien_Db_Select $select, $temporary = false);
+    public function createTableFromSelect($tableName, \Maho\Db\Select $select, $temporary = false);
 
     /**
      * Retrieve the list of all tables in the database
@@ -1095,7 +1100,7 @@ interface Varien_Db_Adapter_Interface
      * Modify table columns, foreign keys, comments and engine
      *
      * @param array $tables
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Pdo\Mysql
      */
     public function modifyTables($tables);
 

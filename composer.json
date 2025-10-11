@@ -100,7 +100,8 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "MahoCLI\\": "lib/MahoCLI"
+            "MahoCLI\\": "lib/MahoCLI",
+            "Maho\\": "lib/Maho"
         }
     },
     "autoload-dev": {

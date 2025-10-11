@@ -478,7 +478,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    public function addStockStatusToSelect(Varien_Db_Select $select, Mage_Core_Model_Website $website)
+    public function addStockStatusToSelect(\Maho\Db\Select $select, Mage_Core_Model_Website $website)
     {
         $this->_getResource()->addStockStatusToSelect($select, $website);
         return $this;
@@ -487,11 +487,11 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     /**
      * Add stock status limitation to catalog product price index select object
      *
-     * @param string|Varien_Db_Expr $entityField
-     * @param string|Varien_Db_Expr $websiteField
+     * @param string|Maho\Db\Expr $entityField
+     * @param string|Maho\Db\Expr $websiteField
      * @return $this
      */
-    public function prepareCatalogProductIndexSelect(Varien_Db_Select $select, $entityField, $websiteField)
+    public function prepareCatalogProductIndexSelect(\Maho\Db\Select $select, $entityField, $websiteField)
     {
         if (Mage::helper('cataloginventory')->isShowOutOfStock()) {
             return $this;

@@ -185,9 +185,9 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
          */
         Mage::dispatchEvent('prepare_catalog_product_index_select', [
             'select'        => $select,
-            'entity_field'  => new Varien_Db_Expr('l.parent_id'),
-            'website_field' => new Varien_Db_Expr('cs.website_id'),
-            'store_field'   => new Varien_Db_Expr('cs.store_id'),
+            'entity_field'  => new Maho\Db\Expr('l.parent_id'),
+            'website_field' => new Maho\Db\Expr('cs.website_id'),
+            'store_field'   => new Maho\Db\Expr('cs.store_id'),
         ]);
 
         $query = $write->insertFromSelect($select, $idxTable, [], Varien_Db_Adapter_Interface::INSERT_IGNORE);

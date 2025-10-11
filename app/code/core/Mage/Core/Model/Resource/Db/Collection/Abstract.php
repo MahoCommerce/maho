@@ -196,7 +196,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
             if ($correlationName !== 'main_table') { // Add joined fields to select
-                if ($column instanceof Varien_Db_Expr) {
+                if ($column instanceof Maho\Db\Expr) {
                     $column = $column->__toString();
                 }
                 $key = $alias ?? $column;
@@ -215,7 +215,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
                     $alias = null;
                 }
 
-                if ($field instanceof Varien_Db_Expr) {
+                if ($field instanceof Maho\Db\Expr) {
                     $column = $field->__toString();
                 } else {
                     $column = $field;
@@ -334,7 +334,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
             $fullExpression = str_replace('{{' . $fieldKey . '}}', $fieldItem, $fullExpression);
         }
 
-        $this->getSelect()->columns([$alias => new Varien_Db_Expr($fullExpression)]);
+        $this->getSelect()->columns([$alias => new Maho\Db\Expr($fullExpression)]);
 
         return $this;
     }
@@ -508,7 +508,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @return string
      */
-    protected function _prepareSelect(Varien_Db_Select $select)
+    protected function _prepareSelect(\Maho\Db\Select $select)
     {
         /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('core');
@@ -527,7 +527,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     /**
      * Join table to collection select
      *
-     * @param  array|string|Varien_Db_Expr $table Table name
+     * @param  array|string|Maho\Db\Expr $table Table name
      * @param  string $cond Join on this condition
      * @param  array|string $cols The columns to select from the joined table
      * @return $this

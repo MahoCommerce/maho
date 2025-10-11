@@ -928,11 +928,11 @@ class Mage_CatalogInventory_Model_Observer
             return $this;
         }
 
-        if (!($entityField instanceof Varien_Db_Expr)) {
-            $entityField = new Varien_Db_Expr($entityField);
+        if (!($entityField instanceof Maho\Db\Expr)) {
+            $entityField = new Maho\Db\Expr($entityField);
         }
-        if (!($websiteField instanceof Varien_Db_Expr)) {
-            $websiteField = new Varien_Db_Expr($websiteField);
+        if (!($websiteField instanceof Maho\Db\Expr)) {
+            $websiteField = new Maho\Db\Expr($websiteField);
         }
 
         Mage::getResourceSingleton('cataloginventory/stock_status')

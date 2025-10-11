@@ -73,7 +73,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
         $select = $this->_getReadAdapter()->select();
         $select->from(
             ['p' => $this->getTable('catalog/product')],
-            [new Varien_Db_Expr('DISTINCT p.entity_id')],
+            [new Maho\Db\Expr('DISTINCT p.entity_id')],
         )
             ->joinInner(
                 ['cpf' => $this->getTable('catalog/product_flat') . '_' . $storeId],

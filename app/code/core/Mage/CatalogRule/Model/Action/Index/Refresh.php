@@ -371,7 +371,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Prepare price column
      *
-     * @return Varien_Db_Expr
+     * @return Maho\Db\Expr
      */
     protected function _calculatePrice()
     {
@@ -385,47 +385,47 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             '',
             [
                 $this->_connection->getIfNullSql(
-                    new Varien_Db_Expr('@group_id'),
+                    new Maho\Db\Expr('@group_id'),
                     $nA,
                 ) . ' != cppt.grouped_id' =>
                 '@price := ' . $this->_connection->getCaseSql(
                     $this->_connection->quoteIdentifier('cppt.action_operator'),
                     [
-                        $toPercent => new Varien_Db_Expr('cppt.price * cppt.action_amount/100'),
-                        $byPercent => new Varien_Db_Expr('cppt.price * (1 - cppt.action_amount/100)'),
+                        $toPercent => new Maho\Db\Expr('cppt.price * cppt.action_amount/100'),
+                        $byPercent => new Maho\Db\Expr('cppt.price * (1 - cppt.action_amount/100)'),
                         $toFixed   => $this->_connection->getCheckSql(
-                            new Varien_Db_Expr('cppt.action_amount < cppt.price'),
-                            new Varien_Db_Expr('cppt.action_amount'),
-                            new Varien_Db_Expr('cppt.price'),
+                            new Maho\Db\Expr('cppt.action_amount < cppt.price'),
+                            new Maho\Db\Expr('cppt.action_amount'),
+                            new Maho\Db\Expr('cppt.price'),
                         ),
                         $byFixed   => $this->_connection->getCheckSql(
-                            new Varien_Db_Expr('0 > cppt.price - cppt.action_amount'),
-                            new Varien_Db_Expr('0'),
-                            new Varien_Db_Expr('cppt.price - cppt.action_amount'),
+                            new Maho\Db\Expr('0 > cppt.price - cppt.action_amount'),
+                            new Maho\Db\Expr('0'),
+                            new Maho\Db\Expr('cppt.price - cppt.action_amount'),
                         ),
                     ],
                 ),
                 $this->_connection->getIfNullSql(
-                    new Varien_Db_Expr('@group_id'),
+                    new Maho\Db\Expr('@group_id'),
                     $nA,
                 ) . ' = cppt.grouped_id AND '
                 . $this->_connection->getIfNullSql(
-                    new Varien_Db_Expr('@action_stop'),
-                    new Varien_Db_Expr('0'),
+                    new Maho\Db\Expr('@action_stop'),
+                    new Maho\Db\Expr('0'),
                 ) . ' = 0' => '@price := ' . $this->_connection->getCaseSql(
                     $this->_connection->quoteIdentifier('cppt.action_operator'),
                     [
-                        $toPercent => new Varien_Db_Expr('@price * cppt.action_amount/100'),
-                        $byPercent => new Varien_Db_Expr('@price * (1 - cppt.action_amount/100)'),
+                        $toPercent => new Maho\Db\Expr('@price * cppt.action_amount/100'),
+                        $byPercent => new Maho\Db\Expr('@price * (1 - cppt.action_amount/100)'),
                         $toFixed   => $this->_connection->getCheckSql(
-                            new Varien_Db_Expr('cppt.action_amount < @price'),
-                            new Varien_Db_Expr('cppt.action_amount'),
-                            new Varien_Db_Expr('@price'),
+                            new Maho\Db\Expr('cppt.action_amount < @price'),
+                            new Maho\Db\Expr('cppt.action_amount'),
+                            new Maho\Db\Expr('@price'),
                         ),
                         $byFixed   => $this->_connection->getCheckSql(
-                            new Varien_Db_Expr('0 > @price - cppt.action_amount'),
-                            new Varien_Db_Expr('0'),
-                            new Varien_Db_Expr('@price - cppt.action_amount'),
+                            new Maho\Db\Expr('0 > @price - cppt.action_amount'),
+                            new Maho\Db\Expr('0'),
+                            new Maho\Db\Expr('@price - cppt.action_amount'),
                         ),
                     ],
                 ),
@@ -437,7 +437,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Prepare index select
      *
-     * @param int|Varien_Db_Expr $time
+     * @param int|Maho\Db\Expr $time
      * @return Varien_Db_Select
      */
     protected function _prepareIndexSelect(Mage_Core_Model_Website $website, $time)
@@ -457,26 +457,26 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                     'rule_price'        => $this->_calculatePrice(),
                     'latest_start_date' => 'cppt.from_date',
                     'earliest_end_date' => 'cppt.to_date',
-                    new Varien_Db_Expr(
+                    new Maho\Db\Expr(
                         $this->_connection->getCaseSql(
                             '',
                             [
                                 $this->_connection->getIfNullSql(
-                                    new Varien_Db_Expr('@group_id'),
+                                    new Maho\Db\Expr('@group_id'),
                                     $nA,
-                                ) . ' != cppt.grouped_id' => new Varien_Db_Expr('@action_stop := cppt.action_stop'),
+                                ) . ' != cppt.grouped_id' => new Maho\Db\Expr('@action_stop := cppt.action_stop'),
                                 $this->_connection->getIfNullSql(
-                                    new Varien_Db_Expr('@group_id'),
+                                    new Maho\Db\Expr('@group_id'),
                                     $nA,
                                 ) . ' = cppt.grouped_id' => '@action_stop := '
                                     . $this->_connection->getIfNullSql(
-                                        new Varien_Db_Expr('@action_stop'),
-                                        new Varien_Db_Expr('0'),
+                                        new Maho\Db\Expr('@action_stop'),
+                                        new Maho\Db\Expr('0'),
                                     ) . ' + cppt.action_stop',
                             ],
                         ),
                     ),
-                    new Varien_Db_Expr('@group_id := cppt.grouped_id'),
+                    new Maho\Db\Expr('@group_id := cppt.grouped_id'),
                     'from_time'         => 'cppt.from_time',
                     'to_time'           => 'cppt.to_time',
                 ],
@@ -488,15 +488,15 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                 [
                     'dates' => $this->_connection->select()->union(
                         [
-                            new Varien_Db_Expr(
+                            new Maho\Db\Expr(
                                 'SELECT ' . $this->_connection->getDateAddSql(
                                     $this->_connection->fromUnixtime($time),
                                     -1,
                                     Varien_Db_Adapter_Interface::INTERVAL_DAY,
                                 ) . ' AS rule_date',
                             ),
-                            new Varien_Db_Expr('SELECT ' . $this->_connection->fromUnixtime($time) . ' AS rule_date'),
-                            new Varien_Db_Expr(
+                            new Maho\Db\Expr('SELECT ' . $this->_connection->fromUnixtime($time) . ' AS rule_date'),
+                            new Maho\Db\Expr(
                                 'SELECT ' . $this->_connection->getDateAddSql(
                                     $this->_connection->fromUnixtime($time),
                                     1,
@@ -511,22 +511,22 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             )
             ->columns(
                 [
-                    'rule_product_price_id' => new Varien_Db_Expr('NULL'),
+                    'rule_product_price_id' => new Maho\Db\Expr('NULL'),
                     'rule_date'             => 'dates.rule_date',
                     'customer_group_id'     => 'customer_group_id',
                     'product_id'            => 'product_id',
                     'rule_price'            => 'MIN(rule_price)',
-                    'website_id'            => new Varien_Db_Expr($website->getId()),
+                    'website_id'            => new Maho\Db\Expr($website->getId()),
                     'latest_start_date'     => 'latest_start_date',
                     'earliest_end_date'     => 'earliest_end_date',
                 ],
             )
-            ->where(new Varien_Db_Expr($this->_connection->getUnixTimestamp('dates.rule_date') . ' >= from_time'))
+            ->where(new Maho\Db\Expr($this->_connection->getUnixTimestamp('dates.rule_date') . ' >= from_time'))
             ->where(
                 $this->_connection->getCheckSql(
-                    new Varien_Db_Expr('to_time = 0'),
-                    new Varien_Db_Expr('1'),
-                    new Varien_Db_Expr($this->_connection->getUnixTimestamp('dates.rule_date') . ' <= to_time'),
+                    new Maho\Db\Expr('to_time = 0'),
+                    new Maho\Db\Expr('1'),
+                    new Maho\Db\Expr($this->_connection->getUnixTimestamp('dates.rule_date') . ' <= to_time'),
                 ),
             )
             ->group(['customer_group_id', 'product_id', 'dates.rule_date', 'website_id']);
@@ -591,12 +591,12 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                 $this->_resource->getTable('catalogrule/rule_product'),
                 ['rule_id', 'customer_group_id', 'website_id'],
             )
-            ->where(new Varien_Db_Expr("{$timestamp} >= from_time"))
+            ->where(new Maho\Db\Expr("{$timestamp} >= from_time"))
             ->where(
                 $this->_connection->getCheckSql(
-                    new Varien_Db_Expr('to_time = 0'),
-                    new Varien_Db_Expr('1'),
-                    new Varien_Db_Expr("{$timestamp} <= to_time"),
+                    new Maho\Db\Expr('to_time = 0'),
+                    new Maho\Db\Expr('1'),
+                    new Maho\Db\Expr("{$timestamp} <= to_time"),
                 ),
             );
         $query = $select->insertFromSelect($this->_resource->getTable('catalogrule/rule_group_website'));

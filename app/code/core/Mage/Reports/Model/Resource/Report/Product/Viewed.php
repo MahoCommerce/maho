@@ -73,19 +73,19 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             'source_table.object_id',
         ]);
 
-        $viewsNumExpr = new Varien_Db_Expr('COUNT(source_table.event_id)');
+        $viewsNumExpr = new Maho\Db\Expr('COUNT(source_table.event_id)');
 
         $columns = [
             'period'                 => $periodExpr,
             'store_id'               => 'source_table.store_id',
             'product_id'             => 'source_table.object_id',
-            'product_name'           => new Varien_Db_Expr(
+            'product_name'           => new Maho\Db\Expr(
                 sprintf(
                     'MIN(%s)',
                     $adapter->getIfNullSql('product_name.value', 'product_default_name.value'),
                 ),
             ),
-            'product_price'          => new Varien_Db_Expr(
+            'product_price'          => new Maho\Db\Expr(
                 sprintf(
                     '%s',
                     $helper->prepareColumn(

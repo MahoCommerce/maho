@@ -163,7 +163,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     public function getLastUsedRewriteRequestIncrement($prefix, $suffix, $storeId)
     {
         $adapter = $this->_getWriteAdapter();
-        $requestPathField = new Varien_Db_Expr($adapter->quoteIdentifier('request_path'));
+        $requestPathField = new Maho\Db\Expr($adapter->quoteIdentifier('request_path'));
         /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('eav');
         //select increment part of request path and cast expression to integer
@@ -174,7 +174,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
                 $adapter->getLengthSql($requestPathField) . ' - ' . strlen($prefix) . ' - ' . strlen($suffix),
             ));
         $select = $adapter->select()
-            ->from($this->getMainTable(), new Varien_Db_Expr('MAX(' . $urlIncrementPartExpression . ')'))
+            ->from($this->getMainTable(), new Maho\Db\Expr('MAX(' . $urlIncrementPartExpression . ')'))
             ->where('store_id = :store_id')
             ->where('request_path LIKE :request_path')
             ->where($adapter->prepareSqlCondition('request_path', [

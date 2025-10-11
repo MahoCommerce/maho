@@ -105,7 +105,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         $excludedWherePart = Mage_Catalog_Model_Resource_Product_Collection::MAIN_TABLE_ALIAS . '.status';
         foreach ($wherePart as $key => $wherePartItem) {
             if (str_contains($wherePartItem, $excludedWherePart)) {
-                $wherePart[$key] = new Varien_Db_Expr('1=1');
+                $wherePart[$key] = new Maho\Db\Expr('1=1');
                 continue;
             }
             $wherePart[$key] = $this->_replaceTableAlias($wherePartItem);
@@ -217,11 +217,11 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
      *
      * @param Mage_Catalog_Model_Layer_Filter_Price $filter
      * @param Varien_Db_Select $select
-     * @return Varien_Db_Expr
+     * @return Maho\Db\Expr
      */
     protected function _getFullPriceExpression($filter, $select)
     {
-        return new Varien_Db_Expr('ROUND((' . $this->_getPriceExpression($filter, $select) . ') * '
+        return new Maho\Db\Expr('ROUND((' . $this->_getPriceExpression($filter, $select) . ') * '
             . $filter->getLayer()->getProductCollection()->getCurrencyRate() . ', 2)');
     }
 
@@ -244,9 +244,9 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if ($range == 0) {
             $range = 1;
         }
-        $countExpr = new Varien_Db_Expr('COUNT(*)');
-        $rangeExpr = new Varien_Db_Expr("FLOOR(({$priceExpression}) / {$range}) + 1");
-        $rangeOrderExpr = new Varien_Db_Expr("FLOOR(({$priceExpression}) / {$range}) + 1 ASC");
+        $countExpr = new Maho\Db\Expr('COUNT(*)');
+        $rangeExpr = new Maho\Db\Expr("FLOOR(({$priceExpression}) / {$range}) + 1");
+        $rangeOrderExpr = new Maho\Db\Expr("FLOOR(({$priceExpression}) / {$range}) + 1 ASC");
 
         $select->columns([
             'range' => $rangeExpr,
@@ -301,7 +301,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if (!is_null($upperPrice)) {
             $select->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
-        $select->order(new Varien_Db_Expr("$priceExpression ASC"))->limit($limit, $offset);
+        $select->order(new Maho\Db\Expr("$priceExpression ASC"))->limit($limit, $offset);
 
         return $this->_getReadAdapter()->fetchCol($select);
     }
@@ -364,7 +364,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         if (!is_null($upperPrice)) {
             $pricesSelect->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
-        $pricesSelect->order(new Varien_Db_Expr("$priceExpression DESC"))->limit($rightIndex - $offset + 1, $offset - 1);
+        $pricesSelect->order(new Maho\Db\Expr("$priceExpression DESC"))->limit($rightIndex - $offset + 1, $offset - 1);
 
         return array_reverse($this->_getReadAdapter()->fetchCol($pricesSelect));
     }

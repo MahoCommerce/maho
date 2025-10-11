@@ -128,7 +128,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         $expression = $this->_getSalesAmountExpression();
         if ($isFilter == 0) {
             $this->getSelect()->columns([
-                'revenue' => new Varien_Db_Expr(
+                'revenue' => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s) * %s)',
                         $expression,
@@ -138,7 +138,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
             ]);
         } else {
             $this->getSelect()->columns([
-                'revenue' => new Varien_Db_Expr(sprintf('SUM(%s)', $expression)),
+                'revenue' => new Maho\Db\Expr(sprintf('SUM(%s)', $expression)),
             ]);
         }
 
@@ -153,14 +153,14 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
 
         $this->getSelect()
             ->columns([
-                'quantity' => new Varien_Db_Expr('COUNT(main_table.entity_id)'),
+                'quantity' => new Maho\Db\Expr('COUNT(main_table.entity_id)'),
                 'range' => $tzRangeOffsetExpression,
             ])
             ->where('main_table.state NOT IN (?)', [
                 Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
                 Mage_Sales_Model_Order::STATE_NEW])
             ->order('range ' . Varien_Db_Select::SQL_ASC)
-            ->group(new Varien_Db_Expr($tzRangeOffsetExpression));
+            ->group(new Maho\Db\Expr($tzRangeOffsetExpression));
 
         $this->addFieldToFilter('created_at', $dateRange);
 
@@ -188,12 +188,12 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         $rangePeriod2 = str_replace($tableName, "MIN($tableName)", $rangePeriod);
 
         $this->getSelect()->columns([
-            'revenue'  => new Varien_Db_Expr('SUM(main_table.total_revenue_amount)'),
-            'quantity' => new Varien_Db_Expr('SUM(main_table.orders_count)'),
+            'revenue'  => new Maho\Db\Expr('SUM(main_table.total_revenue_amount)'),
+            'quantity' => new Maho\Db\Expr('SUM(main_table.orders_count)'),
             'range' => $rangePeriod2,
         ])
         ->order('range')
-        ->group(new Varien_Db_Expr($rangePeriod));
+        ->group(new Maho\Db\Expr($rangePeriod));
 
         $this->getSelect()->where(
             $this->_getConditionSql('main_table.period', $this->getDateRange($range, $customStart, $customEnd)),
@@ -214,7 +214,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      * Get range expression
      *
      * @param string $range
-     * @return Varien_Db_Expr
+     * @return Maho\Db\Expr
      */
     protected function _getRangeExpression($range)
     {
@@ -409,17 +409,17 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
             $rateExp = $adapter->getIfNullSql('main_table.base_to_global_rate', 0);
             $this->getSelect()->columns(
                 [
-                    'revenue'  => new Varien_Db_Expr(sprintf('SUM((%s) * %s)', $revenueExp, $rateExp)),
-                    'tax'      => new Varien_Db_Expr(sprintf('SUM((%s) * %s)', $taxExp, $rateExp)),
-                    'shipping' => new Varien_Db_Expr(sprintf('SUM((%s) * %s)', $shippingExp, $rateExp)),
+                    'revenue'  => new Maho\Db\Expr(sprintf('SUM((%s) * %s)', $revenueExp, $rateExp)),
+                    'tax'      => new Maho\Db\Expr(sprintf('SUM((%s) * %s)', $taxExp, $rateExp)),
+                    'shipping' => new Maho\Db\Expr(sprintf('SUM((%s) * %s)', $shippingExp, $rateExp)),
                 ],
             );
         } else {
             $this->getSelect()->columns(
                 [
-                    'revenue'  => new Varien_Db_Expr(sprintf('SUM(%s)', $revenueExp)),
-                    'tax'      => new Varien_Db_Expr(sprintf('SUM(%s)', $taxExp)),
-                    'shipping' => new Varien_Db_Expr(sprintf('SUM(%s)', $shippingExp)),
+                    'revenue'  => new Maho\Db\Expr(sprintf('SUM(%s)', $revenueExp)),
+                    'tax'      => new Maho\Db\Expr(sprintf('SUM(%s)', $taxExp)),
+                    'shipping' => new Maho\Db\Expr(sprintf('SUM(%s)', $shippingExp)),
                 ],
             );
         }
@@ -489,7 +489,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
                 '0',
             );
             $this->getSelect()->columns([
-                'lifetime' => new Varien_Db_Expr('SUM(main_table.total_revenue_amount)'),
+                'lifetime' => new Maho\Db\Expr('SUM(main_table.total_revenue_amount)'),
                 'average'  => $averageExpr,
             ]);
 
@@ -512,8 +512,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
 
             $this->getSelect()
                 ->columns([
-                    'lifetime' => new Varien_Db_Expr("SUM({$expr})"),
-                    'average'  => new Varien_Db_Expr("AVG({$expr})"),
+                    'lifetime' => new Maho\Db\Expr("SUM({$expr})"),
+                    'average'  => new Maho\Db\Expr("AVG({$expr})"),
                 ])
                 ->where('main_table.status NOT IN(?)', $statuses)
                 ->where('main_table.state NOT IN(?)', [
@@ -561,27 +561,27 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         $baseTotalInvocedCost = $adapter->getIfNullSql('main_table.base_total_invoiced_cost', 0);
         if ($storeIds) {
             $this->getSelect()->columns([
-                'subtotal'  => new Varien_Db_Expr('SUM(main_table.base_subtotal)'),
-                'tax'       => new Varien_Db_Expr('SUM(main_table.base_tax_amount)'),
-                'shipping'  => new Varien_Db_Expr('SUM(main_table.base_shipping_amount)'),
-                'discount'  => new Varien_Db_Expr('SUM(main_table.base_discount_amount)'),
-                'total'     => new Varien_Db_Expr('SUM(main_table.base_grand_total)'),
-                'invoiced'  => new Varien_Db_Expr('SUM(main_table.base_total_paid)'),
-                'refunded'  => new Varien_Db_Expr('SUM(main_table.base_total_refunded)'),
-                'profit'    => new Varien_Db_Expr("SUM($baseSubtotalInvoiced) "
+                'subtotal'  => new Maho\Db\Expr('SUM(main_table.base_subtotal)'),
+                'tax'       => new Maho\Db\Expr('SUM(main_table.base_tax_amount)'),
+                'shipping'  => new Maho\Db\Expr('SUM(main_table.base_shipping_amount)'),
+                'discount'  => new Maho\Db\Expr('SUM(main_table.base_discount_amount)'),
+                'total'     => new Maho\Db\Expr('SUM(main_table.base_grand_total)'),
+                'invoiced'  => new Maho\Db\Expr('SUM(main_table.base_total_paid)'),
+                'refunded'  => new Maho\Db\Expr('SUM(main_table.base_total_refunded)'),
+                'profit'    => new Maho\Db\Expr("SUM($baseSubtotalInvoiced) "
                                 . "+ SUM({$baseDiscountRefunded}) - SUM({$baseSubtotalRefunded}) "
                                 . "- SUM({$baseDiscountInvoiced}) - SUM({$baseTotalInvocedCost})"),
             ]);
         } else {
             $this->getSelect()->columns([
-                'subtotal'  => new Varien_Db_Expr('SUM(main_table.base_subtotal * main_table.base_to_global_rate)'),
-                'tax'       => new Varien_Db_Expr('SUM(main_table.base_tax_amount * main_table.base_to_global_rate)'),
-                'shipping'  => new Varien_Db_Expr('SUM(main_table.base_shipping_amount * main_table.base_to_global_rate)'),
-                'discount'  => new Varien_Db_Expr('SUM(main_table.base_discount_amount * main_table.base_to_global_rate)'),
-                'total'     => new Varien_Db_Expr('SUM(main_table.base_grand_total * main_table.base_to_global_rate)'),
-                'invoiced'  => new Varien_Db_Expr('SUM(main_table.base_total_paid * main_table.base_to_global_rate)'),
-                'refunded'  => new Varien_Db_Expr('SUM(main_table.base_total_refunded * main_table.base_to_global_rate)'),
-                'profit'    => new Varien_Db_Expr("SUM({$baseSubtotalInvoiced} *  main_table.base_to_global_rate) "
+                'subtotal'  => new Maho\Db\Expr('SUM(main_table.base_subtotal * main_table.base_to_global_rate)'),
+                'tax'       => new Maho\Db\Expr('SUM(main_table.base_tax_amount * main_table.base_to_global_rate)'),
+                'shipping'  => new Maho\Db\Expr('SUM(main_table.base_shipping_amount * main_table.base_to_global_rate)'),
+                'discount'  => new Maho\Db\Expr('SUM(main_table.base_discount_amount * main_table.base_to_global_rate)'),
+                'total'     => new Maho\Db\Expr('SUM(main_table.base_grand_total * main_table.base_to_global_rate)'),
+                'invoiced'  => new Maho\Db\Expr('SUM(main_table.base_total_paid * main_table.base_to_global_rate)'),
+                'refunded'  => new Maho\Db\Expr('SUM(main_table.base_total_refunded * main_table.base_to_global_rate)'),
+                'profit'    => new Maho\Db\Expr("SUM({$baseSubtotalInvoiced} *  main_table.base_to_global_rate) "
                                 . "+ SUM({$baseDiscountRefunded} * main_table.base_to_global_rate) "
                                 . "- SUM({$baseSubtotalRefunded} * main_table.base_to_global_rate) "
                                 . "- SUM({$baseDiscountInvoiced} * main_table.base_to_global_rate) "

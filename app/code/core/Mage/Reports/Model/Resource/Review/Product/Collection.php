@@ -40,8 +40,8 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
                 ['r' => $this->getTable('review/review')],
                 'e.entity_id = r.entity_pk_value',
                 [
-                    'review_cnt'    => new Varien_Db_Expr(sprintf('(%s)', $subSelect)),
-                    'last_created'  => new Varien_Db_Expr('MAX(r.created_at)'),
+                    'review_cnt'    => new Maho\Db\Expr(sprintf('(%s)', $subSelect)),
+                    'last_created'  => new Maho\Db\Expr('MAX(r.created_at)'),
                 ],
             )
             ->group('e.entity_id');
@@ -61,8 +61,8 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
                 ['table_rating' => $this->getTable('rating/rating_vote_aggregated')],
                 implode(' AND ', $joinCondition),
                 [
-                    'avg_rating'          => new Varien_Db_Expr("$sumPercentField / $countRatingId"),
-                    'avg_rating_approved' => new Varien_Db_Expr("$sumPercentApproved / $countRatingId"),
+                    'avg_rating'          => new Maho\Db\Expr("$sumPercentField / $countRatingId"),
+                    'avg_rating_approved' => new Maho\Db\Expr("$sumPercentApproved / $countRatingId"),
                 ],
             );
 
@@ -96,7 +96,7 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
         $select->reset(Varien_Db_Select::LIMIT_OFFSET);
         $select->reset(Varien_Db_Select::COLUMNS);
         $select->resetJoinLeft();
-        $select->columns(new Varien_Db_Expr('1'));
+        $select->columns(new Maho\Db\Expr('1'));
 
         $countSelect = clone $select;
         $countSelect->reset();

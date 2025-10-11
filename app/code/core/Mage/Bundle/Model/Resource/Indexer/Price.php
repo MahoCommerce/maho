@@ -167,11 +167,11 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
         if ($this->isModuleEnabled('Mage_Tax')) {
             $taxClassId = $this->_addAttributeToSelect($select, 'tax_class_id', 'e.entity_id', 'cs.store_id');
         } else {
-            $taxClassId = new Varien_Db_Expr('0');
+            $taxClassId = new Maho\Db\Expr('0');
         }
 
         if ($priceType == Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC) {
-            $select->columns(['tax_class_id' => new Varien_Db_Expr('0')]);
+            $select->columns(['tax_class_id' => new Maho\Db\Expr('0')]);
         } else {
             $select->columns(
                 ['tax_class_id' => $write->getCheckSql($taxClassId . ' IS NOT NULL', $taxClassId, '0')],
@@ -185,7 +185,7 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
         $specialPrice   = $this->_addAttributeToSelect($select, 'special_price', 'e.entity_id', 'cs.store_id');
         $specialFrom    = $this->_addAttributeToSelect($select, 'special_from_date', 'e.entity_id', 'cs.store_id');
         $specialTo      = $this->_addAttributeToSelect($select, 'special_to_date', 'e.entity_id', 'cs.store_id');
-        $curentDate     = new Varien_Db_Expr('cwd.website_date');
+        $curentDate     = new Maho\Db\Expr('cwd.website_date');
 
         $specialExpr    = $write->getCheckSql(
             $write->getCheckSql(
@@ -217,7 +217,7 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
             '0',
         );
 
-        $tierExpr       = new Varien_Db_Expr('tp.min_price');
+        $tierExpr       = new Maho\Db\Expr('tp.min_price');
 
         if ($priceType == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
             $finalPrice = $write->getCheckSql(
@@ -241,13 +241,13 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
                 $finalPrice,
             );
         } else {
-            $finalPrice     = new Varien_Db_Expr('0');
+            $finalPrice     = new Maho\Db\Expr('0');
             $tierPrice      = $write->getCheckSql($tierExpr . ' IS NOT NULL', '0', 'NULL');
             $groupPrice     = $write->getCheckSql($groupPriceExpr . ' > 0', $groupPriceExpr, 'NULL');
         }
 
         $select->columns([
-            'price_type'          => new Varien_Db_Expr((string) $priceType),
+            'price_type'          => new Maho\Db\Expr((string) $priceType),
             'special_price'       => $specialExpr,
             'tier_percent'        => $tierExpr,
             'orig_price'          => $write->getCheckSql($price . ' IS NULL', '0', $price),
@@ -258,7 +258,7 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
             'base_tier'           => $tierPrice,
             'group_price'         => $groupPrice,
             'base_group_price'    => $groupPrice,
-            'group_price_percent' => new Varien_Db_Expr('gp.price'),
+            'group_price_percent' => new Maho\Db\Expr('gp.price'),
         ]);
 
         if (!is_null($entityIds)) {
@@ -270,9 +270,9 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
          */
         Mage::dispatchEvent('catalog_product_prepare_index_select', [
             'select'        => $select,
-            'entity_field'  => new Varien_Db_Expr('e.entity_id'),
-            'website_field' => new Varien_Db_Expr('cw.website_id'),
-            'store_field'   => new Varien_Db_Expr('cs.store_id'),
+            'entity_field'  => new Maho\Db\Expr('e.entity_id'),
+            'website_field' => new Maho\Db\Expr('cw.website_id'),
+            'store_field'   => new Maho\Db\Expr('cs.store_id'),
         ]);
 
         $query = $select->insertFromSelect($table);
@@ -317,12 +317,12 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
 
         $this->_prepareDefaultFinalPriceTable();
 
-        $minPrice  = new Varien_Db_Expr($write->getCheckSql(
+        $minPrice  = new Maho\Db\Expr($write->getCheckSql(
             'SUM(io.min_price) = 0',
             'MIN(io.alt_price)',
             'SUM(io.min_price)',
         ) . ' + i.price');
-        $maxPrice  = new Varien_Db_Expr('SUM(io.max_price) + i.price');
+        $maxPrice  = new Maho\Db\Expr('SUM(io.max_price) + i.price');
         $tierPrice = $write->getCheckSql(
             'MIN(i.tier_percent) IS NOT NULL',
             $write->getCheckSql(
@@ -393,7 +393,7 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
                 'bs.selection_price_type',
                 'bsp.selection_price_type',
             );
-            $priceExpr = new Varien_Db_Expr(
+            $priceExpr = new Maho\Db\Expr(
                 $write->getCheckSql(
                     $selectionPriceType . ' = 1',
                     'ROUND(i.price * (' . $selectionPriceValue . ' / 100),2)',
@@ -434,11 +434,11 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
                 ) . ' * bs.selection_qty',
                 'NULL',
             );
-            $priceExpr = new Varien_Db_Expr(
+            $priceExpr = new Maho\Db\Expr(
                 $write->getCheckSql("{$groupExpr} < {$priceExpr}", $groupExpr, $priceExpr),
             );
         } else {
-            $priceExpr = new Varien_Db_Expr(
+            $priceExpr = new Maho\Db\Expr(
                 $write->getCheckSql(
                     'i.special_price > 0 AND i.special_price < 100',
                     'ROUND(idx.min_price * (i.special_price / 100), 2)',
@@ -455,14 +455,14 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
                 'ROUND(idx.min_price * (i.base_group_price / 100), 2)* bs.selection_qty',
                 'NULL',
             );
-            $groupPriceExpr = new Varien_Db_Expr(
+            $groupPriceExpr = new Maho\Db\Expr(
                 $write->getCheckSql(
                     'i.base_group_price IS NOT NULL AND i.base_group_price > 0 AND i.base_group_price < 100',
                     'ROUND(idx.min_price - idx.min_price * (i.base_group_price / 100), 2)',
                     'idx.min_price',
                 ) . ' * bs.selection_qty',
             );
-            $priceExpr = new Varien_Db_Expr(
+            $priceExpr = new Maho\Db\Expr(
                 $write->getCheckSql("{$groupPriceExpr} < {$priceExpr}", $groupPriceExpr, $priceExpr),
             );
         }
@@ -604,7 +604,7 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
             )
             ->where('cw.website_id != 0')
             ->where('e.type_id=?', $this->getTypeId())
-            ->columns(new Varien_Db_Expr('MIN(tp.value)'))
+            ->columns(new Maho\Db\Expr('MIN(tp.value)'))
             ->group(['tp.entity_id', 'cg.customer_group_id', 'cw.website_id']);
 
         if (!empty($entityIds)) {
@@ -663,7 +663,7 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
             )
             ->where('cw.website_id != 0')
             ->where('e.type_id=?', $this->getTypeId())
-            ->columns(new Varien_Db_Expr('MIN(gp.value)'))
+            ->columns(new Maho\Db\Expr('MIN(gp.value)'))
             ->group(['gp.entity_id', 'cg.customer_group_id', 'cw.website_id']);
 
         if (!empty($entityIds)) {

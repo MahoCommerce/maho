@@ -60,7 +60,7 @@ class Mage_Sales_Model_Resource_Order_Shipment extends Mage_Sales_Model_Resource
             $adapter->quote(' '),
             $checkedLastname,
         ]);
-        $concatName = new Varien_Db_Expr("TRIM(REPLACE($concatName,'  ', ' '))");
+        $concatName = new Maho\Db\Expr("TRIM(REPLACE($concatName,'  ', ' '))");
 
         $this->addVirtualGridColumn(
             'shipping_name',

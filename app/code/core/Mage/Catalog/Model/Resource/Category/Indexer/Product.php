@@ -346,11 +346,11 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                 ->where('cc.path LIKE ?', $rootPath . '/%')
                 ->where('ie.category_id IS NULL')
                 ->columns([
-                    'category_id'   => new Varien_Db_Expr($rootId),
+                    'category_id'   => new Maho\Db\Expr($rootId),
                     'product_id'    => 'i.product_id',
-                    'position'      => new Varien_Db_Expr('0'),
-                    'is_parent'     => new Varien_Db_Expr('0'),
-                    'store_id'      => new Varien_Db_Expr($storeId),
+                    'position'      => new Maho\Db\Expr('0'),
+                    'is_parent'     => new Maho\Db\Expr('0'),
+                    'store_id'      => new Maho\Db\Expr($storeId),
                     'visibility'    => 'i.visibility',
                 ]);
             $query = $select->insertFromSelect($this->getMainTable());
@@ -396,11 +396,11 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                     Mage_Catalog_Model_Product_Status::STATUS_ENABLED,
                 )
                 ->columns([
-                    'category_id'   => new Varien_Db_Expr($rootId),
+                    'category_id'   => new Maho\Db\Expr($rootId),
                     'product_id'    => 'pw.product_id',
-                    'position'      => new Varien_Db_Expr('0'),
-                    'is_parent'     => new Varien_Db_Expr('1'),
-                    'store_id'      => new Varien_Db_Expr($storeId),
+                    'position'      => new Maho\Db\Expr('0'),
+                    'is_parent'     => new Maho\Db\Expr('1'),
+                    'store_id'      => new Maho\Db\Expr($storeId),
                     'visibility'    => $adapter->getCheckSql('sv.value_id IS NOT NULL', 'sv.value', 'dv.value'),
                 ]);
 
@@ -432,7 +432,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
          * product_ids (enabled filter) X category_ids X store_ids
          * Validate store root category
          */
-        $isParent = new Varien_Db_Expr('1');
+        $isParent = new Maho\Db\Expr('1');
         $select = $adapter->select()
             ->from(
                 ['cp' => $this->_categoryProductTable],
@@ -628,8 +628,8 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         /**
          * Insert anchor categories relations
          */
-        $isParent = new Varien_Db_Expr('0');
-        $position = new Varien_Db_Expr('0');
+        $isParent = new Maho\Db\Expr('0');
+        $position = new Maho\Db\Expr('0');
         $select = $this->_getReadAdapter()->select()
             ->distinct()
             ->from(['pw'  => $this->_productWebsiteTable], [])
@@ -726,7 +726,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                 'category_id'   => 'g.root_category_id',
                 'product_id'    => 'pw.product_id',
                 'position'      => $position,
-                'is_parent'     => new Varien_Db_Expr('1'),
+                'is_parent'     => new Maho\Db\Expr('1'),
                 'store_id'      => 's.store_id',
                 'visibility'    => $adapter->getCheckSql('sv.value_id IS NOT NULL', 'sv.value', 'dv.value'),
             ]);
@@ -821,8 +821,8 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                 $select = $idxAdapter->select();
                 $select->from(
                     ['cp' => $this->_categoryProductTable],
-                    ['category_id', 'product_id', 'position', 'is_parent' => new Varien_Db_Expr('1'),
-                        'store_id' => new Varien_Db_Expr($storeId)],
+                    ['category_id', 'product_id', 'position', 'is_parent' => new Maho\Db\Expr('1'),
+                        'store_id' => new Maho\Db\Expr($storeId)],
                 )
                 ->joinInner(['pv' => $enabledTable], 'pv.product_id=cp.product_id', ['visibility'])
                 ->joinLeft(['ac' => $anchorTable], 'ac.category_id=cp.category_id', [])
@@ -842,8 +842,8 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                 $select = $idxAdapter->select();
                 $select->from(
                     ['pv' => $enabledTable],
-                    [new Varien_Db_Expr($rootId), 'product_id', new Varien_Db_Expr('0'), new Varien_Db_Expr('1'),
-                        new Varien_Db_Expr($storeId), 'visibility'],
+                    [new Maho\Db\Expr($rootId), 'product_id', new Maho\Db\Expr('0'), new Maho\Db\Expr('1'),
+                        new Maho\Db\Expr($storeId), 'visibility'],
                 )
                 ->joinLeft(['cp' => $this->_categoryProductTable], 'pv.product_id=cp.product_id', [])
                 ->where('cp.product_id IS NULL');
@@ -906,9 +906,9 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                 ->from(
                     ['ap' => $anchorProductsTable],
                     ['category_id', 'product_id',
-                        'position', // => new Varien_Db_Expr('MIN('. $idxAdapter->quoteIdentifier('ap.position').')'),
+                        'position', // => new Maho\Db\Expr('MIN('. $idxAdapter->quoteIdentifier('ap.position').')'),
                         'is_parent' => $idxAdapter->getCheckSql('cp.product_id > 0', '1', '0'),
-                        'store_id' => new Varien_Db_Expr($storeId)],
+                        'store_id' => new Maho\Db\Expr($storeId)],
                 )
                 ->joinLeft(
                     ['cp' => $this->_categoryProductTable],
@@ -938,11 +938,11 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                     )
                     ->where('i.product_id IS NULL')
                     ->columns([
-                        'category_id'   => new Varien_Db_Expr($rootId),
+                        'category_id'   => new Maho\Db\Expr($rootId),
                         'product_id'    => 'e.entity_id',
-                        'position'      => new Varien_Db_Expr('0'),
-                        'is_parent'     => new Varien_Db_Expr('1'),
-                        'store_id'      => new Varien_Db_Expr($storeId),
+                        'position'      => new Maho\Db\Expr('0'),
+                        'is_parent'     => new Maho\Db\Expr('1'),
+                        'store_id'      => new Maho\Db\Expr($storeId),
                         'visibility'    => 'ei.visibility',
                     ]);
 

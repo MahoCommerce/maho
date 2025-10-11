@@ -352,7 +352,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
             $table = $this->getTable('catalog/product_option_title');
 
             $select = $this->_getReadAdapter()->select()
-                ->from($table, [new Varien_Db_Expr($newOptionId), 'store_id', 'title'])
+                ->from($table, [new Maho\Db\Expr($newOptionId), 'store_id', 'title'])
                 ->where('option_id = ?', $oldOptionId);
 
             $insertSelect = $write->insertFromSelect(
@@ -367,7 +367,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
             $table = $this->getTable('catalog/product_option_price');
 
             $select = $read->select()
-                ->from($table, [new Varien_Db_Expr($newOptionId), 'store_id', 'price', 'price_type'])
+                ->from($table, [new Maho\Db\Expr($newOptionId), 'store_id', 'price', 'price_type'])
                 ->where('option_id = ?', $oldOptionId);
 
             $insertSelect = $write->insertFromSelect(

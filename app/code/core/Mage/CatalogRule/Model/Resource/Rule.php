@@ -202,18 +202,18 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                         )
                         ->reset(Varien_Db_Select::COLUMNS)
                         ->columns([
-                            new Varien_Db_Expr((string) $store->getWebsiteId()),
+                            new Maho\Db\Expr((string) $store->getWebsiteId()),
                             'cg.customer_group_id',
                             'p.entity_id',
-                            new Varien_Db_Expr($rule->getId()),
-                            new Varien_Db_Expr((string) $fromTime),
-                            new Varien_Db_Expr((string) $toTime),
-                            new Varien_Db_Expr("'" . $actionOperator . "'"),
-                            new Varien_Db_Expr((string) $actionAmount),
-                            new Varien_Db_Expr((string) $actionStop),
-                            new Varien_Db_Expr((string) $sortOrder),
-                            new Varien_Db_Expr("'" . $subActionOperator . "'"),
-                            new Varien_Db_Expr((string) $subActionAmount),
+                            new Maho\Db\Expr($rule->getId()),
+                            new Maho\Db\Expr((string) $fromTime),
+                            new Maho\Db\Expr((string) $toTime),
+                            new Maho\Db\Expr("'" . $actionOperator . "'"),
+                            new Maho\Db\Expr((string) $actionAmount),
+                            new Maho\Db\Expr((string) $actionStop),
+                            new Maho\Db\Expr((string) $sortOrder),
+                            new Maho\Db\Expr("'" . $subActionOperator . "'"),
+                            new Maho\Db\Expr((string) $subActionAmount),
                         ]);
 
                     if (count($productIds) > 0) {

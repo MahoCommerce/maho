@@ -85,7 +85,7 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
      * @return $this
      */
     #[\Override]
-    public function joinTableToSelect(Varien_Db_Select $select, $storeId)
+    public function joinTableToSelect(\Maho\Db\Select $select, $storeId)
     {
         $select->joinLeft(
             ['url_rewrite' => $this->_resource->getTableName('core/url_rewrite')],

@@ -153,7 +153,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      *
      * @param string $value
      * @param array $options
-     * @return Varien_Db_Expr
+     * @return Maho\Db\Expr
      *
      * @see escapeLikeValue()
      */
@@ -166,14 +166,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      * @param string $field
      * @param string $value
      * @param array $options
-     * @return Varien_Db_Expr
+     * @return Maho\Db\Expr
      *
      * @see escapeLikeValue()
      */
     public function getCILike($field, $value, $options = [])
     {
         $quotedField = $this->_getReadAdapter()->quoteIdentifier($field);
-        return new Varien_Db_Expr($quotedField . ' LIKE ' . $this->addLikeEscape($value, $options));
+        return new Maho\Db\Expr($quotedField . ' LIKE ' . $this->addLikeEscape($value, $options));
     }
 
     /**

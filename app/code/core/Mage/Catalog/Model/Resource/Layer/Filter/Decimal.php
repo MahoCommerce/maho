@@ -63,8 +63,8 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_R
         $adapter    = $this->_getReadAdapter();
 
         $select->columns([
-            'min_value' => new Varien_Db_Expr('MIN(decimal_index.value)'),
-            'max_value' => new Varien_Db_Expr('MAX(decimal_index.value)'),
+            'min_value' => new Maho\Db\Expr('MIN(decimal_index.value)'),
+            'max_value' => new Maho\Db\Expr('MAX(decimal_index.value)'),
         ]);
 
         $result     = $adapter->fetchRow($select);
@@ -117,8 +117,8 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_R
         $select     = $this->_getSelect($filter);
         $adapter    = $this->_getReadAdapter();
 
-        $countExpr  = new Varien_Db_Expr('COUNT(*)');
-        $rangeExpr  = new Varien_Db_Expr("FLOOR(decimal_index.value / {$range}) + 1");
+        $countExpr  = new Maho\Db\Expr('COUNT(*)');
+        $rangeExpr  = new Maho\Db\Expr("FLOOR(decimal_index.value / {$range}) + 1");
 
         $select->columns([
             'decimal_range' => $rangeExpr,

@@ -75,9 +75,9 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Decimal extends Mage_Catal
          */
         Mage::dispatchEvent('prepare_catalog_product_index_select', [
             'select'        => $select,
-            'entity_field'  => new Varien_Db_Expr('pdd.entity_id'),
-            'website_field' => new Varien_Db_Expr('cs.website_id'),
-            'store_field'   => new Varien_Db_Expr('cs.store_id'),
+            'entity_field'  => new Maho\Db\Expr('pdd.entity_id'),
+            'website_field' => new Maho\Db\Expr('cs.website_id'),
+            'store_field'   => new Maho\Db\Expr('cs.store_id'),
         ]);
 
         $query = $select->insertFromSelect($idxTable);

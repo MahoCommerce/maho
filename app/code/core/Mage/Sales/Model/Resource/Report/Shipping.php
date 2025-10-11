@@ -71,11 +71,11 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 'store_id'              => 'store_id',
                 'order_status'          => 'status',
                 'shipping_description'  => 'shipping_description',
-                'orders_count'          => new Varien_Db_Expr('COUNT(entity_id)'),
-                'total_shipping'        => new Varien_Db_Expr(
+                'orders_count'          => new Maho\Db\Expr('COUNT(entity_id)'),
+                'total_shipping'        => new Maho\Db\Expr(
                     "SUM((base_shipping_amount - {$ifnullBaseShippingCanceled}) * base_to_global_rate)",
                 ),
-                'total_shipping_actual' => new Varien_Db_Expr(
+                'total_shipping_actual' => new Maho\Db\Expr(
                     "SUM((base_shipping_invoiced - {$ifnullBaseShippingRefunded}) * base_to_global_rate)",
                 ),
             ];
@@ -110,12 +110,12 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
 
             $columns = [
                 'period'                => 'period',
-                'store_id'              => new Varien_Db_Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
+                'store_id'              => new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
                 'order_status'          => 'order_status',
                 'shipping_description'  => 'shipping_description',
-                'orders_count'          => new Varien_Db_Expr('SUM(orders_count)'),
-                'total_shipping'        => new Varien_Db_Expr('SUM(total_shipping)'),
-                'total_shipping_actual' => new Varien_Db_Expr('SUM(total_shipping_actual)'),
+                'orders_count'          => new Maho\Db\Expr('SUM(orders_count)'),
+                'total_shipping'        => new Maho\Db\Expr('SUM(total_shipping)'),
+                'total_shipping_actual' => new Maho\Db\Expr('SUM(total_shipping_actual)'),
             ];
 
             $select
@@ -189,10 +189,10 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 'store_id'              => 'order_table.store_id',
                 'order_status'          => 'order_table.status',
                 'shipping_description'  => 'order_table.shipping_description',
-                'orders_count'          => new Varien_Db_Expr('COUNT(order_table.entity_id)'),
-                'total_shipping'        => new Varien_Db_Expr('SUM((order_table.base_shipping_amount - '
+                'orders_count'          => new Maho\Db\Expr('COUNT(order_table.entity_id)'),
+                'total_shipping'        => new Maho\Db\Expr('SUM((order_table.base_shipping_amount - '
                     . "{$ifnullBaseShippingCanceled}) * order_table.base_to_global_rate)"),
-                'total_shipping_actual' => new Varien_Db_Expr('SUM((order_table.base_shipping_invoiced - '
+                'total_shipping_actual' => new Maho\Db\Expr('SUM((order_table.base_shipping_invoiced - '
                     . "{$ifnullBaseShippingRefunded}) * order_table.base_to_global_rate)"),
             ];
 
@@ -216,7 +216,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
-            $select->where('source_table.entity_id = (?)', new Varien_Db_Expr($filterSubSelect));
+            $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));
             unset($filterSubSelect);
 
             $select->group([
@@ -235,12 +235,12 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
 
             $columns = [
                 'period'                => 'period',
-                'store_id'              => new Varien_Db_Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
+                'store_id'              => new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
                 'order_status'          => 'order_status',
                 'shipping_description'  => 'shipping_description',
-                'orders_count'          => new Varien_Db_Expr('SUM(orders_count)'),
-                'total_shipping'        => new Varien_Db_Expr('SUM(total_shipping)'),
-                'total_shipping_actual' => new Varien_Db_Expr('SUM(total_shipping_actual)'),
+                'orders_count'          => new Maho\Db\Expr('SUM(orders_count)'),
+                'total_shipping'        => new Maho\Db\Expr('SUM(total_shipping)'),
+                'total_shipping_actual' => new Maho\Db\Expr('SUM(total_shipping_actual)'),
             ];
 
             $select

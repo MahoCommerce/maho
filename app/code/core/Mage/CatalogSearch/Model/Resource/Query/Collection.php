@@ -92,7 +92,7 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
      */
     public function setPopularQueryFilter($storeIds = null)
     {
-        $ifSynonymFor = new Varien_Db_Expr($this->getConnection()
+        $ifSynonymFor = new Maho\Db\Expr($this->getConnection()
             ->getCheckSql("synonym_for IS NOT NULL AND synonym_for != ''", 'synonym_for', 'query_text'));
 
         $this->getSelect()

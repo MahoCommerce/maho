@@ -66,7 +66,7 @@ class Mage_Reports_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource
         }
 
         $cols = array_keys($columns);
-        $cols['total_qty'] = new Varien_Db_Expr('SUM(t.' . $column . ')');
+        $cols['total_qty'] = new Maho\Db\Expr('SUM(t.' . $column . ')');
 
         $periodSubSelect->from(['t' => $mainTable], $cols)
             ->group(['t.store_id', $periodCol, 't.product_id']);
@@ -90,11 +90,11 @@ class Mage_Reports_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource
 
         $cols = $columns;
         $cols[$column] = 't.total_qty';
-        $cols['rating_pos']  = new Varien_Db_Expr(
+        $cols['rating_pos']  = new Maho\Db\Expr(
             "(@pos := IF(t.`store_id` <> @prevStoreId OR {$periodCol} <> @prevPeriod, 1, @pos+1))",
         );
-        $cols['prevStoreId'] = new Varien_Db_Expr('(@prevStoreId := t.`store_id`)');
-        $cols['prevPeriod']  = new Varien_Db_Expr("(@prevPeriod := {$periodCol})");
+        $cols['prevStoreId'] = new Maho\Db\Expr('(@prevStoreId := t.`store_id`)');
+        $cols['prevPeriod']  = new Maho\Db\Expr("(@prevPeriod := {$periodCol})");
         $ratingSubSelect->from($periodSubSelect, $cols);
 
         $cols               = $columns;

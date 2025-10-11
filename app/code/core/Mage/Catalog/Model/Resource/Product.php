@@ -383,7 +383,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
 
             $selectFields = [
                 't_v_default.entity_id',
-                new Varien_Db_Expr((string) $storeId),
+                new Maho\Db\Expr((string) $storeId),
                 $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
             ];
 
@@ -411,8 +411,8 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             ];
 
             $selectFields = [
-                new Varien_Db_Expr($productId),
-                new Varien_Db_Expr((string) $storeId),
+                new Maho\Db\Expr($productId),
+                new Maho\Db\Expr((string) $storeId),
                 $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
             ];
 
@@ -561,7 +561,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
                     'entity_type_id',
                     'attribute_id',
                     'store_id',
-                    'entity_id' => new Varien_Db_Expr($adapter->quote($newId)),
+                    'entity_id' => new Maho\Db\Expr($adapter->quote($newId)),
                     'value',
                 ])
                 ->where('entity_id = ?', $oldId)

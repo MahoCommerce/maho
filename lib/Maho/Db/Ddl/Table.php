@@ -1,15 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Varien_Db_Ddl_Table
+namespace Maho\Db\Ddl;
+
+class Table
 {
     /**
      * Types of columns
@@ -169,7 +173,7 @@ class Varien_Db_Ddl_Table
      * Set table name
      *
      * @param string $name
-     * @return Varien_Db_Ddl_Table
+     * @return Table
      */
     public function setName($name)
     {
@@ -184,7 +188,7 @@ class Varien_Db_Ddl_Table
      * Set schema name
      *
      * @param string $name
-     * @return Varien_Db_Ddl_Table
+     * @return Table
      */
     public function setSchema($name)
     {
@@ -196,7 +200,7 @@ class Varien_Db_Ddl_Table
      * Set comment for table
      *
      * @param string $comment
-     * @return Varien_Db_Ddl_Table
+     * @return Table
      */
     public function setComment($comment)
     {
@@ -207,13 +211,13 @@ class Varien_Db_Ddl_Table
     /**
      * Retrieve name of table
      *
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      * @return string
      */
     public function getName()
     {
         if (is_null($this->_tableName)) {
-            throw new Zend_Db_Exception('Table name is not defined');
+            throw new \Maho\Db\Exception('Table name is not defined');
         }
         return $this->_tableName;
     }
@@ -256,8 +260,8 @@ class Varien_Db_Ddl_Table
      * @param string|int|array $size the column length
      * @param array $options array of additional options
      * @param string $comment column description
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Ddl_Table
+     * @throws \Maho\Db\Exception
+     * @return Table
      */
     public function addColumn($name, $type, $size = null, $options = [], $comment = null)
     {
@@ -356,7 +360,7 @@ class Varien_Db_Ddl_Table
                 $length = $size;
                 break;
             default:
-                throw new Zend_Db_Exception('Invalid column data type "' . $type . '"');
+                throw new \Maho\Db\Exception('Invalid column data type "' . $type . '"');
         }
 
         if (array_key_exists('default', $options)) {
@@ -416,8 +420,8 @@ class Varien_Db_Ddl_Table
      * @param string $refColumn     the reference table column name
      * @param string $onDelete      the action on delete row
      * @param string $onUpdate      the action on update
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Ddl_Table
+     * @throws \Maho\Db\Exception
+     * @return Table
      */
     public function addForeignKey($fkName, $column, $refTable, $refColumn, $onDelete = null, $onUpdate = null)
     {
@@ -425,7 +429,7 @@ class Varien_Db_Ddl_Table
 
         // validate column name
         if (!isset($this->_columns[strtoupper($column)])) {
-            throw new Zend_Db_Exception('Undefined column "' . $column . '"');
+            throw new \Maho\Db\Exception('Undefined column "' . $column . '"');
         }
 
         switch ($onDelete) {
@@ -466,11 +470,11 @@ class Varien_Db_Ddl_Table
      * @param string $indexName     the index name
      * @param array|string $fields  array of columns or column string
      * @param array $options        array of additional options
-     * @return Varien_Db_Ddl_Table
+     * @return Table
      */
     public function addIndex($indexName, $fields, $options = [])
     {
-        $idxType    = Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX;
+        $idxType    = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX;
         $position   = 0;
         $columns    = [];
         if (!is_array($fields)) {
@@ -484,7 +488,7 @@ class Varien_Db_Ddl_Table
                 $columnName = $columnData;
             } elseif (is_array($columnData)) {
                 if (!isset($columnData['name'])) {
-                    throw new Zend_Db_Exception('Invalid index column data');
+                    throw new \Maho\Db\Exception('Invalid index column data');
                 }
 
                 $columnName = $columnData['name'];
@@ -508,7 +512,7 @@ class Varien_Db_Ddl_Table
         }
 
         if (empty($columns)) {
-            throw new Zend_Db_Exception('Columns for index are not defined');
+            throw new \Maho\Db\Exception('Columns for index are not defined');
         }
 
         if (!empty($options['type'])) {
@@ -542,7 +546,7 @@ class Varien_Db_Ddl_Table
      * Set column, formatted according to DDL Table format, into columns structure
      *
      * @param array $column
-     * @return Varien_Db_Ddl_Table
+     * @return Table
      */
     public function setColumn($column)
     {

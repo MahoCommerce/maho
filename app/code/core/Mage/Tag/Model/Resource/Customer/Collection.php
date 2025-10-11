@@ -334,7 +334,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
 
             foreach ($this->_orders as $field => $direction) {
                 if (empty($appliedOrders[$field])) {
-                    $this->_select->order(new Varien_Db_Expr($field . ' ' . $direction));
+                    $this->_select->order(new Maho\Db\Expr($field . ' ' . $direction));
                 }
             }
         }

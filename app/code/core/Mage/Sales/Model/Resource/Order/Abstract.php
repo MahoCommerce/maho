@@ -191,7 +191,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
      * @param array $columnsToSelect
      * @return $this
      */
-    public function joinVirtualGridColumnsToSelect($mainTableAlias, Varien_Db_Select $select, &$columnsToSelect)
+    public function joinVirtualGridColumnsToSelect($mainTableAlias, \Maho\Db\Select $select, &$columnsToSelect)
     {
         $adapter = $this->_getWriteAdapter();
         foreach ($this->getVirtualGridColumns() as $alias => $expression) {

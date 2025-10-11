@@ -103,7 +103,7 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
      * @param int $storeId
      * @return $this
      */
-    protected function _addValueToSelect(Varien_Db_Select $select, $storeId = Mage_Core_Model_App::ADMIN_STORE_ID)
+    protected function _addValueToSelect(\Maho\Db\Select $select, $storeId = Mage_Core_Model_App::ADMIN_STORE_ID)
     {
         $adapter = $this->_getReadAdapter();
         $ifNullPlainValue = $adapter->getCheckSql('store.plain_value IS NULL', 'def.plain_value', 'store.plain_value');

@@ -57,7 +57,7 @@ class Mage_Core_Model_Resource_Iterator extends Varien_Object
         }
 
         if (is_string($query)) {
-            if (!$conn instanceof Varien_Db_Adapter_Interface) {
+            if (!$conn instanceof \Maho\Db\Adapter\AdapterInterface) {
                 Mage::throwException(Mage::helper('core')->__('Invalid connection'));
             }
             return $conn->query($query);

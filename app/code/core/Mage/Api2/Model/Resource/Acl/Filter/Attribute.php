@@ -51,7 +51,7 @@ class Mage_Api2_Model_Resource_Acl_Filter_Attribute extends Mage_Core_Model_Reso
         $resourceId = self::FILTER_RESOURCE_ALL;
 
         $select = $this->getReadConnection()->select()
-            ->from($this->getMainTable(), new Varien_Db_Expr('COUNT(*)'))
+            ->from($this->getMainTable(), new Maho\Db\Expr('COUNT(*)'))
             ->where('user_type = ?', $userType)
             ->where('resource_id = ?', $resourceId);
 

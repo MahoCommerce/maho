@@ -120,7 +120,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
 
             //exclude removed products
             $subSelect = $this->getConnection()->select();
-            $subSelect->from(['existed_products' => $this->getTable('catalog/product')], new Varien_Db_Expr('1)'));
+            $subSelect->from(['existed_products' => $this->getTable('catalog/product')], new Maho\Db\Expr('1)'));
 
             $select->exists($subSelect, $mainTable . '.product_id = existed_products.entity_id')
                 ->group('product_id')

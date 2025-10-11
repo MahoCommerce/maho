@@ -231,7 +231,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
             ->from(
                 $this->_reviewTable,
                 [
-                    'review_count' => new Varien_Db_Expr('COUNT(*)'),
+                    'review_count' => new Maho\Db\Expr('COUNT(*)'),
                 ],
             )
             ->where('entity_id = ?', $object->getEntityId())
@@ -272,7 +272,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
             ->from(
                 $this->_reviewTable,
                 [
-                    'review_count' => new Varien_Db_Expr('COUNT(*)'),
+                    'review_count' => new Maho\Db\Expr('COUNT(*)'),
                 ],
             )
             ->where("{$this->_reviewTable}.entity_pk_value = :pk_value");

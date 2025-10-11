@@ -175,7 +175,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     public function appendChild($data, $parentNode, $prevNode = null)
     {
         $orderSelect = $this->_conn->select();
-        $orderSelect->from($this->_table, new Varien_Db_Expr('MAX(' . $this->_conn->quoteIdentifier($this->_orderField) . ')'))
+        $orderSelect->from($this->_table, new Maho\Db\Expr('MAX(' . $this->_conn->quoteIdentifier($this->_orderField) . ')'))
             ->where($this->_conn->quoteIdentifier($this->_parentField) . '=' . $parentNode->getId());
 
         $order = $this->_conn->fetchOne($orderSelect);
@@ -212,14 +212,14 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
 
         // For reorder new node branch
         $dataReorderNew = [
-            $this->_orderField => new Varien_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '+1'),
+            $this->_orderField => new Maho\Db\Expr($this->_conn->quoteIdentifier($this->_orderField) . '+1'),
         ];
         $conditionReorderNew = $this->_conn->quoteIdentifier($this->_parentField) . '=' . $parentNode->getId() .
                             ' AND ' . $this->_conn->quoteIdentifier($this->_orderField) . '>=' . $data[$this->_orderField];
 
         // For reorder old node branch
         $dataReorderOld = [
-            $this->_orderField => new Varien_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
+            $this->_orderField => new Maho\Db\Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
         ];
         $conditionReorderOld = $this->_conn->quoteIdentifier($this->_parentField) . '=' . $node->getData($this->_parentField) .
                             ' AND ' . $this->_conn->quoteIdentifier($this->_orderField) . '>' . $node->getData($this->_orderField);
@@ -295,7 +295,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
     {
         // For reorder old node branch
         $dataReorderOld = [
-            $this->_orderField => new Varien_Db_Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
+            $this->_orderField => new Maho\Db\Expr($this->_conn->quoteIdentifier($this->_orderField) . '-1'),
         ];
         $conditionReorderOld = $this->_conn->quoteIdentifier($this->_parentField) . '=' . $node->getData($this->_parentField) .
                             ' AND ' . $this->_conn->quoteIdentifier($this->_orderField) . '>' . $node->getData($this->_orderField);

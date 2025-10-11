@@ -125,7 +125,7 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'Website Id')
     ->addIndex(
-        $installer->getIdxName('catalogrule/rule_product', ['rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'], true),
+        $installer->getIdxName('catalogrule/rule_product', ['rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'], \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'],
         ['type' => 'unique'],
     )

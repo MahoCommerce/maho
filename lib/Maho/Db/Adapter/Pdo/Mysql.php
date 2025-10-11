@@ -1,16 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
+namespace Maho\Db\Adapter\Pdo;
+
+use Maho\Db\Helper;
+
+class Mysql implements \Maho\Db\Adapter\AdapterInterface
 {
     /**
      * Doctrine DBAL Connection
@@ -31,7 +37,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @var int
      */
-    protected $_fetchMode = PDO::FETCH_ASSOC;
+    protected $_fetchMode = \PDO::FETCH_ASSOC;
 
     /**
      * Numeric data types
@@ -42,11 +48,11 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         'INT' => 0,        // Zend_Db::INT_TYPE
         'SMALLINT' => 0,   // Zend_Db::INT_TYPE
         'BIGINT' => 5,     // Zend_Db::BIGINT_TYPE
-        'FLOAT' => 2,      // Zend_Db::FLOAT_TYPE
-        'DECIMAL' => 2,    // Zend_Db::FLOAT_TYPE
-        'NUMERIC' => 2,    // Zend_Db::FLOAT_TYPE
-        'DOUBLE' => 2,     // Zend_Db::FLOAT_TYPE
-        'REAL' => 2,       // Zend_Db::FLOAT_TYPE
+        'FLOAT' => 2,      // \Zend_Db::FLOAT_TYPE
+        'DECIMAL' => 2,    // \Zend_Db::FLOAT_TYPE
+        'NUMERIC' => 2,    // \Zend_Db::FLOAT_TYPE
+        'DOUBLE' => 2,     // \Zend_Db::FLOAT_TYPE
+        'REAL' => 2,       // \Zend_Db::FLOAT_TYPE
     ];
 
     public const DEBUG_CONNECT         = 0;
@@ -86,7 +92,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @var string
      */
-    protected $_defaultStmtClass = 'Varien_Db_Statement_Pdo_Mysql';
+    protected $_defaultStmtClass = \Maho\Db\Statement\Pdo\Mysql::class;
 
     /**
      * Current Transaction Level
@@ -154,7 +160,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Io File Adapter
      *
-     * @var Varien_Io_File
+     * @var \Varien_Io_File
      */
     protected $_debugIoAdapter;
 
@@ -168,7 +174,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Cache frontend adapter instance
      *
-     * @var Mage_Core_Model_Cache
+     * @var \Mage_Core_Model_Cache
      */
     protected $_cacheAdapter;
 
@@ -184,19 +190,19 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @var array
      */
     protected $_ddlColumnTypes      = [
-        Varien_Db_Ddl_Table::TYPE_BOOLEAN       => 'bool',
-        Varien_Db_Ddl_Table::TYPE_SMALLINT      => 'smallint',
-        Varien_Db_Ddl_Table::TYPE_INTEGER       => 'int',
-        Varien_Db_Ddl_Table::TYPE_BIGINT        => 'bigint',
-        Varien_Db_Ddl_Table::TYPE_FLOAT         => 'float',
-        Varien_Db_Ddl_Table::TYPE_DECIMAL       => 'decimal',
-        Varien_Db_Ddl_Table::TYPE_NUMERIC       => 'decimal',
-        Varien_Db_Ddl_Table::TYPE_DATE          => 'date',
-        Varien_Db_Ddl_Table::TYPE_TIMESTAMP     => 'timestamp',
-        Varien_Db_Ddl_Table::TYPE_DATETIME      => 'datetime',
-        Varien_Db_Ddl_Table::TYPE_TEXT          => 'text',
-        Varien_Db_Ddl_Table::TYPE_BLOB          => 'blob',
-        Varien_Db_Ddl_Table::TYPE_VARBINARY     => 'blob',
+        \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
+        \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
+        \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
+        \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
+        \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
+        \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
+        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'decimal',
+        \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
+        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
+        \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
+        \Maho\Db\Ddl\Table::TYPE_BLOB          => 'blob',
+        \Maho\Db\Ddl\Table::TYPE_VARBINARY     => 'blob',
     ];
 
     /**
@@ -246,12 +252,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Constructor
      *
      * @param array $config
-     * @throws Varien_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     public function __construct($config)
     {
         if (!is_array($config)) {
-            throw new Varien_Db_Exception('Adapter configuration must be an array');
+            throw new \Maho\Db\Exception('Adapter configuration must be an array');
         }
 
         $this->_config = $config;
@@ -353,7 +359,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Fetches all SQL result rows as an array.
      *
-     * @param string|Varien_Db_Select $sql SQL query.
+     * @param string|\Maho\Db\Select $sql SQL query.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @param mixed $fetchMode Fetch mode.
      * @return array
@@ -371,7 +377,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Fetches the first row of the SQL result.
      *
-     * @param string|Varien_Db_Select $sql SQL query.
+     * @param string|\Maho\Db\Select $sql SQL query.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @param mixed $fetchMode Fetch mode.
      * @return array|false
@@ -389,7 +395,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Fetches the first column of all SQL result rows as an array.
      *
-     * @param string|Varien_Db_Select $sql SQL query.
+     * @param string|\Maho\Db\Select $sql SQL query.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return array
      */
@@ -397,7 +403,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     public function fetchCol($sql, $bind = [])
     {
         $stmt = $this->query($sql, $bind);
-        return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
     /**
@@ -405,7 +411,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * The first column is the key, the second column is the value.
      *
-     * @param string|Varien_Db_Select $sql SQL query.
+     * @param string|\Maho\Db\Select $sql SQL query.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return array
      */
@@ -413,13 +419,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     public function fetchPairs($sql, $bind = [])
     {
         $stmt = $this->query($sql, $bind);
-        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+        return $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
     }
 
     /**
      * Fetches the first column of the first row of the SQL result.
      *
-     * @param string|Varien_Db_Select $sql SQL query.
+     * @param string|\Maho\Db\Select $sql SQL query.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return mixed|false
      */
@@ -433,7 +439,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Quote an identifier.
      *
-     * @param string|array|Varien_Db_Expr $ident The identifier.
+     * @param string|array|\Maho\Db\Expr $ident The identifier.
      * @param bool $auto If true, auto-quote identifier. Default: false.
      * @return string The quoted identifier.
      */
@@ -446,8 +452,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Quote a column identifier and alias.
      *
-     * @param string|array|Varien_Db_Expr $ident The column identifier or expression.
-     * @param string $alias An alias for the column.
+     * @param string|array|\Maho\Db\Expr $ident The column identifier or expression.
+     * @param string|null $alias An alias for the column.
      * @param bool $auto If true, auto-quote identifiers. Default: false.
      * @return string The quoted identifier and alias.
      */
@@ -460,7 +466,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Quote a table identifier and alias.
      *
-     * @param string|array|Varien_Db_Expr $ident The table identifier or expression.
+     * @param string|array|\Maho\Db\Expr $ident The table identifier or expression.
      * @param string|null $alias An alias for the table.
      * @param bool $auto If true, auto-quote identifiers. Default: false.
      * @return string The quoted identifier and alias.
@@ -474,7 +480,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Quote an identifier and an optional alias.
      *
-     * @param string|array|Varien_Db_Expr $ident The identifier or expression.
+     * @param string|array|\Maho\Db\Expr $ident The identifier or expression.
      * @param string|null $alias An optional alias.
      * @param bool $auto If true, auto-quote identifiers. Default: false.
      * @param string $as The string to use for the AS keyword. Default: ' AS '.
@@ -482,9 +488,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      */
     protected function _quoteIdentifierAs($ident, $alias = null, $auto = false, $as = ' AS ')
     {
-        if ($ident instanceof Varien_Db_Expr) {
+        if ($ident instanceof \Maho\Db\Expr) {
             $quoted = $ident->__toString();
-        } elseif ($ident instanceof Varien_Db_Select) {
+        } elseif ($ident instanceof \Maho\Db\Select) {
             $quoted = '(' . $ident->assemble() . ')';
         } else {
             if (is_string($ident)) {
@@ -497,7 +503,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                     if ($segment === '' || $segment === null) {
                         continue;
                     }
-                    if ($segment instanceof Varien_Db_Expr) {
+                    if ($segment instanceof \Maho\Db\Expr) {
                         $segments[] = $segment->__toString();
                     } else {
                         $segments[] = $this->_quoteIdentifier($segment, $auto);
@@ -543,7 +549,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * The first column is the key, the entire row array is the value.
      *
-     * @param string|Varien_Db_Select $sql SQL query.
+     * @param string|\Maho\Db\Select $sql SQL query.
      * @param mixed $bind Data to bind into SELECT placeholders.
      * @return array
      */
@@ -552,14 +558,14 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     {
         $stmt = $this->query($sql, $bind);
         $data = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $data[current($row)] = $row;
         }
         return $data;
     }
 
     /**
-     * Convert an array, string, or Varien_Db_Expr object into a string to put in a WHERE clause.
+     * Convert an array, string, or \Maho\Db\Expr object into a string to put in a WHERE clause.
      *
      * @param mixed $where
      * @return string
@@ -576,7 +582,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             // is $cond an int? (i.e. Not a condition)
             if (is_int($cond)) {
                 // $term is the full condition
-                if ($term instanceof Varien_Db_Expr) {
+                if ($term instanceof \Maho\Db\Expr) {
                     $term = $term->__toString();
                 }
             } else {
@@ -592,8 +598,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Convert date to DB format
      *
-     * @param   int|string|DateTime $date
-     * @return  Varien_Db_Expr
+     * @param   int|string|\DateTime $date
+     * @return  \Maho\Db\Expr
      */
     public function convertDate($date)
     {
@@ -603,8 +609,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Convert date and time to DB format
      *
-     * @param   int|string|DateTime $datetime
-     * @return  Varien_Db_Expr
+     * @param   int|string|\DateTime $datetime
+     * @return  \Maho\Db\Expr
      */
     public function convertDateTime($datetime)
     {
@@ -613,13 +619,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 
     /**
      * Parse a source hostname and generate a host info
-     * @param $hostName
+     * @param string $hostName
      *
-     * @return Varien_Object
+     * @return \Varien_Object
      */
     protected function _getHostInfo($hostName)
     {
-        $hostInfo = new Varien_Object();
+        $hostInfo = new \Varien_Object();
         $matches = [];
         if (str_contains($hostName, '/')) {
             $hostInfo->setAddressType(self::ADDRESS_TYPE_UNIX_SOCKET)
@@ -657,7 +663,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Creates a PDO object and connects to the database.
      *
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     protected function _connect(): void
     {
@@ -666,7 +672,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         }
 
         if (!extension_loaded('pdo_mysql')) {
-            throw new RuntimeException('pdo_mysql extension is not installed');
+            throw new \RuntimeException('pdo_mysql extension is not installed');
         }
 
         $hostInfo = $this->_getHostInfo($this->_config['host'] ?? $this->_config['unix_socket'] ?? null);
@@ -710,8 +716,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 
         $driverOptions = [];
         if (!$this->_connectionFlagsSet) {
-            $driverOptions[PDO::ATTR_EMULATE_PREPARES] = true;
-            $driverOptions[PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
+            $driverOptions[\PDO::ATTR_EMULATE_PREPARES] = true;
+            $driverOptions[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
         }
         if (!empty($driverOptions)) {
             $params['driverOptions'] = $driverOptions;
@@ -730,8 +736,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Run RAW Query
      *
      * @param string $sql
-     * @return Varien_Db_Statement_Pdo_Mysql
-     * @throws PDOException
+     * @return \Maho\Db\Statement\Pdo\Mysql
+     * @throws \PDOException
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function raw_query($sql)
@@ -742,12 +748,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             $retry = false;
             try {
                 $result = $this->query($sql);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // Convert to PDOException to maintain backwards compatibility with usage of MySQL adapter
-                if ($e instanceof RuntimeException) {
+                if ($e instanceof \RuntimeException) {
                     $e = $e->getPrevious();
-                    if (!($e instanceof PDOException)) {
-                        $e = new PDOException($e->getMessage(), $e->getCode());
+                    if (!($e instanceof \PDOException)) {
+                        $e = new \PDOException($e->getMessage(), $e->getCode());
                     }
                 }
                 // Check to reconnect
@@ -778,7 +784,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             return false;
         }
 
-        $row = $result->fetch(PDO::FETCH_ASSOC);
+        $row = $result->fetch(\PDO::FETCH_ASSOC);
         if (!$row) {
             return false;
         }
@@ -793,8 +799,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Check transaction level in case of DDL query
      *
-     * @param string|Varien_Db_Select $sql
-     * @throws RuntimeException
+     * @param string|\Maho\Db\Select $sql
+     * @throws \RuntimeException
+     * @return void
      */
     protected function _checkDdlTransaction($sql)
     {
@@ -803,7 +810,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             if (in_array($startSql, $this->_ddlRoutines)
                 && (preg_match($this->_tempRoutines, $sql) !== 1)
             ) {
-                throw new Varien_Db_Exception(Varien_Db_Adapter_Interface::ERROR_DDL_MESSAGE);
+                throw new \Maho\Db\Exception(\Maho\Db\Adapter\AdapterInterface::ERROR_DDL_MESSAGE);
             }
         }
     }
@@ -812,10 +819,10 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Special handling for PDO query().
      * All bind parameter names must begin with ':'.
      *
-     * @param string|Varien_Db_Select $sql The SQL statement with placeholders.
+     * @param string|\Maho\Db\Select $sql The SQL statement with placeholders.
      * @param mixed $bind An array of data or data itself to bind to the placeholders.
-     * @return Varien_Db_Statement_Pdo_Mysql
-     * @throws RuntimeException To re-throw PDOException.
+     * @return \Maho\Db\Statement\Pdo\Mysql
+     * @throws \RuntimeException To re-throw PDOException.
      */
     #[\Override]
     public function query($sql, $bind = [])
@@ -840,9 +847,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 $result = $this->_connection->executeQuery($sql);
             }
 
-            // Wrap the result in Varien_Db_Statement_Pdo_Mysql for compatibility
-            $result = new Varien_Db_Statement_Pdo_Mysql($this, $result);
-        } catch (Exception $e) {
+            // Wrap the result in \Maho\Db\Statement\Pdo\Mysql for compatibility
+            $result = new \Maho\Db\Statement\Pdo\Mysql($this, $result);
+        } catch (\Exception $e) {
             $this->_debugStat(self::DEBUG_QUERY, $sql, $bind);
 
             // Detect implicit rollback - MySQL SQLSTATE: ER_LOCK_WAIT_TIMEOUT or ER_LOCK_DEADLOCK
@@ -868,7 +875,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * (e.g. "foo:bar"). And also changes named bind to positional one, because underlying library has problems
      * with named binds.
      *
-     * @param Varien_Db_Select|string $sql
+     * @param \Maho\Db\Select|string $sql
      * @param-out string $sql
      * @param mixed $bind
      * @return $this
@@ -1014,7 +1021,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * $hook must be either array with 'object' and 'method' entries, or null to remove hook.
      * Previous hook is returned.
      *
-     * @param array $hook
+     * @param array|null $hook
      * @return mixed
      */
     public function setQueryHook($hook)
@@ -1028,7 +1035,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Executes a SQL statement(s)
      *
      * @param string $sql
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      * @return array
      */
     #[\Override]
@@ -1056,7 +1063,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 $result[] = $this->raw_query($stmt);
             }
             #$this->commit();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             #$this->rollback();
             throw $e;
         }
@@ -1172,11 +1179,11 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $columnName,
         $refTableName,
         $refColumnName,
-        $onDelete = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
+        $onDelete = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
     ) {
         $onDelete = strtoupper($onDelete);
-        if ($onDelete == Varien_Db_Adapter_Interface::FK_ACTION_CASCADE
-            || $onDelete == Varien_Db_Adapter_Interface::FK_ACTION_RESTRICT
+        if ($onDelete == \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE
+            || $onDelete == \Maho\Db\Adapter\AdapterInterface::FK_ACTION_RESTRICT
         ) {
             $sql = sprintf(
                 'DELETE p.* FROM %s AS p LEFT JOIN %s AS r ON p.%s = r.%s WHERE r.%s IS NULL',
@@ -1187,7 +1194,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 $this->quoteIdentifier($refColumnName),
             );
             $this->raw_query($sql);
-        } elseif ($onDelete == Varien_Db_Adapter_Interface::FK_ACTION_SET_NULL) {
+        } elseif ($onDelete == \Maho\Db\Adapter\AdapterInterface::FK_ACTION_SET_NULL) {
             $sql = sprintf(
                 'UPDATE %s AS p LEFT JOIN %s AS r ON p.%s = r.%s SET p.%s = NULL WHERE r.%s IS NULL',
                 $this->quoteIdentifier($tableName),
@@ -1234,8 +1241,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param   string $columnName
      * @param   array|string $definition  string specific or universal array DB Server definition
      * @param   string $schemaName
-     * @return  int|boolean|Varien_Db_Statement_Pdo_Mysql
-     * @throws  Zend_Db_Exception
+     * @return  int|boolean|\Maho\Db\Statement\Pdo\Mysql
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function addColumn($tableName, $columnName, $definition, $schemaName = null)
@@ -1248,7 +1255,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         if (is_array($definition)) {
             $definition = array_change_key_case($definition, CASE_UPPER);
             if (empty($definition['COMMENT'])) {
-                throw new Zend_Db_Exception('Impossible to create a column without comment.');
+                throw new \Maho\Db\Exception('Impossible to create a column without comment.');
             }
             if (!empty($definition['PRIMARY'])) {
                 $primaryKey = sprintf(', ADD PRIMARY KEY (%s)', $this->quoteIdentifier($columnName));
@@ -1277,7 +1284,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $columnName
      * @param string $schemaName
-     * @return true|Varien_Db_Statement_Pdo_Mysql
+     * @return true|\Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
     public function dropColumn($tableName, $columnName, $schemaName = null)
@@ -1319,8 +1326,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param array $definition
      * @param boolean $flushData        flush table statistic
      * @param string $schemaName
-     * @return Varien_Db_Statement_Pdo_Mysql|Varien_Db_Statement_Pdo_Mysql
-     * @throws Zend_Db_Exception
+     * @return \Maho\Db\Statement\Pdo\Mysql|\Maho\Db\Statement\Pdo\Mysql
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function changeColumn(
@@ -1332,7 +1339,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $schemaName = null,
     ) {
         if (!$this->tableColumnExists($tableName, $oldColumnName, $schemaName)) {
-            throw new Zend_Db_Exception(sprintf(
+            throw new \Maho\Db\Exception(sprintf(
                 'Column "%s" does not exist in table "%s".',
                 $oldColumnName,
                 $tableName,
@@ -1370,13 +1377,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param boolean $flushData
      * @param string $schemaName
      * @return $this
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function modifyColumn($tableName, $columnName, $definition, $flushData = false, $schemaName = null)
     {
         if (!$this->tableColumnExists($tableName, $columnName, $schemaName)) {
-            throw new Zend_Db_Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
+            throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
         if (is_array($definition)) {
             $definition = $this->_getColumnDefinition($definition);
@@ -1456,7 +1463,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 $this->_connection->executeStatement('USE ' . $this->quoteIdentifier($schemaName));
                 $tables = $schemaManager->listTableNames();
                 $this->_connection->executeStatement('USE ' . $this->quoteIdentifier($originalDb));
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // Restore original database even on error
                 $this->_connection->executeStatement('USE ' . $this->quoteIdentifier($originalDb));
                 throw $e;
@@ -1587,8 +1594,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                     $onDelete = $options['ON_DELETE'];
                     $onUpdate = $options['ON_UPDATE'];
 
-                    if ($onDelete == Varien_Db_Adapter_Interface::FK_ACTION_SET_NULL
-                        || $onUpdate == Varien_Db_Adapter_Interface::FK_ACTION_SET_NULL
+                    if ($onDelete == \Maho\Db\Adapter\AdapterInterface::FK_ACTION_SET_NULL
+                        || $onUpdate == \Maho\Db\Adapter\AdapterInterface::FK_ACTION_SET_NULL
                     ) {
                         $columnDefinition['nullable'] = true;
                     }
@@ -1599,8 +1606,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                         $options['COLUMN_NAME'],
                         $options['REF_TABLE_NAME'],
                         $options['REF_COLUMN_NAME'],
-                        $onDelete ?: Varien_Db_Adapter_Interface::FK_ACTION_NO_ACTION,
-                        $onUpdate ?: Varien_Db_Adapter_Interface::FK_ACTION_NO_ACTION,
+                        $onDelete ?: \Maho\Db\Adapter\AdapterInterface::FK_ACTION_NO_ACTION,
+                        $onUpdate ?: \Maho\Db\Adapter\AdapterInterface::FK_ACTION_NO_ACTION,
                     );
                 }
             }
@@ -1655,14 +1662,14 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 $fieldColumn    = 'Column_name';
                 $fieldIndexType = 'Index_type';
 
-                if (strtolower($row[$fieldKeyName]) == Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY) {
-                    $indexType  = Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY;
+                if (strtolower($row[$fieldKeyName]) == \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY) {
+                    $indexType  = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY;
                 } elseif ($row[$fieldNonUnique] == 0) {
-                    $indexType  = Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE;
-                } elseif (strtolower($row[$fieldIndexType]) == Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT) {
-                    $indexType  = Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT;
+                    $indexType  = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE;
+                } elseif (strtolower($row[$fieldIndexType]) == \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_FULLTEXT) {
+                    $indexType  = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_FULLTEXT;
                 } else {
-                    $indexType  = Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX;
+                    $indexType  = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX;
                 }
 
                 $upperKeyName = strtoupper($row[$fieldKeyName]);
@@ -1689,14 +1696,14 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     }
 
     /**
-     * Creates and returns a new Varien_Db_Select object for this adapter.
+     * Creates and returns a new \Maho\Db\Select object for this adapter.
      *
-     * @return Varien_Db_Select
+     * @return \Maho\Db\Select
      */
     #[\Override]
     public function select()
     {
-        return new Varien_Db_Select($this);
+        return new \Maho\Db\Select($this);
     }
 
     /**
@@ -1719,7 +1726,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param int $type
      * @param string $sql
      * @param array $bind
-     * @param Varien_Db_Statement_Pdo_Mysql $result
+     * @param \Maho\Db\Statement\Pdo\Mysql $result
      * @return $this
      */
     protected function _debugStat($type, $sql, $bind = [], $result = null)
@@ -1748,7 +1755,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 if ($bind) {
                     $code .= 'BIND: ' . var_export($bind, true) . $nl;
                 }
-                if ($result instanceof Varien_Db_Statement_Pdo_Mysql) {
+                if ($result instanceof \Maho\Db\Statement\Pdo\Mysql) {
                     $code .= 'AFF: ' . $result->rowCount() . $nl;
                 }
                 break;
@@ -1763,9 +1770,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Write exception and throw
      *
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function _debugException(Exception $e)
+    protected function _debugException(\Exception $e): never
     {
         if (!$this->_debug) {
             throw $e;
@@ -1783,12 +1790,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @param string $str
      */
-    protected function _debugWriteToFile($str)
+    protected function _debugWriteToFile($str): void
     {
         $str = '## ' . date(self::TIMESTAMP_FORMAT) . "\r\n" . $str;
         if (!$this->_debugIoAdapter) {
-            $this->_debugIoAdapter = new Varien_Io_File();
-            $dir = Mage::getBaseDir() . DS . $this->_debugIoAdapter->dirname($this->_debugFile);
+            $this->_debugIoAdapter = new \Varien_Io_File();
+            $dir = \Mage::getBaseDir() . DS . $this->_debugIoAdapter->dirname($this->_debugFile);
             $this->_debugIoAdapter->checkAndCreateFolder($dir);
             $this->_debugIoAdapter->open(['path' => $dir]);
             $this->_debugFile = basename($this->_debugFile);
@@ -1807,7 +1814,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * If an array is passed as the value, the array values are quote
      * and then returned as a comma-separated string.
      *
-     * @param Varien_Db_Select|Varien_Db_Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
+     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
      * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @return string An SQL-safe quoted value (or string of separated values).
      */
@@ -1821,8 +1828,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             return 'NULL';
         }
 
-        // Handle Varien_Db_Expr (raw SQL expressions)
-        if ($value instanceof Varien_Db_Expr) {
+        // Handle \Maho\Db\Expr (raw SQL expressions)
+        if ($value instanceof \Maho\Db\Expr) {
             return $value->__toString();
         }
 
@@ -1838,7 +1845,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         // Handle numeric types
         if ($type !== null
             && array_key_exists($type = strtoupper($type), $this->_numericDataTypes)
-            && $this->_numericDataTypes[$type] == Zend_Db::FLOAT_TYPE
+            && $this->_numericDataTypes[$type] == \Zend_Db::FLOAT_TYPE
         ) {
             $value = $this->_convertFloat($value);
             $quoteValue = sprintf('%F', $value);
@@ -1849,8 +1856,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             return (string) $value;
         }
 
-        // Use Doctrine DBAL's quote method for strings
-        return $this->_connection->quote($value);
+        // Cast to string for Doctrine DBAL compatibility (it only accepts strings)
+        // This handles booleans, objects with __toString(), and other scalar types
+        return $this->_connection->quote((string) $value);
     }
 
     /**
@@ -1878,7 +1886,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Method revrited for handle empty arrays in value param
      *
      * @param string  $text  The text with a placeholder.
-     * @param Varien_Db_Select|Varien_Db_Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
+     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
      * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @param integer $count OPTIONAL count of placeholders to replace
      * @return string An SQL-safe quoted value placed into the original text.
@@ -1887,14 +1895,14 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     public function quoteInto($text, $value, $type = null, $count = null)
     {
         if (is_array($value) && empty($value)) {
-            $value = new Varien_Db_Expr('NULL');
+            $value = new \Maho\Db\Expr('NULL');
         }
 
         if ($count === null) {
-            return str_replace('?', $this->quote($value, $type), $text, $count);
+            return str_replace('?', (string) $this->quote($value, $type), $text, $count);
         } else {
             while ($count > 0) {
-                $text = substr_replace($text, $this->quote($value, $type), strpos($text, '?'), 1);
+                $text = substr_replace($text, (string) $this->quote($value, $type), strpos($text, '?'), 1);
                 --$count;
             }
             return $text;
@@ -1907,7 +1915,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $schemaName
      */
-    protected function _getTableName($tableName, $schemaName = null)
+    protected function _getTableName($tableName, $schemaName = null): string
     {
         return ($schemaName ? $schemaName . '.' : '') . $tableName;
     }
@@ -2035,11 +2043,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 
     /**
      * Decorate a table info by detecting and parsing the binary/varbinary fields
-     * @param $tableColumnInfo
      *
-     * @return mixed
      */
-    public function decorateTableInfo($tableColumnInfo)
+    public function decorateTableInfo(array $tableColumnInfo): array
     {
         $matches = [];
         if (preg_match('/^((?:var)?binary)\((\d+)\)/', $tableColumnInfo['DATA_TYPE'], $matches)) {
@@ -2238,7 +2244,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             $options['unsigned'] = true;
         }
         if ($columnData['NULLABLE'] === false
-            && !($type == Varien_Db_Ddl_Table::TYPE_TEXT && isset($columnData['DEFAULT']) && strlen($columnData['DEFAULT']) != 0)
+            && !($type == \Maho\Db\Ddl\Table::TYPE_TEXT && isset($columnData['DEFAULT']) && strlen($columnData['DEFAULT']) != 0)
         ) {
             $options['nullable'] = false;
         }
@@ -2246,7 +2252,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             $options['primary'] = true;
         }
         if (!is_null($columnData['DEFAULT'])
-            && $type != Varien_Db_Ddl_Table::TYPE_TEXT
+            && $type != \Maho\Db\Ddl\Table::TYPE_TEXT
         ) {
             $options['default'] = $this->quote($columnData['DEFAULT']);
         }
@@ -2271,11 +2277,11 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     }
 
     /**
-     * Create Varien_Db_Ddl_Table object by data from describe table
+     * Create \Maho\Db\Ddl\Table object by data from describe table
      *
      * @param $tableName
      * @param $newTableName
-     * @return Varien_Db_Ddl_Table
+     * @return \Maho\Db\Ddl\Table
      */
     #[\Override]
     public function createTableByDdl($tableName, $newTableName)
@@ -2303,7 +2309,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
              * For reliability check both name and type, because these values can start to differ in future.
              */
             if (($indexData['KEY_NAME'] == 'PRIMARY')
-                || ($indexData['INDEX_TYPE'] == Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY)
+                || ($indexData['INDEX_TYPE'] == \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY)
             ) {
                 continue;
             }
@@ -2336,7 +2342,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 
         // Set additional options
         $tableData = $this->showTableStatus($tableName);
-        $table->setOption('type', $tableData['Engine']);
+        if ($tableData !== false && isset($tableData['Engine'])) {
+            $table->setOption('type', $tableData['Engine']);
+        }
 
         return $table;
     }
@@ -2375,7 +2383,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         switch ($dataType) {
             case 'bool':
             case 'boolean':
-                return Varien_Db_Ddl_Table::TYPE_BOOLEAN;
+                return \Maho\Db\Ddl\Table::TYPE_BOOLEAN;
             case 'tinytext':
             case 'char':
             case 'varchar':
@@ -2383,46 +2391,46 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             case 'string':
             case 'mediumtext':
             case 'longtext':
-                return Varien_Db_Ddl_Table::TYPE_TEXT;
+                return \Maho\Db\Ddl\Table::TYPE_TEXT;
             case 'blob':
             case 'binary':
             case 'mediumblob':
             case 'longblob':
-                return Varien_Db_Ddl_Table::TYPE_BLOB;
+                return \Maho\Db\Ddl\Table::TYPE_BLOB;
             case 'tinyint':
             case 'tinyinteger':
             case 'tinyint unsigned':
             case 'smallint':
             case 'smallinteger':
             case 'smallint unsigned':
-                return Varien_Db_Ddl_Table::TYPE_SMALLINT;
+                return \Maho\Db\Ddl\Table::TYPE_SMALLINT;
             case 'mediumint':
             case 'int':
             case 'integer':
             case 'int unsigned':
-                return Varien_Db_Ddl_Table::TYPE_INTEGER;
+                return \Maho\Db\Ddl\Table::TYPE_INTEGER;
             case 'bigint':
             case 'biginteger':
             case 'bigint unsigned':
-                return Varien_Db_Ddl_Table::TYPE_BIGINT;
+                return \Maho\Db\Ddl\Table::TYPE_BIGINT;
             case 'datetime':
-                return Varien_Db_Ddl_Table::TYPE_DATETIME;
+                return \Maho\Db\Ddl\Table::TYPE_DATETIME;
             case 'timestamp':
-                return Varien_Db_Ddl_Table::TYPE_TIMESTAMP;
+                return \Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
             case 'date':
-                return Varien_Db_Ddl_Table::TYPE_DATE;
+                return \Maho\Db\Ddl\Table::TYPE_DATE;
             case 'float':
-                return Varien_Db_Ddl_Table::TYPE_FLOAT;
+                return \Maho\Db\Ddl\Table::TYPE_FLOAT;
             case 'decimal':
             case 'numeric':
-                return Varien_Db_Ddl_Table::TYPE_DECIMAL;
+                return \Maho\Db\Ddl\Table::TYPE_DECIMAL;
             case 'varbinary':
-                return Varien_Db_Ddl_Table::TYPE_VARBINARY;
+                return \Maho\Db\Ddl\Table::TYPE_VARBINARY;
             default:
                 // Log unknown type for debugging
-                Mage::log("Unknown column type in _getColumnTypeByDdl: {$dataType}. Column data: " . print_r($column, true), Mage::LOG_WARNING);
+                \Mage::log("Unknown column type in _getColumnTypeByDdl: {$dataType}. Column data: " . print_r($column, true), \Mage::LOG_WARNING);
                 // Default to TEXT for unknown types to avoid fatal errors
-                return Varien_Db_Ddl_Table::TYPE_TEXT;
+                return \Maho\Db\Ddl\Table::TYPE_TEXT;
         }
     }
 
@@ -2464,7 +2472,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $increment
      * @param null|string $schemaName
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
     public function changeTableAutoIncrement($tableName, $increment, $schemaName = null)
@@ -2480,7 +2488,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param mixed $table The table to insert data into.
      * @param array $bind Column-value pairs.
      * @return int The number of affected rows.
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function insert($table, array $bind)
@@ -2530,7 +2538,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param array $data Column-value pairs or array of column-value pairs.
      * @param array $fields update fields pairs or values
      * @return int The number of affected rows.
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function insertOnDuplicate($table, array $data, array $fields = [])
@@ -2544,7 +2552,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             $cols = array_keys($row);
             foreach ($data as $row) {
                 if (array_diff($cols, array_keys($row))) {
-                    throw new Zend_Db_Exception('Invalid data for insert');
+                    throw new \Maho\Db\Exception('Invalid data for insert');
                 }
                 $values[] = $this->_prepareInsertData($row, $bind);
             }
@@ -2567,7 +2575,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             $field = $value = null;
             if (!is_numeric($k)) {
                 $field = $this->quoteIdentifier($k);
-                if ($v instanceof Varien_Db_Expr) {
+                if ($v instanceof \Maho\Db\Expr) {
                     $value = $v->__toString();
                 } elseif (is_string($v)) {
                     $value = sprintf('VALUES(%s)', $this->quoteIdentifier($v));
@@ -2601,7 +2609,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param mixed $table The table to insert data into.
      * @param array $data Column-value pairs or array of Column-value pairs.
      * @return int The number of affected rows.
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function insertMultiple($table, array $data)
@@ -2618,7 +2626,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         foreach ($data as $row) {
             $line = [];
             if (array_diff($cols, array_keys($row))) {
-                throw new Zend_Db_Exception('Invalid data for insert');
+                throw new \Maho\Db\Exception('Invalid data for insert');
             }
             foreach ($cols as $field) {
                 $line[] = $row[$field];
@@ -2635,7 +2643,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @param   string $table
      * @return  int
-     * @throws  Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function insertArray($table, array $columns, array $data)
@@ -2645,7 +2653,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $columnsCount = count($columns);
         foreach ($data as $row) {
             if ($columnsCount != count($row)) {
-                throw new Zend_Db_Exception('Invalid data for insert');
+                throw new \Maho\Db\Exception('Invalid data for insert');
             }
             $values[] = $this->_prepareInsertData($row, $bind);
         }
@@ -2665,7 +2673,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param mixed $table The table to insert data into.
      * @param array $bind Column-value pairs.
      * @return int The number of affected rows.
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     #[\Override]
     public function insertIgnore($table, array $bind)
@@ -2676,7 +2684,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $i = 0;
         foreach ($bind as $col => $val) {
             $cols[] = $this->quoteIdentifier($col, true);
-            if ($val instanceof Varien_Db_Expr) {
+            if ($val instanceof \Maho\Db\Expr) {
                 $vals[] = $val->__toString();
                 unset($bind[$col]);
             } else {
@@ -2722,7 +2730,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @return int
      */
     public function insertBatchFromSelect(
-        Varien_Db_Select $select,
+        \Maho\Db\Select $select,
         $table,
         array $fields = [],
         $mode = false,
@@ -2752,13 +2760,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param int $step
      * @return array
      */
-    public function splitSelect(Varien_Db_Select $select, $entityIdField = '*', $step = 10000)
+    public function splitSelect(\Maho\Db\Select $select, $entityIdField = '*', $step = 10000)
     {
         $countSelect = clone $select;
 
-        $countSelect->reset(Varien_Db_Select::COLUMNS);
-        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $countSelect->reset(\Maho\Db\Select::COLUMNS);
+        $countSelect->reset(\Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(\Maho\Db\Select::LIMIT_OFFSET);
         $countSelect->columns('COUNT(' . $entityIdField . ')');
 
         $row = $this->fetchRow($countSelect);
@@ -2774,7 +2782,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     }
 
     #[\Override]
-    public function setCacheAdapter(Mage_Core_Model_Cache $adapter): self
+    public function setCacheAdapter(\Mage_Core_Model_Cache $adapter): self
     {
         $this->_cacheAdapter = $adapter;
         return $this;
@@ -2785,12 +2793,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @param string $tableName the table name
      * @param string $schemaName the database/schema name
-     * @return Varien_Db_Ddl_Table
+     * @return \Maho\Db\Ddl\Table
      */
     #[\Override]
     public function newTable($tableName = null, $schemaName = null)
     {
-        $table = new Varien_Db_Ddl_Table();
+        $table = new \Maho\Db\Ddl\Table();
         if ($tableName !== null) {
             $table->setName($tableName);
         }
@@ -2804,16 +2812,16 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Create table
      *
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @throws \Maho\Db\Exception
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
-    public function createTable(Varien_Db_Ddl_Table $table)
+    public function createTable(\Maho\Db\Ddl\Table $table)
     {
         $columns = $table->getColumns();
         foreach ($columns as $columnEntry) {
             if (empty($columnEntry['COMMENT'])) {
-                throw new Zend_Db_Exception('Cannot create table without columns comments');
+                throw new \Maho\Db\Exception('Cannot create table without columns comments');
             }
         }
 
@@ -2836,11 +2844,11 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Create temporary table
      *
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @throws \Maho\Db\Exception
+     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
-    public function createTemporaryTable(Varien_Db_Ddl_Table $table)
+    public function createTemporaryTable(\Maho\Db\Ddl\Table $table)
     {
         $sqlFragment    = array_merge(
             $this->_getColumnsDefinition($table),
@@ -2862,15 +2870,15 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Retrieve columns and primary keys definition array for create table
      *
      * @return array
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
-    protected function _getColumnsDefinition(Varien_Db_Ddl_Table $table)
+    protected function _getColumnsDefinition(\Maho\Db\Ddl\Table $table)
     {
         $definition = [];
         $primary    = [];
         $columns    = $table->getColumns();
         if (empty($columns)) {
-            throw new Zend_Db_Exception('Table columns are not defined');
+            throw new \Maho\Db\Exception('Table columns are not defined');
         }
 
         foreach ($columns as $columnData) {
@@ -2901,7 +2909,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @return array
      */
-    protected function _getIndexesDefinition(Varien_Db_Ddl_Table $table)
+    protected function _getIndexesDefinition(\Maho\Db\Ddl\Table $table)
     {
         $definition = [];
         $indexes    = $table->getIndexes();
@@ -2947,7 +2955,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @return array
      */
-    protected function _getForeignKeysDefinition(Varien_Db_Ddl_Table $table)
+    protected function _getForeignKeysDefinition(\Maho\Db\Ddl\Table $table)
     {
         $definition = [];
         $relations  = $table->getForeignKeys();
@@ -2976,14 +2984,14 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Retrieve table options definition array for create table
      *
      * @return array
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
-    protected function _getOptionsDefinition(Varien_Db_Ddl_Table $table)
+    protected function _getOptionsDefinition(\Maho\Db\Ddl\Table $table)
     {
         $definition = [];
         $comment    = $table->getComment();
         if (empty($comment)) {
-            throw new Zend_Db_Exception('Comment for table is required and must be defined');
+            throw new \Maho\Db\Exception('Comment for table is required and must be defined');
         }
         $definition[] = $this->quoteInto('COMMENT=?', $comment);
 
@@ -3030,9 +3038,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @param array $options
      * @param string $ddlType Table DDL Column type constant
-     * @throws Varien_Exception
+     * @throws \Varien_Exception
      * @return string
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     protected function _getColumnDefinition($options, $ddlType = null)
     {
@@ -3050,21 +3058,21 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         }
 
         if (empty($ddlType) || !isset($this->_ddlColumnTypes[$ddlType])) {
-            throw new Zend_Db_Exception('Invalid column definition data');
+            throw new \Maho\Db\Exception('Invalid column definition data');
         }
 
         // column size
         $cType = $this->_ddlColumnTypes[$ddlType];
         switch ($ddlType) {
-            case Varien_Db_Ddl_Table::TYPE_SMALLINT:
-            case Varien_Db_Ddl_Table::TYPE_INTEGER:
-            case Varien_Db_Ddl_Table::TYPE_BIGINT:
+            case \Maho\Db\Ddl\Table::TYPE_SMALLINT:
+            case \Maho\Db\Ddl\Table::TYPE_INTEGER:
+            case \Maho\Db\Ddl\Table::TYPE_BIGINT:
                 if (!empty($options['UNSIGNED'])) {
                     $cUnsigned = true;
                 }
                 break;
-            case Varien_Db_Ddl_Table::TYPE_DECIMAL:
-            case Varien_Db_Ddl_Table::TYPE_NUMERIC:
+            case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
+            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision  = 10;
                 $scale      = 0;
                 $match      = [];
@@ -3081,23 +3089,23 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 }
                 $cType .= sprintf('(%d,%d)', $precision, $scale);
                 break;
-            case Varien_Db_Ddl_Table::TYPE_TEXT:
-            case Varien_Db_Ddl_Table::TYPE_BLOB:
-            case Varien_Db_Ddl_Table::TYPE_VARBINARY:
+            case \Maho\Db\Ddl\Table::TYPE_TEXT:
+            case \Maho\Db\Ddl\Table::TYPE_BLOB:
+            case \Maho\Db\Ddl\Table::TYPE_VARBINARY:
                 if (empty($options['LENGTH'])) {
-                    $length = Varien_Db_Ddl_Table::DEFAULT_TEXT_SIZE;
+                    $length = \Maho\Db\Ddl\Table::DEFAULT_TEXT_SIZE;
                 } else {
                     $length = $this->_parseTextSize($options['LENGTH']);
                 }
                 if ($length <= 255) {
-                    $cType = $ddlType == Varien_Db_Ddl_Table::TYPE_TEXT ? 'varchar' : 'varbinary';
+                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'varchar' : 'varbinary';
                     $cType = sprintf('%s(%d)', $cType, $length);
                 } elseif ($length > 255 && $length <= 65536) {
-                    $cType = $ddlType == Varien_Db_Ddl_Table::TYPE_TEXT ? 'text' : 'blob';
+                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'text' : 'blob';
                 } elseif ($length > 65536 && $length <= 16777216) {
-                    $cType = $ddlType == Varien_Db_Ddl_Table::TYPE_TEXT ? 'mediumtext' : 'mediumblob';
+                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'mediumtext' : 'mediumblob';
                 } else {
-                    $cType = $ddlType == Varien_Db_Ddl_Table::TYPE_TEXT ? 'longtext' : 'longblob';
+                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'longtext' : 'longblob';
                 }
                 break;
         }
@@ -3116,27 +3124,27 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
          *  where default value can be quoted already.
          *  We need to avoid "double-quoting" here
          */
-        if ($cDefault !== null && strlen($cDefault)) {
+        if ($cDefault !== null && is_string($cDefault) && strlen($cDefault)) {
             $cDefault = str_replace("'", '', $cDefault);
         }
 
         // prepare default value string
-        if ($ddlType == Varien_Db_Ddl_Table::TYPE_TIMESTAMP) {
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
             if ($cDefault === null) {
-                $cDefault = new Varien_Db_Expr('NULL');
-            } elseif ($cDefault == Varien_Db_Ddl_Table::TIMESTAMP_INIT) {
-                $cDefault = new Varien_Db_Expr('CURRENT_TIMESTAMP');
-            } elseif ($cDefault == Varien_Db_Ddl_Table::TIMESTAMP_UPDATE) {
-                $cDefault = new Varien_Db_Expr('0 ON UPDATE CURRENT_TIMESTAMP');
-            } elseif ($cDefault == Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE) {
-                $cDefault = new Varien_Db_Expr('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+                $cDefault = new \Maho\Db\Expr('NULL');
+            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
+                $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
+            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE) {
+                $cDefault = new \Maho\Db\Expr('0 ON UPDATE CURRENT_TIMESTAMP');
+            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE) {
+                $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
             } elseif ($cNullable && !$cDefault) {
-                $cDefault = new Varien_Db_Expr('NULL');
+                $cDefault = new \Maho\Db\Expr('NULL');
             } else {
-                $cDefault = new Varien_Db_Expr('0');
+                $cDefault = new \Maho\Db\Expr('0');
             }
         } elseif (is_null($cDefault) && $cNullable) {
-            $cDefault = new Varien_Db_Expr('NULL');
+            $cDefault = new \Maho\Db\Expr('NULL');
         }
 
         if (empty($options['COMMENT'])) {
@@ -3185,16 +3193,15 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @param string $tableName
      * @param string $schemaName
-     * @return $this
      */
     #[\Override]
-    public function dropTemporaryTable($tableName, $schemaName = null)
+    public function dropTemporaryTable($tableName, $schemaName = null): bool
     {
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $query = 'DROP TEMPORARY TABLE IF EXISTS ' . $table;
         $this->query($query);
 
-        return $this;
+        return true;
     }
 
     /**
@@ -3203,13 +3210,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $schemaName
      * @return $this
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function truncateTable($tableName, $schemaName = null)
     {
         if (!$this->isTableExists($tableName, $schemaName)) {
-            throw new Zend_Db_Exception(sprintf('Table "%s" is not exists', $tableName));
+            throw new \Maho\Db\Exception(sprintf('Table "%s" is not exists', $tableName));
         }
 
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
@@ -3254,16 +3261,16 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string $newTableName
      * @param string $schemaName
      * @return boolean
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function renameTable($oldTableName, $newTableName, $schemaName = null)
     {
         if (!$this->isTableExists($oldTableName, $schemaName)) {
-            throw new Zend_Db_Exception(sprintf('Table "%s" is not exists', $oldTableName));
+            throw new \Maho\Db\Exception(sprintf('Table "%s" is not exists', $oldTableName));
         }
         if ($this->isTableExists($newTableName, $schemaName)) {
-            throw new Zend_Db_Exception(sprintf('Table "%s" already exists', $newTableName));
+            throw new \Maho\Db\Exception(sprintf('Table "%s" already exists', $newTableName));
         }
 
         $oldTable = $this->_getTableName($oldTableName, $schemaName);
@@ -3283,13 +3290,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param array $tablePairs array('oldName' => 'Name1', 'newName' => 'Name2')
      *
      * @return boolean
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function renameTablesBatch(array $tablePairs)
     {
         if (count($tablePairs) == 0) {
-            throw new Zend_Db_Exception('Please provide tables for rename');
+            throw new \Maho\Db\Exception('Please provide tables for rename');
         }
 
         $renamesList = [];
@@ -3321,15 +3328,15 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string|array $fields  the table column name or array of ones
      * @param string $indexType     the index type
      * @param string $schemaName
-     * @return Varien_Db_Statement_Pdo_Mysql
-     * @throws Zend_Db_Exception|Exception
+     * @return \Maho\Db\Statement\Pdo\Mysql
+     * @throws \Maho\Db\Exception|\Exception
      */
     #[\Override]
     public function addIndex(
         $tableName,
         $indexName,
         $fields,
-        $indexType = Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX,
+        $indexType = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX,
         $schemaName = null,
     ) {
         $columns = $this->describeTable($tableName, $schemaName);
@@ -3337,7 +3344,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 
         $query = sprintf('ALTER TABLE %s', $this->quoteIdentifier($this->_getTableName($tableName, $schemaName)));
         if (isset($keyList[strtoupper($indexName)])) {
-            if ($keyList[strtoupper($indexName)]['INDEX_TYPE'] == Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY) {
+            if ($keyList[strtoupper($indexName)]['INDEX_TYPE'] == \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY) {
                 $query .= ' DROP PRIMARY KEY,';
             } else {
                 $query .= sprintf(' DROP INDEX %s,', $this->quoteIdentifier($indexName));
@@ -3351,7 +3358,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $fieldSql = [];
         foreach ($fields as $field) {
             if (!isset($columns[$field])) {
-                throw new Zend_Db_Exception(sprintf(
+                throw new \Maho\Db\Exception(sprintf(
                     'There is no field "%s" that you are trying to create an index on "%s"',
                     $field,
                     $tableName,
@@ -3362,9 +3369,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $fieldSql = implode(',', $fieldSql);
 
         $condition = match (strtolower($indexType)) {
-            Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY => 'PRIMARY KEY',
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE => 'UNIQUE ' . $this->quoteIdentifier($indexName),
-            Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT => 'FULLTEXT ' . $this->quoteIdentifier($indexName),
+            \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY => 'PRIMARY KEY',
+            \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE => 'UNIQUE ' . $this->quoteIdentifier($indexName),
+            \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_FULLTEXT => 'FULLTEXT ' . $this->quoteIdentifier($indexName),
             default => 'INDEX ' . $this->quoteIdentifier($indexName),
         };
 
@@ -3381,7 +3388,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string $tableName
      * @param string $keyName
      * @param string $schemaName
-     * @return bool|Varien_Db_Statement_Pdo_Mysql
+     * @return bool|\Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
     public function dropIndex($tableName, $keyName, $schemaName = null)
@@ -3422,7 +3429,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param boolean $purge            trying remove invalid data
      * @param string $schemaName
      * @param string $refSchemaName
-     * @return Varien_Db_Statement_Pdo_Mysql|Varien_Db_Statement_Pdo_Mysql
+     * @return \Maho\Db\Statement\Pdo\Mysql|\Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
     public function addForeignKey(
@@ -3431,8 +3438,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $columnName,
         $refTableName,
         $refColumnName,
-        $onDelete = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
-        $onUpdate = Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
+        $onDelete = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
+        $onUpdate = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
         $purge = false,
         $schemaName = null,
         $refSchemaName = null,
@@ -3467,36 +3474,36 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Format Date to internal database date format
      *
-     * @param int|string|DateTime $date
+     * @param int|string|\DateTime $date
      * @param boolean $includeTime
-     * @return Varien_Db_Expr|string|null
+     * @return \Maho\Db\Expr|string|null
      */
     #[\Override]
     public function formatDate($date, $includeTime = true, bool $asExpr = true)
     {
         if ($date === true) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+            $format = $includeTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
             $date = date($format);
-        } elseif ($date instanceof DateTime) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+        } elseif ($date instanceof \DateTime) {
+            $format = $includeTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
             $date = $date->format($format);
         } elseif (empty($date)) {
-            return $asExpr ? new Varien_Db_Expr('NULL') : null;
+            return $asExpr ? new \Maho\Db\Expr('NULL') : null;
         } else {
             if (!is_numeric($date)) {
                 $date = strtotime($date);
             }
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
+            $format = $includeTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
             $date = date($format, $date);
         }
 
         if ($date === null) {
-            return $asExpr ? new Varien_Db_Expr('NULL') : null;
+            return $asExpr ? new \Maho\Db\Expr('NULL') : null;
         }
 
         // When used in prepared statements, return the plain string value without quoting
-        // When used in raw SQL, wrap in Varien_Db_Expr with quotes
-        return $asExpr ? new Varien_Db_Expr($this->quote($date)) : $date;
+        // When used in raw SQL, wrap in \Maho\Db\Expr with quotes
+        return $asExpr ? new \Maho\Db\Expr($this->quote($date)) : $date;
     }
 
     /**
@@ -3664,10 +3671,10 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     #[\Override]
     public function prepareColumnValue(array $column, $value)
     {
-        if ($value instanceof Varien_Db_Expr) {
+        if ($value instanceof \Maho\Db\Expr) {
             return $value;
         }
-        if ($value instanceof Varien_Db_Statement_Parameter) {
+        if ($value instanceof \Maho\Db\Statement\Parameter) {
             return $value;
         }
 
@@ -3741,40 +3748,40 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Generate fragment of SQL, that check condition and return true or false value
      *
-     * @param Varien_Db_Expr|Varien_Db_Select|string $expression
+     * @param \Maho\Db\Expr|\Maho\Db\Select|string $expression
      * @param string $true  true value
      * @param string $false false value
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getCheckSql($expression, $true, $false)
     {
-        if ($expression instanceof Varien_Db_Expr || $expression instanceof Varien_Db_Select) {
+        if ($expression instanceof \Maho\Db\Expr || $expression instanceof \Maho\Db\Select) {
             $expression = sprintf('IF((%s), %s, %s)', $expression, $true, $false);
         } else {
             $expression = sprintf('IF(%s, %s, %s)', $expression, $true, $false);
         }
 
-        return new Varien_Db_Expr($expression);
+        return new \Maho\Db\Expr($expression);
     }
 
     /**
      * Returns valid IFNULL expression
      *
-     * @param Varien_Db_Expr|Varien_Db_Select|string $expression
+     * @param \Maho\Db\Expr|\Maho\Db\Select|string $expression
      * @param string|int $value OPTIONAL. Applies when $expression is NULL
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getIfNullSql($expression, $value = '0')
     {
-        if ($expression instanceof Varien_Db_Expr || $expression instanceof Varien_Db_Select) {
+        if ($expression instanceof \Maho\Db\Expr || $expression instanceof \Maho\Db\Select) {
             $expression = sprintf('IFNULL((%s), %s)', $expression, $value);
         } else {
             $expression = sprintf('IFNULL(%s, %s)', $expression, $value);
         }
 
-        return new Varien_Db_Expr($expression);
+        return new \Maho\Db\Expr($expression);
     }
 
     /**
@@ -3785,7 +3792,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param array $casesResults Cases and results
      * @param string $defaultValue value to use if value doesn't conform to any cases
      *
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getCaseSql($valueName, $casesResults, $defaultValue = null)
@@ -3799,7 +3806,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         }
         $expression .= ' END';
 
-        return new Varien_Db_Expr($expression);
+        return new \Maho\Db\Expr($expression);
     }
 
     /**
@@ -3807,13 +3814,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * All arguments in data must be quoted
      *
      * @param string $separator concatenate with separator
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getConcatSql(array $data, $separator = null)
     {
         $format = empty($separator) ? 'CONCAT(%s)' : "CONCAT_WS('{$separator}', %s)";
-        return new Varien_Db_Expr(sprintf($format, implode(', ', $data)));
+        return new \Maho\Db\Expr(sprintf($format, implode(', ', $data)));
     }
 
     /**
@@ -3821,12 +3828,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * The string argument must be quoted
      *
      * @param string $string
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getLengthSql($string)
     {
-        return new Varien_Db_Expr(sprintf('LENGTH(%s)', $string));
+        return new \Maho\Db\Expr(sprintf('LENGTH(%s)', $string));
     }
 
     /**
@@ -3834,12 +3841,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * (minimum-valued) argument
      * All arguments in data must be quoted
      *
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getLeastSql(array $data)
     {
-        return new Varien_Db_Expr(sprintf('LEAST(%s)', implode(', ', $data)));
+        return new \Maho\Db\Expr(sprintf('LEAST(%s)', implode(', ', $data)));
     }
 
     /**
@@ -3847,12 +3854,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * (maximum-valued) argument
      * All arguments in data must be quoted
      *
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getGreatestSql(array $data)
     {
-        return new Varien_Db_Expr(sprintf('GREATEST(%s)', implode(', ', $data)));
+        return new \Maho\Db\Expr(sprintf('GREATEST(%s)', implode(', ', $data)));
     }
 
     /**
@@ -3861,12 +3868,12 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param int $interval
      * @param string $unit
      * @return string
-     * @throws Zend_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     protected function _getIntervalUnitSql($interval, $unit)
     {
         if (!isset($this->_intervalUnits[$unit])) {
-            throw new Zend_Db_Exception(sprintf('Undefined interval unit "%s" specified', $unit));
+            throw new \Maho\Db\Exception(sprintf('Undefined interval unit "%s" specified', $unit));
         }
 
         return sprintf('INTERVAL %d %s', $interval, $this->_intervalUnits[$unit]);
@@ -3877,16 +3884,16 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @see INTERVAL_ constants for $unit
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      * @param int $interval
      * @param string $unit
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getDateAddSql($date, $interval, $unit)
     {
         $expr = sprintf('DATE_ADD(%s, %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
-        return new Varien_Db_Expr($expr);
+        return new \Maho\Db\Expr($expr);
     }
 
     /**
@@ -3894,16 +3901,16 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @see INTERVAL_ constants for $expr
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      * @param int|string $interval
      * @param string $unit
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getDateSubSql($date, $interval, $unit)
     {
         $expr = sprintf('DATE_SUB(%s, %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
-        return new Varien_Db_Expr($expr);
+        return new \Maho\Db\Expr($expr);
     }
 
     /**
@@ -3920,54 +3927,54 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @param string $date  quoted date value or non quoted SQL statement(field)
      * @param string $format
-     * @return Varien_Db_Expr
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getDateFormatSql($date, $format)
     {
         $expr = sprintf("DATE_FORMAT(%s, '%s')", $date, $format);
-        return new Varien_Db_Expr($expr);
+        return new \Maho\Db\Expr($expr);
     }
 
     /**
      * Extract the date part of a date or datetime expression
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
-     * @return Varien_Db_Expr
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getDatePartSql($date)
     {
-        return new Varien_Db_Expr(sprintf('DATE(%s)', $date));
+        return new \Maho\Db\Expr(sprintf('DATE(%s)', $date));
     }
 
     /**
      * Prepare substring sql function
      *
-     * @param Varien_Db_Expr|string $stringExpression quoted field name or SQL statement
-     * @param int|string|Varien_Db_Expr $pos
-     * @param int|string|Varien_Db_Expr|null $len
-     * @return Varien_Db_Expr
+     * @param \Maho\Db\Expr|string $stringExpression quoted field name or SQL statement
+     * @param int|string|\Maho\Db\Expr $pos
+     * @param int|string|\Maho\Db\Expr|null $len
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getSubstringSql($stringExpression, $pos, $len = null)
     {
         if (is_null($len)) {
-            return new Varien_Db_Expr(sprintf('SUBSTRING(%s, %s)', $stringExpression, $pos));
+            return new \Maho\Db\Expr(sprintf('SUBSTRING(%s, %s)', $stringExpression, $pos));
         }
-        return new Varien_Db_Expr(sprintf('SUBSTRING(%s, %s, %s)', $stringExpression, $pos, $len));
+        return new \Maho\Db\Expr(sprintf('SUBSTRING(%s, %s, %s)', $stringExpression, $pos, $len));
     }
 
     /**
      * Prepare standard deviation sql function
      *
-     * @param Varien_Db_Expr|string $expressionField   quoted field name or SQL statement
-     * @return Varien_Db_Expr
+     * @param \Maho\Db\Expr|string $expressionField   quoted field name or SQL statement
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getStandardDeviationSql($expressionField)
     {
-        return new Varien_Db_Expr(sprintf('STDDEV_SAMP(%s)', $expressionField));
+        return new \Maho\Db\Expr(sprintf('STDDEV_SAMP(%s)', $expressionField));
     }
 
     /**
@@ -3975,20 +3982,20 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      *
      * @see INTERVAL_ constants for $unit
      *
-     * @param Varien_Db_Expr|string $date   quoted field name or SQL statement
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      * @param string $unit
-     * @return Varien_Db_Expr
-     * @throws Zend_Db_Exception
+     * @return \Maho\Db\Expr
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function getDateExtractSql($date, $unit)
     {
         if (!isset($this->_intervalUnits[$unit])) {
-            throw new Zend_Db_Exception(sprintf('Undefined interval unit "%s" specified', $unit));
+            throw new \Maho\Db\Exception(sprintf('Undefined interval unit "%s" specified', $unit));
         }
 
         $expr = sprintf('EXTRACT(%s FROM %s)', $this->_intervalUnits[$unit], $date);
-        return new Varien_Db_Expr($expr);
+        return new \Maho\Db\Expr($expr);
     }
 
     /**
@@ -3997,9 +4004,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param  $hash
      * @param  $prefix
      * @param  $maxCharacters
-     * @return string
      */
-    protected function _minusSuperfluous($hash, $prefix, $maxCharacters)
+    protected function _minusSuperfluous(string $hash, string $prefix, int $maxCharacters): string
     {
         $diff        = strlen($hash) + strlen($prefix) -  $maxCharacters;
         $superfluous = $diff / 2;
@@ -4020,7 +4026,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     {
         $prefix = 't_';
         if (strlen($tableName) > self::LENGTH_TABLE_NAME) {
-            $shortName = Varien_Db_Helper::shortName($tableName);
+            $shortName = Helper::shortName($tableName);
             if (strlen($shortName) > self::LENGTH_TABLE_NAME) {
                 $hash = md5($tableName);
                 if (strlen($prefix . $hash) > self::LENGTH_TABLE_NAME) {
@@ -4053,15 +4059,15 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         }
 
         switch (strtolower($indexType)) {
-            case Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE:
+            case \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE:
                 $prefix = 'unq_';
                 $shortPrefix = 'u_';
                 break;
-            case Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT:
+            case \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_FULLTEXT:
                 $prefix = 'fti_';
                 $shortPrefix = 'f_';
                 break;
-            case Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX:
+            case \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX:
             default:
                 $prefix = 'idx_';
                 $shortPrefix = 'i_';
@@ -4070,7 +4076,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $hash = $tableName . '_' . $fields;
 
         if (strlen($hash) + strlen($prefix) > self::LENGTH_INDEX_NAME) {
-            $short = Varien_Db_Helper::shortName($prefix . $hash);
+            $short = Helper::shortName($prefix . $hash);
             if (strlen($short) > self::LENGTH_INDEX_NAME) {
                 $hash = md5($hash);
                 if (strlen($hash) + strlen($shortPrefix) > self::LENGTH_INDEX_NAME) {
@@ -4102,7 +4108,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         $prefix = 'fk_';
         $hash = sprintf('%s_%s_%s_%s', $priTableName, $priColumnName, $refTableName, $refColumnName);
         if (strlen($prefix . $hash) > self::LENGTH_FOREIGN_NAME) {
-            $short = Varien_Db_Helper::shortName($prefix . $hash);
+            $short = Helper::shortName($prefix . $hash);
             if (strlen($short) > self::LENGTH_FOREIGN_NAME) {
                 $hash = md5($hash);
                 if (strlen($prefix . $hash) > self::LENGTH_FOREIGN_NAME) {
@@ -4162,7 +4168,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @return string
      */
     #[\Override]
-    public function insertFromSelect(Varien_Db_Select $select, $table, array $fields = [], $mode = false)
+    public function insertFromSelect(\Maho\Db\Select $select, $table, array $fields = [], $mode = false)
     {
         $query = 'INSERT';
         if ($mode == self::INSERT_IGNORE) {
@@ -4191,7 +4197,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 $field = $value = null;
                 if (!is_numeric($k)) {
                     $field = $this->quoteIdentifier($k);
-                    if ($v instanceof Varien_Db_Expr) {
+                    if ($v instanceof \Maho\Db\Expr) {
                         $value = $v->__toString();
                     } elseif (is_string($v)) {
                         $value = sprintf('VALUES(%s)', $this->quoteIdentifier($v));
@@ -4221,21 +4227,21 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param string $rangeField
      * @param int $stepCount
      * @return array
-     * @throws Varien_Db_Exception
+     * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function selectsByRange($rangeField, Varien_Db_Select $select, $stepCount = 100)
+    public function selectsByRange($rangeField, \Maho\Db\Select $select, $stepCount = 100)
     {
         $queries = [];
-        $fromSelect = $select->getPart(Varien_Db_Select::FROM);
+        $fromSelect = $select->getPart(\Maho\Db\Select::FROM);
         if (empty($fromSelect)) {
-            throw new Varien_Db_Exception('Select must have correct FROM part');
+            throw new \Maho\Db\Exception('Select must have correct FROM part');
         }
 
         $tableName = [];
         $correlationName = '';
         foreach ($fromSelect as $correlationName => $formPart) {
-            if ($formPart['joinType'] == Varien_Db_Select::FROM) {
+            if ($formPart['joinType'] == \Maho\Db\Select::FROM) {
                 $tableName = $formPart['tableName'];
                 break;
             }
@@ -4245,8 +4251,8 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             ->from(
                 $tableName,
                 [
-                    new Varien_Db_Expr('MIN(' . $this->quoteIdentifier($rangeField) . ') AS min'),
-                    new Varien_Db_Expr('MAX(' . $this->quoteIdentifier($rangeField) . ') AS max'),
+                    new \Maho\Db\Expr('MIN(' . $this->quoteIdentifier($rangeField) . ') AS min'),
+                    new \Maho\Db\Expr('MAX(' . $this->quoteIdentifier($rangeField) . ') AS max'),
                 ],
             );
 
@@ -4275,28 +4281,28 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     /**
      * Convert date format to unix time
      *
-     * @param string|Varien_Db_Expr $date
-     * @throws Varien_Db_Exception
-     * @return Varien_Db_Expr
+     * @param string|\Maho\Db\Expr $date
+     * @throws \Maho\Db\Exception
+     * @return \Maho\Db\Expr
      */
     #[\Override]
     public function getUnixTimestamp($date)
     {
         $expr = sprintf('UNIX_TIMESTAMP(%s)', $date);
-        return new Varien_Db_Expr($expr);
+        return new \Maho\Db\Expr($expr);
     }
 
     /**
      * Convert unix time to date format
      *
-     * @param int|Varien_Db_Expr $timestamp
+     * @param int|\Maho\Db\Expr $timestamp
      * @return mixed
      */
     #[\Override]
     public function fromUnixtime($timestamp)
     {
         $expr = sprintf('FROM_UNIXTIME(%s)', $timestamp);
-        return new Varien_Db_Expr($expr);
+        return new \Maho\Db\Expr($expr);
     }
 
     /**
@@ -4334,11 +4340,11 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Get update table query using select object for join and update
      *
      * @param string|array $table
-     * @throws Varien_Db_Exception
+     * @throws \Maho\Db\Exception
      * @return string
      */
     #[\Override]
-    public function updateFromSelect(Varien_Db_Select $select, $table)
+    public function updateFromSelect(\Maho\Db\Select $select, $table)
     {
         if (!is_array($table)) {
             $table = [$table => $table];
@@ -4353,9 +4359,9 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 
         // render JOIN conditions (FROM Part)
         $joinConds  = [];
-        foreach ($select->getPart(Varien_Db_Select::FROM) as $correlationName => $joinProp) {
-            if ($joinProp['joinType'] == Varien_Db_Select::FROM) {
-                $joinType = strtoupper(Varien_Db_Select::INNER_JOIN);
+        foreach ($select->getPart(\Maho\Db\Select::FROM) as $correlationName => $joinProp) {
+            if ($joinProp['joinType'] == \Maho\Db\Select::FROM) {
+                $joinType = strtoupper(\Maho\Db\Select::INNER_JOIN);
             } else {
                 $joinType = strtoupper($joinProp['joinType']);
             }
@@ -4380,14 +4386,14 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 
         // render UPDATE SET
         $columns = [];
-        foreach ($select->getPart(Varien_Db_Select::COLUMNS) as $columnEntry) {
+        foreach ($select->getPart(\Maho\Db\Select::COLUMNS) as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
             if (empty($alias)) {
                 $alias = $column;
             }
 
             // Handle column value - if it's an expression, use it as-is; otherwise quote it
-            if ($column instanceof Varien_Db_Expr) {
+            if ($column instanceof \Maho\Db\Expr) {
                 $columnValue = $column->__toString();
             } elseif (!empty($correlationName)) {
                 $columnValue = $this->quoteIdentifier([$correlationName, $column]);
@@ -4396,7 +4402,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
             }
 
             // Handle alias - if it's an expression or object, can't use it as field name
-            if ($alias instanceof Varien_Db_Expr || is_object($alias)) {
+            if ($alias instanceof \Maho\Db\Expr || is_object($alias)) {
                 // Can't update with an expression as the field name - skip this
                 continue;
             }
@@ -4405,13 +4411,13 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         }
 
         if (!$columns) {
-            throw new Varien_Db_Exception('The columns for UPDATE statement are not defined');
+            throw new \Maho\Db\Exception('The columns for UPDATE statement are not defined');
         }
 
         $query = sprintf("%s\nSET %s", $query, implode(', ', $columns));
 
         // render WHERE - handle array structure correctly
-        $wherePart = $select->getPart(Varien_Db_Select::WHERE);
+        $wherePart = $select->getPart(\Maho\Db\Select::WHERE);
         if ($wherePart) {
             $where = [];
             foreach ($wherePart as $term) {
@@ -4466,17 +4472,17 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @return string|int
      */
     #[\Override]
-    public function deleteFromSelect(Varien_Db_Select $select, $table)
+    public function deleteFromSelect(\Maho\Db\Select $select, $table)
     {
         $select = clone $select;
-        $select->reset(Varien_Db_Select::DISTINCT);
-        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(\Maho\Db\Select::DISTINCT);
+        $select->reset(\Maho\Db\Select::COLUMNS);
 
         // Build DELETE query: DELETE table_name FROM ... JOIN ... WHERE ...
         $query = sprintf('DELETE %s FROM', $this->quoteIdentifier($table));
 
         // Add FROM clause
-        $fromPart = $select->getPart(Varien_Db_Select::FROM);
+        $fromPart = $select->getPart(\Maho\Db\Select::FROM);
         if ($fromPart) {
             $from = [];
             foreach ($fromPart as $correlationName => $tableInfo) {
@@ -4501,7 +4507,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         }
 
         // Add WHERE clause
-        $wherePart = $select->getPart(Varien_Db_Select::WHERE);
+        $wherePart = $select->getPart(\Maho\Db\Select::WHERE);
         if ($wherePart) {
             $where = [];
             foreach ($wherePart as $term) {
@@ -4566,14 +4572,14 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @return $this
      */
     #[\Override]
-    public function orderRand(Varien_Db_Select $select, $field = null)
+    public function orderRand(\Maho\Db\Select $select, $field = null)
     {
         if ($field !== null) {
-            $expression = new Varien_Db_Expr(sprintf('RAND() * %s', $this->quoteIdentifier($field)));
+            $expression = new \Maho\Db\Expr(sprintf('RAND() * %s', $this->quoteIdentifier($field)));
             $select->columns(['mage_rand' => $expression]);
-            $spec = new Varien_Db_Expr('mage_rand');
+            $spec = new \Maho\Db\Expr('mage_rand');
         } else {
-            $spec = new Varien_Db_Expr('RAND()');
+            $spec = new \Maho\Db\Expr('RAND()');
         }
         $select->order($spec);
 
@@ -4604,7 +4610,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         if (is_array($row)) {
             $line = [];
             foreach ($row as $value) {
-                if ($value instanceof Varien_Db_Expr) {
+                if ($value instanceof \Maho\Db\Expr) {
                     $line[] = $value->__toString();
                 } else {
                     $line[] = '?';
@@ -4612,7 +4618,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
                 }
             }
             $line = implode(', ', $line);
-        } elseif ($row instanceof Varien_Db_Expr) {
+        } elseif ($row instanceof \Maho\Db\Expr) {
             $line = $row->__toString();
         } else {
             $line = '?';
@@ -4667,10 +4673,10 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     protected function _getDdlAction($action)
     {
         return match ($action) {
-            Varien_Db_Adapter_Interface::FK_ACTION_CASCADE => Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Adapter_Interface::FK_ACTION_SET_NULL => Varien_Db_Ddl_Table::ACTION_SET_NULL,
-            Varien_Db_Adapter_Interface::FK_ACTION_RESTRICT => Varien_Db_Ddl_Table::ACTION_RESTRICT,
-            default => Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+            \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE => \Maho\Db\Ddl\Table::ACTION_CASCADE,
+            \Maho\Db\Adapter\AdapterInterface::FK_ACTION_SET_NULL => \Maho\Db\Ddl\Table::ACTION_SET_NULL,
+            \Maho\Db\Adapter\AdapterInterface::FK_ACTION_RESTRICT => \Maho\Db\Ddl\Table::ACTION_RESTRICT,
+            default => \Maho\Db\Ddl\Table::ACTION_NO_ACTION,
         };
     }
 
@@ -4723,7 +4729,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      */
     protected function _parseTextSize($size)
     {
-        $size = trim($size);
+        $size = trim((string) $size);
         $last = strtolower(substr($size, -1));
 
         switch ($last) {
@@ -4739,10 +4745,10 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
         }
 
         if (empty($size)) {
-            return Varien_Db_Ddl_Table::DEFAULT_TEXT_SIZE;
+            return \Maho\Db\Ddl\Table::DEFAULT_TEXT_SIZE;
         }
-        if ($size >= Varien_Db_Ddl_Table::MAX_TEXT_SIZE) {
-            return Varien_Db_Ddl_Table::MAX_TEXT_SIZE;
+        if ($size >= \Maho\Db\Ddl\Table::MAX_TEXT_SIZE) {
+            return \Maho\Db\Ddl\Table::MAX_TEXT_SIZE;
         }
 
         return (int) $size;
@@ -4777,7 +4783,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * Drop trigger
      *
      * @param string $triggerName
-     * @return Varien_Db_Adapter_Interface
+     * @return \Maho\Db\Adapter\AdapterInterface
      */
     #[\Override]
     public function dropTrigger($triggerName)
@@ -4797,7 +4803,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
      * @param bool $temporary
      */
     #[\Override]
-    public function createTableFromSelect($tableName, Varien_Db_Select $select, $temporary = false): void
+    public function createTableFromSelect($tableName, \Maho\Db\Select $select, $temporary = false): void
     {
         $query = sprintf(
             'CREATE' . ($temporary ? ' TEMPORARY' : '') . ' TABLE `%s` AS (%s)',
@@ -4835,7 +4841,7 @@ class Varien_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
     public function __destruct()
     {
         if ($this->_transactionLevel > 0) {
-            throw new RuntimeException(Varien_Db_Adapter_Interface::ERROR_TRANSACTION_NOT_COMMITTED);
+            throw new \RuntimeException(\Maho\Db\Adapter\AdapterInterface::ERROR_TRANSACTION_NOT_COMMITTED);
         }
     }
 }

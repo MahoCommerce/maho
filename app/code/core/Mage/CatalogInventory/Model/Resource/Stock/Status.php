@@ -183,7 +183,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
      *
      * @return $this
      */
-    public function addStockStatusToSelect(Varien_Db_Select $select, Mage_Core_Model_Website $website)
+    public function addStockStatusToSelect(\Maho\Db\Select $select, Mage_Core_Model_Website $website)
     {
         $websiteId = $website->getId();
         $select->joinLeft(
@@ -198,11 +198,11 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
     /**
      * Add stock status limitation to catalog product price index select object
      *
-     * @param string|Varien_Db_Expr $entityField
-     * @param string|Varien_Db_Expr $websiteField
+     * @param string|Maho\Db\Expr $entityField
+     * @param string|Maho\Db\Expr $websiteField
      * @return $this
      */
-    public function prepareCatalogProductIndexSelect(Varien_Db_Select $select, $entityField, $websiteField)
+    public function prepareCatalogProductIndexSelect(\Maho\Db\Select $select, $entityField, $websiteField)
     {
         $select->join(
             ['ciss' => $this->getMainTable()],

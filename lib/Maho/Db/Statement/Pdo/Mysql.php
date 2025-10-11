@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
@@ -16,7 +18,10 @@
  * This class wraps Doctrine DBAL's Result class to maintain compatibility
  * with code that expects a Zend_Db_Statement interface.
  */
-class Varien_Db_Statement_Pdo_Mysql
+
+namespace Maho\Db\Statement\Pdo;
+
+class Mysql
 {
     /**
      * Doctrine DBAL Result object
@@ -28,14 +33,14 @@ class Varien_Db_Statement_Pdo_Mysql
     /**
      * The adapter that created this statement
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql
+     * @var \Maho\Db\Adapter\Pdo\Mysql
      */
     protected $_adapter;
 
     /**
      * Constructor
      */
-    public function __construct(Varien_Db_Adapter_Pdo_Mysql $adapter, \Doctrine\DBAL\Result $result)
+    public function __construct(\Maho\Db\Adapter\Pdo\Mysql $adapter, \Doctrine\DBAL\Result $result)
     {
         $this->_adapter = $adapter;
         $this->_result = $result;
@@ -171,7 +176,7 @@ class Varien_Db_Statement_Pdo_Mysql
      * @param mixed $options
      * @return bool
      */
-    public function bindParam($parameter, &$variable, $type = PDO::PARAM_STR, $length = null, $options = null)
+    public function bindParam($parameter, &$variable, $type = \PDO::PARAM_STR, $length = null, $options = null)
     {
         // Doctrine DBAL handles parameter binding differently
         // This is for compatibility only
@@ -186,7 +191,7 @@ class Varien_Db_Statement_Pdo_Mysql
      * @param int $type
      * @return bool
      */
-    public function bindValue($parameter, $value, $type = PDO::PARAM_STR)
+    public function bindValue($parameter, $value, $type = \PDO::PARAM_STR)
     {
         // Doctrine DBAL handles parameter binding differently
         // This is for compatibility only
@@ -252,7 +257,7 @@ class Varien_Db_Statement_Pdo_Mysql
     /**
      * Get the adapter
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return \Maho\Db\Adapter\Pdo\Mysql
      */
     public function getAdapter()
     {

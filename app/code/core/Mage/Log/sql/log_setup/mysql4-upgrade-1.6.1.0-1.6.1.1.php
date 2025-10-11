@@ -24,7 +24,7 @@ $installer->getConnection()->changeColumn(
 $installer->getConnection()->update(
     $installer->getTable('log/visitor_info'),
     [
-        'server_addr' => new Varien_Db_Expr('UNHEX(HEX(CAST(server_addr as UNSIGNED INT)))'),
+        'server_addr' => new Maho\Db\Expr('UNHEX(HEX(CAST(server_addr as UNSIGNED INT)))'),
     ],
 );
 
@@ -38,7 +38,7 @@ $installer->getConnection()->changeColumn(
 $installer->getConnection()->update(
     $installer->getTable('log/visitor_info'),
     [
-        'remote_addr' => new Varien_Db_Expr('UNHEX(HEX(CAST(remote_addr as UNSIGNED INT)))'),
+        'remote_addr' => new Maho\Db\Expr('UNHEX(HEX(CAST(remote_addr as UNSIGNED INT)))'),
     ],
 );
 
@@ -52,7 +52,7 @@ $installer->getConnection()->changeColumn(
 $installer->getConnection()->update(
     $installer->getTable('log/visitor_online'),
     [
-        'remote_addr' => new Varien_Db_Expr('UNHEX(HEX(CAST(remote_addr as UNSIGNED INT)))'),
+        'remote_addr' => new Maho\Db\Expr('UNHEX(HEX(CAST(remote_addr as UNSIGNED INT)))'),
     ],
 );
 

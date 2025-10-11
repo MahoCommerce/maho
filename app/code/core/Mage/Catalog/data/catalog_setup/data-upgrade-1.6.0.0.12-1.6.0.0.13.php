@@ -21,7 +21,7 @@ $select = $connection->select()
     ->join(
         ['t2' => $installer->getTable('eav/entity_attribute')],
         't1.attribute_group_id = t2.attribute_group_id',
-        ['sort_order' => new Varien_Db_Expr('t2.sort_order + 1')],
+        ['sort_order' => new Maho\Db\Expr('t2.sort_order + 1')],
     )->where('t1.attribute_id = ?', $groupPriceAttrId)
     ->where('t2.attribute_id = ?', $priceAttrId);
 $query = $select->crossUpdateFromSelect(['t1' => $installer->getTable('eav/entity_attribute')]);
@@ -32,7 +32,7 @@ $select = $connection->select()
     ->join(
         ['t2' => $installer->getTable('eav/entity_attribute')],
         't1.attribute_group_id = t2.attribute_group_id',
-        ['sort_order' => new Varien_Db_Expr('t1.sort_order + 1')],
+        ['sort_order' => new Maho\Db\Expr('t1.sort_order + 1')],
     )->where('t1.attribute_id != ?', $groupPriceAttrId)
     ->where('t1.sort_order >= t2.sort_order')
     ->where('t2.attribute_id = ?', $groupPriceAttrId);

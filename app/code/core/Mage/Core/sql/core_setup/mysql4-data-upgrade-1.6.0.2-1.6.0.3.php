@@ -14,5 +14,5 @@
 $installer = $this;
 $connection = $installer->getConnection();
 $connection->update($installer->getTable('core/translate'), [
-    'crc_string' => new Varien_Db_Expr('CRC32(' . $connection->quoteIdentifier('string') . ')'),
+    'crc_string' => new Maho\Db\Expr('CRC32(' . $connection->quoteIdentifier('string') . ')'),
 ]);

@@ -419,7 +419,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         if ($this->isEnabledFlat()) {
             $this->getSelect()
                 ->from([self::MAIN_TABLE_ALIAS => $this->getEntity()->getFlatTableName()], [])
-                ->where('e.status = ?', new Varien_Db_Expr((string) Mage_Catalog_Model_Product_Status::STATUS_ENABLED));
+                ->where('e.status = ?', new Maho\Db\Expr((string) Mage_Catalog_Model_Product_Status::STATUS_ENABLED));
             $this->addAttributeToSelect(['entity_id', 'type_id', 'attribute_set_id']);
             if ($this->getFlatHelper()->isAddChildData()) {
                 $this->getSelect()
@@ -718,7 +718,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $select->join(
             [$tableAlias => $attribute->getBackend()->getTable()],
             $condition,
-            [$fieldAlias => new Varien_Db_Expr('MAX(' . $tableAlias . '.value)')],
+            [$fieldAlias => new Maho\Db\Expr('MAX(' . $tableAlias . '.value)')],
         )
             ->group('e.entity_type_id');
 
@@ -748,8 +748,8 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             [$tableAlias => $attribute->getBackend()->getTable()],
             $condition,
             [
-                'count_' . $attributeCode => new Varien_Db_Expr('COUNT(DISTINCT e.entity_id)'),
-                'range_' . $attributeCode => new Varien_Db_Expr(
+                'count_' . $attributeCode => new Maho\Db\Expr('COUNT(DISTINCT e.entity_id)'),
+                'range_' . $attributeCode => new Maho\Db\Expr(
                     'CEIL((' . $tableAlias . '.value+0.01)/' . $range . ')',
                 ),
             ],
@@ -786,8 +786,8 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             [$tableAlias => $attribute->getBackend()->getTable()],
             $condition,
             [
-                'count_' . $attributeCode => new Varien_Db_Expr('COUNT(DISTINCT e.entity_id)'),
-                'value_' . $attributeCode => new Varien_Db_Expr($tableAlias . '.value'),
+                'count_' . $attributeCode => new Maho\Db\Expr('COUNT(DISTINCT e.entity_id)'),
+                'value_' . $attributeCode => new Maho\Db\Expr($tableAlias . '.value'),
             ],
         )
             ->group('value_' . $attributeCode);
@@ -954,7 +954,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                     'count_table.product_id = e.entity_id',
                     [
                         'count_table.category_id',
-                        'product_count' => new Varien_Db_Expr('COUNT(DISTINCT count_table.product_id)'),
+                        'product_count' => new Maho\Db\Expr('COUNT(DISTINCT count_table.product_id)'),
                     ],
                 )
                 ->where('count_table.store_id = ?', $this->getStoreId())
@@ -1349,7 +1349,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             foreach ($columns as $columnEntry) {
                 [$correlationName, $column, $alias] = $columnEntry;
                 if ($alias == 'is_saleable') {
-                    if ($column instanceof Varien_Db_Expr) {
+                    if ($column instanceof Maho\Db\Expr) {
                         $field = $column;
                     } else {
                         $adapter = $this->getSelect()->getAdapter();

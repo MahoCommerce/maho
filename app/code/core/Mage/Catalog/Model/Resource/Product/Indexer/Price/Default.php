@@ -226,7 +226,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
         if ($this->isModuleEnabled('Mage_Tax')) {
             $taxClassId = $this->_addAttributeToSelect($select, 'tax_class_id', 'e.entity_id', 'cs.store_id');
         } else {
-            $taxClassId = new Varien_Db_Expr('0');
+            $taxClassId = new Maho\Db\Expr('0');
         }
         $select->columns(['tax_class_id' => $taxClassId]);
 
@@ -253,10 +253,10 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
             'price'            => $finalPrice,
             'min_price'        => $finalPrice,
             'max_price'        => $finalPrice,
-            'tier_price'       => new Varien_Db_Expr('tp.min_price'),
-            'base_tier'        => new Varien_Db_Expr('tp.min_price'),
-            'group_price'      => new Varien_Db_Expr('gp.price'),
-            'base_group_price' => new Varien_Db_Expr('gp.price'),
+            'tier_price'       => new Maho\Db\Expr('tp.min_price'),
+            'base_tier'        => new Maho\Db\Expr('tp.min_price'),
+            'group_price'      => new Maho\Db\Expr('gp.price'),
+            'base_group_price' => new Maho\Db\Expr('gp.price'),
         ]);
 
         if (!is_null($entityIds)) {
@@ -268,9 +268,9 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
          */
         Mage::dispatchEvent('prepare_catalog_product_index_select', [
             'select'        => $select,
-            'entity_field'  => new Varien_Db_Expr('e.entity_id'),
-            'website_field' => new Varien_Db_Expr('cw.website_id'),
-            'store_field'   => new Varien_Db_Expr('cs.store_id'),
+            'entity_field'  => new Maho\Db\Expr('e.entity_id'),
+            'website_field' => new Maho\Db\Expr('cw.website_id'),
+            'store_field'   => new Maho\Db\Expr('cs.store_id'),
         ]);
 
         $query = $select->insertFromSelect($this->_getDefaultFinalPriceTable(), [], false);
@@ -399,24 +399,24 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
 
         $optPriceType   = $write->getCheckSql('otps.option_type_price_id > 0', 'otps.price_type', 'otpd.price_type');
         $optPriceValue  = $write->getCheckSql('otps.option_type_price_id > 0', 'otps.price', 'otpd.price');
-        $minPriceRound  = new Varien_Db_Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
+        $minPriceRound  = new Maho\Db\Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
         $minPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $minPriceRound);
-        $minPriceMin    = new Varien_Db_Expr("MIN({$minPriceExpr})");
+        $minPriceMin    = new Maho\Db\Expr("MIN({$minPriceExpr})");
         $minPrice       = $write->getCheckSql('MIN(o.is_require) = 1', $minPriceMin, '0');
 
-        $tierPriceRound = new Varien_Db_Expr("ROUND(i.base_tier * ({$optPriceValue} / 100), 4)");
+        $tierPriceRound = new Maho\Db\Expr("ROUND(i.base_tier * ({$optPriceValue} / 100), 4)");
         $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $tierPriceRound);
-        $tierPriceMin   = new Varien_Db_Expr("MIN($tierPriceExpr)");
+        $tierPriceMin   = new Maho\Db\Expr("MIN($tierPriceExpr)");
         $tierPriceValue = $write->getCheckSql('MIN(o.is_require) > 0', $tierPriceMin, '0');
         $tierPrice      = $write->getCheckSql('MIN(i.base_tier) IS NOT NULL', $tierPriceValue, 'NULL');
 
-        $groupPriceRound = new Varien_Db_Expr("ROUND(i.base_group_price * ({$optPriceValue} / 100), 4)");
+        $groupPriceRound = new Maho\Db\Expr("ROUND(i.base_group_price * ({$optPriceValue} / 100), 4)");
         $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $groupPriceRound);
-        $groupPriceMin   = new Varien_Db_Expr("MIN($groupPriceExpr)");
+        $groupPriceMin   = new Maho\Db\Expr("MIN($groupPriceExpr)");
         $groupPriceValue = $write->getCheckSql('MIN(o.is_require) > 0', $groupPriceMin, '0');
         $groupPrice      = $write->getCheckSql('MIN(i.base_group_price) IS NOT NULL', $groupPriceValue, 'NULL');
 
-        $maxPriceRound  = new Varien_Db_Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
+        $maxPriceRound  = new Maho\Db\Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
         $maxPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $maxPriceRound);
         $maxPrice       = $write->getCheckSql(
             "(MIN(o.type)='radio' OR MIN(o.type)='drop_down')",
@@ -468,18 +468,18 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
         $optPriceType   = $write->getCheckSql('ops.option_price_id > 0', 'ops.price_type', 'opd.price_type');
         $optPriceValue  = $write->getCheckSql('ops.option_price_id > 0', 'ops.price', 'opd.price');
 
-        $minPriceRound  = new Varien_Db_Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
+        $minPriceRound  = new Maho\Db\Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
         $priceExpr      = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $minPriceRound);
         $minPrice       = $write->getCheckSql("{$priceExpr} > 0 AND o.is_require > 1", $priceExpr, '0');
 
         $maxPrice       = $priceExpr;
 
-        $tierPriceRound = new Varien_Db_Expr("ROUND(i.base_tier * ({$optPriceValue} / 100), 4)");
+        $tierPriceRound = new Maho\Db\Expr("ROUND(i.base_tier * ({$optPriceValue} / 100), 4)");
         $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $tierPriceRound);
         $tierPriceValue = $write->getCheckSql("{$tierPriceExpr} > 0 AND o.is_require > 0", $tierPriceExpr, '0');
         $tierPrice      = $write->getCheckSql('i.base_tier IS NOT NULL', $tierPriceValue, 'NULL');
 
-        $groupPriceRound = new Varien_Db_Expr("ROUND(i.base_group_price * ({$optPriceValue} / 100), 4)");
+        $groupPriceRound = new Maho\Db\Expr("ROUND(i.base_group_price * ({$optPriceValue} / 100), 4)");
         $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $groupPriceRound);
         $groupPriceValue = $write->getCheckSql("{$groupPriceExpr} > 0 AND o.is_require > 0", $groupPriceExpr, '0');
         $groupPrice      = $write->getCheckSql('i.base_group_price IS NOT NULL', $groupPriceValue, 'NULL');
@@ -520,8 +520,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
                 [],
             );
         $select->columns([
-            'min_price'   => new Varien_Db_Expr('i.min_price + io.min_price'),
-            'max_price'   => new Varien_Db_Expr('i.max_price + io.max_price'),
+            'min_price'   => new Maho\Db\Expr('i.min_price + io.min_price'),
+            'max_price'   => new Maho\Db\Expr('i.max_price + io.max_price'),
             'tier_price'  => $write->getCheckSql('i.tier_price IS NOT NULL', 'i.tier_price + io.tier_price', 'NULL'),
             'group_price' => $write->getCheckSql(
                 'i.group_price IS NOT NULL',

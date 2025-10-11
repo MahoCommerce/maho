@@ -124,7 +124,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      *
      * @return $this
      */
-    protected function _applyStoresFilterToSelect(?Varien_Db_Select $select = null)
+    protected function _applyStoresFilterToSelect(?\Maho\Db\Select $select = null)
     {
         $adapter = $this->getConnection();
         $storesIds = $this->_storesIds;
@@ -365,7 +365,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
             case 'type':
                 if ($condition == 1) {
                     $conditionParts = [
-                        $this->_getConditionSql('rdt.customer_id', ['is' => new Varien_Db_Expr('NULL')]),
+                        $this->_getConditionSql('rdt.customer_id', ['is' => new Maho\Db\Expr('NULL')]),
                         $this->_getConditionSql('rdt.store_id', ['eq' => Mage_Core_Model_App::ADMIN_STORE_ID]),
                     ];
                     $conditionSql = implode(' AND ', $conditionParts);
@@ -373,7 +373,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
                     $conditionSql = $this->_getConditionSql('rdt.customer_id', ['gt' => 0]);
                 } else {
                     $conditionParts = [
-                        $this->_getConditionSql('rdt.customer_id', ['is' => new Varien_Db_Expr('NULL')]),
+                        $this->_getConditionSql('rdt.customer_id', ['is' => new Maho\Db\Expr('NULL')]),
                         $this->_getConditionSql('rdt.store_id', ['neq' => Mage_Core_Model_App::ADMIN_STORE_ID]),
                     ];
                     $conditionSql = implode(' AND ', $conditionParts);

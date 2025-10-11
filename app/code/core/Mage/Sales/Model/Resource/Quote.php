@@ -187,7 +187,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
             ->join(
                 ['tmp' => $subSelect],
                 'q.entity_id = tmp.entity_id',
-                ['trigger_recollect' => new Varien_Db_Expr('1')],
+                ['trigger_recollect' => new Maho\Db\Expr('1')],
             )
              ->where('q.is_active = ?', 1);
         $sql = $writeAdapter->updateFromSelect($select, ['q' => $this->getTable('sales/quote')]);
@@ -222,10 +222,10 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         $subSelect = $adapter->select();
 
         $subSelect->columns([
-            'items_qty'   => new Varien_Db_Expr(
+            'items_qty'   => new Maho\Db\Expr(
                 $adapter->quoteIdentifier('q.items_qty') . ' - ' . $adapter->quoteIdentifier('qi.qty'),
             ),
-            'items_count' => new Varien_Db_Expr($adapter->quoteIdentifier('q.items_count') . ' - 1'),
+            'items_count' => new Maho\Db\Expr($adapter->quoteIdentifier('q.items_count') . ' - 1'),
         ])
         ->where('q.items_count > 0')
         ->join(
@@ -248,7 +248,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     /**
      * Mark recollect contain product(s) quotes
      *
-     * @param array|int|Varien_Db_Expr $productIds
+     * @param array|int|Maho\Db\Expr $productIds
      * @return $this
      */
     public function markQuotesRecollect($productIds)
@@ -264,7 +264,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         $select = $this->_getReadAdapter()->select()->join(
             ['t2' => $subSelect],
             't1.entity_id = t2.entity_id',
-            ['trigger_recollect' => new Varien_Db_Expr('1')],
+            ['trigger_recollect' => new Maho\Db\Expr('1')],
         );
         $updateQuery = $select->crossUpdateFromSelect(['t1' => $tableQuote]);
         $this->_getWriteAdapter()->query($updateQuery);

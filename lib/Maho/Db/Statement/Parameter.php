@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
@@ -18,12 +20,15 @@
  * Most used properties and methods are defined in interface. Specific things for concrete DB adapter can be
  * transmitted using 'additional' property (Varien_Object) as a container.
  */
-class Varien_Db_Statement_Parameter
+
+namespace Maho\Db\Statement;
+
+class Parameter
 {
     /**
      * Actual parameter value
      */
-    protected $_value = null;
+    protected mixed $_value = null;
 
     /**
      * Value is a BLOB.
@@ -32,27 +37,27 @@ class Varien_Db_Statement_Parameter
      * BLOB data to query placeholders. If FALSE, then specific settings from $_dataType, $_length,
      * $_driverOptions will be used.
      */
-    protected $_isBlob = false;
+    protected bool $_isBlob = false;
 
     /**
      * Data type to set to DB driver during parameter bind
      */
-    protected $_dataType = null;
+    protected mixed $_dataType = null;
 
     /**
      * Length to set to DB driver during parameter bind
      */
-    protected $_length = null;
+    protected mixed $_length = null;
 
     /**
      * Specific driver options to set to DB driver during parameter bind
      */
-    protected $_driverOptions = null;
+    protected mixed $_driverOptions = null;
 
     /**
      * Additional information to be used by DB adapter internally
      */
-    protected $_additional = null;
+    protected ?\Varien_Object $_additional = null;
 
     /**
      * Inits instance
@@ -62,14 +67,14 @@ class Varien_Db_Statement_Parameter
     public function __construct($value)
     {
         $this->_value = $value;
-        $this->_additional = new Varien_Object();
+        $this->_additional = new \Varien_Object();
     }
 
     /**
      * Sets parameter value.
      *
      * @param mixed $value
-     * @return Varien_Db_Statement_Parameter
+     * @return Parameter
      */
     public function setValue($value)
     {
@@ -95,7 +100,7 @@ class Varien_Db_Statement_Parameter
      * as a BLOB value.
      *
      * @param bool $isBlob
-     * @return Varien_Db_Statement_Parameter
+     * @return Parameter
      */
     public function setIsBlob($isBlob)
     {
@@ -120,7 +125,7 @@ class Varien_Db_Statement_Parameter
      * Sets data type option to be used during binding parameter value.
      *
      * @param mixed $dataType
-     * @return Varien_Db_Statement_Parameter
+     * @return Parameter
      */
     public function setDataType($dataType)
     {
@@ -142,7 +147,7 @@ class Varien_Db_Statement_Parameter
      * Sets length option to be used during binding parameter value.
      *
      * @param mixed $length
-     * @return Varien_Db_Statement_Parameter
+     * @return Parameter
      */
     public function setLength($length)
     {
@@ -164,7 +169,7 @@ class Varien_Db_Statement_Parameter
      * Sets specific driver options to be used during binding parameter value.
      *
      * @param mixed $driverOptions
-     * @return Varien_Db_Statement_Parameter
+     * @return Parameter
      */
     public function setDriverOptions($driverOptions)
     {
@@ -186,8 +191,8 @@ class Varien_Db_Statement_Parameter
      * Sets additional information for concrete DB adapter.
      * Set there any data you want to pass along with query parameter.
      *
-     * @param Varien_Object $additional
-     * @return Varien_Db_Statement_Parameter
+     * @param \Varien_Object $additional
+     * @return Parameter
      */
     public function setAdditional($additional)
     {
@@ -198,7 +203,7 @@ class Varien_Db_Statement_Parameter
     /**
      * Gets additional information for concrete DB adapter.
      *
-     * @return Varien_Object
+     * @return \Varien_Object
      */
     public function getAdditional()
     {

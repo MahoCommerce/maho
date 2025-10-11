@@ -8674,12 +8674,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
 
 		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Collection/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Config::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8972,12 +8966,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link.php
-
-		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
 
 		-
 			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Link_Collection::$_linkTypeId (Mage_Catalog_Model_Product_Type) does not accept int.'
@@ -9616,7 +9604,7 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Item.php
 
 		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::_initSelect() should return $this(Mage_CatalogInventory_Model_Resource_Stock_Item_Collection) but returns Varien_Db_Select.'
+			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::_initSelect() should return $this(Mage_CatalogInventory_Model_Resource_Stock_Item_Collection) but returns Maho\Db\Select.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Item/Collection.php
@@ -9872,12 +9860,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogRule/Model/Rule/Condition/Product.php
-
-		-
-			rawMessage: 'Parameter #3 $indexType of method Mage_Core_Model_Resource_Setup::getIdxName() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogRule/sql/catalogrule_setup/install-1.6.0.0.php
 
 		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
@@ -11764,7 +11746,7 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource::getIdxName() should return Varien_Db_Adapter_Interface|false but returns string.'
+			rawMessage: 'Method Mage_Core_Model_Resource::getIdxName() should return Maho\Db\Adapter\AdapterInterface|false but returns string.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource.php
@@ -11950,14 +11932,8 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Setup::getIdxName() should return string but returns Varien_Db_Adapter_Interface|false.'
+			rawMessage: 'Method Mage_Core_Model_Resource_Setup::getIdxName() should return string but returns Maho\Db\Adapter\AdapterInterface|false.'
 			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Setup.php
-
-		-
-			rawMessage: 'Parameter #1 $hook of method Varien_Db_Adapter_Pdo_Mysql::setQueryHook() expects array, null given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
@@ -15148,7 +15124,7 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Source/Table.php
 
 		-
-			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Varien_Db_Adapter_Pdo_Mysql|false given.'
+			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Maho\Db\Adapter\Pdo\Mysql|false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Collection.php
@@ -15199,12 +15175,6 @@ parameters:
 			rawMessage: 'Parameter #1 $entity of method Mage_Eav_Model_Entity_Collection_Abstract::setEntity() expects Mage_Eav_Model_Entity_Abstract, Mage_Core_Model_Resource_Db_Collection_Abstract|false given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 4
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
@@ -15943,7 +15913,7 @@ parameters:
 			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Varien_Db_Adapter_Interface) in isset() is not nullable.'
+			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Maho\Db\Adapter\AdapterInterface) in isset() is not nullable.'
 			identifier: isset.property
 			count: 1
 			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
@@ -19174,12 +19144,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Customer/Collection.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Varien_Db_Adapter_Interface::getIfNullSql() expects string, int given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Reports/Model/Resource/Customer/Collection.php
-
-		-
 			rawMessage: 'Property Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract::$_entityCollection (Mage_Eav_Model_Entity_Collection_Abstract) in empty() is not falsy.'
 			identifier: empty.property
 			count: 1
@@ -19213,18 +19177,6 @@ parameters:
 			rawMessage: 'Parameter #2 $customStart of method Mage_Reports_Model_Resource_Order_Collection::getDateRange() expects string, int given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $interval of method Varien_Db_Adapter_Interface::getDateAddSql() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Varien_Db_Adapter_Interface::getIfNullSql() expects string, int given.'
-			identifier: argument.type
-			count: 20
 			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
 
 		-
@@ -22402,12 +22354,6 @@ parameters:
 			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
 
 		-
-			rawMessage: 'Parameter #3 $indexType of method Mage_Core_Model_Resource_Setup::getIdxName() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
-
-		-
 			rawMessage: 'Method Mage_Usa_Helper_Data::getMeasureDimensionName() has parameter $key with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -25346,168 +25292,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Varien/Data/Tree/Node/Collection.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::createTableByDdl() has parameter $newTableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::createTableByDdl() has parameter $tableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::decodeVarbinary() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::saveDdlCache() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: Cannot access offset 'Engine' on bool.
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_checkDdlTransaction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_debugException() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_debugWriteToFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_getHostInfo() has parameter $hostName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_getTableName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $hash with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $maxCharacters with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $prefix with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::createTableByDdl() has parameter $newTableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::createTableByDdl() has parameter $tableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::decodeVarbinary() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::decorateTableInfo() has parameter $tableColumnInfo with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::saveDdlCache() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Return type ($this(Varien_Db_Adapter_Pdo_Mysql)) of method Varien_Db_Adapter_Pdo_Mysql::dropTemporaryTable() should be compatible with return type (bool) of method Varien_Db_Adapter_Interface::dropTemporaryTable()'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Return type (array) of method Varien_Db_Adapter_Pdo_Mysql::multiQuery() should be compatible with return type (Varien_Db_Adapter_Interface) of method Varien_Db_Adapter_Interface::multiQuery()'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: Variable $result might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_additional has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_dataType has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_driverOptions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_isBlob has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_length has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_value has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
 
 		-
 			rawMessage: 'Method Varien_Event::getBlock() has no return type specified.'

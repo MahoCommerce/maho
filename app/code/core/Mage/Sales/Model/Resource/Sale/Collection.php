@@ -105,11 +105,11 @@ class Mage_Sales_Model_Resource_Sale_Collection extends Varien_Data_Collection_D
                 ['sales' => Mage::getResourceSingleton('sales/order')->getMainTable()],
                 [
                     'store_id',
-                    'lifetime'      => new Varien_Db_Expr('SUM(sales.base_grand_total)'),
-                    'base_lifetime' => new Varien_Db_Expr('SUM(sales.base_grand_total * sales.base_to_global_rate)'),
-                    'avgsale'       => new Varien_Db_Expr('AVG(sales.base_grand_total)'),
-                    'base_avgsale'  => new Varien_Db_Expr('AVG(sales.base_grand_total * sales.base_to_global_rate)'),
-                    'num_orders'    => new Varien_Db_Expr('COUNT(sales.base_grand_total)'),
+                    'lifetime'      => new Maho\Db\Expr('SUM(sales.base_grand_total)'),
+                    'base_lifetime' => new Maho\Db\Expr('SUM(sales.base_grand_total * sales.base_to_global_rate)'),
+                    'avgsale'       => new Maho\Db\Expr('AVG(sales.base_grand_total)'),
+                    'base_avgsale'  => new Maho\Db\Expr('AVG(sales.base_grand_total * sales.base_to_global_rate)'),
+                    'num_orders'    => new Maho\Db\Expr('COUNT(sales.base_grand_total)'),
                 ],
             )
             ->group('sales.store_id');

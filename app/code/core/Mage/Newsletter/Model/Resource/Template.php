@@ -51,7 +51,7 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
     {
         if ($template->getTemplateActual() !== 0 && !$template->getIsSystem()) {
             $select = $this->_getReadAdapter()->select()
-                ->from($this->getTable('newsletter/queue'), new Varien_Db_Expr('COUNT(queue_id)'))
+                ->from($this->getTable('newsletter/queue'), new Maho\Db\Expr('COUNT(queue_id)'))
                 ->where('template_id = :template_id');
 
             $countOfQueue = $this->_getReadAdapter()->fetchOne($select, ['template_id' => $template->getId()]);
@@ -78,7 +78,7 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
                 'template_actual' => 1,
             ];
             $select = $this->_getReadAdapter()->select()
-                ->from($this->getMainTable(), new Varien_Db_Expr('COUNT(template_id)'))
+                ->from($this->getMainTable(), new Maho\Db\Expr('COUNT(template_id)'))
                 ->where('template_id != :template_id')
                 ->where('template_code = :template_code')
                 ->where('template_actual = :template_actual');

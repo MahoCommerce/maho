@@ -34,5 +34,5 @@ interface Mage_Catalog_Helper_Category_Url_Rewrite_Interface
      * @param int $storeId
      * @return Mage_Catalog_Helper_Category_Url_Rewrite
      */
-    public function joinTableToSelect(Varien_Db_Select $select, $storeId);
+    public function joinTableToSelect(\Maho\Db\Select $select, $storeId);
 }

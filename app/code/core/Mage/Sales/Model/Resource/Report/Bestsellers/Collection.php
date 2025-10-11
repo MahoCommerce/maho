@@ -121,7 +121,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
 
             //exclude removed products
             $subSelect = $this->getConnection()->select();
-            $subSelect->from(['existed_products' => $this->getTable('catalog/product')], new Varien_Db_Expr('1)'));
+            $subSelect->from(['existed_products' => $this->getTable('catalog/product')], new Maho\Db\Expr('1)'));
 
             $select->exists($subSelect, $mainTable . '.product_id = existed_products.entity_id')
                 ->group('product_id')
@@ -324,7 +324,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
      *
      * @return Mage_Sales_Model_Resource_Report_Collection_Abstract
      */
-    protected function _applyProductTypeFilter(Varien_Db_Select $select)
+    protected function _applyProductTypeFilter(\Maho\Db\Select $select)
     {
         $select->where('product_type_id NOT IN (?)', Mage_Catalog_Model_Product_Type::getCompositeTypes());
         return $this;

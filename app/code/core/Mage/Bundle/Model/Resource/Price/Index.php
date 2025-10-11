@@ -104,7 +104,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         if ($product instanceof Mage_Catalog_Model_Product) {
             $select->where('e.entity_id=?', $product->getId());
         } elseif ($product instanceof Mage_Catalog_Model_Product_Condition_Interface) {
-            $value = new Varien_Db_Expr($product->getIdsSelect($this->_getReadAdapter()));
+            $value = new Maho\Db\Expr($product->getIdsSelect($this->_getReadAdapter()));
             $select->where('e.entity_id IN(?)', $value);
         } elseif (is_numeric($product) || is_array($product)) {
             $select->where('e.entity_id IN(?)', $product);

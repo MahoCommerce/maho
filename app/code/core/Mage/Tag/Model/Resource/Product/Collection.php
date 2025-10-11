@@ -383,7 +383,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
         } else {
             $field = 'e.entity_id';
         }
-        $expr = new Varien_Db_Expr('COUNT('
+        $expr = new Maho\Db\Expr('COUNT('
             . ($this->getFlag('distinct') ? 'DISTINCT ' : '')
             . $field . ')');
 
@@ -413,7 +413,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
 
             foreach ($this->_orders as $field => $direction) {
                 if (empty($appliedOrders[$field])) {
-                    $this->_select->order(new Varien_Db_Expr($field . ' ' . $direction));
+                    $this->_select->order(new Maho\Db\Expr($field . ' ' . $direction));
                 }
             }
         }

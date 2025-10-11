@@ -149,7 +149,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
     public function unassignState($status, $state)
     {
         $select = $this->_getWriteAdapter()->select()
-            ->from($this->_stateTable, ['qty' => new Varien_Db_Expr('COUNT(*)')])
+            ->from($this->_stateTable, ['qty' => new Maho\Db\Expr('COUNT(*)')])
             ->where('state = ?', $state);
 
         if ($this->_getWriteAdapter()->fetchOne($select) == 1) {

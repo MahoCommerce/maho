@@ -119,7 +119,7 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
         $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
         $countSelect->reset(Varien_Db_Select::COLUMNS);
 
-        $countSelect->columns(new Varien_Db_Expr('COUNT(DISTINCT detail.customer_id)'));
+        $countSelect->columns(new Maho\Db\Expr('COUNT(DISTINCT detail.customer_id)'));
 
         return  $countSelect;
     }

@@ -67,7 +67,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Grouped extends Mage_Ca
                 'i.product_id = l.linked_product_id AND cw.website_id = i.website_id AND cis.stock_id = i.stock_id',
                 [],
             )
-            ->columns(['qty' => new Varien_Db_Expr('0')])
+            ->columns(['qty' => new Maho\Db\Expr('0')])
             ->where('cw.website_id != 0')
             ->where('e.type_id = ?', $this->getTypeId())
             ->group(['e.entity_id', 'cw.website_id', 'cis.stock_id']);

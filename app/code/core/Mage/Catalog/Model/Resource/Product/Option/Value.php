@@ -287,7 +287,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
             // price
             $priceTable = $this->getTable('catalog/product_option_type_price');
             $columns = [
-                new Varien_Db_Expr($newTypeId),
+                new Maho\Db\Expr($newTypeId),
                 'store_id', 'price', 'price_type',
             ];
 
@@ -305,7 +305,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
             // title
             $titleTable = $this->getTable('catalog/product_option_type_title');
             $columns = [
-                new Varien_Db_Expr($newTypeId),
+                new Maho\Db\Expr($newTypeId),
                 'store_id', 'title',
             ];
 

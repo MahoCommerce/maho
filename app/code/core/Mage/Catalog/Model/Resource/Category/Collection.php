@@ -251,7 +251,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
                 $select = $this->_conn->select();
                 $select->from(
                     ['main_table' => $this->_productTable],
-                    ['category_id', new Varien_Db_Expr('COUNT(main_table.product_id)')],
+                    ['category_id', new Maho\Db\Expr('COUNT(main_table.product_id)')],
                 )
                     ->where($this->_conn->quoteInto('main_table.category_id IN(?)', $regularIds))
                     ->group('main_table.category_id');
@@ -285,7 +285,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
                     $select = $this->_conn->select();
                     $select->from(
                         ['main_table' => $this->_productTable],
-                        new Varien_Db_Expr('COUNT(DISTINCT main_table.product_id)'),
+                        new Maho\Db\Expr('COUNT(DISTINCT main_table.product_id)'),
                     )
                         ->joinInner(
                             ['e' => $this->getTable('catalog/category')],

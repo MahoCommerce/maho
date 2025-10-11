@@ -369,7 +369,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * Retrieve attribute expression by specified column
      *
      * @param string $field
-     * @return string|Varien_Db_Expr
+     * @return string|Maho\Db\Expr
      */
     protected function _prepareOrderExpression($field)
     {
@@ -377,7 +377,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
             if ($columnEntry[2] != $field) {
                 continue;
             }
-            if ($columnEntry[1] instanceof Varien_Db_Expr) {
+            if ($columnEntry[1] instanceof Maho\Db\Expr) {
                 return $columnEntry[1];
             }
         }
@@ -723,7 +723,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     /**
      * Join a table
      *
-     * @param array|string|Varien_Db_Expr $table
+     * @param array|string|Maho\Db\Expr $table
      * @param string $bind
      * @param string|array $fields
      * @param string|array|null $cond
@@ -1488,7 +1488,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param Varien_Db_Select $select OPTIONAL
      * @return string
      */
-    public function _prepareSelect(Varien_Db_Select $select)
+    public function _prepareSelect(\Maho\Db\Select $select)
     {
         if ($this->_useAnalyticFunction) {
             /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */

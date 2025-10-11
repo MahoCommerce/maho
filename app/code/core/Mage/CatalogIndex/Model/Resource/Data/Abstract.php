@@ -70,7 +70,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
     {
         $suffixes = ['decimal', 'varchar', 'int', 'text', 'datetime'];
         if (!is_array($products)) {
-            $products = new Varien_Db_Expr($products);
+            $products = new Maho\Db\Expr($products);
         }
         $result = [];
         foreach ($suffixes as $suffix) {
@@ -227,7 +227,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
      * @param int|string|array $value the filter value
      * @return $this
      */
-    protected function _addAttributeFilter(Varien_Db_Select $select, $attributeCode, $table, $field, $store, $value)
+    protected function _addAttributeFilter(\Maho\Db\Select $select, $attributeCode, $table, $field, $store, $value)
     {
         $adapter = $this->_getReadAdapter();
         $attribute = Mage::getSingleton('eav/config')

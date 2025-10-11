@@ -833,7 +833,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
         $colsList   = ['entity_id', 'type_id', 'attribute_set_id'];
         if ($this->getFlatHelper()->isAddChildData()) {
             $fieldList = array_merge($fieldList, ['child_id', 'is_child']);
-            $isChild   = new Varien_Db_Expr('0');
+            $isChild   = new Maho\Db\Expr('0');
             $colsList  = array_merge($colsList, ['entity_id', $isChild]);
         }
 
@@ -1090,7 +1090,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 $select = $adapter->select()
                     ->from(
                         ['t' => $this->getTable($relation->getTable())],
-                        [$relation->getParentFieldName(), $relation->getChildFieldName(), new Varien_Db_Expr('1')],
+                        [$relation->getParentFieldName(), $relation->getChildFieldName(), new Maho\Db\Expr('1')],
                     )
                     ->join(
                         ['e' => $this->getFlatTableName($storeId)],
@@ -1135,7 +1135,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
             if ($columnName === 'entity_id' || $columnName === 'child_id' || $columnName === 'is_child') {
                 continue;
             }
-            $select->columns([$columnName => new Varien_Db_Expr('t1.' . $columnName)]);
+            $select->columns([$columnName => new Maho\Db\Expr('t1.' . $columnName)]);
         }
         $select
             ->joinLeft(
@@ -1193,7 +1193,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                     $joinLeftCond[] = $relation->getWhere();
                 }
 
-                $entitySelect = new Varien_Db_Expr($select->__toString());
+                $entitySelect = new Maho\Db\Expr($select->__toString());
 
                 $select = $adapter->select()
                     ->from(['e' => $this->getFlatTableName($storeId)], [])

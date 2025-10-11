@@ -101,13 +101,13 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                     }
 
                     if (!is_null($previousSelect)) {
-                        $select->where('t1.entity_id IN (?)', new Varien_Db_Expr($previousSelect));
+                        $select->where('t1.entity_id IN (?)', new Maho\Db\Expr($previousSelect));
                     }
                     $previousSelect = $select;
                 }
             }
             if (isset($select)) {
-                $this->addFieldToFilter('entity_id', ['in' => new Varien_Db_Expr($select)]);
+                $this->addFieldToFilter('entity_id', ['in' => new Maho\Db\Expr($select)]);
             }
         }
 

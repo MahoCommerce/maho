@@ -161,7 +161,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      */
     public function setConnection($conn)
     {
-        if (!$conn instanceof Varien_Db_Adapter_Interface) {
+        if (!$conn instanceof \Maho\Db\Adapter\AdapterInterface) {
             throw new Mage_Core_Exception('dbModel read resource does not implement Varien_Db_Adapter_Interface');
         }
 
@@ -533,7 +533,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     {
         if (!$this->_isOrdersRendered) {
             foreach ($this->_orders as $field => $direction) {
-                $this->_select->order(new Varien_Db_Expr($field . ' ' . $direction));
+                $this->_select->order(new Maho\Db\Expr($field . ' ' . $direction));
             }
             $this->_isOrdersRendered = true;
         }

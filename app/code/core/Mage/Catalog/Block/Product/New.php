@@ -83,16 +83,16 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
             ->addStoreFilter()
             ->addAttributeToFilter('news_from_date', ['or' => [
                 0 => ['date' => true, 'to' => $todayEndOfDayDate],
-                1 => ['is' => new Varien_Db_Expr('null')]],
+                1 => ['is' => new Maho\Db\Expr('null')]],
             ], 'left')
             ->addAttributeToFilter('news_to_date', ['or' => [
                 0 => ['date' => true, 'from' => $todayStartOfDayDate],
-                1 => ['is' => new Varien_Db_Expr('null')]],
+                1 => ['is' => new Maho\Db\Expr('null')]],
             ], 'left')
             ->addAttributeToFilter(
                 [
-                    ['attribute' => 'news_from_date', 'is' => new Varien_Db_Expr('not null')],
-                    ['attribute' => 'news_to_date', 'is' => new Varien_Db_Expr('not null')],
+                    ['attribute' => 'news_from_date', 'is' => new Maho\Db\Expr('not null')],
+                    ['attribute' => 'news_to_date', 'is' => new Maho\Db\Expr('not null')],
                 ],
             )
             ->addAttributeToSort('news_from_date', 'desc')

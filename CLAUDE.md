@@ -96,10 +96,10 @@ $select = $adapter->select()
     ->where('status = ?', 1)
     ->order('created_at DESC');
 
-// Raw SQL expressions - use Varien_Db_Expr to prevent quoting
+// Raw SQL expressions - use Maho\Db\Expr to prevent quoting
 $select->columns([
-    'total' => new Varien_Db_Expr('COUNT(*)'),
-    'sum' => new Varien_Db_Expr('SUM(price)')
+    'total' => new Maho\Db\Expr('COUNT(*)'),
+    'sum' => new Maho\Db\Expr('SUM(price)')
 ]);
 ```
 

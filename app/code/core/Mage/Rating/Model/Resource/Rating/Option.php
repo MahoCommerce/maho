@@ -164,10 +164,10 @@ class Mage_Rating_Model_Resource_Rating_Option extends Mage_Core_Model_Resource_
             ->from(
                 ['vote' => $this->_ratingVoteTable],
                 [
-                    'vote_count'         => new Varien_Db_Expr('COUNT(vote.vote_id)'),
-                    'vote_value_sum'     => new Varien_Db_Expr('SUM(vote.value)'),
-                    'app_vote_count'     => new Varien_Db_Expr("COUNT({$appVoteCountCond})"),
-                    'app_vote_value_sum' => new Varien_Db_Expr("SUM({$appVoteValueSumCond})")],
+                    'vote_count'         => new Maho\Db\Expr('COUNT(vote.vote_id)'),
+                    'vote_value_sum'     => new Maho\Db\Expr('SUM(vote.value)'),
+                    'app_vote_count'     => new Maho\Db\Expr("COUNT({$appVoteCountCond})"),
+                    'app_vote_value_sum' => new Maho\Db\Expr("SUM({$appVoteValueSumCond})")],
             )
             ->join(
                 ['review'   => $this->_reviewTable],

@@ -422,7 +422,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
                 [],
             )
             ->where('cw.website_id != 0')
-            ->columns(new Varien_Db_Expr("MIN({$websiteExpression})"))
+            ->columns(new Maho\Db\Expr("MIN({$websiteExpression})"))
             ->group(['tp.entity_id', 'cg.customer_group_id', 'cw.website_id']);
 
         if (!empty($entityIds)) {
@@ -469,7 +469,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
                 [],
             )
             ->where('cw.website_id != 0')
-            ->columns(new Varien_Db_Expr("MIN({$websiteExpression})"))
+            ->columns(new Maho\Db\Expr("MIN({$websiteExpression})"))
             ->group(['gp.entity_id', 'cg.customer_group_id', 'cw.website_id']);
 
         if (!empty($entityIds)) {

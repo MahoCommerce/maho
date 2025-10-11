@@ -28,11 +28,11 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * @param string $column
      * @param string $groupAliasName OPTIONAL
      * @param string $orderBy OPTIONAL
-     * @return Varien_Db_Expr
+     * @return Maho\Db\Expr
      */
     public function prepareColumn($column, $groupAliasName = null, $orderBy = null)
     {
-        return new Varien_Db_Expr((string) $column);
+        return new Maho\Db\Expr((string) $column);
     }
 
     /**
@@ -40,7 +40,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * @return string
      */
-    public function getQueryUsingAnalyticFunction(Varien_Db_Select $select)
+    public function getQueryUsingAnalyticFunction(\Maho\Db\Select $select)
     {
         return $select->assemble();
     }
@@ -53,7 +53,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * @param array $fields
      * @return string
      */
-    public function getInsertFromSelectUsingAnalytic(Varien_Db_Select $select, $table, $fields)
+    public function getInsertFromSelectUsingAnalytic(\Maho\Db\Select $select, $table, $fields)
     {
         return $select->insertFromSelect($table, $fields);
     }
@@ -76,7 +76,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * @param bool $autoReset
      * @return array
      */
-    protected function _prepareOrder(Varien_Db_Select $select, $autoReset = false)
+    protected function _prepareOrder(\Maho\Db\Select $select, $autoReset = false)
     {
         $selectOrders = $select->getPart(Varien_Db_Select::ORDER);
         if (!$selectOrders) {
@@ -135,7 +135,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * @param bool $autoReset
      * @return array
      */
-    protected function _prepareGroup(Varien_Db_Select $select, $autoReset = false)
+    protected function _prepareGroup(\Maho\Db\Select $select, $autoReset = false)
     {
         $selectGroups = $select->getPart(Varien_Db_Select::GROUP);
         if (!$selectGroups) {
@@ -161,7 +161,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * @return array
      * @throws Mage_Core_Exception
      */
-    protected function _prepareHaving(Varien_Db_Select $select, $autoReset = false)
+    protected function _prepareHaving(\Maho\Db\Select $select, $autoReset = false)
     {
         $selectHavings = $select->getPart(Varien_Db_Select::HAVING);
         if (!$selectHavings) {
@@ -231,7 +231,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * @return array
      * @throws Mage_Core_Exception
      */
-    public function prepareColumnsList(Varien_Db_Select $select, $groupByCondition = null)
+    public function prepareColumnsList(\Maho\Db\Select $select, $groupByCondition = null)
     {
         if (!count($select->getPart(Varien_Db_Select::FROM))) {
             return $select->getPart(Varien_Db_Select::COLUMNS);
@@ -243,7 +243,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
 
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
-            if ($column instanceof Varien_Db_Expr) {
+            if ($column instanceof Maho\Db\Expr) {
                 if ($alias !== null) {
                     if (preg_match('/(^|[^a-zA-Z_])^(SELECT)?(SUM|MIN|MAX|AVG|COUNT)\s*\(/i', (string) $column, $matches)) {
                         $column = $this->prepareColumn($column, $groupByCondition);
@@ -254,7 +254,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
                 }
             } else {
                 if ($column == Varien_Db_Select::SQL_WILDCARD) {
-                    if ($tables[$correlationName]['tableName'] instanceof Varien_Db_Expr) {
+                    if ($tables[$correlationName]['tableName'] instanceof Maho\Db\Expr) {
                         throw new Mage_Core_Exception("Can't prepare expression when tableName is instance of Varien_Db_Expr");
                     }
                     $tableColumns = $this->_getReadAdapter()->describeTable($tables[$correlationName]['tableName']);
@@ -297,7 +297,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
             $separator = sprintf(" SEPARATOR '%s'", $groupConcatDelimiter);
         }
 
-        $select->columns([$fieldAlias => new Varien_Db_Expr(sprintf('GROUP_CONCAT(%s%s)', $fieldExpr, $separator))]);
+        $select->columns([$fieldAlias => new Maho\Db\Expr(sprintf('GROUP_CONCAT(%s%s)', $fieldExpr, $separator))]);
 
         return $select;
     }
@@ -305,14 +305,14 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Returns expression of days passed from $startDate to $endDate
      *
-     * @param  string|Varien_Db_Expr $startDate
-     * @param  string|Varien_Db_Expr $endDate
-     * @return Varien_Db_Expr
+     * @param  string|Maho\Db\Expr $startDate
+     * @param  string|Maho\Db\Expr $endDate
+     * @return Maho\Db\Expr
      */
     public function getDateDiff($startDate, $endDate)
     {
         $dateDiff = '(TO_DAYS(' . $endDate . ') - TO_DAYS(' . $startDate . '))';
-        return new Varien_Db_Expr($dateDiff);
+        return new Maho\Db\Expr($dateDiff);
     }
 
     /**
@@ -322,7 +322,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * @param string $value
      * @param array $options
-     * @return Varien_Db_Expr
+     * @return Maho\Db\Expr
      *
      * @see escapeLikeValue()
      */
@@ -330,6 +330,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     public function addLikeEscape($value, $options = [])
     {
         $value = $this->escapeLikeValue($value, $options);
-        return new Varien_Db_Expr($this->_getReadAdapter()->quote($value));
+        return new Maho\Db\Expr($this->_getReadAdapter()->quote($value));
     }
 }

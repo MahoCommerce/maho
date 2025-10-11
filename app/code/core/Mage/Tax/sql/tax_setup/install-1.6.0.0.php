@@ -302,7 +302,7 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'tax/tax_order_aggregated_created',
             ['period', 'store_id', 'code', 'percent', 'order_status'],
-            true,
+            \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['period', 'store_id', 'code', 'percent', 'order_status'],
         ['type' => 'unique'],

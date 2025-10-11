@@ -110,7 +110,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             $rate    = $adapter->fetchOne($select, $bind);
             if ($rate === false) {
                 $select = $adapter->select()
-                    ->from($this->_currencyRateTable, new Varien_Db_Expr('1/rate'))
+                    ->from($this->_currencyRateTable, new Maho\Db\Expr('1/rate'))
                     ->where('currency_to = :currency_from')
                     ->where('currency_from = :currency_to');
                 $rate = $adapter->fetchOne($select, $bind);

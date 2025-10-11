@@ -21,6 +21,26 @@ if (!class_exists('Mage')) {
     }
 }
 
+// Varien to Maho namespace aliases for backward compatibility
+// These are registered as lazy aliases through the autoloader
+spl_autoload_register(function ($class) {
+    static $aliases = [
+        'Varien_Db_Expr' => \Maho\Db\Expr::class,
+        'Varien_Db_Exception' => \Maho\Db\Exception::class,
+        'Varien_Db_Select' => \Maho\Db\Select::class,
+        'Varien_Db_Helper' => \Maho\Db\Helper::class,
+        'Varien_Db_Adapter_Interface' => \Maho\Db\Adapter\AdapterInterface::class,
+        'Varien_Db_Adapter_Pdo_Mysql' => \Maho\Db\Adapter\Pdo\Mysql::class,
+        'Varien_Db_Ddl_Table' => \Maho\Db\Ddl\Table::class,
+        'Varien_Db_Statement_Parameter' => \Maho\Db\Statement\Parameter::class,
+        'Varien_Db_Statement_Pdo_Mysql' => \Maho\Db\Statement\Pdo\Mysql::class,
+    ];
+
+    if (isset($aliases[$class])) {
+        class_alias($aliases[$class], $class);
+    }
+}, true, true);
+
 defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 defined('PS') || define('PS', PATH_SEPARATOR);
 defined('BP') || define('BP', Maho::getBasePath());

@@ -305,7 +305,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
         $conditionalDate = $adapter->getCheckSql($condition, $currentDbTime, 'NULL');
 
         $value  = [
-            'low_stock_date' => new Varien_Db_Expr($conditionalDate),
+            'low_stock_date' => new Maho\Db\Expr($conditionalDate),
         ];
 
         $select = $adapter->select()

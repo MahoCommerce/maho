@@ -93,7 +93,7 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
             ->from(
                 ['oi' => $this->getTable('sales/order_item')],
                 [
-                    'orders' => new Varien_Db_Expr('COUNT(1)'),
+                    'orders' => new Maho\Db\Expr('COUNT(1)'),
                     'product_id'],
             )
             ->group('oi.product_id');
@@ -119,15 +119,15 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
             ->joinInner(
                 ['product_price' => $productAttrPriceTable],
                 "product_price.entity_id = e.entity_id AND product_price.attribute_id = {$productAttrPriceId}",
-                ['price' => new Varien_Db_Expr('product_price.value * main_table.base_to_global_rate')],
+                ['price' => new Maho\Db\Expr('product_price.value * main_table.base_to_global_rate')],
             )
             ->joinLeft(
-                ['order_items' => new Varien_Db_Expr(sprintf('(%s)', $ordersSubSelect))],
+                ['order_items' => new Maho\Db\Expr(sprintf('(%s)', $ordersSubSelect))],
                 'order_items.product_id = e.entity_id',
                 [],
             )
             ->columns('e.*')
-            ->columns(['carts' => new Varien_Db_Expr('COUNT(quote_items.item_id)')])
+            ->columns(['carts' => new Maho\Db\Expr('COUNT(quote_items.item_id)')])
             ->columns('order_items.orders')
             ->where('main_table.is_active = ?', 1)
             ->group('quote_items.product_id');

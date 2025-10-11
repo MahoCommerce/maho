@@ -155,7 +155,7 @@ class Mage_Core_Model_Resource
             $config['profiler'] = isset($config['profiler']) && $config['profiler'] != 'false';
 
             $connection = new $className($config);
-            if ($connection instanceof Varien_Db_Adapter_Interface) {
+            if ($connection instanceof \Maho\Db\Adapter\AdapterInterface) {
                 // run after initialization statements
                 if (!empty($config['initStatements'])) {
                     $connection->query($config['initStatements']);
@@ -169,7 +169,7 @@ class Mage_Core_Model_Resource
         if (!$connection) {
             $typeInstance = $this->getConnectionTypeInstance($type);
             $connection = $typeInstance->getConnection($config);
-            if (!$connection instanceof Varien_Db_Adapter_Interface) {
+            if (!$connection instanceof \Maho\Db\Adapter\AdapterInterface) {
                 $connection = false;
             }
         }
