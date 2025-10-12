@@ -26,7 +26,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * DB connection
      *
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_conn;
 
@@ -42,7 +42,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * SQL select object
      *
-     * @var Varien_Db_Select
+     * @var Maho\Db\Select
      */
     protected $_select;
 
@@ -66,7 +66,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      *      Varien_Data_Tree_Dbp::LEVEL_FIELD    => string
      * )
      *
-     * @param Varien_Db_Adapter_Interface $connection
+     * @param Maho\Db\Adapter\AdapterInterface $connection
      * @param string $table
      * @param array $fields
      */
@@ -94,7 +94,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
         $this->_orderField  = $fields[self::ORDER_FIELD];
         $this->_levelField  = $fields[self::LEVEL_FIELD];
 
-        /** @var Varien_Db_Select $select */
+        /** @var Maho\Db\Select $select */
         $select = $this->_conn->select();
         $this->_select = $select;
         $this->_select->from($this->_table);
@@ -103,7 +103,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * Retrieve current select object
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getDbSelect()
     {
@@ -113,7 +113,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * Set Select object
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      */
     public function setDbSelect($select): void
     {
