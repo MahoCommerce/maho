@@ -15,7 +15,7 @@ namespace MahoCLI\Commands;
 use Exception;
 use Mage;
 use Mage_Core_Model_Resource;
-use Varien_Db_Adapter_Interface;
+use Maho\Db\Adapter\AdapterInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -493,7 +493,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $output->writeln("\n<comment>This was a dry run. Use without --dry-run to apply changes.</comment>");
     }
 
-    private function getExistingRegionName(int $regionId, string $locale, Varien_Db_Adapter_Interface $connection): ?string
+    private function getExistingRegionName(int $regionId, string $locale, Maho\Db\Adapter\AdapterInterface $connection): ?string
     {
         $tableName = $connection->getTableName('directory_country_region_name');
         $select = $connection->select()
@@ -505,7 +505,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         return $result ?: null;
     }
 
-    private function insertRegionName(int $regionId, string $locale, string $name, Varien_Db_Adapter_Interface $connection): void
+    private function insertRegionName(int $regionId, string $locale, string $name, Maho\Db\Adapter\AdapterInterface $connection): void
     {
         $connection->insertOnDuplicate(
             $connection->getTableName('directory_country_region_name'),
@@ -518,7 +518,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         );
     }
 
-    private function updateRegionName(int $regionId, string $locale, string $name, Varien_Db_Adapter_Interface $connection): void
+    private function updateRegionName(int $regionId, string $locale, string $name, Maho\Db\Adapter\AdapterInterface $connection): void
     {
         $this->insertRegionName($regionId, $locale, $name, $connection);
     }
