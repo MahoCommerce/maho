@@ -98,11 +98,11 @@ describe('DDL Operations - Table Creation', function () {
             ->addIndex(
                 $this->adapter->getIndexName($this->testTableName, ['email'], AdapterInterface::INDEX_TYPE_UNIQUE),
                 ['email'],
-                ['type' => AdapterInterface::INDEX_TYPE_UNIQUE]
+                ['type' => AdapterInterface::INDEX_TYPE_UNIQUE],
             )
             ->addIndex(
                 $this->adapter->getIndexName($this->testTableName, ['name', 'status']),
-                ['name', 'status']
+                ['name', 'status'],
             );
 
         $this->adapter->createTable($table);
@@ -135,14 +135,14 @@ describe('DDL Operations - Table Creation', function () {
             ->addColumn('parent_id', Table::TYPE_INTEGER, null, ['nullable' => false])
             ->addIndex(
                 $this->adapter->getIndexName($this->testTableName, ['parent_id']),
-                ['parent_id']
+                ['parent_id'],
             )
             ->addForeignKey(
                 $this->adapter->getForeignKeyName($this->testTableName, 'parent_id', $parentTable, 'id'),
                 'parent_id',
                 $parentTable,
                 'id',
-                Table::ACTION_CASCADE
+                Table::ACTION_CASCADE,
             );
 
         $this->adapter->createTable($childTable);
@@ -338,14 +338,14 @@ describe('DDL Operations - Index Management', function () {
         $indexName = $this->adapter->getIndexName(
             $this->testTableName,
             ['username'],
-            AdapterInterface::INDEX_TYPE_UNIQUE
+            AdapterInterface::INDEX_TYPE_UNIQUE,
         );
 
         $this->adapter->addIndex(
             $this->testTableName,
             $indexName,
             ['username'],
-            AdapterInterface::INDEX_TYPE_UNIQUE
+            AdapterInterface::INDEX_TYPE_UNIQUE,
         );
 
         $indexes = $this->adapter->getIndexList($this->testTableName);
@@ -432,7 +432,7 @@ describe('DDL Operations - Foreign Key Management', function () {
         $this->adapter->addIndex(
             $this->testTableName,
             $this->adapter->getIndexName($this->testTableName, ['parent_id']),
-            ['parent_id']
+            ['parent_id'],
         );
 
         $fkName = $this->adapter->getForeignKeyName($this->testTableName, 'parent_id', $parentTable, 'id');
@@ -443,7 +443,7 @@ describe('DDL Operations - Foreign Key Management', function () {
             'parent_id',
             $parentTable,
             'id',
-            Table::ACTION_CASCADE
+            Table::ACTION_CASCADE,
         );
 
         $fks = $this->adapter->getForeignKeys($this->testTableName);
@@ -469,14 +469,14 @@ describe('DDL Operations - Foreign Key Management', function () {
             ->addColumn('parent_id', Table::TYPE_INTEGER, null, [])
             ->addIndex(
                 $this->adapter->getIndexName($this->testTableName, ['parent_id']),
-                ['parent_id']
+                ['parent_id'],
             )
             ->addForeignKey(
                 $fkName,
                 'parent_id',
                 $parentTable,
                 'id',
-                Table::ACTION_CASCADE
+                Table::ACTION_CASCADE,
             );
 
         $this->adapter->createTable($childTable);
@@ -508,14 +508,14 @@ describe('DDL Operations - Foreign Key Management', function () {
             ->addColumn('parent_id', Table::TYPE_INTEGER, null, [])
             ->addIndex(
                 $this->adapter->getIndexName($childTable1, ['parent_id']),
-                ['parent_id']
+                ['parent_id'],
             )
             ->addForeignKey(
                 $this->adapter->getForeignKeyName($childTable1, 'parent_id', $parentTable, 'id'),
                 'parent_id',
                 $parentTable,
                 'id',
-                Table::ACTION_CASCADE
+                Table::ACTION_CASCADE,
             );
 
         $this->adapter->createTable($table);
@@ -528,14 +528,14 @@ describe('DDL Operations - Foreign Key Management', function () {
             ->addColumn('parent_id', Table::TYPE_INTEGER, null, ['nullable' => true])
             ->addIndex(
                 $this->adapter->getIndexName($childTable2, ['parent_id']),
-                ['parent_id']
+                ['parent_id'],
             )
             ->addForeignKey(
                 $this->adapter->getForeignKeyName($childTable2, 'parent_id', $parentTable, 'id'),
                 'parent_id',
                 $parentTable,
                 'id',
-                Table::ACTION_SET_NULL
+                Table::ACTION_SET_NULL,
             );
 
         $this->adapter->createTable($table);
