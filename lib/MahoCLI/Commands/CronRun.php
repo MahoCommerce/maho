@@ -97,7 +97,7 @@ class CronRun extends BaseMahoCommand
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
-                ->setExecutedAt(date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                ->setExecutedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
                 ->save();
         }
 
@@ -107,7 +107,7 @@ class CronRun extends BaseMahoCommand
         } catch (\Exception $e) {
             if ($schedule) {
                 $schedule
-                    ->setFinishedAt(date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                    ->setFinishedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
                     ->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
                     ->setMessages($e->__toString())
                     ->save();
@@ -120,7 +120,7 @@ class CronRun extends BaseMahoCommand
         if ($schedule) {
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                ->setFinishedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
                 ->save();
         }
 
