@@ -55,19 +55,19 @@ describe('insertFromSelect', function () {
         $sql = $this->adapter->insertFromSelect(
             $select,
             $this->tempTableTarget,
-            ['name', 'value']
+            ['name', 'value'],
         );
 
         $this->adapter->query($sql);
 
         $count = $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}");
-        expect((int)$count)->toBe(2); // test2 and test3
+        expect((int) $count)->toBe(2); // test2 and test3
 
         $result = $this->adapter->fetchAll("SELECT name, value FROM {$this->tempTableTarget} ORDER BY value");
         expect($result[0]['name'])->toBe('test2');
-        expect((int)$result[0]['value'])->toBe(200);
+        expect((int) $result[0]['value'])->toBe(200);
         expect($result[1]['name'])->toBe('test3');
-        expect((int)$result[1]['value'])->toBe(300);
+        expect((int) $result[1]['value'])->toBe(300);
     });
 
     it('handles INSERT ON DUPLICATE UPDATE correctly', function () {
@@ -82,20 +82,20 @@ describe('insertFromSelect', function () {
         $sql = $select->insertFromSelect(
             $this->tempTableTarget,
             ['name', 'value'],
-            true // onDuplicate = true
+            true, // onDuplicate = true
         );
 
         $this->adapter->query($sql);
 
         // Should have updated, not created duplicate
         $count = $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}");
-        expect((int)$count)->toBe(1);
+        expect((int) $count)->toBe(1);
 
         $value = $this->adapter->fetchOne(
             "SELECT value FROM {$this->tempTableTarget} WHERE name = ?",
-            ['test1']
+            ['test1'],
         );
-        expect((int)$value)->toBe(100);
+        expect((int) $value)->toBe(100);
     });
 
     it('handles INSERT IGNORE correctly', function () {
@@ -109,14 +109,14 @@ describe('insertFromSelect', function () {
 
         $sql = $select->insertIgnoreFromSelect(
             $this->tempTableTarget,
-            ['name', 'value']
+            ['name', 'value'],
         );
 
         $this->adapter->query($sql);
 
         // Should have ignored, not error
         $count = $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}");
-        expect((int)$count)->toBe(1);
+        expect((int) $count)->toBe(1);
     });
 });
 
@@ -128,13 +128,13 @@ describe('updateFromSelect', function () {
             ->join(
                 ['s' => $this->tempTableSource],
                 't.name = s.name',
-                []
+                [],
             )
             ->where('s.value > ?', 100);
 
         $sql = $this->adapter->updateFromSelect(
             $select,
-            ['t' => $this->tempTableTarget]
+            ['t' => $this->tempTableTarget],
         );
 
         // Verify SQL structure contains expected elements
@@ -149,7 +149,7 @@ describe('updateFromSelect', function () {
             ->join(
                 ['s' => $this->tempTableSource],
                 't.name = s.name',
-                []
+                [],
             )
             ->where('s.status = ?', 1);
 
@@ -168,7 +168,7 @@ describe('deleteFromSelect', function () {
         $this->adapter->insert($this->tempTableTarget, ['name' => 'test3', 'value' => 300]);
 
         $initialCount = $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}");
-        expect((int)$initialCount)->toBe(3);
+        expect((int) $initialCount)->toBe(3);
 
         // Delete using select
         $select = $this->adapter->select()
@@ -179,10 +179,10 @@ describe('deleteFromSelect', function () {
         $this->adapter->query($sql);
 
         $finalCount = $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}");
-        expect((int)$finalCount)->toBe(1); // Only test1 remains
+        expect((int) $finalCount)->toBe(1); // Only test1 remains
 
         $remaining = $this->adapter->fetchOne(
-            "SELECT name FROM {$this->tempTableTarget}"
+            "SELECT name FROM {$this->tempTableTarget}",
         );
         expect($remaining)->toBe('test1');
     });
@@ -196,7 +196,7 @@ describe('deleteFromSelect', function () {
             ->joinInner(
                 ['s' => $this->tempTableSource],
                 't.name = s.name',
-                []
+                [],
             )
             ->where('s.value >= ?', 100);
 
@@ -218,18 +218,18 @@ describe('insertOnDuplicate', function () {
         $affected = $this->adapter->insertOnDuplicate(
             $this->tempTableTarget,
             $data,
-            ['value']
+            ['value'],
         );
 
         expect($affected)->toBeGreaterThan(0);
 
         $result = $this->adapter->fetchRow(
             "SELECT * FROM {$this->tempTableTarget} WHERE name = ?",
-            ['new_item']
+            ['new_item'],
         );
 
         expect($result['name'])->toBe('new_item');
-        expect((int)$result['value'])->toBe(999);
+        expect((int) $result['value'])->toBe(999);
     });
 
     it('updates existing row on duplicate key', function () {
@@ -243,7 +243,7 @@ describe('insertOnDuplicate', function () {
         $affected = $this->adapter->insertOnDuplicate(
             $this->tempTableTarget,
             $data,
-            ['value']
+            ['value'],
         );
 
         // MySQL returns 2 for updated rows
@@ -251,10 +251,10 @@ describe('insertOnDuplicate', function () {
 
         $result = $this->adapter->fetchOne(
             "SELECT value FROM {$this->tempTableTarget} WHERE name = ?",
-            ['duplicate_test']
+            ['duplicate_test'],
         );
 
-        expect((int)$result)->toBe(200);
+        expect((int) $result)->toBe(200);
     });
 
     it('inserts multiple rows at once', function () {
@@ -267,16 +267,16 @@ describe('insertOnDuplicate', function () {
         $affected = $this->adapter->insertOnDuplicate(
             $this->tempTableTarget,
             $data,
-            ['value']
+            ['value'],
         );
 
         expect($affected)->toBeGreaterThan(0);
 
         $count = $this->adapter->fetchOne(
-            "SELECT COUNT(*) FROM {$this->tempTableTarget} WHERE name LIKE 'bulk%'"
+            "SELECT COUNT(*) FROM {$this->tempTableTarget} WHERE name LIKE 'bulk%'",
         );
 
-        expect((int)$count)->toBe(3);
+        expect((int) $count)->toBe(3);
     });
 });
 
@@ -293,11 +293,11 @@ describe('insertMultiple', function () {
         expect($affected)->toBe(3);
 
         $results = $this->adapter->fetchAll(
-            "SELECT name, value FROM {$this->tempTableTarget} WHERE name LIKE 'multi%' ORDER BY value"
+            "SELECT name, value FROM {$this->tempTableTarget} WHERE name LIKE 'multi%' ORDER BY value",
         );
 
         expect(count($results))->toBe(3);
         expect($results[0]['name'])->toBe('multi1');
-        expect((int)$results[0]['value'])->toBe(111);
+        expect((int) $results[0]['value'])->toBe(111);
     });
 });

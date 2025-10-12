@@ -47,7 +47,7 @@ describe('Varien_Db_Expr Compatibility', function () {
         $select = $this->adapter->select()
             ->from($this->testTable, ['path'])
             ->where('scope = ?', 'default')
-            ->where("LENGTH(path) > ?", $expr)
+            ->where('LENGTH(path) > ?', $expr)
             ->limit(1);
 
         $sql = $select->assemble();
@@ -116,7 +116,7 @@ describe('SQL Generation Compatibility - JOINs', function () {
             ->joinInner(
                 ['s' => $storeTable],
                 'c.scope_id = s.store_id',
-                ['code', 'name']
+                ['code', 'name'],
             )
             ->where('c.scope = ?', 'stores')
             ->limit(5);
@@ -137,7 +137,7 @@ describe('SQL Generation Compatibility - JOINs', function () {
             ->joinLeft(
                 ['s' => $storeTable],
                 'c.scope_id = s.store_id',
-                ['code']
+                ['code'],
             )
             ->limit(5);
 
@@ -154,7 +154,7 @@ describe('SQL Generation Compatibility - JOINs', function () {
             ->from(['c' => $this->testTable], ['path'])
             ->joinCross(
                 ['s' => $storeTable],
-                ['code']
+                ['code'],
             )
             ->limit(1);
 
@@ -323,7 +323,7 @@ describe('SQL Generation Compatibility - Insert/Update/Delete', function () {
         // Cleanup
         $this->adapter->delete(
             $this->testTable,
-            $this->adapter->quoteInto('path = ?', $data['path'])
+            $this->adapter->quoteInto('path = ?', $data['path']),
         );
     });
 
@@ -340,7 +340,7 @@ describe('SQL Generation Compatibility - Insert/Update/Delete', function () {
         $affected = $this->adapter->update(
             $this->testTable,
             ['value' => 'updated'],
-            $this->adapter->quoteInto('path = ?', $testPath)
+            $this->adapter->quoteInto('path = ?', $testPath),
         );
 
         expect($affected)->toBe(1);
@@ -361,7 +361,7 @@ describe('SQL Generation Compatibility - Insert/Update/Delete', function () {
 
         $affected = $this->adapter->delete(
             $this->testTable,
-            $this->adapter->quoteInto('path = ?', $testPath)
+            $this->adapter->quoteInto('path = ?', $testPath),
         );
 
         expect($affected)->toBe(1);
@@ -455,10 +455,10 @@ describe('SQL Generation Compatibility - Edge Cases', function () {
 
     it('handles numeric values correctly', function () {
         $quoted = $this->adapter->quote(42);
-        expect((string)$quoted)->toContain('42');
+        expect((string) $quoted)->toContain('42');
 
         $quoted = $this->adapter->quote(3.14159);
-        $quotedStr = (string)$quoted;
+        $quotedStr = (string) $quoted;
         expect($quotedStr)->toBeString();
         expect($quotedStr)->toMatch('/3\.14159/');
     });

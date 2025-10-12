@@ -55,7 +55,7 @@ describe('Select Query Builder - Basic Operations', function () {
 
         foreach ($results as $row) {
             expect($row['scope'])->toBe('default');
-            expect((int)$row['scope_id'])->toBe(0);
+            expect((int) $row['scope_id'])->toBe(0);
         }
     });
 
@@ -84,7 +84,7 @@ describe('Select Query Builder - JOINs', function () {
             ->joinInner(
                 ['s' => $storeTable],
                 'c.scope_id = s.store_id',
-                ['store_id', 'code']
+                ['store_id', 'code'],
             )
             ->where('c.scope = ?', 'stores')
             ->limit(5);
@@ -103,7 +103,7 @@ describe('Select Query Builder - JOINs', function () {
             ->joinLeft(
                 ['s' => $storeTable],
                 'c.scope_id = s.store_id AND c.scope = "stores"',
-                ['code']
+                ['code'],
             )
             ->limit(5);
 
@@ -120,7 +120,7 @@ describe('Select Query Builder - JOINs', function () {
             ->joinInner(
                 ['s' => $storeTable],
                 'c.scope_id = s.store_id',
-                ['code']
+                ['code'],
             )
             ->where('c.scope = ?', 'stores')
             ->limit(5);
@@ -159,7 +159,7 @@ describe('Select Query Builder - Aggregates and Grouping', function () {
 
         expect($results)->toBeArray();
         foreach ($results as $row) {
-            expect((int)$row['config_count'])->toBeGreaterThan(10);
+            expect((int) $row['config_count'])->toBeGreaterThan(10);
         }
     });
 
@@ -232,7 +232,7 @@ describe('Select Query Builder - Complex Queries', function () {
     it('handles raw SQL expressions in WHERE', function () {
         $select = $this->adapter->select()
             ->from($this->configTable, ['path', 'value'])
-            ->where("LENGTH(path) > ?", 10)
+            ->where('LENGTH(path) > ?', 10)
             ->limit(5);
 
         $sql = $select->assemble();
@@ -281,7 +281,7 @@ describe('Select Query Builder - Complex Queries', function () {
             ->joinLeft(
                 ['s' => $storeTable],
                 'c.scope_id = s.store_id',
-                ['code']
+                ['code'],
             )
             ->where('c.scope = ?', 'default')
             ->limit(5);

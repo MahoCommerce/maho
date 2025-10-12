@@ -23,7 +23,7 @@ describe('SQL Helper Methods - String Functions', function () {
         $expr = $this->adapter->getConcatSql(['firstname', 'lastname'], ' ');
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as full_name FROM (SELECT 'John' as firstname, 'Doe' as lastname) as t"
+            "SELECT {$expr} as full_name FROM (SELECT 'John' as firstname, 'Doe' as lastname) as t",
         );
 
         expect($result)->toBe('John Doe');
@@ -33,7 +33,7 @@ describe('SQL Helper Methods - String Functions', function () {
         $expr = $this->adapter->getConcatSql(['firstname', 'lastname']);
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as full_name FROM (SELECT 'John' as firstname, 'Doe' as lastname) as t"
+            "SELECT {$expr} as full_name FROM (SELECT 'John' as firstname, 'Doe' as lastname) as t",
         );
 
         expect($result)->toBe('JohnDoe');
@@ -43,7 +43,7 @@ describe('SQL Helper Methods - String Functions', function () {
         $expr = $this->adapter->getConcatSql(['firstname', 'lastname'], ' ');
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as full_name FROM (SELECT 'John' as firstname, 'Doe' as lastname) as t"
+            "SELECT {$expr} as full_name FROM (SELECT 'John' as firstname, 'Doe' as lastname) as t",
         );
 
         // Test proper concatenation without NULL values
@@ -54,17 +54,17 @@ describe('SQL Helper Methods - String Functions', function () {
         $expr = $this->adapter->getLengthSql('email');
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as length FROM (SELECT 'test@example.com' as email) as t"
+            "SELECT {$expr} as length FROM (SELECT 'test@example.com' as email) as t",
         );
 
-        expect((int)$result)->toBe(16);
+        expect((int) $result)->toBe(16);
     });
 
     it('extracts substring correctly', function () {
         $expr = $this->adapter->getSubstringSql('email', 1, 4);
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as substr FROM (SELECT 'test@example.com' as email) as t"
+            "SELECT {$expr} as substr FROM (SELECT 'test@example.com' as email) as t",
         );
 
         expect($result)->toBe('test');
@@ -74,7 +74,7 @@ describe('SQL Helper Methods - String Functions', function () {
         $expr = $this->adapter->getSubstringSql('email', 6);
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as substr FROM (SELECT 'test@example.com' as email) as t"
+            "SELECT {$expr} as substr FROM (SELECT 'test@example.com' as email) as t",
         );
 
         expect($result)->toBe('example.com');
@@ -90,7 +90,7 @@ describe('SQL Helper Methods - Conditional Logic', function () {
         $expr = $this->adapter->getCheckSql($condition, $trueValue, $falseValue);
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as status_text FROM (SELECT 1 as status) as t"
+            "SELECT {$expr} as status_text FROM (SELECT 1 as status) as t",
         );
 
         expect($result)->toBe('Active');
@@ -104,7 +104,7 @@ describe('SQL Helper Methods - Conditional Logic', function () {
         $expr = $this->adapter->getCheckSql($condition, $trueValue, $falseValue);
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as status_text FROM (SELECT 0 as status) as t"
+            "SELECT {$expr} as status_text FROM (SELECT 0 as status) as t",
         );
 
         expect($result)->toBe('Inactive');
@@ -115,11 +115,11 @@ describe('SQL Helper Methods - Conditional Logic', function () {
         $expr = $this->adapter->getCheckSql($condition, '1', '0');
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as in_stock FROM (SELECT 5 as qty) as t"
+            "SELECT {$expr} as in_stock FROM (SELECT 5 as qty) as t",
         );
 
         // Doctrine may return 1 or '1' - both are truthy
-        expect((int)$result)->toBe(1);
+        expect((int) $result)->toBe(1);
     });
 
     it('generates CASE SQL for multiple conditions', function () {
@@ -135,19 +135,19 @@ describe('SQL Helper Methods - Conditional Logic', function () {
 
         // Test case 1
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as status_text FROM (SELECT 1 as status) as t"
+            "SELECT {$expr} as status_text FROM (SELECT 1 as status) as t",
         );
         expect($result)->toBe('Pending');
 
         // Test case 2
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as status_text FROM (SELECT 2 as status) as t"
+            "SELECT {$expr} as status_text FROM (SELECT 2 as status) as t",
         );
         expect($result)->toBe('Processing');
 
         // Test default
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as status_text FROM (SELECT 99 as status) as t"
+            "SELECT {$expr} as status_text FROM (SELECT 99 as status) as t",
         );
         expect($result)->toBe('Unknown');
     });
@@ -156,7 +156,7 @@ describe('SQL Helper Methods - Conditional Logic', function () {
         $expr = $this->adapter->getIfNullSql('middle_name', $this->adapter->quote('N/A'));
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as middle FROM (SELECT NULL as middle_name) as t"
+            "SELECT {$expr} as middle FROM (SELECT NULL as middle_name) as t",
         );
 
         expect($result)->toBe('N/A');
@@ -166,7 +166,7 @@ describe('SQL Helper Methods - Conditional Logic', function () {
         $expr = $this->adapter->getIfNullSql('middle_name', $this->adapter->quote('N/A'));
 
         $result = $this->adapter->fetchOne(
-            "SELECT {$expr} as middle FROM (SELECT 'James' as middle_name) as t"
+            "SELECT {$expr} as middle FROM (SELECT 'James' as middle_name) as t",
         );
 
         expect($result)->toBe('James');
@@ -178,7 +178,7 @@ describe('SQL Helper Methods - Date Functions', function () {
         $expr = $this->adapter->getDateAddSql(
             $this->adapter->quote('2025-01-01'),
             7,
-            AdapterInterface::INTERVAL_DAY
+            AdapterInterface::INTERVAL_DAY,
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as new_date");
@@ -190,7 +190,7 @@ describe('SQL Helper Methods - Date Functions', function () {
         $expr = $this->adapter->getDateAddSql(
             $this->adapter->quote('2025-01-15'),
             2,
-            AdapterInterface::INTERVAL_MONTH
+            AdapterInterface::INTERVAL_MONTH,
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as new_date");
@@ -202,7 +202,7 @@ describe('SQL Helper Methods - Date Functions', function () {
         $expr = $this->adapter->getDateSubSql(
             $this->adapter->quote('2025-01-10'),
             5,
-            AdapterInterface::INTERVAL_DAY
+            AdapterInterface::INTERVAL_DAY,
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as new_date");
@@ -213,7 +213,7 @@ describe('SQL Helper Methods - Date Functions', function () {
     it('formats date correctly', function () {
         $expr = $this->adapter->getDateFormatSql(
             $this->adapter->quote('2025-01-15 14:30:45'),
-            '%Y-%m-%d'
+            '%Y-%m-%d',
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as formatted_date");
@@ -223,7 +223,7 @@ describe('SQL Helper Methods - Date Functions', function () {
 
     it('extracts date part from datetime', function () {
         $expr = $this->adapter->getDatePartSql(
-            $this->adapter->quote('2025-01-15 14:30:45')
+            $this->adapter->quote('2025-01-15 14:30:45'),
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as date_only");
@@ -234,35 +234,35 @@ describe('SQL Helper Methods - Date Functions', function () {
     it('extracts year from date', function () {
         $expr = $this->adapter->getDateExtractSql(
             $this->adapter->quote('2025-01-15'),
-            AdapterInterface::INTERVAL_YEAR
+            AdapterInterface::INTERVAL_YEAR,
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as year");
 
-        expect((int)$result)->toBe(2025);
+        expect((int) $result)->toBe(2025);
     });
 
     it('extracts month from date', function () {
         $expr = $this->adapter->getDateExtractSql(
             $this->adapter->quote('2025-03-15'),
-            AdapterInterface::INTERVAL_MONTH
+            AdapterInterface::INTERVAL_MONTH,
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as month");
 
-        expect((int)$result)->toBe(3);
+        expect((int) $result)->toBe(3);
     });
 
     it('converts to unix timestamp', function () {
         $expr = $this->adapter->getUnixTimestamp(
-            $this->adapter->quote('2025-01-01 00:00:00')
+            $this->adapter->quote('2025-01-01 00:00:00'),
         );
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as timestamp");
 
         // Should be around 2025-01-01 (timezone may vary)
-        expect((int)$result)->toBeGreaterThan(1700000000); // After 2023
-        expect((int)$result)->toBeLessThan(1800000000); // Before 2027
+        expect((int) $result)->toBeGreaterThan(1700000000); // After 2023
+        expect((int) $result)->toBeLessThan(1800000000); // Before 2027
     });
 
     it('converts from unix timestamp', function () {
@@ -280,7 +280,7 @@ describe('SQL Helper Methods - Aggregate Functions', function () {
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as min_value");
 
-        expect((int)$result)->toBe(3);
+        expect((int) $result)->toBe(3);
     });
 
     it('calculates GREATEST of multiple values', function () {
@@ -288,7 +288,7 @@ describe('SQL Helper Methods - Aggregate Functions', function () {
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as max_value");
 
-        expect((int)$result)->toBe(20);
+        expect((int) $result)->toBe(20);
     });
 
     it('calculates standard deviation', function () {
@@ -301,12 +301,12 @@ describe('SQL Helper Methods - Aggregate Functions', function () {
                 SELECT 30 UNION ALL
                 SELECT 40 UNION ALL
                 SELECT 50
-            ) as t"
+            ) as t",
         );
 
         // Standard deviation should be calculated (MySQL may use population or sample stddev)
-        expect((float)$result)->toBeGreaterThan(10.0);
-        expect((float)$result)->toBeLessThan(20.0);
+        expect((float) $result)->toBeGreaterThan(10.0);
+        expect((float) $result)->toBeLessThan(20.0);
     });
 });
 
@@ -330,6 +330,6 @@ describe('SQL Helper Methods - Expr Objects', function () {
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as ts");
 
-        expect((int)$result)->toBeGreaterThan(1700000000); // After 2023
+        expect((int) $result)->toBeGreaterThan(1700000000); // After 2023
     });
 });

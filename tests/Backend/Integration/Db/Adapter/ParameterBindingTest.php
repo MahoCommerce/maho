@@ -24,7 +24,7 @@ describe('Parameter Binding and SQL Injection Protection', function () {
 
         $result = $this->adapter->fetchOne(
             "SELECT scope FROM {$this->testTable} WHERE scope = ? LIMIT 1",
-            [$value]
+            [$value],
         );
 
         // Should return false (no match) instead of SQL injection
@@ -37,13 +37,13 @@ describe('Parameter Binding and SQL Injection Protection', function () {
 
         $result = $this->adapter->fetchAll(
             "SELECT * FROM {$this->testTable} WHERE scope = ? AND scope_id = ? LIMIT 5",
-            [$scope, $scopeId]
+            [$scope, $scopeId],
         );
 
         expect($result)->toBeArray();
         foreach ($result as $row) {
             expect($row['scope'])->toBe('default');
-            expect((int)$row['scope_id'])->toBe(0);
+            expect((int) $row['scope_id'])->toBe(0);
         }
     });
 
@@ -54,17 +54,17 @@ describe('Parameter Binding and SQL Injection Protection', function () {
             "admin'--",
             "' UNION SELECT NULL--",
             "<script>alert('xss')</script>",
-            "../../etc/passwd",
+            '../../etc/passwd',
         ];
 
         foreach ($maliciousStrings as $malicious) {
             $result = $this->adapter->fetchOne(
                 "SELECT COUNT(*) FROM {$this->testTable} WHERE path = ?",
-                [$malicious]
+                [$malicious],
             );
 
             // Should safely return 0, not execute injection (Doctrine may return 0 or '0')
-            expect((int)$result)->toBe(0);
+            expect((int) $result)->toBe(0);
         }
     });
 
@@ -72,7 +72,7 @@ describe('Parameter Binding and SQL Injection Protection', function () {
         $malicious = "' OR '1'='1";
         $sql = $this->adapter->quoteInto(
             "SELECT * FROM {$this->testTable} WHERE path = ?",
-            $malicious
+            $malicious,
         );
 
         // Should contain escaped value - Doctrine escapes properly
@@ -85,7 +85,7 @@ describe('Parameter Binding and SQL Injection Protection', function () {
 
         $result = $this->adapter->fetchAll(
             "SELECT DISTINCT scope FROM {$this->testTable} WHERE scope IN (?)",
-            [$scopes]
+            [$scopes],
         );
 
         expect($result)->toBeArray();
@@ -95,8 +95,8 @@ describe('Parameter Binding and SQL Injection Protection', function () {
 
     it('handles NULL values correctly', function () {
         $result = $this->adapter->fetchOne(
-            "SELECT ? as test_null",
-            [null]
+            'SELECT ? as test_null',
+            [null],
         );
 
         expect($result)->toBeNull();
@@ -107,13 +107,13 @@ describe('Parameter Binding and SQL Injection Protection', function () {
         $float = 3.14159;
 
         $result = $this->adapter->fetchRow(
-            "SELECT ? as int_val, ? as float_val",
-            [$int, $float]
+            'SELECT ? as int_val, ? as float_val',
+            [$int, $float],
         );
 
         // Doctrine may return numbers as strings or integers - both are valid
-        expect((int)$result['int_val'])->toBe(42);
-        $floatVal = (float)$result['float_val'];
+        expect((int) $result['int_val'])->toBe(42);
+        $floatVal = (float) $result['float_val'];
         expect($floatVal)->toBeGreaterThan(3.14);
         expect($floatVal)->toBeLessThan(3.15);
     });
@@ -133,7 +133,7 @@ describe('Parameter Binding and SQL Injection Protection', function () {
         // Retrieve and use in another query (should be safe)
         $retrieved = $this->adapter->fetchOne(
             "SELECT value FROM {$this->testTable} WHERE path = ?",
-            [$testPath]
+            [$testPath],
         );
 
         expect($retrieved)->toBe($testValue);
@@ -141,13 +141,13 @@ describe('Parameter Binding and SQL Injection Protection', function () {
         // Use retrieved value in another query (should not inject)
         $result = $this->adapter->fetchOne(
             "SELECT COUNT(*) FROM {$this->testTable} WHERE value = ?",
-            [$retrieved]
+            [$retrieved],
         );
 
-        expect((int)$result)->toBe(1);
+        expect((int) $result)->toBe(1);
 
         // Cleanup
-        $this->adapter->delete($this->testTable, "path = " . $this->adapter->quote($testPath));
+        $this->adapter->delete($this->testTable, 'path = ' . $this->adapter->quote($testPath));
     });
 });
 
@@ -168,7 +168,7 @@ describe('Insert/Update/Delete Parameter Binding', function () {
         // Verify safe insertion
         $result = $this->adapter->fetchOne(
             "SELECT value FROM {$this->testTable} WHERE path = ?",
-            [$uniquePath]
+            [$uniquePath],
         );
 
         expect($result)->toBe($specialValue);
@@ -192,7 +192,7 @@ describe('Insert/Update/Delete Parameter Binding', function () {
         $affected = $this->adapter->update(
             $this->testTable,
             ['value' => $maliciousUpdate],
-            $this->adapter->quoteInto('path = ?', $uniquePath)
+            $this->adapter->quoteInto('path = ?', $uniquePath),
         );
 
         expect($affected)->toBe(1);
@@ -200,7 +200,7 @@ describe('Insert/Update/Delete Parameter Binding', function () {
         // Verify safe update
         $result = $this->adapter->fetchOne(
             "SELECT value FROM {$this->testTable} WHERE path = ?",
-            [$uniquePath]
+            [$uniquePath],
         );
 
         expect($result)->toBe($maliciousUpdate);
@@ -222,7 +222,7 @@ describe('Insert/Update/Delete Parameter Binding', function () {
         // Delete using WHERE with binding
         $affected = $this->adapter->delete(
             $this->testTable,
-            $this->adapter->quoteInto('path = ?', $uniquePath)
+            $this->adapter->quoteInto('path = ?', $uniquePath),
         );
 
         expect($affected)->toBe(1);
@@ -230,16 +230,16 @@ describe('Insert/Update/Delete Parameter Binding', function () {
         // Verify deletion
         $result = $this->adapter->fetchOne(
             "SELECT COUNT(*) FROM {$this->testTable} WHERE path = ?",
-            [$uniquePath]
+            [$uniquePath],
         );
 
-        expect((int)$result)->toBe(0);
+        expect((int) $result)->toBe(0);
     });
 });
 
 describe('Quote Methods', function () {
     it('quotes identifiers safely', function () {
-        $tableName = "users";
+        $tableName = 'users';
         $quoted = $this->adapter->quoteIdentifier($tableName);
 
         expect($quoted)->toBe('`users`');
