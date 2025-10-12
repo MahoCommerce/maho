@@ -17,7 +17,7 @@ $this->getConnection()->changeColumn(
     'api_key',
     'api_key',
     [
-        'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type' => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length' => 255,
         'comment' => 'Api key',
     ],

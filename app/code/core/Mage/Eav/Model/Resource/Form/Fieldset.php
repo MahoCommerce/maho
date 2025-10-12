@@ -117,7 +117,7 @@ class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_
      * @param string $field
      * @param mixed $value
      * @param Mage_Eav_Model_Form_Fieldset $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

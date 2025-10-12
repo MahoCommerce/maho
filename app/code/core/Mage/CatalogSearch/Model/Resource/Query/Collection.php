@@ -67,7 +67,7 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
 
         $ifSynonymFor = $this->getConnection()
             ->getIfNullSql('synonym_for', 'query_text');
-        $this->getSelect()->reset(Varien_Db_Select::FROM)->distinct(true)
+        $this->getSelect()->reset(Maho\Db\Select::FROM)->distinct(true)
             ->from(
                 ['main_table' => $this->getTable('catalogsearch/search_query')],
                 ['query'      => $ifSynonymFor, 'num_results'],
@@ -76,7 +76,7 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
                 'num_results > 0 AND display_in_terms = 1 AND query_text LIKE ?',
                 $helper->addLikeEscape($query, ['position' => 'start']),
             )
-            ->order('popularity ' . Varien_Db_Select::SQL_DESC);
+            ->order('popularity ' . Maho\Db\Select::SQL_DESC);
         if ($this->getStoreId()) {
             $this->getSelect()
                 ->where('store_id = ?', (int) $this->getStoreId());
@@ -96,8 +96,8 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
             ->getCheckSql("synonym_for IS NOT NULL AND synonym_for != ''", 'synonym_for', 'query_text'));
 
         $this->getSelect()
-            ->reset(Varien_Db_Select::FROM)
-            ->reset(Varien_Db_Select::COLUMNS)
+            ->reset(Maho\Db\Select::FROM)
+            ->reset(Maho\Db\Select::COLUMNS)
             ->distinct(true)
             ->from(
                 ['main_table' => $this->getTable('catalogsearch/search_query')],

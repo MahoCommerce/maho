@@ -90,7 +90,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
                 "{$idFieldName} = evt.object_id",
                 [],
             )
-            ->order('evt.event_id ' . Varien_Db_Select::SQL_DESC);
+            ->order('evt.event_id ' . Maho\Db\Select::SQL_DESC);
 
         return $this;
     }

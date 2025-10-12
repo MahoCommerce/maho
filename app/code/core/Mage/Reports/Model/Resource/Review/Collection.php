@@ -43,16 +43,16 @@ class Mage_Reports_Model_Resource_Review_Collection extends Mage_Review_Model_Re
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->_select;
-        $countSelect->reset(Varien_Db_Select::ORDER);
-        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Varien_Db_Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
         $countSelect->columns('COUNT(main_table.review_id)');
 
         return $countSelect;

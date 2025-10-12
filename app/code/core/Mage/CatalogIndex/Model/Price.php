@@ -48,7 +48,7 @@ class Mage_CatalogIndex_Model_Price extends Mage_Core_Model_Abstract
 
     /**
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Varien_Db_Select $entityIdsFilter
+     * @param Maho\Db\Select $entityIdsFilter
      * @return float|int
      */
     public function getMaxValue($attribute, $entityIdsFilter)
@@ -59,7 +59,7 @@ class Mage_CatalogIndex_Model_Price extends Mage_Core_Model_Abstract
     /**
      * @param Mage_Eav_Model_Entity_Attribute $attribute
      * @param int $range
-     * @param Varien_Db_Select $entitySelect
+     * @param Maho\Db\Select $entitySelect
      * @return array
      */
     public function getCount($attribute, $range, $entitySelect)

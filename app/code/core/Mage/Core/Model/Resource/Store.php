@@ -140,7 +140,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Abstract $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

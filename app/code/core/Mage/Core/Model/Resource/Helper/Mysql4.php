@@ -62,8 +62,8 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      * Correct limitation of queries with UNION
      * No need to do additional actions on MySQL
      *
-     * @param Varien_Db_Select $select
-     * @return Varien_Db_Select
+     * @param Maho\Db\Select $select
+     * @return Maho\Db\Select
      */
     public function limitUnion($select)
     {
@@ -78,7 +78,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      */
     protected function _prepareOrder(\Maho\Db\Select $select, $autoReset = false)
     {
-        $selectOrders = $select->getPart(Varien_Db_Select::ORDER);
+        $selectOrders = $select->getPart(Maho\Db\Select::ORDER);
         if (!$selectOrders) {
             return [];
         }
@@ -97,7 +97,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         }
 
         if ($autoReset) {
-            $select->reset(Varien_Db_Select::ORDER);
+            $select->reset(Maho\Db\Select::ORDER);
         }
 
         return $orders;
@@ -137,7 +137,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      */
     protected function _prepareGroup(\Maho\Db\Select $select, $autoReset = false)
     {
-        $selectGroups = $select->getPart(Varien_Db_Select::GROUP);
+        $selectGroups = $select->getPart(Maho\Db\Select::GROUP);
         if (!$selectGroups) {
             return [];
         }
@@ -148,7 +148,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         }
 
         if ($autoReset) {
-            $select->reset(Varien_Db_Select::GROUP);
+            $select->reset(Maho\Db\Select::GROUP);
         }
 
         return $groups;
@@ -163,13 +163,13 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      */
     protected function _prepareHaving(\Maho\Db\Select $select, $autoReset = false)
     {
-        $selectHavings = $select->getPart(Varien_Db_Select::HAVING);
+        $selectHavings = $select->getPart(Maho\Db\Select::HAVING);
         if (!$selectHavings) {
             return [];
         }
 
         $havings = [];
-        $columns = $select->getPart(Varien_Db_Select::COLUMNS);
+        $columns = $select->getPart(Maho\Db\Select::COLUMNS);
         foreach ($columns as $columnEntry) {
             $correlationName = (string) $columnEntry[1];
             $column          = $columnEntry[2];
@@ -191,7 +191,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         }
 
         if ($autoReset) {
-            $select->reset(Varien_Db_Select::HAVING);
+            $select->reset(Maho\Db\Select::HAVING);
         }
 
         return $havings;
@@ -233,12 +233,12 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      */
     public function prepareColumnsList(\Maho\Db\Select $select, $groupByCondition = null)
     {
-        if (!count($select->getPart(Varien_Db_Select::FROM))) {
-            return $select->getPart(Varien_Db_Select::COLUMNS);
+        if (!count($select->getPart(Maho\Db\Select::FROM))) {
+            return $select->getPart(Maho\Db\Select::COLUMNS);
         }
 
-        $columns          = $select->getPart(Varien_Db_Select::COLUMNS);
-        $tables           = $select->getPart(Varien_Db_Select::FROM);
+        $columns          = $select->getPart(Maho\Db\Select::COLUMNS);
+        $tables           = $select->getPart(Maho\Db\Select::FROM);
         $preparedColumns  = [];
 
         foreach ($columns as $columnEntry) {
@@ -253,9 +253,9 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
                     throw new Mage_Core_Exception("Can't prepare expression without alias");
                 }
             } else {
-                if ($column == Varien_Db_Select::SQL_WILDCARD) {
+                if ($column == Maho\Db\Select::SQL_WILDCARD) {
                     if ($tables[$correlationName]['tableName'] instanceof Maho\Db\Expr) {
-                        throw new Mage_Core_Exception("Can't prepare expression when tableName is instance of Varien_Db_Expr");
+                        throw new Mage_Core_Exception("Can't prepare expression when tableName is instance of Maho\Db\Expr");
                     }
                     $tableColumns = $this->_getReadAdapter()->describeTable($tables[$correlationName]['tableName']);
                     foreach (array_keys($tableColumns) as $col) {
@@ -274,13 +274,13 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Add prepared column group_concat expression
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @param string $fieldAlias Field alias which will be added with column group_concat expression
      * @param string $fields
      * @param string $groupConcatDelimiter
      * @param string $fieldsDelimiter
      * @param string $additionalWhere
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function addGroupConcatColumn($select, $fieldAlias, $fields, $groupConcatDelimiter = ',', $fieldsDelimiter = '', $additionalWhere = '')
     {

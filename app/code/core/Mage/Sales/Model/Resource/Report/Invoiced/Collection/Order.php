@@ -15,7 +15,7 @@ class Mage_Sales_Model_Resource_Report_Invoiced_Collection_Order extends Mage_Sa
     /**
      * Period format
      *
-     * @var Varien_Db_Expr
+     * @var Maho\Db\Expr
      */
     protected $_periodFormat;
 
@@ -49,7 +49,7 @@ class Mage_Sales_Model_Resource_Report_Invoiced_Collection_Order extends Mage_Sa
         if ($this->_period == 'month') {
             $this->_periodFormat = $adapter->getDateFormatSql('period', '%Y-%m');
         } elseif ($this->_period == 'year') {
-            $this->_periodFormat = $adapter->getDateExtractSql('period', Varien_Db_Adapter_Interface::INTERVAL_YEAR);
+            $this->_periodFormat = $adapter->getDateExtractSql('period', Maho\Db\Adapter\AdapterInterface::INTERVAL_YEAR);
         } else {
             $this->_periodFormat = $adapter->getDateFormatSql('period', '%Y-%m-%d');
         }

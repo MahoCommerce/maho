@@ -29,7 +29,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
         $this->setUseAjax(true);
         $this->setSaveParametersInSession(true);
         $this->setDefaultSort('entity_id')
-            ->setDefaultDir(Varien_Db_Select::SQL_DESC);
+            ->setDefaultDir(Maho\Db\Select::SQL_DESC);
 
         /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton('admin/session');

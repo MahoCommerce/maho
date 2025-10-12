@@ -19,13 +19,13 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/resource'))
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
         'nullable'  => false,
         'primary'   => true,
     ], 'Resource Code')
-    ->addColumn('version', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('version', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Resource Version')
-    ->addColumn('data_version', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('data_version', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Data Version')
     ->setComment('Resources');
 $installer->getConnection()->createTable($table);
@@ -35,34 +35,34 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/website'))
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Code')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
     ], 'Website Name')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
-    ->addColumn('default_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('default_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Default Group Id')
-    ->addColumn('is_default', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_default', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Defines Is Website Default')
     ->addIndex(
-        $installer->getIdxName('core/website', ['code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('core/website', ['code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('core/website', ['sort_order']),
@@ -80,26 +80,26 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/store_group'))
-    ->addColumn('group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Group Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Website Id')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Store Group Name')
-    ->addColumn('root_category_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('root_category_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Root Category Id')
-    ->addColumn('default_store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('default_store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -117,8 +117,8 @@ $table = $installer->getConnection()
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Store Groups');
 $installer->getConnection()->createTable($table);
@@ -128,41 +128,41 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/store'))
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Store Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Code')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Website Id')
-    ->addColumn('group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Group Id')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Store Name')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Sort Order')
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Activity')
     ->addIndex(
-        $installer->getIdxName('core/store', ['code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('core/store', ['code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('core/store', ['website_id']),
@@ -181,16 +181,16 @@ $table = $installer->getConnection()
         'group_id',
         $installer->getTable('core/store_group'),
         'group_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('core/store', 'website_id', 'core/website', 'website_id'),
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Stores');
 $installer->getConnection()->createTable($table);
@@ -200,33 +200,33 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/config_data'))
-    ->addColumn('config_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('config_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Config Id')
-    ->addColumn('scope', Varien_Db_Ddl_Table::TYPE_TEXT, 8, [
+    ->addColumn('scope', Maho\Db\Ddl\Table::TYPE_TEXT, 8, [
         'nullable'  => false,
         'default'   => 'default',
     ], 'Config Scope')
-    ->addColumn('scope_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('scope_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Config Scope Id')
-    ->addColumn('path', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('path', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
         'default'   => 'general',
     ], 'Config Path')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [], 'Config Value')
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [], 'Config Value')
     ->addIndex(
         $installer->getIdxName(
             'core/config_data',
             ['scope', 'scope_id', 'path'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['scope', 'scope_id', 'path'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->setComment('Config Data');
 $installer->getConnection()->createTable($table);
@@ -236,46 +236,46 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/email_template'))
-    ->addColumn('template_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('template_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Template Id')
-    ->addColumn('template_code', Varien_Db_Ddl_Table::TYPE_TEXT, 150, [
+    ->addColumn('template_code', Maho\Db\Ddl\Table::TYPE_TEXT, 150, [
         'nullable' => false,
     ], 'Template Name')
-    ->addColumn('template_text', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('template_text', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable' => false,
     ], 'Template Content')
-    ->addColumn('template_styles', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('template_styles', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Templste Styles')
-    ->addColumn('template_type', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('template_type', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Template Type')
-    ->addColumn('template_subject', Varien_Db_Ddl_Table::TYPE_TEXT, 200, [
+    ->addColumn('template_subject', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
         'nullable' => false,
     ], 'Template Subject')
-    ->addColumn('template_sender_name', Varien_Db_Ddl_Table::TYPE_TEXT, 200, [
+    ->addColumn('template_sender_name', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
     ], 'Template Sender Name')
-    ->addColumn('template_sender_email', Varien_Db_Ddl_Table::TYPE_TEXT, 200, [
+    ->addColumn('template_sender_email', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
     ], 'Template Sender Email')
-    ->addColumn('added_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Date of Template Creation')
-    ->addColumn('modified_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('modified_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Date of Template Modification')
-    ->addColumn('orig_template_code', Varien_Db_Ddl_Table::TYPE_TEXT, 200, [
+    ->addColumn('orig_template_code', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
     ], 'Original Template Code')
-    ->addColumn('orig_template_variables', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('orig_template_variables', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Original Template Variables')
     ->addIndex(
         $installer->getIdxName(
             'core/email_template',
             ['template_code'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['template_code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('core/email_template', ['added_at']),
@@ -293,17 +293,17 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/layout_update'))
-    ->addColumn('layout_update_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('layout_update_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Layout Update Id')
-    ->addColumn('handle', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('handle', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Handle')
-    ->addColumn('xml', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('xml', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Xml')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
@@ -319,24 +319,24 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/layout_link'))
-    ->addColumn('layout_link_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('layout_link_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Link Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('area', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('area', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
     ], 'Area')
-    ->addColumn('package', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('package', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
     ], 'Package')
-    ->addColumn('theme', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('theme', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
     ], 'Theme')
-    ->addColumn('layout_update_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('layout_update_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -345,10 +345,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'core/layout_link',
             ['store_id', 'package', 'theme', 'layout_update_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['store_id', 'package', 'theme', 'layout_update_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('core/layout_link', ['layout_update_id']),
@@ -359,16 +359,16 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('core/layout_link', 'layout_update_id', 'core/layout_update', 'layout_update_id'),
         'layout_update_id',
         $installer->getTable('core/layout_update'),
         'layout_update_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Layout Link');
 $installer->getConnection()->createTable($table);
@@ -378,16 +378,16 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/session'))
-    ->addColumn('session_id', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('session_id', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
         'primary'   => true,
     ], 'Session Id')
-    ->addColumn('session_expires', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('session_expires', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Date of Session Expiration')
-    ->addColumn('session_data', Varien_Db_Ddl_Table::TYPE_BLOB, '2M', [
+    ->addColumn('session_data', Maho\Db\Ddl\Table::TYPE_BLOB, '2M', [
         'nullable'  => false,
     ], 'Session Data')
     ->setComment('Database Sessions Storage');
@@ -398,24 +398,24 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/translate'))
-    ->addColumn('key_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('key_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Key Id of Translation')
-    ->addColumn('string', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('string', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
         'default'   => Mage_Core_Model_Translate::DEFAULT_STRING,
     ], 'Translation String')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('translate', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('translate', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Translate')
-    ->addColumn('locale', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('locale', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
         'nullable'  => false,
         'default'   => 'en_US',
     ], 'Locale')
@@ -423,10 +423,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'core/translate',
             ['store_id', 'locale', 'string'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['store_id', 'locale', 'string'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('core/translate', ['store_id']),
@@ -437,8 +437,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Translations');
 $installer->getConnection()->createTable($table);
@@ -448,49 +448,49 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/url_rewrite'))
-    ->addColumn('url_rewrite_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('url_rewrite_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Rewrite Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('id_path', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('id_path', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Id Path')
-    ->addColumn('request_path', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('request_path', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Request Path')
-    ->addColumn('target_path', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('target_path', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Target Path')
-    ->addColumn('is_system', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_system', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '1',
     ], 'Defines is Rewrite System')
-    ->addColumn('options', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('options', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
     ], 'Options')
-    ->addColumn('description', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('description', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Deascription')
     ->addIndex(
         $installer->getIdxName(
             'core/url_rewrite',
             ['request_path', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['request_path', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(
             'core/url_rewrite',
             ['id_path', 'is_system', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['id_path', 'is_system', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('core/url_rewrite', ['target_path', 'store_id']),
@@ -509,8 +509,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Url Rewrites');
 $installer->getConnection()->createTable($table);
@@ -520,21 +520,21 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/design_change'))
-    ->addColumn('design_change_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('design_change_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Design Change Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('design', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('design', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Design')
-    ->addColumn('date_from', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('date_from', Maho\Db\Ddl\Table::TYPE_DATE, null, [
     ], 'First Date of Design Activity')
-    ->addColumn('date_to', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('date_to', Maho\Db\Ddl\Table::TYPE_DATE, null, [
     ], 'Last Date of Design Activity')
     ->addIndex(
         $installer->getIdxName('core/design_change', ['store_id']),
@@ -545,8 +545,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Design Changes');
 $installer->getConnection()->createTable($table);
@@ -556,20 +556,20 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/variable'))
-    ->addColumn('variable_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('variable_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Variable Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Variable Code')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Variable Name')
     ->addIndex(
-        $installer->getIdxName('core/variable', ['code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('core/variable', ['code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->setComment('Variables');
 $installer->getConnection()->createTable($table);
@@ -579,34 +579,34 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/variable_value'))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Variable Value Id')
-    ->addColumn('variable_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('variable_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Variable Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('plain_value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('plain_value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Plain Text Value')
-    ->addColumn('html_value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('html_value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Html Value')
     ->addIndex(
         $installer->getIdxName(
             'core/variable_value',
             ['variable_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['variable_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('core/variable_value', ['variable_id']),
@@ -621,16 +621,16 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('core/variable_value', 'variable_id', 'core/variable', 'variable_id'),
         'variable_id',
         $installer->getTable('core/variable'),
         'variable_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Variable Value');
 $installer->getConnection()->createTable($table);
@@ -640,17 +640,17 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/cache'))
-    ->addColumn('id', Varien_Db_Ddl_Table::TYPE_TEXT, 200, [
+    ->addColumn('id', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
         'nullable'  => false,
         'primary'   => true,
     ], 'Cache Id')
-    ->addColumn('data', Varien_Db_Ddl_Table::TYPE_BLOB, '2M', [
+    ->addColumn('data', Maho\Db\Ddl\Table::TYPE_BLOB, '2M', [
     ], 'Cache Data')
-    ->addColumn('create_time', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('create_time', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
     ], 'Cache Creation Time')
-    ->addColumn('update_time', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('update_time', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
     ], 'Time of Cache Updating')
-    ->addColumn('expire_time', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('expire_time', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
     ], 'Cache Expiration Time')
     ->addIndex(
         $installer->getIdxName('core/cache', ['expire_time']),
@@ -664,11 +664,11 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/cache_tag'))
-    ->addColumn('tag', Varien_Db_Ddl_Table::TYPE_TEXT, 100, [
+    ->addColumn('tag', Maho\Db\Ddl\Table::TYPE_TEXT, 100, [
         'nullable'  => false,
         'primary'   => true,
     ], 'Tag')
-    ->addColumn('cache_id', Varien_Db_Ddl_Table::TYPE_TEXT, 200, [
+    ->addColumn('cache_id', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
         'nullable'  => false,
         'primary'   => true,
     ], 'Cache Id')
@@ -684,11 +684,11 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/cache_option'))
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
         'nullable'  => false,
         'primary'   => true,
     ], 'Code')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
     ], 'Value')
     ->setComment('Cache Options');
 $installer->getConnection()->createTable($table);
@@ -698,25 +698,25 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('core/flag'))
-    ->addColumn('flag_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('flag_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Flag Id')
-    ->addColumn('flag_code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('flag_code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Flag Code')
-    ->addColumn('state', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('state', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Flag State')
-    ->addColumn('flag_data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('flag_data', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Flag Data')
-    ->addColumn('last_update', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('last_update', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
     ], 'Date of Last Flag Update')
     ->addIndex(
         $installer->getIdxName('core/flag', ['last_update']),

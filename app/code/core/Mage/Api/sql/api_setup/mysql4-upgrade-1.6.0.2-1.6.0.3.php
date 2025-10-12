@@ -16,7 +16,7 @@ $this->getConnection()->changeColumn(
     'lognum',
     'lognum',
     [
-        'type' => Varien_Db_Ddl_Table::TYPE_INTEGER,
+        'type' => Maho\Db\Ddl\Table::TYPE_INTEGER,
         'unsigned' => true,
         'nullable' => false,
         'default' => '0',

@@ -19,7 +19,7 @@ $this->getConnection()
         $this->getTable('tax/tax_calculation_rule'),
         'calculate_subtotal',
         [
-            'TYPE' => Varien_Db_Ddl_Table::TYPE_INTEGER,
+            'TYPE' => Maho\Db\Ddl\Table::TYPE_INTEGER,
             'NULLABLE' => false,
             'COMMENT' => 'Calculate off subtotal option',
         ],

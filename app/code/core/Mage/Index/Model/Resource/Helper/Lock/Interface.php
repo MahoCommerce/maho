@@ -44,5 +44,5 @@ interface Mage_Index_Model_Resource_Helper_Lock_Interface
     /**
      * @return $this
      */
-    public function setWriteAdapter(Varien_Db_Adapter_Interface $adapter);
+    public function setWriteAdapter(Maho\Db\Adapter\AdapterInterface $adapter);
 }

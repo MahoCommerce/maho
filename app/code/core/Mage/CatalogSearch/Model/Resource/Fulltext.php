@@ -531,7 +531,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         }
 
         if ($selects) {
-            $select = $adapter->select()->union($selects, Varien_Db_Select::SQL_UNION_ALL);
+            $select = $adapter->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
             $query = $adapter->query($select);
             while ($row = $query->fetch()) {
                 $result[$row['entity_id']][$row['attribute_id']] = $row['value'];

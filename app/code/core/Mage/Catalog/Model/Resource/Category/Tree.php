@@ -484,7 +484,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
             $select = $this->_createCollectionDataSelect();
         } else {
             $select = clone $this->_select;
-            $select->order($this->_orderField . ' ' . Varien_Db_Select::SQL_ASC);
+            $select->order($this->_orderField . ' ' . Maho\Db\Select::SQL_ASC);
         }
         if (count($where)) {
             $select->where(implode(' OR ', array_unique($where)));
@@ -532,7 +532,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
             }
             $select
                 ->where('e.entity_id IN(?)', $pathIds)
-                ->order($this->_conn->getLengthSql('e.path') . ' ' . Varien_Db_Select::SQL_ASC);
+                ->order($this->_conn->getLengthSql('e.path') . ' ' . Maho\Db\Select::SQL_ASC);
             $result = $this->_conn->fetchAll($select);
             $this->_updateAnchorProductCount($result);
         }
@@ -561,7 +561,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      *
      * @param bool $sorted
      * @param array $optionalAttributes
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _createCollectionDataSelect($sorted = true, $optionalAttributes = [])
     {

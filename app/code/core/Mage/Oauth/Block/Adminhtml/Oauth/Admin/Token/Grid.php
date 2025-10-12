@@ -22,7 +22,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Admin_Token_Grid extends Mage_Adminhtml_B
         $this->setUseAjax(true);
         $this->setSaveParametersInSession(true);
         $this->setDefaultSort('entity_id')
-            ->setDefaultDir(Varien_Db_Select::SQL_DESC);
+            ->setDefaultDir(Maho\Db\Select::SQL_DESC);
     }
 
     /**

@@ -37,7 +37,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources extends Mage_Adminhtml_Block
         parent::__construct();
 
         $this->setId('api2_role_section_resources')
-                ->setData('default_dir', Varien_Db_Select::SQL_ASC)
+                ->setData('default_dir', Maho\Db\Select::SQL_ASC)
                 ->setData('default_sort', 'sort_order')
                 ->setData('title', Mage::helper('api2')->__('Api Rules Information'))
                 ->setData('use_ajax', true);

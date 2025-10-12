@@ -15,7 +15,7 @@ $installer = $this;
 
 $tableName = $installer->getTable('catalogrule/rule');
 $columnOptions = [
-    'TYPE'      => Varien_Db_Ddl_Table::TYPE_SMALLINT,
+    'TYPE'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
     'UNSIGNED'  => true,
     'NULLABLE'  => false,
     'DEFAULT'   => 0,
@@ -24,14 +24,14 @@ $columnOptions = [
 $installer->getConnection()->addColumn($tableName, 'sub_is_enable', $columnOptions);
 
 $columnOptions = [
-    'TYPE'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+    'TYPE'      => Maho\Db\Ddl\Table::TYPE_TEXT,
     'LENGTH'    => 32,
     'COMMENT'   => 'Simple Action For Subitems',
 ];
 $installer->getConnection()->addColumn($tableName, 'sub_simple_action', $columnOptions);
 
 $columnOptions = [
-    'TYPE'      => Varien_Db_Ddl_Table::TYPE_DECIMAL,
+    'TYPE'      => Maho\Db\Ddl\Table::TYPE_DECIMAL,
     'SCALE'     => 4,
     'PRECISION' => 12,
     'NULLABLE'  => false,

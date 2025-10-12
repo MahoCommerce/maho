@@ -97,7 +97,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
             $column['type']     = 'tinyint(1)';
             $column['is_null']  = true;
         } else {
-            $column['type']     = Varien_Db_Ddl_Table::TYPE_SMALLINT;
+            $column['type']     = Maho\Db\Ddl\Table::TYPE_SMALLINT;
             $column['length']   = 1;
             $column['nullable'] = true;
             $column['comment']  = $attributeCode . ' column';
@@ -129,7 +129,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
      * Retrieve Select For Flat Attribute update
      *
      * @param int $store
-     * @return Varien_Db_Select|null
+     * @return Maho\Db\Select|null
      */
     #[\Override]
     public function getFlatUpdateSelect($store)

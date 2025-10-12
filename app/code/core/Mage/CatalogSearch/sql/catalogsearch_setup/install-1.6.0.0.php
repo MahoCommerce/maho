@@ -19,44 +19,44 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('catalogsearch/search_query'))
-    ->addColumn('query_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('query_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Query ID')
-    ->addColumn('query_text', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('query_text', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Query text')
-    ->addColumn('num_results', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('num_results', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Num results')
-    ->addColumn('popularity', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('popularity', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Popularity')
-    ->addColumn('redirect', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('redirect', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Redirect')
-    ->addColumn('synonym_for', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('synonym_for', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Synonym for')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store ID')
-    ->addColumn('display_in_terms', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('display_in_terms', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '1',
     ], 'Display in terms')
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'default'   => '1',
     ], 'Active status')
-    ->addColumn('is_processed', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_processed', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'default'   => '0',
     ], 'Processed status')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Updated at')
     ->addIndex(
@@ -69,8 +69,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog search query table');
 $installer->getConnection()->createTable($table);
@@ -80,17 +80,17 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('catalogsearch/result'))
-    ->addColumn('query_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('query_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Query ID')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Product ID')
-    ->addColumn('relevance', Varien_Db_Ddl_Table::TYPE_DECIMAL, '20,4', [
+    ->addColumn('relevance', Maho\Db\Ddl\Table::TYPE_DECIMAL, '20,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Relevance')
@@ -100,8 +100,8 @@ $table = $installer->getConnection()
         'query_id',
         $installer->getTable('catalogsearch/search_query'),
         'query_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('catalogsearch/result', 'product_id'), 'product_id')
     ->addForeignKey(
@@ -109,8 +109,8 @@ $table = $installer->getConnection()
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog search result table');
 $installer->getConnection()->createTable($table);
@@ -120,39 +120,39 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('catalogsearch/fulltext'))
-    ->addColumn('fulltext_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('fulltext_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity ID')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Product ID')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Store ID')
-    ->addColumn('data_index', Varien_Db_Ddl_Table::TYPE_TEXT, '4g', [
+    ->addColumn('data_index', Maho\Db\Ddl\Table::TYPE_TEXT, '4g', [
     ], 'Data index')
     ->addIndex(
         $installer->getIdxName(
             'catalogsearch/fulltext',
             ['product_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['product_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(
             'catalogsearch/fulltext',
             'data_index',
-            Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_FULLTEXT,
         ),
         'data_index',
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_FULLTEXT],
     )
     ->setOption('type', 'MyISAM')
     ->setComment('Catalog search result table');

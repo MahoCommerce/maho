@@ -282,7 +282,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             )
             ->where('option_table.parent_id=:product_id');
 
-        /** @var Varien_Db_Statement_Pdo_Mysql $query */
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select, ['product_id' => $productId]);
         while ($row = $query->fetch()) {
             if (!isset($options[$row['option_id']])) {
@@ -375,7 +375,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             'bind'      => $bind,
         ]);
 
-        /** @var Varien_Db_Statement_Pdo_Mysql $query */
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select, $bind);
         while ($row = $query->fetch()) {
             $salable = $row['salable'] ?? true;
@@ -431,7 +431,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         $this->_addAttributeDataToSelect($select, 'special_from_date', $website);
         $this->_addAttributeDataToSelect($select, 'special_to_date', $website);
 
-        /** @var Varien_Db_Statement_Pdo_Mysql $query */
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select);
         while ($row = $query->fetch()) {
             $productsData[$row['entity_id']] = [
@@ -453,7 +453,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * @throws Mage_Core_Exception
      */
     protected function _addAttributeDataToSelect(
-        Varien_Db_Select $select,
+        Maho\Db\Select $select,
         $attributeCode,
         Mage_Core_Model_Website $website,
     ) {
@@ -589,7 +589,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                 );
         }
 
-        /** @var Varien_Db_Statement_Pdo_Mysql $query */
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
             if (!isset($options[$row['option_id']])) {
@@ -645,7 +645,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                 );
         }
 
-        /** @var Varien_Db_Statement_Pdo_Mysql $query */
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
             if (!isset($options[$row['option_id']])) {
@@ -847,7 +847,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             'website_id' => $websiteId,
             'group_id'   => $groupId,
         ];
-        /** @var Varien_Db_Statement_Pdo_Mysql $query */
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
             $prices[$row['entity_id']] = [

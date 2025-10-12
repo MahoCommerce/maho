@@ -42,7 +42,7 @@ class Mage_Admin_Model_Resource_Rules_Collection extends Mage_Core_Model_Resourc
     {
         $length = $this->getConnection()->getLengthSql('{{resource_id}}');
         $this->addExpressionFieldToSelect('length', $length, 'resource_id');
-        $this->getSelect()->order('length ' . Varien_Db_Select::SQL_DESC);
+        $this->getSelect()->order('length ' . Maho\Db\Select::SQL_DESC);
 
         return $this;
     }

@@ -17,14 +17,14 @@ $installer->startSetup();
 $ruleProductTable = $installer->getTable('catalogrule/rule_product');
 
 $columnOptions = [
-    'TYPE' => Varien_Db_Ddl_Table::TYPE_TEXT,
+    'TYPE' => Maho\Db\Ddl\Table::TYPE_TEXT,
     'LENGTH' => 32,
     'COMMENT' => 'Simple Action For Subitems',
 ];
 $installer->getConnection()->addColumn($ruleProductTable, 'sub_simple_action', $columnOptions);
 
 $columnOptions = [
-    'TYPE' => Varien_Db_Ddl_Table::TYPE_DECIMAL,
+    'TYPE' => Maho\Db\Ddl\Table::TYPE_DECIMAL,
     'SCALE' => 4,
     'PRECISION' => 12,
     'NULLABLE' => false,

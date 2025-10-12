@@ -96,7 +96,7 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
     /**
      * Get SQL for get record count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -112,7 +112,7 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
      *
      * @param int $limit
      * @param int $offset
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getAllIdsSelect($limit = null, $offset = null)

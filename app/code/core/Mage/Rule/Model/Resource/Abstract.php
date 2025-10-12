@@ -66,7 +66,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      *
      * @param int $storeId
      * @param Mage_Rule_Model_Condition_Abstract $condition
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getProductFlatSelect($storeId, $condition)
     {

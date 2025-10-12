@@ -15,7 +15,7 @@
  *
  * @package    Mage_Catalog
  *
- * @property Varien_Db_Adapter_Interface $_conn
+ * @property Maho\Db\Adapter\AdapterInterface $_conn
  *
  * @method Mage_Catalog_Model_Category getFirstItem()
  * @method Mage_Catalog_Model_Category getItemById(string $value)

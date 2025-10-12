@@ -19,7 +19,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Grid extends Mage_Adminhtml_Block_Widget_G
         $this->setUseAjax(true);
         $this->setSaveParametersInSession(true);
         $this->setDefaultSort('entity_id')
-            ->setDefaultDir(Varien_Db_Select::SQL_DESC);
+            ->setDefaultDir(Maho\Db\Select::SQL_DESC);
     }
 
     /**

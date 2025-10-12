@@ -22,7 +22,7 @@ $indexNameTmp = $installer->getConnection()->getPrimaryKeyName($tableNameTmp);
 $fields = ['entity_id', 'attribute_id', 'store_id'];
 
 $installer->getConnection()
-        ->addIndex($tableName, $indexName, $fields, Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY);
+        ->addIndex($tableName, $indexName, $fields, Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY);
 
 $installer->getConnection()
-        ->addIndex($tableNameTmp, $indexNameTmp, $fields, Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY);
+        ->addIndex($tableNameTmp, $indexNameTmp, $fields, Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY);

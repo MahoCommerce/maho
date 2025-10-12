@@ -19,32 +19,32 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('cron/schedule'))
-    ->addColumn('schedule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('schedule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Schedule Id')
-    ->addColumn('job_code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('job_code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Job Code')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_TEXT, 7, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_TEXT, 7, [
         'nullable'  => false,
         'default'   => 'pending',
     ], 'Status')
-    ->addColumn('messages', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('messages', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Messages')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Created At')
-    ->addColumn('scheduled_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('scheduled_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => true,
     ], 'Scheduled At')
-    ->addColumn('executed_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('executed_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => true,
     ], 'Executed At')
-    ->addColumn('finished_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('finished_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => true,
     ], 'Finished At')
     ->addIndex(

@@ -13,10 +13,10 @@
 /** @var Mage_Eav_Model_Entity_Setup $this */
 $installer = $this;
 
-/** @var Varien_Db_Adapter_Pdo_Mysql $connection */
+/** @var Maho\Db\Adapter\Pdo\Mysql $connection */
 $connection = $installer->getConnection();
 
 $connection->changeTableEngine(
     $installer->getTable('cataloginventory/stock_status_indexer_tmp'),
-    Varien_Db_Adapter_Pdo_Mysql::ENGINE_MEMORY,
+    Maho\Db\Adapter\Pdo\Mysql::ENGINE_MEMORY,
 );

@@ -123,7 +123,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         /**
          * Reset all columns, because result will group only by 'created_at' field
          */
-        $this->getSelect()->reset(Varien_Db_Select::COLUMNS);
+        $this->getSelect()->reset(Maho\Db\Select::COLUMNS);
 
         $expression = $this->_getSalesAmountExpression();
         if ($isFilter == 0) {
@@ -159,7 +159,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
             ->where('main_table.state NOT IN (?)', [
                 Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
                 Mage_Sales_Model_Order::STATE_NEW])
-            ->order('range ' . Varien_Db_Select::SQL_ASC)
+            ->order('range ' . Maho\Db\Select::SQL_ASC)
             ->group(new Maho\Db\Expr($tzRangeOffsetExpression));
 
         $this->addFieldToFilter('created_at', $dateRange);
@@ -181,7 +181,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         /**
          * Reset all columns, because result will group only by 'created_at' field
          */
-        $this->getSelect()->reset(Varien_Db_Select::COLUMNS);
+        $this->getSelect()->reset(Maho\Db\Select::COLUMNS);
         $rangePeriod = $this->_getRangeExpressionForAttribute($range, 'main_table.period');
 
         $tableName = $this->getConnection()->quoteIdentifier('main_table.period');
@@ -279,7 +279,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         $adapter = $this->getConnection();
         $expression = $this->_getRangeExpression($range);
         $attribute  = $adapter->quoteIdentifier($attribute);
-        $periodExpr = $adapter->getDateAddSql($attribute, $tzTo, Varien_Db_Adapter_Interface::INTERVAL_HOUR);
+        $periodExpr = $adapter->getDateAddSql($attribute, $tzTo, Maho\Db\Adapter\AdapterInterface::INTERVAL_HOUR);
 
         return str_replace('{{attribute}}', $periodExpr, $expression);
     }
@@ -745,18 +745,18 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Varien_Db_Select::ORDER);
-        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Varien_Db_Select::COLUMNS);
-        $countSelect->reset(Varien_Db_Select::GROUP);
-        $countSelect->reset(Varien_Db_Select::HAVING);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::HAVING);
         $countSelect->columns('COUNT(DISTINCT main_table.entity_id)');
 
         return $countSelect;

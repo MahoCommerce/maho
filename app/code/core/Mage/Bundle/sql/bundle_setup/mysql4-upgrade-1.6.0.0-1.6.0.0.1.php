@@ -18,7 +18,7 @@ if (file_exists($installFile)) {
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 
-/** @var Varien_Db_Adapter_Pdo_Mysql $connection */
+/** @var Maho\Db\Adapter\Pdo\Mysql $connection */
 $connection = $installer->getConnection();
 
 $memoryTables = [
@@ -28,5 +28,5 @@ $memoryTables = [
 ];
 
 foreach ($memoryTables as $table) {
-    $connection->changeTableEngine($installer->getTable($table), Varien_Db_Adapter_Pdo_Mysql::ENGINE_MEMORY);
+    $connection->changeTableEngine($installer->getTable($table), Maho\Db\Adapter\Pdo\Mysql::ENGINE_MEMORY);
 }

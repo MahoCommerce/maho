@@ -40,8 +40,8 @@ class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage
     }
 
     /**
-     * @param Varien_Db_Adapter_Pdo_Mysql $dbAdapter
-     * @return string|Varien_Db_Select
+     * @param Maho\Db\Adapter\Pdo\Mysql $dbAdapter
+     * @return string|Maho\Db\Select
      */
     #[\Override]
     public function getIdsSelect($dbAdapter)

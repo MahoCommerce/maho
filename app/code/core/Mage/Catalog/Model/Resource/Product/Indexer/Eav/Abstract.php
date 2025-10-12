@@ -190,7 +190,7 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
             'store_field'   => new Maho\Db\Expr('cs.store_id'),
         ]);
 
-        $query = $write->insertFromSelect($select, $idxTable, [], Varien_Db_Adapter_Interface::INSERT_IGNORE);
+        $query = $write->insertFromSelect($select, $idxTable, [], Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE);
         $write->query($query);
 
         return $this;

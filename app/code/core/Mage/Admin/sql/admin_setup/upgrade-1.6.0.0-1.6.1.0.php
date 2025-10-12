@@ -16,7 +16,7 @@ $installer->startSetup();
 
 // Add reset password link token column
 $installer->getConnection()->addColumn($installer->getTable('admin/user'), 'rp_token', [
-    'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
+    'type' => Maho\Db\Ddl\Table::TYPE_TEXT,
     'length' => 256,
     'nullable' => true,
     'default' => null,
@@ -25,7 +25,7 @@ $installer->getConnection()->addColumn($installer->getTable('admin/user'), 'rp_t
 
 // Add reset password link token creation date column
 $installer->getConnection()->addColumn($installer->getTable('admin/user'), 'rp_token_created_at', [
-    'type' => Varien_Db_Ddl_Table::TYPE_TIMESTAMP,
+    'type' => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
     'nullable' => true,
     'default' => null,
     'comment' => 'Reset Password Link Token Creation Date',

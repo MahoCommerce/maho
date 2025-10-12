@@ -317,7 +317,7 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
      */
     public function resetSortOrder()
     {
-        $this->getSelect()->reset(Varien_Db_Select::ORDER);
+        $this->getSelect()->reset(Maho\Db\Select::ORDER);
         return $this;
     }
 

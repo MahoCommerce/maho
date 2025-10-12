@@ -44,7 +44,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
      * @param string $field
      * @param mixed $value
      * @param Varien_Object $object
-     * @return  Varien_Db_Select
+     * @return  Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

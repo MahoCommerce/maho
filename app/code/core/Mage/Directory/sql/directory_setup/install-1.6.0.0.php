@@ -19,16 +19,16 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('directory/country'))
-    ->addColumn('country_id', Varien_Db_Ddl_Table::TYPE_TEXT, 2, [
+    ->addColumn('country_id', Maho\Db\Ddl\Table::TYPE_TEXT, 2, [
         'nullable'  => false,
         'primary'   => true,
         'default'   => '',
     ], 'Country Id in ISO-2')
-    ->addColumn('iso2_code', Varien_Db_Ddl_Table::TYPE_TEXT, 2, [
+    ->addColumn('iso2_code', Maho\Db\Ddl\Table::TYPE_TEXT, 2, [
         'nullable'  => true,
         'default'   => null,
     ], 'Country ISO-2 format')
-    ->addColumn('iso3_code', Varien_Db_Ddl_Table::TYPE_TEXT, 3, [
+    ->addColumn('iso3_code', Maho\Db\Ddl\Table::TYPE_TEXT, 3, [
         'nullable'  => true,
         'default'   => null,
     ], 'Country ISO-3')
@@ -40,31 +40,31 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('directory/country_format'))
-    ->addColumn('country_format_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('country_format_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Country Format Id')
-    ->addColumn('country_id', Varien_Db_Ddl_Table::TYPE_TEXT, 2, [
+    ->addColumn('country_id', Maho\Db\Ddl\Table::TYPE_TEXT, 2, [
         'nullable'  => true,
         'default'   => null,
     ], 'Country Id in ISO-2')
-    ->addColumn('type', Varien_Db_Ddl_Table::TYPE_TEXT, 30, [
+    ->addColumn('type', Maho\Db\Ddl\Table::TYPE_TEXT, 30, [
         'nullable'  => true,
         'default'   => null,
     ], 'Country Format Type')
-    ->addColumn('format', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('format', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => false,
     ], 'Country Format')
     ->addIndex(
         $installer->getIdxName(
             'directory/country_format',
             ['country_id', 'type'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['country_id', 'type'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
      ->setComment('Directory Country Format');
 $installer->getConnection()->createTable($table);
@@ -74,21 +74,21 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('directory/country_region'))
-    ->addColumn('region_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('region_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Region Id')
-    ->addColumn('country_id', Varien_Db_Ddl_Table::TYPE_TEXT, 4, [
+    ->addColumn('country_id', Maho\Db\Ddl\Table::TYPE_TEXT, 4, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Country Id in ISO-2')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
         'nullable'  => true,
         'default'   => null,
     ], 'Region code')
-    ->addColumn('default_name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('default_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Region Name')
     ->addIndex(
         $installer->getIdxName('directory/country_region', ['country_id']),
@@ -102,18 +102,18 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('directory/country_region_name'))
-    ->addColumn('locale', Varien_Db_Ddl_Table::TYPE_TEXT, 8, [
+    ->addColumn('locale', Maho\Db\Ddl\Table::TYPE_TEXT, 8, [
         'nullable'  => false,
         'primary'   => true,
         'default'   => '',
     ], 'Locale')
-    ->addColumn('region_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('region_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Region Id')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Region Name')
@@ -126,8 +126,8 @@ $table = $installer->getConnection()
         'region_id',
         $installer->getTable('directory/country_region'),
         'region_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Directory Country Region Name');
 $installer->getConnection()->createTable($table);
@@ -137,17 +137,17 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('directory/currency_rate'))
-    ->addColumn('currency_from', Varien_Db_Ddl_Table::TYPE_TEXT, 3, [
+    ->addColumn('currency_from', Maho\Db\Ddl\Table::TYPE_TEXT, 3, [
         'nullable'  => false,
         'primary'   => true,
         'default'   => '',
     ], 'Currency Code Convert From')
-    ->addColumn('currency_to', Varien_Db_Ddl_Table::TYPE_TEXT, 3, [
+    ->addColumn('currency_to', Maho\Db\Ddl\Table::TYPE_TEXT, 3, [
         'nullable'  => false,
         'primary'   => true,
         'default'   => '',
     ], 'Currency Code Convert To')
-    ->addColumn('rate', Varien_Db_Ddl_Table::TYPE_DECIMAL, '24,12', [
+    ->addColumn('rate', Maho\Db\Ddl\Table::TYPE_DECIMAL, '24,12', [
         'nullable'  => false,
         'default'   => '0.000000000000',
     ], 'Currency Conversion Rate')

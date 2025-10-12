@@ -566,10 +566,10 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             $this->_columns = array_merge($this->_getStaticColumns(), $this->_getEavColumns());
             foreach ($this->_columns as $fieldName => $fieldProp) {
                 $default = $fieldProp['default'];
-                if ($fieldProp['type'][0] == Varien_Db_Ddl_Table::TYPE_TIMESTAMP
+                if ($fieldProp['type'][0] == Maho\Db\Ddl\Table::TYPE_TIMESTAMP
                     && $default === 'CURRENT_TIMESTAMP'
                 ) {
-                    $default = Varien_Db_Ddl_Table::TIMESTAMP_INIT;
+                    $default = Maho\Db\Ddl\Table::TIMESTAMP_INIT;
                 }
                 $table->addColumn($fieldName, $fieldProp['type'][0], $fieldProp['type'][1], [
                     'nullable' => $fieldProp['nullable'],
@@ -615,16 +615,16 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             'entity_id',
             $this->getTable('catalog/category'),
             'entity_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         );
         $table->addForeignKey(
             $_writeAdapter->getForeignKeyName($tableName, 'store_id', $this->getTable('core/store'), 'store_id'),
             'store_id',
             $this->getTable('core/store'),
             'store_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         );
         $_writeAdapter->createTable($table);
         return $this;
@@ -651,9 +651,9 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             $ddlType = $helper->getDdlTypeByColumnType($column['DATA_TYPE']);
             $column['DEFAULT'] = empty($column['DEFAULT']) ? $column['DEFAULT'] : trim($column['DEFAULT'], "' ");
             switch ($ddlType) {
-                case Varien_Db_Ddl_Table::TYPE_SMALLINT:
-                case Varien_Db_Ddl_Table::TYPE_INTEGER:
-                case Varien_Db_Ddl_Table::TYPE_BIGINT:
+                case Maho\Db\Ddl\Table::TYPE_SMALLINT:
+                case Maho\Db\Ddl\Table::TYPE_INTEGER:
+                case Maho\Db\Ddl\Table::TYPE_BIGINT:
                     $isUnsigned = (bool) $column['UNSIGNED'];
                     if ($column['DEFAULT'] === '') {
                         $column['DEFAULT'] = null;
@@ -661,27 +661,27 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
 
                     $options = null;
                     if ($column['SCALE'] > 0) {
-                        $ddlType = Varien_Db_Ddl_Table::TYPE_DECIMAL;
+                        $ddlType = Maho\Db\Ddl\Table::TYPE_DECIMAL;
                     } else {
                         break;
                     }
                     // no break
-                case Varien_Db_Ddl_Table::TYPE_DECIMAL:
+                case Maho\Db\Ddl\Table::TYPE_DECIMAL:
                     $options = $column['PRECISION'] . ',' . $column['SCALE'];
                     $isUnsigned = null;
                     if ($column['DEFAULT'] === '') {
                         $column['DEFAULT'] = null;
                     }
                     break;
-                case Varien_Db_Ddl_Table::TYPE_TEXT:
+                case Maho\Db\Ddl\Table::TYPE_TEXT:
                     $options = $column['LENGTH'];
                     $isUnsigned = null;
                     break;
-                case Varien_Db_Ddl_Table::TYPE_TIMESTAMP:
+                case Maho\Db\Ddl\Table::TYPE_TIMESTAMP:
                     $options = null;
                     $isUnsigned = null;
                     break;
-                case Varien_Db_Ddl_Table::TYPE_DATETIME:
+                case Maho\Db\Ddl\Table::TYPE_DATETIME:
                     $isUnsigned = null;
                     break;
             }
@@ -694,7 +694,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             ];
         }
         $columns['store_id'] = [
-            'type' => [Varien_Db_Ddl_Table::TYPE_SMALLINT, 5],
+            'type' => [Maho\Db\Ddl\Table::TYPE_SMALLINT, 5],
             'unsigned' => true,
             'nullable' => false,
             'default' => '0',
@@ -720,7 +720,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             switch ($attribute['backend_type']) {
                 case 'varchar':
                     $columns[$attribute['attribute_code']] = [
-                        'type' => [Varien_Db_Ddl_Table::TYPE_TEXT, 255],
+                        'type' => [Maho\Db\Ddl\Table::TYPE_TEXT, 255],
                         'unsigned' => null,
                         'nullable' => true,
                         'default' => null,
@@ -729,7 +729,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     break;
                 case 'int':
                     $columns[$attribute['attribute_code']] = [
-                        'type' => [Varien_Db_Ddl_Table::TYPE_INTEGER, null],
+                        'type' => [Maho\Db\Ddl\Table::TYPE_INTEGER, null],
                         'unsigned' => null,
                         'nullable' => true,
                         'default' => null,
@@ -738,7 +738,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     break;
                 case 'text':
                     $columns[$attribute['attribute_code']] = [
-                        'type' => [Varien_Db_Ddl_Table::TYPE_TEXT, '64k'],
+                        'type' => [Maho\Db\Ddl\Table::TYPE_TEXT, '64k'],
                         'unsigned' => null,
                         'nullable' => true,
                         'default' => null,
@@ -747,7 +747,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     break;
                 case 'datetime':
                     $columns[$attribute['attribute_code']] = [
-                        'type' => [Varien_Db_Ddl_Table::TYPE_DATETIME, null],
+                        'type' => [Maho\Db\Ddl\Table::TYPE_DATETIME, null],
                         'unsigned' => null,
                         'nullable' => true,
                         'default' => null,
@@ -756,7 +756,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     break;
                 case 'decimal':
                     $columns[$attribute['attribute_code']] = [
-                        'type' => [Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4'],
+                        'type' => [Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4'],
                         'unsigned' => null,
                         'nullable' => true,
                         'default' => null,
@@ -1275,7 +1275,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             ->where('entity_id IN (?)', $pathIds)
             ->where('custom_use_parent_settings = ?', 0)
             ->where($levelField . ' != ?', 0)
-            ->order('level ' . Varien_Db_Select::SQL_DESC);
+            ->order('level ' . Maho\Db\Select::SQL_DESC);
         $result = $adapter->fetchRow($select);
         return Mage::getModel('catalog/category')->setData($result);
     }
@@ -1403,7 +1403,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             )
             ->where('main_table.entity_id IN (?)', $pathIds)
             ->where('main_table.is_active = ?', '1')
-            ->order('main_table.path ' . Varien_Db_Select::SQL_DESC);
+            ->order('main_table.path ' . Maho\Db\Select::SQL_DESC);
         $result = $this->_getReadAdapter()->fetchAll($select);
         foreach ($result as $row) {
             $row['id'] = $row['entity_id'];

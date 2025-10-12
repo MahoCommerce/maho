@@ -407,7 +407,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * Retrieve Select For Flat Attribute update
      *
      * @param int $storeId
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getFlatUpdateSelect(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $storeId)
     {

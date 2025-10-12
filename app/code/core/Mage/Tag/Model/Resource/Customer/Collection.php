@@ -194,7 +194,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
     /**
      * Gets number of rows
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -202,8 +202,8 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
         $countSelect = parent::getSelectCountSql();
 
         if ($this->_allowDisableGrouping) {
-            $countSelect->reset(Varien_Db_Select::COLUMNS);
-            $countSelect->reset(Varien_Db_Select::GROUP);
+            $countSelect->reset(Maho\Db\Select::COLUMNS);
+            $countSelect->reset(Maho\Db\Select::GROUP);
             $countSelect->columns('COUNT(DISTINCT ' . $this->getCountAttribute() . ')');
         }
         return $countSelect;
@@ -306,7 +306,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
     {
         if ($attribute == 'name') {
             $where = $this->_getConditionSql('t.name', $condition);
-            $this->getSelect()->where($where, null, Varien_Db_Select::TYPE_CONDITION);
+            $this->getSelect()->where($where, null, Maho\Db\Select::TYPE_CONDITION);
             return $this;
         } else {
             return parent::addFieldToFilter($attribute, $condition);
@@ -325,7 +325,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
             parent::_renderOrders();
 
             $orders = $this->getSelect()
-                ->getPart(Varien_Db_Select::ORDER);
+                ->getPart(Maho\Db\Select::ORDER);
 
             $appliedOrders = [];
             foreach ($orders as $order) {

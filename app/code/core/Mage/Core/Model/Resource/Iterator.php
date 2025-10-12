@@ -15,9 +15,9 @@ class Mage_Core_Model_Resource_Iterator extends Varien_Object
     /**
      * Walk over records fetched from query one by one using callback function
      *
-     * @param Varien_Db_Statement_Pdo_Mysql|Varien_Db_Select|string $query
+     * @param Maho\Db\Statement\Pdo\Mysql|Maho\Db\Select|string $query
      * @param array|string $callbacks
-     * @param Varien_Db_Adapter_Interface $adapter
+     * @param Maho\Db\Adapter\AdapterInterface $adapter
      * @return $this
      */
     public function walk($query, array $callbacks, array $args = [], $adapter = null)
@@ -41,18 +41,18 @@ class Mage_Core_Model_Resource_Iterator extends Varien_Object
     /**
      * Fetch statement instance
      *
-     * @param Varien_Db_Statement_Pdo_Mysql|Varien_Db_Select|string $query
-     * @param Varien_Db_Adapter_Interface $conn
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @param Maho\Db\Statement\Pdo\Mysql|Maho\Db\Select|string $query
+     * @param Maho\Db\Adapter\AdapterInterface $conn
+     * @return Maho\Db\Statement\Pdo\Mysql
      * @throws Mage_Core_Exception
      */
     protected function _getStatement($query, $conn = null)
     {
-        if ($query instanceof Varien_Db_Statement_Pdo_Mysql) {
+        if ($query instanceof Maho\Db\Statement\Pdo\Mysql) {
             return $query;
         }
 
-        if ($query instanceof Varien_Db_Select) {
+        if ($query instanceof Maho\Db\Select) {
             return $query->query();
         }
 

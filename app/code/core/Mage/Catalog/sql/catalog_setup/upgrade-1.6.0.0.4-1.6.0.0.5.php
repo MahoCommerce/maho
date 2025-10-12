@@ -17,7 +17,7 @@ $installer->getConnection()->modifyColumn(
     $installer->getTable('catalog/category_product_index'),
     'position',
     [
-        'type'      => Varien_Db_Ddl_Table::TYPE_INTEGER,
+        'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
         'unsigned'  => false,
         'nullable'  => true,
         'default'   => null,

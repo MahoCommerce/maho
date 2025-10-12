@@ -61,7 +61,7 @@ class Mage_Rss_Model_Resource_Order
         $commentSelects[] = '(' . $select . ')';
 
         $commentSelect = $read->select()
-            ->union($commentSelects, Varien_Db_Select::SQL_UNION_ALL);
+            ->union($commentSelects, Maho\Db\Select::SQL_UNION_ALL);
 
         $select = $read->select()
             ->from(['orders' => $res->getTableName('sales/order')], ['increment_id'])

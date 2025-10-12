@@ -707,7 +707,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                                 if (isset($values[$code]['from']) && isset($values[$code]['to'])) {
                                     if ($values[$code]['from']) {
                                         if (!is_numeric($values[$code]['from'])) {
-                                            $_date = date(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT, strtotime($values[$code]['from']));
+                                            $_date = date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT, strtotime($values[$code]['from']));
                                             $values[$code]['from'] = $_date;
                                         }
 
@@ -716,7 +716,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
 
                                     if ($values[$code]['to']) {
                                         if (!is_numeric($values[$code]['to'])) {
-                                            $values[$code]['to'] = date(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT, strtotime($values[$code]['to']));
+                                            $values[$code]['to'] = date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT, strtotime($values[$code]['to']));
                                         }
                                         $filter[$code]->where('value <= ?', $values[$code]['to']);
                                     }
@@ -739,7 +739,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
     /**
      * Retrieve SELECT object
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getSelect()
     {

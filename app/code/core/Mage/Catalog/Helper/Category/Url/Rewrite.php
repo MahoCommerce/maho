@@ -15,7 +15,7 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
     /**
      * Adapter instance
      *
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_connection;
 

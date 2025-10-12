@@ -203,7 +203,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
      *
      * @param int $storeId
      * @param int $attributeId
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getLoadGallerySelect(array $productIds, $storeId, $attributeId)
     {
@@ -233,7 +233,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
             )
             ->where('main.attribute_id = ?', $attributeId)
             ->where('main.entity_id in (?)', $productIds)
-            ->order($positionCheckSql . ' ' . Varien_Db_Select::SQL_ASC);
+            ->order($positionCheckSql . ' ' . Maho\Db\Select::SQL_ASC);
     }
 
     /**

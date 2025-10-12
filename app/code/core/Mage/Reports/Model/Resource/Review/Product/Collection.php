@@ -83,7 +83,7 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -91,10 +91,10 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
         $this->_renderFilters();
 
         $select = clone $this->getSelect();
-        $select->reset(Varien_Db_Select::ORDER);
-        $select->reset(Varien_Db_Select::LIMIT_COUNT);
-        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
         $select->resetJoinLeft();
         $select->columns(new Maho\Db\Expr('1'));
 

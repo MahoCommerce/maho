@@ -116,7 +116,7 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
      *
      * @param string $txnId
      * @param string|array|Maho\Db\Expr $columns
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     private function _getLoadByUniqueKeySelect($txnId, $columns = '*')
     {

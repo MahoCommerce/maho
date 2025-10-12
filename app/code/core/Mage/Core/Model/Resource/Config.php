@@ -44,7 +44,7 @@ class Mage_Core_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abstra
         $stores = [];
         $select = $read->select()
             ->from($this->getTable('core/store'), ['store_id', 'code', 'name', 'website_id'])
-            ->order('sort_order ' . Varien_Db_Select::SQL_ASC);
+            ->order('sort_order ' . Maho\Db\Select::SQL_ASC);
         $rowset = $read->fetchAssoc($select);
         foreach ($rowset as $s) {
             if (!isset($websites[$s['website_id']])) {

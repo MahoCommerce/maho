@@ -30,7 +30,7 @@ class Mage_CatalogRule_Model_Resource_Rule_Product_Price extends Mage_Core_Model
      * @return $this
      */
     public function applyPriceRuleToIndexTable(
-        Varien_Db_Select $select,
+        Maho\Db\Select $select,
         $indexTable,
         $entityId,
         $customerGroupId,

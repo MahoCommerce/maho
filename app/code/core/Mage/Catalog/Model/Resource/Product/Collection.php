@@ -109,7 +109,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Category product count select
      *
-     * @var Varien_Db_Select|null
+     * @var Maho\Db\Select|null
      */
     protected $_productCountSelect           = null;
 
@@ -184,7 +184,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Cloned Select after dispatching 'catalog_prepare_price_select' event
      *
-     * @var Varien_Db_Select
+     * @var Maho\Db\Select
      */
     protected $_catalogPreparePriceSelect = null;
 
@@ -209,7 +209,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Get cloned Select after dispatching 'catalog_prepare_price_select' event
      *
-     * @return Varien_Db_Select|null
+     * @return Maho\Db\Select|null
      */
     public function getCatalogPreparedSelect()
     {
@@ -219,7 +219,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Prepare additional price expression sql part
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return $this
      */
     protected function _preparePriceExpressionParameters($select)
@@ -227,7 +227,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         // prepare response object for event
         $response = new Varien_Object();
         $response->setAdditionalCalculations([]);
-        $tableAliases = array_keys($select->getPart(Varien_Db_Select::FROM));
+        $tableAliases = array_keys($select->getPart(Maho\Db\Select::FROM));
         if (in_array(self::INDEX_TABLE_ALIAS, $tableAliases)) {
             $table = self::INDEX_TABLE_ALIAS;
         } else {
@@ -255,7 +255,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Get price expression sql part
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return string
      */
     public function getPriceExpression($select)
@@ -269,7 +269,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Get additional price expression sql part
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return string
      */
     public function getAdditionalPriceExpression($select)
@@ -743,7 +743,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $condition  = 'e.entity_id = ' . $tableAlias . '.entity_id
             AND ' . $this->_getConditionSql($tableAlias . '.attribute_id', $attribute->getId());
 
-        $select->reset(Varien_Db_Select::GROUP);
+        $select->reset(Maho\Db\Select::GROUP);
         $select->join(
             [$tableAlias => $attribute->getBackend()->getTable()],
             $condition,
@@ -778,7 +778,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $attributeCode = $attribute->getAttributeCode();
         $tableAlias    = $attributeCode . '_value_count';
 
-        $select->reset(Varien_Db_Select::GROUP);
+        $select->reset(Maho\Db\Select::GROUP);
         $condition  = 'e.entity_id=' . $tableAlias . '.entity_id
             AND ' . $this->_getConditionSql($tableAlias . '.attribute_id', $attribute->getId());
 
@@ -838,7 +838,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Get SQL for get record count without left JOINs
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -849,9 +849,9 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Get SQL for get record count
      *
-     * @param Varien_Db_Select|null $select
+     * @param Maho\Db\Select|null $select
      * @param bool $resetLeftJoins
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getSelectCountSql($select = null, $resetLeftJoins = true)
     {
@@ -860,7 +860,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $this->_getClearSelect() :
             $this->_buildClearSelect($select);
         // Clear GROUP condition for count method
-        $countSelect->reset(Varien_Db_Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::GROUP);
         $countSelect->columns('COUNT(DISTINCT e.entity_id)');
         if ($resetLeftJoins) {
             $countSelect->resetJoinLeft();
@@ -899,7 +899,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Retrieve clear select
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getClearSelect()
     {
@@ -909,18 +909,18 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Build clear select
      *
-     * @param Varien_Db_Select $select
-     * @return Varien_Db_Select
+     * @param Maho\Db\Select $select
+     * @return Maho\Db\Select
      */
     protected function _buildClearSelect($select = null)
     {
         if (is_null($select)) {
             $select = clone $this->getSelect();
         }
-        $select->reset(Varien_Db_Select::ORDER);
-        $select->reset(Varien_Db_Select::LIMIT_COUNT);
-        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
 
         return $select;
     }
@@ -939,15 +939,15 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Retrieve product count select for categories
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getProductCountSelect()
     {
         if ($this->_productCountSelect === null) {
             $this->_productCountSelect = clone $this->getSelect();
-            $this->_productCountSelect->reset(Varien_Db_Select::COLUMNS)
-                ->reset(Varien_Db_Select::GROUP)
-                ->reset(Varien_Db_Select::ORDER)
+            $this->_productCountSelect->reset(Maho\Db\Select::COLUMNS)
+                ->reset(Maho\Db\Select::GROUP)
+                ->reset(Maho\Db\Select::ORDER)
                 ->distinct(false)
                 ->join(
                     ['count_table' => $this->getTable('catalog/category_product_index')],
@@ -1036,7 +1036,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     public function getSetIds()
     {
         $select = clone $this->getSelect();
-        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Maho\Db\Select::COLUMNS);
         $select->distinct(true);
         $select->columns('attribute_set_id');
         return $this->getConnection()->fetchCol($select);
@@ -1050,7 +1050,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     public function getProductTypeIds()
     {
         $select = clone $this->getSelect();
-        $select->reset(Varien_Db_Select::COLUMNS);
+        $select->reset(Maho\Db\Select::COLUMNS);
         $select->distinct(true);
         $select->columns('type_id');
         return $this->getConnection()->fetchCol($select);
@@ -1345,7 +1345,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $this->_allIdsCache = null;
 
         if (is_string($attribute) && $attribute == 'is_saleable') {
-            $columns = $this->getSelect()->getPart(Varien_Db_Select::COLUMNS);
+            $columns = $this->getSelect()->getPart(Maho\Db\Select::COLUMNS);
             foreach ($columns as $columnEntry) {
                 [$correlationName, $column, $alias] = $columnEntry;
                 if ($alias == 'is_saleable') {
@@ -1575,14 +1575,14 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 ->quoteInto('product_website.website_id = ?', $websiteId);
         }
 
-        $fromPart = $this->getSelect()->getPart(Varien_Db_Select::FROM);
+        $fromPart = $this->getSelect()->getPart(Maho\Db\Select::FROM);
         if (isset($fromPart['product_website'])) {
             if (!$joinWebsite) {
                 unset($fromPart['product_website']);
             } else {
                 $fromPart['product_website']['joinCondition'] = implode(' AND ', $conditions);
             }
-            $this->getSelect()->setPart(Varien_Db_Select::FROM, $fromPart);
+            $this->getSelect()->setPart(Maho\Db\Select::FROM, $fromPart);
         } elseif ($joinWebsite) {
             $this->getSelect()->join(
                 ['product_website' => $this->getTable('catalog/product_website')],
@@ -1607,7 +1607,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         }
 
         $hasColumn = false;
-        foreach ($this->getSelect()->getPart(Varien_Db_Select::COLUMNS) as $columnEntry) {
+        foreach ($this->getSelect()->getPart(Maho\Db\Select::COLUMNS) as $columnEntry) {
             [, , $alias] = $columnEntry;
             if ($alias == 'visibility') {
                 $hasColumn = true;
@@ -1617,7 +1617,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $this->getSelect()->columns('visibility', 'cat_index');
         }
 
-        $fromPart = $this->getSelect()->getPart(Varien_Db_Select::FROM);
+        $fromPart = $this->getSelect()->getPart(Maho\Db\Select::FROM);
         if (!isset($fromPart['store_index'])) {
             $this->getSelect()->joinLeft(
                 ['store_index' => $this->getTable('core/store')],
@@ -1653,7 +1653,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $this->getConnection()->quoteInto('store_cat_index.visibility IN(?)', $filters['visibility']),
         ]);
 
-        $wherePart = $this->getSelect()->getPart(Varien_Db_Select::WHERE);
+        $wherePart = $this->getSelect()->getPart(Maho\Db\Select::WHERE);
         $hasCond   = false;
         foreach ($wherePart as $cond) {
             if ($cond == '(' . $whereCond . ')') {
@@ -1703,7 +1703,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $connection->quoteInto('price_index.customer_group_id = ?', $filters['customer_group_id']),
         ]);
 
-        $fromPart = $select->getPart(Varien_Db_Select::FROM);
+        $fromPart = $select->getPart(Maho\Db\Select::FROM);
         if (!isset($fromPart['price_index'])) {
             $least       = $connection->getLeastSql(['price_index.min_price', 'price_index.tier_price']);
             $minimalExpr = $connection->getCheckSql(
@@ -1725,7 +1725,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             }
         } else {
             $fromPart['price_index']['joinCondition'] = $joinCond;
-            $select->setPart(Varien_Db_Select::FROM, $fromPart);
+            $select->setPart(Maho\Db\Select::FROM, $fromPart);
         }
         //Clean duplicated fields
         $helper->prepareColumnsList($select);
@@ -1795,10 +1795,10 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         }
 
         $joinCond = implode(' AND ', $conditions);
-        $fromPart = $this->getSelect()->getPart(Varien_Db_Select::FROM);
+        $fromPart = $this->getSelect()->getPart(Maho\Db\Select::FROM);
         if (isset($fromPart['cat_index'])) {
             $fromPart['cat_index']['joinCondition'] = $joinCond;
-            $this->getSelect()->setPart(Varien_Db_Select::FROM, $fromPart);
+            $this->getSelect()->setPart(Maho\Db\Select::FROM, $fromPart);
         } else {
             $this->getSelect()->join(
                 ['cat_index' => $this->getTable('catalog/category_product_index')],
@@ -1833,10 +1833,10 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         ];
         $joinCond = implode(' AND ', $conditions);
 
-        $fromPart = $this->getSelect()->getPart(Varien_Db_Select::FROM);
+        $fromPart = $this->getSelect()->getPart(Maho\Db\Select::FROM);
         if (isset($fromPart['cat_pro'])) {
             $fromPart['cat_pro']['joinCondition'] = $joinCond;
-            $this->getSelect()->setPart(Varien_Db_Select::FROM, $fromPart);
+            $this->getSelect()->setPart(Maho\Db\Select::FROM, $fromPart);
         } else {
             $this->getSelect()->join(
                 ['cat_pro' => $this->getTable('catalog/category_product')],

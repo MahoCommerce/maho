@@ -163,14 +163,14 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
      * Get SQL for get record count.
      * Extra GROUP BY strip added.
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = parent::getSelectCountSql();
 
-        $countSelect->reset(Varien_Db_Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::GROUP);
 
         return $countSelect;
     }

@@ -45,7 +45,7 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                         $select->where('t1.store_id = ?', 0);
                         $select->where('t1.attribute_id = ?', $attributeId);
 
-                        if (array_key_exists('price_index', $this->getSelect()->getPart(Varien_Db_Select::FROM))) {
+                        if (array_key_exists('price_index', $this->getSelect()->getPart(Maho\Db\Select::FROM))) {
                             $select->where('t1.entity_id = price_index.entity_id');
                         }
 

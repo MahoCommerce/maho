@@ -64,8 +64,8 @@ abstract class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice_
     /**
      * Load specific db-select data
      *
-     * @param Varien_Db_Select $select
-     * @return Varien_Db_Select
+     * @param Maho\Db\Select $select
+     * @return Maho\Db\Select
      */
     protected function _loadPriceDataSelect($select)
     {

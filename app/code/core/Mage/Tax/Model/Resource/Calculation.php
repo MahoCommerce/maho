@@ -335,12 +335,12 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
                 );
             }
 
-            $select->order('priority ' . Varien_Db_Select::SQL_ASC)
-                   ->order('tax_calculation_rule_id ' . Varien_Db_Select::SQL_ASC)
-                   ->order('tax_country_id ' . Varien_Db_Select::SQL_DESC)
-                   ->order('tax_region_id ' . Varien_Db_Select::SQL_DESC)
-                   ->order('tax_postcode ' . Varien_Db_Select::SQL_DESC)
-                   ->order('value ' . Varien_Db_Select::SQL_DESC);
+            $select->order('priority ' . Maho\Db\Select::SQL_ASC)
+                   ->order('tax_calculation_rule_id ' . Maho\Db\Select::SQL_ASC)
+                   ->order('tax_country_id ' . Maho\Db\Select::SQL_DESC)
+                   ->order('tax_region_id ' . Maho\Db\Select::SQL_DESC)
+                   ->order('tax_postcode ' . Maho\Db\Select::SQL_DESC)
+                   ->order('value ' . Maho\Db\Select::SQL_DESC);
 
             $this->_ratesCache[$cacheKey] = $this->_getReadAdapter()->fetchAll($select);
         }

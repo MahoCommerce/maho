@@ -12,7 +12,7 @@
 
 /**
  * @var Mage_Customer_Model_Resource_Setup $this
- * @var Varien_Db_Adapter_Interface $conn
+ * @var Maho\Db\Adapter\AdapterInterface $conn
  */
 $conn = $this->getConnection();
 
@@ -61,8 +61,8 @@ $conn->addIndex(
     $this->getIdxName(
         'customer/entity',
         ['email', 'website_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
     ),
     ['email', 'website_id'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+    Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
 );

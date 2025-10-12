@@ -198,7 +198,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      * @param int $paymentId
      * @param string $txnId
      * @param string|array|Maho\Db\Expr $columns
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     private function _getLoadByUniqueKeySelect($orderId, $paymentId, $txnId, $columns = '*')
     {

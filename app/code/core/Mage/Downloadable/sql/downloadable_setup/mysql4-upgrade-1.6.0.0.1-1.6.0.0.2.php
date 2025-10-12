@@ -18,10 +18,10 @@ if (file_exists($installFile)) {
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 
-/** @var Varien_Db_Adapter_Pdo_Mysql $connection */
+/** @var Maho\Db\Adapter\Pdo\Mysql $connection */
 $connection = $installer->getConnection();
 
 $connection->changeTableEngine(
     $installer->getTable('downloadable/product_price_indexer_tmp'),
-    Varien_Db_Adapter_Pdo_Mysql::ENGINE_MEMORY,
+    Maho\Db\Adapter\Pdo\Mysql::ENGINE_MEMORY,
 );

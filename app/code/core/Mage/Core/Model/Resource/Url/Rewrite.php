@@ -53,7 +53,7 @@ class Mage_Core_Model_Resource_Url_Rewrite extends Mage_Core_Model_Resource_Db_A
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Url_Rewrite $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -62,7 +62,7 @@ class Mage_Core_Model_Resource_Url_Rewrite extends Mage_Core_Model_Resource_Db_A
 
         if (!is_null($object->getStoreId())) {
             $select->where('store_id = ?', $object->getStoreId());
-            $select->order('is_system ' . Varien_Db_Select::SQL_DESC);
+            $select->order('is_system ' . Maho\Db\Select::SQL_DESC);
             $select->limit(1);
         }
 

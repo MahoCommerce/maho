@@ -28,7 +28,7 @@ class Mage_Review_Model_Resource_Review_Summary extends Mage_Core_Model_Resource
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Abstract $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

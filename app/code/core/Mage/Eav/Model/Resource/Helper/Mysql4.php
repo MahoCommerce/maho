@@ -26,19 +26,19 @@ class Mage_Eav_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Hel
      * @var array
      */
     protected $_ddlColumnTypes      = [
-        Varien_Db_Ddl_Table::TYPE_BOOLEAN       => 'bool',
-        Varien_Db_Ddl_Table::TYPE_SMALLINT      => 'smallint',
-        Varien_Db_Ddl_Table::TYPE_INTEGER       => 'int',
-        Varien_Db_Ddl_Table::TYPE_BIGINT        => 'bigint',
-        Varien_Db_Ddl_Table::TYPE_FLOAT         => 'float',
-        Varien_Db_Ddl_Table::TYPE_DECIMAL       => 'decimal',
-        Varien_Db_Ddl_Table::TYPE_NUMERIC       => 'decimal',
-        Varien_Db_Ddl_Table::TYPE_DATE          => 'date',
-        Varien_Db_Ddl_Table::TYPE_TIMESTAMP     => 'timestamp',
-        Varien_Db_Ddl_Table::TYPE_DATETIME      => 'datetime',
-        Varien_Db_Ddl_Table::TYPE_TEXT          => 'text',
-        Varien_Db_Ddl_Table::TYPE_BLOB          => 'blob',
-        Varien_Db_Ddl_Table::TYPE_VARBINARY     => 'blob',
+        Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
+        Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
+        Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
+        Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
+        Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
+        Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
+        Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'decimal',
+        Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
+        Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
+        Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
+        Maho\Db\Ddl\Table::TYPE_BLOB          => 'blob',
+        Maho\Db\Ddl\Table::TYPE_VARBINARY     => 'blob',
     ];
 
     /**

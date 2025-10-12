@@ -21,7 +21,7 @@ $installer->getConnection()
         $installer->getTable('cataloginventory/stock_item'),
         'is_decimal_divided',
         [
-            'TYPE' => Varien_Db_Ddl_Table::TYPE_SMALLINT,
+            'TYPE' => Maho\Db\Ddl\Table::TYPE_SMALLINT,
             'LENGTH' => 5,
             'UNSIGNED' => true,
             'NULLABLE' => false,

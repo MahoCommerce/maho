@@ -353,12 +353,12 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
 
         $where = [];
         foreach ($conditions as $k => $part) {
-            $where[$k] = implode(' ' . Varien_Db_Select::SQL_AND . ' ', $part);
+            $where[$k] = implode(' ' . Maho\Db\Select::SQL_AND . ' ', $part);
         }
 
         $where = $adapter->prepareSqlCondition('invtr.low_stock_date', ['notnull' => true])
-            . ' ' . Varien_Db_Select::SQL_AND . ' (('
-            . implode(') ' . Varien_Db_Select::SQL_OR . ' (', $where)
+            . ' ' . Maho\Db\Select::SQL_AND . ' (('
+            . implode(') ' . Maho\Db\Select::SQL_OR . ' (', $where)
             . '))';
 
         $collection->joinTable(

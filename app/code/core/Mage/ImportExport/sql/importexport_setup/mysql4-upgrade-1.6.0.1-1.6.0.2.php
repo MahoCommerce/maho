@@ -17,7 +17,7 @@ $installer->getConnection()->modifyColumn(
     $installer->getTable('importexport/importdata'),
     'data',
     [
-        'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type' => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length' => '4G',
         'default' => '',
         'comment' => 'Data',

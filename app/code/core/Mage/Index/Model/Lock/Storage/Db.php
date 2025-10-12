@@ -18,7 +18,7 @@ class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_
     protected $_helper;
 
     /**
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_connection;
 

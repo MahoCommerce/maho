@@ -15,7 +15,7 @@ $installer = $this;
 
 $installer->getConnection()
     ->addColumn($installer->getTable('paypal/settlement_report_row'), 'payment_tracking_id', [
-        'type'    => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'    => Maho\Db\Ddl\Table::TYPE_TEXT,
         'comment' => 'Payment Tracking ID',
         'length'  => '255',
     ]);

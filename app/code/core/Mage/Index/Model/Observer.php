@@ -149,7 +149,7 @@ class Mage_Index_Model_Observer
         $dateInterval = new DateInterval('PT' . self::OLD_INDEX_EVENT_THRESHOLD_SECONDS . 'S');
         $oldEventsThreshold = $now
             ->sub($dateInterval)
-            ->format(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT);
+            ->format(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT);
 
         $coreResource = Mage::getSingleton('core/resource');
         $writeConnection = $coreResource->getConnection('core_write');

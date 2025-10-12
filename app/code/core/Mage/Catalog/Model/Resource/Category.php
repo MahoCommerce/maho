@@ -612,7 +612,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             ->addAttributeToSelect('name')
             ->addAttributeToSelect('all_children')
             ->addAttributeToSelect('is_anchor')
-            ->setOrder('position', Varien_Db_Select::SQL_ASC)
+            ->setOrder('position', Maho\Db\Select::SQL_ASC)
             ->joinUrlRewrite();
 
         return $collection;
@@ -653,7 +653,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      *
      * @param Mage_Catalog_Model_Category $category
      * @param bool $recursive
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getChildrenIdSelect($category, $recursive = true)
     {

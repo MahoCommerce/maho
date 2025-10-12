@@ -129,7 +129,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
      * Retrieve Select For Flat Attribute update
      *
      * @param int $store
-     * @return Varien_Db_Select|null
+     * @return Maho\Db\Select|null
      */
     public function getFlatUpdateSelect($store)
     {

@@ -21,7 +21,7 @@ $installer->getConnection()
         $installer->getTable('tax/sales_order_tax_item'),
         'tax_percent',
         [
-            'TYPE'      => Varien_Db_Ddl_Table::TYPE_DECIMAL,
+            'TYPE'      => Maho\Db\Ddl\Table::TYPE_DECIMAL,
             'SCALE'     => 4,
             'PRECISION' => 12,
             'NULLABLE'  => false,

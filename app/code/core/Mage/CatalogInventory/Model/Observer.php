@@ -753,7 +753,7 @@ class Mage_CatalogInventory_Model_Observer
         $stockCollection = Mage::getModel('cataloginventory/stock_item')->getCollection()
             ->addFieldToFilter('product_id', ['in' => $productIds])
             ->addFieldToFilter('manage_stock', ['eq' => 1]);
-        $stockCollection->getSelect()->reset(Varien_Db_Select::COLUMNS)->columns(['product_id']);
+        $stockCollection->getSelect()->reset(Maho\Db\Select::COLUMNS)->columns(['product_id']);
         $productIds = $stockCollection->getColumnValues('product_id');
 
         if (count($productIds)) {

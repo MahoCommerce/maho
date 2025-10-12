@@ -73,7 +73,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled extends Mage
             $column['type']     = 'tinyint(1)';
             $column['is_null']  = true;
         } else {
-            $column['type']     = Varien_Db_Ddl_Table::TYPE_SMALLINT;
+            $column['type']     = Maho\Db\Ddl\Table::TYPE_SMALLINT;
             $column['length']   = 1;
             $column['nullable'] = true;
             $column['comment']  = $attributeCode . ' column';
@@ -86,7 +86,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled extends Mage
      * Retrieve Select For Flat Attribute update
      *
      * @param int $store
-     * @return Varien_Db_Select|null
+     * @return Maho\Db\Select|null
      */
     #[\Override]
     public function getFlatUpdateSelect($store)

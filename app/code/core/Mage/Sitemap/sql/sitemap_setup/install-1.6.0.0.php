@@ -19,22 +19,22 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('sitemap/sitemap'))
-    ->addColumn('sitemap_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sitemap_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Sitemap Id')
-    ->addColumn('sitemap_type', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('sitemap_type', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Sitemap Type')
-    ->addColumn('sitemap_filename', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('sitemap_filename', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Sitemap Filename')
-    ->addColumn('sitemap_path', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('sitemap_path', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Sitemap Path')
-    ->addColumn('sitemap_time', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('sitemap_time', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => true,
     ], 'Sitemap Time')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -48,8 +48,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Google Sitemap');
 

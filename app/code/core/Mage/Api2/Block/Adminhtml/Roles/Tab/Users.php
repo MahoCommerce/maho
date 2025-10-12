@@ -27,7 +27,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
         $this->setData('use_ajax', true);
         $this->setSaveParametersInSession(true);
         $this->setDefaultSort('user_id')
-            ->setDefaultDir(Varien_Db_Select::SQL_DESC);
+            ->setDefaultDir(Maho\Db\Select::SQL_DESC);
         $this->setDefaultFilter(['filter_in_role_users' => 1]);
     }
 

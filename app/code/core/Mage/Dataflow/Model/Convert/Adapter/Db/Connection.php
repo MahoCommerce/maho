@@ -19,7 +19,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Db_Connection extends Mage_Dataflow_Mo
             // Create Varien database adapter with provided configuration
             $config = $this->getVars();
             $config['type'] = $this->getVar('adapter', 'Pdo_Mysql');
-            $this->_resource = new Varien_Db_Adapter_Pdo_Mysql($config);
+            $this->_resource = new Maho\Db\Adapter\Pdo\Mysql($config);
         }
         return $this->_resource;
     }

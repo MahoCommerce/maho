@@ -160,7 +160,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
      * @param array $ids
      * @param array $flatColumnsToSelect
      * @param array|null $gridColumns
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getUpdateGridRecordsSelect($ids, &$flatColumnsToSelect, $gridColumns = null)
     {

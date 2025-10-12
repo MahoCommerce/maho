@@ -80,7 +80,7 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
      *
      * @param string $table
      * @param array|int $attributeIds
-     * @return Varien_Db_Select|Varien_Db_Select
+     * @return Maho\Db\Select|Maho\Db\Select
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -145,10 +145,10 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
     }
 
     /**
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @param string $table
      * @param string $type
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _addLoadAttributesSelectValues($select, $table, $type)

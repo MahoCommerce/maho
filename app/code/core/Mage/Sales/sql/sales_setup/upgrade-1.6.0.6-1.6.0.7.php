@@ -15,7 +15,7 @@ $installer = $this;
 
 $installer->getConnection()
     ->addColumn($installer->getTable('sales/order'), 'coupon_rule_name', [
-        'TYPE'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'TYPE'      => Maho\Db\Ddl\Table::TYPE_TEXT,
         'LENGTH'    => 255,
         'NULLABLE'  => true,
         'COMMENT'   => 'Coupon Sales Rule Name',

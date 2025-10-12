@@ -27,8 +27,8 @@ $this->getConnection()->addForeignKey(
     'order_id',
     $orderTable,
     'entity_id',
-    Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
-    Varien_Db_Adapter_Interface::FK_ACTION_CASCADE,
+    Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
+    Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
     true,
 );
 

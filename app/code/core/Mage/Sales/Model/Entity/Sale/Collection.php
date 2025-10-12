@@ -15,7 +15,7 @@ class Mage_Sales_Model_Entity_Sale_Collection extends Varien_Object implements I
     /**
      * Read connection
      *
-     * @var Varien_Db_Adapter_Interface|false
+     * @var Maho\Db\Adapter\AdapterInterface|false
      */
     protected $_read;
 
@@ -31,9 +31,9 @@ class Mage_Sales_Model_Entity_Sale_Collection extends Varien_Object implements I
     protected $_entity;
 
     /**
-     * Collection's Varien_Db_Select object
+     * Collection's Maho\Db\Select object
      *
-     * @var Varien_Db_Select
+     * @var Maho\Db\Select
      */
     protected $_select;
 
@@ -138,7 +138,7 @@ class Mage_Sales_Model_Entity_Sale_Collection extends Varien_Object implements I
     /**
      * Get zend db select instance
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getSelect()
     {

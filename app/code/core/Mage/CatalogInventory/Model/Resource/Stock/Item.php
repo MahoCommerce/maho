@@ -42,7 +42,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
      * @param string $field
      * @param mixed $value
      * @param Mage_CatalogInventory_Model_Stock_Item $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

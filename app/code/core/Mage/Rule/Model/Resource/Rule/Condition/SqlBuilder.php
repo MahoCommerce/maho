@@ -14,7 +14,7 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
 {
     /**
      * Database adapter
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_adapter;
 

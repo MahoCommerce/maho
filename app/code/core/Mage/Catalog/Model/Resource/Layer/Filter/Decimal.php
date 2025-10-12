@@ -77,7 +77,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_R
      * Joined table has index
      *
      * @param Mage_Catalog_Model_Layer_Filter_Decimal $filter
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getSelect($filter)
     {
@@ -86,10 +86,10 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_R
         // clone select from collection with filters
         $select = clone $collection->getSelect();
         // reset columns, order and limitation conditions
-        $select->reset(Varien_Db_Select::COLUMNS);
-        $select->reset(Varien_Db_Select::ORDER);
-        $select->reset(Varien_Db_Select::LIMIT_COUNT);
-        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
 
         $attributeId = $filter->getAttributeModel()->getId();
         $storeId     = $collection->getStoreId();

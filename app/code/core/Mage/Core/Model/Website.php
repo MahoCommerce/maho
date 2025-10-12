@@ -532,7 +532,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
      * Select fields website_id, store_id
      *
      * @param bool $withDefault include/exclude default admin website
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getDefaultStoresSelect($withDefault = false)
     {

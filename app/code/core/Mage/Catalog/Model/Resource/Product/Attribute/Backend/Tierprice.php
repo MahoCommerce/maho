@@ -35,8 +35,8 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Tierprice extends Ma
     /**
      * Order by qty
      *
-     * @param Varien_Db_Select $select
-     * @return Varien_Db_Select
+     * @param Maho\Db\Select $select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _loadPriceDataSelect($select)

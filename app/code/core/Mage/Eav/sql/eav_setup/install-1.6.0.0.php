@@ -19,63 +19,63 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/entity_type'))
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Type Id')
-    ->addColumn('entity_type_code', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('entity_type_code', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
         'nullable'  => false,
     ], 'Entity Type Code')
-    ->addColumn('entity_model', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('entity_model', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Entity Model')
-    ->addColumn('attribute_model', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('attribute_model', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
     ], 'Attribute Model')
-    ->addColumn('entity_table', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('entity_table', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Entity Table')
-    ->addColumn('value_table_prefix', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('value_table_prefix', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Value Table Prefix')
-    ->addColumn('entity_id_field', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('entity_id_field', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Entity Id Field')
-    ->addColumn('is_data_sharing', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_data_sharing', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ], 'Defines Is Data Sharing')
-    ->addColumn('data_sharing_key', Varien_Db_Ddl_Table::TYPE_TEXT, 100, [
+    ->addColumn('data_sharing_key', Maho\Db\Ddl\Table::TYPE_TEXT, 100, [
         'default'   => 'default',
     ], 'Data Sharing Key')
-    ->addColumn('default_attribute_set_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('default_attribute_set_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Default Attribute Set Id')
-    ->addColumn('increment_model', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('increment_model', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => '',
     ], 'Increment Model')
-    ->addColumn('increment_per_store', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('increment_per_store', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Increment Per Store')
-    ->addColumn('increment_pad_length', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('increment_pad_length', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '8',
     ], 'Increment Pad Length')
-    ->addColumn('increment_pad_char', Varien_Db_Ddl_Table::TYPE_TEXT, 1, [
+    ->addColumn('increment_pad_char', Maho\Db\Ddl\Table::TYPE_TEXT, 1, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Increment Pad Char')
-    ->addColumn('additional_attribute_table', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('additional_attribute_table', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => '',
     ], 'Additional Attribute Table')
-    ->addColumn('entity_attribute_collection', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('entity_attribute_collection', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Entity Attribute Collection')
@@ -91,43 +91,43 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/entity'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_set_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_set_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Set Id')
-    ->addColumn('increment_id', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('increment_id', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
         'nullable'  => true,
         'default'   => null,
     ], 'Increment Id')
-    ->addColumn('parent_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('parent_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Parent Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Created At')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Updated At')
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
@@ -145,16 +145,16 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/entity', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity');
 $installer->getConnection()->createTable($table);
@@ -164,32 +164,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'datetime']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
         'nullable'  => false,
         'default' => $installer->getConnection()->getSuggestedZeroDate(),
     ], 'Attribute Value')
@@ -221,10 +221,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             ['eav/entity_value_prefix', 'datetime'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -236,8 +236,8 @@ $table = $installer->getConnection()
         'entity_id',
         $installer->getTable('eav/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -249,8 +249,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -262,8 +262,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity Value Prefix');
 $installer->getConnection()->createTable($table);
@@ -273,32 +273,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'decimal']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Attribute Value')
@@ -330,10 +330,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             ['eav/entity_value_prefix', 'decimal'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -345,8 +345,8 @@ $table = $installer->getConnection()
         'entity_id',
         $installer->getTable('eav/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -358,8 +358,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -371,8 +371,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity Value Prefix');
 $installer->getConnection()->createTable($table);
@@ -382,32 +382,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'int']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Value')
@@ -439,10 +439,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             ['eav/entity_value_prefix', 'int'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -454,8 +454,8 @@ $table = $installer->getConnection()
         'entity_id',
         $installer->getTable('eav/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -467,8 +467,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -480,8 +480,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity Value Prefix');
 $installer->getConnection()->createTable($table);
@@ -491,32 +491,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'text']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => false,
     ], 'Attribute Value')
     ->addIndex(
@@ -539,10 +539,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             ['eav/entity_value_prefix', 'text'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -554,8 +554,8 @@ $table = $installer->getConnection()
         'entity_id',
         $installer->getTable('eav/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -567,8 +567,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -580,8 +580,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity Value Prefix');
 $installer->getConnection()->createTable($table);
@@ -591,32 +591,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'varchar']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Attribute Value')
@@ -648,10 +648,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             ['eav/entity_value_prefix', 'varchar'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -663,8 +663,8 @@ $table = $installer->getConnection()
         'entity_id',
         $installer->getTable('eav/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -676,8 +676,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -689,8 +689,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity Value Prefix');
 $installer->getConnection()->createTable($table);
@@ -700,68 +700,68 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/attribute'))
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Attribute Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('attribute_code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Attribute Code')
-    ->addColumn('attribute_model', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('attribute_model', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Attribute Model')
-    ->addColumn('backend_model', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('backend_model', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Backend Model')
-    ->addColumn('backend_type', Varien_Db_Ddl_Table::TYPE_TEXT, 8, [
+    ->addColumn('backend_type', Maho\Db\Ddl\Table::TYPE_TEXT, 8, [
         'nullable'  => false,
         'default'   => 'static',
     ], 'Backend Type')
-    ->addColumn('backend_table', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('backend_table', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Backend Table')
-    ->addColumn('frontend_model', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('frontend_model', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Frontend Model')
-    ->addColumn('frontend_input', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('frontend_input', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Frontend Input')
-    ->addColumn('frontend_label', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('frontend_label', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Frontend Label')
-    ->addColumn('frontend_class', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('frontend_class', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Frontend Class')
-    ->addColumn('source_model', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('source_model', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Source Model')
-    ->addColumn('is_required', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_required', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Defines Is Required')
-    ->addColumn('is_user_defined', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_user_defined', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Defines Is User Defined')
-    ->addColumn('default_value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('default_value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Default Value')
-    ->addColumn('is_unique', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_unique', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Defines Is Unique')
-    ->addColumn('note', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('note', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Note')
     ->addIndex(
         $installer->getIdxName(
             'eav/attribute',
             ['entity_type_id', 'attribute_code'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_type_id', 'attribute_code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('eav/attribute', ['entity_type_id']),
@@ -776,8 +776,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute');
 $installer->getConnection()->createTable($table);
@@ -787,26 +787,26 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/entity_store'))
-    ->addColumn('entity_store_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_store_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Store Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('increment_prefix', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('increment_prefix', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
         'nullable'  => true,
     ], 'Increment Prefix')
-    ->addColumn('increment_last_id', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('increment_last_id', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
         'nullable'  => true,
     ], 'Last Incremented Id')
     ->addIndex(
@@ -822,16 +822,16 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/entity_store', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity Store');
 $installer->getConnection()->createTable($table);
@@ -841,22 +841,22 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/attribute_set'))
-    ->addColumn('attribute_set_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_set_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Attribute Set Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_set_name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('attribute_set_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Attribute Set Name')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
@@ -864,10 +864,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'eav/attribute_set',
             ['entity_type_id', 'attribute_set_name'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_type_id', 'attribute_set_name'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('eav/attribute_set', ['entity_type_id', 'sort_order']),
@@ -878,8 +878,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute Set');
 $installer->getConnection()->createTable($table);
@@ -889,26 +889,26 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/attribute_group'))
-    ->addColumn('attribute_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Attribute Group Id')
-    ->addColumn('attribute_set_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_set_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Set Id')
-    ->addColumn('attribute_group_name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('attribute_group_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Attribute Group Name')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
-    ->addColumn('default_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('default_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Default Id')
@@ -916,10 +916,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'eav/attribute_group',
             ['attribute_set_id', 'attribute_group_name'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['attribute_set_id', 'attribute_group_name'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('eav/attribute_group', ['attribute_set_id', 'sort_order']),
@@ -935,8 +935,8 @@ $table = $installer->getConnection()
         'attribute_set_id',
         $installer->getTable('eav/attribute_set'),
         'attribute_set_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute Group');
 $installer->getConnection()->createTable($table);
@@ -946,33 +946,33 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/entity_attribute'))
-    ->addColumn('entity_attribute_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_attribute_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Attribute Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity Type Id')
-    ->addColumn('attribute_set_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_set_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Set Id')
-    ->addColumn('attribute_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Group Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
@@ -980,19 +980,19 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'eav/entity_attribute',
             ['attribute_set_id', 'attribute_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['attribute_set_id', 'attribute_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(
             'eav/entity_attribute',
             ['attribute_group_id', 'attribute_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['attribute_group_id', 'attribute_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('eav/entity_attribute', ['attribute_set_id', 'sort_order']),
@@ -1007,8 +1007,8 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -1020,8 +1020,8 @@ $table = $installer->getConnection()
         'attribute_group_id',
         $installer->getTable('eav/attribute_group'),
         'attribute_group_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Entity Attributes');
 $installer->getConnection()->createTable($table);
@@ -1031,18 +1031,18 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/attribute_option'))
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Option Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -1056,8 +1056,8 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute Option');
 $installer->getConnection()->createTable($table);
@@ -1067,23 +1067,23 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/attribute_option_value'))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Option Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Value')
@@ -1100,16 +1100,16 @@ $table = $installer->getConnection()
         'option_id',
         $installer->getTable('eav/attribute_option'),
         'option_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/attribute_option_value', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute Option Value');
 $installer->getConnection()->createTable($table);
@@ -1119,23 +1119,23 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/attribute_label'))
-    ->addColumn('attribute_label_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('attribute_label_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Attribute Label Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Attribute Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Value')
@@ -1156,16 +1156,16 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/attribute_label', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute Label');
 $installer->getConnection()->createTable($table);
@@ -1175,27 +1175,27 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/form_type'))
-    ->addColumn('type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Type Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
         'nullable'  => false,
     ], 'Code')
-    ->addColumn('label', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('label', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Label')
-    ->addColumn('is_system', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_system', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Is System')
-    ->addColumn('theme', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('theme', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
         'nullable'  => true,
     ], 'Theme')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Store Id')
@@ -1203,10 +1203,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'eav/form_type',
             ['code', 'theme', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['code', 'theme', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('eav/form_type', ['store_id']),
@@ -1217,8 +1217,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Form Type');
 $installer->getConnection()->createTable($table);
@@ -1228,12 +1228,12 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/form_type_entity'))
-    ->addColumn('type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Type Id')
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
@@ -1252,16 +1252,16 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/form_type_entity', 'type_id', 'eav/form_type', 'type_id'),
         'type_id',
         $installer->getTable('eav/form_type'),
         'type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Form Type Entity');
 $installer->getConnection()->createTable($table);
@@ -1271,20 +1271,20 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/form_fieldset'))
-    ->addColumn('fieldset_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('fieldset_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Fieldset Id')
-    ->addColumn('type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Type Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
         'nullable'  => false,
     ], 'Code')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
@@ -1292,10 +1292,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'eav/form_fieldset',
             ['type_id', 'code'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['type_id', 'code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('eav/form_fieldset', ['type_id']),
@@ -1306,8 +1306,8 @@ $table = $installer->getConnection()
         'type_id',
         $installer->getTable('eav/form_type'),
         'type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Form Fieldset');
 $installer->getConnection()->createTable($table);
@@ -1317,17 +1317,17 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/form_fieldset_label'))
-    ->addColumn('fieldset_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('fieldset_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Fieldset Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Store Id')
-    ->addColumn('label', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('label', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Label')
     ->addIndex(
@@ -1343,16 +1343,16 @@ $table = $installer->getConnection()
         'fieldset_id',
         $installer->getTable('eav/form_fieldset'),
         'fieldset_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/form_fieldset_label', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Form Fieldset Label');
 $installer->getConnection()->createTable($table);
@@ -1362,24 +1362,24 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/form_element'))
-    ->addColumn('element_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('element_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Element Id')
-    ->addColumn('type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Type Id')
-    ->addColumn('fieldset_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('fieldset_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
     ], 'Fieldset Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Attribute Id')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
@@ -1387,10 +1387,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'eav/form_element',
             ['type_id', 'attribute_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['type_id', 'attribute_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('eav/form_element', ['type_id']),
@@ -1409,24 +1409,24 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/form_element', 'fieldset_id', 'eav/form_fieldset', 'fieldset_id'),
         'fieldset_id',
         $installer->getTable('eav/form_fieldset'),
         'fieldset_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('eav/form_element', 'type_id', 'eav/form_type', 'type_id'),
         'type_id',
         $installer->getTable('eav/form_type'),
         'type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Form Element');
 $installer->getConnection()->createTable($table);

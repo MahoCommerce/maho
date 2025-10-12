@@ -161,14 +161,14 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Returns select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $select = parent::getSelectCountSql();
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Varien_Db_Select::HAVING);
+        $countSelect->reset(Maho\Db\Select::HAVING);
         return $select;
     }
 

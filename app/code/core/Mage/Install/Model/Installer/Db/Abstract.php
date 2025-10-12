@@ -15,7 +15,7 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
     /**
      *  Adapter instance
      *
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_connection;
 
@@ -96,7 +96,7 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
     /**
      * Create new connection with custom config
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     protected function _getConnection()
     {

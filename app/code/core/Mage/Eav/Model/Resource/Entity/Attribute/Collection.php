@@ -69,7 +69,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
      */
     public function useLoadDataFields()
     {
-        $this->getSelect()->reset(Varien_Db_Select::COLUMNS);
+        $this->getSelect()->reset(Maho\Db\Select::COLUMNS);
         $this->getSelect()->columns($this->_getLoadDataFields());
 
         return $this;

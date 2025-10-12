@@ -206,7 +206,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
                     ->where('entity_id = ?', (int) $product->getId())
                     ->limit(1);
 
-                $order = ['state ' . Varien_Db_Select::SQL_DESC, 'website_id ' . Varien_Db_Select::SQL_DESC];
+                $order = ['state ' . Maho\Db\Select::SQL_DESC, 'website_id ' . Maho\Db\Select::SQL_DESC];
                 $attributeSelect->order($order);
                 $value = $this->getResource()->getReadConnection()->fetchOne($attributeSelect);
 

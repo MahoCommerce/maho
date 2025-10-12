@@ -14,7 +14,7 @@
 $installer = $this;
 $installer->startSetup();
 
-/** @var Varien_Db_Adapter_Pdo_Mysql $connection */
+/** @var Maho\Db\Adapter\Pdo\Mysql $connection */
 $connection  = $installer->getConnection();
 
 $regionTable = $installer->getTable('directory/country_region');

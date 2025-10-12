@@ -38,7 +38,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Collection extends Mage_Eav_
         $helper = Mage::getResourceHelper('core');
         foreach ($columns as $labelColumn => $columnData) {
             $retColumns[$labelColumn] = $labelColumn;
-            if ($columnData['DATA_TYPE'] == Varien_Db_Ddl_Table::TYPE_TEXT) {
+            if ($columnData['DATA_TYPE'] == Maho\Db\Ddl\Table::TYPE_TEXT) {
                 $retColumns[$labelColumn] = $helper->castField('main_table.' . $labelColumn);
             }
         }

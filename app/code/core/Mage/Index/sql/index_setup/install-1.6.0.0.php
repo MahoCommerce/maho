@@ -19,31 +19,31 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('index/event'))
-    ->addColumn('event_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('event_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Event Id')
-    ->addColumn('type', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('type', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
         'nullable'  => false,
     ], 'Type')
-    ->addColumn('entity', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('entity', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
         'nullable'  => false,
     ], 'Entity')
-    ->addColumn('entity_pk', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('entity_pk', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
     ], 'Entity Primary Key')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Creation Time')
-    ->addColumn('old_data', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+    ->addColumn('old_data', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
     ], 'Old Data')
-    ->addColumn('new_data', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+    ->addColumn('new_data', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
     ], 'New Data')
     ->addIndex(
-        $installer->getIdxName('index/event', ['type', 'entity', 'entity_pk'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('index/event', ['type', 'entity', 'entity_pk'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['type', 'entity', 'entity_pk'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->setComment('Index Event');
 $installer->getConnection()->createTable($table);
@@ -53,31 +53,31 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('index/process'))
-    ->addColumn('process_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('process_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Process Id')
-    ->addColumn('indexer_code', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('indexer_code', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
         'nullable'  => false,
     ], 'Indexer Code')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_TEXT, 15, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_TEXT, 15, [
         'nullable'  => false,
         'default'   => 'pending',
     ], 'Status')
-    ->addColumn('started_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('started_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Started At')
-    ->addColumn('ended_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('ended_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Ended At')
-    ->addColumn('mode', Varien_Db_Ddl_Table::TYPE_TEXT, 9, [
+    ->addColumn('mode', Maho\Db\Ddl\Table::TYPE_TEXT, 9, [
         'nullable'  => false,
         'default'   => 'real_time',
     ], 'Mode')
     ->addIndex(
-        $installer->getIdxName('index/process', ['indexer_code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('index/process', ['indexer_code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['indexer_code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->setComment('Index Process');
 $installer->getConnection()->createTable($table);
@@ -87,17 +87,17 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('index/process_event'))
-    ->addColumn('process_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('process_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Process Id')
-    ->addColumn('event_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('event_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Event Id')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_TEXT, 7, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_TEXT, 7, [
         'nullable'  => false,
         'default'   => 'new',
     ], 'Status')
@@ -110,16 +110,16 @@ $table = $installer->getConnection()
         'event_id',
         $installer->getTable('index/event'),
         'event_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('index/process_event', 'process_id', 'index/process', 'process_id'),
         'process_id',
         $installer->getTable('index/process'),
         'process_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Index Process Event');
 $installer->getConnection()->createTable($table);

@@ -37,7 +37,7 @@ class Mage_Sales_Model_Resource_Order_Grid_Collection extends Mage_Sales_Model_R
     /**
      * Get SQL for get record count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -47,9 +47,9 @@ class Mage_Sales_Model_Resource_Order_Grid_Collection extends Mage_Sales_Model_R
 
             $unionSelect = clone $this->getSelect();
 
-            $unionSelect->reset(Varien_Db_Select::ORDER);
-            $unionSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-            $unionSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
+            $unionSelect->reset(Maho\Db\Select::ORDER);
+            $unionSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+            $unionSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
 
             $countSelect = clone $this->getSelect();
             $countSelect->reset();

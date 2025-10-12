@@ -18,7 +18,7 @@ class Mage_Core_Model_Resource_Setup_Query_Modifier
     /**
      * MySQL adapter instance
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql
+     * @var Maho\Db\Adapter\Pdo\Mysql
      */
     protected $_adapter;
 
@@ -32,7 +32,7 @@ class Mage_Core_Model_Resource_Setup_Query_Modifier
     /**
      * Inits query modifier
      *
-     * @param Varien_Db_Adapter_Pdo_Mysql|array $args
+     * @param Maho\Db\Adapter\Pdo\Mysql|array $args
      */
     public function __construct($args)
     {

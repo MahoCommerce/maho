@@ -24,7 +24,7 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
          */
         $this->_useAnalyticFunction = true;
 
-        /** @var Varien_Db_Adapter_Interface $adapter */
+        /** @var Maho\Db\Adapter\AdapterInterface $adapter */
         $adapter            = $this->getConnection();
         /** @var Mage_Customer_Model_Resource_Customer $customer */
         $customer           = Mage::getResourceSingleton('customer/customer');
@@ -88,7 +88,7 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
             "table_customer_middlename.{$middlenameField}",
             "table_customer_lastname.{$lastnameField}",
         ], ' ');
-        $this->getSelect()->reset(Varien_Db_Select::COLUMNS)
+        $this->getSelect()->reset(Maho\Db\Select::COLUMNS)
             ->joinInner(
                 ['table_customer_lastname' => $lastnameAttr->getBackend()->getTable()],
                 implode(' AND ', $lastnameCondition),
@@ -106,18 +106,18 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->_select;
-        $countSelect->reset(Varien_Db_Select::ORDER);
-        $countSelect->reset(Varien_Db_Select::GROUP);
-        $countSelect->reset(Varien_Db_Select::HAVING);
-        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Varien_Db_Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::HAVING);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
 
         $countSelect->columns(new Maho\Db\Expr('COUNT(DISTINCT detail.customer_id)'));
 

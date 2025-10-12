@@ -22,7 +22,7 @@ class Mage_Dataflow_Model_Resource_Import extends Mage_Core_Model_Resource_Db_Ab
      * Returns all import data select by session id
      *
      * @param int $sessionId
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function select($sessionId)
     {

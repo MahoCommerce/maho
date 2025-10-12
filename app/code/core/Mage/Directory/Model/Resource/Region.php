@@ -37,7 +37,7 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
      * @param mixed $value
      * @param Mage_Core_Model_Abstract $object
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

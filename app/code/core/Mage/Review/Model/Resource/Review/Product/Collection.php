@@ -283,10 +283,10 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
     public function getAllIds($limit = null, $offset = null)
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Varien_Db_Select::ORDER);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Varien_Db_Select::COLUMNS);
+        $idsSelect->reset(Maho\Db\Select::ORDER);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $idsSelect->reset(Maho\Db\Select::COLUMNS);
         $idsSelect->columns('rt.review_id');
         return $this->getConnection()->fetchCol($idsSelect);
     }
@@ -294,15 +294,15 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
     /**
      * Render SQL for retrieve product count
      *
-     * @return Varien_Db_Select|null
+     * @return Maho\Db\Select|null
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $select = parent::getSelectCountSql();
-        $select->reset(Varien_Db_Select::COLUMNS)
+        $select->reset(Maho\Db\Select::COLUMNS)
             ->columns('COUNT(e.entity_id)')
-            ->reset(Varien_Db_Select::HAVING);
+            ->reset(Maho\Db\Select::HAVING);
 
         return $select;
     }

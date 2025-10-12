@@ -23,7 +23,7 @@ foreach ($bestsellersTables as $table) {
         $table,
         'product_type_id',
         [
-            'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
+            'type'     => Maho\Db\Ddl\Table::TYPE_TEXT,
             'length'   => 32,
             'default'  => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
             'nullable' => false,

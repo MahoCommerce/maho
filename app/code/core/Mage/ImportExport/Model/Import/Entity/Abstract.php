@@ -24,7 +24,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
     /**
      * DB connection.
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql
+     * @var Maho\Db\Adapter\Pdo\Mysql
      */
     protected $_connection;
 
@@ -178,7 +178,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
         $this->_entityTypeId    = $entityType->getEntityTypeId();
         $this->_dataSourceModel = Mage_ImportExport_Model_Import::getDataSourceModel();
 
-        /** @var Varien_Db_Adapter_Pdo_Mysql $_connection */
+        /** @var Maho\Db\Adapter\Pdo\Mysql $_connection */
         $_connection            = Mage::getSingleton('core/resource')->getConnection('write');
         $this->_connection      = $_connection;
     }

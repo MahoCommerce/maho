@@ -671,7 +671,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 break;
             case 'datetime':
                 $columns[$this->getAttributeCode()] = [
-                    'type'      => Varien_Db_Ddl_Table::TYPE_DATETIME,
+                    'type'      => Maho\Db\Ddl\Table::TYPE_DATETIME,
                     'unsigned'  => false,
                     'nullable'  => true,
                     'default'   => null,
@@ -680,7 +680,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 break;
             case 'decimal':
                 $columns[$this->getAttributeCode()] = [
-                    'type'      => Varien_Db_Ddl_Table::TYPE_DECIMAL,
+                    'type'      => Maho\Db\Ddl\Table::TYPE_DECIMAL,
                     'length'    => '12,4',
                     'unsigned'  => false,
                     'nullable'  => true,
@@ -690,7 +690,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 break;
             case 'int':
                 $columns[$this->getAttributeCode()] = [
-                    'type'      => Varien_Db_Ddl_Table::TYPE_INTEGER,
+                    'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
                     'unsigned'  => false,
                     'nullable'  => true,
                     'default'   => null,
@@ -699,17 +699,17 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 break;
             case 'text':
                 $columns[$this->getAttributeCode()] = [
-                    'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+                    'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
                     'unsigned'  => false,
                     'nullable'  => true,
                     'default'   => null,
                     'extra'     => null,
-                    'length'    => Varien_Db_Ddl_Table::MAX_TEXT_SIZE,
+                    'length'    => Maho\Db\Ddl\Table::MAX_TEXT_SIZE,
                 ];
                 break;
             case 'varchar':
                 $columns[$this->getAttributeCode()] = [
-                    'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+                    'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
                     'length'    => '255',
                     'unsigned'  => false,
                     'nullable'  => true,
@@ -884,7 +884,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
      * Retrieve Select For Flat Attribute update
      *
      * @param int $store
-     * @return $this|Varien_Db_Select|null
+     * @return $this|Maho\Db\Select|null
      */
     public function getFlatUpdateSelect($store = null)
     {

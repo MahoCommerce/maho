@@ -87,7 +87,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      *
      * @param Varien_Object $object
      * @param string $table
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadAttributesSelect($object, $table)
@@ -130,10 +130,10 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Adds Columns prepared for union
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @param string $table
      * @param string $type
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _addLoadAttributesSelectFields($select, $table, $type)
@@ -149,7 +149,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Prepare select object for loading entity attributes values
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _prepareLoadSelect(array $selects)

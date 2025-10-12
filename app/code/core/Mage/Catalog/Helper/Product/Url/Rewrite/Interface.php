@@ -17,7 +17,7 @@ interface Mage_Catalog_Helper_Product_Url_Rewrite_Interface
      *
      * @param int $categoryId
      * @param int $storeId
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getTableSelect(array $productIds, $categoryId, $storeId);
 

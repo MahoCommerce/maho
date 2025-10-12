@@ -30,7 +30,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Grouped extends Mage_Ca
      *
      * @param int|array $entityIds
      * @param bool $usePrimaryTable use primary or temporary index table
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getStockStatusSelect($entityIds = null, $usePrimaryTable = false)

@@ -120,7 +120,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function cleanProductData($ruleId, array $productIds = [])
     {
-        /** @var Varien_Db_Adapter_Interface $write */
+        /** @var Maho\Db\Adapter\AdapterInterface $write */
         $write = $this->_getWriteAdapter();
 
         $conditions = ['rule_id = ?' => $ruleId];
@@ -164,7 +164,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function insertRuleData(Mage_CatalogRule_Model_Rule $rule, array $websiteIds, array $productIds = [])
     {
-        /** @var Varien_Db_Adapter_Interface $write */
+        /** @var Maho\Db\Adapter\AdapterInterface $write */
         $write = $this->_getWriteAdapter();
 
         $customerGroupIds = $rule->getCustomerGroupIds();
@@ -200,7 +200,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                             $write->quoteInto('cg.customer_group_id IN (?)', $customerGroupIds),
                             ['cg.customer_group_id'],
                         )
-                        ->reset(Varien_Db_Select::COLUMNS)
+                        ->reset(Maho\Db\Select::COLUMNS)
                         ->columns([
                             new Maho\Db\Expr((string) $store->getWebsiteId()),
                             'cg.customer_group_id',
@@ -240,7 +240,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                                     'sub_simple_action',
                                     'sub_discount_amount',
                                 ],
-                                Varien_Db_Adapter_Interface::INSERT_IGNORE,
+                                Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
                             ),
                         );
                     }
@@ -416,7 +416,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * @param int|null $productId
      * @param int|null $websiteId
      *
-     * @return Varien_Db_Statement_Pdo_Mysql
+     * @return Maho\Db\Statement\Pdo\Mysql
      */
     protected function _getRuleProductsStmt($fromDate, $toDate, $productId = null, $websiteId = null)
     {

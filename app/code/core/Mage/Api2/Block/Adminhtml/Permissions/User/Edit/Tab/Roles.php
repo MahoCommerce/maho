@@ -25,7 +25,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
 
         $this->setId('api2_roles_section')
             ->setDefaultSort('sort_order')
-            ->setDefaultDir(Varien_Db_Select::SQL_ASC)
+            ->setDefaultDir(Maho\Db\Select::SQL_ASC)
             ->setTitle($this->__('REST Roles Information'))
             ->setUseAjax(true);
     }

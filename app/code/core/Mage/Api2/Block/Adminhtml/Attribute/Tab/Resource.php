@@ -28,7 +28,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource extends Mage_Adminhtml_Bl
         parent::__construct();
 
         $this->setId('api2_attribute_section_resources')
-                ->setData('default_dir', Varien_Db_Select::SQL_ASC)
+                ->setData('default_dir', Maho\Db\Select::SQL_ASC)
                 ->setData('default_sort', 'sort_order')
                 ->setData('title', $this->__('Attribute Rules Information'))
                 ->setData('use_ajax', true);

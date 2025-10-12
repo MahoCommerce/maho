@@ -96,7 +96,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
                                 0,
                             ),
                         ),
-                        $select->getPart(Varien_Db_Select::GROUP),
+                        $select->getPart(Maho\Db\Select::GROUP),
                     ),
                 ),
             ),

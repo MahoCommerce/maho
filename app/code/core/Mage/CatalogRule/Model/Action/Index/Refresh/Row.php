@@ -22,7 +22,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
     /**
      * Constructor with parameters
      * Array of arguments with keys
-     *  - 'connection' Varien_Db_Adapter_Interface
+     *  - 'connection' Maho\Db\Adapter\AdapterInterface
      *  - 'factory' Mage_Core_Model_Factory
      *  - 'resource' Mage_Core_Model_Resource_Db_Abstract
      *  - 'app' Mage_Core_Model_App
@@ -46,7 +46,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
     /**
      * Prepare temporary data
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _prepareTemporarySelect(Mage_Core_Model_Website $website)

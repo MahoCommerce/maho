@@ -100,7 +100,7 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
 
         $this->getSelect()
             ->useStraightJoin(true)
-            ->reset(Varien_Db_Select::COLUMNS)
+            ->reset(Maho\Db\Select::COLUMNS)
             ->joinInner(
                 ['quote_items' => $this->getTable('sales/quote_item')],
                 'quote_items.quote_id = main_table.entity_id',
@@ -265,17 +265,17 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Varien_Db_Select::ORDER);
-        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Varien_Db_Select::COLUMNS);
-        $countSelect->reset(Varien_Db_Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::GROUP);
         $countSelect->resetJoinLeft();
 
         if ($this->_selectCountSqlType == self::SELECT_COUNT_SQL_TYPE_CART) {

@@ -29,7 +29,7 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
     /**
      * DB connection.
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql
+     * @var Maho\Db\Adapter\Pdo\Mysql
      */
     protected $_connection;
 
@@ -162,7 +162,7 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
         $entityCode = $this->getEntityTypeCode();
         $this->_entityTypeId = Mage::getSingleton('eav/config')->getEntityType($entityCode)->getEntityTypeId();
 
-        /** @var Varien_Db_Adapter_Pdo_Mysql $_connection */
+        /** @var Maho\Db\Adapter\Pdo\Mysql $_connection */
         $_connection         = Mage::getSingleton('core/resource')->getConnection('write');
         $this->_connection   = $_connection;
     }

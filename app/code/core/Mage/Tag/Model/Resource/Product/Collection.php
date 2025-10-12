@@ -365,18 +365,18 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
     /**
      * Render SQL for retrieve product count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->getSelect();
 
-        $countSelect->reset(Varien_Db_Select::COLUMNS);
-        $countSelect->reset(Varien_Db_Select::ORDER);
-        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Varien_Db_Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::GROUP);
 
         if ($this->getFlag('group_tag')) {
             $field = 'relation.tag_id';
@@ -404,7 +404,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
             parent::_renderOrders();
 
             $orders = $this->getSelect()
-                ->getPart(Varien_Db_Select::ORDER);
+                ->getPart(Maho\Db\Select::ORDER);
 
             $appliedOrders = [];
             foreach ($orders as $order) {

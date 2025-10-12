@@ -14,7 +14,7 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
 {
     /**
      * @param array $config Connection config
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\Pdo\Mysql
      */
     public function getConnection($config)
     {
@@ -34,7 +34,7 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
      * Create and return DB adapter object instance
      *
      * @param array $configArr Connection config
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\Pdo\Mysql
      */
     protected function _getDbAdapterInstance($configArr)
     {
@@ -49,6 +49,6 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
      */
     protected function _getDbAdapterClassName()
     {
-        return 'Varien_Db_Adapter_Pdo_Mysql';
+        return \Maho\Db\Adapter\Pdo\Mysql::class;
     }
 }

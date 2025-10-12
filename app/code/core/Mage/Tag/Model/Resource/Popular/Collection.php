@@ -42,7 +42,7 @@ class Mage_Tag_Model_Resource_Popular_Collection extends Mage_Core_Model_Resourc
             )
             ->where('tag_summary.store_id = ?', $storeId)
             ->where('tag_summary.products > ?', 0)
-            ->order('popularity ' . Varien_Db_Select::SQL_DESC);
+            ->order('popularity ' . Maho\Db\Select::SQL_DESC);
 
         return $this;
     }
@@ -91,16 +91,16 @@ class Mage_Tag_Model_Resource_Popular_Collection extends Mage_Core_Model_Resourc
     /**
      * Get SQL for get record count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $this->_renderFilters();
         $select = clone $this->getSelect();
-        $select->reset(Varien_Db_Select::ORDER);
-        $select->reset(Varien_Db_Select::LIMIT_COUNT);
-        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
 
         $countSelect = $this->getConnection()->select();
         $countSelect->from(['a' => $select], 'COUNT(popularity)');

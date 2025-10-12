@@ -20,37 +20,37 @@ $installer = $this;
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('reports/compared_product_index'))
-    ->addColumn('index_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('index_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Index Id')
-    ->addColumn('visitor_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('visitor_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Visitor Id')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Customer Id')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Product Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
     ], 'Store Id')
-    ->addColumn('added_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Added At')
     ->addIndex(
-        $installer->getIdxName('reports/compared_product_index', ['visitor_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('reports/compared_product_index', ['visitor_id', 'product_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['visitor_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
-        $installer->getIdxName('reports/compared_product_index', ['customer_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('reports/compared_product_index', ['customer_id', 'product_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['customer_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('reports/compared_product_index', ['store_id']),
@@ -69,24 +69,24 @@ $table = $installer->getConnection()
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/compared_product_index', 'product_id', 'catalog/product', 'entity_id'),
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/compared_product_index', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Reports Compared Product Index Table');
 $installer->getConnection()->createTable($table);
@@ -98,37 +98,37 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('reports/viewed_product_index'))
-    ->addColumn('index_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('index_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Index Id')
-    ->addColumn('visitor_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('visitor_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Visitor Id')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Customer Id')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Product Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
     ], 'Store Id')
-    ->addColumn('added_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Added At')
     ->addIndex(
-        $installer->getIdxName('reports/viewed_product_index', ['visitor_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('reports/viewed_product_index', ['visitor_id', 'product_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['visitor_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
-        $installer->getIdxName('reports/viewed_product_index', ['customer_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('reports/viewed_product_index', ['customer_id', 'product_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['customer_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('reports/viewed_product_index', ['store_id']),
@@ -147,24 +147,24 @@ $table = $installer->getConnection()
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/viewed_product_index', 'product_id', 'catalog/product', 'entity_id'),
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/viewed_product_index', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Reports Viewed Product Index Table');
 $installer->getConnection()->createTable($table);

@@ -16,7 +16,7 @@ $installer->startSetup();
 
 //Increase password field length
 $installer->getConnection()->changeColumn($installer->getTable('admin/user'), 'password', 'password', [
-    'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+    'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
     'length'    => 100,
     'comment'   => 'User Password',
 ]);

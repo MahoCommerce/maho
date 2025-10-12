@@ -103,7 +103,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      * @return $this
      */
     #[\Override]
-    public function addValueSortToCollection($collection, $dir = Varien_Db_Select::SQL_ASC)
+    public function addValueSortToCollection($collection, $dir = Maho\Db\Select::SQL_ASC)
     {
         $valueTable1    = $this->getAttribute()->getAttributeCode() . '_t1';
         $valueTable2    = $this->getAttribute()->getAttributeCode() . '_t2';
@@ -164,7 +164,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
                 ];
             }
         } else {
-            $type = ($isMulti) ? Varien_Db_Ddl_Table::TYPE_TEXT : Varien_Db_Ddl_Table::TYPE_INTEGER;
+            $type = ($isMulti) ? Maho\Db\Ddl\Table::TYPE_TEXT : Maho\Db\Ddl\Table::TYPE_INTEGER;
             $columns[$attributeCode] = [
                 'type'      => $type,
                 'length'    => $isMulti ? '65535' : null,
@@ -176,7 +176,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
             ];
             if (!$isMulti) {
                 $columns[$attributeCode . '_value'] = [
-                    'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+                    'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
                     'length'    => 255,
                     'unsigned'  => false,
                     'nullable'  => true,
@@ -223,7 +223,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      * Retrieve Select For Flat Attribute update
      *
      * @param int $store
-     * @return Varien_Db_Select|null
+     * @return Maho\Db\Select|null
      */
     #[\Override]
     public function getFlatUpdateSelect($store)

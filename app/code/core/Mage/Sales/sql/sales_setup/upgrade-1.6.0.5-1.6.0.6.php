@@ -19,11 +19,11 @@ $entitiesToAlter = [
 ];
 
 $attributes = [
-    'vat_id' => ['type' => Varien_Db_Ddl_Table::TYPE_TEXT],
-    'vat_is_valid' => ['type' => Varien_Db_Ddl_Table::TYPE_SMALLINT],
-    'vat_request_id' => ['type' => Varien_Db_Ddl_Table::TYPE_TEXT],
-    'vat_request_date' => ['type' => Varien_Db_Ddl_Table::TYPE_TEXT],
-    'vat_request_success' => ['type' => Varien_Db_Ddl_Table::TYPE_SMALLINT],
+    'vat_id' => ['type' => Maho\Db\Ddl\Table::TYPE_TEXT],
+    'vat_is_valid' => ['type' => Maho\Db\Ddl\Table::TYPE_SMALLINT],
+    'vat_request_id' => ['type' => Maho\Db\Ddl\Table::TYPE_TEXT],
+    'vat_request_date' => ['type' => Maho\Db\Ddl\Table::TYPE_TEXT],
+    'vat_request_success' => ['type' => Maho\Db\Ddl\Table::TYPE_SMALLINT],
 ];
 
 foreach ($entitiesToAlter as $entityName) {

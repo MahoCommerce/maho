@@ -22,14 +22,14 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
     /**
      * Link select object
      *
-     * @var Varien_Db_Select
+     * @var Maho\Db\Select
      */
     protected $_linkSelect           = null;
 
     /**
      * Set link select
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return $this
      */
     protected function _setLinkSelect($select)
@@ -41,7 +41,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
     /**
      * Get link select
      *
-     * @return Varien_Db_Select $select
+     * @return Maho\Db\Select $select
      */
     protected function _getLinkSelect()
     {

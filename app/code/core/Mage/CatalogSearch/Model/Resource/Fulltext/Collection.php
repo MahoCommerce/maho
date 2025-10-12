@@ -197,7 +197,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog
                     'e.' . $this->getResource()->getIdFieldName(),
                     $foundIds,
                 )
-                . ' ' . Varien_Db_Select::SQL_ASC,
+                . ' ' . Maho\Db\Select::SQL_ASC,
             ),
         );
 

@@ -359,7 +359,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                 $select,
                 $table,
                 ['option_id', 'store_id', 'title'],
-                Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE,
+                Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
             );
             $write->query($insertSelect);
 
@@ -379,7 +379,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                     'price',
                     'price_type',
                 ],
-                Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE,
+                Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
             );
             $write->query($insertSelect);
 

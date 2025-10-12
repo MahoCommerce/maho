@@ -18,7 +18,7 @@ $installer->getConnection()->changeColumn(
     'page_group',
     'page_group',
     [
-        'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'    => 255,
     ],
 );
@@ -28,7 +28,7 @@ $installer->getConnection()->changeColumn(
     'page_for',
     'page_for',
     [
-        'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'    => 255,
     ],
 );

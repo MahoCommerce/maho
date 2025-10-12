@@ -16,7 +16,7 @@ class Mage_Index_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_H
      * Insert data from select statement
      *
      * @param Mage_Index_Model_Resource_Abstract $object
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @param string $destTable
      * @param array $columns
      * @param bool $readToIndex
@@ -68,7 +68,7 @@ class Mage_Index_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_H
      * @return $this
      */
     #[\Override]
-    public function setWriteAdapter(Varien_Db_Adapter_Interface $adapter)
+    public function setWriteAdapter(Maho\Db\Adapter\AdapterInterface $adapter)
     {
         $this->_writeAdapter = $adapter;
 

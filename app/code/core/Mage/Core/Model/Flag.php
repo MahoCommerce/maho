@@ -52,7 +52,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
         }
 
         $this->setFlagCode($this->_flagCode);
-        $this->setLastUpdate(date(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT));
+        $this->setLastUpdate(date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT));
 
         return parent::_beforeSave();
     }

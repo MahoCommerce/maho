@@ -19,27 +19,27 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/option'))
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Option Id')
-    ->addColumn('parent_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('parent_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Parent Id')
-    ->addColumn('required', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('required', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Required')
-    ->addColumn('position', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('position', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Position')
-    ->addColumn('type', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('type', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Type')
     ->addIndex(
         $installer->getIdxName('bundle/option', ['parent_id']),
@@ -50,8 +50,8 @@ $table = $installer->getConnection()
         'parent_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Product Bundle Option');
 $installer->getConnection()->createTable($table);
@@ -61,34 +61,34 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/option_value'))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Option Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Store Id')
-    ->addColumn('title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Title')
     ->addIndex(
-        $installer->getIdxName('bundle/option_value', ['option_id', 'store_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('bundle/option_value', ['option_id', 'store_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['option_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName('bundle/option_value', 'option_id', 'bundle/option', 'option_id'),
         'option_id',
         $installer->getTable('bundle/option'),
         'option_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Product Bundle Option Value');
 $installer->getConnection()->createTable($table);
@@ -98,46 +98,46 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/selection'))
-    ->addColumn('selection_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('selection_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Selection Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Option Id')
-    ->addColumn('parent_product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('parent_product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Parent Product Id')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Product Id')
-    ->addColumn('position', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('position', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Position')
-    ->addColumn('is_default', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_default', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Is Default')
-    ->addColumn('selection_price_type', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('selection_price_type', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Selection Price Type')
-    ->addColumn('selection_price_value', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('selection_price_value', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Selection Price Value')
-    ->addColumn('selection_qty', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('selection_qty', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Selection Qty')
-    ->addColumn('selection_can_change_qty', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('selection_can_change_qty', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Selection Can Change Qty')
@@ -154,16 +154,16 @@ $table = $installer->getConnection()
         'option_id',
         $installer->getTable('bundle/option'),
         'option_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('bundle/selection', 'product_id', 'catalog/product', 'entity_id'),
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Product Bundle Selection');
 $installer->getConnection()->createTable($table);
@@ -173,22 +173,22 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/selection_price'))
-    ->addColumn('selection_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('selection_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Selection Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('selection_price_type', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('selection_price_type', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Selection Price Type')
-    ->addColumn('selection_price_value', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('selection_price_value', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Selection Price Value')
@@ -201,16 +201,16 @@ $table = $installer->getConnection()
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('bundle/selection_price', 'selection_id', 'bundle/selection', 'selection_id'),
         'selection_id',
         $installer->getTable('bundle/selection'),
         'selection_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Product Bundle Selection Price');
 $installer->getConnection()->createTable($table);
@@ -220,25 +220,25 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/price_index'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('min_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('min_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
     ], 'Min Price')
-    ->addColumn('max_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('max_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
     ], 'Max Price')
     ->addIndex(
@@ -254,24 +254,24 @@ $table = $installer->getConnection()
         'customer_group_id',
         $installer->getTable('customer/customer_group'),
         'customer_group_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('bundle/price_index', 'entity_id', 'catalog/product', 'entity_id'),
         'entity_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('bundle/price_index', 'website_id', 'core/website', 'website_id'),
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Product Bundle Price Index');
 $installer->getConnection()->createTable($table);
@@ -281,28 +281,28 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/stock_index'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('stock_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('stock_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Stock Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Option Id')
-    ->addColumn('stock_status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('stock_status', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'default'   => '0',
     ], 'Stock Status')
     ->setComment('Catalog Product Bundle Stock Index');
@@ -313,44 +313,44 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/price_indexer_idx'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('tax_class_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('tax_class_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Tax Class Id')
-    ->addColumn('price_type', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('price_type', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Price Type')
-    ->addColumn('special_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('special_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Special Price')
-    ->addColumn('tier_percent', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_percent', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Percent')
-    ->addColumn('orig_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('orig_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Orig Price')
-    ->addColumn('price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Price')
-    ->addColumn('min_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('min_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Min Price')
-    ->addColumn('max_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('max_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Max Price')
-    ->addColumn('tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Price')
-    ->addColumn('base_tier', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('base_tier', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Base Tier')
     ->setComment('Catalog Product Index Price Bundle Idx');
 $installer->getConnection()->createTable($table);
@@ -360,44 +360,44 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/price_indexer_tmp'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('tax_class_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('tax_class_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Tax Class Id')
-    ->addColumn('price_type', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('price_type', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Price Type')
-    ->addColumn('special_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('special_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Special Price')
-    ->addColumn('tier_percent', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_percent', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Percent')
-    ->addColumn('orig_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('orig_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Orig Price')
-    ->addColumn('price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Price')
-    ->addColumn('min_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('min_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Min Price')
-    ->addColumn('max_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('max_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Max Price')
-    ->addColumn('tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Price')
-    ->addColumn('base_tier', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('base_tier', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Base Tier')
     ->setComment('Catalog Product Index Price Bundle Tmp');
 $installer->getConnection()->createTable($table);
@@ -407,44 +407,44 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/selection_indexer_idx'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Option Id')
-    ->addColumn('selection_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('selection_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Selection Id')
-    ->addColumn('group_type', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('group_type', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Group Type')
-    ->addColumn('is_required', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_required', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Is Required')
-    ->addColumn('price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Price')
-    ->addColumn('tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Price')
     ->setComment('Catalog Product Index Price Bundle Sel Idx');
 $installer->getConnection()->createTable($table);
@@ -454,44 +454,44 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/selection_indexer_tmp'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Option Id')
-    ->addColumn('selection_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('selection_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Selection Id')
-    ->addColumn('group_type', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('group_type', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Group Type')
-    ->addColumn('is_required', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_required', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Is Required')
-    ->addColumn('price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Price')
-    ->addColumn('tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Price')
     ->setComment('Catalog Product Index Price Bundle Sel Tmp');
 $installer->getConnection()->createTable($table);
@@ -501,36 +501,36 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/option_indexer_idx'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Option Id')
-    ->addColumn('min_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('min_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Min Price')
-    ->addColumn('alt_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('alt_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Alt Price')
-    ->addColumn('max_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('max_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Max Price')
-    ->addColumn('tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Price')
-    ->addColumn('alt_tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('alt_tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Alt Tier Price')
     ->setComment('Catalog Product Index Price Bundle Opt Idx');
 $installer->getConnection()->createTable($table);
@@ -540,36 +540,36 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('bundle/option_indexer_tmp'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
         'default'   => '0',
     ], 'Option Id')
-    ->addColumn('min_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('min_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Min Price')
-    ->addColumn('alt_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('alt_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Alt Price')
-    ->addColumn('max_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('max_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Max Price')
-    ->addColumn('tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Tier Price')
-    ->addColumn('alt_tier_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('alt_tier_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Alt Tier Price')
     ->setComment('Catalog Product Index Price Bundle Opt Tmp');
 $installer->getConnection()->createTable($table);

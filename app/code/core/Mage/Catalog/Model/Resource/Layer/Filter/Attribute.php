@@ -58,10 +58,10 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
         // clone select from collection with filters
         $select = clone $filter->getLayer()->getProductCollection()->getSelect();
         // reset columns, order and limitation conditions
-        $select->reset(Varien_Db_Select::COLUMNS);
-        $select->reset(Varien_Db_Select::ORDER);
-        $select->reset(Varien_Db_Select::LIMIT_COUNT);
-        $select->reset(Varien_Db_Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
 
         $connection = $this->_getReadAdapter();
         $attribute  = $filter->getAttributeModel();

@@ -73,7 +73,7 @@ class Mage_Log_Model_Resource_Customer extends Mage_Core_Model_Resource_Db_Abstr
      * @param string $field
      * @param mixed $value
      * @param Mage_Log_Model_Customer $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

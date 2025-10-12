@@ -203,8 +203,8 @@ class Mage_Catalog_Model_Resource_Category_Flat_Collection extends Mage_Core_Mod
     {
         if ($attribute == '*') {
             // Save previous selected columns
-            $columns = $this->getSelect()->getPart(Varien_Db_Select::COLUMNS);
-            $this->getSelect()->reset(Varien_Db_Select::COLUMNS);
+            $columns = $this->getSelect()->getPart(Maho\Db\Select::COLUMNS);
+            $this->getSelect()->reset(Maho\Db\Select::COLUMNS);
             foreach ($columns as $column) {
                 if ($column[0] == 'main_table') {
                     // If column selected from main table,

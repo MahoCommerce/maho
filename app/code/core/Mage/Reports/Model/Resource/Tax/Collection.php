@@ -77,18 +77,18 @@ class Mage_Reports_Model_Resource_Tax_Collection extends Mage_Sales_Model_Entity
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Varien_Db_Select::ORDER);
-        $countSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Varien_Db_Select::COLUMNS);
-        $countSelect->reset(Varien_Db_Select::GROUP);
-        $countSelect->reset(Varien_Db_Select::HAVING);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::HAVING);
         $countSelect->columns('COUNT(DISTINCT e.entity_id)');
         return $countSelect;
     }

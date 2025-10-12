@@ -147,11 +147,11 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
         }
 
         if ($this->_mainTable !== null && $table !== $this->_mainTable && $this->getSelect() !== null) {
-            $from = $this->getSelect()->getPart(Varien_Db_Select::FROM);
+            $from = $this->getSelect()->getPart(Maho\Db\Select::FROM);
             if (isset($from['main_table'])) {
                 $from['main_table']['tableName'] = $table;
             }
-            $this->getSelect()->setPart(Varien_Db_Select::FROM, $from);
+            $this->getSelect()->setPart(Maho\Db\Select::FROM, $from);
         }
 
         $this->_mainTable = $table;
@@ -170,9 +170,9 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     }
 
     /**
-     * Get Varien_Db_Select instance and applies fields to select if needed
+     * Get Maho\Db\Select instance and applies fields to select if needed
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelect()
@@ -191,7 +191,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      */
     protected function _initSelectFields()
     {
-        $columns = $this->_select->getPart(Varien_Db_Select::COLUMNS);
+        $columns = $this->_select->getPart(Maho\Db\Select::COLUMNS);
         $columnsToSelect = [];
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
@@ -236,7 +236,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
             array_unshift($columns, ['main_table', '*', null]);
         }
 
-        $this->_select->setPart(Varien_Db_Select::COLUMNS, $columns);
+        $this->_select->setPart(Maho\Db\Select::COLUMNS, $columns);
 
         return $this;
     }
@@ -473,10 +473,10 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     public function getAllIds()
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Varien_Db_Select::ORDER);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Varien_Db_Select::COLUMNS);
+        $idsSelect->reset(Maho\Db\Select::ORDER);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $idsSelect->reset(Maho\Db\Select::COLUMNS);
 
         $idsSelect->columns($this->getResource()->getIdFieldName(), 'main_table');
         return $this->getConnection()->fetchCol($idsSelect);
@@ -513,7 +513,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
         /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('core');
 
-        $unionParts = $select->getPart(Varien_Db_Select::UNION);
+        $unionParts = $select->getPart(Maho\Db\Select::UNION);
         if (!empty($unionParts)) {
             $select = $helper->limitUnion($select);
         }
@@ -652,7 +652,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     /**
      * Load cached data for select
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return string | false
      */
     #[\Override]
@@ -665,7 +665,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      * Save collection data to cache
      *
      * @param array $data
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return $this
      */
     #[\Override]

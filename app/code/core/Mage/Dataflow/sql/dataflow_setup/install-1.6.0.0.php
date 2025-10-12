@@ -19,23 +19,23 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('dataflow/session'))
-    ->addColumn('session_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('session_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Session Id')
-    ->addColumn('user_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('user_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
     ], 'User Id')
-    ->addColumn('created_date', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Created Date')
-    ->addColumn('file', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('file', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'File')
-    ->addColumn('type', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('type', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Type')
-    ->addColumn('direction', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('direction', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Direction')
-    ->addColumn('comment', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('comment', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Comment')
     ->setComment('Dataflow Session');
 $installer->getConnection()->createTable($table);
@@ -45,20 +45,20 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('dataflow/import'))
-    ->addColumn('import_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('import_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Import Id')
-    ->addColumn('session_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('session_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
     ], 'Session Id')
-    ->addColumn('serial_number', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('serial_number', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Serial Number')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Value')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Status')
@@ -71,8 +71,8 @@ $table = $installer->getConnection()
         'session_id',
         $installer->getTable('dataflow/session'),
         'session_id',
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->setComment('Dataflow Import Data');
 $installer->getConnection()->createTable($table);
@@ -82,32 +82,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('dataflow/profile'))
-    ->addColumn('profile_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('profile_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Profile Id')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Name')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Created At')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Updated At')
-    ->addColumn('actions_xml', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('actions_xml', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Actions Xml')
-    ->addColumn('gui_data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('gui_data', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Gui Data')
-    ->addColumn('direction', Varien_Db_Ddl_Table::TYPE_TEXT, 6, [
+    ->addColumn('direction', Maho\Db\Ddl\Table::TYPE_TEXT, 6, [
     ], 'Direction')
-    ->addColumn('entity_type', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('entity_type', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
     ], 'Entity Type')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('data_transfer', Varien_Db_Ddl_Table::TYPE_TEXT, 11, [
+    ->addColumn('data_transfer', Maho\Db\Ddl\Table::TYPE_TEXT, 11, [
     ], 'Data Transfer')
     ->setComment('Dataflow Profile');
 $installer->getConnection()->createTable($table);
@@ -117,25 +117,25 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('dataflow/profile_history'))
-    ->addColumn('history_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('history_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'History Id')
-    ->addColumn('profile_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('profile_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Profile Id')
-    ->addColumn('action_code', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('action_code', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
     ], 'Action Code')
-    ->addColumn('user_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('user_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'User Id')
-    ->addColumn('performed_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('performed_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Performed At')
     ->addIndex(
         $installer->getIdxName('dataflow/profile_history', ['profile_id']),
@@ -146,8 +146,8 @@ $table = $installer->getConnection()
         'profile_id',
         $installer->getTable('dataflow/profile'),
         'profile_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Dataflow Profile History');
 $installer->getConnection()->createTable($table);
@@ -157,27 +157,27 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('dataflow/batch'))
-    ->addColumn('batch_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('batch_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Batch Id')
-    ->addColumn('profile_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('profile_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Profile ID')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store Id')
-    ->addColumn('adapter', Varien_Db_Ddl_Table::TYPE_TEXT, 128, [
+    ->addColumn('adapter', Maho\Db\Ddl\Table::TYPE_TEXT, 128, [
     ], 'Adapter')
-    ->addColumn('params', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('params', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Parameters')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Created At')
     ->addIndex(
         $installer->getIdxName('dataflow/batch', ['profile_id']),
@@ -196,16 +196,16 @@ $table = $installer->getConnection()
         'profile_id',
         $installer->getTable('dataflow/profile'),
         'profile_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->addForeignKey(
         $installer->getFkName('dataflow/batch', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->setComment('Dataflow Batch');
 $installer->getConnection()->createTable($table);
@@ -215,20 +215,20 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('dataflow/batch_export'))
-    ->addColumn('batch_export_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('batch_export_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Batch Export Id')
-    ->addColumn('batch_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('batch_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Batch Id')
-    ->addColumn('batch_data', Varien_Db_Ddl_Table::TYPE_TEXT, '2G', [
+    ->addColumn('batch_data', Maho\Db\Ddl\Table::TYPE_TEXT, '2G', [
     ], 'Batch Data')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -242,8 +242,8 @@ $table = $installer->getConnection()
         'batch_id',
         $installer->getTable('dataflow/batch'),
         'batch_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->setComment('Dataflow Batch Export');
 $installer->getConnection()->createTable($table);
@@ -253,20 +253,20 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('dataflow/batch_import'))
-    ->addColumn('batch_import_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('batch_import_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Batch Import Id')
-    ->addColumn('batch_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('batch_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Batch Id')
-    ->addColumn('batch_data', Varien_Db_Ddl_Table::TYPE_TEXT, '2G', [
+    ->addColumn('batch_data', Maho\Db\Ddl\Table::TYPE_TEXT, '2G', [
     ], 'Batch Data')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -280,8 +280,8 @@ $table = $installer->getConnection()
         'batch_id',
         $installer->getTable('dataflow/batch'),
         'batch_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->setComment('Dataflow Batch Import');
 $installer->getConnection()->createTable($table);

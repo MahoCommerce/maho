@@ -15,7 +15,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Connection instance
      *
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_connection;
 
@@ -43,7 +43,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Constructor with parameters
      * Array of arguments with keys
-     *  - 'connection' Varien_Db_Adapter_Interface
+     *  - 'connection' Maho\Db\Adapter\AdapterInterface
      *  - 'factory' Mage_Core_Model_Factory
      *  - 'resource' Mage_Core_Model_Resource_Db_Abstract
      *  - 'app' Mage_Core_Model_App
@@ -59,7 +59,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Set connection
      */
-    protected function _setConnection(Varien_Db_Adapter_Interface $connection)
+    protected function _setConnection(Maho\Db\Adapter\AdapterInterface $connection)
     {
         $this->_connection = $connection;
     }
@@ -120,14 +120,14 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         $table = $this->_connection->newTable($this->_getTemporaryTable())
             ->addColumn(
                 'grouped_id',
-                Varien_Db_Ddl_Table::TYPE_VARCHAR,
+                Maho\Db\Ddl\Table::TYPE_VARCHAR,
                 80,
                 [],
                 'Grouped ID',
             )
             ->addColumn(
                 'product_id',
-                Varien_Db_Ddl_Table::TYPE_INTEGER,
+                Maho\Db\Ddl\Table::TYPE_INTEGER,
                 null,
                 [
                     'unsigned' => true,
@@ -136,7 +136,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             )
             ->addColumn(
                 'customer_group_id',
-                Varien_Db_Ddl_Table::TYPE_SMALLINT,
+                Maho\Db\Ddl\Table::TYPE_SMALLINT,
                 5,
                 [
                     'unsigned' => true,
@@ -145,42 +145,42 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             )
             ->addColumn(
                 'from_date',
-                Varien_Db_Ddl_Table::TYPE_DATE,
+                Maho\Db\Ddl\Table::TYPE_DATE,
                 null,
                 [],
                 'From Date',
             )
             ->addColumn(
                 'to_date',
-                Varien_Db_Ddl_Table::TYPE_DATE,
+                Maho\Db\Ddl\Table::TYPE_DATE,
                 null,
                 [],
                 'To Date',
             )
             ->addColumn(
                 'action_amount',
-                Varien_Db_Ddl_Table::TYPE_DECIMAL,
+                Maho\Db\Ddl\Table::TYPE_DECIMAL,
                 '12,4',
                 [],
                 'Action Amount',
             )
             ->addColumn(
                 'action_operator',
-                Varien_Db_Ddl_Table::TYPE_VARCHAR,
+                Maho\Db\Ddl\Table::TYPE_VARCHAR,
                 10,
                 [],
                 'Action Operator',
             )
             ->addColumn(
                 'action_stop',
-                Varien_Db_Ddl_Table::TYPE_SMALLINT,
+                Maho\Db\Ddl\Table::TYPE_SMALLINT,
                 6,
                 [],
                 'Action Stop',
             )
             ->addColumn(
                 'sort_order',
-                Varien_Db_Ddl_Table::TYPE_INTEGER,
+                Maho\Db\Ddl\Table::TYPE_INTEGER,
                 10,
                 [
                     'unsigned' => true,
@@ -189,14 +189,14 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             )
             ->addColumn(
                 'price',
-                Varien_Db_Ddl_Table::TYPE_DECIMAL,
+                Maho\Db\Ddl\Table::TYPE_DECIMAL,
                 '12,4',
                 [],
                 'Product Price',
             )
             ->addColumn(
                 'rule_product_id',
-                Varien_Db_Ddl_Table::TYPE_INTEGER,
+                Maho\Db\Ddl\Table::TYPE_INTEGER,
                 null,
                 [
                     'unsigned' => true,
@@ -205,7 +205,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             )
             ->addColumn(
                 'from_time',
-                Varien_Db_Ddl_Table::TYPE_INTEGER,
+                Maho\Db\Ddl\Table::TYPE_INTEGER,
                 null,
                 [
                     'unsigned' => true,
@@ -216,7 +216,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
             )
             ->addColumn(
                 'to_time',
-                Varien_Db_Ddl_Table::TYPE_INTEGER,
+                Maho\Db\Ddl\Table::TYPE_INTEGER,
                 null,
                 [
                     'unsigned' => true,
@@ -236,7 +236,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Prepare temporary data
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _prepareTemporarySelect(Mage_Core_Model_Website $website)
     {
@@ -438,7 +438,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      * Prepare index select
      *
      * @param int|Maho\Db\Expr $time
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _prepareIndexSelect(Mage_Core_Model_Website $website, $time)
     {
@@ -492,7 +492,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                                 'SELECT ' . $this->_connection->getDateAddSql(
                                     $this->_connection->fromUnixtime($time),
                                     -1,
-                                    Varien_Db_Adapter_Interface::INTERVAL_DAY,
+                                    Maho\Db\Adapter\AdapterInterface::INTERVAL_DAY,
                                 ) . ' AS rule_date',
                             ),
                             new Maho\Db\Expr('SELECT ' . $this->_connection->fromUnixtime($time) . ' AS rule_date'),
@@ -500,7 +500,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                                 'SELECT ' . $this->_connection->getDateAddSql(
                                     $this->_connection->fromUnixtime($time),
                                     1,
-                                    Varien_Db_Adapter_Interface::INTERVAL_DAY,
+                                    Maho\Db\Adapter\AdapterInterface::INTERVAL_DAY,
                                 ) . ' AS rule_date',
                             ),
                         ],
@@ -555,7 +555,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                 $this->_prepareIndexSelect($website, $time),
                 $this->_resource->getTable('catalogrule/rule_product_price'),
                 [],
-                Varien_Db_Adapter_Interface::INSERT_IGNORE,
+                Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
             ),
         );
     }

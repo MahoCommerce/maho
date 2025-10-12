@@ -29,7 +29,7 @@ if (!$connection->isTableExists($rulesWebsitesTable)) {
     $table = $connection->newTable($rulesWebsitesTable)
         ->addColumn(
             'rule_id',
-            Varien_Db_Ddl_Table::TYPE_INTEGER,
+            Maho\Db\Ddl\Table::TYPE_INTEGER,
             null,
             [
                 'unsigned'  => true,
@@ -40,7 +40,7 @@ if (!$connection->isTableExists($rulesWebsitesTable)) {
         )
         ->addColumn(
             'website_id',
-            Varien_Db_Ddl_Table::TYPE_SMALLINT,
+            Maho\Db\Ddl\Table::TYPE_SMALLINT,
             null,
             [
                 'unsigned'  => true,
@@ -62,16 +62,16 @@ if (!$connection->isTableExists($rulesWebsitesTable)) {
             'rule_id',
             $rulesTable,
             'rule_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName('catalogrule/website', 'website_id', 'core/website', 'website_id'),
             'website_id',
             $websitesTable,
             'website_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->setComment('Catalog Rules To Websites Relations');
 
@@ -86,7 +86,7 @@ if (!$connection->isTableExists($rulesCustomerGroupsTable)) {
     $table = $connection->newTable($rulesCustomerGroupsTable)
         ->addColumn(
             'rule_id',
-            Varien_Db_Ddl_Table::TYPE_INTEGER,
+            Maho\Db\Ddl\Table::TYPE_INTEGER,
             null,
             [
                 'unsigned'  => true,
@@ -97,7 +97,7 @@ if (!$connection->isTableExists($rulesCustomerGroupsTable)) {
         )
         ->addColumn(
             'customer_group_id',
-            Varien_Db_Ddl_Table::TYPE_SMALLINT,
+            Maho\Db\Ddl\Table::TYPE_SMALLINT,
             null,
             [
                 'unsigned'  => true,
@@ -119,8 +119,8 @@ if (!$connection->isTableExists($rulesCustomerGroupsTable)) {
             'rule_id',
             $rulesTable,
             'rule_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName(
@@ -132,8 +132,8 @@ if (!$connection->isTableExists($rulesCustomerGroupsTable)) {
             'customer_group_id',
             $customerGroupsTable,
             'customer_group_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->setComment('Catalog Rules To Customer Groups Relations');
 

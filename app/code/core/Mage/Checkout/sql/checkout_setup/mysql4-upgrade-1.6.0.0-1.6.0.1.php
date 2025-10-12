@@ -23,7 +23,7 @@ if (!$connection->tableColumnExists($table, $column)) {
         $table,
         $column,
         [
-            'type'      => Varien_Db_Ddl_Table::TYPE_SMALLINT,
+            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
             'length'    => 2,
             'nullable'  => false,
             'default'   => 0,

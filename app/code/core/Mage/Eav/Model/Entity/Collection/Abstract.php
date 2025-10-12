@@ -299,7 +299,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
         }
 
         if (!empty($conditionSql)) {
-            $this->getSelect()->where($conditionSql, null, Varien_Db_Select::TYPE_CONDITION);
+            $this->getSelect()->where($conditionSql, null, Maho\Db\Select::TYPE_CONDITION);
         } else {
             Mage::throwException('Invalid attribute identifier for filter (' . $attribute::class . ')');
         }
@@ -373,7 +373,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      */
     protected function _prepareOrderExpression($field)
     {
-        foreach ($this->getSelect()->getPart(Varien_Db_Select::COLUMNS) as $columnEntry) {
+        foreach ($this->getSelect()->getPart(Maho\Db\Select::COLUMNS) as $columnEntry) {
             if ($columnEntry[2] != $field) {
                 continue;
             }
@@ -872,16 +872,16 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @param int $limit
      * @param int $offset
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      * @throws Mage_Core_Exception
      */
     protected function _getAllIdsSelect($limit = null, $offset = null)
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Varien_Db_Select::ORDER);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Varien_Db_Select::COLUMNS);
+        $idsSelect->reset(Maho\Db\Select::ORDER);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $idsSelect->reset(Maho\Db\Select::COLUMNS);
         $idsSelect->columns('e.' . $this->getEntity()->getIdFieldName());
         $idsSelect->limit($limit, $offset);
 
@@ -905,16 +905,16 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * Retrieve all ids sql
      *
      * @deprecated
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getAllIdsSql()
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Varien_Db_Select::ORDER);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Varien_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Varien_Db_Select::COLUMNS);
-        $idsSelect->reset(Varien_Db_Select::GROUP);
+        $idsSelect->reset(Maho\Db\Select::ORDER);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $idsSelect->reset(Maho\Db\Select::COLUMNS);
+        $idsSelect->reset(Maho\Db\Select::GROUP);
         $idsSelect->columns('e.' . $this->getEntity()->getIdFieldName());
 
         return $idsSelect;
@@ -1127,7 +1127,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @param   string $table
      * @param array $attributeIds
-     * @return  Varien_Db_Select
+     * @return  Maho\Db\Select
      * @throws Mage_Core_Exception
      */
     protected function _getLoadAttributesSelect($table, $attributeIds = [])
@@ -1145,10 +1145,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     }
 
     /**
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @param string $table
      * @param string $type
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _addLoadAttributesSelectValues($select, $table, $type)
     {
@@ -1485,7 +1485,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     /**
      * Prepare select for load
      *
-     * @param Varien_Db_Select $select OPTIONAL
+     * @param Maho\Db\Select $select OPTIONAL
      * @return string
      */
     public function _prepareSelect(\Maho\Db\Select $select)

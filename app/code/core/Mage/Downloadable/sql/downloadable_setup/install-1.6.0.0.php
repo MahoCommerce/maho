@@ -19,41 +19,41 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/link'))
-    ->addColumn('link_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('link_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Link ID')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Product ID')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort order')
-    ->addColumn('number_of_downloads', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('number_of_downloads', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => true,
     ], 'Number of downloads')
-    ->addColumn('is_shareable', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_shareable', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Shareable flag')
-    ->addColumn('link_url', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_url', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link Url')
-    ->addColumn('link_file', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_file', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link File')
-    ->addColumn('link_type', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('link_type', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
     ], 'Link Type')
-    ->addColumn('sample_url', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('sample_url', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Sample Url')
-    ->addColumn('sample_file', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('sample_file', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Sample File')
-    ->addColumn('sample_type', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('sample_type', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
     ], 'Sample Type')
     ->addIndex($installer->getIdxName('downloadable/link', 'product_id'), 'product_id')
     ->addIndex(
@@ -65,8 +65,8 @@ $table = $installer->getConnection()
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Table');
 $installer->getConnection()->createTable($table);
@@ -76,23 +76,23 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/link_price'))
-    ->addColumn('price_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('price_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Price ID')
-    ->addColumn('link_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('link_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Link ID')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Website ID')
-    ->addColumn('price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Price')
@@ -102,8 +102,8 @@ $table = $installer->getConnection()
         'link_id',
         $installer->getTable('downloadable/link'),
         'link_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('downloadable/link_price', 'website_id'), 'website_id')
     ->addForeignKey(
@@ -111,8 +111,8 @@ $table = $installer->getConnection()
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Price Table');
 $installer->getConnection()->createTable($table);
@@ -122,39 +122,39 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/link_purchased'))
-    ->addColumn('purchased_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('purchased_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Purchased ID')
-    ->addColumn('order_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('order_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Order ID')
-    ->addColumn('order_increment_id', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('order_increment_id', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Order Increment ID')
-    ->addColumn('order_item_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('order_item_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Order Item ID')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Date of creation')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Date of modification')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
         'default'   => '0',
     ], 'Customer ID')
-    ->addColumn('product_name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('product_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Product name')
-    ->addColumn('product_sku', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('product_sku', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Product sku')
-    ->addColumn('link_section_title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_section_title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link_section_title')
     ->addIndex($installer->getIdxName('downloadable/link_purchased', 'order_id'), 'order_id')
     ->addIndex($installer->getIdxName('downloadable/link_purchased', 'order_item_id'), 'order_item_id')
@@ -164,16 +164,16 @@ $table = $installer->getConnection()
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('downloadable/link_purchased', 'order_id', 'sales/order', 'entity_id'),
         'order_id',
         $installer->getTable('sales/order'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Purchased Table');
 $installer->getConnection()->createTable($table);
@@ -183,62 +183,62 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/link_purchased_item'))
-    ->addColumn('item_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('item_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Item ID')
-    ->addColumn('purchased_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('purchased_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Purchased ID')
-    ->addColumn('order_item_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('order_item_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'default'   => '0',
     ], 'Order Item ID')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
         'default'   => '0',
     ], 'Product ID')
-    ->addColumn('link_hash', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_hash', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link hash')
-    ->addColumn('number_of_downloads_bought', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('number_of_downloads_bought', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Number of downloads bought')
-    ->addColumn('number_of_downloads_used', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('number_of_downloads_used', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Number of downloads used')
-    ->addColumn('link_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('link_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Link ID')
-    ->addColumn('link_title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link Title')
-    ->addColumn('is_shareable', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_shareable', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Shareable Flag')
-    ->addColumn('link_url', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_url', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link Url')
-    ->addColumn('link_file', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_file', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link File')
-    ->addColumn('link_type', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('link_type', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Link Type')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Status')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Creation Time')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Update Time')
     ->addIndex($installer->getIdxName('downloadable/link_purchased_item', 'link_hash'), 'link_hash')
@@ -254,8 +254,8 @@ $table = $installer->getConnection()
         'purchased_id',
         $installer->getTable('downloadable/link_purchased'),
         'purchased_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -267,8 +267,8 @@ $table = $installer->getConnection()
         'order_item_id',
         $installer->getTable('sales/order_item'),
         'item_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Purchased Item Table');
 $installer->getConnection()->createTable($table);
@@ -278,32 +278,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/link_title'))
-    ->addColumn('title_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('title_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Title ID')
-    ->addColumn('link_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('link_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Link ID')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store ID')
-    ->addColumn('title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Title')
     ->addIndex(
         $installer->getIdxName(
             'downloadable/link_title',
             ['link_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['link_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex($installer->getIdxName('downloadable/link_title', 'link_id'), 'link_id')
     ->addForeignKey(
@@ -311,8 +311,8 @@ $table = $installer->getConnection()
         'link_id',
         $installer->getTable('downloadable/link'),
         'link_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('downloadable/link_title', 'store_id'), 'store_id')
     ->addForeignKey(
@@ -320,8 +320,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Link Title Table');
 $installer->getConnection()->createTable($table);
@@ -331,24 +331,24 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/sample'))
-    ->addColumn('sample_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sample_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Sample ID')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Product ID')
-    ->addColumn('sample_url', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('sample_url', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Sample URL')
-    ->addColumn('sample_file', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('sample_file', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Sample file')
-    ->addColumn('sample_type', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('sample_type', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
     ], 'Sample Type')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -359,8 +359,8 @@ $table = $installer->getConnection()
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Sample Table');
 $installer->getConnection()->createTable($table);
@@ -370,32 +370,32 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/sample_title'))
-    ->addColumn('title_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('title_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Title ID')
-    ->addColumn('sample_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sample_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Sample ID')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Store ID')
-    ->addColumn('title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Title')
     ->addIndex(
         $installer->getIdxName(
             'downloadable/sample_title',
             ['sample_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['sample_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex($installer->getIdxName('downloadable/sample_title', 'sample_id'), 'sample_id')
     ->addForeignKey(
@@ -403,8 +403,8 @@ $table = $installer->getConnection()
         'sample_id',
         $installer->getTable('downloadable/sample'),
         'sample_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('downloadable/sample_title', 'store_id'), 'store_id')
     ->addForeignKey(
@@ -412,8 +412,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Sample Title Table');
 $installer->getConnection()->createTable($table);
@@ -423,26 +423,26 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/product_price_indexer_idx'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity ID')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group ID')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website ID')
-    ->addColumn('min_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('min_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Minimum price')
-    ->addColumn('max_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('max_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Maximum price')
@@ -454,26 +454,26 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('downloadable/product_price_indexer_tmp'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity ID')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group ID')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website ID')
-    ->addColumn('min_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('min_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Minimum price')
-    ->addColumn('max_price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('max_price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Maximum price')

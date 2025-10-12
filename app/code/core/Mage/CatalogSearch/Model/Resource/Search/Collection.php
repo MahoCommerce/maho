@@ -104,7 +104,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
      * Retrieve SQL for search entities
      *
      * @param string $query
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getSearchEntityIdsSql($query)
     {
@@ -159,7 +159,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
             $selects[] = "SELECT * FROM ({$sql}) AS inoptionsql"; // inheritant unions may be inside
         }
 
-        $sql = $this->getConnection()->select()->union($selects, Varien_Db_Select::SQL_UNION_ALL);
+        $sql = $this->getConnection()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
         return $sql;
     }
 
@@ -167,7 +167,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
      * Retrieve SQL for search entities by option
      *
      * @param string $query
-     * @return false|Varien_Db_Select
+     * @return false|Maho\Db\Select
      */
     protected function _getSearchInOptionSql($query)
     {
@@ -259,6 +259,6 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
                 ->where(implode(' OR ', $where))
                 ->where("store_id={$storeId}");
         }
-        return $this->getConnection()->select()->union($selects, Varien_Db_Select::SQL_UNION_ALL);
+        return $this->getConnection()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
     }
 }

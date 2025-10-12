@@ -15,7 +15,7 @@ class Mage_Catalog_Helper_Product_Url_Rewrite extends Mage_Core_Helper_Abstract 
     /**
      * Adapter instance
      *
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_connection;
 
@@ -41,7 +41,7 @@ class Mage_Catalog_Helper_Product_Url_Rewrite extends Mage_Core_Helper_Abstract 
      *
      * @param int $categoryId
      * @param int $storeId
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getTableSelect(array $productIds, $categoryId, $storeId)

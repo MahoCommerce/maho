@@ -221,16 +221,16 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     /**
      * Get sql for get record count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $select = parent::getSelectCountSql();
 
-        $select->reset(Varien_Db_Select::COLUMNS);
-        $select->reset(Varien_Db_Select::GROUP);
-        $select->reset(Varien_Db_Select::HAVING);
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::GROUP);
+        $select->reset(Maho\Db\Select::HAVING);
         $select->columns('COUNT(DISTINCT main_table.tag_id)');
         return $select;
     }

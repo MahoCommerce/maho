@@ -577,7 +577,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
                     'entity_id',
                     'value',
                 ],
-                Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE,
+                Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
             ));
         }
 

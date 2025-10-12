@@ -98,7 +98,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                                     0,
                                 ),
                             ),
-                            $select->getPart(Varien_Db_Select::GROUP),
+                            $select->getPart(Maho\Db\Select::GROUP),
                         ),
                     ),
                 ),
@@ -222,7 +222,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
     /**
      * Aggregate Orders data for default store
      *
-     * @param Varien_Db_Select|null $subSelect
+     * @param Maho\Db\Select|null $subSelect
      * @return $this
      */
     protected function _aggregateDefault($subSelect = null)
@@ -249,7 +249,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                             'MIN(%s)',
                             $adapter->getIfNullSql('product_default_price.value', 0),
                         ),
-                        $select->getPart(Varien_Db_Select::GROUP),
+                        $select->getPart(Maho\Db\Select::GROUP),
                     ),
                 ),
             ),
