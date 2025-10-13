@@ -96,22 +96,12 @@ class Select
      */
     protected array $_tableCols = [];
 
-    /**
-     * Class constructor
-     *
-     * @param Adapter\Pdo\Mysql $adapter
-     */
-    public function __construct($adapter)
+    public function __construct(Adapter\Pdo\Mysql $adapter)
     {
         $this->_adapter = $adapter;
     }
 
-    /**
-     * Get the adapter
-     *
-     * @return Adapter\Pdo\Mysql
-     */
-    public function getAdapter()
+    public function getAdapter(): Adapter\Pdo\Mysql
     {
         return $this->_adapter;
     }
@@ -120,9 +110,8 @@ class Select
      * Makes the query SELECT DISTINCT.
      *
      * @param bool $flag Whether or not the SELECT is DISTINCT (default true).
-     * @return $this
      */
-    public function distinct($flag = true)
+    public function distinct(bool $flag = true): self
     {
         $this->_parts[self::DISTINCT] = (bool) $flag;
         return $this;
@@ -130,13 +119,8 @@ class Select
 
     /**
      * Adds a FROM table and optional columns to the query.
-     *
-     * @param  array|string|Expr $name The table name or array of table => alias.
-     * @param  array|string $cols The columns to select from the table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function from($name, $cols = '*', $schema = null)
+    public function from(array|string|Expr $name, array|string $cols = '*', ?string $schema = null): self
     {
         // Allow empty array for selecting expressions without a table (e.g., SELECT 1)
         if (is_array($name) && empty($name)) {
@@ -152,28 +136,16 @@ class Select
 
     /**
      * Adds a JOIN table and columns to the query.
-     *
-     * @param  array|string|Expr $name The table name.
-     * @param  string $cond Join on this condition.
-     * @param  array|string $cols The columns to select from the joined table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function join($name, $cond, $cols = self::SQL_WILDCARD, $schema = null)
+    public function join(array|string|Expr $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->joinInner($name, $cond, $cols, $schema);
     }
 
     /**
      * Add an INNER JOIN table and columns to the query
-     *
-     * @param  array|string|Expr $name The table name.
-     * @param  string|null $cond Join on this condition (null for CROSS join).
-     * @param  array|string $cols The columns to select from the joined table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function joinInner($name, $cond, $cols = self::SQL_WILDCARD, $schema = null)
+    public function joinInner(array|string|Expr $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         // If no condition is given for inner join, make it a cross join
         if (empty($cond) && $cond !== null) {
@@ -184,83 +156,48 @@ class Select
 
     /**
      * Add a LEFT OUTER JOIN table and columns to the query
-     *
-     * @param  array|string|Expr $name The table name.
-     * @param  string $cond Join on this condition.
-     * @param  array|string $cols The columns to select from the joined table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function joinLeft($name, $cond, $cols = self::SQL_WILDCARD, $schema = null)
+    public function joinLeft(array|string|Expr $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::LEFT_JOIN, $name, $cond, $cols, $schema);
     }
 
     /**
      * Add a RIGHT OUTER JOIN table and columns to the query
-     *
-     * @param  array|string|Expr $name The table name.
-     * @param  string $cond Join on this condition.
-     * @param  array|string $cols The columns to select from the joined table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function joinRight($name, $cond, $cols = self::SQL_WILDCARD, $schema = null)
+    public function joinRight(array|string|Expr $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::RIGHT_JOIN, $name, $cond, $cols, $schema);
     }
 
     /**
      * Add a FULL OUTER JOIN table and columns to the query
-     *
-     * @param  array|string|Expr $name The table name.
-     * @param  string $cond Join on this condition.
-     * @param  array|string $cols The columns to select from the joined table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function joinFull($name, $cond, $cols = self::SQL_WILDCARD, $schema = null)
+    public function joinFull(array|string|Expr $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::FULL_JOIN, $name, $cond, $cols, $schema);
     }
 
     /**
      * Add a CROSS JOIN table and columns to the query
-     *
-     * @param  array|string|Expr $name The table name.
-     * @param  array|string $cols The columns to select from the joined table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function joinCross($name, $cols = self::SQL_WILDCARD, $schema = null)
+    public function joinCross(array|string|Expr $name, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::CROSS_JOIN, $name, null, $cols, $schema);
     }
 
     /**
      * Add a NATURAL JOIN table and columns to the query
-     *
-     * @param  array|string|Expr $name The table name.
-     * @param  array|string $cols The columns to select from the joined table.
-     * @param  string $schema The schema name to specify, if any.
-     * @return $this
      */
-    public function joinNatural($name, $cols = self::SQL_WILDCARD, $schema = null)
+    public function joinNatural(array|string|Expr $name, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::NATURAL_JOIN, $name, null, $cols, $schema);
     }
 
     /**
      * Populate the {@link $_parts} 'join' key
-     *
-     * @param  string $type Type of join
-     * @param  array|string|Expr $name Table name
-     * @param  string|null $cond Join on this condition (null for CROSS/NATURAL joins)
-     * @param  array|string $cols The columns to select from the joined table
-     * @param  string $schema The database name to specify, if any.
-     * @return $this
      */
-    protected function _join($type, $name, $cond, $cols, $schema = null)
+    protected function _join(string $type, array|string|Expr $name, ?string $cond, array|string $cols, ?string $schema = null): self
     {
         if (!in_array($type, [self::INNER_JOIN, self::LEFT_JOIN, self::RIGHT_JOIN, self::FULL_JOIN, self::CROSS_JOIN, self::NATURAL_JOIN])) {
             throw new Exception("Invalid join type '$type'");
@@ -294,7 +231,7 @@ class Select
         }
 
         // Schema
-        if ($schema !== null && is_string($schema)) {
+        if ($schema !== null) {
             $tableName = [$schema, $tableName];
         }
 
@@ -411,13 +348,8 @@ class Select
 
     /**
      * Adds a WHERE condition to the query by AND
-     *
-     * @param string $cond The WHERE condition.
-     * @param mixed $value OPTIONAL A single value to quote into the condition.
-     * @param mixed $type OPTIONAL The type of the given value
-     * @return $this
      */
-    public function where($cond, $value = null, $type = null)
+    public function where(string $cond, mixed $value = null, mixed $type = null): self
     {
         $this->_parts[self::WHERE][] = $this->_where($cond, $value, $type, true);
         return $this;
@@ -425,13 +357,8 @@ class Select
 
     /**
      * Adds a WHERE condition to the query by OR
-     *
-     * @param string $cond The WHERE condition.
-     * @param mixed $value OPTIONAL A single value to quote into the condition.
-     * @param mixed $type OPTIONAL The type of the given value
-     * @return $this
      */
-    public function orWhere($cond, $value = null, $type = null)
+    public function orWhere(string $cond, mixed $value = null, mixed $type = null): self
     {
         $this->_parts[self::WHERE][] = $this->_where($cond, $value, $type, false);
         return $this;
@@ -439,14 +366,8 @@ class Select
 
     /**
      * Internal function for creating WHERE conditions
-     *
-     * @param string $cond
-     * @param mixed $value
-     * @param string $type
-     * @param bool $bool True = AND, False = OR
-     * @return array<string, string>
      */
-    protected function _where($cond, $value = null, $type = null, $bool = true)
+    protected function _where(string $cond, mixed $value = null, mixed $type = null, bool $bool = true): array
     {
         if (is_null($value) && is_null($type)) {
             $value = '';
@@ -479,9 +400,8 @@ class Select
      * Adds grouping to the query.
      *
      * @param  array|string $spec The column(s) to group by.
-     * @return $this
      */
-    public function group($spec)
+    public function group(array|string $spec): self
     {
         if (!is_array($spec)) {
             $spec = [$spec];
@@ -500,9 +420,8 @@ class Select
      * @param string $cond The HAVING condition.
      * @param mixed $value OPTIONAL A single value to quote into the condition.
      * @param int $type OPTIONAL The type of the given value
-     * @return $this
      */
-    public function having($cond, $value = null, $type = null)
+    public function having(string $cond, mixed $value = null, mixed $type = null): self
     {
         if ($value !== null) {
             $cond = $this->_adapter->quoteInto($cond, $value, $type);
@@ -523,9 +442,8 @@ class Select
      * @param string $cond The HAVING condition.
      * @param mixed $value OPTIONAL A single value to quote into the condition.
      * @param int $type OPTIONAL The type of the given value
-     * @return $this
      */
-    public function orHaving($cond, $value = null, $type = null)
+    public function orHaving(string $cond, mixed $value = null, mixed $type = null): self
     {
         if ($value !== null) {
             $cond = $this->_adapter->quoteInto($cond, $value, $type);
@@ -543,10 +461,9 @@ class Select
     /**
      * Adds a row order to the query.
      *
-     * @param mixed $spec The column(s) and direction to order by.
-     * @return $this
+     * @param array|string|Expr $spec The column(s) and direction to order by.
      */
-    public function order($spec)
+    public function order(array|string|Expr $spec): self
     {
         if (!is_array($spec)) {
             $spec = [$spec];
@@ -583,7 +500,7 @@ class Select
      * @param int $offset OPTIONAL Start returning after this many rows.
      * @return $this
      */
-    public function limit($count = null, $offset = null)
+    public function limit(?int $count = null, ?int $offset = null): self
     {
         if ($count === null) {
             $this->_parts[self::LIMIT_COUNT] = null;
@@ -607,7 +524,7 @@ class Select
      * @param int $rowCount Use this many rows per page.
      * @return $this
      */
-    public function limitPage($page, $rowCount)
+    public function limitPage(int $page, int $rowCount): self
     {
         $page     = ($page > 0) ? $page : 1;
         $rowCount = ($rowCount > 0) ? $rowCount : 1;
@@ -622,7 +539,7 @@ class Select
      * @param bool $flag Whether or not the SELECT is FOR UPDATE (default true).
      * @return $this
      */
-    public function forUpdate($flag = true)
+    public function forUpdate(bool $flag = true): self
     {
         $this->_parts[self::FOR_UPDATE] = (bool) $flag;
         return $this;
@@ -630,11 +547,8 @@ class Select
 
     /**
      * Get part of the structured information for the current query.
-     *
-     * @param string $part
-     * @return mixed
      */
-    public function getPart($part)
+    public function getPart(string $part): mixed
     {
         $part = strtolower($part);
         if (!array_key_exists($part, $this->_parts)) {
@@ -645,12 +559,8 @@ class Select
 
     /**
      * Modify (hack) part of the structured information for the current query
-     *
-     * @param string $part
-     * @param mixed $value
-     * @return $this
      */
-    public function setPart($part, $value)
+    public function setPart(string $part, mixed $value): self
     {
         $part = strtolower($part);
         if (!array_key_exists($part, $this->_parts)) {
@@ -667,7 +577,7 @@ class Select
      * @param string $correlationName Correlation name or table alias
      * @return $this
      */
-    public function columns($cols = '*', $correlationName = null)
+    public function columns(array|string $cols = '*', ?string $correlationName = null): self
     {
         if ($correlationName === null && count($this->_parts[self::FROM])) {
             $correlationNameKeys = array_keys($this->_parts[self::FROM]);
@@ -692,11 +602,8 @@ class Select
 
     /**
      * Clears parts of the SELECT object, or all of it.
-     *
-     * @param string $part OPTIONAL
-     * @return $this
      */
-    public function reset($part = null)
+    public function reset(?string $part = null): self
     {
         if ($part == null) {
             $this->_parts = [
@@ -729,7 +636,7 @@ class Select
      * @param bool $flag Whether or not the SELECT use STRAIGHT_JOIN (default true).
      * @return $this
      */
-    public function useStraightJoin($flag = true)
+    public function useStraightJoin(bool $flag = true): self
     {
         $this->_parts[self::STRAIGHT_JOIN] = (bool) $flag;
         return $this;
@@ -737,24 +644,16 @@ class Select
 
     /**
      * Cross Table Update From Current select
-     *
-     * @param string|array $table
-     * @return string
      */
-    public function crossUpdateFromSelect($table)
+    public function crossUpdateFromSelect(string|array $table): string
     {
         return $this->getAdapter()->updateFromSelect($this, $table);
     }
 
     /**
      * Insert to table from current select
-     *
-     * @param string $tableName
-     * @param array $fields
-     * @param bool $onDuplicate
-     * @return string
      */
-    public function insertFromSelect($tableName, $fields = [], $onDuplicate = true)
+    public function insertFromSelect(string $tableName, array $fields = [], bool $onDuplicate = true): string
     {
         $mode = $onDuplicate ? Adapter\AdapterInterface::INSERT_ON_DUPLICATE : false;
         return $this->getAdapter()->insertFromSelect($this, $tableName, $fields, $mode);
@@ -762,12 +661,8 @@ class Select
 
     /**
      * Generate INSERT IGNORE query to the table from current select
-     *
-     * @param string $tableName
-     * @param array $fields
-     * @return string
      */
-    public function insertIgnoreFromSelect($tableName, $fields = [])
+    public function insertIgnoreFromSelect(string $tableName, array $fields = []): string
     {
         return $this->getAdapter()
             ->insertFromSelect($this, $tableName, $fields, Adapter\AdapterInterface::INSERT_IGNORE);
@@ -775,22 +670,16 @@ class Select
 
     /**
      * Retrieve DELETE query from select
-     *
-     * @param string $table The table name or alias
-     * @return string
      */
-    public function deleteFromSelect($table)
+    public function deleteFromSelect(string $table): string
     {
         return $this->getAdapter()->deleteFromSelect($this, $table);
     }
 
     /**
      * Adds the random order to query
-     *
-     * @param string $field integer field name
-     * @return $this
      */
-    public function orderRand($field = null)
+    public function orderRand(?string $field = null): self
     {
         $this->_adapter->orderRand($this, $field);
         return $this;
@@ -798,13 +687,8 @@ class Select
 
     /**
      * Add EXISTS clause
-     *
-     * @param  Select $select
-     * @param  string           $joinCondition
-     * @param  bool             $isExists
-     * @return $this
      */
-    public function exists($select, $joinCondition, $isExists = true)
+    public function exists(Select $select, string $joinCondition, bool $isExists = true): self
     {
         if ($isExists) {
             $exists = 'EXISTS (%s)';
@@ -823,10 +707,8 @@ class Select
 
     /**
      * Reset unused LEFT JOIN(s)
-     *
-     * @return $this
      */
-    public function resetJoinLeft()
+    public function resetJoinLeft(): self
     {
         foreach ($this->_parts[self::FROM] as $tableId => $tableProp) {
             if ($tableProp['joinType'] == self::LEFT_JOIN) {
@@ -963,10 +845,8 @@ class Select
 
     /**
      * Converts this object to an SQL SELECT string.
-     *
-     * @return string This object as a SELECT string.
      */
-    public function assemble()
+    public function assemble(): string
     {
         $sql = self::SQL_SELECT;
 
@@ -1153,11 +1033,9 @@ class Select
 
     /**
      * Converts this object to an SQL SELECT string.
-     *
-     * @return string
      */
     #[\Override]
-    public function __toString()
+    public function __toString(): string
     {
         try {
             return $this->assemble();
@@ -1169,12 +1047,8 @@ class Select
 
     /**
      * Adds a UNION clause to the query
-     *
-     * @param array $select Array of Select objects to union
-     * @param string $type Union type (default: UNION, or UNION ALL)
-     * @return $this
      */
-    public function union($select = [], $type = null)
+    public function union(array|Select $select = [], ?string $type = null): self
     {
         if (!is_array($select)) {
             $select = [$select];
@@ -1215,11 +1089,8 @@ class Select
 
     /**
      * Executes the current select object and returns the result statement
-     *
-     * @param array $bind Optional bind parameters
-     * @return Statement\Pdo\Mysql
      */
-    public function query($bind = [])
+    public function query(array $bind = []): Statement\Pdo\Mysql
     {
         return $this->_adapter->query($this, $bind);
     }
