@@ -158,11 +158,8 @@ class Table
 
     /**
      * Set table name
-     *
-     * @param string $name
-     * @return Table
      */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->_tableName = $name;
         if ($this->_tableComment === null) {
@@ -173,11 +170,8 @@ class Table
 
     /**
      * Set schema name
-     *
-     * @param string $name
-     * @return Table
      */
-    public function setSchema($name)
+    public function setSchema(string $name): self
     {
         $this->_schemaName = $name;
         return $this;
@@ -185,11 +179,8 @@ class Table
 
     /**
      * Set comment for table
-     *
-     * @param string $comment
-     * @return Table
      */
-    public function setComment($comment)
+    public function setComment(string $comment): self
     {
         $this->_tableComment = $comment;
         return $this;
@@ -199,9 +190,8 @@ class Table
      * Retrieve name of table
      *
      * @throws \Maho\Db\Exception
-     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         if (is_null($this->_tableName)) {
             throw new \Maho\Db\Exception('Table name is not defined');
@@ -211,20 +201,16 @@ class Table
 
     /**
      * Get schema name
-     *
-     * @return string|null
      */
-    public function getSchema()
+    public function getSchema(): ?string
     {
         return $this->_schemaName;
     }
 
     /**
      * Return comment for table
-     *
-     * @return string
      */
-    public function getComment()
+    public function getComment(): ?string
     {
         return $this->_tableComment;
     }
@@ -248,9 +234,8 @@ class Table
      * @param array $options array of additional options
      * @param string $comment column description
      * @throws \Maho\Db\Exception
-     * @return Table
      */
-    public function addColumn($name, $type, $size = null, $options = [], $comment = null)
+    public function addColumn(string $name, string $type, string|int|array|null $size = null, array $options = [], ?string $comment = null): self
     {
         $position           = count($this->_columns);
         $default            = false;
@@ -408,9 +393,8 @@ class Table
      * @param string $onDelete      the action on delete row
      * @param string $onUpdate      the action on update
      * @throws \Maho\Db\Exception
-     * @return Table
      */
-    public function addForeignKey($fkName, $column, $refTable, $refColumn, $onDelete = null, $onUpdate = null)
+    public function addForeignKey(string $fkName, string $column, string $refTable, string $refColumn, ?string $onDelete = null, ?string $onUpdate = null): self
     {
         $upperName = strtoupper($fkName);
 
@@ -453,13 +437,8 @@ class Table
 
     /**
      * Add index to table
-     *
-     * @param string $indexName     the index name
-     * @param array|string $fields  array of columns or column string
-     * @param array $options        array of additional options
-     * @return Table
      */
-    public function addIndex($indexName, $fields, $options = [])
+    public function addIndex(string $indexName, array|string $fields, array $options = []): self
     {
         $idxType    = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX;
         $position   = 0;
@@ -517,11 +496,8 @@ class Table
 
     /**
      * Retrieve array of table columns
-     *
-     * @param bool $normalized
-     * @return array
      */
-    public function getColumns($normalized = true)
+    public function getColumns(bool $normalized = true): array
     {
         if ($normalized) {
             return $this->_normalizeColumnPosition($this->_columns);
@@ -531,11 +507,8 @@ class Table
 
     /**
      * Set column, formatted according to DDL Table format, into columns structure
-     *
-     * @param array $column
-     * @return Table
      */
-    public function setColumn($column)
+    public function setColumn(array $column): self
     {
         $upperName = strtoupper($column['COLUMN_NAME']);
         $this->_columns[$upperName] = $column;
@@ -544,32 +517,24 @@ class Table
 
     /**
      * Retrieve array of table indexes
-     *
-     * @return array
      */
-    public function getIndexes()
+    public function getIndexes(): array
     {
         return $this->_indexes;
     }
 
     /**
      * Retrieve array of table foreign keys
-     *
-     * @return array
      */
-    public function getForeignKeys()
+    public function getForeignKeys(): array
     {
         return $this->_foreignKeys;
     }
 
     /**
      * Set table option
-     *
-     * @param string $key
-     * @param string $value
-     * @return $this
      */
-    public function setOption($key, $value)
+    public function setOption(string $key, mixed $value): self
     {
         $this->_options[$key] = $value;
         return $this;
@@ -578,11 +543,8 @@ class Table
     /**
      * Retrieve table option value by option name
      * Return null if option does not exits
-     *
-     * @param string $key
-     * @return mixed
      */
-    public function getOption($key)
+    public function getOption(string $key): mixed
     {
         if (!isset($this->_options[$key])) {
             return null;
@@ -592,45 +554,32 @@ class Table
 
     /**
      * Retrieve array of table options
-     *
-     * @return array
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->_options;
     }
 
     /**
      * Index column position comparison function
-     *
-     * @param array $a
-     * @param array $b
-     * @return int
      */
-    protected function _sortIndexColumnPosition($a, $b)
+    protected function _sortIndexColumnPosition(array $a, array $b): int
     {
         return $a['POSITION'] - $b['POSITION'];
     }
 
     /**
      * table column position comparison function
-     *
-     * @param array $a
-     * @param array $b
-     * @return int
      */
-    protected function _sortColumnPosition($a, $b)
+    protected function _sortColumnPosition(array $a, array $b): int
     {
         return $a['COLUMN_POSITION'] - $b['COLUMN_POSITION'];
     }
 
     /**
      * Normalize position of index columns array
-     *
-     * @param array $columns
-     * @return array
      */
-    protected function _normalizeIndexColumnPosition($columns)
+    protected function _normalizeIndexColumnPosition(array $columns): array
     {
         uasort($columns, [$this, '_sortIndexColumnPosition']);
         $position = 0;
@@ -643,11 +592,8 @@ class Table
 
     /**
      * Normalize position of table columns array
-     *
-     * @param array $columns
-     * @return array
      */
-    protected function _normalizeColumnPosition($columns)
+    protected function _normalizeColumnPosition(array $columns): array
     {
         uasort($columns, [$this, '_sortColumnPosition']);
         $position = 0;

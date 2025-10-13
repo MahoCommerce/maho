@@ -59,12 +59,7 @@ class Parameter
      */
     protected ?\Varien_Object $_additional = null;
 
-    /**
-     * Inits instance
-     *
-     * @param mixed $value
-     */
-    public function __construct($value)
+    public function __construct(mixed $value)
     {
         $this->_value = $value;
         $this->_additional = new \Varien_Object();
@@ -72,11 +67,8 @@ class Parameter
 
     /**
      * Sets parameter value.
-     *
-     * @param mixed $value
-     * @return Parameter
      */
-    public function setValue($value)
+    public function setValue(mixed $value): self
     {
         $this->_value = $value;
         return $this;
@@ -84,10 +76,8 @@ class Parameter
 
     /**
      * Gets parameter value.
-     *
-     * @return mixed
      */
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->_value;
     }
@@ -98,11 +88,8 @@ class Parameter
      * FALSE (default) means, that concrete binding options come in dataType, length and driverOptions properties.
      * TRUE means that DB adapter must ignore other options and use adapter's default options to bind this parameter
      * as a BLOB value.
-     *
-     * @param bool $isBlob
-     * @return Parameter
      */
-    public function setIsBlob($isBlob)
+    public function setIsBlob(bool $isBlob): self
     {
         $this->_isBlob = $isBlob;
         return $this;
@@ -111,23 +98,16 @@ class Parameter
     /**
      * Gets, whether parameter is a BLOB.
      * See setIsBlob() for returned value explanation.
-     *
-     * @return bool
-     *
-     * @see setIsBlob
      */
-    public function getIsBlob()
+    public function getIsBlob(): bool
     {
         return $this->_isBlob;
     }
 
     /**
      * Sets data type option to be used during binding parameter value.
-     *
-     * @param mixed $dataType
-     * @return Parameter
      */
-    public function setDataType($dataType)
+    public function setDataType(mixed $dataType): self
     {
         $this->_dataType = $dataType;
         return $this;
@@ -135,21 +115,16 @@ class Parameter
 
     /**
      * Gets data type option to be used during binding parameter value.
-     *
-     * @return mixed
      */
-    public function getDataType()
+    public function getDataType(): mixed
     {
         return $this->_dataType;
     }
 
     /**
      * Sets length option to be used during binding parameter value.
-     *
-     * @param mixed $length
-     * @return Parameter
      */
-    public function setLength($length)
+    public function setLength(mixed $length): self
     {
         $this->_length = $length;
         return $this;
@@ -157,21 +132,16 @@ class Parameter
 
     /**
      * Gets length option to be used during binding parameter value.
-     *
-     * @return mixed
      */
-    public function getLength()
+    public function getLength(): mixed
     {
         return $this->_length;
     }
 
     /**
      * Sets specific driver options to be used during binding parameter value.
-     *
-     * @param mixed $driverOptions
-     * @return Parameter
      */
-    public function setDriverOptions($driverOptions)
+    public function setDriverOptions(mixed $driverOptions): self
     {
         $this->_driverOptions = $driverOptions;
         return $this;
@@ -179,10 +149,8 @@ class Parameter
 
     /**
      * Gets driver options to be used during binding parameter value.
-     *
-     * @return mixed
      */
-    public function getDriverOptions()
+    public function getDriverOptions(): mixed
     {
         return $this->_driverOptions;
     }
@@ -190,11 +158,8 @@ class Parameter
     /**
      * Sets additional information for concrete DB adapter.
      * Set there any data you want to pass along with query parameter.
-     *
-     * @param \Varien_Object $additional
-     * @return Parameter
      */
-    public function setAdditional($additional)
+    public function setAdditional(\Varien_Object $additional): self
     {
         $this->_additional = $additional;
         return $this;
@@ -202,31 +167,25 @@ class Parameter
 
     /**
      * Gets additional information for concrete DB adapter.
-     *
-     * @return \Varien_Object
      */
-    public function getAdditional()
+    public function getAdditional(): \Varien_Object
     {
         return $this->_additional;
     }
 
     /**
      * Returns representation of a object to be used in string contexts
-     *
-     * @return string
      */
     #[\Override]
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->_value;
     }
 
     /**
      * Returns representation of a object to be used in string contexts
-     *
-     * @return string
      */
-    public function toString()
+    public function toString(): string
     {
         return $this->__toString();
     }
