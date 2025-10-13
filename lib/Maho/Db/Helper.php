@@ -70,22 +70,16 @@ class Helper
 
     /**
      * Convert name using dictionary
-     *
-     * @param string $name
-     * @return string
      */
-    public static function shortName($name)
+    public static function shortName(string $name): string
     {
         return strtr($name, self::$_translateMap);
     }
 
     /**
      * Add or replace translate to dictionary
-     *
-     * @param string $from
-     * @param string $to
      */
-    public static function addTranslate($from, $to): void
+    public static function addTranslate(string $from, string $to): void
     {
         self::$_translateMap[$from] = $to;
     }

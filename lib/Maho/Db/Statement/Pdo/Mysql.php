@@ -53,9 +53,8 @@ class Mysql
      * Fetch a row from the result set
      *
      * @param int $fetchMode One of self::FETCH_* constants
-     * @return array|false
      */
-    public function fetch($fetchMode = self::FETCH_ASSOC)
+    public function fetch(int $fetchMode = self::FETCH_ASSOC): array|false
     {
         if ($fetchMode === self::FETCH_NUM) {
             return $this->_result->fetchNumeric();
@@ -69,9 +68,8 @@ class Mysql
      *
      * @param int $fetchMode One of self::FETCH_* constants
      * @param int $col Column index (used for FETCH_COLUMN)
-     * @return array
      */
-    public function fetchAll($fetchMode = self::FETCH_ASSOC, $col = 0)
+    public function fetchAll(int $fetchMode = self::FETCH_ASSOC, int $col = 0): array
     {
         return match ($fetchMode) {
             self::FETCH_COLUMN => $this->_result->fetchFirstColumn(),
@@ -83,22 +81,16 @@ class Mysql
 
     /**
      * Fetch a single column from the next row
-     *
-     * @param int $col
-     * @return mixed|false
      */
-    public function fetchColumn($col = 0)
+    public function fetchColumn(int $col = 0): mixed
     {
         return $this->_result->fetchOne();
     }
 
     /**
      * Fetch an object from the result set
-     *
-     * @param string $class
-     * @return object|false
      */
-    public function fetchObject($class = 'stdClass', array $config = [])
+    public function fetchObject(string $class = 'stdClass', array $config = []): object|false
     {
         $row = $this->_result->fetchAssociative();
         if (!$row) {
@@ -118,20 +110,16 @@ class Mysql
 
     /**
      * Return the number of rows affected by the last statement
-     *
-     * @return int
      */
-    public function rowCount()
+    public function rowCount(): int
     {
         return $this->_result->rowCount();
     }
 
     /**
      * Closes the cursor, allowing the statement to be executed again
-     *
-     * @return bool
      */
-    public function closeCursor()
+    public function closeCursor(): bool
     {
         $this->_result->free();
         return true;
@@ -139,31 +127,24 @@ class Mysql
 
     /**
      * Returns the number of columns in the result set
-     *
-     * @return int
      */
-    public function columnCount()
+    public function columnCount(): int
     {
         return $this->_result->columnCount();
     }
 
-
     /**
      * Get the Doctrine DBAL Result object
-     *
-     * @return \Doctrine\DBAL\Result
      */
-    public function getResult()
+    public function getResult(): \Doctrine\DBAL\Result
     {
         return $this->_result;
     }
 
     /**
      * Get the adapter
-     *
-     * @return \Maho\Db\Adapter\Pdo\Mysql
      */
-    public function getAdapter()
+    public function getAdapter(): \Maho\Db\Adapter\Pdo\Mysql
     {
         return $this->_adapter;
     }
