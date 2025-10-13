@@ -12,15 +12,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Class for SQL SELECT generation and results.
- *
- * Standalone implementation that generates SQL without depending on Zend Framework.
- *
- * @property Adapter\AdapterInterface $_adapter
- * @method Adapter\AdapterInterface getAdapter()
- */
-
 namespace Maho\Db;
 
 class Select
@@ -68,9 +59,6 @@ class Select
 
     public const TYPE_CONDITION = 'TYPE_CONDITION';
 
-    /**
-     * The adapter that created this Select object
-     */
     protected Adapter\Pdo\Mysql $_adapter;
 
     /**
