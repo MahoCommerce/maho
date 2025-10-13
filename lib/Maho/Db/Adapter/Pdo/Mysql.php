@@ -37,7 +37,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * @var int
      */
-    protected $_fetchMode = \PDO::FETCH_ASSOC;
+    protected $_fetchMode = \Maho\Db\Statement\Pdo\Mysql::FETCH_ASSOC;
 
     /**
      * Numeric data types
@@ -399,7 +399,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     public function fetchCol($sql, $bind = [])
     {
         $stmt = $this->query($sql, $bind);
-        return $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+        return $stmt->getResult()->fetchFirstColumn();
     }
 
     /**
@@ -415,7 +415,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     public function fetchPairs($sql, $bind = [])
     {
         $stmt = $this->query($sql, $bind);
-        return $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+        return $stmt->getResult()->fetchAllKeyValue();
     }
 
     /**
@@ -554,7 +554,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     {
         $stmt = $this->query($sql, $bind);
         $data = [];
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->getResult()->fetchAssociative()) {
             $data[current($row)] = $row;
         }
         return $data;
@@ -780,7 +780,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             return false;
         }
 
-        $row = $result->fetch(\PDO::FETCH_ASSOC);
+        $row = $result->getResult()->fetchAssociative();
         if (!$row) {
             return false;
         }
