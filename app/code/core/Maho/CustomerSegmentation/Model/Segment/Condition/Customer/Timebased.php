@@ -123,6 +123,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 // Get the most recent activity (login or order), using registration date as fallback
                 $select = $adapter->select()
                     ->from(['c' => $customerTable], ['entity_id'])
+                    ->where('c.created_at IS NOT NULL') // Exclude customers with invalid registration dates
                     ->joinLeft(
                         ['l' => $logTable],
                         'c.entity_id = l.customer_id',
