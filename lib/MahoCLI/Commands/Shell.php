@@ -37,11 +37,11 @@ class Shell extends BaseMahoCommand
 
         // Ensure timezone is properly configured for shell
         $store = Mage::app()->getStore();
-        $timezone = $store->getConfig('general/locale/timezone');
+        $timezone = $store->getConfig(\Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
 
         if (empty($timezone)) {
             // Directly set the config value in the store's configuration cache
-            $store->setConfig('general/locale/timezone', 'UTC');
+            $store->setConfig(\Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 'UTC');
         }
 
         // Also ensure the config tree has a fallback

@@ -35,7 +35,7 @@ class Mage_Core_Model_Date
      */
     protected function _getConfigTimezone()
     {
-        return Mage::app()->getStore()->getConfig('general/locale/timezone');
+        return Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
     }
 
     /**
@@ -126,7 +126,11 @@ class Mage_Core_Model_Date
         }
 
         $date = new DateTime('@' . $result);
-        $date->setTimezone(new DateTimeZone(Mage::app()->getStore()->getConfig('general/locale/timezone')));
+        $date->setTimezone(
+            new DateTimeZone(
+                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE)
+            )
+        );
         $timestamp = $date->getTimestamp() - $date->getOffset();
 
         unset($date);
@@ -151,7 +155,11 @@ class Mage_Core_Model_Date
         }
 
         $date = new DateTime('@' . $result);
-        $date->setTimezone(new DateTimeZone(Mage::app()->getStore()->getConfig('general/locale/timezone')));
+        $date->setTimezone(
+            new DateTimeZone(
+                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE)
+            )
+        );
         $timestamp = $date->getTimestamp() + $date->getOffset();
 
         unset($date);
