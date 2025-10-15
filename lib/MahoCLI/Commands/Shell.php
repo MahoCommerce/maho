@@ -41,12 +41,18 @@ class Shell extends BaseMahoCommand
 
         if (empty($timezone)) {
             // Directly set the config value in the store's configuration cache
-            $store->setConfig(\Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 'UTC');
+            $store->setConfig(
+                \Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE,
+                \Mage_Core_Model_Locale::DEFAULT_TIMEZONE
+            );
         }
 
         // Also ensure the config tree has a fallback
         if (!Mage::getConfig()->getNode('default/general/locale/timezone')) {
-            Mage::getConfig()->setNode('default/general/locale/timezone', 'UTC');
+            Mage::getConfig()->setNode(
+                'default/general/locale/timezone',
+                \Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE
+            );
         }
 
         $io->success('Maho application initialized!');
