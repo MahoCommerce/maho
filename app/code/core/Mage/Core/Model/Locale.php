@@ -178,7 +178,7 @@ class Mage_Core_Model_Locale extends Varien_Object
     }
 
     /**
-     * Get options array for locale dropdown in currunt locale
+     * Get options array for locale dropdown in current locale
      */
     public function getOptionLocales(): array
     {
