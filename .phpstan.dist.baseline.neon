@@ -12892,12 +12892,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
 
 		-
-			rawMessage: 'Parameter #2 $entityId of method Mage_Eav_Model_Entity_Abstract::load() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Resource_Customer_Collection::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -22784,18 +22778,6 @@ parameters:
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
-
-		-
-			rawMessage: 'Binary operation "*" between non-falsy-string and int<min, -1>|int<1, max> results in an error.'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
-
-		-
-			rawMessage: 'Binary operation "-" between non-falsy-string and (float|int) results in an error.'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Abstract::_init() invoked with 2 parameters, 1 required.'

@@ -244,18 +244,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      */
     protected $_autoQuoteIdentifiers = true;
 
-    /**
-     * Constructor
-     *
-     * @param array $config
-     * @throws \Maho\Db\Exception
-     */
-    public function __construct($config)
+    public function __construct(array $config)
     {
-        if (!is_array($config)) {
-            throw new \Maho\Db\Exception('Adapter configuration must be an array');
-        }
-
         $this->_config = $config;
 
         // Set debug mode if configured
@@ -266,32 +256,20 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Returns the configuration variables in this adapter.
-     *
-     * @return array
      */
     #[\Override]
-    public function getConfig()
+    public function getConfig(): array
     {
         return $this->_config;
     }
 
-    /**
-     * Returns flag is transaction now?
-     *
-     * @return bool
-     */
-    public function isTransaction()
+    public function isTransaction(): bool
     {
         return (bool) $this->_transactionLevel;
     }
 
-    /**
-     * Begin new DB transaction for connection
-     *
-     * @return $this
-     */
     #[\Override]
-    public function beginTransaction()
+    public function beginTransaction(): self
     {
         if ($this->_transactionLevel === 0) {
             $this->_debugTimer();
@@ -305,11 +283,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Commit DB transaction
-     *
-     * @return $this
      */
     #[\Override]
-    public function commit()
+    public function commit(): self
     {
         if ($this->_transactionLevel === 1) {
             $this->_debugTimer();
@@ -324,11 +300,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Rollback DB transaction
-     *
-     * @return $this
      */
     #[\Override]
-    public function rollBack()
+    public function rollBack(): self
     {
         if ($this->_transactionLevel === 1) {
             $this->_debugTimer();
@@ -343,25 +317,18 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Get adapter transaction level state. Return 0 if all transactions are complete
-     *
-     * @return int
      */
     #[\Override]
-    public function getTransactionLevel()
+    public function getTransactionLevel(): int
     {
         return $this->_transactionLevel;
     }
 
     /**
      * Fetches all SQL result rows as an array.
-     *
-     * @param string|\Maho\Db\Select $sql SQL query.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @param mixed $fetchMode Fetch mode.
-     * @return array
      */
     #[\Override]
-    public function fetchAll($sql, $bind = [], $fetchMode = null)
+    public function fetchAll(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array
     {
         $stmt = $this->query($sql, $bind);
         if ($fetchMode === null) {
@@ -372,14 +339,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Fetches the first row of the SQL result.
-     *
-     * @param string|\Maho\Db\Select $sql SQL query.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @param mixed $fetchMode Fetch mode.
-     * @return array|false
      */
     #[\Override]
-    public function fetchRow($sql, $bind = [], $fetchMode = null)
+    public function fetchRow(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array|false
     {
         $stmt = $this->query($sql, $bind);
         if ($fetchMode === null) {
@@ -390,13 +352,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Fetches the first column of all SQL result rows as an array.
-     *
-     * @param string|\Maho\Db\Select $sql SQL query.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return array
      */
     #[\Override]
-    public function fetchCol($sql, $bind = [])
+    public function fetchCol(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array
     {
         $stmt = $this->query($sql, $bind);
         return $stmt->getResult()->fetchFirstColumn();
@@ -406,13 +364,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Fetches all SQL result rows as an array of key-value pairs.
      *
      * The first column is the key, the second column is the value.
-     *
-     * @param string|\Maho\Db\Select $sql SQL query.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return array
      */
     #[\Override]
-    public function fetchPairs($sql, $bind = [])
+    public function fetchPairs(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array
     {
         $stmt = $this->query($sql, $bind);
         return $stmt->getResult()->fetchAllKeyValue();
@@ -420,13 +374,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Fetches the first column of the first row of the SQL result.
-     *
-     * @param string|\Maho\Db\Select $sql SQL query.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return mixed|false
      */
     #[\Override]
-    public function fetchOne($sql, $bind = [])
+    public function fetchOne(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): mixed
     {
         $stmt = $this->query($sql, $bind);
         return $stmt->fetchColumn(0);
@@ -434,41 +384,27 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Quote an identifier.
-     *
-     * @param string|array|\Maho\Db\Expr $ident The identifier.
-     * @param bool $auto If true, auto-quote identifier. Default: false.
-     * @return string The quoted identifier.
      */
     #[\Override]
-    public function quoteIdentifier($ident, $auto = false)
+    public function quoteIdentifier(string|array|\Maho\Db\Expr $ident, bool $auto = false): string
     {
         return $this->_quoteIdentifierAs($ident, null, $auto);
     }
 
     /**
      * Quote a column identifier and alias.
-     *
-     * @param string|array|\Maho\Db\Expr $ident The column identifier or expression.
-     * @param string|null $alias An alias for the column.
-     * @param bool $auto If true, auto-quote identifiers. Default: false.
-     * @return string The quoted identifier and alias.
      */
     #[\Override]
-    public function quoteColumnAs($ident, $alias, $auto = false)
+    public function quoteColumnAs(string|array|\Maho\Db\Expr $ident, ?string $alias, bool $auto = false): string
     {
         return $this->_quoteIdentifierAs($ident, $alias, $auto);
     }
 
     /**
      * Quote a table identifier and alias.
-     *
-     * @param string|array|\Maho\Db\Expr $ident The table identifier or expression.
-     * @param string|null $alias An alias for the table.
-     * @param bool $auto If true, auto-quote identifiers. Default: false.
-     * @return string The quoted identifier and alias.
      */
     #[\Override]
-    public function quoteTableAs($ident, $alias = null, $auto = false)
+    public function quoteTableAs(string|array|\Maho\Db\Expr|\Maho\Db\Select $ident, ?string $alias = null, bool $auto = false): string
     {
         return $this->_quoteIdentifierAs($ident, $alias, $auto);
     }
@@ -482,7 +418,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @param string $as The string to use for the AS keyword. Default: ' AS '.
      * @return string The quoted identifier and alias.
      */
-    protected function _quoteIdentifierAs($ident, $alias = null, $auto = false, $as = ' AS ')
+    protected function _quoteIdentifierAs(string|array|\Maho\Db\Expr|\Maho\Db\Select $ident, ?string $alias = null, bool $auto = false, string $as = ' AS '): string
     {
         if ($ident instanceof \Maho\Db\Expr) {
             $quoted = $ident->__toString();
@@ -492,30 +428,27 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             if (is_string($ident)) {
                 $ident = explode('.', $ident);
             }
-            if (is_array($ident)) {
-                $segments = [];
-                foreach ($ident as $segment) {
-                    // Skip empty segments to avoid creating invalid identifiers like 'table.'
-                    if ($segment === '' || $segment === null) {
-                        continue;
-                    }
-                    if ($segment instanceof \Maho\Db\Expr) {
-                        $segments[] = $segment->__toString();
-                    } else {
-                        $segments[] = $this->_quoteIdentifier($segment, $auto);
-                    }
+            // After explode or if already array, process segments
+            $segments = [];
+            foreach ($ident as $segment) {
+                // Skip empty segments to avoid creating invalid identifiers like 'table.'
+                if ($segment === '' || $segment === null) {
+                    continue;
                 }
-                // If all segments were empty, return asterisk (SELECT *)
-                if (empty($segments)) {
-                    $quoted = '*';
+                if ($segment instanceof \Maho\Db\Expr) {
+                    $segments[] = $segment->__toString();
                 } else {
-                    if ($alias !== null && end($ident) == $alias) {
-                        $alias = null;
-                    }
-                    $quoted = implode('.', $segments);
+                    $segments[] = $this->_quoteIdentifier($segment, $auto);
                 }
+            }
+            // If all segments were empty, return asterisk (SELECT *)
+            if (empty($segments)) {
+                $quoted = '*';
             } else {
-                $quoted = $this->_quoteIdentifier($ident, $auto);
+                if ($alias !== null && end($ident) == $alias) {
+                    $alias = null;
+                }
+                $quoted = implode('.', $segments);
             }
         }
         if ($alias !== null) {
@@ -531,7 +464,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @param bool $auto If true, auto-quote only if needed. Default: false.
      * @return string The quoted identifier.
      */
-    protected function _quoteIdentifier($value, $auto = false)
+    protected function _quoteIdentifier(string $value, bool $auto = false): string
     {
         if ($auto === false || $this->_autoQuoteIdentifiers === true) {
             $q = '`';
@@ -544,13 +477,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Fetches all SQL result rows as an associative array.
      *
      * The first column is the key, the entire row array is the value.
-     *
-     * @param string|\Maho\Db\Select $sql SQL query.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return array
      */
     #[\Override]
-    public function fetchAssoc($sql, $bind = [])
+    public function fetchAssoc(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array
     {
         $stmt = $this->query($sql, $bind);
         $data = [];
@@ -562,11 +491,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Convert an array, string, or \Maho\Db\Expr object into a string to put in a WHERE clause.
-     *
-     * @param mixed $where
-     * @return string
      */
-    protected function _whereExpr($where)
+    protected function _whereExpr(mixed $where): string
     {
         if (empty($where)) {
             return '';
@@ -593,33 +519,25 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Convert date to DB format
-     *
-     * @param   int|string|\DateTime $date
-     * @return  \Maho\Db\Expr
      */
-    public function convertDate($date)
+    public function convertDate(int|string|\DateTime $date): \Maho\Db\Expr
     {
         return $this->formatDate($date, false);
     }
 
     /**
      * Convert date and time to DB format
-     *
-     * @param   int|string|\DateTime $datetime
-     * @return  \Maho\Db\Expr
      */
-    public function convertDateTime($datetime)
+    public function convertDateTime(int|string|\DateTime $datetime): \Maho\Db\Expr
     {
         return $this->formatDate($datetime);
     }
 
     /**
      * Parse a source hostname and generate a host info
-     * @param string $hostName
      *
-     * @return \Varien_Object
      */
-    protected function _getHostInfo($hostName)
+    protected function _getHostInfo(string $hostName): \Varien_Object
     {
         $hostInfo = new \Varien_Object();
         $matches = [];
@@ -731,12 +649,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Run RAW Query
      *
-     * @param string $sql
-     * @return \Maho\Db\Statement\Pdo\Mysql
      * @throws \PDOException
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function raw_query($sql)
+    public function raw_query(string $sql): \Maho\Db\Statement\Pdo\Mysql
     {
         $lostConnectionMessage = 'SQLSTATE[HY000]: General error: 2013 Lost connection to MySQL server during query';
         $tries = 0;
@@ -768,18 +684,13 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Run RAW query and Fetch First row
      *
-     * @param string $sql
      * @param string|int $field
-     * @return array|string|false
+     * @return array|string|int|false
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function raw_fetchRow($sql, $field = null)
+    public function raw_fetchRow(string $sql, string|int|null $field = null): array|string|int|false
     {
         $result = $this->raw_query($sql);
-        if (!$result) {
-            return false;
-        }
-
         $row = $result->getResult()->fetchAssociative();
         if (!$row) {
             return false;
@@ -815,13 +726,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Special handling for PDO query().
      * All bind parameter names must begin with ':'.
      *
-     * @param string|\Maho\Db\Select $sql The SQL statement with placeholders.
-     * @param mixed $bind An array of data or data itself to bind to the placeholders.
-     * @return \Maho\Db\Statement\Pdo\Mysql
      * @throws \RuntimeException To re-throw PDOException.
      */
     #[\Override]
-    public function query($sql, $bind = [])
+    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\Pdo\Mysql
     {
         $this->_debugTimer();
         try {
@@ -900,6 +808,20 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         // Doctrine DBAL doesn't support named parameters well, so convert to positional
         if ($isNamedBind) {
             $this->_convertMixedBind($sql, $bind);
+        }
+
+        // Convert DateTime and Expr objects to strings for database compatibility
+        // This ensures values are properly formatted before being bound to queries
+        foreach ($bind as $k => $v) {
+            if ($v instanceof \DateTime) {
+                $bind[$k] = $v->format('Y-m-d H:i:s');
+            } elseif ($v instanceof \Maho\Db\Expr) {
+                // Expr objects should NOT be in bind parameters - they should be in the SQL itself
+                // But if they are here, extract the expression and remove quotes (PDO will add them)
+                $exprValue = (string) $v;
+                // Remove surrounding quotes if present
+                $bind[$k] = trim($exprValue, "'\"");
+            }
         }
 
         // Special query hook
@@ -1030,12 +952,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Executes a SQL statement(s)
      *
-     * @param string $sql
      * @throws \Maho\Db\Exception
-     * @return array
      */
     #[\Override]
-    public function multiQuery($sql)
+    public function multiQuery(string $sql): array
     {
         return $this->multi_query($sql);
     }
@@ -1132,14 +1052,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Drop the Foreign Key from table
-     *
-     * @param string $tableName
-     * @param string $fkName
-     * @param string $schemaName
-     * @return $this
      */
     #[\Override]
-    public function dropForeignKey($tableName, $fkName, $schemaName = null)
+    public function dropForeignKey(string $tableName, string $fkName, ?string $schemaName = null): self
     {
         $foreignKeys = $this->getForeignKeys($tableName, $schemaName);
         $fkName = strtoupper($fkName);
@@ -1208,14 +1123,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Check does table column exist
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param string $schemaName
-     * @return boolean
      */
     #[\Override]
-    public function tableColumnExists($tableName, $columnName, $schemaName = null)
+    public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         $describe = $this->describeTable($tableName, $schemaName);
         foreach ($describe as $column) {
@@ -1233,18 +1143,13 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Using string as $definition is allowed only for concrete DB adapter.
      * Adds primary key if needed
      *
-     * @param   string $tableName
-     * @param   string $columnName
-     * @param   array|string $definition  string specific or universal array DB Server definition
-     * @param   string $schemaName
-     * @return  int|boolean|\Maho\Db\Statement\Pdo\Mysql
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function addColumn($tableName, $columnName, $definition, $schemaName = null)
+    public function addColumn(string $tableName, string $columnName, array|string $definition, ?string $schemaName = null): self
     {
         if ($this->tableColumnExists($tableName, $columnName, $schemaName)) {
-            return true;
+            return $this;
         }
 
         $primaryKey = '';
@@ -1267,23 +1172,18 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             $primaryKey,
         );
 
-        $result = $this->raw_query($sql);
+        $this->raw_query($sql);
 
         $this->resetDdlCache($tableName, $schemaName);
 
-        return $result;
+        return $this;
     }
 
     /**
      * Delete table column
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param string $schemaName
-     * @return true|\Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
-    public function dropColumn($tableName, $columnName, $schemaName = null)
+    public function dropColumn(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         if (!$this->tableColumnExists($tableName, $columnName, $schemaName)) {
             return true;
@@ -1305,10 +1205,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             implode(', ', $alterDrop),
         );
 
-        $result = $this->raw_query($sql);
+        $this->raw_query($sql);
         $this->resetDdlCache($tableName, $schemaName);
 
-        return $result;
+        return true;
     }
 
     /**
@@ -1316,24 +1216,17 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * For change definition of column - use modifyColumn
      *
-     * @param string $tableName
-     * @param string $oldColumnName
-     * @param string $newColumnName
-     * @param array $definition
-     * @param boolean $flushData        flush table statistic
-     * @param string $schemaName
-     * @return \Maho\Db\Statement\Pdo\Mysql|\Maho\Db\Statement\Pdo\Mysql
      * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function changeColumn(
-        $tableName,
-        $oldColumnName,
-        $newColumnName,
-        $definition,
-        $flushData = false,
-        $schemaName = null,
-    ) {
+        string $tableName,
+        string $oldColumnName,
+        string $newColumnName,
+        array|string $definition,
+        bool $flushData = false,
+        ?string $schemaName = null,
+    ): self {
         if (!$this->tableColumnExists($tableName, $oldColumnName, $schemaName)) {
             throw new \Maho\Db\Exception(sprintf(
                 'Column "%s" does not exist in table "%s".',
@@ -1361,22 +1254,16 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         }
         $this->resetDdlCache($tableName, $schemaName);
 
-        return $result;
+        return $this;
     }
 
     /**
      * Modify the column definition
      *
-     * @param string $tableName
-     * @param string $columnName
-     * @param array|string $definition
-     * @param boolean $flushData
-     * @param string $schemaName
-     * @return $this
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function modifyColumn($tableName, $columnName, $definition, $flushData = false, $schemaName = null)
+    public function modifyColumn(string $tableName, string $columnName, array|string $definition, bool $flushData = false, ?string $schemaName = null): self
     {
         if (!$this->tableColumnExists($tableName, $columnName, $schemaName)) {
             throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
@@ -1403,13 +1290,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Show table status
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return bool
      */
     #[\Override]
-    public function showTableStatus($tableName, $schemaName = null)
+    public function showTableStatus(string $tableName, ?string $schemaName = null): array|false
     {
         $fromDbName = null;
         if ($schemaName !== null) {
@@ -1422,12 +1305,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Retrieve Create Table SQL
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return string
      */
-    public function getCreateTable($tableName, $schemaName = null)
+    public function getCreateTable(string $tableName, ?string $schemaName = null): string
     {
         $cacheKey = $this->_getTableName($tableName, $schemaName);
         $ddl = $this->loadDdlCache($cacheKey, self::DDL_CREATE);
@@ -1442,12 +1321,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Returns list of tables in the database
-     *
-     * @param string $schemaName OPTIONAL schema name to list tables from
-     * @return array
      */
     #[\Override]
-    public function listTables($schemaName = null)
+    public function listTables(?string $schemaName = null): array
     {
         $this->_connect();
         $schemaManager = $this->_connection->createSchemaManager();
@@ -1489,13 +1365,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * REF_COLUMN_NAME  => string; reference column name
      * ON_DELETE        => string; action type on delete row
      * ON_UPDATE        => string; action type on update row
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return array
      */
     #[\Override]
-    public function getForeignKeys($tableName, $schemaName = null)
+    public function getForeignKeys(string $tableName, ?string $schemaName = null): array
     {
         $cacheKey = $this->_getTableName($tableName, $schemaName);
         $ddl = $this->loadDdlCache($cacheKey, self::DDL_FOREIGN_KEY);
@@ -1557,11 +1429,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * columns => array; list of columns definitions
      * comment => string; table comment
      * engine  => string; table engine
-     *
-     * @return $this
      */
     #[\Override]
-    public function modifyTables($tables)
+    public function modifyTables(array $tables): self
     {
         $foreignKeys = $this->getForeignKeysTree();
         foreach ($tables as $table => $tableData) {
@@ -1635,13 +1505,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * INDEX_METHOD     => string; index method using
      * type             => string; see INDEX_TYPE
      * fields           => array; see COLUMNS_LIST
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return array
      */
     #[\Override]
-    public function getIndexList($tableName, $schemaName = null)
+    public function getIndexList(string $tableName, ?string $schemaName = null): array
     {
         $cacheKey = $this->_getTableName($tableName, $schemaName);
         $ddl = $this->loadDdlCache($cacheKey, self::DDL_INDEX);
@@ -1693,11 +1559,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Creates and returns a new \Maho\Db\Select object for this adapter.
-     *
-     * @return \Maho\Db\Select
      */
     #[\Override]
-    public function select()
+    public function select(): \Maho\Db\Select
     {
         return new \Maho\Db\Select($this);
     }
@@ -1791,13 +1655,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * If an array is passed as the value, the array values are quote
      * and then returned as a comma-separated string.
-     *
-     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
-     * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
-     * @return string An SQL-safe quoted value (or string of separated values).
      */
     #[\Override]
-    public function quote($value, $type = null)
+    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string
     {
         $this->_connect();
 
@@ -1829,7 +1689,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             $quoteValue = sprintf('%F', $value);
             return $quoteValue;
         } elseif (is_float($value)) {
-            return $this->_quote($value);
+            return (string) $this->_quote($value);
         } elseif (is_int($value)) {
             return (string) $value;
         }
@@ -1862,15 +1722,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Quotes a value and places into a piece of text at a placeholder.
      *
      * Method revrited for handle empty arrays in value param
-     *
-     * @param string  $text  The text with a placeholder.
-     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
-     * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
-     * @param integer $count OPTIONAL count of placeholders to replace
-     * @return string An SQL-safe quoted value placed into the original text.
      */
     #[\Override]
-    public function quoteInto($text, $value, $type = null, $count = null)
+    public function quoteInto(string $text, \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null, ?int $count = null): string
     {
         if (is_array($value) && empty($value)) {
             $value = new \Maho\Db\Expr('NULL');
@@ -1913,13 +1767,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Load DDL data from cache
      * Return false if cache does not exists
-     *
-     * @param string $tableCacheKey the table cache key
-     * @param int $ddlType          the DDL constant
-     * @return string|array|int|false
      */
     #[\Override]
-    public function loadDdlCache($tableCacheKey, $ddlType)
+    public function loadDdlCache(string $tableCacheKey, int $ddlType): string|array|int|false
     {
         if (!$this->_isDdlCacheAllowed) {
             return false;
@@ -1938,13 +1788,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Save DDL data into cache
-     *
-     * @param string $tableCacheKey
-     * @param int $ddlType
-     * @return $this
      */
     #[\Override]
-    public function saveDdlCache($tableCacheKey, $ddlType, $data)
+    public function saveDdlCache(string $tableCacheKey, int $ddlType, mixed $data): self
     {
         if (!$this->_isDdlCacheAllowed) {
             return $this;
@@ -1962,13 +1808,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Reset cached DDL data from cache
      * if table name is null - reset all cached DDL data
-     *
-     * @param string $tableName
-     * @param string $schemaName OPTIONAL
-     * @return $this
      */
     #[\Override]
-    public function resetDdlCache($tableName = null, $schemaName = null)
+    public function resetDdlCache(?string $tableName = null, ?string $schemaName = null): self
     {
         if (!$this->_isDdlCacheAllowed) {
             return $this;
@@ -1999,10 +1841,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Disallow DDL caching
-     * @return $this
      */
     #[\Override]
-    public function disallowDdlCache()
+    public function disallowDdlCache(): self
     {
         $this->_isDdlCacheAllowed = false;
         return $this;
@@ -2010,10 +1851,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Allow DDL caching
-     * @return $this
      */
     #[\Override]
-    public function allowDdlCache()
+    public function allowDdlCache(): self
     {
         $this->_isDdlCacheAllowed = true;
         return $this;
@@ -2057,13 +1897,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * PRIMARY          => boolean; true if column is part of the primary key
      * PRIMARY_POSITION => integer; position of column in primary key
      * IDENTITY         => integer; true if column is auto-generated with unique values
-     *
-     * @param string $tableName
-     * @param string $schemaName OPTIONAL
-     * @return array
      */
     #[\Override]
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable(string $tableName, ?string $schemaName = null): array
     {
         $cacheKey = $this->_getTableName($tableName, $schemaName);
         $ddl = $this->loadDdlCache($cacheKey, self::DDL_DESCRIBE);
@@ -2326,23 +2162,26 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Modify the column definition by data from describe table
      *
-     * @param string $tableName
-     * @param string $columnName
-     * @param array $definition
-     * @param boolean $flushData
      * @param string $schemaName
      * @return $this
      */
     #[\Override]
-    public function modifyColumnByDdl($tableName, $columnName, $definition, $flushData = false, $schemaName = null)
+    public function modifyColumnByDdl(string $tableName, string $columnName, array|string $definition, bool $flushData = false, ?string $schemaName = null): self
     {
+        if (is_string($definition)) {
+            // If definition is a string, pass it directly to modifyColumn
+            $this->modifyColumn($tableName, $columnName, $definition, $flushData, $schemaName);
+            return $this;
+        }
+
         $definition = array_change_key_case($definition, CASE_UPPER);
         $definition['COLUMN_TYPE'] = $this->_getColumnTypeByDdl($definition);
         if (array_key_exists('DEFAULT', $definition) && is_null($definition['DEFAULT'])) {
             unset($definition['DEFAULT']);
         }
 
-        return $this->modifyColumn($tableName, $columnName, $definition, $flushData, $schemaName);
+        $this->modifyColumn($tableName, $columnName, $definition, $flushData, $schemaName);
+        return $this;
     }
 
     /**
@@ -2442,14 +2281,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Change table auto increment value
-     *
-     * @param string $tableName
-     * @param string $increment
-     * @param null|string $schemaName
-     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
-    public function changeTableAutoIncrement($tableName, $increment, $schemaName = null)
+    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql
     {
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $sql = sprintf('ALTER TABLE %s AUTO_INCREMENT=%d', $table, $increment);
@@ -2459,13 +2293,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Inserts a table row with specified data.
      *
-     * @param mixed $table The table to insert data into.
-     * @param array $bind Column-value pairs.
-     * @return int The number of affected rows.
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function insert($table, array $bind)
+    public function insert(string|array|\Maho\Db\Select $table, array $bind): int
     {
         // Extract and quote col names from the array keys
         $cols = [];
@@ -2491,12 +2322,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Inserts a table row with specified data
      * Special for Zero values to identity column
-     *
-     * @param string $table
-     * @return int The number of affected rows.
      */
     #[\Override]
-    public function insertForce($table, array $bind)
+    public function insertForce(string $table, array $bind): int
     {
         $this->raw_query("SET @OLD_INSERT_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
         $result = $this->insert($table, $bind);
@@ -2508,14 +2336,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Inserts a table row with specified data.
      *
-     * @param mixed $table The table to insert data into.
-     * @param array $data Column-value pairs or array of column-value pairs.
-     * @param array $fields update fields pairs or values
-     * @return int The number of affected rows.
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function insertOnDuplicate($table, array $data, array $fields = [])
+    public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
         // extract and quote col names from the array keys
         $row    = reset($data); // get first element from data array
@@ -2580,13 +2404,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Inserts a table multiply rows with specified data.
      *
-     * @param mixed $table The table to insert data into.
-     * @param array $data Column-value pairs or array of Column-value pairs.
-     * @return int The number of affected rows.
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function insertMultiple($table, array $data)
+    public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int
     {
         $row = reset($data);
         // support insert syntaxes
@@ -2615,12 +2436,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Insert array to table based on columns definition
      *
-     * @param   string $table
-     * @return  int
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function insertArray($table, array $columns, array $data)
+    public function insertArray(string $table, array $columns, array $data): int
     {
         $values       = [];
         $bind         = [];
@@ -2644,13 +2463,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Inserts a table row with specified data.
      *
-     * @param mixed $table The table to insert data into.
-     * @param array $bind Column-value pairs.
-     * @return int The number of affected rows.
      * @throws \RuntimeException
      */
     #[\Override]
-    public function insertIgnore($table, array $bind)
+    public function insertIgnore(string|array|\Maho\Db\Select $table, array $bind): int
     {
         // extract and quote col names from the array keys
         $cols = [];
@@ -2683,13 +2499,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Returns the ID of the last inserted row or sequence value
-     *
-     * @param string $tableName OPTIONAL name of the table
-     * @param string $primaryKey OPTIONAL name of the primary key column
-     * @return string
      */
     #[\Override]
-    public function lastInsertId($tableName = null, $primaryKey = null)
+    public function lastInsertId(?string $tableName = null, ?string $primaryKey = null): string|int
     {
         $this->_connect();
         return $this->_connection->lastInsertId();
@@ -2764,13 +2576,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Return new DDL Table object
-     *
-     * @param string $tableName the table name
-     * @param string $schemaName the database/schema name
-     * @return \Maho\Db\Ddl\Table
      */
     #[\Override]
-    public function newTable($tableName = null, $schemaName = null)
+    public function newTable(?string $tableName = null, ?string $schemaName = null): \Maho\Db\Ddl\Table
     {
         $table = new \Maho\Db\Ddl\Table();
         if ($tableName !== null) {
@@ -2787,10 +2595,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Create table
      *
      * @throws \Maho\Db\Exception
-     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
-    public function createTable(\Maho\Db\Ddl\Table $table)
+    public function createTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql
     {
         $columns = $table->getColumns();
         foreach ($columns as $columnEntry) {
@@ -2819,10 +2626,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Create temporary table
      *
      * @throws \Maho\Db\Exception
-     * @return \Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
-    public function createTemporaryTable(\Maho\Db\Ddl\Table $table)
+    public function createTemporaryTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql
     {
         $sqlFragment    = array_merge(
             $this->_getColumnsDefinition($table),
@@ -3074,9 +2880,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                 if ($length <= 255) {
                     $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'varchar' : 'varbinary';
                     $cType = sprintf('%s(%d)', $cType, $length);
-                } elseif ($length > 255 && $length <= 65536) {
+                } elseif ($length <= 65536) {
                     $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'text' : 'blob';
-                } elseif ($length > 65536 && $length <= 16777216) {
+                } elseif ($length <= 16777216) {
                     $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'mediumtext' : 'mediumblob';
                 } else {
                     $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'longtext' : 'longblob';
@@ -3147,13 +2953,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Drop table from database
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return boolean
      */
     #[\Override]
-    public function dropTable($tableName, $schemaName = null)
+    public function dropTable(string $tableName, ?string $schemaName = null): bool
     {
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $query = 'DROP TABLE IF EXISTS ' . $table;
@@ -3164,12 +2966,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Drop temporary table from database
-     *
-     * @param string $tableName
-     * @param string $schemaName
      */
     #[\Override]
-    public function dropTemporaryTable($tableName, $schemaName = null): bool
+    public function dropTemporaryTable(string $tableName, ?string $schemaName = null): bool
     {
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $query = 'DROP TEMPORARY TABLE IF EXISTS ' . $table;
@@ -3181,13 +2980,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Truncate a table
      *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return $this
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function truncateTable($tableName, $schemaName = null)
+    public function truncateTable(string $tableName, ?string $schemaName = null): self
     {
         if (!$this->isTableExists($tableName, $schemaName)) {
             throw new \Maho\Db\Exception(sprintf('Table "%s" is not exists', $tableName));
@@ -3202,13 +2998,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Check is a table exists
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return boolean
      */
     #[\Override]
-    public function isTableExists($tableName, $schemaName = null)
+    public function isTableExists(string $tableName, ?string $schemaName = null): bool
     {
         $fromDbName = 'DATABASE()';
         if ($schemaName !== null) {
@@ -3231,14 +3023,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Rename table
      *
-     * @param string $oldTableName
-     * @param string $newTableName
-     * @param string $schemaName
-     * @return boolean
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function renameTable($oldTableName, $newTableName, $schemaName = null)
+    public function renameTable(string $oldTableName, string $newTableName, ?string $schemaName = null): bool
     {
         if (!$this->isTableExists($oldTableName, $schemaName)) {
             throw new \Maho\Db\Exception(sprintf('Table "%s" is not exists', $oldTableName));
@@ -3261,13 +3049,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Rename several tables
      *
-     * @param array $tablePairs array('oldName' => 'Name1', 'newName' => 'Name2')
-     *
-     * @return boolean
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function renameTablesBatch(array $tablePairs)
+    public function renameTablesBatch(array $tablePairs): bool
     {
         if (count($tablePairs) == 0) {
             throw new \Maho\Db\Exception('Please provide tables for rename');
@@ -3297,22 +3082,16 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Add new index to table name
      *
-     * @param string $tableName
-     * @param string $indexName
-     * @param string|array $fields  the table column name or array of ones
-     * @param string $indexType     the index type
-     * @param string $schemaName
-     * @return \Maho\Db\Statement\Pdo\Mysql
      * @throws \Maho\Db\Exception|\Exception
      */
     #[\Override]
     public function addIndex(
-        $tableName,
-        $indexName,
-        $fields,
-        $indexType = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX,
-        $schemaName = null,
-    ) {
+        string $tableName,
+        string $indexName,
+        string|array $fields,
+        string $indexType = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX,
+        ?string $schemaName = null,
+    ): \Maho\Db\Statement\Pdo\Mysql {
         $columns = $this->describeTable($tableName, $schemaName);
         $keyList = $this->getIndexList($tableName, $schemaName);
 
@@ -3358,14 +3137,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Drop the index from table
-     *
-     * @param string $tableName
-     * @param string $keyName
-     * @param string $schemaName
-     * @return bool|\Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
-    public function dropIndex($tableName, $keyName, $schemaName = null)
+    public function dropIndex(string $tableName, string $keyName, ?string $schemaName = null): bool|\Maho\Db\Statement\Pdo\Mysql
     {
         $indexList = $this->getIndexList($tableName, $schemaName);
         $keyName = strtoupper($keyName);
@@ -3392,32 +3166,20 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Add new Foreign Key to table
      * If Foreign Key with same name is exist - it will be deleted
-     *
-     * @param string $fkName
-     * @param string $tableName
-     * @param string $columnName
-     * @param string $refTableName
-     * @param string $refColumnName
-     * @param string $onDelete
-     * @param string $onUpdate
-     * @param boolean $purge            trying remove invalid data
-     * @param string $schemaName
-     * @param string $refSchemaName
-     * @return \Maho\Db\Statement\Pdo\Mysql|\Maho\Db\Statement\Pdo\Mysql
      */
     #[\Override]
     public function addForeignKey(
-        $fkName,
-        $tableName,
-        $columnName,
-        $refTableName,
-        $refColumnName,
-        $onDelete = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
-        $onUpdate = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
-        $purge = false,
-        $schemaName = null,
-        $refSchemaName = null,
-    ) {
+        string $fkName,
+        string $tableName,
+        string $columnName,
+        string $refTableName,
+        string $refColumnName,
+        string $onDelete = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
+        string $onUpdate = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
+        bool $purge = false,
+        ?string $schemaName = null,
+        ?string $refSchemaName = null,
+    ): self {
         $this->dropForeignKey($tableName, $fkName, $schemaName);
 
         if ($purge) {
@@ -3433,36 +3195,25 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             $this->quoteIdentifier($refColumnName),
         );
 
-        if ($onDelete !== null) {
-            $query .= ' ON DELETE ' . strtoupper($onDelete);
-        }
-        if ($onUpdate  !== null) {
-            $query .= ' ON UPDATE ' . strtoupper($onUpdate);
-        }
+        $query .= ' ON DELETE ' . strtoupper($onDelete);
+        $query .= ' ON UPDATE ' . strtoupper($onUpdate);
 
-        $result = $this->raw_query($query);
+        $this->raw_query($query);
         $this->resetDdlCache($tableName);
-        return $result;
+        return $this;
     }
 
     /**
      * Format Date to internal database date format
-     *
-     * @param int|string|\DateTime $date
-     * @param boolean $includeTime
-     * @return \Maho\Db\Expr|string|null
      */
     #[\Override]
-    public function formatDate($date, $includeTime = true, bool $asExpr = true)
+    public function formatDate(int|string|\DateTime $date, bool $includeTime = true): \Maho\Db\Expr
     {
-        if ($date === true) {
-            $format = $includeTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
-            $date = date($format);
-        } elseif ($date instanceof \DateTime) {
+        if ($date instanceof \DateTime) {
             $format = $includeTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
             $date = $date->format($format);
         } elseif (empty($date)) {
-            return $asExpr ? new \Maho\Db\Expr('NULL') : null;
+            return new \Maho\Db\Expr('NULL');
         } else {
             if (!is_numeric($date)) {
                 $date = strtotime($date);
@@ -3472,21 +3223,17 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         }
 
         if ($date === null) {
-            return $asExpr ? new \Maho\Db\Expr('NULL') : null;
+            return new \Maho\Db\Expr('NULL');
         }
 
-        // When used in prepared statements, return the plain string value without quoting
-        // When used in raw SQL, wrap in \Maho\Db\Expr with quotes
-        return $asExpr ? new \Maho\Db\Expr($this->quote($date)) : $date;
+        return new \Maho\Db\Expr($this->quote($date));
     }
 
     /**
      * Run additional environment before setup
-     *
-     * @return $this
      */
     #[\Override]
-    public function startSetup()
+    public function startSetup(): self
     {
         $this->raw_query("SET SQL_MODE=''");
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
@@ -3497,11 +3244,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Run additional environment after setup
-     *
-     * @return $this
      */
     #[\Override]
-    public function endSetup()
+    public function endSetup(): self
     {
         $this->raw_query("SET SQL_MODE=IFNULL(@OLD_SQL_MODE,'')");
         $this->raw_query('SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS=0, 0, 1)');
@@ -3534,13 +3279,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * If non matched - sequential array is expected and OR conditions
      * will be built using above mentioned structure
-     *
-     * @param string|array $fieldName
-     * @param integer|string|array $condition
-     * @return string
      */
     #[\Override]
-    public function prepareSqlCondition($fieldName, $condition)
+    public function prepareSqlCondition(string|array $fieldName, int|string|array $condition): string
     {
         $conditionKeyMap = [
             'eq'            => '{{fieldName}} = ?',
@@ -3639,11 +3380,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Return converted to column data type value
      *
      * @param array $column     the column describe array
-     * @param mixed $value
-     * @return mixed
      */
     #[\Override]
-    public function prepareColumnValue(array $column, $value)
+    public function prepareColumnValue(array $column, mixed $value): mixed
     {
         if ($value instanceof \Maho\Db\Expr) {
             return $value;
@@ -3691,11 +3430,11 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                 break;
 
             case 'date':
-                $value  = $this->formatDate($value, false, false);
+                $value  = $this->formatDate($value, false);
                 break;
             case 'datetime':
             case 'timestamp':
-                $value  = $this->formatDate($value, true, false);
+                $value  = $this->formatDate($value, true);
                 break;
 
             case 'varchar':
@@ -3722,13 +3461,11 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Generate fragment of SQL, that check condition and return true or false value
      *
-     * @param \Maho\Db\Expr|\Maho\Db\Select|string $expression
      * @param string $true  true value
      * @param string $false false value
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getCheckSql($expression, $true, $false)
+    public function getCheckSql(\Maho\Db\Expr|\Maho\Db\Select|string $expression, \Maho\Db\Expr|string $true, \Maho\Db\Expr|string $false): \Maho\Db\Expr
     {
         if ($expression instanceof \Maho\Db\Expr || $expression instanceof \Maho\Db\Select) {
             $expression = sprintf('IF((%s), %s, %s)', $expression, $true, $false);
@@ -3742,12 +3479,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Returns valid IFNULL expression
      *
-     * @param \Maho\Db\Expr|\Maho\Db\Select|string $expression
      * @param string|int $value OPTIONAL. Applies when $expression is NULL
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getIfNullSql($expression, $value = '0')
+    public function getIfNullSql(\Maho\Db\Expr|\Maho\Db\Select|string $expression, string|int $value = '0'): \Maho\Db\Expr
     {
         if ($expression instanceof \Maho\Db\Expr || $expression instanceof \Maho\Db\Select) {
             $expression = sprintf('IFNULL((%s), %s)', $expression, $value);
@@ -3765,11 +3500,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @param string $valueName Name of value to check
      * @param array $casesResults Cases and results
      * @param string $defaultValue value to use if value doesn't conform to any cases
-     *
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getCaseSql($valueName, $casesResults, $defaultValue = null)
+    public function getCaseSql(string $valueName, array $casesResults, ?string $defaultValue = null): \Maho\Db\Expr
     {
         $expression = 'CASE ' . $valueName;
         foreach ($casesResults as $case => $result) {
@@ -3788,10 +3521,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * All arguments in data must be quoted
      *
      * @param string $separator concatenate with separator
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getConcatSql(array $data, $separator = null)
+    public function getConcatSql(array $data, ?string $separator = null): \Maho\Db\Expr
     {
         $format = empty($separator) ? 'CONCAT(%s)' : "CONCAT_WS('{$separator}', %s)";
         return new \Maho\Db\Expr(sprintf($format, implode(', ', $data)));
@@ -3800,12 +3532,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Generate fragment of SQL that returns length of character string
      * The string argument must be quoted
-     *
-     * @param string $string
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getLengthSql($string)
+    public function getLengthSql(string $string): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf('LENGTH(%s)', $string));
     }
@@ -3814,11 +3543,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Generate fragment of SQL, that compare with two or more arguments, and returns the smallest
      * (minimum-valued) argument
      * All arguments in data must be quoted
-     *
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getLeastSql(array $data)
+    public function getLeastSql(array $data): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf('LEAST(%s)', implode(', ', $data)));
     }
@@ -3827,11 +3554,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Generate fragment of SQL, that compare with two or more arguments, and returns the largest
      * (maximum-valued) argument
      * All arguments in data must be quoted
-     *
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getGreatestSql(array $data)
+    public function getGreatestSql(array $data): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf('GREATEST(%s)', implode(', ', $data)));
     }
@@ -3840,11 +3565,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Get Interval Unit SQL fragment
      *
      * @param int $interval
-     * @param string $unit
-     * @return string
      * @throws \Maho\Db\Exception
      */
-    protected function _getIntervalUnitSql($interval, $unit)
+    protected function _getIntervalUnitSql(int|string $interval, string $unit): string
     {
         if (!isset($this->_intervalUnits[$unit])) {
             throw new \Maho\Db\Exception(sprintf('Undefined interval unit "%s" specified', $unit));
@@ -3860,11 +3583,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      * @param int $interval
-     * @param string $unit
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getDateAddSql($date, $interval, $unit)
+    public function getDateAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
     {
         $expr = sprintf('DATE_ADD(%s, %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
         return new \Maho\Db\Expr($expr);
@@ -3876,12 +3597,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @see INTERVAL_ constants for $expr
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @param int|string $interval
-     * @param string $unit
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getDateSubSql($date, $interval, $unit)
+    public function getDateSubSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
     {
         $expr = sprintf('DATE_SUB(%s, %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
         return new \Maho\Db\Expr($expr);
@@ -3900,11 +3618,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * %Y   Year, numeric, four digits
      *
      * @param string $date  quoted date value or non quoted SQL statement(field)
-     * @param string $format
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getDateFormatSql($date, $format)
+    public function getDateFormatSql(\Maho\Db\Expr|string $date, string $format): \Maho\Db\Expr
     {
         $expr = sprintf("DATE_FORMAT(%s, '%s')", $date, $format);
         return new \Maho\Db\Expr($expr);
@@ -3914,10 +3630,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Extract the date part of a date or datetime expression
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getDatePartSql($date)
+    public function getDatePartSql(\Maho\Db\Expr|string $date): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf('DATE(%s)', $date));
     }
@@ -3926,12 +3641,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Prepare substring sql function
      *
      * @param \Maho\Db\Expr|string $stringExpression quoted field name or SQL statement
-     * @param int|string|\Maho\Db\Expr $pos
-     * @param int|string|\Maho\Db\Expr|null $len
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getSubstringSql($stringExpression, $pos, $len = null)
+    public function getSubstringSql(\Maho\Db\Expr|string $stringExpression, int|string|\Maho\Db\Expr $pos, int|string|\Maho\Db\Expr|null $len = null): \Maho\Db\Expr
     {
         if (is_null($len)) {
             return new \Maho\Db\Expr(sprintf('SUBSTRING(%s, %s)', $stringExpression, $pos));
@@ -3943,10 +3655,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Prepare standard deviation sql function
      *
      * @param \Maho\Db\Expr|string $expressionField   quoted field name or SQL statement
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getStandardDeviationSql($expressionField)
+    public function getStandardDeviationSql(\Maho\Db\Expr|string $expressionField): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf('STDDEV_SAMP(%s)', $expressionField));
     }
@@ -3957,12 +3668,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @see INTERVAL_ constants for $unit
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @param string $unit
-     * @return \Maho\Db\Expr
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function getDateExtractSql($date, $unit)
+    public function getDateExtractSql(\Maho\Db\Expr|string $date, string $unit): \Maho\Db\Expr
     {
         if (!isset($this->_intervalUnits[$unit])) {
             throw new \Maho\Db\Exception(sprintf('Undefined interval unit "%s" specified', $unit));
@@ -3991,12 +3700,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Retrieve valid table name
      * Check table name length and allowed symbols
-     *
-     * @param string $tableName
-     * @return string
      */
     #[\Override]
-    public function getTableName($tableName)
+    public function getTableName(string $tableName): string
     {
         $prefix = 't_';
         if (strlen($tableName) > self::LENGTH_TABLE_NAME) {
@@ -4020,13 +3726,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Retrieve valid index name
      * Check index name length and allowed symbols
      *
-     * @param string $tableName
      * @param string|array $fields  the columns list
-     * @param string $indexType
-     * @return string
      */
     #[\Override]
-    public function getIndexName($tableName, $fields, $indexType = '')
+    public function getIndexName(string $tableName, string|array $fields, string $indexType = ''): string
     {
         if (is_array($fields)) {
             $fields = implode('_', $fields);
@@ -4069,15 +3772,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Retrieve valid foreign key name
      * Check foreign key name length and allowed symbols
-     *
-     * @param string $priTableName
-     * @param string $priColumnName
-     * @param string $refTableName
-     * @param string $refColumnName
-     * @return string
      */
     #[\Override]
-    public function getForeignKeyName($priTableName, $priColumnName, $refTableName, $refColumnName)
+    public function getForeignKeyName(string $priTableName, string $priColumnName, string $refTableName, string $refColumnName): string
     {
         $prefix = 'fk_';
         $hash = sprintf('%s_%s_%s_%s', $priTableName, $priColumnName, $refTableName, $refColumnName);
@@ -4103,12 +3800,11 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Stop updating indexes
      *
-     * @param string $tableName
      * @param string $schemaName
      * @return $this
      */
     #[\Override]
-    public function disableTableKeys($tableName, $schemaName = null)
+    public function disableTableKeys(string $tableName, ?string $schemaName = null): self
     {
         $tableName = $this->_getTableName($tableName, $schemaName);
         $query     = sprintf('ALTER TABLE %s DISABLE KEYS', $this->quoteIdentifier($tableName));
@@ -4120,12 +3816,11 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Re-create missing indexes
      *
-     * @param string $tableName
      * @param string $schemaName
      * @return $this
      */
     #[\Override]
-    public function enableTableKeys($tableName, $schemaName = null)
+    public function enableTableKeys(string $tableName, ?string $schemaName = null): self
     {
         $tableName = $this->_getTableName($tableName, $schemaName);
         $query     = sprintf('ALTER TABLE %s ENABLE KEYS', $this->quoteIdentifier($tableName));
@@ -4138,11 +3833,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Get insert from Select object query
      *
      * @param string $table     insert into table
-     * @param bool|int $mode
-     * @return string
      */
     #[\Override]
-    public function insertFromSelect(\Maho\Db\Select $select, $table, array $fields = [], $mode = false)
+    public function insertFromSelect(\Maho\Db\Select $select, string $table, array $fields = [], bool|int $mode = false): string
     {
         $query = 'INSERT';
         if ($mode == self::INSERT_IGNORE) {
@@ -4198,13 +3891,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Get insert queries in array for insert by range with step parameter
      *
-     * @param string $rangeField
-     * @param int $stepCount
-     * @return array
      * @throws \Maho\Db\Exception
      */
     #[\Override]
-    public function selectsByRange($rangeField, \Maho\Db\Select $select, $stepCount = 100)
+    public function selectsByRange(string $rangeField, \Maho\Db\Select $select, int $stepCount = 100): array
     {
         $queries = [];
         $fromSelect = $select->getPart(\Maho\Db\Select::FROM);
@@ -4255,12 +3945,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Convert date format to unix time
      *
-     * @param string|\Maho\Db\Expr $date
      * @throws \Maho\Db\Exception
-     * @return \Maho\Db\Expr
      */
     #[\Override]
-    public function getUnixTimestamp($date)
+    public function getUnixTimestamp(string|\Maho\Db\Expr $date): \Maho\Db\Expr
     {
         $expr = sprintf('UNIX_TIMESTAMP(%s)', $date);
         return new \Maho\Db\Expr($expr);
@@ -4268,12 +3956,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Convert unix time to date format
-     *
-     * @param int|\Maho\Db\Expr $timestamp
-     * @return mixed
      */
     #[\Override]
-    public function fromUnixtime($timestamp)
+    public function fromUnixtime(int|\Maho\Db\Expr $timestamp): \Maho\Db\Expr
     {
         $expr = sprintf('FROM_UNIXTIME(%s)', $timestamp);
         return new \Maho\Db\Expr($expr);
@@ -4281,14 +3966,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Updates table rows with specified data based on a WHERE clause.
-     *
-     * @param mixed $table The table to update.
-     * @param array $bind Column-value pairs.
-     * @param mixed $where UPDATE WHERE clause(s).
-     * @return int The number of affected rows.
      */
     #[\Override]
-    public function update($table, array $bind, $where = '')
+    public function update(string|array|\Maho\Db\Select $table, array $bind, string|array $where = ''): int
     {
         $set = [];
         foreach (array_keys($bind) as $col) {
@@ -4313,12 +3993,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Get update table query using select object for join and update
      *
-     * @param string|array $table
      * @throws \Maho\Db\Exception
-     * @return string
      */
     #[\Override]
-    public function updateFromSelect(\Maho\Db\Select $select, $table)
+    public function updateFromSelect(\Maho\Db\Select $select, string|array $table): string
     {
         if (!is_array($table)) {
             $table = [$table => $table];
@@ -4418,12 +4096,12 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Deletes table rows based on a WHERE clause.
      *
-     * @param mixed $table The table to update.
-     * @param mixed $where DELETE WHERE clause(s).
+     * @param string|array|\Maho\Db\Select $table The table to update.
+     * @param string|array $where DELETE WHERE clause(s).
      * @return int The number of affected rows.
      */
     #[\Override]
-    public function delete($table, $where = '')
+    public function delete(string|array|\Maho\Db\Select $table, string|array $where = ''): int
     {
         $where = $this->_whereExpr($where);
 
@@ -4443,10 +4121,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Get delete from select object query
      *
      * @param string $table the table name or alias used in select
-     * @return string|int
      */
     #[\Override]
-    public function deleteFromSelect(\Maho\Db\Select $select, $table)
+    public function deleteFromSelect(\Maho\Db\Select $select, string|array $table): string
     {
         $select = clone $select;
         $select->reset(\Maho\Db\Select::DISTINCT);
@@ -4510,10 +4187,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * @param array|string $tableNames array of tables names | table name
      * @param string $schemaName schema name
-     * @return array
      */
     #[\Override]
-    public function getTablesChecksum($tableNames, $schemaName = null)
+    public function getTablesChecksum(array|string $tableNames, ?string $schemaName = null): array
     {
         $result     = [];
         $tableNames = is_array($tableNames) ? $tableNames : [$tableNames];
@@ -4529,11 +4205,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Check if the database support STRAIGHT JOIN
-     *
-     * @return boolean
      */
     #[\Override]
-    public function supportStraightJoin()
+    public function supportStraightJoin(): bool
     {
         return true;
     }
@@ -4546,7 +4220,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @return $this
      */
     #[\Override]
-    public function orderRand(\Maho\Db\Select $select, $field = null)
+    public function orderRand(\Maho\Db\Select $select, ?string $field = null): self
     {
         if ($field !== null) {
             $expression = new \Maho\Db\Expr(sprintf('RAND() * %s', $this->quoteIdentifier($field)));
@@ -4562,24 +4236,17 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Render SQL FOR UPDATE clause
-     *
-     * @param string $sql
-     * @return string
      */
     #[\Override]
-    public function forUpdate($sql)
+    public function forUpdate(string $sql): string
     {
         return sprintf('%s FOR UPDATE', $sql);
     }
 
     /**
      * Prepare insert data
-     *
-     * @param mixed $row
-     * @param array $bind
-     * @return string
      */
-    protected function _prepareInsertData($row, &$bind)
+    protected function _prepareInsertData(mixed $row, array &$bind): string
     {
         if (is_array($row)) {
             $line = [];
@@ -4604,11 +4271,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Return insert sql query
-     *
-     * @param string $tableName
-     * @return string
      */
-    protected function _getInsertSqlQuery($tableName, array $columns, array $values)
+    protected function _getInsertSqlQuery(string $tableName, array $columns, array $values): string
     {
         $tableName = $this->quoteIdentifier($tableName, true);
         $columns   = array_map([$this, 'quoteIdentifier'], $columns);
@@ -4623,10 +4287,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Return ddl type
      *
-     * @param array $options
      * @return string
      */
-    protected function _getDdlType($options)
+    protected function _getDdlType(array $options): ?string
     {
         $ddlType = null;
         if (isset($options['TYPE'])) {
@@ -4640,11 +4303,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Return DDL action
-     *
-     * @param string $action
-     * @return string
      */
-    protected function _getDdlAction($action)
+    protected function _getDdlAction(string $action): string
     {
         return match ($action) {
             \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE => \Maho\Db\Ddl\Table::ACTION_CASCADE,
@@ -4657,11 +4317,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Prepare sql date condition
      *
-     * @param array $condition
-     * @param string $key
      * @return string
      */
-    protected function _prepareSqlDateCondition($condition, $key)
+    protected function _prepareSqlDateCondition(array $condition, string $key): \Maho\Db\Expr|int|string
     {
         if (empty($condition['date'])) {
             if (empty($condition['datetime'])) {
@@ -4684,7 +4342,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * @return string Primary Key name
      */
     #[\Override]
-    public function getPrimaryKeyName($tableName, $schemaName = null)
+    public function getPrimaryKeyName(string $tableName, ?string $schemaName = null): string
     {
         $indexes = $this->getIndexList($tableName, $schemaName);
         if (isset($indexes['PRIMARY'])) {
@@ -4697,11 +4355,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Parse text size
      * Returns max allowed size if value great it
-     *
-     * @param string|int $size
-     * @return int
      */
-    protected function _parseTextSize($size)
+    protected function _parseTextSize(string|int $size): int
     {
         $size = trim((string) $size);
         $last = strtolower(substr($size, -1));
@@ -4733,10 +4388,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * The MySQL drivers do it nice, no processing required.
      *
      * @mixed $value
-     * @return mixed
      */
     #[\Override]
-    public function decodeVarbinary($value)
+    public function decodeVarbinary(mixed $value): mixed
     {
         return $value;
     }
@@ -4744,23 +4398,18 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
      * for a column for current RDBMS.
-     *
-     * @return string
      */
     #[\Override]
-    public function getSuggestedZeroDate()
+    public function getSuggestedZeroDate(): string
     {
         return '0000-00-00 00:00:00';
     }
 
     /**
      * Drop trigger
-     *
-     * @param string $triggerName
-     * @return \Maho\Db\Adapter\AdapterInterface
      */
     #[\Override]
-    public function dropTrigger($triggerName)
+    public function dropTrigger(string $triggerName): self
     {
         $query = sprintf(
             'DROP TRIGGER IF EXISTS %s',
@@ -4772,12 +4421,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Create new table from provided select statement
-     *
-     * @param string $tableName
-     * @param bool $temporary
      */
     #[\Override]
-    public function createTableFromSelect($tableName, \Maho\Db\Select $select, $temporary = false): void
+    public function createTableFromSelect(string $tableName, \Maho\Db\Select $select, bool $temporary = false): void
     {
         $query = sprintf(
             'CREATE' . ($temporary ? ' TEMPORARY' : '') . ' TABLE `%s` AS (%s)',
@@ -4790,11 +4436,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Convert float values that are not supported by MySQL to alternative representation value.
      * Value 99999999.9999 is a maximum value that may be stored in Magento decimal columns in DB.
-     *
-     * @param float $value
-     * @return float
      */
-    protected function _convertFloat($value)
+    protected function _convertFloat(float $value): float
     {
         $value = (float) $value;
 

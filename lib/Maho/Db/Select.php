@@ -108,7 +108,7 @@ class Select
     /**
      * Adds a FROM table and optional columns to the query.
      */
-    public function from(array|string|Expr $name, array|string $cols = '*', ?string $schema = null): self
+    public function from(array|string|Expr|Select $name, array|string $cols = '*', ?string $schema = null): self
     {
         // Allow empty array for selecting expressions without a table (e.g., SELECT 1)
         if (is_array($name) && empty($name)) {
@@ -125,7 +125,7 @@ class Select
     /**
      * Adds a JOIN table and columns to the query.
      */
-    public function join(array|string|Expr $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function join(array|string|Expr|Select $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->joinInner($name, $cond, $cols, $schema);
     }
@@ -133,7 +133,7 @@ class Select
     /**
      * Add an INNER JOIN table and columns to the query
      */
-    public function joinInner(array|string|Expr $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function joinInner(array|string|Expr|Select $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         // If no condition is given for inner join, make it a cross join
         if (empty($cond) && $cond !== null) {
@@ -145,7 +145,7 @@ class Select
     /**
      * Add a LEFT OUTER JOIN table and columns to the query
      */
-    public function joinLeft(array|string|Expr $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function joinLeft(array|string|Expr|Select $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::LEFT_JOIN, $name, $cond, $cols, $schema);
     }
@@ -153,7 +153,7 @@ class Select
     /**
      * Add a RIGHT OUTER JOIN table and columns to the query
      */
-    public function joinRight(array|string|Expr $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function joinRight(array|string|Expr|Select $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::RIGHT_JOIN, $name, $cond, $cols, $schema);
     }
@@ -185,7 +185,7 @@ class Select
     /**
      * Populate the {@link $_parts} 'join' key
      */
-    protected function _join(string $type, array|string|Expr $name, ?string $cond, array|string $cols, ?string $schema = null): self
+    protected function _join(string $type, array|string|Expr|Select $name, ?string $cond, array|string $cols, ?string $schema = null): self
     {
         if (!in_array($type, [self::INNER_JOIN, self::LEFT_JOIN, self::RIGHT_JOIN, self::FULL_JOIN, self::CROSS_JOIN, self::NATURAL_JOIN])) {
             throw new Exception("Invalid join type '$type'");
@@ -213,7 +213,7 @@ class Select
                 break;
             }
         } else {
-            // $name is a string
+            // $name is a string, Expr, or Select
             $tableName = $name;
             $correlationName = $this->_uniqueCorrelation($tableName);
         }
@@ -387,9 +387,9 @@ class Select
     /**
      * Adds grouping to the query.
      *
-     * @param  array|string $spec The column(s) to group by.
+     * @param  array|string|Expr $spec The column(s) to group by.
      */
-    public function group(array|string $spec): self
+    public function group(array|string|Expr $spec): self
     {
         if (!is_array($spec)) {
             $spec = [$spec];

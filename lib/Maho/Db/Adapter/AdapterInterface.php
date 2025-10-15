@@ -48,94 +48,65 @@ interface AdapterInterface
 
     /**
      * Begin new DB transaction for connection
-     *
-     * @return Pdo\Mysql
      */
-    public function beginTransaction();
+    public function beginTransaction(): self;
 
     /**
      * Commit DB transaction
-     *
-     * @return Pdo\Mysql
      */
-    public function commit();
+    public function commit(): self;
 
     /**
      * Roll-back DB transaction
-     *
-     * @return Pdo\Mysql
      */
-    public function rollBack();
+    public function rollBack(): self;
 
     /**
      * Retrieve DDL object for new table
      *
-     * @param string $tableName the table name
-     * @param string $schemaName the database or schema name
-     * @return \Maho\Db\Ddl\Table
+     * @param string|null $tableName the table name
+     * @param string|null $schemaName the database or schema name
      */
-    public function newTable($tableName = null, $schemaName = null);
+    public function newTable(?string $tableName = null, ?string $schemaName = null): \Maho\Db\Ddl\Table;
 
     /**
      * Create table from DDL object
      *
      * @throws \Maho\Db\Exception
-     * @return \Maho\Db\Statement\Pdo\Mysql
      */
-    public function createTable(\Maho\Db\Ddl\Table $table);
+    public function createTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql;
 
     /**
      * Create temporary table from DDL object
      *
      * @throws \Maho\Db\Exception
-     * @return \Maho\Db\Statement\Pdo\Mysql
      */
-    public function createTemporaryTable(\Maho\Db\Ddl\Table $table);
+    public function createTemporaryTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql;
 
     /**
      * Drop table from database
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return boolean
      */
-    public function dropTable($tableName, $schemaName = null);
+    public function dropTable(string $tableName, ?string $schemaName = null): bool;
 
     /**
      * Drop temporary table from database
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return boolean
      */
-    public function dropTemporaryTable($tableName, $schemaName = null);
+    public function dropTemporaryTable(string $tableName, ?string $schemaName = null): bool;
 
     /**
      * Truncate a table
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return AdapterInterface
      */
-    public function truncateTable($tableName, $schemaName = null);
+    public function truncateTable(string $tableName, ?string $schemaName = null): self;
 
     /**
      * Checks if table exists
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return boolean
      */
-    public function isTableExists($tableName, $schemaName = null);
+    public function isTableExists(string $tableName, ?string $schemaName = null): bool;
 
     /**
      * Returns short table status array
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return array|false
      */
-    public function showTableStatus($tableName, $schemaName = null);
+    public function showTableStatus(string $tableName, ?string $schemaName = null): array|false;
 
     /**
      * Returns the column descriptions for a table.
@@ -160,12 +131,8 @@ interface AdapterInterface
      * PRIMARY          => boolean; true if column is part of the primary key
      * PRIMARY_POSITION => integer; position of column in primary key
      * IDENTITY         => integer; true if column is auto-generated with unique values
-     *
-     * @param string $tableName
-     * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null);
+    public function describeTable(string $tableName, ?string $schemaName = null): array;
 
     /**
      * Create \Maho\Db\Ddl\Table object by data from describe table
@@ -174,125 +141,71 @@ interface AdapterInterface
 
     /**
      * Modify the column definition by data from describe table
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param array|string $definition
-     * @param boolean $flushData
-     * @param string $schemaName
-     * @return Pdo\Mysql
      */
-    public function modifyColumnByDdl($tableName, $columnName, $definition, $flushData = false, $schemaName = null);
+    public function modifyColumnByDdl(string $tableName, string $columnName, array|string $definition, bool $flushData = false, ?string $schemaName = null): self;
 
     /**
      * Rename table
-     *
-     * @param string $oldTableName
-     * @param string $newTableName
-     * @param string $schemaName
-     * @return boolean
      */
-    public function renameTable($oldTableName, $newTableName, $schemaName = null);
+    public function renameTable(string $oldTableName, string $newTableName, ?string $schemaName = null): bool;
 
     /**
      * Rename several tables
      *
      * @param array $tablePairs array('oldName' => 'Name1', 'newName' => 'Name2')
      *
-     * @return boolean
      * @throws \Maho\Db\Exception
      */
-    public function renameTablesBatch(array $tablePairs);
+    public function renameTablesBatch(array $tablePairs): bool;
 
     /**
      * Adds new column to the table.
      *
      * Generally $defintion must be array with column data to keep this call cross-DB compatible.
      * Using string as $definition is allowed only for concrete DB adapter.
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param array|string $definition  string specific or universal array DB Server definition
-     * @param string $schemaName
-     * @return AdapterInterface
      */
-    public function addColumn($tableName, $columnName, $definition, $schemaName = null);
+    public function addColumn(string $tableName, string $columnName, array|string $definition, ?string $schemaName = null): self;
 
     /**
      * Change the column name and definition
      *
      * For change definition of column - use modifyColumn
-     *
-     * @param string $tableName
-     * @param string $oldColumnName
-     * @param string $newColumnName
-     * @param array|string $definition
-     * @param boolean $flushData        flush table statistic
-     * @param string $schemaName
-     * @return AdapterInterface
      */
     public function changeColumn(
-        $tableName,
-        $oldColumnName,
-        $newColumnName,
-        $definition,
-        $flushData = false,
-        $schemaName = null,
-    );
+        string $tableName,
+        string $oldColumnName,
+        string $newColumnName,
+        array|string $definition,
+        bool $flushData = false,
+        ?string $schemaName = null,
+    ): self;
 
     /**
      * Modify the column definition
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param array|string $definition
-     * @param boolean $flushData
-     * @param string $schemaName
-     * @return AdapterInterface
      */
-    public function modifyColumn($tableName, $columnName, $definition, $flushData = false, $schemaName = null);
+    public function modifyColumn(string $tableName, string $columnName, array|string $definition, bool $flushData = false, ?string $schemaName = null): self;
 
     /**
      * Drop the column from table
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param string $schemaName
-     * @return boolean
      */
-    public function dropColumn($tableName, $columnName, $schemaName = null);
+    public function dropColumn(string $tableName, string $columnName, ?string $schemaName = null): bool;
 
     /**
      * Check is table column exists
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param string $schemaName
-     * @return boolean
      */
-    public function tableColumnExists($tableName, $columnName, $schemaName = null);
+    public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool;
 
     /**
      * Add new index to table name
      *
-     * @param string $tableName
-     * @param string $indexName
      * @param string|array $fields  the table column name or array of ones
-     * @param string $indexType     the index type
-     * @param string $schemaName
-     * @return \Maho\Db\Statement\Pdo\Mysql
      */
-    public function addIndex($tableName, $indexName, $fields, $indexType = self::INDEX_TYPE_INDEX, $schemaName = null);
+    public function addIndex(string $tableName, string $indexName, string|array $fields, string $indexType = self::INDEX_TYPE_INDEX, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql;
 
     /**
      * Drop the index from table
-     *
-     * @param string $tableName
-     * @param string $keyName
-     * @param string $schemaName
-     * @return bool|\Maho\Db\Statement\Pdo\Mysql
      */
-    public function dropIndex($tableName, $keyName, $schemaName = null);
+    public function dropIndex(string $tableName, string $keyName, ?string $schemaName = null): bool|\Maho\Db\Statement\Pdo\Mysql;
 
     /**
      * Returns the table index information
@@ -311,51 +224,30 @@ interface AdapterInterface
      * INDEX_METHOD     => string; index method using
      * type             => string; see INDEX_TYPE
      * fields           => array; see COLUMNS_LIST
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return array
      */
-    public function getIndexList($tableName, $schemaName = null);
+    public function getIndexList(string $tableName, ?string $schemaName = null): array;
 
     /**
      * Add new Foreign Key to table
      * If Foreign Key with same name is exist - it will be deleted
-     *
-     * @param string $fkName
-     * @param string $tableName
-     * @param string $columnName
-     * @param string $refTableName
-     * @param string $refColumnName
-     * @param string $onDelete
-     * @param string $onUpdate
-     * @param boolean $purge            trying remove invalid data
-     * @param string $schemaName
-     * @param string $refSchemaName
-     * @return AdapterInterface
      */
     public function addForeignKey(
-        $fkName,
-        $tableName,
-        $columnName,
-        $refTableName,
-        $refColumnName,
-        $onDelete = self::FK_ACTION_CASCADE,
-        $onUpdate = self::FK_ACTION_CASCADE,
-        $purge = false,
-        $schemaName = null,
-        $refSchemaName = null,
-    );
+        string $fkName,
+        string $tableName,
+        string $columnName,
+        string $refTableName,
+        string $refColumnName,
+        string $onDelete = self::FK_ACTION_CASCADE,
+        string $onUpdate = self::FK_ACTION_CASCADE,
+        bool $purge = false,
+        ?string $schemaName = null,
+        ?string $refSchemaName = null,
+    ): self;
 
     /**
      * Drop the Foreign Key from table
-     *
-     * @param string $tableName
-     * @param string $fkName
-     * @param string $schemaName
-     * @return AdapterInterface
      */
-    public function dropForeignKey($tableName, $fkName, $schemaName = null);
+    public function dropForeignKey(string $tableName, string $fkName, ?string $schemaName = null): self;
 
     /**
      * Retrieve the foreign keys descriptions for a table.
@@ -375,133 +267,118 @@ interface AdapterInterface
      * REF_COLUMN_NAME  => string; reference column name
      * ON_DELETE        => string; action type on delete row
      * ON_UPDATE        => string; action type on update row
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return array
      */
-    public function getForeignKeys($tableName, $schemaName = null);
+    public function getForeignKeys(string $tableName, ?string $schemaName = null): array;
 
     /**
      * Creates and returns a new \Maho\Db\Select object for this adapter.
-     *
-     * @return \Maho\Db\Select
      */
-    public function select();
+    public function select(): \Maho\Db\Select;
 
     /**
      * Inserts a table row with specified data.
      *
-     * @param mixed $table The table to insert data into.
+     * @param string|array|\Maho\Db\Select $table The table to insert data into.
      * @param array $data Column-value pairs or array of column-value pairs.
      * @param array $fields update fields pairs or values
      * @return int The number of affected rows.
      */
-    public function insertOnDuplicate($table, array $data, array $fields = []);
+    public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int;
 
     /**
      * Inserts a table multiply rows with specified data.
      *
-     * @param mixed $table The table to insert data into.
+     * @param string|array|\Maho\Db\Select $table The table to insert data into.
      * @param array $data Column-value pairs or array of Column-value pairs.
      * @return int The number of affected rows.
      */
-    public function insertMultiple($table, array $data);
+    public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int;
 
     /**
      * Insert array to table based on columns definition
      *
-     * @param   string $table
-     * @param   array $columns  the data array column map
-     * @return  int
+     * @param array $columns  the data array column map
      */
-    public function insertArray($table, array $columns, array $data);
+    public function insertArray(string $table, array $columns, array $data): int;
 
     /**
      * Inserts a table row with specified data.
      *
-     * @param mixed $table The table to insert data into.
+     * @param string|array|\Maho\Db\Select $table The table to insert data into.
      * @param array $bind Column-value pairs.
      * @return int The number of affected rows.
      */
-    public function insert($table, array $bind);
+    public function insert(string|array|\Maho\Db\Select $table, array $bind): int;
 
     /**
      * Inserts a table row with specified data
      * Special for Zero values to identity column
      *
-     * @param string $table
      * @return int The number of affected rows.
      */
-    public function insertForce($table, array $bind);
+    public function insertForce(string $table, array $bind): int;
 
     /**
      * Updates table rows with specified data based on a WHERE clause.
      *
-     * @param  mixed        $table The table to update.
+     * @param  string|array|\Maho\Db\Select $table The table to update.
      * @param  array        $bind  Column-value pairs.
-     * @param  mixed        $where UPDATE WHERE clause(s).
+     * @param  string|array $where UPDATE WHERE clause(s).
      * @return int          The number of affected rows.
      */
-    public function update($table, array $bind, $where = '');
+    public function update(string|array|\Maho\Db\Select $table, array $bind, string|array $where = ''): int;
 
     /**
      * Inserts a table row with specified data.
      *
-     * @param mixed $table The table to insert data into.
+     * @param string|array|\Maho\Db\Select $table The table to insert data into.
      * @param array $bind Column-value pairs.
      * @return int The number of affected rows.
      */
-    public function insertIgnore($table, array $bind);
+    public function insertIgnore(string|array|\Maho\Db\Select $table, array $bind): int;
 
     /**
      * Deletes table rows based on a WHERE clause.
      *
-     * @param  mixed        $table The table to update.
-     * @param  mixed        $where DELETE WHERE clause(s).
+     * @param  string|array|\Maho\Db\Select $table The table to update.
+     * @param  string|array $where DELETE WHERE clause(s).
      * @return int          The number of affected rows.
      */
-    public function delete($table, $where = '');
+    public function delete(string|array|\Maho\Db\Select $table, string|array $where = ''): int;
 
     /**
      * Prepares and executes an SQL statement with bound data.
      *
-     * @param  mixed  $sql  The SQL statement with placeholders.
+     * @param  string|\Maho\Db\Select  $sql  The SQL statement with placeholders.
      *                      May be a string or \Maho\Db\Select.
-     * @param  mixed  $bind An array of data or data itself to bind to the placeholders.
-     * @return \Maho\Db\Statement\Pdo\Mysql
+     * @param  array|int|string|float  $bind An array of data or data itself to bind to the placeholders.
      */
-    public function query($sql, $bind = []);
+    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\Pdo\Mysql;
 
     /**
      * Executes a SQL statement(s)
-     *
-     * @param string $sql
-     * @return array
      */
-    public function multiQuery($sql);
+    public function multiQuery(string $sql): array;
 
     /**
      * Fetches all SQL result rows as a sequential array.
      * Uses the current fetchMode for the adapter.
      *
      * @param string|\Maho\Db\Select $sql  An SQL SELECT statement.
-     * @param mixed                 $bind Data to bind into SELECT placeholders.
-     * @param mixed                 $fetchMode Override current fetch mode.
-     * @return array
+     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param int|null $fetchMode Override current fetch mode.
      */
-    public function fetchAll($sql, $bind = [], $fetchMode = null);
+    public function fetchAll(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array;
 
     /**
      * Fetches the first row of the SQL result.
      * Uses the current fetchMode for the adapter.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @param mixed                 $fetchMode Override current fetch mode.
-     * @return array
+     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param int|null $fetchMode Override current fetch mode.
      */
-    public function fetchRow($sql, $bind = [], $fetchMode = null);
+    public function fetchRow(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array|false;
 
     /**
      * Fetches all SQL result rows as an associative array.
@@ -513,10 +390,9 @@ interface AdapterInterface
      * overwrite previous data.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return array
+     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
      */
-    public function fetchAssoc($sql, $bind = []);
+    public function fetchAssoc(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
 
     /**
      * Fetches the first column of all SQL result rows as an array.
@@ -524,10 +400,9 @@ interface AdapterInterface
      * The first column in each row is used as the array key.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return array
+     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
      */
-    public function fetchCol($sql, $bind = []);
+    public function fetchCol(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
 
     /**
      * Fetches all SQL result rows as an array of key-value pairs.
@@ -536,19 +411,17 @@ interface AdapterInterface
      * value.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return array
+     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
      */
-    public function fetchPairs($sql, $bind = []);
+    public function fetchPairs(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
 
     /**
      * Fetches the first column of the first row of the SQL result.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param mixed $bind Data to bind into SELECT placeholders.
-     * @return string
+     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
      */
-    public function fetchOne($sql, $bind = []);
+    public function fetchOne(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): mixed;
 
     /**
      * Safely quotes a value for an SQL statement.
@@ -556,11 +429,11 @@ interface AdapterInterface
      * If an array is passed as the value, the array values are quoted
      * and then returned as a comma-separated string.
      *
-     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
-     * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
+     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value A single value to quote into the condition.
+     * @param null|string|int $type The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @return string An SQL-safe quoted value (or string of separated values).
      */
-    public function quote($value, $type = null);
+    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string;
 
     /**
      * Quotes a value and places into a piece of text at a placeholder.
@@ -575,13 +448,12 @@ interface AdapterInterface
      * // $safe = "WHERE date < '2005-01-02'"
      * </code>
      *
-     * @param string  $text  The text with a placeholder.
-     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float $value OPTIONAL A single value to quote into the condition.
-     * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
-     * @param integer $count OPTIONAL count of placeholders to replace
+     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value A single value to quote into the condition.
+     * @param null|string|int $type The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
+     * @param int|null $count count of placeholders to replace
      * @return string An SQL-safe quoted value placed into the original text.
      */
-    public function quoteInto($text, $value, $type = null, $count = null);
+    public function quoteInto(string $text, \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null, ?int $count = null): string;
 
     /**
      * Quotes an identifier.
@@ -602,89 +474,68 @@ interface AdapterInterface
      * the adapter.
      *
      * @param string|array|\Maho\Db\Expr $ident The identifier.
-     * @param boolean $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
+     * @param bool $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier.
      */
-    public function quoteIdentifier($ident, $auto = false);
+    public function quoteIdentifier(string|array|\Maho\Db\Expr $ident, bool $auto = false): string;
 
     /**
      * Quote a column identifier and alias.
      *
      * @param string|array|\Maho\Db\Expr $ident The identifier or expression.
      * @param string|null $alias An alias for the column.
-     * @param boolean $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
+     * @param bool $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier and alias.
      */
-    public function quoteColumnAs($ident, $alias, $auto = false);
+    public function quoteColumnAs(string|array|\Maho\Db\Expr $ident, ?string $alias, bool $auto = false): string;
 
     /**
      * Quote a table identifier and alias.
      *
-     * @param string|array|\Maho\Db\Expr $ident The identifier or expression.
-     * @param string $alias An alias for the table.
-     * @param boolean $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
+     * @param string|array|\Maho\Db\Expr|\Maho\Db\Select $ident The identifier or expression.
+     * @param string|null $alias An alias for the table.
+     * @param bool $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier and alias.
      */
-    public function quoteTableAs($ident, $alias = null, $auto = false);
+    public function quoteTableAs(string|array|\Maho\Db\Expr|\Maho\Db\Select $ident, ?string $alias = null, bool $auto = false): string;
 
     /**
      * Format Date to internal database date format
-     *
-     * @param int|string|\DateTime $date
-     * @param boolean $includeTime
-     * @return \Maho\Db\Expr
      */
-    public function formatDate($date, $includeTime = true);
+    public function formatDate(int|string|\DateTime $date, bool $includeTime = true): \Maho\Db\Expr;
 
     /**
      * Run additional environment before setup
-     *
-     * @return AdapterInterface
      */
-    public function startSetup();
+    public function startSetup(): self;
 
     /**
      * Run additional environment after setup
-     *
-     * @return AdapterInterface
      */
-    public function endSetup();
+    public function endSetup(): self;
 
     public function setCacheAdapter(\Mage_Core_Model_Cache $adapter): self;
 
     /**
      * Allow DDL caching
-     *
-     * @return AdapterInterface
      */
-    public function allowDdlCache();
+    public function allowDdlCache(): self;
 
     /**
      * Disallow DDL caching
-     *
-     * @return AdapterInterface
      */
-    public function disallowDdlCache();
+    public function disallowDdlCache(): self;
 
     /**
      * Reset cached DDL data from cache
      * if table name is null - reset all cached DDL data
-     *
-     * @param string $tableName
-     * @param string $schemaName OPTIONAL
-     * @return AdapterInterface
      */
-    public function resetDdlCache($tableName = null, $schemaName = null);
+    public function resetDdlCache(?string $tableName = null, ?string $schemaName = null): self;
 
     /**
      * Save DDL data into cache
-     *
-     * @param string $tableCacheKey
-     * @param int $ddlType
-     * @param mixed $data
-     * @return AdapterInterface
      */
-    public function saveDdlCache($tableCacheKey, $ddlType, $data);
+    public function saveDdlCache(string $tableCacheKey, int $ddlType, mixed $data): self;
 
     /**
      * Load DDL data from cache
@@ -692,9 +543,8 @@ interface AdapterInterface
      *
      * @param string $tableCacheKey the table cache key
      * @param int $ddlType          the DDL constant
-     * @return string|array|int|false
      */
-    public function loadDdlCache($tableCacheKey, $ddlType);
+    public function loadDdlCache(string $tableCacheKey, int $ddlType): string|array|int|false;
 
     /**
      * Build SQL statement for condition
@@ -722,95 +572,73 @@ interface AdapterInterface
      *
      * If non matched - sequential array is expected and OR conditions
      * will be built using above mentioned structure
-     *
-     * @param string $fieldName
-     * @param integer|string|array $condition
-     * @return string
      */
-    public function prepareSqlCondition($fieldName, $condition);
+    public function prepareSqlCondition(string $fieldName, int|string|array $condition): string;
 
     /**
      * Prepare value for save in column
      * Return converted to column data type value
      *
      * @param array $column     the column describe array
-     * @param mixed $value
-     * @return mixed
      */
-    public function prepareColumnValue(array $column, $value);
+    public function prepareColumnValue(array $column, mixed $value): mixed;
 
     /**
      * Generate fragment of SQL, that check condition and return true or false value
      *
-     * @param string $condition     expression
      * @param string|\Maho\Db\Expr $true          true value
      * @param string|\Maho\Db\Expr $false         false value
-     * @return \Maho\Db\Expr
      */
-    public function getCheckSql($condition, $true, $false);
+    public function getCheckSql(string $condition, string|\Maho\Db\Expr $true, string|\Maho\Db\Expr $false): \Maho\Db\Expr;
 
     /**
      * Generate fragment of SQL, that check value against multiple condition cases
      * and return different result depends on them
      *
-     * @param string $valueName Name of value to check
      * @param array $casesResults Cases and results
-     * @param string $defaultValue value to use if value doesn't confirm to any cases
-     *
-     * @return \Maho\Db\Expr
+     * @param string|null $defaultValue value to use if value doesn't confirm to any cases
      */
-    public function getCaseSql($valueName, $casesResults, $defaultValue = null);
+    public function getCaseSql(string $valueName, array $casesResults, ?string $defaultValue = null): \Maho\Db\Expr;
 
     /**
      * Returns valid IFNULL expression
      *
-     * @param string $expression
-     * @param string|int $value OPTIONAL. Applies when $expression is NULL
-     * @return \Maho\Db\Expr
+     * @param string|int $value Applies when $expression is NULL
      */
-    public function getIfNullSql($expression, $value = '0');
+    public function getIfNullSql(string $expression, string|int $value = '0'): \Maho\Db\Expr;
 
     /**
      * Generate fragment of SQL, that combine together (concatenate) the results from data array
      * All arguments in data must be quoted
      *
-     * @param string $separator concatenate with separator
-     * @return \Maho\Db\Expr
+     * @param string|null $separator concatenate with separator
      */
-    public function getConcatSql(array $data, $separator = null);
+    public function getConcatSql(array $data, ?string $separator = null): \Maho\Db\Expr;
 
     /**
      * Returns the configuration variables in this adapter.
-     * @return array
      */
-    public function getConfig();
+    public function getConfig(): array;
 
     /**
      * Generate fragment of SQL that returns length of character string
      * The string argument must be quoted
-     *
-     * @param string $string
-     * @return \Maho\Db\Expr
      */
-    public function getLengthSql($string);
+    public function getLengthSql(string $string): \Maho\Db\Expr;
 
     /**
      * Generate fragment of SQL, that compare with two or more arguments, and returns the smallest
      * (minimum-valued) argument
      * All arguments in data must be quoted
-     *
-     * @return \Maho\Db\Expr
      */
-    public function getLeastSql(array $data);
+    public function getLeastSql(array $data): \Maho\Db\Expr;
 
     /**
      * Generate fragment of SQL, that compare with two or more arguments, and returns the largest
      * (maximum-valued) argument
      * All arguments in data must be quoted
-     *
-     * @return \Maho\Db\Expr
      */
-    public function getGreatestSql(array $data);
+    public function getGreatestSql(array $data): \Maho\Db\Expr;
 
     /**
      * Add time values (intervals) to a date value
@@ -818,11 +646,8 @@ interface AdapterInterface
      * @see INTERVAL_ constants for $unit
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @param int|string $interval
-     * @param string $unit
-     * @return \Maho\Db\Expr
      */
-    public function getDateAddSql($date, $interval, $unit);
+    public function getDateAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr;
 
     /**
      * Subtract time values (intervals) to a date value
@@ -830,11 +655,8 @@ interface AdapterInterface
      * @see INTERVAL_ constants for $unit
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @param int|string $interval
-     * @param string $unit
-     * @return \Maho\Db\Expr
      */
-    public function getDateSubSql($date, $interval, $unit);
+    public function getDateSubSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr;
 
     /**
      * Format date as specified
@@ -849,36 +671,29 @@ interface AdapterInterface
      * %Y   Year, numeric, four digits
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @param string $format
-     * @return \Maho\Db\Expr
      */
-    public function getDateFormatSql($date, $format);
+    public function getDateFormatSql(\Maho\Db\Expr|string $date, string $format): \Maho\Db\Expr;
 
     /**
      * Extract the date part of a date or datetime expression
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @return \Maho\Db\Expr
      */
-    public function getDatePartSql($date);
+    public function getDatePartSql(\Maho\Db\Expr|string $date): \Maho\Db\Expr;
 
     /**
      * Prepare substring sql function
      *
      * @param \Maho\Db\Expr|string $stringExpression quoted field name or SQL statement
-     * @param int|string|\Maho\Db\Expr $pos
-     * @param int|string|\Maho\Db\Expr|null $len
-     * @return \Maho\Db\Expr
      */
-    public function getSubstringSql($stringExpression, $pos, $len = null);
+    public function getSubstringSql(\Maho\Db\Expr|string $stringExpression, int|string|\Maho\Db\Expr $pos, int|string|\Maho\Db\Expr|null $len = null): \Maho\Db\Expr;
 
     /**
      * Prepare standard deviation sql function
      *
      * @param \Maho\Db\Expr|string $expressionField   quoted field name or SQL statement
-     * @return \Maho\Db\Expr
      */
-    public function getStandardDeviationSql($expressionField);
+    public function getStandardDeviationSql(\Maho\Db\Expr|string $expressionField): \Maho\Db\Expr;
 
     /**
      * Extract part of a date
@@ -886,226 +701,144 @@ interface AdapterInterface
      * @see INTERVAL_ constants for $unit
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
-     * @param string $unit
-     * @return \Maho\Db\Expr
      */
-    public function getDateExtractSql($date, $unit);
+    public function getDateExtractSql(\Maho\Db\Expr|string $date, string $unit): \Maho\Db\Expr;
 
     /**
      * Retrieve valid table name
      * Check table name length and allowed symbols
-     *
-     * @param string $tableName
-     * @return string
      */
-    public function getTableName($tableName);
+    public function getTableName(string $tableName): string;
 
     /**
      * Retrieve valid index name
      * Check index name length and allowed symbols
      *
-     * @param string $tableName
      * @param string|array $fields  the columns list
-     * @param string $indexType
-     * @return string
      */
-    public function getIndexName($tableName, $fields, $indexType = '');
+    public function getIndexName(string $tableName, string|array $fields, string $indexType = ''): string;
 
     /**
      * Retrieve valid foreign key name
      * Check foreign key name length and allowed symbols
-     *
-     * @param string $priTableName
-     * @param string $priColumnName
-     * @param string $refTableName
-     * @param string $refColumnName
-     * @return string
      */
-    public function getForeignKeyName($priTableName, $priColumnName, $refTableName, $refColumnName);
+    public function getForeignKeyName(string $priTableName, string $priColumnName, string $refTableName, string $refColumnName): string;
 
     /**
      * Stop updating indexes
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return AdapterInterface
      */
-    public function disableTableKeys($tableName, $schemaName = null);
+    public function disableTableKeys(string $tableName, ?string $schemaName = null): self;
 
     /**
      * Re-create missing indexes
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     * @return AdapterInterface
      */
-    public function enableTableKeys($tableName, $schemaName = null);
+    public function enableTableKeys(string $tableName, ?string $schemaName = null): self;
 
     /**
      * Get insert from Select object query
-     *
-     * @param string $table     insert into table
-     * @param bool|int $mode
-     * @return string
      */
-    public function insertFromSelect(\Maho\Db\Select $select, $table, array $fields = [], $mode = false);
+    public function insertFromSelect(\Maho\Db\Select $select, string $table, array $fields = [], bool|int $mode = false): string;
 
     /**
      * Get insert queries in array for insert by range with step parameter
-     *
-     * @param string $rangeField
-     * @param int $stepCount
-     * @return array
      */
-    public function selectsByRange($rangeField, \Maho\Db\Select $select, $stepCount = 100);
+    public function selectsByRange(string $rangeField, \Maho\Db\Select $select, int $stepCount = 100): array;
 
     /**
      * Get update table query using select object for join and update
-     *
-     * @param string|array $table
-     * @return string
      */
-    public function updateFromSelect(\Maho\Db\Select $select, $table);
+    public function updateFromSelect(\Maho\Db\Select $select, string|array $table): string;
 
     /**
      * Get delete from select object query
      *
      * @param string $table the table name or alias used in select
-     * @return string|int
      */
-    public function deleteFromSelect(\Maho\Db\Select $select, $table);
+    public function deleteFromSelect(\Maho\Db\Select $select, string $table): string;
 
     /**
      * Return array of table(s) checksum as table name - checksum pairs
-     *
-     * @param array|string $tableNames
-     * @param string $schemaName
-     * @return array
      */
-    public function getTablesChecksum($tableNames, $schemaName = null);
+    public function getTablesChecksum(array|string $tableNames, ?string $schemaName = null): array;
 
     /**
      * Check if the database support STRAIGHT JOIN
-     *
-     * @return boolean
      */
-    public function supportStraightJoin();
+    public function supportStraightJoin(): bool;
 
     /**
      * Adds order by random to select object
      * Possible using integer field for optimization
-     *
-     * @param string $field
-     * @return AdapterInterface
      */
-    public function orderRand(\Maho\Db\Select $select, $field = null);
+    public function orderRand(\Maho\Db\Select $select, ?string $field = null): self;
 
     /**
      * Render SQL FOR UPDATE clause
-     *
-     * @param string $sql
-     * @return string
      */
-    public function forUpdate($sql);
+    public function forUpdate(string $sql): string;
 
     /**
      * Try to find installed primary key name, if not - format new one.
      *
      * @param string $tableName Table name
-     * @param string $schemaName OPTIONAL
      * @return string Primary Key name
      */
-    public function getPrimaryKeyName($tableName, $schemaName = null);
+    public function getPrimaryKeyName(string $tableName, ?string $schemaName = null): string;
 
     /**
      * Converts fetched blob into raw binary PHP data.
      * Some DB drivers return blobs as hex-coded strings, so we need to process them.
-     *
-     * @param mixed $value
-     * @return mixed
      */
-    public function decodeVarbinary($value);
+    public function decodeVarbinary(mixed $value): mixed;
 
     /**
      * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
      * for a column for current RDBMS.
-     *
-     * @return string
      */
-    public function getSuggestedZeroDate();
+    public function getSuggestedZeroDate(): string;
 
     /**
      * Drop trigger
-     *
-     * @param string $triggerName
-     * @return AdapterInterface
      */
-    public function dropTrigger($triggerName);
+    public function dropTrigger(string $triggerName): self;
 
     /**
      * Get adapter transaction level state. Return 0 if all transactions are complete
-     *
-     * @return int
      */
-    public function getTransactionLevel();
+    public function getTransactionLevel(): int;
 
     /**
      * Convert date format to unix time
-     *
-     * @param string|\Maho\Db\Expr $date
-     * @return mixed
      */
-    public function getUnixTimestamp($date);
+    public function getUnixTimestamp(string|\Maho\Db\Expr $date): \Maho\Db\Expr;
 
     /**
      * Convert unix time to date format
-     *
-     * @param int|\Maho\Db\Expr $timestamp
-     * @return mixed
      */
-    public function fromUnixtime($timestamp);
+    public function fromUnixtime(int|\Maho\Db\Expr $timestamp): \Maho\Db\Expr;
 
     /**
      * Change table auto increment value
-     *
-     * @param string $tableName
-     * @param string $increment
-     * @param null|string $schemaName
-     * @return \Maho\Db\Statement\Pdo\Mysql
      */
-    public function changeTableAutoIncrement($tableName, $increment, $schemaName = null);
+    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql;
 
     /**
      * Create new table from provided select statement
-     *
-     * @param string $tableName
-     * @param bool $temporary
-     * @return mixed
      */
-    public function createTableFromSelect($tableName, \Maho\Db\Select $select, $temporary = false);
+    public function createTableFromSelect(string $tableName, \Maho\Db\Select $select, bool $temporary = false): void;
 
     /**
      * Retrieve the list of all tables in the database
-     *
-     * @param string|null $schemaName
-     * @return array
      */
-    public function listTables($schemaName = null);
+    public function listTables(?string $schemaName = null): array;
 
     /**
      * Modify table columns, foreign keys, comments and engine
-     *
-     * @param array $tables
-     * @return Pdo\Mysql
      */
-    public function modifyTables($tables);
+    public function modifyTables(array $tables): self;
 
     /**
      * Retrieve last inserted ID
-     *
-     * @param string|null $tableName
-     * @param string|null $primaryKey
-     * @return string|int
      */
-    public function lastInsertId($tableName = null, $primaryKey = null);
+    public function lastInsertId(?string $tableName = null, ?string $primaryKey = null): string|int;
 }
