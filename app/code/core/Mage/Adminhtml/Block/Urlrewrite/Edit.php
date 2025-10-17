@@ -124,7 +124,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
         if ($this->getUrlrewriteId()) {
             $this->_addButton('reset', [
                 'label'   => Mage::helper('adminhtml')->__('Reset'),
-                'onclick' => '$(\'edit_form\').reset()',
+                'onclick' => 'document.getElementById(\'edit_form\').reset()',
                 'class'   => 'scalable',
                 'level'   => -1,
             ]);
