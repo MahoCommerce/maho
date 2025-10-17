@@ -551,6 +551,8 @@ interface AdapterInterface
      *
      * If $condition integer or string - exact value will be filtered ('eq' condition)
      *
+     * If $condition is null - IS NULL condition will be generated
+     *
      * If $condition is array - one of the following structures is expected:
      * - array("from" => $fromValue, "to" => $toValue)
      * - array("eq" => $equalValue)
@@ -573,7 +575,7 @@ interface AdapterInterface
      * If non matched - sequential array is expected and OR conditions
      * will be built using above mentioned structure
      */
-    public function prepareSqlCondition(string $fieldName, int|string|array $condition): string;
+    public function prepareSqlCondition(string $fieldName, int|string|array|null $condition): string;
 
     /**
      * Prepare value for save in column

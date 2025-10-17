@@ -106,7 +106,7 @@ class Select
     /**
      * Adds a FROM table and optional columns to the query.
      */
-    public function from(array|string|Expr|Select $name, array|string $cols = '*', ?string $schema = null): self
+    public function from(array|string|Expr|Select $name, array|string|Expr $cols = '*', ?string $schema = null): self
     {
         // Allow empty array for selecting expressions without a table (e.g., SELECT 1)
         if (is_array($name) && empty($name)) {
@@ -123,7 +123,7 @@ class Select
     /**
      * Adds a JOIN table and columns to the query.
      */
-    public function join(array|string|Expr|Select $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function join(array|string|Expr|Select $name, ?string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->joinInner($name, $cond, $cols, $schema);
     }
@@ -131,7 +131,7 @@ class Select
     /**
      * Add an INNER JOIN table and columns to the query
      */
-    public function joinInner(array|string|Expr|Select $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function joinInner(array|string|Expr|Select $name, ?string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::INNER_JOIN, $name, $cond, $cols, $schema);
     }
@@ -139,7 +139,7 @@ class Select
     /**
      * Add a LEFT OUTER JOIN table and columns to the query
      */
-    public function joinLeft(array|string|Expr|Select $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function joinLeft(array|string|Expr|Select $name, string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::LEFT_JOIN, $name, $cond, $cols, $schema);
     }
@@ -147,7 +147,7 @@ class Select
     /**
      * Add a RIGHT OUTER JOIN table and columns to the query
      */
-    public function joinRight(array|string|Expr|Select $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
+    public function joinRight(array|string|Expr|Select $name, string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
         return $this->_join(self::RIGHT_JOIN, $name, $cond, $cols, $schema);
     }
@@ -156,7 +156,7 @@ class Select
     /**
      * Populate the {@link $_parts} 'join' key
      */
-    protected function _join(string $type, array|string|Expr|Select $name, ?string $cond, array|string $cols, ?string $schema = null): self
+    protected function _join(string $type, array|string|Expr|Select $name, ?string $cond, array|string|Expr $cols, ?string $schema = null): self
     {
         if (!in_array($type, [self::INNER_JOIN, self::LEFT_JOIN, self::RIGHT_JOIN])) {
             throw new Exception("Invalid join type '$type'");
@@ -264,7 +264,15 @@ class Select
             }
 
             $currentCorrelationName = $correlationName;
-            if (is_string($col)) {
+            // Preserve Expr objects as-is (don't parse them)
+            if ($col instanceof Expr) {
+                // Keep Expr as-is, use empty correlation name so it's not modified
+                $columnValues[] = ['', $col, is_string($alias) ? $alias : null];
+            } elseif ($col instanceof Select) {
+                // Convert Select to Expr
+                $col = new Expr(sprintf('(%s)', $col->assemble()));
+                $columnValues[] = ['', $col, is_string($alias) ? $alias : null];
+            } elseif (is_string($col)) {
                 // Check for a column matching "<column> AS <alias>" and extract the alias name
                 if (preg_match('/^(.+)\s+' . self::SQL_AS . '\s+(.+)$/i', $col, $m)) {
                     $col = $m[1];
@@ -279,12 +287,11 @@ class Select
                 if (str_contains($col, '(') && str_contains($col, ')')) {
                     $col = new Expr($col);
                 }
-            } elseif ($col instanceof Select) {
-                // Convert Select to Expr
-                $col = new Expr(sprintf('(%s)', $col->assemble()));
+                $columnValues[] = [$currentCorrelationName, $col, is_string($alias) ? $alias : null];
+            } else {
+                // Unknown type, add as-is
+                $columnValues[] = [$currentCorrelationName, $col, is_string($alias) ? $alias : null];
             }
-
-            $columnValues[] = [$currentCorrelationName, $col, is_string($alias) ? $alias : null];
         }
 
         if ($columnValues) {
@@ -811,7 +818,8 @@ class Select
         $connection = $this->_adapter->getConnection();
         $queryBuilder = $connection->createQueryBuilder();
 
-        // Build SELECT clause with columns
+        // Build columns using our formatting logic, then pass directly to QueryBuilder
+        // QueryBuilder accepts raw SQL fragment strings and joins them with commas
         if (!$this->_parts[self::COLUMNS]) {
             $queryBuilder->select('*');
         } else {
@@ -827,10 +835,11 @@ class Select
                 }
                 $columns[] = $colStr;
             }
+            // Pass formatted columns directly to QueryBuilder - it will join them with commas
             $queryBuilder->select(...$columns);
         }
 
-        // Add DISTINCT
+        // Apply DISTINCT if needed
         if ($this->_parts[self::DISTINCT]) {
             $queryBuilder->distinct();
         }
@@ -980,7 +989,7 @@ class Select
             $hasBaseQuery = !empty($this->_parts[self::FROM]);
 
             if ($hasBaseQuery) {
-                // Get the base SELECT SQL first
+                // Get the base SELECT SQL - it now has correct columns from QueryBuilder
                 $baseSQL = $queryBuilder->getSQL();
 
                 // Create fresh QueryBuilder for UNION (reuse connection from earlier)
@@ -1026,9 +1035,16 @@ class Select
         $sql = $queryBuilder->getSQL();
 
         // Add STRAIGHT_JOIN keyword if enabled (MySQL optimization hint)
+        // Note: Must be added after getting SQL, as DISTINCT needs to come first (SELECT DISTINCT)
         if ($this->_adapter->supportStraightJoin() && $this->_parts[self::STRAIGHT_JOIN]) {
-            // Insert STRAIGHT_JOIN keyword right after SELECT
-            $sql = preg_replace('/^SELECT\s+/i', 'SELECT STRAIGHT_JOIN ', $sql);
+            // Insert STRAIGHT_JOIN keyword right after SELECT (or after SELECT DISTINCT)
+            if ($this->_parts[self::DISTINCT]) {
+                // SELECT DISTINCT -> SELECT DISTINCT STRAIGHT_JOIN
+                $sql = str_replace('SELECT DISTINCT ', 'SELECT DISTINCT STRAIGHT_JOIN ', $sql);
+            } else {
+                // SELECT -> SELECT STRAIGHT_JOIN
+                $sql = str_replace('SELECT ', 'SELECT STRAIGHT_JOIN ', $sql);
+            }
         }
 
         // Add FOR UPDATE clause if enabled (for pessimistic locking)

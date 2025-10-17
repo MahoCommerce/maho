@@ -3290,7 +3290,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * will be built using above mentioned structure
      */
     #[\Override]
-    public function prepareSqlCondition(string|array $fieldName, int|string|array $condition): string
+    public function prepareSqlCondition(string|array $fieldName, int|string|array|null $condition): string
     {
         $conditionKeyMap = [
             'eq'            => '{{fieldName}} = ?',
@@ -3343,6 +3343,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
                 $query = sprintf('(%s)', implode(' OR ', $queries));
             }
+        } elseif ($condition === null) {
+            // Handle NULL values - generate IS NULL condition
+            $query = str_replace('{{fieldName}}', (string) $fieldName, $conditionKeyMap['null']);
         } else {
             $query = $this->_prepareQuotedSqlCondition($conditionKeyMap['eq'], (string) $condition, $fieldName);
         }
@@ -3439,11 +3442,19 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                 break;
 
             case 'date':
-                $value  = $this->formatDate($value, false);
+                if ($column['NULLABLE'] && ($value === false || $value === '' || $value === null)) {
+                    $value = null;
+                } else {
+                    $value = $this->formatDate($value, false);
+                }
                 break;
             case 'datetime':
             case 'timestamp':
-                $value  = $this->formatDate($value, true);
+                if ($column['NULLABLE'] && ($value === false || $value === '' || $value === null)) {
+                    $value = null;
+                } else {
+                    $value = $this->formatDate($value, true);
+                }
                 break;
 
             case 'varchar':
