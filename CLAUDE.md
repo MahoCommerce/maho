@@ -293,25 +293,97 @@ Mage::helper('core')->isValidDate($value);
 
 ## Date Handling (Native PHP DateTime)
 
-Maho uses **native PHP DateTime** for all date operations. Zend_Date and Varien_Date have been completely removed.
+Maho uses **native PHP DateTime** for all date operations. Zend_Date and Varien_Date have been completely removed. Maho has migrated to native HTML5 date inputs with proper timezone handling.
 
-### Usage:
+### Key Concepts
+- **Database storage**: Always in UTC timezone using `'Y-m-d H:i:s'` format
+- **Display/Input**: Converted to store timezone using HTML5 formats
+- **Store timezone**: Configured per store (default: UTC)
+
+### Date Format Constants
 ```php
-// OLD - Don't use
-Varien_Date::now();
-Zend_Date::now();
-Varien_Date::toTimestamp($date);
-
-// NEW - Use these methods
-Mage_Core_Model_Locale::now();           // Current datetime as string
-Mage_Core_Model_Locale::today();         // Current date as string
-strtotime($dateString);                  // Convert to timestamp
-
-// Date format constants
-Mage_Core_Model_Locale::DATETIME_FORMAT;     // 'Y-m-d H:i:s'
-Mage_Core_Model_Locale::DATE_FORMAT;         // 'Y-m-d' 
-Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT; // 'Y-m-d\TH:i'
+Mage_Core_Model_Locale::DATETIME_FORMAT;       // 'Y-m-d H:i:s' (database)
+Mage_Core_Model_Locale::DATE_FORMAT;           // 'Y-m-d'
+Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT; // 'Y-m-d\TH:i' (for datetime-local inputs)
 ```
+
+### Converting Database Dates to HTML5 Format (for display)
+Use `storeDate()` to convert UTC dates from database to store timezone for HTML5 inputs:
+
+```php
+// Convert date (without time) to HTML5 format
+$htmlDate = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
+// Returns: "2025-01-15" (in store timezone)
+
+// Convert datetime (with time) to HTML5 format
+$htmlDateTime = Mage::app()->getLocale()->storeDate(null, $dbDateTime, true, 'html5');
+// Returns: "2025-01-15T14:30" (in store timezone)
+
+// Parameters:
+// - $store: Store ID (null = current store)
+// - $date: Date string from database, DateTime object, or timestamp
+// - $includeTime: false for date-only, true for datetime
+// - $format: 'html5' for HTML5 native inputs
+```
+
+### Converting HTML5 Input to UTC (for database storage)
+Use `utcDate()` to convert HTML5 input values back to UTC for database storage:
+
+```php
+// Convert HTML5 date input to UTC for database
+$utcDate = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
+// Input: "2025-01-15" (in store timezone)
+// Returns: "2025-01-15 00:00:00" (in UTC)
+
+// Convert HTML5 datetime-local input to UTC for database
+$utcDateTime = Mage::app()->getLocale()->utcDate(null, $inputDateTime, true, 'html5');
+// Input: "2025-01-15T14:30" (in store timezone)
+// Returns: "2025-01-15 14:30:00" (in UTC, adjusted if store timezone differs)
+
+// Parameters:
+// - $store: Store ID (null = current store)
+// - $date: HTML5 input value (YYYY-MM-DD or YYYY-MM-DDTHH:mm)
+// - $includeTime: false for date-only, true for datetime
+// - $format: 'html5' for HTML5 native inputs
+```
+
+### Common Usage Patterns
+
+**In Grid Filters (display):**
+```php
+// Convert database date to HTML5 input value
+$fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, false, 'html5') ?? '';
+$toValue = Mage::app()->getLocale()->storeDate(null, $toDate, false, 'html5') ?? '';
+```
+
+**In Grid Filters (processing input):**
+```php
+// Convert HTML5 input value to UTC for database queries
+$fromDate = Mage::app()->getLocale()->utcDate(null, $value['from'], false, 'html5');
+$toDate = Mage::app()->getLocale()->utcDate(null, $value['to'], false, 'html5');
+```
+
+**In Form Fields:**
+```php
+// Display: Convert model date to HTML5 input
+<input type="date" value="<?= Mage::app()->getLocale()->storeDate(null, $model->getCreatedAt(), false, 'html5') ?>" />
+
+// Process: Convert submitted HTML5 value to UTC before saving
+$model->setCreatedAt(Mage::app()->getLocale()->utcDate(null, $this->getUserParam('date'), false, 'html5'));
+```
+
+### Legacy Methods (still available)
+```php
+// Get current datetime/date as string
+Mage_Core_Model_Locale::now();    // Current datetime in 'Y-m-d H:i:s' format
+Mage_Core_Model_Locale::today();  // Current date in 'Y-m-d' format
+```
+
+### Important Notes
+- Always store dates in UTC in the database
+- Always use `storeDate()` with `'html5'` format when populating HTML5 date/datetime-local inputs
+- Always use `utcDate()` with `'html5'` format when processing HTML5 date/datetime-local inputs
+- HTML5 inputs automatically respect the user's browser locale for display while using ISO 8601 format internally
 
 ## Filtering & Locale (Native PHP)
 
