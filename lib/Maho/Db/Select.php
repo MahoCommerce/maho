@@ -34,9 +34,6 @@ class Select
     public const INNER_JOIN     = 'inner join';
     public const LEFT_JOIN      = 'left join';
     public const RIGHT_JOIN     = 'right join';
-    public const FULL_JOIN      = 'full join';
-    public const CROSS_JOIN     = 'cross join';
-    public const NATURAL_JOIN   = 'natural join';
 
     public const SQL_WILDCARD   = '*';
     public const SQL_SELECT     = 'SELECT';
@@ -63,6 +60,7 @@ class Select
 
     /**
      * The component parts of a SELECT statement
+     * Maintained for backward compatibility with getPart()/setPart()
      */
     protected array $_parts = [
         self::DISTINCT     => false,
@@ -135,10 +133,6 @@ class Select
      */
     public function joinInner(array|string|Expr|Select $name, ?string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
-        // If no condition is given for inner join, make it a cross join
-        if (empty($cond) && $cond !== null) {
-            return $this->_join(self::CROSS_JOIN, $name, null, $cols, $schema);
-        }
         return $this->_join(self::INNER_JOIN, $name, $cond, $cols, $schema);
     }
 
@@ -158,36 +152,13 @@ class Select
         return $this->_join(self::RIGHT_JOIN, $name, $cond, $cols, $schema);
     }
 
-    /**
-     * Add a FULL OUTER JOIN table and columns to the query
-     */
-    public function joinFull(array|string|Expr $name, string $cond, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
-    {
-        return $this->_join(self::FULL_JOIN, $name, $cond, $cols, $schema);
-    }
-
-    /**
-     * Add a CROSS JOIN table and columns to the query
-     */
-    public function joinCross(array|string|Expr $name, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
-    {
-        return $this->_join(self::CROSS_JOIN, $name, null, $cols, $schema);
-    }
-
-    /**
-     * Add a NATURAL JOIN table and columns to the query
-     */
-    public function joinNatural(array|string|Expr $name, array|string $cols = self::SQL_WILDCARD, ?string $schema = null): self
-    {
-        return $this->_join(self::NATURAL_JOIN, $name, null, $cols, $schema);
-    }
 
     /**
      * Populate the {@link $_parts} 'join' key
      */
     protected function _join(string $type, array|string|Expr|Select $name, ?string $cond, array|string $cols, ?string $schema = null): self
     {
-        if (!in_array($type, [self::INNER_JOIN, self::LEFT_JOIN, self::RIGHT_JOIN, self::FULL_JOIN, self::CROSS_JOIN, self::NATURAL_JOIN])) {
+        if (!in_array($type, [self::INNER_JOIN, self::LEFT_JOIN, self::RIGHT_JOIN])) {
             throw new Exception("Invalid join type '$type'");
         }
 
@@ -836,182 +807,231 @@ class Select
      */
     public function assemble(): string
     {
-        $sql = self::SQL_SELECT;
+        // Create QueryBuilder on-demand (only when assembling query)
+        $connection = $this->_adapter->getConnection();
+        $queryBuilder = $connection->createQueryBuilder();
 
-        // Add STRAIGHT_JOIN if enabled
-        if ($this->_adapter->supportStraightJoin() && $this->_parts[self::STRAIGHT_JOIN]) {
-            $sql .= ' ' . self::SQL_STRAIGHT_JOIN;
+        // Build SELECT clause with columns
+        if (!$this->_parts[self::COLUMNS]) {
+            $queryBuilder->select('*');
+        } else {
+            $columns = [];
+            foreach ($this->_parts[self::COLUMNS] as $columnEntry) {
+                [$correlationName, $column, $alias] = $columnEntry;
+                if ($column instanceof Expr) {
+                    $colStr = $this->_adapter->quoteColumnAs($column, $alias, true);
+                } elseif ($column == self::SQL_WILDCARD) {
+                    $colStr = ($correlationName ? $this->_adapter->quoteIdentifier($correlationName) . '.' : '') . self::SQL_WILDCARD;
+                } else {
+                    $colStr = $this->_adapter->quoteColumnAs([$correlationName, $column], $alias, true);
+                }
+                $columns[] = $colStr;
+            }
+            $queryBuilder->select(...$columns);
         }
 
         // Add DISTINCT
         if ($this->_parts[self::DISTINCT]) {
-            $sql .= ' ' . self::SQL_DISTINCT;
+            $queryBuilder->distinct();
         }
 
-        // Add columns
-        $columns = [];
-        if (!$this->_parts[self::COLUMNS]) {
-            // If no columns specified, use SELECT *
-            $columns[] = '*';
-        } else {
-            foreach ($this->_parts[self::COLUMNS] as $columnEntry) {
-                [$correlationName, $column, $alias] = $columnEntry;
-                if ($column instanceof Expr) {
-                    $columns[] = $this->_adapter->quoteColumnAs($column, $alias, true);
-                } elseif ($column == self::SQL_WILDCARD) {
-                    $columns[] = ($correlationName ? $this->_adapter->quoteIdentifier($correlationName) . '.' : '') . self::SQL_WILDCARD;
-                } else {
-                    $columns[] = $this->_adapter->quoteColumnAs([$correlationName, $column], $alias, true);
-                }
-            }
-        }
-        $sql .= ' ' . implode(', ', $columns);
-
-        // Add FROM clause
+        // Build FROM/JOIN clauses
         if ($this->_parts[self::FROM]) {
-            $sql .= ' ' . self::SQL_FROM . ' ';
-            $from = [];
+            $isFirstTable = true;
+            $fromAlias = null;
             foreach ($this->_parts[self::FROM] as $correlationName => $table) {
-                $tmp = '';
-
-                // Add join type for all but the first table
-                if (!empty($from)) {
-                    $tmp .= ' ' . strtoupper($table['joinType']) . ' ';
+                // Convert table name to string
+                $tableNameStr = $table['tableName'];
+                if (is_array($tableNameStr)) {
+                    $tableNameStr = implode('.', array_map(fn($part) => $this->_adapter->quoteIdentifier($part), $tableNameStr));
+                } elseif ($tableNameStr instanceof Expr) {
+                    $tableNameStr = (string) $tableNameStr;
+                } elseif ($tableNameStr instanceof Select) {
+                    $tableNameStr = '(' . $tableNameStr->assemble() . ')';
+                } else {
+                    $tableNameStr = $this->_adapter->quoteIdentifier($tableNameStr);
                 }
 
-                // Add table name
-                $tmp .= $this->_adapter->quoteTableAs($table['tableName'], $correlationName, true);
+                // Quote correlation name to handle reserved keywords (e.g., 'order', 'group')
+                $quotedCorrelationName = $this->_adapter->quoteIdentifier($correlationName);
 
-                // Add join condition
-                if (!empty($table['joinCondition']) && !empty($from)) {
-                    $tmp .= ' ' . self::SQL_ON . ' ' . $table['joinCondition'];
+                if ($isFirstTable) {
+                    // First table uses from()
+                    $queryBuilder->from($tableNameStr, $quotedCorrelationName);
+                    $fromAlias = $quotedCorrelationName;
+                    $isFirstTable = false;
+                } else {
+                    // Subsequent tables use join methods
+                    $joinType = strtolower($table['joinType']);
+                    $joinCondition = $table['joinCondition'] ?? '';
+
+                    // Empty join condition means CROSS JOIN (no ON clause)
+                    // DBAL doesn't support CROSS JOIN, so we use "1=1" condition which is equivalent
+                    if (empty($joinCondition)) {
+                        $joinCondition = '1=1';
+                    }
+
+                    match ($joinType) {
+                        self::INNER_JOIN => $queryBuilder->innerJoin(
+                            $fromAlias,
+                            $tableNameStr,
+                            $quotedCorrelationName,
+                            $joinCondition,
+                        ),
+                        self::LEFT_JOIN => $queryBuilder->leftJoin(
+                            $fromAlias,
+                            $tableNameStr,
+                            $quotedCorrelationName,
+                            $joinCondition,
+                        ),
+                        self::RIGHT_JOIN => $queryBuilder->rightJoin(
+                            $fromAlias,
+                            $tableNameStr,
+                            $quotedCorrelationName,
+                            $joinCondition,
+                        ),
+                        default => throw new Exception("Join type '$joinType' not supported in QueryBuilder yet"),
+                    };
                 }
-
-                $from[] = $tmp;
             }
-            $sql .= implode('', $from);
         }
 
-        // Add WHERE clause
+        // Build WHERE clause
         if ($this->_parts[self::WHERE]) {
-            $sql .= ' ' . self::SQL_WHERE;
-            $where = [];
+            $isFirst = true;
             foreach ($this->_parts[self::WHERE] as $term) {
                 if (is_array($term)) {
                     foreach ($term as $type => $cond) {
-                        if (!empty($where)) {
-                            $where[] = $type;
+                        // Skip empty conditions
+                        if (empty(trim($cond))) {
+                            continue;
                         }
-                        $where[] = $cond;
+                        if ($isFirst) {
+                            $queryBuilder->where($cond);
+                            $isFirst = false;
+                        } elseif ($type === self::SQL_OR) {
+                            $queryBuilder->orWhere($cond);
+                        } else {
+                            $queryBuilder->andWhere($cond);
+                        }
                     }
                 } else {
-                    if (!empty($where)) {
-                        $where[] = self::SQL_AND;
+                    // Skip empty conditions
+                    if (empty(trim($term))) {
+                        continue;
                     }
-                    $where[] = $term;
+                    if ($isFirst) {
+                        $queryBuilder->where($term);
+                        $isFirst = false;
+                    } else {
+                        $queryBuilder->andWhere($term);
+                    }
                 }
             }
-            $sql .= ' ' . implode(' ', $where);
         }
 
-        // Add GROUP BY
+        // Build GROUP BY clause
         if ($this->_parts[self::GROUP]) {
-            $group = [];
+            $groupBy = [];
             foreach ($this->_parts[self::GROUP] as $term) {
                 if ($term instanceof Expr) {
-                    $group[] = $term->__toString();
+                    $groupBy[] = $term->__toString();
                 } else {
-                    $group[] = $this->_adapter->quoteIdentifier($term, true);
+                    $groupBy[] = $this->_adapter->quoteIdentifier($term, true);
                 }
             }
-            $sql .= ' ' . self::SQL_GROUP_BY . ' ' . implode(', ', $group);
+            $queryBuilder->groupBy(...$groupBy);
         }
 
-        // Add HAVING
+        // Build HAVING clause
         if ($this->_parts[self::HAVING]) {
-            $sql .= ' ' . self::SQL_HAVING . ' ' . implode(' ', $this->_parts[self::HAVING]);
+            $havingStr = implode(' ', $this->_parts[self::HAVING]);
+            $queryBuilder->having($havingStr);
         }
 
-        // Add ORDER BY
+        // Build ORDER BY clause
         if ($this->_parts[self::ORDER]) {
-            $order = [];
             foreach ($this->_parts[self::ORDER] as $term) {
                 if ($term instanceof Expr) {
-                    $order[] = $term->__toString();
+                    $queryBuilder->addOrderBy($term->__toString());
                 } elseif (is_array($term)) {
-                    // Check if the order field is a SQL expression (contains parentheses = function call)
-                    // If so, don't quote it as an identifier
                     if (str_contains($term[0], '(') && str_contains($term[0], ')')) {
-                        $order[] = $term[0] . ' ' . $term[1];
+                        $queryBuilder->addOrderBy($term[0], $term[1]);
                     } else {
-                        $order[] = $this->_adapter->quoteIdentifier($term[0], true) . ' ' . $term[1];
+                        $queryBuilder->addOrderBy($this->_adapter->quoteIdentifier($term[0], true), $term[1]);
                     }
                 }
             }
-            $sql .= ' ' . self::SQL_ORDER_BY . ' ' . implode(', ', $order);
         }
 
-        // Add UNION
-        if ($this->_parts[self::UNION]) {
-            // Check if this is an empty select (no FROM clause)
-            $isEmptySelect = empty($this->_parts[self::FROM]);
-
-            if ($isEmptySelect) {
-                // For empty selects, just render the UNIONs without a base query
-                $parts = [];
-                foreach ($this->_parts[self::UNION] as $union) {
-                    $target = $union['target'];
-                    if ($target instanceof Select) {
-                        $target = $target->assemble();
-                    }
-                    $parts[] = $target;
-                }
-                // Join with UNION (first one doesn't need UNION keyword)
-                $sql = $parts[0];
-                for ($i = 1; $i < count($parts); $i++) {
-                    $unionType = $this->_parts[self::UNION][$i]['type'];
-                    $sql .= ' ' . ($unionType === self::SQL_UNION_ALL ? 'UNION ALL' : 'UNION') . ' ' . $parts[$i];
-                }
-
-                // Add ORDER BY if specified (applies to entire UNION)
-                if ($this->_parts[self::ORDER]) {
-                    $order = [];
-                    foreach ($this->_parts[self::ORDER] as $term) {
-                        if ($term instanceof Expr) {
-                            $order[] = $term->__toString();
-                        } elseif (is_array($term)) {
-                            if (str_contains($term[0], '(') && str_contains($term[0], ')')) {
-                                $order[] = $term[0] . ' ' . $term[1];
-                            } else {
-                                $order[] = $this->_adapter->quoteIdentifier($term[0], true) . ' ' . $term[1];
-                            }
-                        }
-                    }
-                    $sql .= ' ' . self::SQL_ORDER_BY . ' ' . implode(', ', $order);
-                }
-            } else {
-                // Normal case: base query with UNIONs
-                $parts = [$sql];
-                foreach ($this->_parts[self::UNION] as $union) {
-                    $target = $union['target'];
-                    if ($target instanceof Select) {
-                        $target = $target->assemble();
-                    }
-                    $parts[] = ($union['type'] === self::SQL_UNION_ALL ? 'UNION ALL' : 'UNION') . ' ' . $target;
-                }
-                $sql = implode(' ', $parts);
+        // Build LIMIT/OFFSET (but not if we have UNION - it goes after UNION)
+        if (!$this->_parts[self::UNION]) {
+            if ($this->_parts[self::LIMIT_COUNT] !== null) {
+                $queryBuilder->setMaxResults((int) $this->_parts[self::LIMIT_COUNT]);
             }
-        }
-
-        // Add LIMIT
-        if ($this->_parts[self::LIMIT_COUNT] !== null) {
-            $sql .= ' LIMIT ' . (int) $this->_parts[self::LIMIT_COUNT];
             if ($this->_parts[self::LIMIT_OFFSET] !== null) {
-                $sql .= ' OFFSET ' . (int) $this->_parts[self::LIMIT_OFFSET];
+                $queryBuilder->setFirstResult((int) $this->_parts[self::LIMIT_OFFSET]);
             }
         }
 
-        // Add FOR UPDATE
+        // Build UNION - DBAL requires converting base SELECT to first union() call
+        if ($this->_parts[self::UNION]) {
+            // Check if we have a base query (non-empty SELECT with FROM clause)
+            $hasBaseQuery = !empty($this->_parts[self::FROM]);
+
+            if ($hasBaseQuery) {
+                // Get the base SELECT SQL first
+                $baseSQL = $queryBuilder->getSQL();
+
+                // Create fresh QueryBuilder for UNION (reuse connection from earlier)
+                $queryBuilder = $connection->createQueryBuilder();
+
+                // Add base SELECT as first union part (union() always uses DISTINCT by default)
+                $queryBuilder->union($baseSQL);
+            } else {
+                // No base query - create fresh QueryBuilder and use first UNION part as base
+                $queryBuilder = $connection->createQueryBuilder();
+            }
+
+            // Add all UNION parts
+            $isFirstUnion = !$hasBaseQuery;
+            foreach ($this->_parts[self::UNION] as $union) {
+                $target = $union['target'];
+                if ($target instanceof Select) {
+                    $target = $target->assemble();
+                }
+
+                $unionType = ($union['type'] === self::SQL_UNION_ALL)
+                    ? \Doctrine\DBAL\Query\UnionType::ALL
+                    : \Doctrine\DBAL\Query\UnionType::DISTINCT;
+
+                if ($isFirstUnion) {
+                    // First UNION part becomes the base when there's no base query
+                    $queryBuilder->union($target);
+                    $isFirstUnion = false;
+                } else {
+                    $queryBuilder->addUnion($target, $unionType);
+                }
+            }
+
+            // Add LIMIT/OFFSET after UNION
+            if ($this->_parts[self::LIMIT_COUNT] !== null) {
+                $queryBuilder->setMaxResults((int) $this->_parts[self::LIMIT_COUNT]);
+            }
+            if ($this->_parts[self::LIMIT_OFFSET] !== null) {
+                $queryBuilder->setFirstResult((int) $this->_parts[self::LIMIT_OFFSET]);
+            }
+        }
+
+        $sql = $queryBuilder->getSQL();
+
+        // Add STRAIGHT_JOIN keyword if enabled (MySQL optimization hint)
+        if ($this->_adapter->supportStraightJoin() && $this->_parts[self::STRAIGHT_JOIN]) {
+            // Insert STRAIGHT_JOIN keyword right after SELECT
+            $sql = preg_replace('/^SELECT\s+/i', 'SELECT STRAIGHT_JOIN ', $sql);
+        }
+
+        // Add FOR UPDATE clause if enabled (for pessimistic locking)
         if ($this->_parts[self::FOR_UPDATE]) {
             $sql = $this->_adapter->forUpdate($sql);
         }

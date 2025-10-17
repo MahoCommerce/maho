@@ -263,6 +263,15 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         return $this->_config;
     }
 
+    /**
+     * Returns the underlying Doctrine DBAL Connection instance.
+     */
+    public function getConnection(): \Doctrine\DBAL\Connection
+    {
+        $this->_connect();
+        return $this->_connection;
+    }
+
     public function isTransaction(): bool
     {
         return (bool) $this->_transactionLevel;
