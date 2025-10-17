@@ -120,7 +120,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     {
         $stores = [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId];
         $select = $this->getLoadByUrlKeySelect($urlKey, $stores, true);
-        $select->reset(Zend_Db_Select::COLUMNS)
+        $select->reset(Maho\Db\Select::COLUMNS)
             ->columns('bp.entity_id')
             ->order('bps.store_id DESC')
             ->limit(1);
@@ -129,7 +129,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         return $result ? (int) $result : null;
     }
 
-    protected function getLoadByUrlKeySelect(string $urlKey, array $store, ?bool $isActive = null): Varien_Db_Select
+    protected function getLoadByUrlKeySelect(string $urlKey, array $store, ?bool $isActive = null): Maho\Db\Select
     {
         $select = $this->_getReadAdapter()->select()
             ->from(['bp' => $this->getEntityTable()])
@@ -214,12 +214,13 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         }
         $object->setUpdatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
 
+        // First do the EAV save (creates entity and gets ID)
+        parent::save($object);
 
-        // Save static attributes to main table
+        // Then save static attributes to main table (needs ID from parent save)
         $this->_saveStaticAttributes($object);
 
-        // Continue with EAV save for non-static attributes
-        return parent::save($object);
+        return $this;
     }
 
     protected function _saveStaticAttributes(Varien_Object $object): self
@@ -235,10 +236,8 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             }
         }
 
-        if (!empty($data)) {
-            if ($object->getId()) {
-                $adapter->update($table, $data, ['entity_id = ?' => $object->getId()]);
-            }
+        if (!empty($data) && $object->getId()) {
+            $adapter->update($table, $data, ['entity_id = ?' => $object->getId()]);
         }
 
         return $this;

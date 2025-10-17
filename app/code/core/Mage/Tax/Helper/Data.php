@@ -854,7 +854,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Join tax class
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @param int $storeId
      * @param string $priceTable
      * @return $this

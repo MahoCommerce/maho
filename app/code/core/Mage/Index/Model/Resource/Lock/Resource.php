@@ -23,7 +23,7 @@ class Mage_Index_Model_Resource_Lock_Resource extends Mage_Core_Model_Resource
      * @param string $name
      * @param string $extendConfigWith
      *
-     * @return Varien_Db_Adapter_Interface|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     #[\Override]
     public function getConnection($name, $extendConfigWith = '')
@@ -91,7 +91,7 @@ class Mage_Index_Model_Resource_Lock_Resource extends Mage_Core_Model_Resource
      * @param string $requiredConnectionName
      * @param string $extendConfigWith
      *
-     * @return Varien_Db_Adapter_Interface|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     #[\Override]
     protected function _getDefaultConnection($requiredConnectionName, $extendConfigWith = '')

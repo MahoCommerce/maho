@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -335,12 +335,12 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
                 );
             }
 
-            $select->order('priority ' . Varien_Db_Select::SQL_ASC)
-                   ->order('tax_calculation_rule_id ' . Varien_Db_Select::SQL_ASC)
-                   ->order('tax_country_id ' . Varien_Db_Select::SQL_DESC)
-                   ->order('tax_region_id ' . Varien_Db_Select::SQL_DESC)
-                   ->order('tax_postcode ' . Varien_Db_Select::SQL_DESC)
-                   ->order('value ' . Varien_Db_Select::SQL_DESC);
+            $select->order('priority ' . Maho\Db\Select::SQL_ASC)
+                   ->order('tax_calculation_rule_id ' . Maho\Db\Select::SQL_ASC)
+                   ->order('tax_country_id ' . Maho\Db\Select::SQL_DESC)
+                   ->order('tax_region_id ' . Maho\Db\Select::SQL_DESC)
+                   ->order('tax_postcode ' . Maho\Db\Select::SQL_DESC)
+                   ->order('value ' . Maho\Db\Select::SQL_DESC);
 
             $this->_ratesCache[$cacheKey] = $this->_getReadAdapter()->fetchAll($select);
         }

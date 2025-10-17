@@ -6,7 +6,7 @@
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,22 +19,22 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('giftmessage/message'))
-    ->addColumn('gift_message_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('gift_message_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'GiftMessage Id')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Customer id')
-    ->addColumn('sender', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('sender', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Sender')
-    ->addColumn('recipient', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('recipient', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Recipient')
-    ->addColumn('message', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('message', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
     ], 'Message')
     ->setComment('Gift Message');
 
@@ -52,7 +52,7 @@ $entities = [
     'order_item',
 ];
 $options = [
-    'type'     => Varien_Db_Ddl_Table::TYPE_INTEGER,
+    'type'     => Maho\Db\Ddl\Table::TYPE_INTEGER,
     'visible'  => false,
     'required' => false,
 ];

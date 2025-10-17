@@ -5,6 +5,15 @@
  *
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+/**
+ * Maho
+ *
+ * @package    Mage_Core
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -14,14 +23,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
     /**
      * Read adapter instance
      *
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_readAdapter;
 
     /**
      * Write adapter instance
      *
-     * @var Varien_Db_Adapter_Interface
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_writeAdapter;
 
@@ -45,7 +54,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
     /**
      * Retrieve connection for read data
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     protected function _getReadAdapter()
     {
@@ -59,7 +68,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
     /**
      * Retrieve connection for write data
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     protected function _getWriteAdapter()
     {
@@ -74,7 +83,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      * Retrieves connection to the resource
      *
      * @param string $name
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     protected function _getConnection($name)
     {
@@ -144,7 +153,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      *
      * @param string $value
      * @param array $options
-     * @return Zend_Db_Expr
+     * @return Maho\Db\Expr
      *
      * @see escapeLikeValue()
      */
@@ -157,21 +166,21 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      * @param string $field
      * @param string $value
      * @param array $options
-     * @return Zend_Db_Expr
+     * @return Maho\Db\Expr
      *
      * @see escapeLikeValue()
      */
     public function getCILike($field, $value, $options = [])
     {
         $quotedField = $this->_getReadAdapter()->quoteIdentifier($field);
-        return new Zend_Db_Expr($quotedField . ' LIKE ' . $this->addLikeEscape($value, $options));
+        return new Maho\Db\Expr($quotedField . ' LIKE ' . $this->addLikeEscape($value, $options));
     }
 
     /**
      * Converts old pre-MMDB column definition for MySQL to new cross-db column DDL definition.
      * Used to convert data from 3rd party extensions that hasn't been updated to MMDB style yet.
      *
-     * E.g. Converts type 'varchar(255)' to array('type' => Varien_Db_Ddl_Table::TYPE_TEXT, 'length' => 255)
+     * E.g. Converts type 'varchar(255)' to array('type' => Maho\Db\Ddl\Table::TYPE_TEXT, 'length' => 255)
      *
      * @param array $column
      * @return array
@@ -193,7 +202,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
         switch (strtolower($matches[1])) {
             case 'bool':
                 $length = null;
-                $type = Varien_Db_Ddl_Table::TYPE_BOOLEAN;
+                $type = Maho\Db\Ddl\Table::TYPE_BOOLEAN;
                 break;
             case 'char':
             case 'varchar':
@@ -202,79 +211,79 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
                 if (!$length) {
                     $length = 255;
                 }
-                $type = Varien_Db_Ddl_Table::TYPE_TEXT;
+                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
                 break;
             case 'text':
                 $length = $proposedLength;
                 if (!$length) {
                     $length = '64k';
                 }
-                $type = Varien_Db_Ddl_Table::TYPE_TEXT;
+                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
                 break;
             case 'mediumtext':
                 $length = $proposedLength;
                 if (!$length) {
                     $length = '16M';
                 }
-                $type = Varien_Db_Ddl_Table::TYPE_TEXT;
+                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
                 break;
             case 'longtext':
                 $length = $proposedLength;
                 if (!$length) {
                     $length = '4G';
                 }
-                $type = Varien_Db_Ddl_Table::TYPE_TEXT;
+                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
                 break;
             case 'blob':
                 $length = $proposedLength;
                 if (!$length) {
                     $length = '64k';
                 }
-                $type = Varien_Db_Ddl_Table::TYPE_BLOB;
+                $type = Maho\Db\Ddl\Table::TYPE_BLOB;
                 break;
             case 'mediumblob':
                 $length = $proposedLength;
                 if (!$length) {
                     $length = '16M';
                 }
-                $type = Varien_Db_Ddl_Table::TYPE_BLOB;
+                $type = Maho\Db\Ddl\Table::TYPE_BLOB;
                 break;
             case 'longblob':
                 $length = $proposedLength;
                 if (!$length) {
                     $length = '4G';
                 }
-                $type = Varien_Db_Ddl_Table::TYPE_BLOB;
+                $type = Maho\Db\Ddl\Table::TYPE_BLOB;
                 break;
             case 'tinyint':
             case 'smallint':
             case 'smallint unsigned':
-                $type = Varien_Db_Ddl_Table::TYPE_SMALLINT;
+                $type = Maho\Db\Ddl\Table::TYPE_SMALLINT;
                 break;
             case 'mediumint':
             case 'int':
-                $type = Varien_Db_Ddl_Table::TYPE_INTEGER;
+                $type = Maho\Db\Ddl\Table::TYPE_INTEGER;
                 break;
             case 'bigint':
-                $type = Varien_Db_Ddl_Table::TYPE_BIGINT;
+                $type = Maho\Db\Ddl\Table::TYPE_BIGINT;
                 break;
             case 'float':
-                $type = Varien_Db_Ddl_Table::TYPE_FLOAT;
+                $type = Maho\Db\Ddl\Table::TYPE_FLOAT;
                 break;
             case 'decimal':
             case 'numeric':
                 $length = $proposedLength;
-                $type = Varien_Db_Ddl_Table::TYPE_DECIMAL;
+                $type = Maho\Db\Ddl\Table::TYPE_DECIMAL;
                 break;
             case 'datetime':
-                $type = Varien_Db_Ddl_Table::TYPE_DATETIME;
+                $type = Maho\Db\Ddl\Table::TYPE_DATETIME;
                 break;
             case 'timestamp':
             case 'time':
-                $type = Varien_Db_Ddl_Table::TYPE_TIMESTAMP;
+                $type = Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
                 break;
             case 'date':
-                $type = Varien_Db_Ddl_Table::TYPE_DATE;
+                $type = Maho\Db\Ddl\Table::TYPE_DATE;
                 break;
             default:
                 throw Mage::exception(

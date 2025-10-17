@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,8 +33,8 @@ class Mage_Reports_Model_Resource_Product_Downloads_Collection extends Mage_Cata
                 ['d' =>  $this->getTable('downloadable/link_purchased_item')],
                 'e.entity_id = d.product_id',
                 [
-                    'purchases' => new Zend_Db_Expr('SUM(d.number_of_downloads_bought)'),
-                    'downloads' => new Zend_Db_Expr('SUM(d.number_of_downloads_used)'),
+                    'purchases' => new Maho\Db\Expr('SUM(d.number_of_downloads_bought)'),
+                    'downloads' => new Maho\Db\Expr('SUM(d.number_of_downloads_used)'),
                 ],
             )
             ->joinInner(

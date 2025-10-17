@@ -129,9 +129,9 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
         }
 
         if (!$this->isLoaded()) {
-            $this->addOrder('CASE WHEN main_table.store_id = 0 THEN 0 ELSE 1 END', Varien_Db_Select::SQL_ASC)
-                ->addOrder('main_table.sort_order', Varien_Db_Select::SQL_ASC)
-                ->addOrder('main_table.name', Varien_Db_Select::SQL_ASC);
+            $this->addOrder('CASE WHEN main_table.store_id = 0 THEN 0 ELSE 1 END', Maho\Db\Select::SQL_ASC)
+                ->addOrder('main_table.sort_order', Maho\Db\Select::SQL_ASC)
+                ->addOrder('main_table.name', Maho\Db\Select::SQL_ASC);
         }
         return parent::load($printQuery, $logQuery);
     }

@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,14 +14,14 @@
 $installer = $this;
 $installer->startSetup();
 
-/** @var Varien_Db_Adapter_Pdo_Mysql $adapter */
+/** @var Maho\Db\Adapter\Pdo\Mysql $adapter */
 $adapter = $installer->getConnection();
 
 /**
  * Create table 'api2/acl_role'
  */
 $table = $adapter->newTable($installer->getTable('api2/acl_role'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity' => true,
         'unsigned' => true,
         'nullable' => false,
@@ -29,17 +29,17 @@ $table = $adapter->newTable($installer->getTable('api2/acl_role'))
     ], 'Entity ID')
     ->addColumn(
         'created_at',
-        Varien_Db_Ddl_Table::TYPE_TIMESTAMP,
+        Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
         null,
         [
             'nullable' => false,
-            'default'  => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
         ],
         'Created At',
     )
     ->addColumn(
         'updated_at',
-        Varien_Db_Ddl_Table::TYPE_TIMESTAMP,
+        Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
         null,
         [
             'nullable'  => true,
@@ -48,7 +48,7 @@ $table = $adapter->newTable($installer->getTable('api2/acl_role'))
     )
     ->addColumn(
         'role_name',
-        Varien_Db_Ddl_Table::TYPE_VARCHAR,
+        Maho\Db\Ddl\Table::TYPE_VARCHAR,
         255,
         ['nullable'  => false],
         'Name of role',
@@ -71,11 +71,11 @@ $adapter->insertMultiple(
  * Create table 'api2/acl_user'
  */
 $table = $adapter->newTable($installer->getTable('api2/acl_user'))
-    ->addColumn('admin_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('admin_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned' => true,
         'nullable' => false,
     ], 'Admin ID')
-    ->addColumn('role_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('role_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned' => true,
         'nullable' => false,
     ], 'Role ID')
@@ -83,26 +83,26 @@ $table = $adapter->newTable($installer->getTable('api2/acl_user'))
         $installer->getIdxName(
             $installer->getTable('api2/acl_user'),
             ['admin_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['admin_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName('api2/acl_user', 'admin_id', 'admin/user', 'user_id'),
         'admin_id',
         $installer->getTable('admin/user'),
         'user_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('api2/acl_user', 'role_id', 'api2/acl_role', 'entity_id'),
         'role_id',
         $installer->getTable('api2/acl_role'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Api2 Global ACL Users');
 $adapter->createTable($table);
@@ -111,38 +111,38 @@ $adapter->createTable($table);
  * Create table 'api2/acl_rule'
  */
 $table = $adapter->newTable($installer->getTable('api2/acl_rule'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'primary'  => true,
         'identity' => true,
         'unsigned' => true,
         'nullable' => false,
     ], 'Entity ID')
-    ->addColumn('role_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('role_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned' => true,
         'nullable' => false,
     ], 'Role ID')
-    ->addColumn('resource_id', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('resource_id', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable' => false,
     ], 'Resource ID')
-    ->addColumn('privilege', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('privilege', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
         'nullable' => true,
     ], 'ACL Privilege')
     ->addIndex(
         $installer->getIdxName(
             $installer->getTable('api2/acl_rule'),
             ['role_id', 'resource_id', 'privilege'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['role_id', 'resource_id', 'privilege'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName('api2/acl_rule', 'role_id', 'api2/acl_role', 'entity_id'),
         'role_id',
         $installer->getTable('api2/acl_role'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Api2 Global ACL Rules');
 $adapter->createTable($table);
@@ -151,22 +151,22 @@ $adapter->createTable($table);
 * Create table 'api2/acl_attribute'
 */
 $table = $adapter->newTable($installer->getTable('api2/acl_attribute'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity' => true,
         'unsigned' => true,
         'nullable' => false,
         'primary'  => true,
     ], 'Entity ID')
-    ->addColumn('user_type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 20, [
+    ->addColumn('user_type', Maho\Db\Ddl\Table::TYPE_VARCHAR, 20, [
         'nullable' => false,
     ], 'Type of user')
-    ->addColumn('resource_id', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
+    ->addColumn('resource_id', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable' => false,
     ], 'Resource ID')
-    ->addColumn('operation', Varien_Db_Ddl_Table::TYPE_VARCHAR, 20, [
+    ->addColumn('operation', Maho\Db\Ddl\Table::TYPE_VARCHAR, 20, [
         'nullable' => false,
     ], 'Operation')
-    ->addColumn('allowed_attributes', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('allowed_attributes', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable' => true,
     ], 'Allowed attributes')
     ->addIndex(
@@ -177,10 +177,10 @@ $table = $adapter->newTable($installer->getTable('api2/acl_attribute'))
         $installer->getIdxName(
             $installer->getTable('api2/acl_attribute'),
             ['user_type', 'resource_id', 'operation'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['user_type', 'resource_id', 'operation'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->setComment('Api2 Filter ACL Attributes');
 $adapter->createTable($table);

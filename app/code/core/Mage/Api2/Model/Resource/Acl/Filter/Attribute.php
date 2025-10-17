@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,7 +51,7 @@ class Mage_Api2_Model_Resource_Acl_Filter_Attribute extends Mage_Core_Model_Reso
         $resourceId = self::FILTER_RESOURCE_ALL;
 
         $select = $this->getReadConnection()->select()
-            ->from($this->getMainTable(), new Zend_Db_Expr('COUNT(*)'))
+            ->from($this->getMainTable(), new Maho\Db\Expr('COUNT(*)'))
             ->where('user_type = ?', $userType)
             ->where('resource_id = ?', $resourceId);
 

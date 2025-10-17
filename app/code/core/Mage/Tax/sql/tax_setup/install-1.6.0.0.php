@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,15 +19,15 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('tax/tax_class'))
-    ->addColumn('class_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('class_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Class Id')
-    ->addColumn('class_name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('class_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Class Name')
-    ->addColumn('class_type', Varien_Db_Ddl_Table::TYPE_TEXT, 8, [
+    ->addColumn('class_type', Maho\Db\Ddl\Table::TYPE_TEXT, 8, [
         'nullable'  => false,
         'default'   => Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER,
     ], 'Class Type')
@@ -39,18 +39,18 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('tax/tax_calculation_rule'))
-    ->addColumn('tax_calculation_rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_calculation_rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Tax Calculation Rule Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Code')
-    ->addColumn('priority', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('priority', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
     ], 'Priority')
-    ->addColumn('position', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('position', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
     ], 'Position')
     ->addIndex(
@@ -72,31 +72,31 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('tax/tax_calculation_rate'))
-    ->addColumn('tax_calculation_rate_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_calculation_rate_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Tax Calculation Rate Id')
-    ->addColumn('tax_country_id', Varien_Db_Ddl_Table::TYPE_TEXT, 2, [
+    ->addColumn('tax_country_id', Maho\Db\Ddl\Table::TYPE_TEXT, 2, [
         'nullable'  => false,
     ], 'Tax Country Id')
-    ->addColumn('tax_region_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_region_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
     ], 'Tax Region Id')
-    ->addColumn('tax_postcode', Varien_Db_Ddl_Table::TYPE_TEXT, 21, [
+    ->addColumn('tax_postcode', Maho\Db\Ddl\Table::TYPE_TEXT, 21, [
     ], 'Tax Postcode')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Code')
-    ->addColumn('rate', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('rate', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
     ], 'Rate')
-    ->addColumn('zip_is_range', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('zip_is_range', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
     ], 'Zip Is Range')
-    ->addColumn('zip_from', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('zip_from', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Zip From')
-    ->addColumn('zip_to', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('zip_to', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Zip To')
     ->addIndex(
@@ -125,21 +125,21 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('tax/tax_calculation'))
-    ->addColumn('tax_calculation_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_calculation_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Tax Calculation Id')
-    ->addColumn('tax_calculation_rate_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_calculation_rate_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
     ], 'Tax Calculation Rate Id')
-    ->addColumn('tax_calculation_rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_calculation_rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
     ], 'Tax Calculation Rule Id')
-    ->addColumn('customer_tax_class_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_tax_class_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
     ], 'Customer Tax Class Id')
-    ->addColumn('product_tax_class_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('product_tax_class_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
     ], 'Product Tax Class Id')
     ->addIndex(
@@ -170,16 +170,16 @@ $table = $installer->getConnection()
         'product_tax_class_id',
         $installer->getTable('tax/tax_class'),
         'class_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('tax/tax_calculation', 'customer_tax_class_id', 'tax/tax_class', 'class_id'),
         'customer_tax_class_id',
         $installer->getTable('tax/tax_class'),
         'class_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -191,8 +191,8 @@ $table = $installer->getConnection()
         'tax_calculation_rate_id',
         $installer->getTable('tax/tax_calculation_rate'),
         'tax_calculation_rate_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -204,8 +204,8 @@ $table = $installer->getConnection()
         'tax_calculation_rule_id',
         $installer->getTable('tax/tax_calculation_rule'),
         'tax_calculation_rule_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Tax Calculation');
 $installer->getConnection()->createTable($table);
@@ -215,19 +215,19 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('tax/tax_calculation_rate_title'))
-    ->addColumn('tax_calculation_rate_title_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_calculation_rate_title_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Tax Calculation Rate Title Id')
-    ->addColumn('tax_calculation_rate_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('tax_calculation_rate_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
     ], 'Tax Calculation Rate Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Store Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Value')
     ->addIndex(
@@ -247,8 +247,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -260,8 +260,8 @@ $table = $installer->getConnection()
         'tax_calculation_rate_id',
         $installer->getTable('tax/tax_calculation_rate'),
         'tax_calculation_rate_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Tax Calculation Rate Title');
 $installer->getConnection()->createTable($table);
@@ -271,38 +271,38 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('tax/tax_order_aggregated_created'))
-    ->addColumn('id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Id')
-    ->addColumn('period', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('period', Maho\Db\Ddl\Table::TYPE_DATE, null, [
         'nullable'  => true,
     ], 'Period')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
     ], 'Store Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Code')
-    ->addColumn('order_status', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('order_status', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
         'nullable'  => false,
     ], 'Order Status')
-    ->addColumn('percent', Varien_Db_Ddl_Table::TYPE_FLOAT, null, [
+    ->addColumn('percent', Maho\Db\Ddl\Table::TYPE_FLOAT, null, [
     ], 'Percent')
-    ->addColumn('orders_count', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('orders_count', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Orders Count')
-    ->addColumn('tax_base_amount_sum', Varien_Db_Ddl_Table::TYPE_FLOAT, null, [
+    ->addColumn('tax_base_amount_sum', Maho\Db\Ddl\Table::TYPE_FLOAT, null, [
     ], 'Tax Base Amount Sum')
     ->addIndex(
         $installer->getIdxName(
             'tax/tax_order_aggregated_created',
             ['period', 'store_id', 'code', 'percent', 'order_status'],
-            true,
+            \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['period', 'store_id', 'code', 'percent', 'order_status'],
         ['type' => 'unique'],
@@ -316,8 +316,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Tax Order Aggregation');
 $installer->getConnection()->createTable($table);

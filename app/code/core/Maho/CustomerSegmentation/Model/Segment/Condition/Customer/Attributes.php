@@ -112,7 +112,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -146,7 +146,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         return false;
     }
 
-    protected function buildAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
+    protected function buildAttributeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $attributeCode, string $operator, mixed $value): string|false
     {
         $attributeData = $this->getCustomerAttributeTable($attributeCode);
         if (!$attributeData) {
@@ -161,13 +161,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildDaysSinceCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildDaysSinceCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
         return $this->buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', {$field})", $operator, $value);
     }
 
-    protected function buildDaysUntilBirthdayCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
+    protected function buildDaysUntilBirthdayCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string|false
     {
         $attributeData = $this->getCustomerAttributeTable('dob');
         if (!$attributeData) {
@@ -187,7 +187,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function getBirthdayDiffSql(Varien_Db_Adapter_Interface $adapter): string
+    protected function getBirthdayDiffSql(\Maho\Db\Adapter\AdapterInterface $adapter): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
 

@@ -44,7 +44,13 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
 
         if ($value === false) {
             // try to load original value and validate it
-            $value = $this->getEntity()->getDataUsingMethod($attribute->getAttributeCode());
+            $originalValue = $this->getEntity()->getDataUsingMethod($attribute->getAttributeCode());
+            $value = $originalValue;
+
+            // If the stored value is a datetime (contains time), strip time component for date validation
+            if (is_string($value) && strlen($value) > 10 && str_contains($value, ' ')) {
+                $value = substr($value, 0, 10);
+            }
         }
 
         if (!$errors && !$attribute->getIsRequired() && empty($value)) {

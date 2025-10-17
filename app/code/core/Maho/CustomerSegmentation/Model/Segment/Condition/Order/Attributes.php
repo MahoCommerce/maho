@@ -196,7 +196,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -213,7 +213,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         };
     }
 
-    protected function buildOrderFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildOrderFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
         // Map attribute names to correct database field names
         $fieldMapping = [
@@ -235,7 +235,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildPaymentMethodCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildPaymentMethodCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
@@ -246,7 +246,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildShippingMethodCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildShippingMethodCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
@@ -256,7 +256,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildCouponCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildCouponCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
@@ -266,7 +266,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildDaysSinceLastOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildDaysSinceLastOrderCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         $subselect = $adapter->select()
@@ -279,7 +279,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     }
 
 
-    protected function buildAverageOrderCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildAverageOrderCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
@@ -291,7 +291,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildTotalOrderedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildTotalOrderedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])

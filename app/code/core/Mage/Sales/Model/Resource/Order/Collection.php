@@ -53,14 +53,14 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
     /**
      * Minimize usual count select
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = parent::getSelectCountSql();
         $countSelect->resetJoinLeft();
-        $countSelect->reset(Zend_Db_Select::GROUP);
+        $countSelect->reset(Maho\Db\Select::GROUP);
         return $countSelect;
     }
 
@@ -69,7 +69,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      *
      * @param int $limit
      * @param int $offset
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getAllIdsSelect($limit = null, $offset = null)

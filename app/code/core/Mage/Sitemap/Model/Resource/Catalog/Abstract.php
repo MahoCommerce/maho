@@ -15,7 +15,7 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
     /**
      * Collection Zend Db select
      *
-     * @var Zend_Db_Select
+     * @var Maho\Db\Select
      */
     protected $_select;
 
@@ -57,7 +57,7 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
      * @param string $attributeCode
      * @param mixed $value
      * @param string $type
-     * @return Zend_Db_Select|false
+     * @return Maho\Db\Select|false
      */
     protected function _addFilter($storeId, $attributeCode, $value, $type = '=')
     {
@@ -67,7 +67,7 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
 
         $attribute = $this->_attributesCache[$attributeCode];
 
-        if (!$this->_select instanceof Zend_Db_Select) {
+        if (!$this->_select instanceof Maho\Db\Select) {
             return false;
         }
 

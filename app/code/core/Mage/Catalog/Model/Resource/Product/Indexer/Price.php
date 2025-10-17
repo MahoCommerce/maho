@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -197,7 +197,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         $write  = $this->_getWriteAdapter();
         $select = $write->select()
             ->from($this->getTable('catalog/product'), 'COUNT(*)');
-        $pCount = $write->fetchOne($select);
+        $pCount = (int) $write->fetchOne($select);
 
         // if affected more 30% of all products - run reindex all products
         if ($pCount * 0.3 < count($processIds)) {
@@ -208,11 +208,11 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         $select = $write->select()
             ->from($this->getTable('catalog/product_relation'), 'COUNT(DISTINCT parent_id)')
             ->where('child_id IN(?)', $processIds);
-        $aCount = $write->fetchOne($select);
+        $aCount = (int) $write->fetchOne($select);
         $select = $write->select()
             ->from($this->getTable('catalog/product_relation'), 'COUNT(DISTINCT child_id)')
             ->where('parent_id IN(?)', $processIds);
-        $bCount = $write->fetchOne($select);
+        $bCount = (int) $write->fetchOne($select);
 
         // if affected with relations more 30% of all products - run reindex all products
         if ($pCount * 0.3 < count($processIds) + $aCount + $bCount) {
@@ -422,7 +422,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
                 [],
             )
             ->where('cw.website_id != 0')
-            ->columns(new Zend_Db_Expr("MIN({$websiteExpression})"))
+            ->columns(new Maho\Db\Expr("MIN({$websiteExpression})"))
             ->group(['tp.entity_id', 'cg.customer_group_id', 'cw.website_id']);
 
         if (!empty($entityIds)) {
@@ -469,7 +469,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
                 [],
             )
             ->where('cw.website_id != 0')
-            ->columns(new Zend_Db_Expr("MIN({$websiteExpression})"))
+            ->columns(new Maho\Db\Expr("MIN({$websiteExpression})"))
             ->group(['gp.entity_id', 'cg.customer_group_id', 'cw.website_id']);
 
         if (!empty($entityIds)) {

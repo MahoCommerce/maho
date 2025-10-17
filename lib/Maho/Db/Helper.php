@@ -1,15 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Varien_Db_Helper
+namespace Maho\Db;
+
+class Helper
 {
     /**
      * Dictionary for generate short name
@@ -65,22 +70,16 @@ class Varien_Db_Helper
 
     /**
      * Convert name using dictionary
-     *
-     * @param string $name
-     * @return string
      */
-    public static function shortName($name)
+    public static function shortName(string $name): string
     {
         return strtr($name, self::$_translateMap);
     }
 
     /**
      * Add or replace translate to dictionary
-     *
-     * @param string $from
-     * @param string $to
      */
-    public static function addTranslate($from, $to): void
+    public static function addTranslate(string $from, string $to): void
     {
         self::$_translateMap[$from] = $to;
     }

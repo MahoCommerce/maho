@@ -5,6 +5,7 @@
  *
  * @package    Mage_Api
  * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,7 +17,7 @@ $this->getConnection()->changeColumn(
     'lognum',
     'lognum',
     [
-        'type' => Varien_Db_Ddl_Table::TYPE_INTEGER,
+        'type' => Maho\Db\Ddl\Table::TYPE_INTEGER,
         'unsigned' => true,
         'nullable' => false,
         'default' => '0',

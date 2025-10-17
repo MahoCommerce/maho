@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,7 +29,6 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
      * @param mixed $to
      * @return Mage_Reports_Model_Resource_Report_Product_Viewed
      * @throws Mage_Core_Exception
-     * @throws Zend_Db_Select_Exception
      */
     public function aggregate($from = null, $to = null)
     {
@@ -74,19 +73,19 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             'source_table.object_id',
         ]);
 
-        $viewsNumExpr = new Zend_Db_Expr('COUNT(source_table.event_id)');
+        $viewsNumExpr = new Maho\Db\Expr('COUNT(source_table.event_id)');
 
         $columns = [
             'period'                 => $periodExpr,
             'store_id'               => 'source_table.store_id',
             'product_id'             => 'source_table.object_id',
-            'product_name'           => new Zend_Db_Expr(
+            'product_name'           => new Maho\Db\Expr(
                 sprintf(
                     'MIN(%s)',
                     $adapter->getIfNullSql('product_name.value', 'product_default_name.value'),
                 ),
             ),
-            'product_price'          => new Zend_Db_Expr(
+            'product_price'          => new Maho\Db\Expr(
                 sprintf(
                     '%s',
                     $helper->prepareColumn(
@@ -97,7 +96,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
                                 0,
                             ),
                         ),
-                        $select->getPart(Zend_Db_Select::GROUP),
+                        $select->getPart(Maho\Db\Select::GROUP),
                     ),
                 ),
             ),

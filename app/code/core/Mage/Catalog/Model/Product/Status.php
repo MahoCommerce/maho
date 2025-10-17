@@ -205,7 +205,7 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
             $column['type']     = 'tinyint';
             $column['is_null']  = true;
         } else {
-            $column['type']     = Varien_Db_Ddl_Table::TYPE_SMALLINT;
+            $column['type']     = Maho\Db\Ddl\Table::TYPE_SMALLINT;
             $column['nullable'] = true;
             $column['comment']  = 'Catalog Product Status ' . $attributeCode . ' column';
         }
@@ -235,7 +235,7 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
      * Retrieve Select For Flat Attribute update
      *
      * @param int $store
-     * @return Varien_Db_Select|null
+     * @return Maho\Db\Select|null
      */
     public function getFlatUpdateSelect($store)
     {

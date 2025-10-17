@@ -15,14 +15,14 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * DB connection
      *
-     * @var Zend_Db_Adapter_Abstract
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_conn;
 
     /**
      * Select oblect
      *
-     * @var Varien_Db_Select
+     * @var Maho\Db\Select
      */
     protected $_select;
 
@@ -67,7 +67,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Database's statement for fetch item one by one
      *
-     * @var Zend_Db_Statement_Pdo
+     * @var Maho\Db\Statement\Pdo\Mysql
      */
     protected $_fetchStmt = null;
 
@@ -156,13 +156,13 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Set database connection adapter
      *
-     * @param Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract $conn
+     * @param Maho\Db\Adapter\AdapterInterface $conn
      * @return $this
      */
     public function setConnection($conn)
     {
-        if (!$conn instanceof Zend_Db_Adapter_Abstract) {
-            throw new Mage_Core_Exception('dbModel read resource does not implement Zend_Db_Adapter_Abstract');
+        if (!$conn instanceof \Maho\Db\Adapter\AdapterInterface) {
+            throw new Mage_Core_Exception('dbModel read resource does not implement Maho\Db\Adapter\AdapterInterface');
         }
 
         $this->_conn = $conn;
@@ -172,9 +172,9 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     }
 
     /**
-     * Get Zend_Db_Select instance
+     * Get Maho\Db\Select instance
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getSelect()
     {
@@ -184,7 +184,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Retrieve connection object
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     public function getConnection()
     {
@@ -209,22 +209,22 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Get SQL for get record count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getSelectCountSql()
     {
         $this->_renderFilters();
 
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Zend_Db_Select::ORDER);
-        $countSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Zend_Db_Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
 
-        if (count($this->getSelect()->getPart(Zend_Db_Select::GROUP)) > 0) {
-            $countSelect->reset(Zend_Db_Select::GROUP);
+        if (count($this->getSelect()->getPart(Maho\Db\Select::GROUP)) > 0) {
+            $countSelect->reset(Maho\Db\Select::GROUP);
             $countSelect->distinct(true);
-            $group = $this->getSelect()->getPart(Zend_Db_Select::GROUP);
+            $group = $this->getSelect()->getPart(Maho\Db\Select::GROUP);
             $group = array_map(function ($token) {
                 return $this->getSelect()->getAdapter()->quoteIdentifier($token, true);
             }, $group);
@@ -236,17 +236,17 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
             // - there are no where clauses using joined tables
             // - all joins are left joins
             // - there are no join conditions using bind params (for simplicity)
-            $leftJoins = array_filter($countSelect->getPart(Zend_Db_Select::FROM), function ($table) {
-                return ($table['joinType'] == Zend_Db_Select::LEFT_JOIN || $table['joinType'] == Zend_Db_Select::FROM);
+            $leftJoins = array_filter($countSelect->getPart(Maho\Db\Select::FROM), function ($table) {
+                return ($table['joinType'] == Maho\Db\Select::LEFT_JOIN || $table['joinType'] == Maho\Db\Select::FROM);
             });
-            if (count($leftJoins) == count($countSelect->getPart(Zend_Db_Select::FROM))) {
+            if (count($leftJoins) == count($countSelect->getPart(Maho\Db\Select::FROM))) {
                 $mainTable = array_filter($leftJoins, function ($table) {
-                    return $table['joinType'] == Zend_Db_Select::FROM;
+                    return $table['joinType'] == Maho\Db\Select::FROM;
                 });
                 $mainTable = key($mainTable);
                 $mainTable = preg_quote($mainTable, '/');
                 $pattern = "/^$mainTable\\.\\w+/";
-                $whereUsingJoin = array_filter($countSelect->getPart(Zend_Db_Select::WHERE), function ($clause) use ($pattern) {
+                $whereUsingJoin = array_filter($countSelect->getPart(Maho\Db\Select::WHERE), function ($clause) use ($pattern) {
                     $clauses = preg_split('/(^|\s+)(AND|OR)\s+/', $clause, -1, PREG_SPLIT_NO_EMPTY);
                     return array_filter($clauses, function ($clause) use ($pattern) {
                         $clause = preg_replace('/[()`\s]+/', '', $clause);
@@ -264,7 +264,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
                 }
                 if (empty($whereUsingJoin) && empty($joinUsingBind)) {
                     $from = array_slice($leftJoins, 0, 1);
-                    $countSelect->setPart(Zend_Db_Select::FROM, $from);
+                    $countSelect->setPart(Maho\Db\Select::FROM, $from);
                 }
             }
         }
@@ -276,7 +276,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      * Get sql select string or object
      *
      * @param   bool $stringMode
-     * @return  string|Zend_Db_Select
+     * @return  string|Maho\Db\Select
      */
     public function getSelectSql($stringMode = false)
     {
@@ -378,7 +378,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
                     $this->_select->where(
                         $this->_getConditionSql($field, $condition),
                         null,
-                        Varien_Db_Select::TYPE_CONDITION,
+                        Maho\Db\Select::TYPE_CONDITION,
                     );
                     break;
                 default:
@@ -417,7 +417,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
                 );
             }
 
-            $resultCondition = '(' . implode(') ' . Zend_Db_Select::SQL_OR . ' (', $conditions) . ')';
+            $resultCondition = '(' . implode(') ' . Maho\Db\Select::SQL_OR . ' (', $conditions) . ')';
         }
 
         $this->_select->where($resultCondition);
@@ -505,7 +505,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      * If non matched - sequential array is expected and OR conditions
      * will be built using above mentioned structure
      *
-     * @param string $fieldName Field name must be already escaped with Varien_Db_Adapter_Interface::quoteIdentifier()
+     * @param string $fieldName Field name must be already escaped with Maho\Db\Adapter\AdapterInterface::quoteIdentifier()
      * @param integer|string|array $condition
      * @return string
      */
@@ -533,7 +533,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     {
         if (!$this->_isOrdersRendered) {
             foreach ($this->_orders as $field => $direction) {
-                $this->_select->order(new Zend_Db_Expr($field . ' ' . $direction));
+                $this->_select->order(new Maho\Db\Expr($field . ' ' . $direction));
             }
             $this->_isOrdersRendered = true;
         }
@@ -767,7 +767,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Fetch collection data
      *
-     * @param   Zend_Db_Select|string $select
+     * @param   Maho\Db\Select|string $select
      * @return  array
      */
     protected function _fetchAll($select)
@@ -789,7 +789,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Load cached data for select
      *
-     * @param Zend_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return string|false
      */
     protected function _loadCache($select)
@@ -806,7 +806,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      * Save collection data to cache
      *
      * @param array $data
-     * @param Zend_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return $this
      */
     protected function _saveCache($data, $select)
@@ -829,7 +829,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Get cache identifier base on select
      *
-     * @param Zend_Db_Select|string $select
+     * @param Maho\Db\Select|string $select
      * @return string
      */
     protected function _getSelectCacheId($select)
@@ -880,7 +880,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Magic clone function
      *
-     * Clone also Zend_Db_Select
+     * Clone also Maho\Db\Select
      *
      * @return void
      */

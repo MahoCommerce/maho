@@ -6,7 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,12 +17,12 @@ class Mage_CatalogSearch_Model_Resource_Helper_Mysql4 extends Mage_Eav_Model_Res
      *
      * @param string $table
      * @param string $alias
-     * @param Varien_Db_Select $select
-     * @return Zend_Db_Expr $select
+     * @param Maho\Db\Select $select
+     * @return Maho\Db\Expr $select
      */
     public function chooseFulltext($table, $alias, $select)
     {
-        $field = new Zend_Db_Expr('MATCH (' . $alias . '.data_index) AGAINST (:query IN BOOLEAN MODE)');
+        $field = new Maho\Db\Expr('MATCH (' . $alias . '.data_index) AGAINST (:query IN BOOLEAN MODE)');
         $select->columns(['relevance' => $field]);
         return $field;
     }

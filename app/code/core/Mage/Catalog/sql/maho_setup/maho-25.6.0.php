@@ -16,31 +16,31 @@ $installer->startSetup();
 // Create dynamic category rules table
 $table = $installer->getConnection()
     ->newTable($installer->getTable('catalog/category_dynamic_rule'))
-    ->addColumn('rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Rule ID')
-    ->addColumn('category_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('category_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Category ID')
-    ->addColumn('conditions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+    ->addColumn('conditions_serialized', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
         'nullable'  => true,
     ], 'Conditions Serialized')
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ], 'Is Active')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Created At')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('catalog/category_dynamic_rule', ['category_id']),
@@ -55,8 +55,8 @@ $table = $installer->getConnection()
         'category_id',
         $installer->getTable('catalog/category'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Category Dynamic Rules');
 

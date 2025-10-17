@@ -6,7 +6,7 @@
  * @package    Mage_AdminNotification
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -118,7 +118,7 @@ class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
         if (is_array($description)) {
             $description = '<ul><li>' . implode('</li><li>', $description) . '</li></ul>';
         }
-        $date = date(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT);
+        $date = date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT);
         $this->parse([[
             'severity'    => $severity,
             'date_added'  => $date,

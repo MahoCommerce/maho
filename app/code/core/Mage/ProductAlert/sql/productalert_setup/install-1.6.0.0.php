@@ -6,7 +6,7 @@
  * @package    Mage_ProductAlert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,42 +19,42 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('productalert/price'))
-    ->addColumn('alert_price_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('alert_price_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Product alert price id')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Customer id')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Product id')
-    ->addColumn('price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Price amount')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Website id')
-    ->addColumn('add_date', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('add_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Product alert add date')
-    ->addColumn('last_send_date', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('last_send_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Product alert last send date')
-    ->addColumn('send_count', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('send_count', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Product alert send count')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -76,24 +76,24 @@ $table = $installer->getConnection()
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('productalert/price', 'product_id', 'catalog/product', 'entity_id'),
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('productalert/price', 'website_id', 'core/website', 'website_id'),
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Product Alert Price');
 $installer->getConnection()->createTable($table);
@@ -103,38 +103,38 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('productalert/stock'))
-    ->addColumn('alert_stock_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('alert_stock_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Product alert stock id')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Customer id')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Product id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Website id')
-    ->addColumn('add_date', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('add_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Product alert add date')
-    ->addColumn('send_date', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('send_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Product alert send date')
-    ->addColumn('send_count', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('send_count', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Send Count')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -156,24 +156,24 @@ $table = $installer->getConnection()
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('productalert/stock', 'customer_id', 'customer/entity', 'entity_id'),
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('productalert/stock', 'product_id', 'catalog/product', 'entity_id'),
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Product Alert Stock');
 $installer->getConnection()->createTable($table);

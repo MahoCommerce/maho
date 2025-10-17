@@ -26,7 +26,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * DB connection
      *
-     * @var Zend_Db_Adapter_Abstract
+     * @var Maho\Db\Adapter\AdapterInterface
      */
     protected $_conn;
 
@@ -42,7 +42,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * SQL select object
      *
-     * @var Varien_Db_Select
+     * @var Maho\Db\Select
      */
     protected $_select;
 
@@ -66,7 +66,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      *      Varien_Data_Tree_Dbp::LEVEL_FIELD    => string
      * )
      *
-     * @param Zend_Db_Adapter_Abstract $connection
+     * @param Maho\Db\Adapter\AdapterInterface $connection
      * @param string $table
      * @param array $fields
      */
@@ -94,7 +94,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
         $this->_orderField  = $fields[self::ORDER_FIELD];
         $this->_levelField  = $fields[self::LEVEL_FIELD];
 
-        /** @var Varien_Db_Select $select */
+        /** @var Maho\Db\Select $select */
         $select = $this->_conn->select();
         $this->_select = $select;
         $this->_select->from($this->_table);
@@ -103,7 +103,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * Retrieve current select object
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getDbSelect()
     {
@@ -113,7 +113,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     /**
      * Set Select object
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      */
     public function setDbSelect($select): void
     {
@@ -288,14 +288,14 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
         $levelDisposition = $newLevel - $node->getLevel();
 
         $data = [
-            $this->_levelField => new Zend_Db_Expr("{$this->_levelField} + '{$levelDisposition}'"),
-            $this->_pathField  => new Zend_Db_Expr("CONCAT('$newPath', RIGHT($this->_pathField, LENGTH($this->_pathField) - {$oldPathLength}))"),
+            $this->_levelField => new Maho\Db\Expr("{$this->_levelField} + '{$levelDisposition}'"),
+            $this->_pathField  => new Maho\Db\Expr("CONCAT('$newPath', RIGHT($this->_pathField, LENGTH($this->_pathField) - {$oldPathLength}))"),
         ];
         $condition = $this->_conn->quoteInto("$this->_pathField REGEXP ?", "^$oldPath(/|$)");
 
         $this->_conn->beginTransaction();
 
-        $reorderData = [$this->_orderField => new Zend_Db_Expr("$this->_orderField + 1")];
+        $reorderData = [$this->_orderField => new Maho\Db\Expr("$this->_orderField + 1")];
         try {
             if ($prevNode && $prevNode->getId()) {
                 $reorderCondition = "{$this->_orderField} > {$prevNode->getData($this->_orderField)}";
@@ -303,7 +303,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
             } else {
                 $reorderCondition = $this->_conn->quoteInto("{$this->_pathField} REGEXP ?", "^{$newParent->getData($this->_pathField)}/[0-9]+$");
                 $select = $this->_conn->select()
-                    ->from($this->_table, new Zend_Db_Expr("MIN({$this->_orderField})"))
+                    ->from($this->_table, new Maho\Db\Expr("MIN({$this->_orderField})"))
                     ->where($reorderCondition);
 
                 $position = (int) $this->_conn->fetchOne($select);

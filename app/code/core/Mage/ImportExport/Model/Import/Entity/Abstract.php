@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +24,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
     /**
      * DB connection.
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql
+     * @var Maho\Db\Adapter\Pdo\Mysql
      */
     protected $_connection;
 
@@ -178,7 +178,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
         $this->_entityTypeId    = $entityType->getEntityTypeId();
         $this->_dataSourceModel = Mage_ImportExport_Model_Import::getDataSourceModel();
 
-        /** @var Varien_Db_Adapter_Pdo_Mysql $_connection */
+        /** @var Maho\Db\Adapter\Pdo\Mysql $_connection */
         $_connection            = Mage::getSingleton('core/resource')->getConnection('write');
         $this->_connection      = $_connection;
     }

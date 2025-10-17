@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,84 +19,84 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/rule'))
-    ->addColumn('rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Rule Id')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Name')
-    ->addColumn('description', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('description', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Description')
-    ->addColumn('from_date', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('from_date', Maho\Db\Ddl\Table::TYPE_DATE, null, [
     ], 'From Date')
-    ->addColumn('to_date', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('to_date', Maho\Db\Ddl\Table::TYPE_DATE, null, [
     ], 'To Date')
-    ->addColumn('uses_per_customer', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('uses_per_customer', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Uses Per Customer')
-    ->addColumn('customer_group_ids', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('customer_group_ids', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Customer Group Ids')
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Is Active')
-    ->addColumn('conditions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+    ->addColumn('conditions_serialized', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
     ], 'Conditions Serialized')
-    ->addColumn('actions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+    ->addColumn('actions_serialized', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
     ], 'Actions Serialized')
-    ->addColumn('stop_rules_processing', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('stop_rules_processing', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '1',
     ], 'Stop Rules Processing')
-    ->addColumn('is_advanced', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_advanced', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ], 'Is Advanced')
-    ->addColumn('product_ids', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('product_ids', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Product Ids')
-    ->addColumn('sort_order', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('sort_order', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Sort Order')
-    ->addColumn('simple_action', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('simple_action', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Simple Action')
-    ->addColumn('discount_amount', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('discount_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Discount Amount')
-    ->addColumn('discount_qty', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('discount_qty', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
     ], 'Discount Qty')
-    ->addColumn('discount_step', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('discount_step', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Discount Step')
-    ->addColumn('simple_free_shipping', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('simple_free_shipping', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Simple Free Shipping')
-    ->addColumn('apply_to_shipping', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('apply_to_shipping', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Apply To Shipping')
-    ->addColumn('times_used', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('times_used', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Times Used')
-    ->addColumn('is_rss', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_rss', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Is Rss')
-    ->addColumn('website_ids', Varien_Db_Ddl_Table::TYPE_TEXT, 4000, [
+    ->addColumn('website_ids', Maho\Db\Ddl\Table::TYPE_TEXT, 4000, [
     ], 'Website Ids')
-    ->addColumn('coupon_type', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('coupon_type', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
@@ -113,43 +113,43 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/coupon'))
-    ->addColumn('coupon_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('coupon_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Coupon Id')
-    ->addColumn('rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Rule Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Code')
-    ->addColumn('usage_limit', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('usage_limit', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Usage Limit')
-    ->addColumn('usage_per_customer', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('usage_per_customer', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
     ], 'Usage Per Customer')
-    ->addColumn('times_used', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('times_used', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Times Used')
-    ->addColumn('expiration_date', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('expiration_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Expiration Date')
-    ->addColumn('is_primary', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_primary', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
     ], 'Is Primary')
     ->addIndex(
-        $installer->getIdxName('salesrule/coupon', ['code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('salesrule/coupon', ['code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
-        $installer->getIdxName('salesrule/coupon', ['rule_id', 'is_primary'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('salesrule/coupon', ['rule_id', 'is_primary'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['rule_id', 'is_primary'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('salesrule/coupon', ['rule_id']),
@@ -160,8 +160,8 @@ $table = $installer->getConnection()
         'rule_id',
         $installer->getTable('salesrule/rule'),
         'rule_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Salesrule Coupon');
 $installer->getConnection()->createTable($table);
@@ -171,17 +171,17 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/coupon_usage'))
-    ->addColumn('coupon_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('coupon_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Coupon Id')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Id')
-    ->addColumn('times_used', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('times_used', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -199,16 +199,16 @@ $table = $installer->getConnection()
         'coupon_id',
         $installer->getTable('salesrule/coupon'),
         'coupon_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/coupon_usage', 'customer_id', 'customer/entity', 'entity_id'),
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Salesrule Coupon Usage');
 $installer->getConnection()->createTable($table);
@@ -218,23 +218,23 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/rule_customer'))
-    ->addColumn('rule_customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('rule_customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Rule Customer Id')
-    ->addColumn('rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Rule Id')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Customer Id')
-    ->addColumn('times_used', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('times_used', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -252,16 +252,16 @@ $table = $installer->getConnection()
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/rule_customer', 'rule_id', 'salesrule/rule', 'rule_id'),
         'rule_id',
         $installer->getTable('salesrule/rule'),
         'rule_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Salesrule Customer');
 $installer->getConnection()->createTable($table);
@@ -271,26 +271,26 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/label'))
-    ->addColumn('label_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('label_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Label Id')
-    ->addColumn('rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Rule Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Store Id')
-    ->addColumn('label', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('label', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Label')
     ->addIndex(
-        $installer->getIdxName('salesrule/label', ['rule_id', 'store_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('salesrule/label', ['rule_id', 'store_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['rule_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('salesrule/label', ['store_id']),
@@ -305,16 +305,16 @@ $table = $installer->getConnection()
         'rule_id',
         $installer->getTable('salesrule/rule'),
         'rule_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/label', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Salesrule Label');
 $installer->getConnection()->createTable($table);
@@ -324,22 +324,22 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/product_attribute'))
-    ->addColumn('rule_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('rule_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Rule Id')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website Id')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group Id')
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
@@ -361,32 +361,32 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/product_attribute', 'customer_group_id', 'customer/customer_group', 'customer_group_id'),
         'customer_group_id',
         $installer->getTable('customer/customer_group'),
         'customer_group_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/product_attribute', 'rule_id', 'salesrule/rule', 'rule_id'),
         'rule_id',
         $installer->getTable('salesrule/rule'),
         'rule_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/product_attribute', 'website_id', 'core/website', 'website_id'),
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_NO_ACTION,
     )
     ->setComment('Salesrule Product Attribute');
 $installer->getConnection()->createTable($table);
@@ -396,54 +396,54 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/coupon_aggregated'))
-    ->addColumn('id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Id')
-    ->addColumn('period', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('period', Maho\Db\Ddl\Table::TYPE_DATE, null, [
         'nullable'  => false,
     ], 'Period')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
     ], 'Store Id')
-    ->addColumn('order_status', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('order_status', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Order Status')
-    ->addColumn('coupon_code', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('coupon_code', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Coupon Code')
-    ->addColumn('coupon_uses', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('coupon_uses', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Coupon Uses')
-    ->addColumn('subtotal_amount', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('subtotal_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Subtotal Amount')
-    ->addColumn('discount_amount', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('discount_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Discount Amount')
-    ->addColumn('total_amount', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('total_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Total Amount')
-    ->addColumn('subtotal_amount_actual', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('subtotal_amount_actual', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Subtotal Amount Actual')
-    ->addColumn('discount_amount_actual', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('discount_amount_actual', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Discount Amount Actual')
-    ->addColumn('total_amount_actual', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('total_amount_actual', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Total Amount Actual')
     ->addIndex(
-        $installer->getIdxName('salesrule/coupon_aggregated', ['period', 'store_id', 'order_status', 'coupon_code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('salesrule/coupon_aggregated', ['period', 'store_id', 'order_status', 'coupon_code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['period', 'store_id', 'order_status', 'coupon_code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('salesrule/coupon_aggregated', ['store_id']),
@@ -454,8 +454,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Coupon Aggregated');
 $installer->getConnection()->createTable($table);
@@ -465,42 +465,42 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('salesrule/coupon_aggregated_order'))
-    ->addColumn('id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Id')
-    ->addColumn('period', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('period', Maho\Db\Ddl\Table::TYPE_DATE, null, [
         'nullable'  => false,
     ], 'Period')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
     ], 'Store Id')
-    ->addColumn('order_status', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('order_status', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Order Status')
-    ->addColumn('coupon_code', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('coupon_code', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Coupon Code')
-    ->addColumn('coupon_uses', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('coupon_uses', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Coupon Uses')
-    ->addColumn('subtotal_amount', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('subtotal_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Subtotal Amount')
-    ->addColumn('discount_amount', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('discount_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Discount Amount')
-    ->addColumn('total_amount', Varien_Db_Ddl_Table::TYPE_DECIMAL, [12,4], [
+    ->addColumn('total_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12,4], [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Total Amount')
     ->addIndex(
-        $installer->getIdxName('salesrule/coupon_aggregated_order', ['period', 'store_id', 'order_status', 'coupon_code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('salesrule/coupon_aggregated_order', ['period', 'store_id', 'order_status', 'coupon_code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['period', 'store_id', 'order_status', 'coupon_code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('salesrule/coupon_aggregated_order', ['store_id']),
@@ -511,8 +511,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Coupon Aggregated Order');
 $installer->getConnection()->createTable($table);

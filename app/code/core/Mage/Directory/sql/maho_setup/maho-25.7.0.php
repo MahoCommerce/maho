@@ -17,17 +17,17 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('directory/country_name'))
-    ->addColumn('locale', Varien_Db_Ddl_Table::TYPE_TEXT, 8, [
+    ->addColumn('locale', Maho\Db\Ddl\Table::TYPE_TEXT, 8, [
         'nullable'  => false,
         'primary'   => true,
         'default'   => '',
     ], 'Locale')
-    ->addColumn('country_id', Varien_Db_Ddl_Table::TYPE_TEXT, 2, [
+    ->addColumn('country_id', Maho\Db\Ddl\Table::TYPE_TEXT, 2, [
         'nullable'  => false,
         'primary'   => true,
         'default'   => '',
     ], 'Country Id')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Country Name')
@@ -40,8 +40,8 @@ $table = $installer->getConnection()
         'country_id',
         $installer->getTable('directory/country'),
         'country_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Directory Country Name');
 $installer->getConnection()->createTable($table);

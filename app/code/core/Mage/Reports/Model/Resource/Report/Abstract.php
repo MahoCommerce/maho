@@ -99,7 +99,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * @param string $table
      * @param string|null $from
      * @param string|null $to
-     * @param Zend_Db_Select|string|null $subSelect
+     * @param Maho\Db\Select|string|null $subSelect
      * @param bool $doNotUseTruncate
      * @return Mage_Reports_Model_Resource_Report_Abstract
      */
@@ -142,7 +142,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * @param string|null $to
      * @param array $additionalWhere
      * @param string $alias
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getTableDateRangeSelect(
         $table,
@@ -191,7 +191,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * from select statement with single date column
      *
      *
-     * @param Zend_Db_Select|string $select
+     * @param Maho\Db\Select|string $select
      * @param string $periodColumn
      * @return string|false
      */
@@ -245,7 +245,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * @param array $additionalWhere
      * @param string $alias
      * @param string $relatedAlias
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getTableDateRangeRelatedSelect(
         $table,
@@ -373,7 +373,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             }
 
             $then = $this->_getWriteAdapter()
-                ->getDateAddSql($column, $offset, Varien_Db_Adapter_Interface::INTERVAL_SECOND);
+                ->getDateAddSql($column, $offset, Maho\Db\Adapter\AdapterInterface::INTERVAL_SECOND);
 
             $query .= (++$i == $periodsCount) ? $then : 'CASE WHEN ' . implode(' OR ', $subParts) . " THEN $then ELSE ";
         }

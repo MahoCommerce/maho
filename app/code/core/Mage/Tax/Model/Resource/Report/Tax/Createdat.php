@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -106,7 +106,7 @@ class Mage_Tax_Model_Resource_Report_Tax_Createdat extends Mage_Reports_Model_Re
 
             $columns = [
                 'period'                => 'period',
-                'store_id'              => new Zend_Db_Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
+                'store_id'              => new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
                 'code'                  => 'code',
                 'order_status'          => 'order_status',
                 'percent'               => 'MAX(' . $writeAdapter->quoteIdentifier('percent') . ')',

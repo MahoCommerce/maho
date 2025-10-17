@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -43,16 +43,16 @@ class Mage_Reports_Model_Resource_Review_Collection extends Mage_Review_Model_Re
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->_select;
-        $countSelect->reset(Zend_Db_Select::ORDER);
-        $countSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $countSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $countSelect->reset(Zend_Db_Select::COLUMNS);
+        $countSelect->reset(Maho\Db\Select::ORDER);
+        $countSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $countSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $countSelect->reset(Maho\Db\Select::COLUMNS);
         $countSelect->columns('COUNT(main_table.review_id)');
 
         return $countSelect;

@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
     /**
      * Period format for report (day, month, year)
      *
-     * @var Zend_Db_Expr
+     * @var Maho\Db\Expr
      */
     protected $_periodFormat;
 
@@ -64,7 +64,7 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
             $this->_periodFormat = $adapter->getDateFormatSql('period', '%Y-%m');
         } elseif ($this->_period == 'year') {
             $this->_periodFormat =
-                $adapter->getDateExtractSql('period', Varien_Db_Adapter_Interface::INTERVAL_YEAR);
+                $adapter->getDateExtractSql('period', Maho\Db\Adapter\AdapterInterface::INTERVAL_YEAR);
         } else {
             $this->_periodFormat = $adapter->getDateFormatSql('period', '%Y-%m-%d');
         }

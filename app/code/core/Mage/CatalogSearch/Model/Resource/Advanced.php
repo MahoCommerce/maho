@@ -22,7 +22,7 @@ class Mage_CatalogSearch_Model_Resource_Advanced extends Mage_Core_Model_Resourc
      * Prepare response object and dispatch prepare price event
      * Return response object
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return Varien_Object
      */
     protected function _dispatchPreparePriceEvent($select)
@@ -95,14 +95,12 @@ class Mage_CatalogSearch_Model_Resource_Advanced extends Mage_Core_Model_Resourc
             $conditions[] = $adapter->quoteInto(
                 'price_index.min_price %s * %s >= ?',
                 $value['from'],
-                Zend_Db::FLOAT_TYPE,
             );
         }
         if ((string) $value['to'] !== '') {
             $conditions[] = $adapter->quoteInto(
                 'price_index.min_price %s * %s <= ?',
                 $value['to'],
-                Zend_Db::FLOAT_TYPE,
             );
         }
 

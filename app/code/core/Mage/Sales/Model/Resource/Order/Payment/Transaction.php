@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -80,7 +80,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
             // inject
             $where = [
                 $adapter->quoteIdentifier($this->getIdFieldName()) . '!=?' => $id,
-                new Zend_Db_Expr('parent_id IS NULL'),
+                new Maho\Db\Expr('parent_id IS NULL'),
                 'payment_id = ?'    => (int) $paymentId,
                 'order_id = ?'      => (int) $orderId,
                 'parent_txn_id = ?' => $txnId,
@@ -197,8 +197,8 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      * @param int $orderId
      * @param int $paymentId
      * @param string $txnId
-     * @param string|array|Zend_Db_Expr $columns
-     * @return Varien_Db_Select
+     * @param string|array|Maho\Db\Expr $columns
+     * @return Maho\Db\Select
      */
     private function _getLoadByUniqueKeySelect($orderId, $paymentId, $txnId, $columns = '*')
     {

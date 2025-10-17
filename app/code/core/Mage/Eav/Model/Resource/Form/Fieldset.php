@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,7 +26,7 @@ class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_
      * After save (save labels)
      *
      * @param Mage_Eav_Model_Form_Fieldset $object
-     * @throws Zend_Db_Adapter_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -117,7 +117,7 @@ class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_
      * @param string $field
      * @param mixed $value
      * @param Mage_Eav_Model_Form_Fieldset $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

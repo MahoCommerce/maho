@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,7 +36,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
             ->where('attribute_set_id = :attribute_set_id')
             ->where('attribute_group_name = :attribute_group_name');
 
-        return $adapter->fetchRow($select, $bind) > 0;
+        return (bool) $adapter->fetchRow($select, $bind);
     }
 
     /**
@@ -82,7 +82,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
         $adapter = $this->_getReadAdapter();
         $bind    = [':attribute_set_id' => $object->getAttributeSetId()];
         $select  = $adapter->select()
-            ->from($this->getMainTable(), new Zend_Db_Expr('MAX(sort_order)'))
+            ->from($this->getMainTable(), new Maho\Db\Expr('MAX(sort_order)'))
             ->where('attribute_set_id = :attribute_set_id');
 
         return $adapter->fetchOne($select, $bind);

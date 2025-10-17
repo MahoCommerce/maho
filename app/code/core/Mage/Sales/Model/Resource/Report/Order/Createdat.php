@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,10 +75,10 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                 'period'                         => $periodExpr,
                 'store_id'                       => 'o.store_id',
                 'order_status'                   => 'o.status',
-                'orders_count'                   => new Zend_Db_Expr('COUNT(o.entity_id)'),
-                'total_qty_ordered'              => new Zend_Db_Expr('SUM(oi.total_qty_ordered)'),
-                'total_qty_invoiced'             => new Zend_Db_Expr('SUM(oi.total_qty_invoiced)'),
-                'total_income_amount'            => new Zend_Db_Expr(
+                'orders_count'                   => new Maho\Db\Expr('COUNT(o.entity_id)'),
+                'total_qty_ordered'              => new Maho\Db\Expr('SUM(oi.total_qty_ordered)'),
+                'total_qty_invoiced'             => new Maho\Db\Expr('SUM(oi.total_qty_invoiced)'),
+                'total_income_amount'            => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s - %s) * %s)',
                         $adapter->getIfNullSql('o.base_grand_total', 0),
@@ -86,7 +86,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_revenue_amount'           => new Zend_Db_Expr(
+                'total_revenue_amount'           => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s - %s - %s - (%s - %s - %s)) * %s)',
                         $adapter->getIfNullSql('o.base_total_invoiced', 0),
@@ -98,7 +98,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_profit_amount'            => new Zend_Db_Expr(
+                'total_profit_amount'            => new Maho\Db\Expr(
                     sprintf(
                         'SUM(((%s - %s) - (%s - %s) - (%s - %s) - %s) * %s)',
                         $adapter->getIfNullSql('o.base_total_paid', 0),
@@ -111,35 +111,35 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_invoiced_amount'          => new Zend_Db_Expr(
+                'total_invoiced_amount'          => new Maho\Db\Expr(
                     sprintf(
                         'SUM(%s * %s)',
                         $adapter->getIfNullSql('o.base_total_invoiced', 0),
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_canceled_amount'          => new Zend_Db_Expr(
+                'total_canceled_amount'          => new Maho\Db\Expr(
                     sprintf(
                         'SUM(%s * %s)',
                         $adapter->getIfNullSql('o.base_total_canceled', 0),
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_paid_amount'              => new Zend_Db_Expr(
+                'total_paid_amount'              => new Maho\Db\Expr(
                     sprintf(
                         'SUM(%s * %s)',
                         $adapter->getIfNullSql('o.base_total_paid', 0),
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_refunded_amount'          => new Zend_Db_Expr(
+                'total_refunded_amount'          => new Maho\Db\Expr(
                     sprintf(
                         'SUM(%s * %s)',
                         $adapter->getIfNullSql('o.base_total_refunded', 0),
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_tax_amount'               => new Zend_Db_Expr(
+                'total_tax_amount'               => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s - %s) * %s)',
                         $adapter->getIfNullSql('o.base_tax_amount', 0),
@@ -147,7 +147,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_tax_amount_actual'        => new Zend_Db_Expr(
+                'total_tax_amount_actual'        => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s -%s) * %s)',
                         $adapter->getIfNullSql('o.base_tax_invoiced', 0),
@@ -155,7 +155,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_shipping_amount'          => new Zend_Db_Expr(
+                'total_shipping_amount'          => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s - %s) * %s)',
                         $adapter->getIfNullSql('o.base_shipping_amount', 0),
@@ -163,7 +163,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_shipping_amount_actual'   => new Zend_Db_Expr(
+                'total_shipping_amount_actual'   => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s - %s) * %s)',
                         $adapter->getIfNullSql('o.base_shipping_invoiced', 0),
@@ -171,7 +171,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_discount_amount'          => new Zend_Db_Expr(
+                'total_discount_amount'          => new Maho\Db\Expr(
                     sprintf(
                         'SUM((ABS(%s) - %s) * %s)',
                         $adapter->getIfNullSql('o.base_discount_amount', 0),
@@ -179,7 +179,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                         $adapter->getIfNullSql('o.base_to_global_rate', 0),
                     ),
                 ),
-                'total_discount_amount_actual'   => new Zend_Db_Expr(
+                'total_discount_amount_actual'   => new Maho\Db\Expr(
                     sprintf(
                         'SUM((%s - %s) * %s)',
                         $adapter->getIfNullSql('o.base_discount_invoiced', 0),
@@ -195,8 +195,8 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
             $qtyCanceledExpr = $adapter->getIfNullSql('qty_canceled', 0);
             $cols            = [
                 'order_id'           => 'order_id',
-                'total_qty_ordered'  => new Zend_Db_Expr("SUM(qty_ordered - {$qtyCanceledExpr})"),
-                'total_qty_invoiced' => new Zend_Db_Expr('SUM(qty_invoiced)'),
+                'total_qty_ordered'  => new Maho\Db\Expr("SUM(qty_ordered - {$qtyCanceledExpr})"),
+                'total_qty_invoiced' => new Maho\Db\Expr('SUM(qty_invoiced)'),
             ];
             $selectOrderItem->from($this->getTable('sales/order_item'), $cols)
                 ->where('parent_item_id IS NULL')
@@ -223,10 +223,10 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
 
             // setup all columns to select SUM() except period, store_id and order_status
             foreach (array_keys($columns) as $k) {
-                $columns[$k] = new Zend_Db_Expr('SUM(' . $k . ')');
+                $columns[$k] = new Maho\Db\Expr('SUM(' . $k . ')');
             }
             $columns['period']         = 'period';
-            $columns['store_id']       = new Zend_Db_Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID);
+            $columns['store_id']       = new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID);
             $columns['order_status']   = 'order_status';
 
             $select->reset();

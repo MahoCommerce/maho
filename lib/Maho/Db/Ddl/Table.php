@@ -1,15 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Varien_Db
+ * @package    Maho_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Varien_Db_Ddl_Table
+namespace Maho\Db\Ddl;
+
+class Table
 {
     /**
      * Types of columns
@@ -65,24 +70,18 @@ class Varien_Db_Ddl_Table
 
     /**
      * Name of table
-     *
-     * @var string|null
      */
-    protected $_tableName;
+    protected ?string $_tableName = null;
 
     /**
      * Schema name
-     *
-     * @var string
      */
-    protected $_schemaName;
+    protected ?string $_schemaName = null;
 
     /**
      * Comment for Table
-     *
-     * @var string
      */
-    protected $_tableComment;
+    protected ?string $_tableComment = null;
 
     /**
      * Column descriptions for a table
@@ -104,10 +103,8 @@ class Varien_Db_Ddl_Table
      * PRIMARY_POSITION => integer; position of column in primary key
      * IDENTITY         => integer; true if column is auto-generated with unique values
      * COMMENT          => string; column description
-     *
-     * @var array
      */
-    protected $_columns         = [];
+    protected array $_columns = [];
 
     /**
      * Index descriptions for a table
@@ -127,10 +124,8 @@ class Varien_Db_Ddl_Table
      * NAME             => string; The column name
      * SIZE             => int|null; Length of index column (always null if index is unique)
      * POSITION         => int; Position in index
-     *
-     * @var array
      */
-    protected $_indexes         = [];
+    protected array $_indexes = [];
 
     /**
      * Foreign key descriptions for a table
@@ -148,17 +143,13 @@ class Varien_Db_Ddl_Table
      *
      * Valid Integrity Actions:
      * CASCADE | SET NULL | NONE | RESTRICT | SET DEFAULT
-     *
-     * @var array
      */
-    protected $_foreignKeys     = [];
+    protected array $_foreignKeys = [];
 
     /**
      * Additional table options
-     *
-     * @var array
      */
-    protected $_options         = [
+    protected array $_options = [
         'type'          => 'INNODB',
         'charset'       => 'utf8',
         'collate'       => 'utf8_general_ci',
@@ -167,11 +158,8 @@ class Varien_Db_Ddl_Table
 
     /**
      * Set table name
-     *
-     * @param string $name
-     * @return Varien_Db_Ddl_Table
      */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->_tableName = $name;
         if ($this->_tableComment === null) {
@@ -182,11 +170,8 @@ class Varien_Db_Ddl_Table
 
     /**
      * Set schema name
-     *
-     * @param string $name
-     * @return Varien_Db_Ddl_Table
      */
-    public function setSchema($name)
+    public function setSchema(string $name): self
     {
         $this->_schemaName = $name;
         return $this;
@@ -194,11 +179,8 @@ class Varien_Db_Ddl_Table
 
     /**
      * Set comment for table
-     *
-     * @param string $comment
-     * @return Varien_Db_Ddl_Table
      */
-    public function setComment($comment)
+    public function setComment(string $comment): self
     {
         $this->_tableComment = $comment;
         return $this;
@@ -207,33 +189,28 @@ class Varien_Db_Ddl_Table
     /**
      * Retrieve name of table
      *
-     * @throws Zend_Db_Exception
-     * @return string
+     * @throws \Maho\Db\Exception
      */
-    public function getName()
+    public function getName(): string
     {
         if (is_null($this->_tableName)) {
-            throw new Zend_Db_Exception('Table name is not defined');
+            throw new \Maho\Db\Exception('Table name is not defined');
         }
         return $this->_tableName;
     }
 
     /**
      * Get schema name
-     *
-     * @return string|null
      */
-    public function getSchema()
+    public function getSchema(): ?string
     {
         return $this->_schemaName;
     }
 
     /**
      * Return comment for table
-     *
-     * @return string
      */
-    public function getComment()
+    public function getComment(): ?string
     {
         return $this->_tableComment;
     }
@@ -256,10 +233,9 @@ class Varien_Db_Ddl_Table
      * @param string|int|array $size the column length
      * @param array $options array of additional options
      * @param string $comment column description
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Ddl_Table
+     * @throws \Maho\Db\Exception
      */
-    public function addColumn($name, $type, $size = null, $options = [], $comment = null)
+    public function addColumn(string $name, string $type, string|int|array|null $size = null, array $options = [], ?string $comment = null): self
     {
         $position           = count($this->_columns);
         $default            = false;
@@ -356,7 +332,7 @@ class Varien_Db_Ddl_Table
                 $length = $size;
                 break;
             default:
-                throw new Zend_Db_Exception('Invalid column data type "' . $type . '"');
+                throw new \Maho\Db\Exception('Invalid column data type "' . $type . '"');
         }
 
         if (array_key_exists('default', $options)) {
@@ -416,16 +392,15 @@ class Varien_Db_Ddl_Table
      * @param string $refColumn     the reference table column name
      * @param string $onDelete      the action on delete row
      * @param string $onUpdate      the action on update
-     * @throws Zend_Db_Exception
-     * @return Varien_Db_Ddl_Table
+     * @throws \Maho\Db\Exception
      */
-    public function addForeignKey($fkName, $column, $refTable, $refColumn, $onDelete = null, $onUpdate = null)
+    public function addForeignKey(string $fkName, string $column, string $refTable, string $refColumn, ?string $onDelete = null, ?string $onUpdate = null): self
     {
         $upperName = strtoupper($fkName);
 
         // validate column name
         if (!isset($this->_columns[strtoupper($column)])) {
-            throw new Zend_Db_Exception('Undefined column "' . $column . '"');
+            throw new \Maho\Db\Exception('Undefined column "' . $column . '"');
         }
 
         switch ($onDelete) {
@@ -462,15 +437,10 @@ class Varien_Db_Ddl_Table
 
     /**
      * Add index to table
-     *
-     * @param string $indexName     the index name
-     * @param array|string $fields  array of columns or column string
-     * @param array $options        array of additional options
-     * @return Varien_Db_Ddl_Table
      */
-    public function addIndex($indexName, $fields, $options = [])
+    public function addIndex(string $indexName, array|string $fields, array $options = []): self
     {
-        $idxType    = Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX;
+        $idxType    = \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX;
         $position   = 0;
         $columns    = [];
         if (!is_array($fields)) {
@@ -484,7 +454,7 @@ class Varien_Db_Ddl_Table
                 $columnName = $columnData;
             } elseif (is_array($columnData)) {
                 if (!isset($columnData['name'])) {
-                    throw new Zend_Db_Exception('Invalid index column data');
+                    throw new \Maho\Db\Exception('Invalid index column data');
                 }
 
                 $columnName = $columnData['name'];
@@ -508,7 +478,7 @@ class Varien_Db_Ddl_Table
         }
 
         if (empty($columns)) {
-            throw new Zend_Db_Exception('Columns for index are not defined');
+            throw new \Maho\Db\Exception('Columns for index are not defined');
         }
 
         if (!empty($options['type'])) {
@@ -526,11 +496,8 @@ class Varien_Db_Ddl_Table
 
     /**
      * Retrieve array of table columns
-     *
-     * @param bool $normalized
-     * @return array
      */
-    public function getColumns($normalized = true)
+    public function getColumns(bool $normalized = true): array
     {
         if ($normalized) {
             return $this->_normalizeColumnPosition($this->_columns);
@@ -540,11 +507,8 @@ class Varien_Db_Ddl_Table
 
     /**
      * Set column, formatted according to DDL Table format, into columns structure
-     *
-     * @param array $column
-     * @return Varien_Db_Ddl_Table
      */
-    public function setColumn($column)
+    public function setColumn(array $column): self
     {
         $upperName = strtoupper($column['COLUMN_NAME']);
         $this->_columns[$upperName] = $column;
@@ -553,32 +517,24 @@ class Varien_Db_Ddl_Table
 
     /**
      * Retrieve array of table indexes
-     *
-     * @return array
      */
-    public function getIndexes()
+    public function getIndexes(): array
     {
         return $this->_indexes;
     }
 
     /**
      * Retrieve array of table foreign keys
-     *
-     * @return array
      */
-    public function getForeignKeys()
+    public function getForeignKeys(): array
     {
         return $this->_foreignKeys;
     }
 
     /**
      * Set table option
-     *
-     * @param string $key
-     * @param string $value
-     * @return $this
      */
-    public function setOption($key, $value)
+    public function setOption(string $key, mixed $value): self
     {
         $this->_options[$key] = $value;
         return $this;
@@ -587,11 +543,8 @@ class Varien_Db_Ddl_Table
     /**
      * Retrieve table option value by option name
      * Return null if option does not exits
-     *
-     * @param string $key
-     * @return mixed
      */
-    public function getOption($key)
+    public function getOption(string $key): mixed
     {
         if (!isset($this->_options[$key])) {
             return null;
@@ -601,45 +554,32 @@ class Varien_Db_Ddl_Table
 
     /**
      * Retrieve array of table options
-     *
-     * @return array
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->_options;
     }
 
     /**
      * Index column position comparison function
-     *
-     * @param array $a
-     * @param array $b
-     * @return int
      */
-    protected function _sortIndexColumnPosition($a, $b)
+    protected function _sortIndexColumnPosition(array $a, array $b): int
     {
         return $a['POSITION'] - $b['POSITION'];
     }
 
     /**
      * table column position comparison function
-     *
-     * @param array $a
-     * @param array $b
-     * @return int
      */
-    protected function _sortColumnPosition($a, $b)
+    protected function _sortColumnPosition(array $a, array $b): int
     {
         return $a['COLUMN_POSITION'] - $b['COLUMN_POSITION'];
     }
 
     /**
      * Normalize position of index columns array
-     *
-     * @param array $columns
-     * @return array
      */
-    protected function _normalizeIndexColumnPosition($columns)
+    protected function _normalizeIndexColumnPosition(array $columns): array
     {
         uasort($columns, [$this, '_sortIndexColumnPosition']);
         $position = 0;
@@ -652,11 +592,8 @@ class Varien_Db_Ddl_Table
 
     /**
      * Normalize position of table columns array
-     *
-     * @param array $columns
-     * @return array
      */
-    protected function _normalizeColumnPosition($columns)
+    protected function _normalizeColumnPosition(array $columns): array
     {
         uasort($columns, [$this, '_sortColumnPosition']);
         $position = 0;

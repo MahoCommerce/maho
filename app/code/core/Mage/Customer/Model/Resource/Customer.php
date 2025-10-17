@@ -162,7 +162,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * @param Mage_Customer_Model_Customer $object
      * @param mixed $rowId
-     * @return Zend_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadRowSelect($object, $rowId)

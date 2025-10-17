@@ -37,7 +37,7 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
      * @param mixed $value
      * @param Mage_Core_Model_Abstract $object
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -149,7 +149,7 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
                 ['region_id', 'country_id', 'code', 'default_name'],
             )
             ->columns([
-                'id' => new Zend_Db_Expr("CONCAT(rname.region_id, '|', rname.locale)"),
+                'id' => new Maho\Db\Expr("CONCAT(rname.region_id, '|', rname.locale)"),
             ]);
 
         if ($region) {
@@ -179,7 +179,7 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
             ->where('region_id = ?', $region->getRegionId())
             ->where('locale = ?', $locale)
             ->columns([
-                'id' => new Zend_Db_Expr("CONCAT(region_id, '|', locale)"),
+                'id' => new Maho\Db\Expr("CONCAT(region_id, '|', locale)"),
             ]);
 
         return new Varien_Object($this->_getReadAdapter()->fetchRow($select));

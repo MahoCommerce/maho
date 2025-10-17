@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,16 +19,16 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('reports/event_type'))
-    ->addColumn('event_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('event_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Event Type Id')
-    ->addColumn('event_name', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('event_name', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
         'nullable'  => false,
     ], 'Event Name')
-    ->addColumn('customer_login', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_login', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
@@ -41,36 +41,36 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('reports/event'))
-    ->addColumn('event_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+    ->addColumn('event_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Event Id')
-    ->addColumn('logged_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('logged_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
     ], 'Logged At')
-    ->addColumn('event_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('event_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Event Type Id')
-    ->addColumn('object_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('object_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Object Id')
-    ->addColumn('subject_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('subject_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Subject Id')
-    ->addColumn('subtype', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('subtype', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Subtype')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Store Id')
@@ -99,16 +99,16 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/event', 'event_type_id', 'reports/event_type', 'event_type_id'),
         'event_type_id',
         $installer->getTable('reports/event_type'),
         'event_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Reports Event Table');
 $installer->getConnection()->createTable($table);
@@ -122,26 +122,26 @@ $tableName = $installer->getTable('reports/compared_product_index');
 if (!$installer->tableExists($tableName)) {
     $table = $installer->getConnection()
         ->newTable($tableName)
-        ->addColumn('index_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+        ->addColumn('index_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
             'identity'  => true,
             'unsigned'  => true,
             'nullable'  => false,
             'primary'   => true,
         ], 'Index Id')
-        ->addColumn('visitor_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+        ->addColumn('visitor_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned'  => true,
         ], 'Visitor Id')
-        ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+        ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned'  => true,
         ], 'Customer Id')
-        ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+        ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned'  => true,
             'nullable'  => false,
         ], 'Product Id')
-        ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+        ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
             'unsigned'  => true,
         ], 'Store Id')
-        ->addColumn('added_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+        ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable'  => false,
         ], 'Added At')
         ->addIndex(
@@ -169,24 +169,24 @@ if (!$installer->tableExists($tableName)) {
             'customer_id',
             $installer->getTable('customer/entity'),
             'entity_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName('reports/compared_product_index', 'product_id', 'catalog/product', 'entity_id'),
             'product_id',
             $installer->getTable('catalog/product'),
             'entity_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName('reports/compared_product_index', 'store_id', 'core/store', 'store_id'),
             'store_id',
             $installer->getTable('core/store'),
             'store_id',
-            Varien_Db_Ddl_Table::ACTION_SET_NULL,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_SET_NULL,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->setComment('Reports Compared Product Index Table');
     $installer->getConnection()->createTable($table);
@@ -201,26 +201,26 @@ $tableName = $installer->getTable('reports/viewed_product_index');
 if (!$installer->tableExists($tableName)) {
     $table = $installer->getConnection()
         ->newTable($tableName)
-        ->addColumn('index_id', Varien_Db_Ddl_Table::TYPE_BIGINT, null, [
+        ->addColumn('index_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
             'identity'  => true,
             'unsigned'  => true,
             'nullable'  => false,
             'primary'   => true,
         ], 'Index Id')
-        ->addColumn('visitor_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+        ->addColumn('visitor_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned'  => true,
         ], 'Visitor Id')
-        ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+        ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned'  => true,
         ], 'Customer Id')
-        ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+        ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned'  => true,
             'nullable'  => false,
         ], 'Product Id')
-        ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+        ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
             'unsigned'  => true,
         ], 'Store Id')
-        ->addColumn('added_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+        ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable'  => false,
         ], 'Added At')
         ->addIndex(
@@ -248,24 +248,24 @@ if (!$installer->tableExists($tableName)) {
             'customer_id',
             $installer->getTable('customer/entity'),
             'entity_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName('reports/viewed_product_index', 'product_id', 'catalog/product', 'entity_id'),
             'product_id',
             $installer->getTable('catalog/product'),
             'entity_id',
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName('reports/viewed_product_index', 'store_id', 'core/store', 'store_id'),
             'store_id',
             $installer->getTable('core/store'),
             'store_id',
-            Varien_Db_Ddl_Table::ACTION_SET_NULL,
-            Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Maho\Db\Ddl\Table::ACTION_SET_NULL,
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
         )
         ->setComment('Reports Viewed Product Index Table');
     $installer->getConnection()->createTable($table);

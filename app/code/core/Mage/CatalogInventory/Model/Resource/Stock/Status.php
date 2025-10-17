@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -27,7 +27,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
      * @param int $stockId
      * @param int|null $websiteId
      * @return $this
-     * @throws Zend_Db_Adapter_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     public function saveProductStatus(
         Mage_CatalogInventory_Model_Stock_Status $object,
@@ -183,7 +183,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
      *
      * @return $this
      */
-    public function addStockStatusToSelect(Varien_Db_Select $select, Mage_Core_Model_Website $website)
+    public function addStockStatusToSelect(\Maho\Db\Select $select, Mage_Core_Model_Website $website)
     {
         $websiteId = $website->getId();
         $select->joinLeft(
@@ -198,11 +198,11 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
     /**
      * Add stock status limitation to catalog product price index select object
      *
-     * @param string|Zend_Db_Expr $entityField
-     * @param string|Zend_Db_Expr $websiteField
+     * @param string|Maho\Db\Expr $entityField
+     * @param string|Maho\Db\Expr $websiteField
      * @return $this
      */
-    public function prepareCatalogProductIndexSelect(Varien_Db_Select $select, $entityField, $websiteField)
+    public function prepareCatalogProductIndexSelect(\Maho\Db\Select $select, $entityField, $websiteField)
     {
         $select->join(
             ['ciss' => $this->getMainTable()],

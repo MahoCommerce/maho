@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -203,8 +203,8 @@ class Mage_Catalog_Model_Resource_Category_Flat_Collection extends Mage_Core_Mod
     {
         if ($attribute == '*') {
             // Save previous selected columns
-            $columns = $this->getSelect()->getPart(Zend_Db_Select::COLUMNS);
-            $this->getSelect()->reset(Zend_Db_Select::COLUMNS);
+            $columns = $this->getSelect()->getPart(Maho\Db\Select::COLUMNS);
+            $this->getSelect()->reset(Maho\Db\Select::COLUMNS);
             foreach ($columns as $column) {
                 if ($column[0] == 'main_table') {
                     // If column selected from main table,

@@ -29,58 +29,58 @@ $installer->addEntityType('blog_post', [
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('blog/post'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ])
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('attribute_set_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_set_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('url_key', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('url_key', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ])
-    ->addColumn('title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ])
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ])
-    ->addColumn('publish_date', Varien_Db_Ddl_Table::TYPE_DATE, null, [
+    ->addColumn('publish_date', Maho\Db\Ddl\Table::TYPE_DATE, null, [
         'nullable'  => false,
     ])
-    ->addColumn('content', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+    ->addColumn('content', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
         'nullable'  => true,
     ])
-    ->addColumn('meta_description', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('meta_description', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ])
-    ->addColumn('meta_keywords', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('meta_keywords', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ])
-    ->addColumn('meta_title', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('meta_title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
     ])
-    ->addColumn('meta_robots', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('meta_robots', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
         'nullable'  => true,
     ])
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ])
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
     ])
     ->addIndex(
         $installer->getIdxName('blog/post', ['entity_type_id']),
@@ -111,8 +111,8 @@ $table = $installer->getConnection()
         'entity_type_id',
         $installer->getTable('eav/entity_type'),
         'entity_type_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Blog Post Entity Table');
 $installer->getConnection()->createTable($table);
@@ -122,41 +122,41 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['blog/post', 'datetime']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ])
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
     ], 'Value')
     ->addIndex(
         $installer->getIdxName(
             ['blog/post', 'datetime'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(['blog/post', 'datetime'], ['attribute_id']),
@@ -175,24 +175,24 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'datetime'], 'entity_id', 'blog/post', 'entity_id'),
         'entity_id',
         $installer->getTable('blog/post'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'datetime'], 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Blog Post Datetime Attribute Backend Table');
 $installer->getConnection()->createTable($table);
@@ -202,41 +202,41 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['blog/post', 'int']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ])
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
     ], 'Value')
     ->addIndex(
         $installer->getIdxName(
             ['blog/post', 'int'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(['blog/post', 'int'], ['attribute_id']),
@@ -255,24 +255,24 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'int'], 'entity_id', 'blog/post', 'entity_id'),
         'entity_id',
         $installer->getTable('blog/post'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'int'], 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Blog Post Integer Attribute Backend Table');
 $installer->getConnection()->createTable($table);
@@ -282,41 +282,41 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['blog/post', 'text']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ])
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ])
     ->addIndex(
         $installer->getIdxName(
             ['blog/post', 'text'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(['blog/post', 'text'], ['attribute_id']),
@@ -335,24 +335,24 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'text'], 'entity_id', 'blog/post', 'entity_id'),
         'entity_id',
         $installer->getTable('blog/post'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'text'], 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Blog Post Text Attribute Backend Table');
 $installer->getConnection()->createTable($table);
@@ -362,41 +362,41 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['blog/post', 'varchar']))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ])
-    ->addColumn('entity_type_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_type_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('attribute_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('attribute_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ])
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ])
     ->addIndex(
         $installer->getIdxName(
             ['blog/post', 'varchar'],
             ['entity_id', 'attribute_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'attribute_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(['blog/post', 'varchar'], ['attribute_id']),
@@ -415,24 +415,24 @@ $table = $installer->getConnection()
         'attribute_id',
         $installer->getTable('eav/attribute'),
         'attribute_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'varchar'], 'entity_id', 'blog/post', 'entity_id'),
         'entity_id',
         $installer->getTable('blog/post'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(['blog/post', 'varchar'], 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Blog Post Varchar Attribute Backend Table');
 $installer->getConnection()->createTable($table);
@@ -486,7 +486,7 @@ $table = $installer->getConnection()
     ->newTable($installer->getTable('blog/post_store'))
     ->addColumn(
         'post_id',
-        Varien_Db_Ddl_Table::TYPE_INTEGER,
+        Maho\Db\Ddl\Table::TYPE_INTEGER,
         null,
         [
             'unsigned' => true,
@@ -496,7 +496,7 @@ $table = $installer->getConnection()
     )
     ->addColumn(
         'store_id',
-        Varien_Db_Ddl_Table::TYPE_SMALLINT,
+        Maho\Db\Ddl\Table::TYPE_SMALLINT,
         null,
         [
             'unsigned' => true,
@@ -521,8 +521,8 @@ $table = $installer->getConnection()
         'post_id',
         $installer->getTable('blog/post'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -534,8 +534,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Blog Post To Store Linkage Table');
 $installer->getConnection()->createTable($table);

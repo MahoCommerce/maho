@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,9 +15,9 @@ class Mage_Core_Model_Resource_Iterator extends Varien_Object
     /**
      * Walk over records fetched from query one by one using callback function
      *
-     * @param Zend_Db_Statement_Interface|Zend_Db_Select|string $query
+     * @param Maho\Db\Statement\Pdo\Mysql|Maho\Db\Select|string $query
      * @param array|string $callbacks
-     * @param Varien_Db_Adapter_Interface $adapter
+     * @param Maho\Db\Adapter\AdapterInterface $adapter
      * @return $this
      */
     public function walk($query, array $callbacks, array $args = [], $adapter = null)
@@ -39,25 +39,25 @@ class Mage_Core_Model_Resource_Iterator extends Varien_Object
     }
 
     /**
-     * Fetch Zend statement instance
+     * Fetch statement instance
      *
-     * @param Zend_Db_Statement_Interface|Zend_Db_Select|string $query
-     * @param Zend_Db_Adapter_Abstract $conn
-     * @return Zend_Db_Statement_Interface
+     * @param Maho\Db\Statement\Pdo\Mysql|Maho\Db\Select|string $query
+     * @param Maho\Db\Adapter\AdapterInterface $conn
+     * @return Maho\Db\Statement\Pdo\Mysql
      * @throws Mage_Core_Exception
      */
     protected function _getStatement($query, $conn = null)
     {
-        if ($query instanceof Zend_Db_Statement_Interface) {
+        if ($query instanceof Maho\Db\Statement\Pdo\Mysql) {
             return $query;
         }
 
-        if ($query instanceof Zend_Db_Select) {
+        if ($query instanceof Maho\Db\Select) {
             return $query->query();
         }
 
         if (is_string($query)) {
-            if (!$conn instanceof Zend_Db_Adapter_Abstract) {
+            if (!$conn instanceof \Maho\Db\Adapter\AdapterInterface) {
                 Mage::throwException(Mage::helper('core')->__('Invalid connection'));
             }
             return $conn->query($query);

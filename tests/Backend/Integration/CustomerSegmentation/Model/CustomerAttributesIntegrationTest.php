@@ -223,9 +223,13 @@ describe('Customer Attributes Integration Tests', function () {
                 $customer = Mage::getModel('customer/customer')->load($customerId);
                 $createdAt = $customer->getCreatedAt();
 
-                $now = new DateTime();
-                $registrationDate = new DateTime($createdAt);
-                $daysDiff = $now->diff($registrationDate)->days;
+                // Use date-only comparison to match MySQL's DATEDIFF behavior
+                $now = Mage::app()->getLocale()->utcDate(null, null, true);
+                $registrationDate = Mage::app()->getLocale()->utcDate(null, $createdAt, true);
+                // Strip time component for date-only comparison
+                $nowDate = new DateTime($now->format('Y-m-d'));
+                $regDate = new DateTime($registrationDate->format('Y-m-d'));
+                $daysDiff = $nowDate->diff($regDate)->days;
 
                 expect($daysDiff)->toBeGreaterThanOrEqual(365);
             }
@@ -906,7 +910,7 @@ describe('Customer Attributes Integration Tests', function () {
                 'dob' => '1985-08-15',
                 'gender' => 1,
                 'group_id' => 2,
-                'created_at' => date('Y-m-d H:i:s', strtotime('-2 years')),
+                'created_at' => Mage::app()->getLocale()->utcDate(null, '-2 years', true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
                 'orders' => [
                     ['days_ago' => 30, 'total' => 200.00, 'status' => 'pending'],
                     ['days_ago' => 60, 'total' => 150.00, 'status' => 'processing'],

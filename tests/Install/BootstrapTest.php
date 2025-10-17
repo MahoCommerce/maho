@@ -31,7 +31,7 @@ describe('Sale Category Integration', function () {
 
         expect($saleCategory->getId())->not()->toBeNull()
             ->and($saleCategory->getName())->toBe('Sale')
-            ->and($saleCategory->getIsActive())->toBe('1');
+            ->and($saleCategory->getIsActive())->toBe(1);
 
         // Get products in the Sale category
         $productCollection = Mage::getResourceModel('catalog/product_collection')

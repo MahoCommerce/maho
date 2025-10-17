@@ -193,7 +193,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
      * @param string $field
      * @param mixed $value
      * @param Mage_Cms_Model_Page $object
-     * @return Zend_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -222,7 +222,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
      * @param string $identifier
      * @param int|array $store
      * @param int $isActive
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getLoadByIdentifierSelect($identifier, $store, $isActive = null)
     {
@@ -323,7 +323,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     {
         $stores = [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId];
         $select = $this->_getLoadByIdentifierSelect($identifier, $stores, 1);
-        $select->reset(Zend_Db_Select::COLUMNS)
+        $select->reset(Maho\Db\Select::COLUMNS)
             ->columns('cp.page_id')
             ->order('cps.store_id DESC')
             ->limit(1);
@@ -345,7 +345,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         }
 
         $select = $this->_getLoadByIdentifierSelect($identifier, $stores);
-        $select->reset(Zend_Db_Select::COLUMNS)
+        $select->reset(Maho\Db\Select::COLUMNS)
             ->columns('cp.title')
             ->order('cps.store_id DESC')
             ->limit(1);

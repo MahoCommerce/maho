@@ -146,7 +146,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    protected function recryptAdminUserTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    protected function recryptAdminUserTable(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection, \Maho\Db\Adapter\AdapterInterface $writeConnection): void
     {
         $output->write('Re-encrypting data on admin_user table... ');
 
@@ -167,7 +167,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $output->writeln('OK');
     }
 
-    protected function recryptCoreConfigDataTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    protected function recryptCoreConfigDataTable(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection, \Maho\Db\Adapter\AdapterInterface $writeConnection): void
     {
         // Checking if there are any encrypted configurations that should be re-encrypted
         $encryptedPaths = [];

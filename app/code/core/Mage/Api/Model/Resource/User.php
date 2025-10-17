@@ -102,7 +102,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
         $timeSubtract   = $readAdapter->getDateAddSql(
             'logdate',
             $timeout,
-            Varien_Db_Adapter_Interface::INTERVAL_SECOND,
+            Maho\Db\Adapter\AdapterInterface::INTERVAL_SECOND,
         );
         $where = [
             $readAdapter->quote(Mage_Core_Model_Locale::now()) . ' > ' . $timeSubtract,

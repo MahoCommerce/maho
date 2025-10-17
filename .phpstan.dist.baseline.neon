@@ -8632,12 +8632,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Flat/Collection.php
 
 		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Indexer/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Indexer_Product::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8668,24 +8662,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
 
 		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getCheckSql().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getConcatSql().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getLengthSql().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Tree::_getItemIsActive() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -8696,18 +8672,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Parameter #2 $cols of method Zend_Db_Select::from() expects array|string|Zend_Db_Expr, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Collection/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Config::_construct() has no return type specified.'
@@ -8738,18 +8702,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: Binary operation "-" between int and non-falsy-string results in an error.
-			identifier: binaryOp.invalid
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
-
-		-
-			rawMessage: Binary operation "-" between non-falsy-string and 1 results in an error.
-			identifier: binaryOp.invalid
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Layer_Filter_Price::_construct() has no return type specified.'
@@ -8874,12 +8826,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_initTables() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::getProductCountSelect() should return Varien_Db_Select but returns Zend_Db_Select.'
-			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
@@ -9022,12 +8968,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link.php
 
 		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Link_Collection::$_linkTypeId (Mage_Catalog_Model_Product_Type) does not accept int.'
 			identifier: assign.propertyType
 			count: 1
@@ -9048,12 +8988,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option::_saveValueTitles() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
-
-		-
-			rawMessage: 'Parameter #2 $newOptionId of method Mage_Catalog_Model_Product_Option_Value::duplicate() expects int, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
 
@@ -9194,24 +9128,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/data/catalog_setup/data-install-1.6.0.0.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::crossUpdateFromSelect().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.12-1.6.0.0.13.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.13-1.6.0.0.14.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.19.1.3-1.6.0.0.19.1.4.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_CatalogIndex_Model_Resource_Attribute::checkCount().'
@@ -9394,12 +9310,6 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Aggregation.php
 
 		-
-			rawMessage: 'Parameter #1 $aggregationId of method Mage_CatalogIndex_Model_Resource_Aggregation::_saveTagRelations() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Aggregation.php
-
-		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Attribute::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9424,20 +9334,8 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Configurable.php
 
 		-
-			rawMessage: 'Parameter #1 $select of method Mage_CatalogIndex_Model_Resource_Data_Abstract::_addAttributeFilter() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Configurable.php
-
-		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Grouped::_prepareLinkFetchSelect() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Grouped.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Mage_CatalogIndex_Model_Resource_Data_Abstract::_addAttributeFilter() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Grouped.php
 
@@ -9694,7 +9592,7 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Item.php
 
 		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::_initSelect() should return $this(Mage_CatalogInventory_Model_Resource_Stock_Item_Collection) but returns Varien_Db_Select.'
+			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::_initSelect() should return $this(Mage_CatalogInventory_Model_Resource_Stock_Item_Collection) but returns Maho\Db\Select.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Item/Collection.php
@@ -9950,18 +9848,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogRule/Model/Rule/Condition/Product.php
-
-		-
-			rawMessage: 'Parameter #3 $indexType of method Mage_Core_Model_Resource_Setup::getIdxName() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogRule/sql/catalogrule_setup/install-1.6.0.0.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/CatalogRule/sql/catalogrule_setup/upgrade-1.6.0.1-1.6.0.2.php
 
 		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
@@ -11848,7 +11734,7 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource::getIdxName() should return Varien_Db_Adapter_Interface|false but returns string.'
+			rawMessage: 'Method Mage_Core_Model_Resource::getIdxName() should return Maho\Db\Adapter\AdapterInterface|false but returns string.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource.php
@@ -12010,12 +11896,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Iterator.php
 
 		-
-			rawMessage: 'Parameter #2 $conn of method Mage_Core_Model_Resource_Iterator::_getStatement() expects Zend_Db_Adapter_Abstract|null, Varien_Db_Adapter_Interface|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Iterator.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Language::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12040,14 +11920,8 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Setup::getIdxName() should return string but returns Varien_Db_Adapter_Interface|false.'
+			rawMessage: 'Method Mage_Core_Model_Resource_Setup::getIdxName() should return string but returns Maho\Db\Adapter\AdapterInterface|false.'
 			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Setup.php
-
-		-
-			rawMessage: 'Parameter #1 $hook of method Varien_Db_Adapter_Pdo_Mysql::setQueryHook() expects array, null given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
@@ -13018,12 +12892,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
 
 		-
-			rawMessage: 'Parameter #2 $entityId of method Mage_Eav_Model_Entity_Abstract::load() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Resource_Customer_Collection::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13130,12 +12998,6 @@ parameters:
 			identifier: argument.type
 			count: 3
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Customer/data/customer_setup/data-upgrade-1.6.2.0.4-1.6.2.0.5.php
 
 		-
 			rawMessage: Result of && is always false.
@@ -13430,18 +13292,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Std.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Zend_Db::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Zend/Db.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Zend_Db::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Zend/Db.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Container_Abstract::addException() has no return type specified.'
@@ -15106,12 +14956,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
 
 		-
-			rawMessage: 'Cannot call method lastInsertId() on Varien_Db_Adapter_Interface|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Abstract::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -15262,7 +15106,7 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Source/Table.php
 
 		-
-			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Varien_Db_Adapter_Pdo_Mysql|false given.'
+			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Maho\Db\Adapter\AdapterInterface|false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Collection.php
@@ -15313,12 +15157,6 @@ parameters:
 			rawMessage: 'Parameter #1 $entity of method Mage_Eav_Model_Entity_Collection_Abstract::setEntity() expects Mage_Eav_Model_Entity_Abstract, Mage_Core_Model_Resource_Db_Collection_Abstract|false given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 4
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
@@ -15781,18 +15619,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
 
 		-
-			rawMessage: 'Method Mage_ImportExport_Model_Resource_Import_Data::getIterator() return type with generic class IteratorIterator does not specify its types: TKey, TValue, TIterator'
-			identifier: missingType.generics
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
-
-		-
-			rawMessage: 'Property Mage_ImportExport_Model_Resource_Import_Data::$_iterator with generic class IteratorIterator does not specify its types: TKey, TValue, TIterator'
-			identifier: missingType.generics
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
-
-		-
 			rawMessage: 'Method Mage_ImportExport_Adminhtml_ExportController::getFilterAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -16069,7 +15895,7 @@ parameters:
 			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Varien_Db_Adapter_Interface) in isset() is not nullable.'
+			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Maho\Db\Adapter\AdapterInterface) in isset() is not nullable.'
 			identifier: isset.property
 			count: 1
 			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
@@ -16195,12 +16021,6 @@ parameters:
 			path: app/code/core/Mage/Log/Model/Resource/Customer.php
 
 		-
-			rawMessage: Binary operation "+" between non-falsy-string and 1 results in an error.
-			identifier: binaryOp.invalid
-			count: 2
-			path: app/code/core/Mage/Log/Model/Resource/Log.php
-
-		-
 			rawMessage: 'Method Mage_Log_Model_Resource_Log::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -16313,12 +16133,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Newsletter/controllers/ManageController.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Varien_Db_Adapter_Interface::deleteFromSelect() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Newsletter/data/newsletter_setup/data-upgrade-1.6.0.0-1.6.0.1.php
 
 		-
 			rawMessage: 'Parameter #1 $e of static method Mage::logException() expects Throwable, string given.'
@@ -19228,12 +19042,6 @@ parameters:
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Rating_Model_Rating_Option::setVoteId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
-
-		-
 			rawMessage: 'Parameter #2 $entityPkValue of method Mage_Rating_Model_Resource_Rating_Option::aggregateEntityByRatingId() expects int, string given.'
 			identifier: argument.type
 			count: 1
@@ -19312,12 +19120,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Customer/Collection.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Varien_Db_Adapter_Interface::getIfNullSql() expects string, int given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Reports/Model/Resource/Customer/Collection.php
-
-		-
 			rawMessage: 'Property Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract::$_entityCollection (Mage_Eav_Model_Entity_Collection_Abstract) in empty() is not falsy.'
 			identifier: empty.property
 			count: 1
@@ -19351,18 +19153,6 @@ parameters:
 			rawMessage: 'Parameter #2 $customStart of method Mage_Reports_Model_Resource_Order_Collection::getDateRange() expects string, int given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $interval of method Varien_Db_Adapter_Interface::getDateAddSql() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Varien_Db_Adapter_Interface::getIfNullSql() expects string, int given.'
-			identifier: argument.type
-			count: 20
 			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
 
 		-
@@ -19426,12 +19216,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Product/Sold/Collection.php
 
 		-
-			rawMessage: 'Parameter #3 $cols of method Zend_Db_Select::joinInner() expects array|string, null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Reports/Model/Resource/Quote/Collection.php
-
-		-
 			rawMessage: Property Mage_Reports_Model_Resource_Quote_Collection::$_selectCountSqlType has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -19454,12 +19238,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Report/Product/Viewed.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Mage_Core_Model_Resource_Helper_Mysql4::getQueryUsingAnalyticFunction() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Report/Product/Viewed/Collection.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Reports_Model_Resource_Review_Collection::_joinFields().'
@@ -21412,12 +21190,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Report/Bestsellers.php
 
 		-
-			rawMessage: 'Parameter #1 $select of method Mage_Core_Model_Resource_Helper_Mysql4::getQueryUsingAnalyticFunction() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Bestsellers/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Invoiced::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -21536,12 +21308,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/controllers/DownloadController.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Varien_Db_Adapter_Interface::updateFromSelect() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/data/sales_setup/data-upgrade-1.6.0.4-1.6.0.5.php
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() has no return type specified.'
@@ -21748,12 +21514,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/Model/Validator.php
 
 		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/SalesRule/sql/salesrule_setup/upgrade-1.6.0.2-1.6.0.3.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Shipping_Model_Carrier_Abstract::_getQuotes().'
 			identifier: method.notFound
 			count: 1
@@ -21920,12 +21680,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sitemap/Model/Observer.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getCheckSql().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sitemap/Model/Resource/Catalog/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_Sitemap_Model_Resource_Catalog_Category::_construct() has no return type specified.'
@@ -22576,12 +22330,6 @@ parameters:
 			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
 
 		-
-			rawMessage: 'Parameter #3 $indexType of method Mage_Core_Model_Resource_Setup::getIdxName() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
-
-		-
 			rawMessage: 'Method Mage_Usa_Helper_Data::getMeasureDimensionName() has parameter $key with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -23032,18 +22780,6 @@ parameters:
 			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
 
 		-
-			rawMessage: 'Binary operation "*" between non-falsy-string and int<min, -1>|int<1, max> results in an error.'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
-
-		-
-			rawMessage: 'Binary operation "-" between non-falsy-string and (float|int) results in an error.'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Abstract::_init() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -23234,12 +22970,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Widget/controllers/Adminhtml/Widget/InstanceController.php
-
-		-
-			rawMessage: 'Call to an undefined method Varien_Db_Adapter_Interface|Zend_Db_Adapter_Pdo_Abstract::modifyTables().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Widget/sql/widget_setup/install-1.6.0.0.php
 
 		-
 			rawMessage: 'Method Mage_Wishlist_Block_Abstract::addItemPriceBlockType() has no return type specified.'
@@ -25228,12 +24958,6 @@ parameters:
 			path: lib/Varien/Data/Collection/Db.php
 
 		-
-			rawMessage: 'Method Varien_Data_Collection_Db::getConnection() should return Varien_Db_Adapter_Interface but returns Zend_Db_Adapter_Abstract.'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Data/Collection/Db.php
-
-		-
 			rawMessage: 'Method Varien_Data_Collection_Db::initCache() has parameter $object with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -25242,18 +24966,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): array<int<0, max>, non-empty-string> given.'
 			identifier: argument.type
-			count: 1
-			path: lib/Varien/Data/Collection/Db.php
-
-		-
-			rawMessage: 'Property Varien_Data_Collection_Db::$_fetchStmt (Zend_Db_Statement_Pdo) does not accept Zend_Db_Statement_Interface.'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Varien/Data/Collection/Db.php
-
-		-
-			rawMessage: 'Property Varien_Data_Collection_Db::$_select (Varien_Db_Select) does not accept Zend_Db_Select.'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Varien/Data/Collection/Db.php
 
@@ -25456,24 +25168,6 @@ parameters:
 			path: lib/Varien/Data/Tree.php
 
 		-
-			rawMessage: Property Varien_Data_Tree_Db::$_levelField has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Tree/Db.php
-
-		-
-			rawMessage: Property Varien_Data_Tree_Db::$_orderField has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Tree/Db.php
-
-		-
-			rawMessage: Property Varien_Data_Tree_Db::$_parentField has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Tree/Db.php
-
-		-
 			rawMessage: 'Method Varien_Data_Tree_Dbp::_addChildNodes() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -25544,216 +25238,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Varien/Data/Tree/Node/Collection.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::createTableByDdl() has parameter $newTableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::createTableByDdl() has parameter $tableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::decodeVarbinary() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::saveDdlCache() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: Cannot access offset 'Engine' on bool.
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Cannot call method query() on object|resource.'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Cannot call method setAttribute() on object|resource.'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_checkDdlTransaction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_debugException() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_debugWriteToFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_getHostInfo() has parameter $hostName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_getTableName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $hash with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $maxCharacters with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $prefix with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::createTableByDdl() has parameter $newTableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::createTableByDdl() has parameter $tableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::decodeVarbinary() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::decorateTableInfo() has parameter $tableColumnInfo with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::modifyTables() has parameter $tables with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::query() should return Zend_Db_Statement_Pdo but returns PDOStatement|Zend_Db_Statement_Interface.'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::saveDdlCache() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Parameter #4 $result of method Varien_Db_Adapter_Pdo_Mysql::_debugStat() expects Zend_Db_Statement_Pdo|null, PDOStatement|Zend_Db_Statement_Interface given.'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Return type ($this(Varien_Db_Adapter_Pdo_Mysql)) of method Varien_Db_Adapter_Pdo_Mysql::dropTemporaryTable() should be compatible with return type (bool) of method Varien_Db_Adapter_Interface::dropTemporaryTable()'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Return type (array) of method Varien_Db_Adapter_Pdo_Mysql::multiQuery() should be compatible with return type (Varien_Db_Adapter_Interface) of method Varien_Db_Adapter_Interface::multiQuery()'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: Variable $result might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Select::_tableCols() has parameter $correlationName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Select.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_additional has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_dataType has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_driverOptions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_isBlob has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_length has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_value has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
-
-		-
-			rawMessage: 'Cannot call method bindParam() on object|resource.'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Varien/Db/Statement/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Cannot call method execute() on object|resource.'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Varien/Db/Statement/Pdo/Mysql.php
 
 		-
 			rawMessage: 'Method Varien_Event::getBlock() has no return type specified.'

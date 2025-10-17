@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -40,8 +40,8 @@ class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage
     }
 
     /**
-     * @param Varien_Db_Adapter_Pdo_Mysql $dbAdapter
-     * @return string|Varien_Db_Select
+     * @param Maho\Db\Adapter\Pdo\Mysql $dbAdapter
+     * @return string|Maho\Db\Select
      */
     #[\Override]
     public function getIdsSelect($dbAdapter)

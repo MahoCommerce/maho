@@ -105,7 +105,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -117,7 +117,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         };
     }
 
-    protected function buildCartFieldCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildCartFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['q' => $this->getQuoteTable()], ['customer_id'])
@@ -133,7 +133,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildAppliedRulesCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildAppliedRulesCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['q' => $this->getQuoteTable()], ['customer_id'])
