@@ -80,16 +80,18 @@ app/design/
 ```
 
 ### Database Access Pattern (Doctrine DBAL)
-Maho uses Doctrine DBAL 4.0 for database abstraction, wrapped in Varien compatibility layer.
+Maho uses **Doctrine DBAL 4.3** for all database operations. This is a complete replacement of Zend_Db - no Zend Framework database components remain in the codebase.
 
 **Basic Pattern:**
 - Models extend `Mage_Core_Model_Abstract`
 - Resource models handle database operations
 - Collections for querying multiple records
+- Database adapter: `Maho\Db\Adapter\AdapterInterface` (replaces `Zend_Db_Adapter_Abstract`)
+- Query builder: `Maho\Db\Select` wraps Doctrine's QueryBuilder
 
 **Query Building:**
 ```php
-// Using Varien_Db_Select (wraps Doctrine QueryBuilder)
+// Using Maho\Db\Select (wraps Doctrine QueryBuilder)
 $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
 $select = $adapter->select()
     ->from(['p' => 'catalog_product'], ['entity_id', 'sku'])
@@ -151,6 +153,12 @@ Observers are configured in module's `config.xml`.
 
 ## Development Guidelines
 
+### Critical Rules
+- **NEVER use Zend Framework components** - They have been completely removed from Maho. Use the modern alternatives documented above.
+- **NEVER use Varien_Date or Zend_Date** - Use native PHP DateTime and `Mage_Core_Model_Locale` methods.
+- **NEVER use Zend_Db or Zend_Db_Select directly** - Use `Maho\Db\Select` and `Maho\Db\Adapter\AdapterInterface`.
+
+### General Guidelines
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
 - When you write Javascript, never use prototypejs or jquery, only the most modern vanillajs
 - When making AJAX requests in JavaScript, always use `mahoFetch()` instead of the native `fetch()` API for consistency and proper error handling
@@ -200,8 +208,10 @@ $collection = Mage::getResourceModel('catalog/product_collection')
 
 ## Logging System (Monolog)
 
+Maho uses **Monolog** for all logging operations. Zend_Log has been completely removed from the codebase.
+
 ### Log Level Constants
-Use the new Mage constants instead of Zend_Log constants:
+Use the Mage constants - Zend_Log constants no longer exist:
 ```php
 // OLD - Don't use these anymore
 Zend_Log::ERR, Zend_Log::WARN, Zend_Log::DEBUG
@@ -224,7 +234,9 @@ Mage::logException($e); // Logs to exception.log at ERROR level
 
 ## HTTP Client (Symfony HttpClient)
 
-### Use Symfony HttpClient instead of deprecated clients:
+Maho uses **Symfony HttpClient** for all HTTP operations. Varien_Http_Client and Zend_Http have been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 new Varien_Http_Client();
@@ -238,7 +250,9 @@ $data = $response->getContent();
 
 ## JSON Handling
 
-### Use Core Helper instead of Zend_Json:
+Maho uses **native PHP JSON functions** wrapped in Core Helper. Zend_Json has been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 Zend_Json::encode($data);
@@ -258,7 +272,9 @@ try {
 
 ## Validation (Symfony Validator)
 
-### Use Core Helper instead of Zend_Validate:
+Maho uses **Symfony Validator** wrapped in Core Helper. Zend_Validate has been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 Zend_Validate::is($value, 'NotEmpty');
@@ -277,7 +293,9 @@ Mage::helper('core')->isValidDate($value);
 
 ## Date Handling (Native PHP DateTime)
 
-### Use Mage_Core_Model_Locale instead of Zend_Date/Varien_Date:
+Maho uses **native PHP DateTime** for all date operations. Zend_Date and Varien_Date have been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 Varien_Date::now();
@@ -297,7 +315,9 @@ Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT; // 'Y-m-d\TH:i'
 
 ## Filtering & Locale (Native PHP)
 
-### Use Core Helper filters instead of Zend_Filter:
+Maho uses Core Helpers for filtering. Zend_Filter has been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 new Zend_Filter_LocalizedToNormalized();
@@ -314,8 +334,12 @@ Mage::helper('core')->filterFloat($value);
 
 ## Other Modernizations
 
-- **Exceptions**: Use `Mage_Core_Exception` instead of `Zend_Exception` for custom exception classes.
-- **PDF Generation**: Use DomPdf with HTML/CSS templates instead of `Zend_Pdf` coordinate-based drawing. Extend `Mage_Core_Block_Pdf` for PDF blocks.
+All remaining Zend Framework components have been removed:
+
+- **Exceptions**: Use `Mage_Core_Exception` for custom exception classes. Zend_Exception has been removed.
+- **PDF Generation**: Use **DomPdf** with HTML/CSS templates. Zend_Pdf coordinate-based drawing has been removed. Extend `Mage_Core_Block_Pdf` for PDF blocks.
+- **Filters**: Use `Mage::helper('core')->filter*()` methods. Zend_Filter has been removed.
+- **Cache**: Use native Maho cache system. Zend_Cache has been removed.
 
 ## Testing Approach
 Maho uses Pest PHP as its testing framework with comprehensive test coverage:
