@@ -15,6 +15,7 @@ namespace Maho\Data;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
+use Mage;
 use Maho\DataObject;
 
 class Collection implements IteratorAggregate, Countable
