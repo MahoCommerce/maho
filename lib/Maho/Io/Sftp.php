@@ -12,7 +12,7 @@
 
 namespace Maho\Io;
 
-use phpseclib3\Net\SFTP as PhpSecLibSftp;
+use phpseclib\Net\SFTP as PhpSecLibSftp;
 
 class Sftp extends AbstractIo implements IoInterface
 {
@@ -22,7 +22,7 @@ class Sftp extends AbstractIo implements IoInterface
     /**
      * @var PhpSecLibSftp $_connection
      */
-    protected $_connection = null;
+    protected $_connection = null; // @phpstan-ignore class.notFound
 
     /**
      * Open a SFTP connection to a remote site.
@@ -42,8 +42,8 @@ class Sftp extends AbstractIo implements IoInterface
             $host = $args['host'];
             $port = self::SSH2_PORT;
         }
-        $this->_connection = new PhpSecLibSftp($host, $port, $args['timeout']);
-        if (!$this->_connection->login($args['username'], $args['password'])) {
+        $this->_connection = new PhpSecLibSftp($host, $port, $args['timeout']); // @phpstan-ignore class.notFound
+        if (!$this->_connection->login($args['username'], $args['password'])) { // @phpstan-ignore class.notFound
             throw new \Exception(sprintf('Unable to open SFTP connection as %s@%s', $args['username'], $args['host']));
         }
         return true;
@@ -227,6 +227,6 @@ class Sftp extends AbstractIo implements IoInterface
      */
     public function writeFile($filename, $src)
     {
-        return $this->_connection->put($filename, $src, PhpSecLibSftp::SOURCE_LOCAL_FILE);
+        return $this->_connection->put($filename, $src, PhpSecLibSftp::SOURCE_LOCAL_FILE); // @phpstan-ignore class.notFound,class.notFound
     }
 }
