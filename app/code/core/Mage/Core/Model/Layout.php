@@ -64,15 +64,13 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
 
     /**
      * Class constructor
-     *
-     * @param array $data
      */
-    public function __construct($data = [])
+    public function __construct()
     {
         $this->_elementClass = Mage::getConfig()->getModelClassName('core/layout_element');
         $this->setXml(simplexml_load_string('<layout/>', $this->_elementClass));
         $this->_update = Mage::getModel('core/layout_update');
-        parent::__construct($data);
+        parent::__construct();
     }
 
     /**
