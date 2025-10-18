@@ -128,13 +128,13 @@ abstract class AbstractForm extends \Maho\DataObject
         if (isset($this->_types[$type])) {
             $className = $this->_types[$type];
         } else {
-            $className = '\\Varien_Data_Form_Element_' . ucfirst(strtolower($type));
+            $className = '\\Maho\\Data\\Form\\Element\\' . ucfirst(strtolower($type));
         }
 
         if (class_exists($className)) {
             $element = new $className($config);
         } else {
-            $className = '\\Varien_Data_Form_Element_Note';
+            $className = \Maho\Data\Form\Element\Note::class;
             $element = new $className($config);
         }
         $element->setId($elementId);
@@ -161,7 +161,7 @@ abstract class AbstractForm extends \Maho\DataObject
      */
     public function addFieldset($elementId, $config, $after = false)
     {
-        $element = new \Varien_Data_Form_Element_Fieldset($config);
+        $element = new Element\Fieldset($config);
         $element->setId($elementId);
         $this->addElement($element, $after);
         return $element;
@@ -174,7 +174,7 @@ abstract class AbstractForm extends \Maho\DataObject
      */
     public function addColumn($elementId, $config)
     {
-        $element = new \Varien_Data_Form_Element_Column($config);
+        $element = new Element\Column($config);
         $element->setForm($this)
             ->setId($elementId);
         $this->addElement($element);

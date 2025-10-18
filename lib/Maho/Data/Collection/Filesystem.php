@@ -97,8 +97,8 @@ class Filesystem extends Collection
     /**
      * Filter rendering helper variables
      *
-     * @see Varien_Data_Collection::$_filter
-     * @see Varien_Data_Collection::$_isFiltersRendered
+     * @see \Maho\Data\Collection::$_filter
+     * @see \Maho\Data\Collection::$_isFiltersRendered
      */
     private int $_filterIncrement = 0;
     private array $_filterBrackets = [];
@@ -488,7 +488,7 @@ class Filesystem extends Collection
      * @param string $field
      * @param mixed $cond
      * @param string $type 'and' | 'or'
-     * @see Varien_Data_Collection_Db::addFieldToFilter()
+     * @see \Maho\Data\Collection\Db::addFieldToFilter()
      * @return $this
      */
     public function addFieldToFilter($field, $cond, $type = 'and')

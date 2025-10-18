@@ -2827,8 +2827,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * @param array $options
      * @param string $ddlType Table DDL Column type constant
-     * @throws \Varien_Exception
      * @return string
+     * @throws \Maho\Exception
      * @throws \Maho\Db\Exception
      */
     protected function _getColumnDefinition($options, $ddlType = null)

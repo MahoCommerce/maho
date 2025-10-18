@@ -12,6 +12,7 @@
 
 namespace Maho\Data\Form\Element;
 
+use Maho\Data\Form;
 use Maho\Data\Form\Element\AbstractElement;
 
 /**
@@ -39,7 +40,7 @@ class Fieldset extends AbstractElement
     public function __construct($attributes = [])
     {
         parent::__construct($attributes);
-        $this->_renderer = \Varien_Data_Form::getFieldsetRenderer();
+        $this->_renderer = Form::getFieldsetRenderer();
         $this->setType('fieldset');
     }
 
@@ -109,7 +110,7 @@ class Fieldset extends AbstractElement
     public function addField($elementId, $type, $config, $after = false)
     {
         $element = parent::addField($elementId, $type, $config, $after);
-        if ($renderer = \Varien_Data_Form::getFieldsetElementRenderer()) {
+        if ($renderer = Form::getFieldsetElementRenderer()) {
             $element->setRenderer($renderer);
         }
         return $element;

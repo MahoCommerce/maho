@@ -68,10 +68,10 @@ class Dbp extends Tree
      * Db tree constructor
      *
      * $fields = array(
-     *      Varien_Data_Tree_Dbp::ID_FIELD       => string,
-     *      Varien_Data_Tree_Dbp::PATH_FIELD     => string,
-     *      Varien_Data_Tree_Dbp::ORDER_FIELD    => string
-     *      Varien_Data_Tree_Dbp::LEVEL_FIELD    => string
+     *      self::ID_FIELD       => string,
+     *      self::PATH_FIELD     => string,
+     *      self::ORDER_FIELD    => string
+     *      self::LEVEL_FIELD    => string
      * )
      *
      * @param AdapterInterface $connection

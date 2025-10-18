@@ -135,7 +135,7 @@ class Cache
      */
     public function save($object, $idx = null, $tags = null)
     {
-        //Varien_Profiler::start('OBJECT_SAVE');
+        //Maho\Profiler::start('OBJECT_SAVE');
         if (!is_object($object)) {
             return false;
         }
@@ -174,7 +174,7 @@ class Cache
                 $this->_objectTags[$idx][$t] = true;
             }
         }
-        //Varien_Profiler::stop('OBJECT_SAVE');
+        //Maho\Profiler::stop('OBJECT_SAVE');
 
         return $idx;
     }
@@ -212,18 +212,18 @@ class Cache
      */
     public function delete($idx)
     {
-        //Varien_Profiler::start("OBJECT_DELETE");
+        //Maho\Profiler::start("OBJECT_DELETE");
         if (is_object($idx)) {
             $idx = $this->find($idx);
             if (false === $idx) {
-                //Varien_Profiler::stop("OBJECT_DELETE");
+                //Maho\Profiler::stop("OBJECT_DELETE");
                 return false;
             }
             unset($this->_objects[$idx]);
-            //Varien_Profiler::stop("OBJECT_DELETE");
+            //Maho\Profiler::stop("OBJECT_DELETE");
             return false;
         } elseif (!isset($this->_objects[$idx])) {
-            //Varien_Profiler::stop("OBJECT_DELETE");
+            //Maho\Profiler::stop("OBJECT_DELETE");
             return false;
         }
 
@@ -244,7 +244,7 @@ class Cache
             }
             unset($this->_objectReferences[$idx]);
         }
-        //Varien_Profiler::stop("OBJECT_DELETE");
+        //Maho\Profiler::stop("OBJECT_DELETE");
 
         return true;
     }

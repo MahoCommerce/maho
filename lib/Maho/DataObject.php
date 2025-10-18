@@ -631,30 +631,30 @@ class DataObject implements ArrayAccess, JsonSerializable
     {
         switch (substr($method, 0, 3)) {
             case 'get':
-                //Varien_Profiler::start('GETTER: '.get_class($this).'::'.$method);
+                //Maho\Profiler::start('GETTER: '.get_class($this).'::'.$method);
                 $key = $this->_underscore(substr($method, 3));
                 $data = $this->getData($key, $args[0] ?? null);
-                //Varien_Profiler::stop('GETTER: '.get_class($this).'::'.$method);
+                //Maho\Profiler::stop('GETTER: '.get_class($this).'::'.$method);
                 return $data;
 
             case 'set':
-                //Varien_Profiler::start('SETTER: '.get_class($this).'::'.$method);
+                //Maho\Profiler::start('SETTER: '.get_class($this).'::'.$method);
                 $key = $this->_underscore(substr($method, 3));
                 $result = $this->setData($key, $args[0] ?? null);
-                //Varien_Profiler::stop('SETTER: '.get_class($this).'::'.$method);
+                //Maho\Profiler::stop('SETTER: '.get_class($this).'::'.$method);
                 return $result;
 
             case 'uns':
-                //Varien_Profiler::start('UNS: '.get_class($this).'::'.$method);
+                //Maho\Profiler::start('UNS: '.get_class($this).'::'.$method);
                 $key = $this->_underscore(substr($method, 3));
                 $result = $this->unsetData($key);
-                //Varien_Profiler::stop('UNS: '.get_class($this).'::'.$method);
+                //Maho\Profiler::stop('UNS: '.get_class($this).'::'.$method);
                 return $result;
 
             case 'has':
-                //Varien_Profiler::start('HAS: '.get_class($this).'::'.$method);
+                //Maho\Profiler::start('HAS: '.get_class($this).'::'.$method);
                 $key = $this->_underscore(substr($method, 3));
-                //Varien_Profiler::stop('HAS: '.get_class($this).'::'.$method);
+                //Maho\Profiler::stop('HAS: '.get_class($this).'::'.$method);
                 return isset($this->_data[$key]);
         }
         throw new Exception(
@@ -713,9 +713,9 @@ class DataObject implements ArrayAccess, JsonSerializable
         if (isset(self::$_underscoreCache[$name])) {
             return self::$_underscoreCache[$name];
         }
-        #Varien_Profiler::start('underscore');
+        #Maho\Profiler::start('underscore');
         $result = strtolower(preg_replace('/([A-Z])/', '_$1', lcfirst($name)));
-        #Varien_Profiler::stop('underscore');
+        #Maho\Profiler::stop('underscore');
         self::$_underscoreCache[$name] = $result;
         return $result;
     }
