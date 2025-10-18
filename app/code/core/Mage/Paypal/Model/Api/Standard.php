@@ -187,7 +187,7 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
     /**
      * Import address object, if set, to the request
      *
-     * @param array|Varien_Object $request
+     * @param array|Maho\DataObject $request
      */
     protected function _importAddress(&$request)
     {
@@ -199,7 +199,8 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
             return;
         }
 
-        $request = Varien_Object_Mapper::accumulateByMap($address, $request, array_flip($this->_addressMap));
+        /** @var array|Maho\DataObject $request */
+        $request = Maho\DataObject\Mapper::accumulateByMap($address, $request, array_flip($this->_addressMap));
 
         // Address may come without email info (user is not always required to enter it), so add email from order
         if (!$request['email']) {
