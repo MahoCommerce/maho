@@ -12,6 +12,7 @@
 
 namespace Maho;
 
+use Maho\Event\Observer;
 use Maho\Event\Observer\Collection as ObserverCollection;
 
 class Event extends DataObject

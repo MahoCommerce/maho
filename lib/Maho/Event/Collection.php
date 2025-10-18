@@ -12,6 +12,7 @@
 
 namespace Maho\Event;
 
+use Maho\Event as MahoEvent;
 use Maho\Event\Observer\Collection as ObserverCollection;
 
 class Collection
@@ -73,12 +74,12 @@ class Collection
      * If event doesn't exist creates new one and returns it
      *
      * @param string $eventName
-     * @return Event
+     * @return MahoEvent
      */
     public function getEventByName($eventName)
     {
         if (!isset($this->_events[$eventName])) {
-            $this->addEvent(new Event(['name' => $eventName]));
+            $this->addEvent(new MahoEvent(['name' => $eventName]));
         }
         return $this->_events[$eventName];
     }
@@ -88,7 +89,7 @@ class Collection
      *
      * @return Collection
      */
-    public function addEvent(Event $event)
+    public function addEvent(MahoEvent $event)
     {
         $this->_events[$event->getName()] = $event;
         return $this;

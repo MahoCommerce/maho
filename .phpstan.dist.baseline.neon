@@ -26032,49 +26032,49 @@ parameters:
 			path: lib/Maho/DataObject.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::debug() has parameter $idx with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $idx with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::debug() has parameter $object with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $object with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::deleteByTags() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::deleteByTags() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::findByClass() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByClass() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::findByHash() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::findByHash() has parameter $hash with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has parameter $hash with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::findByIds() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Maho\Object\Cache::findByIds() has parameter $ids with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has parameter $ids with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/DataObject/Cache.php
