@@ -12,11 +12,13 @@
 
 namespace Maho\Data\Collection;
 
+use Mage_Core_Model_Cache;
 use Maho\Data\Collection;
 use Maho\DataObject;
 use Maho\Db\Adapter\AdapterInterface;
 use Maho\Db\Expr;
 use Maho\Db\Select;
+use Maho\Db\Statement\Pdo\Mysql;
 
 class Db extends Collection
 {
@@ -75,7 +77,7 @@ class Db extends Collection
     /**
      * Database's statement for fetch item one by one
      *
-     * @var Maho\Db\Statement\Pdo\Mysql
+     * @var Mysql
      */
     protected $_fetchStmt = null;
 
@@ -284,7 +286,7 @@ class Db extends Collection
      * Get sql select string or object
      *
      * @param   bool $stringMode
-     * @return  string|Maho\Db\Select
+     * @return  string|Select
      */
     public function getSelectSql($stringMode = false)
     {

@@ -283,7 +283,7 @@ class Form extends AbstractForm
             $html .= '<form ' . $this->serialize($this->getHtmlAttributes()) . '>';
             $html .= '<div>';
             if (strtolower((string) $this->getData('method')) == 'post') {
-                $html .= '<input name="form_key" type="hidden" value="' . Mage::getSingleton('core/session')->getFormKey() . '" />';
+                $html .= '<input name="form_key" type="hidden" value="' . \Mage::getSingleton('core/session')->getFormKey() . '" />';
             }
             $html .= '</div>';
         }
