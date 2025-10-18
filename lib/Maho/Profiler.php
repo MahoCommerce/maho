@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -14,14 +16,9 @@ namespace Maho;
 
 class Profiler
 {
-    /**
-     * Timers for code profiling
-     *
-     * @var array
-     */
-    private static $_timers = [];
-    private static $_enabled = false;
-    private static $_memory_get_usage = false;
+    private static array $_timers = [];
+    private static bool $_enabled = false;
+    private static bool $_memory_get_usage = false;
 
     public static function enable(): void
     {
@@ -34,7 +31,7 @@ class Profiler
         self::$_enabled = false;
     }
 
-    public static function reset($timerName): void
+    public static function reset(string $timerName): void
     {
         self::$_timers[$timerName] = [
             'start' => false,
@@ -45,7 +42,7 @@ class Profiler
         ];
     }
 
-    public static function resume($timerName): void
+    public static function resume(string $timerName): void
     {
         if (!self::$_enabled) {
             return;
@@ -62,12 +59,12 @@ class Profiler
         self::$_timers[$timerName]['count']++;
     }
 
-    public static function start($timerName): void
+    public static function start(string $timerName): void
     {
         self::resume($timerName);
     }
 
-    public static function pause($timerName): void
+    public static function pause(string $timerName): void
     {
         if (!self::$_enabled) {
             return;
@@ -88,12 +85,12 @@ class Profiler
         }
     }
 
-    public static function stop($timerName): void
+    public static function stop(string $timerName): void
     {
         self::pause($timerName);
     }
 
-    public static function fetch($timerName, $key = 'sum')
+    public static function fetch(string $timerName, string $key = 'sum'): false|array|int|float
     {
         if (empty(self::$_timers[$timerName])) {
             return false;
@@ -132,16 +129,15 @@ class Profiler
         return false;
     }
 
-    public static function getTimers()
+    public static function getTimers(): array
     {
         return self::$_timers;
     }
 
     /**
-     * Output SQl Zend_Db_Profiler
-     *
+     * Output SQL Profiler
      */
-    public static function getSqlProfiler($res)
+    public static function getSqlProfiler(mixed $res): string
     {
         if (!$res) {
             return '';
