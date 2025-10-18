@@ -40,9 +40,9 @@ class Mapper
      *     <Object> => $from->setData($key, <from>)
      *     array(<Object>, <method>) => $from->$method($key, <from>)
      *
-     * @param array|Object|callable $from
-     * @param array|Object|callable $to
-     * @return array|Object
+     * @param array|DataObject|callable $from
+     * @param array|DataObject|callable $to
+     * @return array|DataObject
      */
     public static function &accumulateByMap($from, $to, array $map, array $defaults = [])
     {
