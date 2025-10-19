@@ -18,7 +18,7 @@ declare(strict_types=1);
  * Used to transmit specific information about parameter value binding to be bound the right
  * way to the query.
  * Most used properties and methods are defined in interface. Specific things for concrete DB adapter can be
- * transmitted using 'additional' property (Varien_Object) as a container.
+ * transmitted using 'additional' property (\Maho\DataObject) as a container.
  */
 
 namespace Maho\Db\Statement;
@@ -57,12 +57,12 @@ class Parameter
     /**
      * Additional information to be used by DB adapter internally
      */
-    protected ?\Varien_Object $_additional = null;
+    protected ?\Maho\DataObject $_additional = null;
 
     public function __construct(mixed $value)
     {
         $this->_value = $value;
-        $this->_additional = new \Varien_Object();
+        $this->_additional = new \Maho\DataObject();
     }
 
     /**
@@ -159,7 +159,7 @@ class Parameter
      * Sets additional information for concrete DB adapter.
      * Set there any data you want to pass along with query parameter.
      */
-    public function setAdditional(\Varien_Object $additional): self
+    public function setAdditional(\Maho\DataObject $additional): self
     {
         $this->_additional = $additional;
         return $this;
@@ -168,7 +168,7 @@ class Parameter
     /**
      * Gets additional information for concrete DB adapter.
      */
-    public function getAdditional(): \Varien_Object
+    public function getAdditional(): \Maho\DataObject
     {
         return $this->_additional;
     }

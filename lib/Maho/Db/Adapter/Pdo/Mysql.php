@@ -546,9 +546,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Parse a source hostname and generate a host info
      *
      */
-    protected function _getHostInfo(string $hostName): \Varien_Object
+    protected function _getHostInfo(string $hostName): \Maho\DataObject
     {
-        $hostInfo = new \Varien_Object();
+        $hostInfo = new \Maho\DataObject();
         $matches = [];
         if (str_contains($hostName, '/')) {
             $hostInfo->setAddressType(self::ADDRESS_TYPE_UNIX_SOCKET)
@@ -2827,8 +2827,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      *
      * @param array $options
      * @param string $ddlType Table DDL Column type constant
-     * @throws \Varien_Exception
      * @return string
+     * @throws \Maho\Exception
      * @throws \Maho\Db\Exception
      */
     protected function _getColumnDefinition($options, $ddlType = null)
