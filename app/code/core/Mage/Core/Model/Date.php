@@ -128,8 +128,8 @@ class Mage_Core_Model_Date
         $date = new DateTime('@' . $result);
         $date->setTimezone(
             new DateTimeZone(
-                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE)
-            )
+                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE),
+            ),
         );
         $timestamp = $date->getTimestamp() - $date->getOffset();
 
@@ -157,8 +157,8 @@ class Mage_Core_Model_Date
         $date = new DateTime('@' . $result);
         $date->setTimezone(
             new DateTimeZone(
-                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE)
-            )
+                Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE),
+            ),
         );
         $timestamp = $date->getTimestamp() + $date->getOffset();
 
