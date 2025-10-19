@@ -129,27 +129,11 @@ try {
 }
 ```
 
-### Event System
-Maho uses an event-driven architecture:
-```php
-Mage::dispatchEvent('event_name', ['data' => $data]);
-```
-Observers are configured in module's `config.xml`.
-
-### Layout System
-- XML-based layout configuration
-- Block hierarchy system
-- Template assignment via layout XML
-
-### Session Management
-- Customer sessions: `Mage::getSingleton('customer/session')`
-- Admin sessions: `Mage::getSingleton('admin/session')`
-- Checkout sessions: `Mage::getSingleton('checkout/session')`
-
-### Translation System
-- CSV-based translations in `app/locale/[locale]/`
-- Helper method: `$this->__('Text to translate')`
-- Admin translations: `Mage::helper('adminhtml')->__('Text')`
+### Other Key Systems
+- **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])` - Observers in `config.xml`
+- **Layout**: XML-based configuration with block hierarchy and template assignment
+- **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
+- **Translations**: CSV files in `app/locale/[locale]/` - Use `$this->__('Text')` in code
 
 ## Development Guidelines
 
@@ -157,6 +141,7 @@ Observers are configured in module's `config.xml`.
 - **NEVER use Zend Framework components** - They have been completely removed from Maho. Use the modern alternatives documented above.
 - **NEVER use Varien_Date or Zend_Date** - Use native PHP DateTime and `Mage_Core_Model_Locale` methods.
 - **NEVER use Zend_Db or Zend_Db_Select directly** - Use `Maho\Db\Select` and `Maho\Db\Adapter\AdapterInterface`.
+- **NEVER use Varien_ prefixed classes in new code** - All Varien classes have been moved to the Maho namespace. Use the new `Maho\*` classes instead (see Varien Migration section below).
 
 ### General Guidelines
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
@@ -206,17 +191,18 @@ $collection = Mage::getResourceModel('catalog/product_collection')
 - Use `Mage::throwException()` for user-facing errors
 - Log errors with `Mage::log()`
 
-## Logging System (Monolog)
+## Modernizations
 
-Maho uses **Monolog** for all logging operations. Zend_Log has been completely removed from the codebase.
+Maho has replaced legacy Zend Framework and Varien components with modern alternatives:
 
-### Log Level Constants
-Use the Mage constants - Zend_Log constants no longer exist:
+### Logging (Monolog)
+
+Zend_Log has been completely removed:
 ```php
-// OLD - Don't use these anymore
+// OLD - Don't use
 Zend_Log::ERR, Zend_Log::WARN, Zend_Log::DEBUG
 
-// NEW - Use these Mage constants
+// NEW - Use Mage constants
 Mage::LOG_EMERGENCY  // System is unusable
 Mage::LOG_ALERT      // Action must be taken immediately  
 Mage::LOG_CRITICAL   // Critical conditions
@@ -232,11 +218,9 @@ Mage::log('Debug info', Mage::LOG_DEBUG, 'custom.log');
 Mage::logException($e); // Logs to exception.log at ERROR level
 ```
 
-## HTTP Client (Symfony HttpClient)
+### HTTP Client (Symfony HttpClient)
 
-Maho uses **Symfony HttpClient** for all HTTP operations. Varien_Http_Client and Zend_Http have been completely removed.
-
-### Usage:
+Varien_Http_Client and Zend_Http have been completely removed:
 ```php
 // OLD - Don't use
 new Varien_Http_Client();
@@ -248,11 +232,9 @@ $response = $client->request('GET', $url);
 $data = $response->getContent();
 ```
 
-## JSON Handling
+### JSON Handling
 
-Maho uses **native PHP JSON functions** wrapped in Core Helper. Zend_Json has been completely removed.
-
-### Usage:
+Zend_Json has been completely removed:
 ```php
 // OLD - Don't use
 Zend_Json::encode($data);
@@ -270,11 +252,9 @@ try {
 }
 ```
 
-## Validation (Symfony Validator)
+### Validation (Symfony Validator)
 
-Maho uses **Symfony Validator** wrapped in Core Helper. Zend_Validate has been completely removed.
-
-### Usage:
+Zend_Validate has been completely removed:
 ```php
 // OLD - Don't use
 Zend_Validate::is($value, 'NotEmpty');
@@ -291,105 +271,35 @@ Mage::helper('core')->isValidUrl($value);
 Mage::helper('core')->isValidDate($value);
 ```
 
-## Date Handling (Native PHP DateTime)
+### Date Handling (Native PHP DateTime)
 
-Maho uses **native PHP DateTime** for all date operations. Zend_Date and Varien_Date have been completely removed. Maho has migrated to native HTML5 date inputs with proper timezone handling.
+Zend_Date and Varien_Date have been completely removed.
 
-### Key Concepts
-- **Database storage**: Always in UTC timezone using `'Y-m-d H:i:s'` format
-- **Display/Input**: Converted to store timezone using HTML5 formats
-- **Store timezone**: Configured per store (default: UTC)
-
-### Date Format Constants
-```php
-Mage_Core_Model_Locale::DATETIME_FORMAT;       // 'Y-m-d H:i:s' (database)
-Mage_Core_Model_Locale::DATE_FORMAT;           // 'Y-m-d'
-Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT; // 'Y-m-d\TH:i' (for datetime-local inputs)
-```
-
-### Converting Database Dates to HTML5 Format (for display)
-Use `storeDate()` to convert UTC dates from database to store timezone for HTML5 inputs:
+**Key Concepts:**
+- **Database storage**: Always UTC in `'Y-m-d H:i:s'` format
+- **Display/Input**: Use `storeDate()` to convert UTC → HTML5 format
+- **Processing**: Use `utcDate()` to convert HTML5 → UTC for database
 
 ```php
-// Convert date (without time) to HTML5 format
-$htmlDate = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
-// Returns: "2025-01-15" (in store timezone)
+// Display: Database (UTC) → HTML5 input
+$html = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
+// "2025-01-15" for type="date"
 
-// Convert datetime (with time) to HTML5 format
-$htmlDateTime = Mage::app()->getLocale()->storeDate(null, $dbDateTime, true, 'html5');
-// Returns: "2025-01-15T14:30" (in store timezone)
+$html = Mage::app()->getLocale()->storeDate(null, $dbDateTime, true, 'html5');
+// "2025-01-15T14:30" for type="datetime-local"
 
-// Parameters:
-// - $store: Store ID (null = current store)
-// - $date: Date string from database, DateTime object, or timestamp
-// - $includeTime: false for date-only, true for datetime
-// - $format: 'html5' for HTML5 native inputs
+// Process: HTML5 input → Database (UTC)
+$utc = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
+$utc = Mage::app()->getLocale()->utcDate(null, $inputDateTime, true, 'html5');
+
+// Current date/time
+Mage_Core_Model_Locale::now();    // 'Y-m-d H:i:s'
+Mage_Core_Model_Locale::today();  // 'Y-m-d'
 ```
 
-### Converting HTML5 Input to UTC (for database storage)
-Use `utcDate()` to convert HTML5 input values back to UTC for database storage:
+### Filtering & Locale
 
-```php
-// Convert HTML5 date input to UTC for database
-$utcDate = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
-// Input: "2025-01-15" (in store timezone)
-// Returns: "2025-01-15 00:00:00" (in UTC)
-
-// Convert HTML5 datetime-local input to UTC for database
-$utcDateTime = Mage::app()->getLocale()->utcDate(null, $inputDateTime, true, 'html5');
-// Input: "2025-01-15T14:30" (in store timezone)
-// Returns: "2025-01-15 14:30:00" (in UTC, adjusted if store timezone differs)
-
-// Parameters:
-// - $store: Store ID (null = current store)
-// - $date: HTML5 input value (YYYY-MM-DD or YYYY-MM-DDTHH:mm)
-// - $includeTime: false for date-only, true for datetime
-// - $format: 'html5' for HTML5 native inputs
-```
-
-### Common Usage Patterns
-
-**In Grid Filters (display):**
-```php
-// Convert database date to HTML5 input value
-$fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, false, 'html5') ?? '';
-$toValue = Mage::app()->getLocale()->storeDate(null, $toDate, false, 'html5') ?? '';
-```
-
-**In Grid Filters (processing input):**
-```php
-// Convert HTML5 input value to UTC for database queries
-$fromDate = Mage::app()->getLocale()->utcDate(null, $value['from'], false, 'html5');
-$toDate = Mage::app()->getLocale()->utcDate(null, $value['to'], false, 'html5');
-```
-
-**In Form Fields:**
-```php
-// Display: Convert model date to HTML5 input
-<input type="date" value="<?= Mage::app()->getLocale()->storeDate(null, $model->getCreatedAt(), false, 'html5') ?>" />
-
-// Process: Convert submitted HTML5 value to UTC before saving
-$model->setCreatedAt(Mage::app()->getLocale()->utcDate(null, $this->getUserParam('date'), false, 'html5'));
-```
-
-### Legacy Methods (still available)
-```php
-// Get current datetime/date as string
-Mage_Core_Model_Locale::now();    // Current datetime in 'Y-m-d H:i:s' format
-Mage_Core_Model_Locale::today();  // Current date in 'Y-m-d' format
-```
-
-### Important Notes
-- Always store dates in UTC in the database
-- Always use `storeDate()` with `'html5'` format when populating HTML5 date/datetime-local inputs
-- Always use `utcDate()` with `'html5'` format when processing HTML5 date/datetime-local inputs
-- HTML5 inputs automatically respect the user's browser locale for display while using ISO 8601 format internally
-
-## Filtering & Locale (Native PHP)
-
-Maho uses Core Helpers for filtering. Zend_Filter has been completely removed.
-
-### Usage:
+Zend_Filter has been completely removed:
 ```php
 // OLD - Don't use
 new Zend_Filter_LocalizedToNormalized();
@@ -404,61 +314,58 @@ Mage::helper('core')->filterInt($value);
 Mage::helper('core')->filterFloat($value);
 ```
 
-## Other Modernizations
+### Varien Classes (Maho Namespace)
 
-All remaining Zend Framework components have been removed:
+All Varien classes have been migrated to the Maho namespace. Class aliases exist for backward compatibility, but **always use the new Maho classes in new code**.
 
-- **Exceptions**: Use `Mage_Core_Exception` for custom exception classes. Zend_Exception has been removed.
-- **PDF Generation**: Use **DomPdf** with HTML/CSS templates. Zend_Pdf coordinate-based drawing has been removed. Extend `Mage_Core_Block_Pdf` for PDF blocks.
-- **Filters**: Use `Mage::helper('core')->filter*()` methods. Zend_Filter has been removed.
-- **Cache**: Use native Maho cache system. Zend_Cache has been removed.
+**Naming Pattern:**
+- `Varien_Class_Name` → `Maho\Class\Name`
+- `Varien_Object` → `Maho\DataObject` (special case)
+- `Varien_Filter_Array` → `Maho\Filter\ArrayFilter`
+- `Varien_Filter_Object` → `Maho\Filter\ObjectFilter`
 
-## Testing Approach
-Maho uses Pest PHP as its testing framework with comprehensive test coverage:
-
-### Test Framework (Pest PHP)
-- **Pest Framework**: Modern PHP testing framework with clean syntax
-- **Three Test Contexts**: Separate base classes for different Maho environments
-  - `MahoFrontendTestCase` - For frontend/customer-facing functionality
-  - `MahoBackendTestCase` - For admin/backend functionality (with `isSecureArea` enabled)
-  - `MahoInstallTestCase` - For installation context tests
-- **Proper Maho Bootstrap**: Each test context initializes Maho with correct paths and settings
-- **Test Isolation**: Clean setup/teardown with `Mage::reset()` between tests
-
-### Test Structure
-```
-tests/
-├── Frontend/           # Frontend context tests
-├── Backend/            # Backend context tests  
-├── Install/            # Install context tests
-├── MahoFrontendTestCase.php
-├── MahoBackendTestCase.php
-├── MahoInstallTestCase.php
-└── Pest.php           # Configuration
-```
-
-### Writing Tests
-Tests must explicitly declare their context:
 ```php
-// Frontend test
+// OLD - Don't use in new code
+new Varien_Object();
+new Varien_Data_Form();
+new Varien_Io_File();
+new Varien_Event_Observer();
+
+// NEW - Always use these
+new Maho\DataObject();
+new Maho\Data\Form();
+new Maho\Io\File();
+new Maho\Event\Observer();
+```
+
+### Other Components
+
+- **Exceptions**: Use `Mage_Core_Exception` (Zend_Exception removed)
+- **PDF Generation**: Use DomPdf with HTML/CSS templates. Extend `Mage_Core_Block_Pdf` (Zend_Pdf removed)
+- **Cache**: Use native Maho cache system (Zend_Cache removed)
+
+## Testing
+
+Maho uses **Pest PHP** with three test contexts:
+
+### Test Contexts
+- `MahoFrontendTestCase` - Frontend/customer-facing tests
+- `MahoBackendTestCase` - Admin/backend tests (with `isSecureArea` enabled)
+- `MahoInstallTestCase` - Installation context tests
+
+```php
 uses(Tests\MahoFrontendTestCase::class);
 
 it('can process customer orders', function () {
-    // Test has full Maho frontend context available
-});
-
-// Backend test  
-uses(Tests\MahoBackendTestCase::class);
-
-it('can manage admin users', function () {
-    // Test has full Maho backend context with isSecureArea enabled
+    // Test code
 });
 ```
 
-### Additional Quality Assurance
-- PHPStan static analysis (level 6)
-- PHP-CS-Fixer for code standards
-- GitHub Actions CI for automated checks
+### Quality Tools
+- **Pest PHP**: Test framework
+- **PHPStan**: Static analysis (level 6)
+- **PHP-CS-Fixer**: Code standards
+- **GitHub Actions**: CI automation
 
 ## Modern PHP Patterns
 
