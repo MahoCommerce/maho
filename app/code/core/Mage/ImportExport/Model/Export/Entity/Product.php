@@ -859,6 +859,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                 }
                 $options = null;
             }
+            unset($storeId);
             foreach ($customOptionsDataPre as $productId => &$optionsData) {
                 $customOptionsData[$productId] = [];
 
@@ -942,6 +943,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                             }
                         }
                     }
+                    unset($colPrefix);
                     if (!empty($customOptionsData[$productId])) {
                         $dataRow = array_merge($dataRow, array_shift($customOptionsData[$productId]));
                     }
@@ -1031,8 +1033,10 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                             }
                             $writer->writeRow($dataRow);
                         }
+                        unset($colPrefix);
                     }
                 }
+                unset($storeId, $dataRow);
             }
         }
         return $writer->getContents();

@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Layout extends Varien_Simplexml_Config
+class Mage_Core_Model_Layout extends Maho\Simplexml\Config
 {
     /**
      * Layout Update module
@@ -64,15 +64,13 @@ class Mage_Core_Model_Layout extends Varien_Simplexml_Config
 
     /**
      * Class constructor
-     *
-     * @param array $data
      */
-    public function __construct($data = [])
+    public function __construct()
     {
         $this->_elementClass = Mage::getConfig()->getModelClassName('core/layout_element');
         $this->setXml(simplexml_load_string('<layout/>', $this->_elementClass));
         $this->_update = Mage::getModel('core/layout_update');
-        parent::__construct($data);
+        parent::__construct();
     }
 
     /**

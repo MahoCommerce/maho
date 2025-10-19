@@ -21,7 +21,7 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Fetch one
      *
-     * @param Varien_Db_Select|string $select
+     * @param Maho\Db\Select|string $select
      * @return string
      */
     public function fetchOne($select)
@@ -32,7 +32,7 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Fetch column
      *
-     * @param Varien_Db_Select|string $select
+     * @param Maho\Db\Select|string $select
      * @return array
      */
     public function fetchCol($select)

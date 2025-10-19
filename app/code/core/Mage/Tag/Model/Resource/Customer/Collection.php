@@ -194,7 +194,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
     /**
      * Gets number of rows
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -202,8 +202,8 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
         $countSelect = parent::getSelectCountSql();
 
         if ($this->_allowDisableGrouping) {
-            $countSelect->reset(Zend_Db_Select::COLUMNS);
-            $countSelect->reset(Zend_Db_Select::GROUP);
+            $countSelect->reset(Maho\Db\Select::COLUMNS);
+            $countSelect->reset(Maho\Db\Select::GROUP);
             $countSelect->columns('COUNT(DISTINCT ' . $this->getCountAttribute() . ')');
         }
         return $countSelect;
@@ -306,7 +306,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
     {
         if ($attribute == 'name') {
             $where = $this->_getConditionSql('t.name', $condition);
-            $this->getSelect()->where($where, null, Varien_Db_Select::TYPE_CONDITION);
+            $this->getSelect()->where($where, null, Maho\Db\Select::TYPE_CONDITION);
             return $this;
         } else {
             return parent::addFieldToFilter($attribute, $condition);
@@ -325,7 +325,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
             parent::_renderOrders();
 
             $orders = $this->getSelect()
-                ->getPart(Zend_Db_Select::ORDER);
+                ->getPart(Maho\Db\Select::ORDER);
 
             $appliedOrders = [];
             foreach ($orders as $order) {
@@ -334,7 +334,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
 
             foreach ($this->_orders as $field => $direction) {
                 if (empty($appliedOrders[$field])) {
-                    $this->_select->order(new Zend_Db_Expr($field . ' ' . $direction));
+                    $this->_select->order(new Maho\Db\Expr($field . ' ' . $direction));
                 }
             }
         }

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,7 +38,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Collection extends Mage_Eav_
         $helper = Mage::getResourceHelper('core');
         foreach ($columns as $labelColumn => $columnData) {
             $retColumns[$labelColumn] = $labelColumn;
-            if ($columnData['DATA_TYPE'] == Varien_Db_Ddl_Table::TYPE_TEXT) {
+            if ($columnData['DATA_TYPE'] == Maho\Db\Ddl\Table::TYPE_TEXT) {
                 $retColumns[$labelColumn] = $helper->castField('main_table.' . $labelColumn);
             }
         }

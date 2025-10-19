@@ -259,8 +259,8 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
          */
         Mage::dispatchEvent('prepare_catalog_product_index_select', [
             'select'        => $select,
-            'entity_field'  => new Zend_Db_Expr('e.entity_id'),
-            'website_field' => new Zend_Db_Expr('website.website_id'),
+            'entity_field'  => new Maho\Db\Expr('e.entity_id'),
+            'website_field' => new Maho\Db\Expr('website.website_id'),
             'store_field'   => $storeId,
         ]);
 
@@ -352,7 +352,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         if ($likeCond != '' && $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE) {
             $where .= ($where ? ' OR ' : '') . $likeCond;
         } elseif ($likeCond != '' && $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE) {
-            $select->columns(['relevance' => new Zend_Db_Expr('0')]);
+            $select->columns(['relevance' => new Maho\Db\Expr('0')]);
             $where = $likeCond;
         }
 
@@ -521,9 +521,9 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
                  */
                 Mage::dispatchEvent('prepare_catalog_product_index_select', [
                     'select'        => $select,
-                    'entity_field'  => new Zend_Db_Expr('t_default.entity_id'),
+                    'entity_field'  => new Maho\Db\Expr('t_default.entity_id'),
                     'website_field' => $websiteId,
-                    'store_field'   => new Zend_Db_Expr('t_store.store_id'),
+                    'store_field'   => new Maho\Db\Expr('t_store.store_id'),
                 ]);
 
                 $selects[] = $select;
@@ -531,7 +531,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         }
 
         if ($selects) {
-            $select = $adapter->select()->union($selects, Zend_Db_Select::SQL_UNION_ALL);
+            $select = $adapter->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
             $query = $adapter->query($select);
             while ($row = $query->fetch()) {
                 $result[$row['entity_id']][$row['attribute_id']] = $row['value'];

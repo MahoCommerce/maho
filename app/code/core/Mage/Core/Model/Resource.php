@@ -31,7 +31,7 @@ class Mage_Core_Model_Resource
     /**
      * Instances of actual connections
      *
-     * @var Varien_Db_Adapter_Pdo_Mysql[]|false
+     * @var array<Maho\Db\Adapter\AdapterInterface>|false
      */
     protected $_connections        = [];
 
@@ -60,7 +60,7 @@ class Mage_Core_Model_Resource
      * Creates a connection to resource whenever needed
      *
      * @param string $name
-     * @return Varien_Db_Adapter_Pdo_Mysql|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     public function getConnection($name)
     {
@@ -109,7 +109,7 @@ class Mage_Core_Model_Resource
     /**
      * Get Instances of actual connections
      *
-     * @return Varien_Db_Adapter_Interface[]|false
+     * @return Maho\Db\Adapter\AdapterInterface[]|false
      */
     public function getConnections()
     {
@@ -136,7 +136,7 @@ class Mage_Core_Model_Resource
      *
      * @param string $type the connection type
      * @param Mage_Core_Model_Config_Element|array $config the connection configuration
-     * @return Varien_Db_Adapter_Interface|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     protected function _newConnection($type, $config)
     {
@@ -155,7 +155,7 @@ class Mage_Core_Model_Resource
             $config['profiler'] = isset($config['profiler']) && $config['profiler'] != 'false';
 
             $connection = new $className($config);
-            if ($connection instanceof Varien_Db_Adapter_Interface) {
+            if ($connection instanceof \Maho\Db\Adapter\AdapterInterface) {
                 // run after initialization statements
                 if (!empty($config['initStatements'])) {
                     $connection->query($config['initStatements']);
@@ -169,7 +169,7 @@ class Mage_Core_Model_Resource
         if (!$connection) {
             $typeInstance = $this->getConnectionTypeInstance($type);
             $connection = $typeInstance->getConnection($config);
-            if (!$connection instanceof Varien_Db_Adapter_Interface) {
+            if (!$connection instanceof \Maho\Db\Adapter\AdapterInterface) {
                 $connection = false;
             }
         }
@@ -181,7 +181,7 @@ class Mage_Core_Model_Resource
      * Retrieve default connection name by required connection name
      *
      * @param string $requiredConnectionName
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     protected function _getDefaultConnection($requiredConnectionName)
     {
@@ -323,7 +323,7 @@ class Mage_Core_Model_Resource
      * @param string $name
      * @param string $type
      * @param array $config
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     public function createConnection($name, $type, $config)
     {
@@ -366,9 +366,9 @@ class Mage_Core_Model_Resource
      * @param string $tableName
      * @param array|string $fields
      * @param string $indexType
-     * @return Varien_Db_Adapter_Interface|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
-    public function getIdxName($tableName, $fields, $indexType = Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX)
+    public function getIdxName($tableName, $fields, $indexType = Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX)
     {
         return $this->getConnection(self::DEFAULT_READ_RESOURCE)
             ->getIndexName($this->getTableName($tableName), $fields, $indexType);

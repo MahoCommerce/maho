@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -177,7 +177,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save titles
      *
-     * @throws Zend_Db_Adapter_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     protected function _saveValueTitles(Mage_Core_Model_Abstract $object)
     {
@@ -352,14 +352,14 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
             $table = $this->getTable('catalog/product_option_title');
 
             $select = $this->_getReadAdapter()->select()
-                ->from($table, [new Zend_Db_Expr($newOptionId), 'store_id', 'title'])
+                ->from($table, [new Maho\Db\Expr($newOptionId), 'store_id', 'title'])
                 ->where('option_id = ?', $oldOptionId);
 
             $insertSelect = $write->insertFromSelect(
                 $select,
                 $table,
                 ['option_id', 'store_id', 'title'],
-                Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE,
+                Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
             );
             $write->query($insertSelect);
 
@@ -367,7 +367,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
             $table = $this->getTable('catalog/product_option_price');
 
             $select = $read->select()
-                ->from($table, [new Zend_Db_Expr($newOptionId), 'store_id', 'price', 'price_type'])
+                ->from($table, [new Maho\Db\Expr($newOptionId), 'store_id', 'price', 'price_type'])
                 ->where('option_id = ?', $oldOptionId);
 
             $insertSelect = $write->insertFromSelect(
@@ -379,7 +379,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                     'price',
                     'price_type',
                 ],
-                Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE,
+                Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
             );
             $write->query($insertSelect);
 
@@ -424,7 +424,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
         );
 
         $select = $adapter->select()
-            ->from(['product_option' => $this->getMainTable()], null)
+            ->from(['product_option' => $this->getMainTable()], [])
             ->join(
                 ['option_title_default' => $this->getTable('catalog/product_option_title')],
                 $defaultOptionJoin,
@@ -458,7 +458,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
         );
 
         $select = $adapter->select()
-            ->from(['product_option' => $this->getMainTable()], null)
+            ->from(['product_option' => $this->getMainTable()], [])
             ->join(
                 ['option_type' => $this->getTable('catalog/product_option_type_value')],
                 'option_type.option_id=product_option.option_id',

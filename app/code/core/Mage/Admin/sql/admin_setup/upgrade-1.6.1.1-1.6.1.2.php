@@ -6,7 +6,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,25 +16,25 @@ $installer->startSetup();
 
 $table = $installer->getConnection()
     ->newTable($installer->getTable('admin/permission_variable'))
-    ->addColumn('variable_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('variable_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Variable ID')
-    ->addColumn('variable_name', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
+    ->addColumn('variable_name', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'primary'   => true,
         'nullable'  => false,
         'default'   => '',
     ], 'Config Path')
-    ->addColumn('is_allowed', Varien_Db_Ddl_Table::TYPE_BOOLEAN, null, [
+    ->addColumn('is_allowed', Maho\Db\Ddl\Table::TYPE_BOOLEAN, null, [
         'nullable'  => false,
         'default'   => 0,
     ], 'Mark that config can be processed by filters')
     ->addIndex(
-        $installer->getIdxName('admin/permission_variable', ['variable_name'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('admin/permission_variable', ['variable_name'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['variable_name'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->setComment('System variables that can be processed via content filter');
 $installer->getConnection()->createTable($table);
@@ -62,24 +62,24 @@ $installer->getConnection()->insertMultiple(
 
 $table = $installer->getConnection()
     ->newTable($installer->getTable('admin/permission_block'))
-    ->addColumn('block_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('block_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Block ID')
-    ->addColumn('block_name', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
+    ->addColumn('block_name', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable'  => false,
         'default'   => '',
     ], 'Block Name')
-    ->addColumn('is_allowed', Varien_Db_Ddl_Table::TYPE_BOOLEAN, null, [
+    ->addColumn('is_allowed', Maho\Db\Ddl\Table::TYPE_BOOLEAN, null, [
         'nullable'  => false,
         'default'   => 0,
     ], 'Mark that block can be processed by filters')
     ->addIndex(
-        $installer->getIdxName('admin/permission_block', ['block_name'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('admin/permission_block', ['block_name'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['block_name'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->setComment('System blocks that can be processed via content filter');
 $installer->getConnection()->createTable($table);

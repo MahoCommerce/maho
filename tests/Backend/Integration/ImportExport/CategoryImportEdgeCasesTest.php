@@ -214,7 +214,7 @@ it('handles concurrent modifications gracefully', function () {
     // Reload and check - should have import changes, not concurrent changes
     $category->load($originalId);
     expect($category->getName())->toBe('Updated Name')
-        ->and($category->getIsActive())->toBe('0');
+        ->and($category->getIsActive())->toBe(0);
 });
 
 it('handles url_key conflicts during import', function () {

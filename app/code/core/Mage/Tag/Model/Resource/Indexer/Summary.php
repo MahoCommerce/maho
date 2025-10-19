@@ -6,7 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -135,7 +135,7 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
                         'tr.store_id',
                         'customers'         => 'COUNT(DISTINCT tr.customer_id)',
                         'products'          => 'COUNT(DISTINCT tr.product_id)',
-                        'popularity'        => new Zend_Db_Expr(
+                        'popularity'        => new Maho\Db\Expr(
                             'COUNT(tr.customer_id) + MIN('
                             . $writeAdapter->getCheckSql(
                                 'tp.base_popularity IS NOT NULL',
@@ -143,9 +143,9 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
                                 '0',
                             ) . ')',
                         ),
-                        'uses'              => new Zend_Db_Expr('0'), // deprecated since 1.4.0.1
-                        'historical_uses'   => new Zend_Db_Expr('0'), // deprecated since 1.4.0.1
-                        'base_popularity'   => new Zend_Db_Expr('0'),  // deprecated since 1.4.0.1
+                        'uses'              => new Maho\Db\Expr('0'), // deprecated since 1.4.0.1
+                        'historical_uses'   => new Maho\Db\Expr('0'), // deprecated since 1.4.0.1
+                        'base_popularity'   => new Maho\Db\Expr('0'),  // deprecated since 1.4.0.1
                     ],
                 )
                 ->joinInner(
@@ -187,9 +187,9 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
 
             Mage::dispatchEvent('prepare_catalog_product_index_select', [
                 'select'        => $select,
-                'entity_field'  => new Zend_Db_Expr('e.entity_id'),
-                'website_field' => new Zend_Db_Expr('cs.website_id'),
-                'store_field'   => new Zend_Db_Expr('cs.store_id'),
+                'entity_field'  => new Maho\Db\Expr('e.entity_id'),
+                'website_field' => new Maho\Db\Expr('cs.website_id'),
+                'store_field'   => new Maho\Db\Expr('cs.store_id'),
             ]);
 
             $writeAdapter->query(
@@ -207,13 +207,13 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
 
             $selectedFields = [
                 'tag_id'            => 'tag_id',
-                'store_id'          => new Zend_Db_Expr('0'),
+                'store_id'          => new Maho\Db\Expr('0'),
                 'customers'         => 'COUNT(DISTINCT customer_id)',
                 'products'          => 'COUNT(DISTINCT product_id)',
                 'popularity'        => 'COUNT(customer_id)',
-                'uses'              => new Zend_Db_Expr('0'), // deprecated since 1.4.0.1
-                'historical_uses'   => new Zend_Db_Expr('0'), // deprecated since 1.4.0.1
-                'base_popularity'   => new Zend_Db_Expr('0'),  // deprecated since 1.4.0.1
+                'uses'              => new Maho\Db\Expr('0'), // deprecated since 1.4.0.1
+                'historical_uses'   => new Maho\Db\Expr('0'), // deprecated since 1.4.0.1
+                'base_popularity'   => new Maho\Db\Expr('0'),  // deprecated since 1.4.0.1
             ];
 
             $agregateSelect = $writeAdapter->select();

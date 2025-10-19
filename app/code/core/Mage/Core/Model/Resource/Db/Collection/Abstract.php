@@ -147,11 +147,11 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
         }
 
         if ($this->_mainTable !== null && $table !== $this->_mainTable && $this->getSelect() !== null) {
-            $from = $this->getSelect()->getPart(Zend_Db_Select::FROM);
+            $from = $this->getSelect()->getPart(Maho\Db\Select::FROM);
             if (isset($from['main_table'])) {
                 $from['main_table']['tableName'] = $table;
             }
-            $this->getSelect()->setPart(Zend_Db_Select::FROM, $from);
+            $this->getSelect()->setPart(Maho\Db\Select::FROM, $from);
         }
 
         $this->_mainTable = $table;
@@ -170,9 +170,9 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     }
 
     /**
-     * Get Zend_Db_Select instance and applies fields to select if needed
+     * Get Maho\Db\Select instance and applies fields to select if needed
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelect()
@@ -191,12 +191,12 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      */
     protected function _initSelectFields()
     {
-        $columns = $this->_select->getPart(Zend_Db_Select::COLUMNS);
+        $columns = $this->_select->getPart(Maho\Db\Select::COLUMNS);
         $columnsToSelect = [];
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
             if ($correlationName !== 'main_table') { // Add joined fields to select
-                if ($column instanceof Zend_Db_Expr) {
+                if ($column instanceof Maho\Db\Expr) {
                     $column = $column->__toString();
                 }
                 $key = $alias ?? $column;
@@ -215,7 +215,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
                     $alias = null;
                 }
 
-                if ($field instanceof Zend_Db_Expr) {
+                if ($field instanceof Maho\Db\Expr) {
                     $column = $field->__toString();
                 } else {
                     $column = $field;
@@ -236,7 +236,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
             array_unshift($columns, ['main_table', '*', null]);
         }
 
-        $this->_select->setPart(Zend_Db_Select::COLUMNS, $columns);
+        $this->_select->setPart(Maho\Db\Select::COLUMNS, $columns);
 
         return $this;
     }
@@ -334,7 +334,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
             $fullExpression = str_replace('{{' . $fieldKey . '}}', $fieldItem, $fullExpression);
         }
 
-        $this->getSelect()->columns([$alias => new Zend_Db_Expr($fullExpression)]);
+        $this->getSelect()->columns([$alias => new Maho\Db\Expr($fullExpression)]);
 
         return $this;
     }
@@ -473,10 +473,10 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     public function getAllIds()
     {
         $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Zend_Db_Select::ORDER);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-        $idsSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $idsSelect->reset(Zend_Db_Select::COLUMNS);
+        $idsSelect->reset(Maho\Db\Select::ORDER);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+        $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $idsSelect->reset(Maho\Db\Select::COLUMNS);
 
         $idsSelect->columns($this->getResource()->getIdFieldName(), 'main_table');
         return $this->getConnection()->fetchCol($idsSelect);
@@ -507,14 +507,13 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      * Prepare select for load
      *
      * @return string
-     * @throws Zend_Db_Select_Exception
      */
-    protected function _prepareSelect(Varien_Db_Select $select)
+    protected function _prepareSelect(\Maho\Db\Select $select)
     {
         /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('core');
 
-        $unionParts = $select->getPart(Zend_Db_Select::UNION);
+        $unionParts = $select->getPart(Maho\Db\Select::UNION);
         if (!empty($unionParts)) {
             $select = $helper->limitUnion($select);
         }
@@ -528,7 +527,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     /**
      * Join table to collection select
      *
-     * @param  array|string|Zend_Db_Expr $table Table name
+     * @param  array|string|Maho\Db\Expr $table Table name
      * @param  string $cond Join on this condition
      * @param  array|string $cols The columns to select from the joined table
      * @return $this
@@ -653,7 +652,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     /**
      * Load cached data for select
      *
-     * @param Zend_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return string | false
      */
     #[\Override]
@@ -666,7 +665,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      * Save collection data to cache
      *
      * @param array $data
-     * @param Zend_Db_Select $select
+     * @param Maho\Db\Select $select
      * @return $this
      */
     #[\Override]

@@ -76,7 +76,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         return $this->getSubfilterSql('e.entity_id', true, $websiteId);
     }
@@ -118,10 +118,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
             case 'days_inactive':
                 $logTable = $resource->getTableName('log/customer');
                 $orderTable = $resource->getTableName('sales/order');
+                $customerTable = $resource->getTableName('customer/entity');
 
                 // Get the most recent activity (login or order), using registration date as fallback
                 $select = $adapter->select()
-                    ->from(['c' => $resource->getTableName('customer/entity')], ['entity_id'])
+                    ->from(['c' => $customerTable], ['entity_id'])
+                    ->where('c.created_at IS NOT NULL') // Exclude customers with invalid registration dates
                     ->joinLeft(
                         ['l' => $logTable],
                         'c.entity_id = l.customer_id',
@@ -164,7 +166,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 $select = $adapter->select()
                     ->from(['o' => $orderTable], [
                         'customer_id',
-                        'days' => new Zend_Db_Expr('DATEDIFF(MAX(o.created_at), MIN(o.created_at)) / GREATEST(COUNT(*) - 1, 1)'),
+                        'days' => new Maho\Db\Expr('DATEDIFF(MAX(o.created_at), MIN(o.created_at)) / GREATEST(COUNT(*) - 1, 1)'),
                     ])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
@@ -179,6 +181,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
             case 'days_without_purchase':
                 $orderTable = $resource->getTableName('sales/order');
+                $customerTable = $resource->getTableName('customer/entity');
 
                 // Get customers who haven't purchased in X days
                 $lastOrderSelect = $adapter->select()
@@ -192,13 +195,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 }
 
                 $select = $adapter->select()
-                    ->from(['lo' => new Zend_Db_Expr("({$lastOrderSelect})")], ['customer_id'])
+                    ->from(['lo' => new Maho\Db\Expr("({$lastOrderSelect})")], ['customer_id'])
                     ->where("DATEDIFF('{$now}', lo.last_order) {$operator} {$value}");
 
                 // Also include customers with no orders if operator allows
                 if (in_array($operator, ['>=', '>'])) {
                     $noOrderSelect = $adapter->select()
-                        ->from(['c' => $resource->getTableName('customer/entity')], ['entity_id'])
+                        ->from(['c' => $customerTable], ['entity_id'])
                         ->joinLeft(
                             ['o' => $orderTable],
                             'c.entity_id = o.customer_id AND o.state NOT IN ("canceled")',
@@ -208,7 +211,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
                     $unionSelect = $adapter->select()->union([$select, $noOrderSelect]);
                     $select = $adapter->select()
-                        ->from(['u' => new Zend_Db_Expr("({$unionSelect})")], ['customer_id']);
+                        ->from(['u' => new Maho\Db\Expr("({$unionSelect})")], ['customer_id']);
                 }
                 break;
 
@@ -218,12 +221,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
         // Build the final condition
         $customerIds = $adapter->select()
-            ->from(['timedata' => new Zend_Db_Expr("({$select})")], ['customer_id']);
+            ->from(['timedata' => new Maho\Db\Expr("({$select})")], ['customer_id']);
 
         if ($requireValid) {
-            return $adapter->quoteInto("{$fieldName} IN (?)", new Zend_Db_Expr((string) $customerIds));
+            return $adapter->quoteInto("{$fieldName} IN (?)", new Maho\Db\Expr((string) $customerIds));
         } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Zend_Db_Expr((string) $customerIds));
+            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $customerIds));
         }
     }
 

@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -115,8 +115,8 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
      * Get select object for loading transaction by the unique key of order_id, payment_id, txn_id
      *
      * @param string $txnId
-     * @param string|array|Zend_Db_Expr $columns
-     * @return Varien_Db_Select
+     * @param string|array|Maho\Db\Expr $columns
+     * @return Maho\Db\Select
      */
     private function _getLoadByUniqueKeySelect($txnId, $columns = '*')
     {

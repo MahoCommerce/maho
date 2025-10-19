@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extends Mage_Rule_Model_Condition_Abstract
 {
-    abstract public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false;
+    abstract public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false;
 
     public function getMappedSqlOperator(): string
     {
@@ -73,7 +73,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         }
     }
 
-    protected function buildSqlCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildSqlCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
         // Fallback for empty operator
         if (empty($operator)) {

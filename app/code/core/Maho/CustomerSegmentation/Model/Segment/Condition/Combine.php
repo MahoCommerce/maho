@@ -222,7 +222,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
         return $newsletterConditions;
     }
 
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $conditions = [];
         $aggregator = $this->getAggregator();

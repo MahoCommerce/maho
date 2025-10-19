@@ -79,11 +79,55 @@ app/design/
 └── install/        # Installer theme
 ```
 
-### Database Access Pattern
+### Database Access Pattern (Doctrine DBAL)
+Maho uses **Doctrine DBAL 4.3** for all database operations. This is a complete replacement of Zend_Db - no Zend Framework database components remain in the codebase.
+
+**Basic Pattern:**
 - Models extend `Mage_Core_Model_Abstract`
 - Resource models handle database operations
 - Collections for querying multiple records
-- Uses Zend_Db adapters for database abstraction
+- Database adapter: `Maho\Db\Adapter\AdapterInterface` (replaces `Zend_Db_Adapter_Abstract`)
+- Query builder: `Maho\Db\Select` wraps Doctrine's QueryBuilder
+
+**Query Building:**
+```php
+// Using Maho\Db\Select (wraps Doctrine QueryBuilder)
+$adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+$select = $adapter->select()
+    ->from(['p' => 'catalog_product'], ['entity_id', 'sku'])
+    ->where('status = ?', 1)
+    ->order('created_at DESC');
+
+// Raw SQL expressions - use Maho\Db\Expr to prevent quoting
+$select->columns([
+    'total' => new Maho\Db\Expr('COUNT(*)'),
+    'sum' => new Maho\Db\Expr('SUM(price)')
+]);
+```
+
+**Direct Queries:**
+```php
+// Read query
+$result = $adapter->fetchAll($select);
+
+// Write operations
+$adapter->insert('table_name', ['column' => 'value']);
+$adapter->update('table_name', ['column' => 'new_value'], 'id = 1');
+$adapter->delete('table_name', 'id = 1');
+```
+
+**Transactions:**
+```php
+// Nested transactions are safe (counted internally)
+$adapter->beginTransaction();
+try {
+    // operations
+    $adapter->commit();
+} catch (Exception $e) {
+    $adapter->rollBack();
+    throw $e;
+}
+```
 
 ### Event System
 Maho uses an event-driven architecture:
@@ -109,6 +153,12 @@ Observers are configured in module's `config.xml`.
 
 ## Development Guidelines
 
+### Critical Rules
+- **NEVER use Zend Framework components** - They have been completely removed from Maho. Use the modern alternatives documented above.
+- **NEVER use Varien_Date or Zend_Date** - Use native PHP DateTime and `Mage_Core_Model_Locale` methods.
+- **NEVER use Zend_Db or Zend_Db_Select directly** - Use `Maho\Db\Select` and `Maho\Db\Adapter\AdapterInterface`.
+
+### General Guidelines
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
 - When you write Javascript, never use prototypejs or jquery, only the most modern vanillajs
 - When making AJAX requests in JavaScript, always use `mahoFetch()` instead of the native `fetch()` API for consistency and proper error handling
@@ -158,8 +208,10 @@ $collection = Mage::getResourceModel('catalog/product_collection')
 
 ## Logging System (Monolog)
 
+Maho uses **Monolog** for all logging operations. Zend_Log has been completely removed from the codebase.
+
 ### Log Level Constants
-Use the new Mage constants instead of Zend_Log constants:
+Use the Mage constants - Zend_Log constants no longer exist:
 ```php
 // OLD - Don't use these anymore
 Zend_Log::ERR, Zend_Log::WARN, Zend_Log::DEBUG
@@ -182,7 +234,9 @@ Mage::logException($e); // Logs to exception.log at ERROR level
 
 ## HTTP Client (Symfony HttpClient)
 
-### Use Symfony HttpClient instead of deprecated clients:
+Maho uses **Symfony HttpClient** for all HTTP operations. Varien_Http_Client and Zend_Http have been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 new Varien_Http_Client();
@@ -196,7 +250,9 @@ $data = $response->getContent();
 
 ## JSON Handling
 
-### Use Core Helper instead of Zend_Json:
+Maho uses **native PHP JSON functions** wrapped in Core Helper. Zend_Json has been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 Zend_Json::encode($data);
@@ -216,7 +272,9 @@ try {
 
 ## Validation (Symfony Validator)
 
-### Use Core Helper instead of Zend_Validate:
+Maho uses **Symfony Validator** wrapped in Core Helper. Zend_Validate has been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 Zend_Validate::is($value, 'NotEmpty');
@@ -235,27 +293,103 @@ Mage::helper('core')->isValidDate($value);
 
 ## Date Handling (Native PHP DateTime)
 
-### Use Mage_Core_Model_Locale instead of Zend_Date/Varien_Date:
+Maho uses **native PHP DateTime** for all date operations. Zend_Date and Varien_Date have been completely removed. Maho has migrated to native HTML5 date inputs with proper timezone handling.
+
+### Key Concepts
+- **Database storage**: Always in UTC timezone using `'Y-m-d H:i:s'` format
+- **Display/Input**: Converted to store timezone using HTML5 formats
+- **Store timezone**: Configured per store (default: UTC)
+
+### Date Format Constants
 ```php
-// OLD - Don't use
-Varien_Date::now();
-Zend_Date::now();
-Varien_Date::toTimestamp($date);
-
-// NEW - Use these methods
-Mage_Core_Model_Locale::now();           // Current datetime as string
-Mage_Core_Model_Locale::today();         // Current date as string
-strtotime($dateString);                  // Convert to timestamp
-
-// Date format constants
-Mage_Core_Model_Locale::DATETIME_FORMAT;     // 'Y-m-d H:i:s'
-Mage_Core_Model_Locale::DATE_FORMAT;         // 'Y-m-d' 
-Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT; // 'Y-m-d\TH:i'
+Mage_Core_Model_Locale::DATETIME_FORMAT;       // 'Y-m-d H:i:s' (database)
+Mage_Core_Model_Locale::DATE_FORMAT;           // 'Y-m-d'
+Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT; // 'Y-m-d\TH:i' (for datetime-local inputs)
 ```
+
+### Converting Database Dates to HTML5 Format (for display)
+Use `storeDate()` to convert UTC dates from database to store timezone for HTML5 inputs:
+
+```php
+// Convert date (without time) to HTML5 format
+$htmlDate = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
+// Returns: "2025-01-15" (in store timezone)
+
+// Convert datetime (with time) to HTML5 format
+$htmlDateTime = Mage::app()->getLocale()->storeDate(null, $dbDateTime, true, 'html5');
+// Returns: "2025-01-15T14:30" (in store timezone)
+
+// Parameters:
+// - $store: Store ID (null = current store)
+// - $date: Date string from database, DateTime object, or timestamp
+// - $includeTime: false for date-only, true for datetime
+// - $format: 'html5' for HTML5 native inputs
+```
+
+### Converting HTML5 Input to UTC (for database storage)
+Use `utcDate()` to convert HTML5 input values back to UTC for database storage:
+
+```php
+// Convert HTML5 date input to UTC for database
+$utcDate = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
+// Input: "2025-01-15" (in store timezone)
+// Returns: "2025-01-15 00:00:00" (in UTC)
+
+// Convert HTML5 datetime-local input to UTC for database
+$utcDateTime = Mage::app()->getLocale()->utcDate(null, $inputDateTime, true, 'html5');
+// Input: "2025-01-15T14:30" (in store timezone)
+// Returns: "2025-01-15 14:30:00" (in UTC, adjusted if store timezone differs)
+
+// Parameters:
+// - $store: Store ID (null = current store)
+// - $date: HTML5 input value (YYYY-MM-DD or YYYY-MM-DDTHH:mm)
+// - $includeTime: false for date-only, true for datetime
+// - $format: 'html5' for HTML5 native inputs
+```
+
+### Common Usage Patterns
+
+**In Grid Filters (display):**
+```php
+// Convert database date to HTML5 input value
+$fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, false, 'html5') ?? '';
+$toValue = Mage::app()->getLocale()->storeDate(null, $toDate, false, 'html5') ?? '';
+```
+
+**In Grid Filters (processing input):**
+```php
+// Convert HTML5 input value to UTC for database queries
+$fromDate = Mage::app()->getLocale()->utcDate(null, $value['from'], false, 'html5');
+$toDate = Mage::app()->getLocale()->utcDate(null, $value['to'], false, 'html5');
+```
+
+**In Form Fields:**
+```php
+// Display: Convert model date to HTML5 input
+<input type="date" value="<?= Mage::app()->getLocale()->storeDate(null, $model->getCreatedAt(), false, 'html5') ?>" />
+
+// Process: Convert submitted HTML5 value to UTC before saving
+$model->setCreatedAt(Mage::app()->getLocale()->utcDate(null, $this->getUserParam('date'), false, 'html5'));
+```
+
+### Legacy Methods (still available)
+```php
+// Get current datetime/date as string
+Mage_Core_Model_Locale::now();    // Current datetime in 'Y-m-d H:i:s' format
+Mage_Core_Model_Locale::today();  // Current date in 'Y-m-d' format
+```
+
+### Important Notes
+- Always store dates in UTC in the database
+- Always use `storeDate()` with `'html5'` format when populating HTML5 date/datetime-local inputs
+- Always use `utcDate()` with `'html5'` format when processing HTML5 date/datetime-local inputs
+- HTML5 inputs automatically respect the user's browser locale for display while using ISO 8601 format internally
 
 ## Filtering & Locale (Native PHP)
 
-### Use Core Helper filters instead of Zend_Filter:
+Maho uses Core Helpers for filtering. Zend_Filter has been completely removed.
+
+### Usage:
 ```php
 // OLD - Don't use
 new Zend_Filter_LocalizedToNormalized();
@@ -272,8 +406,12 @@ Mage::helper('core')->filterFloat($value);
 
 ## Other Modernizations
 
-- **Exceptions**: Use `Mage_Core_Exception` instead of `Zend_Exception` for custom exception classes.
-- **PDF Generation**: Use DomPdf with HTML/CSS templates instead of `Zend_Pdf` coordinate-based drawing. Extend `Mage_Core_Block_Pdf` for PDF blocks.
+All remaining Zend Framework components have been removed:
+
+- **Exceptions**: Use `Mage_Core_Exception` for custom exception classes. Zend_Exception has been removed.
+- **PDF Generation**: Use **DomPdf** with HTML/CSS templates. Zend_Pdf coordinate-based drawing has been removed. Extend `Mage_Core_Block_Pdf` for PDF blocks.
+- **Filters**: Use `Mage::helper('core')->filter*()` methods. Zend_Filter has been removed.
+- **Cache**: Use native Maho cache system. Zend_Cache has been removed.
 
 ## Testing Approach
 Maho uses Pest PHP as its testing framework with comprehensive test coverage:

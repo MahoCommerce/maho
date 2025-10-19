@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,31 +19,31 @@ $connection = $installer->getConnection();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('catalog/product_attribute_group_price'))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value ID')
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Entity ID')
-    ->addColumn('all_groups', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('all_groups', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ], 'Is Applicable To All Customer Groups')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Customer Group ID')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
         'default'   => '0.0000',
     ], 'Value')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Website ID')
@@ -51,10 +51,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'catalog/product_attribute_group_price',
             ['entity_id', 'all_groups', 'customer_group_id', 'website_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+            Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
         ),
         ['entity_id', 'all_groups', 'customer_group_id', 'website_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('catalog/product_attribute_group_price', ['entity_id']),
@@ -78,8 +78,8 @@ $table = $installer->getConnection()
         'customer_group_id',
         $installer->getTable('customer/customer_group'),
         'customer_group_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -91,8 +91,8 @@ $table = $installer->getConnection()
         'entity_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -104,8 +104,8 @@ $table = $installer->getConnection()
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Product Group Price Attribute Backend Table');
 $installer->getConnection()->createTable($table);
@@ -127,22 +127,22 @@ $installer->addAttribute('catalog_product', 'group_price', [
  */
 $table = $connection
     ->newTable($installer->getTable('catalog/product_index_group_price'))
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Entity ID')
-    ->addColumn('customer_group_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('customer_group_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer Group ID')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Website ID')
-    ->addColumn('price', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('price', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Min Price')
     ->addIndex(
         $installer->getIdxName('catalog/product_index_group_price', ['customer_group_id']),
@@ -162,8 +162,8 @@ $table = $connection
         'customer_group_id',
         $installer->getTable('customer/customer_group'),
         'customer_group_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -175,8 +175,8 @@ $table = $connection
         'entity_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -188,8 +188,8 @@ $table = $connection
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Product Group Price Index Table');
 $connection->createTable($table);
@@ -215,12 +215,12 @@ $priceIndexerTables =  [
 
 foreach ($finalPriceIndexerTables as $table) {
     $connection->addColumn($installer->getTable($table), 'group_price', [
-        'type'      => Varien_Db_Ddl_Table::TYPE_DECIMAL,
+        'type'      => Maho\Db\Ddl\Table::TYPE_DECIMAL,
         'length'    => '12,4',
         'comment'   => 'Group price',
     ]);
     $connection->addColumn($installer->getTable($table), 'base_group_price', [
-        'type'      => Varien_Db_Ddl_Table::TYPE_DECIMAL,
+        'type'      => Maho\Db\Ddl\Table::TYPE_DECIMAL,
         'length'    => '12,4',
         'comment'   => 'Base Group Price',
     ]);
@@ -228,7 +228,7 @@ foreach ($finalPriceIndexerTables as $table) {
 
 foreach ($priceIndexerTables as $table) {
     $connection->addColumn($installer->getTable($table), 'group_price', [
-        'type'      => Varien_Db_Ddl_Table::TYPE_DECIMAL,
+        'type'      => Maho\Db\Ddl\Table::TYPE_DECIMAL,
         'length'    => '12,4',
         'comment'   => 'Group price',
     ]);

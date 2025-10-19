@@ -6,7 +6,7 @@
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,7 +75,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
                 return $this;
         }
 
-        /** @var Varien_Db_Select $select */
+        /** @var Maho\Db\Select $select */
         $select = $observer->getEvent()->getSelect();
         $table = $observer->getEvent()->getTable();
 
@@ -135,8 +135,8 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
                 ->where("{$quotedTableAlias}.state IN(?)", [$rateRequest->getRegionId(), '*']);
 
             $order = [
-                sprintf('%s.state %s', $tableAlias, Varien_Db_Select::SQL_DESC),
-                sprintf('%s.website_id %s', $tableAlias, Varien_Db_Select::SQL_DESC),
+                sprintf('%s.state %s', $tableAlias, Maho\Db\Select::SQL_DESC),
+                sprintf('%s.website_id %s', $tableAlias, Maho\Db\Select::SQL_DESC),
             ];
             $attributeSelect->order($order);
 
@@ -153,7 +153,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
     /**
      * Get empty select object
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getSelect()
     {

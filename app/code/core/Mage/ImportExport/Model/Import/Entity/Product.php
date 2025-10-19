@@ -1125,7 +1125,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $resource       = Mage::getResourceModel('catalog/product_link');
         $mainTable      = $resource->getMainTable();
         $positionAttrId = [];
-        /** @var Varien_Db_Adapter_Interface $adapter */
+        /** @var Maho\Db\Adapter\AdapterInterface $adapter */
         $adapter = $this->_connection;
 
         // pre-load 'position' attributes ID for each link type once
@@ -1983,7 +1983,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * DB connection getter.
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\Pdo\Mysql
      */
     public function getConnection()
     {

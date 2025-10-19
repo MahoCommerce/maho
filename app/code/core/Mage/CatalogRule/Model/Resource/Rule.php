@@ -120,7 +120,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function cleanProductData($ruleId, array $productIds = [])
     {
-        /** @var Varien_Db_Adapter_Interface $write */
+        /** @var Maho\Db\Adapter\AdapterInterface $write */
         $write = $this->_getWriteAdapter();
 
         $conditions = ['rule_id = ?' => $ruleId];
@@ -164,7 +164,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function insertRuleData(Mage_CatalogRule_Model_Rule $rule, array $websiteIds, array $productIds = [])
     {
-        /** @var Varien_Db_Adapter_Interface $write */
+        /** @var Maho\Db\Adapter\AdapterInterface $write */
         $write = $this->_getWriteAdapter();
 
         $customerGroupIds = $rule->getCustomerGroupIds();
@@ -200,20 +200,20 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                             $write->quoteInto('cg.customer_group_id IN (?)', $customerGroupIds),
                             ['cg.customer_group_id'],
                         )
-                        ->reset(Varien_Db_Select::COLUMNS)
+                        ->reset(Maho\Db\Select::COLUMNS)
                         ->columns([
-                            new Zend_Db_Expr((string) $store->getWebsiteId()),
+                            new Maho\Db\Expr((string) $store->getWebsiteId()),
                             'cg.customer_group_id',
                             'p.entity_id',
-                            new Zend_Db_Expr($rule->getId()),
-                            new Zend_Db_Expr((string) $fromTime),
-                            new Zend_Db_Expr((string) $toTime),
-                            new Zend_Db_Expr("'" . $actionOperator . "'"),
-                            new Zend_Db_Expr((string) $actionAmount),
-                            new Zend_Db_Expr((string) $actionStop),
-                            new Zend_Db_Expr((string) $sortOrder),
-                            new Zend_Db_Expr("'" . $subActionOperator . "'"),
-                            new Zend_Db_Expr((string) $subActionAmount),
+                            new Maho\Db\Expr($rule->getId()),
+                            new Maho\Db\Expr((string) $fromTime),
+                            new Maho\Db\Expr((string) $toTime),
+                            new Maho\Db\Expr("'" . $actionOperator . "'"),
+                            new Maho\Db\Expr((string) $actionAmount),
+                            new Maho\Db\Expr((string) $actionStop),
+                            new Maho\Db\Expr((string) $sortOrder),
+                            new Maho\Db\Expr("'" . $subActionOperator . "'"),
+                            new Maho\Db\Expr((string) $subActionAmount),
                         ]);
 
                     if (count($productIds) > 0) {
@@ -240,7 +240,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                                     'sub_simple_action',
                                     'sub_discount_amount',
                                 ],
-                                Varien_Db_Adapter_Interface::INSERT_IGNORE,
+                                Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
                             ),
                         );
                     }
@@ -416,7 +416,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * @param int|null $productId
      * @param int|null $websiteId
      *
-     * @return Zend_Db_Statement_Interface
+     * @return Maho\Db\Statement\Pdo\Mysql
      */
     protected function _getRuleProductsStmt($fromDate, $toDate, $productId = null, $websiteId = null)
     {

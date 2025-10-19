@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -383,7 +383,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
 
             $selectFields = [
                 't_v_default.entity_id',
-                new Zend_Db_Expr((string) $storeId),
+                new Maho\Db\Expr((string) $storeId),
                 $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
             ];
 
@@ -411,8 +411,8 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             ];
 
             $selectFields = [
-                new Zend_Db_Expr($productId),
-                new Zend_Db_Expr((string) $storeId),
+                new Maho\Db\Expr($productId),
+                new Maho\Db\Expr((string) $storeId),
                 $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
             ];
 
@@ -561,7 +561,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
                     'entity_type_id',
                     'attribute_id',
                     'store_id',
-                    'entity_id' => new Zend_Db_Expr($adapter->quote($newId)),
+                    'entity_id' => new Maho\Db\Expr($adapter->quote($newId)),
                     'value',
                 ])
                 ->where('entity_id = ?', $oldId)
@@ -577,7 +577,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
                     'entity_id',
                     'value',
                 ],
-                Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE,
+                Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
             ));
         }
 

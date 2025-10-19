@@ -157,7 +157,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $this->generateSitemapIndex($storeId, $baseUrl, $date);
 
         $this->setSitemapTime(
-            Mage::getSingleton('core/date')->gmtDate(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT),
+            Mage::getSingleton('core/date')->gmtDate(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT),
         );
         $this->save();
 

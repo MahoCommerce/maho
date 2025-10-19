@@ -6,7 +6,7 @@
  * @package    Mage_Rating
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,7 +41,7 @@ class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abst
      * @param string $field
      * @param mixed $value
      * @param Mage_Rating_Model_Rating $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -292,8 +292,8 @@ class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abst
     protected function _getEntitySummaryData($object)
     {
         $adapter     = $this->_getReadAdapter();
-        $sumColumn   = new Zend_Db_Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
-        $countColumn = new Zend_Db_Expr('COUNT(*)');
+        $sumColumn   = new Maho\Db\Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
+        $countColumn = new Maho\Db\Expr('COUNT(*)');
 
         $select = $adapter->select()
             ->from(
@@ -349,8 +349,8 @@ class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abst
     {
         $adapter = $this->_getReadAdapter();
 
-        $sumColumn      = new Zend_Db_Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
-        $countColumn    = new Zend_Db_Expr('COUNT(*)');
+        $sumColumn      = new Maho\Db\Expr("SUM(rating_vote.{$adapter->quoteIdentifier('percent')})");
+        $countColumn    = new Maho\Db\Expr('COUNT(*)');
         $select = $adapter->select()
             ->from(
                 ['rating_vote' => $this->getTable('rating/rating_option_vote')],

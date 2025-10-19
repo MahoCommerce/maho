@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,7 +51,7 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
         $select   = $adapter->select()
             ->from(['bo' => $this->getTable('bundle/option')], ['parent_id']);
         $this->_addWebsiteJoinToSelect($select, false);
-        $status = new Zend_Db_Expr('MAX(' .
+        $status = new Maho\Db\Expr('MAX(' .
                 $adapter->getCheckSql('e.required_options = 0', 'i.stock_status', '0') . ')');
         $select->columns('website_id', 'cw')
             ->join(
@@ -105,7 +105,7 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
      *
      * @param int|array $entityIds
      * @param bool $usePrimaryTable use primary or temporary index table
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getStockStatusSelect($entityIds = null, $usePrimaryTable = false)
@@ -133,7 +133,7 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
                 'o.entity_id = e.entity_id AND o.website_id = cw.website_id AND o.stock_id = cis.stock_id',
                 [],
             )
-            ->columns(['qty' => new Zend_Db_Expr('0')])
+            ->columns(['qty' => new Maho\Db\Expr('0')])
             ->where('cw.website_id != 0')
             ->where('e.type_id = ?', $this->getTypeId())
             ->group(['e.entity_id', 'cw.website_id', 'cis.stock_id']);
@@ -157,8 +157,8 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
         }
 
         $select->columns(['status' => $adapter->getLeastSql([
-            new Zend_Db_Expr('MIN(' . $adapter->getCheckSql('o.stock_status IS NOT NULL', 'o.stock_status', '0') . ')'),
-            new Zend_Db_Expr('MIN(' . $statusExpr . ')'),
+            new Maho\Db\Expr('MIN(' . $adapter->getCheckSql('o.stock_status IS NOT NULL', 'o.stock_status', '0') . ')'),
+            new Maho\Db\Expr('MIN(' . $statusExpr . ')'),
         ])]);
 
         if (!is_null($entityIds)) {

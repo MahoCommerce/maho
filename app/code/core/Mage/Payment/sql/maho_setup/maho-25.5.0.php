@@ -16,48 +16,48 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('payment/restriction'))
-    ->addColumn('restriction_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('restriction_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Restriction ID')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable'  => false,
     ], 'Restriction Name')
-    ->addColumn('description', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('description', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Description')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ], 'Status')
-    ->addColumn('payment_methods', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('payment_methods', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => false,
     ], 'Payment Methods (comma-separated)')
-    ->addColumn('customer_groups', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('customer_groups', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Customer Groups (comma-separated)')
-    ->addColumn('websites', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('websites', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Websites (comma-separated)')
-    ->addColumn('from_date', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
+    ->addColumn('from_date', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
         'nullable'  => true,
     ], 'From Date')
-    ->addColumn('to_date', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
+    ->addColumn('to_date', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
         'nullable'  => true,
     ], 'To Date')
-    ->addColumn('conditions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('conditions_serialized', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Serialized conditions for payment restrictions')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Created At')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('payment/restriction', ['status']),

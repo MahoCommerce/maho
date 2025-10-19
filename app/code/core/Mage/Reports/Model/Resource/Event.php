@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -69,7 +69,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
         $derivedSelect = $this->getReadConnection()->select()
             ->from(
                 $this->getTable('reports/event'),
-                ['event_id' => new Zend_Db_Expr('MAX(event_id)'), 'object_id'],
+                ['event_id' => new Maho\Db\Expr('MAX(event_id)'), 'object_id'],
             )
             ->where('event_type_id = ?', (int) $eventTypeId)
             ->where('subject_id = ?', (int) $eventSubjectId)
@@ -86,11 +86,11 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
 
         $collection->getSelect()
             ->joinInner(
-                ['evt' => new Zend_Db_Expr("({$derivedSelect})")],
+                ['evt' => new Maho\Db\Expr("({$derivedSelect})")],
                 "{$idFieldName} = evt.object_id",
                 [],
             )
-            ->order('evt.event_id ' . Varien_Db_Select::SQL_DESC);
+            ->order('evt.event_id ' . Maho\Db\Select::SQL_DESC);
 
         return $this;
     }

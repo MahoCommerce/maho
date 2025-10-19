@@ -21,7 +21,7 @@ $connection->addColumn(
     $installer->getTable('cms/page'),
     'meta_robots',
     [
-        'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'    => 50,
         'nullable'  => true,
         'comment'   => 'Meta Robots',

@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,7 +37,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
         $timesUsed = $read->fetchOne($select, [':coupon_id' => $couponId, ':customer_id' => $customerId]);
 
         if ($timesUsed !== false) {
-            $timesUsed += ($decrement ? -1 : 1);
+            $timesUsed = (int) $timesUsed + ($decrement ? -1 : 1);
             if ($timesUsed >= 0) {
                 $this->_getWriteAdapter()->update(
                     $this->getMainTable(),

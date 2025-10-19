@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,7 +14,7 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
 {
     /**
      * @param array $config Connection config
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\Pdo\Mysql
      */
     public function getConnection($config)
     {
@@ -34,7 +34,7 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
      * Create and return DB adapter object instance
      *
      * @param array $configArr Connection config
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\Pdo\Mysql
      */
     protected function _getDbAdapterInstance($configArr)
     {
@@ -49,6 +49,6 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
      */
     protected function _getDbAdapterClassName()
     {
-        return 'Varien_Db_Adapter_Pdo_Mysql';
+        return \Maho\Db\Adapter\Pdo\Mysql::class;
     }
 }

@@ -228,7 +228,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
                 ->from($this->getTable('eav/attribute_set'), 'MAX(sort_order)')
                 ->where('entity_type_id = :entity_type_id');
 
-            $sortOrder = $this->_conn->fetchOne($select, $bind) + 1;
+            $sortOrder = (int) $this->_conn->fetchOne($select, $bind) + 1;
         }
 
         return $sortOrder;
@@ -415,7 +415,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
                 ->from($this->getTable('eav/attribute_group'), 'MAX(sort_order)')
                 ->where('attribute_set_id = :attribute_set_id');
 
-            $sortOrder = $this->_conn->fetchOne($select, $bind) + 1;
+            $sortOrder = (int) $this->_conn->fetchOne($select, $bind) + 1;
         }
 
         return $sortOrder;
@@ -576,7 +576,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
         $select = $this->getConnection()->select()
             ->from($this->getTable('eav/attribute_group'), 'attribute_group_id')
             ->where('attribute_set_id = :attribute_set_id')
-            ->order(['default_id ' . Varien_Db_Select::SQL_DESC, 'sort_order'])
+            ->order(['default_id ' . Maho\Db\Select::SQL_DESC, 'sort_order'])
             ->limit(1);
 
         return $this->getConnection()->fetchOne($select, $bind);
@@ -1053,7 +1053,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
                 ->from($this->getTable('eav/entity_attribute'), 'MAX(sort_order)')
                 ->where('attribute_group_id = :attribute_group_id');
 
-            $sortOrder = $this->_conn->fetchOne($select, $bind) + 1;
+            $sortOrder = (int) $this->_conn->fetchOne($select, $bind) + 1;
         }
 
         return $sortOrder;

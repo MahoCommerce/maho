@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -72,10 +72,10 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
                 'period'            => $periodExpr,
                 'store_id'          => 'store_id',
                 'order_status'      => 'status',
-                'orders_count'      => new Zend_Db_Expr('COUNT(total_refunded)'),
-                'refunded'          => new Zend_Db_Expr('SUM(base_total_refunded * base_to_global_rate)'),
-                'online_refunded'   => new Zend_Db_Expr('SUM(base_total_online_refunded * base_to_global_rate)'),
-                'offline_refunded'  => new Zend_Db_Expr('SUM(base_total_offline_refunded * base_to_global_rate)'),
+                'orders_count'      => new Maho\Db\Expr('COUNT(total_refunded)'),
+                'refunded'          => new Maho\Db\Expr('SUM(base_total_refunded * base_to_global_rate)'),
+                'online_refunded'   => new Maho\Db\Expr('SUM(base_total_online_refunded * base_to_global_rate)'),
+                'offline_refunded'  => new Maho\Db\Expr('SUM(base_total_offline_refunded * base_to_global_rate)'),
             ];
 
             $select = $adapter->select();
@@ -104,12 +104,12 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
 
             $columns = [
                 'period'            => 'period',
-                'store_id'          => new Zend_Db_Expr('0'),
+                'store_id'          => new Maho\Db\Expr('0'),
                 'order_status'      => 'order_status',
-                'orders_count'      => new Zend_Db_Expr('SUM(orders_count)'),
-                'refunded'          => new Zend_Db_Expr('SUM(refunded)'),
-                'online_refunded'   => new Zend_Db_Expr('SUM(online_refunded)'),
-                'offline_refunded'  => new Zend_Db_Expr('SUM(offline_refunded)'),
+                'orders_count'      => new Maho\Db\Expr('SUM(orders_count)'),
+                'refunded'          => new Maho\Db\Expr('SUM(refunded)'),
+                'online_refunded'   => new Maho\Db\Expr('SUM(online_refunded)'),
+                'offline_refunded'  => new Maho\Db\Expr('SUM(offline_refunded)'),
             ];
 
             $select
@@ -181,14 +181,14 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
                 'period'            => $periodExpr,
                 'store_id'          => 'order_table.store_id',
                 'order_status'      => 'order_table.status',
-                'orders_count'      => new Zend_Db_Expr('COUNT(order_table.entity_id)'),
-                'refunded'          => new Zend_Db_Expr(
+                'orders_count'      => new Maho\Db\Expr('COUNT(order_table.entity_id)'),
+                'refunded'          => new Maho\Db\Expr(
                     'SUM(order_table.base_total_refunded * order_table.base_to_global_rate)',
                 ),
-                'online_refunded'   => new Zend_Db_Expr(
+                'online_refunded'   => new Maho\Db\Expr(
                     'SUM(order_table.base_total_online_refunded * order_table.base_to_global_rate)',
                 ),
-                'offline_refunded'  => new Zend_Db_Expr(
+                'offline_refunded'  => new Maho\Db\Expr(
                     'SUM(order_table.base_total_offline_refunded * order_table.base_to_global_rate)',
                 ),
             ];
@@ -207,7 +207,7 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
             $filterSubSelect
                 ->from(
                     ['filter_source_table' => $sourceTable],
-                    new Zend_Db_Expr('MAX(filter_source_table.entity_id)'),
+                    new Maho\Db\Expr('MAX(filter_source_table.entity_id)'),
                 )
                 ->where('filter_source_table.order_id = source_table.order_id');
 
@@ -215,7 +215,7 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
                 $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
-            $select->where('source_table.entity_id = (?)', new Zend_Db_Expr($filterSubSelect));
+            $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));
             unset($filterSubSelect);
 
             $select->group([
@@ -235,12 +235,12 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
 
             $columns = [
                 'period'            => 'period',
-                'store_id'          => new Zend_Db_Expr('0'),
+                'store_id'          => new Maho\Db\Expr('0'),
                 'order_status'      => 'order_status',
-                'orders_count'      => new Zend_Db_Expr('SUM(orders_count)'),
-                'refunded'          => new Zend_Db_Expr('SUM(refunded)'),
-                'online_refunded'   => new Zend_Db_Expr('SUM(online_refunded)'),
-                'offline_refunded'  => new Zend_Db_Expr('SUM(offline_refunded)'),
+                'orders_count'      => new Maho\Db\Expr('SUM(orders_count)'),
+                'refunded'          => new Maho\Db\Expr('SUM(refunded)'),
+                'online_refunded'   => new Maho\Db\Expr('SUM(online_refunded)'),
+                'offline_refunded'  => new Maho\Db\Expr('SUM(offline_refunded)'),
             ];
 
             $select

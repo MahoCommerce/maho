@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -104,7 +104,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         if ($product instanceof Mage_Catalog_Model_Product) {
             $select->where('e.entity_id=?', $product->getId());
         } elseif ($product instanceof Mage_Catalog_Model_Product_Condition_Interface) {
-            $value = new Zend_Db_Expr($product->getIdsSelect($this->_getReadAdapter()));
+            $value = new Maho\Db\Expr($product->getIdsSelect($this->_getReadAdapter()));
             $select->where('e.entity_id IN(?)', $value);
         } elseif (is_numeric($product) || is_array($product)) {
             $select->where('e.entity_id IN(?)', $product);
@@ -235,7 +235,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * @param float $minPrice
      * @param float $maxPrice
      * @return $this
-     * @throws Zend_Db_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     protected function _savePriceIndex($productId, $websiteId, $groupId, $minPrice, $maxPrice)
     {
@@ -258,7 +258,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      *
      * @param int $productId
      * @return array
-     * @throws Zend_Db_Adapter_Exception|Zend_Db_Statement_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     public function getSelections($productId)
     {
@@ -282,6 +282,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             )
             ->where('option_table.parent_id=:product_id');
 
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select, ['product_id' => $productId]);
         while ($row = $query->fetch()) {
             if (!isset($options[$row['option_id']])) {
@@ -374,6 +375,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             'bind'      => $bind,
         ]);
 
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select, $bind);
         while ($row = $query->fetch()) {
             $salable = $row['salable'] ?? true;
@@ -414,7 +416,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      *
      * @param int|array $products
      * @return array
-     * @throws Zend_Db_Adapter_Exception|Zend_Db_Statement_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     public function getProductsPriceData($products, Mage_Core_Model_Website $website)
     {
@@ -429,6 +431,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         $this->_addAttributeDataToSelect($select, 'special_from_date', $website);
         $this->_addAttributeDataToSelect($select, 'special_to_date', $website);
 
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select);
         while ($row = $query->fetch()) {
             $productsData[$row['entity_id']] = [
@@ -450,7 +453,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * @throws Mage_Core_Exception
      */
     protected function _addAttributeDataToSelect(
-        Varien_Db_Select $select,
+        Maho\Db\Select $select,
         $attributeCode,
         Mage_Core_Model_Website $website,
     ) {
@@ -522,7 +525,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      *
      * @param int $productId
      * @return array
-     * @throws Zend_Db_Adapter_Exception|Zend_Db_Statement_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     public function getCustomOptions($productId, Mage_Core_Model_Website $website)
     {
@@ -586,6 +589,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                 );
         }
 
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
             if (!isset($options[$row['option_id']])) {
@@ -641,6 +645,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                 );
         }
 
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
             if (!isset($options[$row['option_id']])) {
@@ -824,7 +829,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * @param int $websiteId
      * @param int $groupId
      * @return array
-     * @throws Zend_Db_Adapter_Exception|Zend_Db_Statement_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     public function loadPriceIndex($productIds, $websiteId, $groupId)
     {
@@ -842,6 +847,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             'website_id' => $websiteId,
             'group_id'   => $groupId,
         ];
+        /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
             $prices[$row['entity_id']] = [

@@ -5,6 +5,15 @@
  *
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+/**
+ * Maho
+ *
+ * @package    Mage_Reports
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -20,7 +29,7 @@ class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model
      */
     protected function _joinFields($from = '', $to = '')
     {
-        $this->getSelect()->reset(Zend_Db_Select::COLUMNS);
+        $this->getSelect()->reset(Maho\Db\Select::COLUMNS);
         $this->addAttributeToFilter('created_at', ['from' => $from, 'to' => $to, 'datetime' => true])
              ->addExpressionAttributeToSelect('accounts', 'COUNT({{entity_id}})', ['entity_id']);
 

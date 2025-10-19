@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -72,7 +72,7 @@ class Mage_Bundle_Model_Product_Attribute_Source_Price_View extends Mage_Eav_Mod
             $column['type']     = 'int';
             $column['is_null']  = true;
         } else {
-            $column['type']     = Varien_Db_Ddl_Table::TYPE_INTEGER;
+            $column['type']     = Maho\Db\Ddl\Table::TYPE_INTEGER;
             $column['nullable'] = true;
             $column['comment']  = 'Bundle Price View ' . $attributeCode . ' column';
         }
@@ -84,7 +84,7 @@ class Mage_Bundle_Model_Product_Attribute_Source_Price_View extends Mage_Eav_Mod
      * Retrieve Select for update Attribute value in flat table
      *
      * @param   int $store
-     * @return  Varien_Db_Select|null
+     * @return  Maho\Db\Select|null
      */
     #[\Override]
     public function getFlatUpdateSelect($store)

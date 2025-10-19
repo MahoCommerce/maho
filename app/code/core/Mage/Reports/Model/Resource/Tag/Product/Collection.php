@@ -35,7 +35,7 @@ class Mage_Reports_Model_Resource_Tag_Product_Collection extends Mage_Tag_Model_
             ->where('rel.product_id = e.entity_id');
 
         $this->getSelect()
-            ->columns(['utaged' => new Zend_Db_Expr(sprintf('(%s)', $select))]);
+            ->columns(['utaged' => new Maho\Db\Expr(sprintf('(%s)', $select))]);
         return $this;
     }
 

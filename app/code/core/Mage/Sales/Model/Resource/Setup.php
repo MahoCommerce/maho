@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -138,25 +138,25 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
         $length = null;
         switch ($data['type']) {
             case 'timestamp':
-                $type = Varien_Db_Ddl_Table::TYPE_TIMESTAMP;
+                $type = Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
                 break;
             case 'datetime':
-                $type = Varien_Db_Ddl_Table::TYPE_DATETIME;
+                $type = Maho\Db\Ddl\Table::TYPE_DATETIME;
                 break;
             case 'decimal':
-                $type = Varien_Db_Ddl_Table::TYPE_DECIMAL;
+                $type = Maho\Db\Ddl\Table::TYPE_DECIMAL;
                 $length = '12,4';
                 break;
             case 'int':
-                $type = Varien_Db_Ddl_Table::TYPE_INTEGER;
+                $type = Maho\Db\Ddl\Table::TYPE_INTEGER;
                 break;
             case 'text':
-                $type = Varien_Db_Ddl_Table::TYPE_TEXT;
+                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
                 $length = 65536;
                 break;
             case 'char':
             case 'varchar':
-                $type = Varien_Db_Ddl_Table::TYPE_TEXT;
+                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
                 $length = 255;
                 break;
         }

@@ -34,13 +34,13 @@ abstract class Mage_Core_Model_Resource_Abstract
 
     /**
      * Retrieve connection for read data
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     abstract protected function _getReadAdapter();
 
     /**
      * Retrieve connection for write data
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     abstract protected function _getWriteAdapter();
 
@@ -207,7 +207,7 @@ abstract class Mage_Core_Model_Resource_Abstract
         foreach (array_keys($fields) as $field) {
             if ($object->hasData($field)) {
                 $fieldValue = $object->getData($field);
-                if ($fieldValue instanceof Zend_Db_Expr) {
+                if ($fieldValue instanceof Maho\Db\Expr) {
                     $data[$field] = $fieldValue;
                 } else {
                     if ($fieldValue !== null) {

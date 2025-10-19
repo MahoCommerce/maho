@@ -279,7 +279,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      * Get connection by name or type
      *
      * @param string $connectionName
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     protected function _getConnection($connectionName)
     {
@@ -309,7 +309,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Retrieve connection for read data
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     #[\Override]
     protected function _getReadAdapter()
@@ -328,7 +328,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Retrieve connection for write data
      *
-     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     #[\Override]
     protected function _getWriteAdapter()
@@ -339,7 +339,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Temporary resolving collection compatibility
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     public function getReadConnection()
     {
@@ -381,7 +381,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Abstract $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      * @throws Exception
      */
     protected function _getLoadSelect($field, $value, $object)
@@ -633,7 +633,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
                 ->from($this->getMainTable());
 
             foreach ($fields as $unique) {
-                $select->reset(Zend_Db_Select::WHERE);
+                $select->reset(Maho\Db\Select::WHERE);
 
                 if (is_array($unique['field'])) {
                     foreach ($unique['field'] as $field) {

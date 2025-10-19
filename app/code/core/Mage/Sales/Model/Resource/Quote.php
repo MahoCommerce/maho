@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,7 +28,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Abstract|Mage_Sales_Model_Quote $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -59,7 +59,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         $adapter = $this->_getReadAdapter();
         $select  = $this->_getLoadSelect('customer_id', $customerId, $quote)
             ->where('is_active = ?', 1)
-            ->order('updated_at ' . Varien_Db_Select::SQL_DESC)
+            ->order('updated_at ' . Maho\Db\Select::SQL_DESC)
             ->limit(1);
 
         $data    = $adapter->fetchRow($select);
@@ -187,7 +187,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
             ->join(
                 ['tmp' => $subSelect],
                 'q.entity_id = tmp.entity_id',
-                ['trigger_recollect' => new Zend_Db_Expr('1')],
+                ['trigger_recollect' => new Maho\Db\Expr('1')],
             )
              ->where('q.is_active = ?', 1);
         $sql = $writeAdapter->updateFromSelect($select, ['q' => $this->getTable('sales/quote')]);
@@ -221,11 +221,11 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         $adapter   = $this->_getWriteAdapter();
         $subSelect = $adapter->select();
 
-        $subSelect->from(false, [
-            'items_qty'   => new Zend_Db_Expr(
+        $subSelect->columns([
+            'items_qty'   => new Maho\Db\Expr(
                 $adapter->quoteIdentifier('q.items_qty') . ' - ' . $adapter->quoteIdentifier('qi.qty'),
             ),
-            'items_count' => new Zend_Db_Expr($adapter->quoteIdentifier('q.items_count') . ' - 1'),
+            'items_count' => new Maho\Db\Expr($adapter->quoteIdentifier('q.items_count') . ' - 1'),
         ])
         ->where('q.items_count > 0')
         ->join(
@@ -248,7 +248,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     /**
      * Mark recollect contain product(s) quotes
      *
-     * @param array|int|Zend_Db_Expr $productIds
+     * @param array|int|Maho\Db\Expr $productIds
      * @return $this
      */
     public function markQuotesRecollect($productIds)
@@ -264,7 +264,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         $select = $this->_getReadAdapter()->select()->join(
             ['t2' => $subSelect],
             't1.entity_id = t2.entity_id',
-            ['trigger_recollect' => new Zend_Db_Expr('1')],
+            ['trigger_recollect' => new Maho\Db\Expr('1')],
         );
         $updateQuery = $select->crossUpdateFromSelect(['t1' => $tableQuote]);
         $this->_getWriteAdapter()->query($updateQuery);

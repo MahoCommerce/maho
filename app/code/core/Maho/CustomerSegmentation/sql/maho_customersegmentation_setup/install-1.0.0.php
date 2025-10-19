@@ -18,57 +18,57 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('customersegmentation/segment'))
-    ->addColumn('segment_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('segment_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Segment ID')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Segment Name')
-    ->addColumn('description', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('description', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Segment Description')
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ], 'Is Active')
-    ->addColumn('conditions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, '2M', [
+    ->addColumn('conditions_serialized', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
         'nullable'  => true,
     ], 'Serialized Segment Conditions')
-    ->addColumn('website_ids', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('website_ids', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Website IDs (comma-separated)')
-    ->addColumn('customer_group_ids', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('customer_group_ids', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Customer Group IDs (comma-separated)')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Created At')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
     ], 'Updated At')
-    ->addColumn('matched_customers_count', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('matched_customers_count', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
         'default'   => '0',
     ], 'Cached Count of Matched Customers')
-    ->addColumn('last_refresh_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('last_refresh_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => true,
     ], 'Last Refresh Time')
-    ->addColumn('refresh_status', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('refresh_status', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
         'nullable'  => true,
         'default'   => 'pending',
     ], 'Refresh Status: pending, processing, completed, error')
-    ->addColumn('refresh_mode', Varien_Db_Ddl_Table::TYPE_TEXT, 20, [
+    ->addColumn('refresh_mode', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
         'nullable'  => true,
         'default'   => 'auto',
     ], 'Refresh Mode: auto, manual')
-    ->addColumn('priority', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('priority', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
         'default'   => '0',
@@ -93,27 +93,27 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('customersegmentation/segment_customer'))
-    ->addColumn('segment_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('segment_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Segment ID')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Customer ID')
-    ->addColumn('website_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Website ID')
-    ->addColumn('added_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Added to Segment At')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('customersegmentation/segment_customer', ['segment_id', 'customer_id', 'website_id']),
@@ -149,7 +149,7 @@ $table = $installer->getConnection()
         'segment_id',
         $installer->getTable('customersegmentation/segment'),
         'segment_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -161,7 +161,7 @@ $table = $installer->getConnection()
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
@@ -173,7 +173,7 @@ $table = $installer->getConnection()
         'website_id',
         $installer->getTable('core/website'),
         'website_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Customer Segment Members');
 $installer->getConnection()->createTable($table);
@@ -185,7 +185,7 @@ $installer->getConnection()->addColumn(
     $installer->getTable('newsletter/queue'),
     'customer_segment_ids',
     [
-        'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'     => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'   => 255,
         'nullable' => true,
         'comment'  => 'Customer Segment IDs (comma-separated)',

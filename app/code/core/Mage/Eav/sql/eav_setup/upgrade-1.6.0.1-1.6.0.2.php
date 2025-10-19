@@ -5,7 +5,7 @@
  *
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,37 +18,37 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('eav/attribute_option_swatch'))
-    ->addColumn('value_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('value_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Value Id')
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Option Id')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Value')
-    ->addColumn('filename', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('filename', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => true,
         'default'   => null,
     ], 'Filename')
     ->addIndex(
         $installer->getIdxName('eav/attribute_option_value', ['option_id']),
         ['option_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName('eav/attribute_option_swatch', 'option_id', 'eav/attribute_option', 'option_id'),
         'option_id',
         $installer->getTable('eav/attribute_option'),
         'option_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute Option Swatch');
 $installer->getConnection()->createTable($table);

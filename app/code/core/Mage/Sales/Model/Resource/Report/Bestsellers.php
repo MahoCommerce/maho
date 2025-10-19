@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -81,13 +81,13 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 'store_id'               => 'source_table.store_id',
                 'product_id'             => 'order_item.product_id',
                 'product_type_id'        => 'product.type_id',
-                'product_name'           => new Zend_Db_Expr(
+                'product_name'           => new Maho\Db\Expr(
                     sprintf(
                         'MIN(%s)',
                         $adapter->getIfNullSql('product_name.value', 'product_default_name.value'),
                     ),
                 ),
-                'product_price'          => new Zend_Db_Expr(
+                'product_price'          => new Maho\Db\Expr(
                     sprintf(
                         '%s',
                         $helper->prepareColumn(
@@ -98,11 +98,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                                     0,
                                 ),
                             ),
-                            $select->getPart(Zend_Db_Select::GROUP),
+                            $select->getPart(Maho\Db\Select::GROUP),
                         ),
                     ),
                 ),
-                'qty_ordered'            => new Zend_Db_Expr('SUM(order_item.qty_ordered)'),
+                'qty_ordered'            => new Maho\Db\Expr('SUM(order_item.qty_ordered)'),
             ];
 
             $select
@@ -222,7 +222,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
     /**
      * Aggregate Orders data for default store
      *
-     * @param Varien_Db_Select|null $subSelect
+     * @param Maho\Db\Select|null $subSelect
      * @return $this
      */
     protected function _aggregateDefault($subSelect = null)
@@ -237,11 +237,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
 
         $columns = [
             'period'            => 'period',
-            'store_id'          => new Zend_Db_Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
+            'store_id'          => new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
             'product_id'        => 'product_id',
             'product_type_id'   => 'product_type_id',
-            'product_name'      => new Zend_Db_Expr('MIN(product_name)'),
-            'product_price'     => new Zend_Db_Expr(
+            'product_name'      => new Maho\Db\Expr('MIN(product_name)'),
+            'product_price'     => new Maho\Db\Expr(
                 sprintf(
                     '%s',
                     $helper->prepareColumn(
@@ -249,11 +249,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                             'MIN(%s)',
                             $adapter->getIfNullSql('product_default_price.value', 0),
                         ),
-                        $select->getPart(Zend_Db_Select::GROUP),
+                        $select->getPart(Maho\Db\Select::GROUP),
                     ),
                 ),
             ),
-            'qty_ordered'       => new Zend_Db_Expr('SUM(qty_ordered)'),
+            'qty_ordered'       => new Maho\Db\Expr('SUM(qty_ordered)'),
         ];
 
         $select->from($this->getMainTable(), $columns)

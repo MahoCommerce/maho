@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,7 +23,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Option extends Mage_Core_Model_Re
      *
      * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Expr $valueExpr
+     * @param Maho\Db\Expr $valueExpr
      * @return $this
      */
     public function addOptionValueToCollection($collection, $attribute, $valueExpr)
@@ -64,7 +64,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Option extends Mage_Core_Model_Re
      *
      * @param int $store
      * @param bool $hasValueField flag which require option value
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getFlatUpdateSelect(
         Mage_Eav_Model_Entity_Attribute_Abstract $attribute,
