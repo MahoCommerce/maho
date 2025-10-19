@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\Filter\ObjectNS;
+namespace Maho\Filter\ObjectFilter;
 
 use Maho\Filter\ObjectFilter;
 
