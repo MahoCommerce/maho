@@ -157,6 +157,7 @@ Observers are configured in module's `config.xml`.
 - **NEVER use Zend Framework components** - They have been completely removed from Maho. Use the modern alternatives documented above.
 - **NEVER use Varien_Date or Zend_Date** - Use native PHP DateTime and `Mage_Core_Model_Locale` methods.
 - **NEVER use Zend_Db or Zend_Db_Select directly** - Use `Maho\Db\Select` and `Maho\Db\Adapter\AdapterInterface`.
+- **NEVER use Varien_ prefixed classes in new code** - All Varien classes have been moved to the Maho namespace. Use the new `Maho\*` classes instead (see Varien Migration section below).
 
 ### General Guidelines
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
@@ -402,6 +403,31 @@ Mage::helper('core')->filterEmail($email);
 Mage::helper('core')->filterUrl($url);
 Mage::helper('core')->filterInt($value);
 Mage::helper('core')->filterFloat($value);
+```
+
+## Varien Migration (Maho Namespace)
+
+All Varien classes have been migrated to the **Maho namespace**. Class aliases exist for backward compatibility, but **always use the new Maho classes in new code**.
+
+### Naming Pattern
+- `Varien_Class_Name` → `Maho\Class\Name`
+- `Varien_Object` → `Maho\DataObject` (special case)
+- `Varien_Filter_Array` → `Maho\Filter\ArrayFilter`
+- `Varien_Filter_Object` → `Maho\Filter\ObjectFilter`
+
+### Examples
+```php
+// OLD - Don't use in new code
+new Varien_Object();
+new Varien_Data_Form();
+new Varien_Io_File();
+new Varien_Event_Observer();
+
+// NEW - Always use these
+new Maho\DataObject();
+new Maho\Data\Form();
+new Maho\Io\File();
+new Maho\Event\Observer();
 ```
 
 ## Other Modernizations
