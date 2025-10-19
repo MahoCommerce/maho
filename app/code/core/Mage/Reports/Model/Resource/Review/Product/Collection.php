@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -40,8 +40,8 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
                 ['r' => $this->getTable('review/review')],
                 'e.entity_id = r.entity_pk_value',
                 [
-                    'review_cnt'    => new Zend_Db_Expr(sprintf('(%s)', $subSelect)),
-                    'last_created'  => new Zend_Db_Expr('MAX(r.created_at)'),
+                    'review_cnt'    => new Maho\Db\Expr(sprintf('(%s)', $subSelect)),
+                    'last_created'  => new Maho\Db\Expr('MAX(r.created_at)'),
                 ],
             )
             ->group('e.entity_id');
@@ -61,8 +61,8 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
                 ['table_rating' => $this->getTable('rating/rating_vote_aggregated')],
                 implode(' AND ', $joinCondition),
                 [
-                    'avg_rating'          => new Zend_Db_Expr("$sumPercentField / $countRatingId"),
-                    'avg_rating_approved' => new Zend_Db_Expr("$sumPercentApproved / $countRatingId"),
+                    'avg_rating'          => new Maho\Db\Expr("$sumPercentField / $countRatingId"),
+                    'avg_rating_approved' => new Maho\Db\Expr("$sumPercentApproved / $countRatingId"),
                 ],
             );
 
@@ -83,7 +83,7 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
     /**
      * Get select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -91,12 +91,12 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
         $this->_renderFilters();
 
         $select = clone $this->getSelect();
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
-        $select->reset(Zend_Db_Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
         $select->resetJoinLeft();
-        $select->columns(new Zend_Db_Expr('1'));
+        $select->columns(new Maho\Db\Expr('1'));
 
         $countSelect = clone $select;
         $countSelect->reset();

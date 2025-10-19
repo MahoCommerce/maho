@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,7 +44,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
      * @param string $field
      * @param mixed $value
      * @param Varien_Object $object
-     * @return  Zend_Db_Select
+     * @return  Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -149,7 +149,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
     public function unassignState($status, $state)
     {
         $select = $this->_getWriteAdapter()->select()
-            ->from($this->_stateTable, ['qty' => new Zend_Db_Expr('COUNT(*)')])
+            ->from($this->_stateTable, ['qty' => new Maho\Db\Expr('COUNT(*)')])
             ->where('state = ?', $state);
 
         if ($this->_getWriteAdapter()->fetchOne($select) == 1) {

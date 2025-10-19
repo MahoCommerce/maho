@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -105,11 +105,11 @@ class Mage_Sales_Model_Resource_Sale_Collection extends Varien_Data_Collection_D
                 ['sales' => Mage::getResourceSingleton('sales/order')->getMainTable()],
                 [
                     'store_id',
-                    'lifetime'      => new Zend_Db_Expr('SUM(sales.base_grand_total)'),
-                    'base_lifetime' => new Zend_Db_Expr('SUM(sales.base_grand_total * sales.base_to_global_rate)'),
-                    'avgsale'       => new Zend_Db_Expr('AVG(sales.base_grand_total)'),
-                    'base_avgsale'  => new Zend_Db_Expr('AVG(sales.base_grand_total * sales.base_to_global_rate)'),
-                    'num_orders'    => new Zend_Db_Expr('COUNT(sales.base_grand_total)'),
+                    'lifetime'      => new Maho\Db\Expr('SUM(sales.base_grand_total)'),
+                    'base_lifetime' => new Maho\Db\Expr('SUM(sales.base_grand_total * sales.base_to_global_rate)'),
+                    'avgsale'       => new Maho\Db\Expr('AVG(sales.base_grand_total)'),
+                    'base_avgsale'  => new Maho\Db\Expr('AVG(sales.base_grand_total * sales.base_to_global_rate)'),
+                    'num_orders'    => new Maho\Db\Expr('COUNT(sales.base_grand_total)'),
                 ],
             )
             ->group('sales.store_id');

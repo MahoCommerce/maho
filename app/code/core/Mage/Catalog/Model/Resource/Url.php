@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -163,7 +163,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     public function getLastUsedRewriteRequestIncrement($prefix, $suffix, $storeId)
     {
         $adapter = $this->_getWriteAdapter();
-        $requestPathField = new Zend_Db_Expr($adapter->quoteIdentifier('request_path'));
+        $requestPathField = new Maho\Db\Expr($adapter->quoteIdentifier('request_path'));
         /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('eav');
         //select increment part of request path and cast expression to integer
@@ -174,7 +174,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
                 $adapter->getLengthSql($requestPathField) . ' - ' . strlen($prefix) . ' - ' . strlen($suffix),
             ));
         $select = $adapter->select()
-            ->from($this->getMainTable(), new Zend_Db_Expr('MAX(' . $urlIncrementPartExpression . ')'))
+            ->from($this->getMainTable(), new Maho\Db\Expr('MAX(' . $urlIncrementPartExpression . ')'))
             ->where('store_id = :store_id')
             ->where('request_path LIKE :request_path')
             ->where($adapter->prepareSqlCondition('request_path', [

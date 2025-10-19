@@ -60,6 +60,11 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
             return null;
         }
 
+        // Handle MySQL zero dates and invalid dates
+        if (is_string($date) && preg_match('/^0000-00-00/', $date)) {
+            return null;
+        }
+
         try {
             // Unix timestamp given
             if (preg_match('/^[0-9]+$/', $date)) {
@@ -81,8 +86,10 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
             // ISO 8601 datetime-local format from native input (YYYY-MM-DDTHH:mm)
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                 $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
-                // Validate the datetime is actually valid (not just format)
-                if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT) === substr($date, 0, 16)) {
+                // Validate the datetime is actually valid (not just format) and has a valid year
+                if ($dateTime
+                    && $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT) === substr($date, 0, 16)
+                    && $dateTime->format('Y') >= 1) {
                     return $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
                 return null;

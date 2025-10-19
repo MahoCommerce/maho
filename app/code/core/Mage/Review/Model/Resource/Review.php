@@ -6,7 +6,7 @@
  * @package    Mage_Review
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -82,7 +82,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Abstract $object
-     * @return Zend_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -120,7 +120,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * Perform actions after object save
      *
      * @return $this
-     * @throws Zend_Db_Adapter_Exception
+     * @throws Doctrine\DBAL\Exception
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -231,7 +231,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
             ->from(
                 $this->_reviewTable,
                 [
-                    'review_count' => new Zend_Db_Expr('COUNT(*)'),
+                    'review_count' => new Maho\Db\Expr('COUNT(*)'),
                 ],
             )
             ->where('entity_id = ?', $object->getEntityId())
@@ -272,7 +272,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
             ->from(
                 $this->_reviewTable,
                 [
-                    'review_count' => new Zend_Db_Expr('COUNT(*)'),
+                    'review_count' => new Maho\Db\Expr('COUNT(*)'),
                 ],
             )
             ->where("{$this->_reviewTable}.entity_pk_value = :pk_value");
@@ -424,7 +424,8 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
         $select = $adapter->select()
             ->from($this->_reviewEntityTable, ['entity_id'])
             ->where('entity_code = :entity_code');
-        return $adapter->fetchOne($select, [':entity_code' => $entityCode]);
+        $result = $adapter->fetchOne($select, [':entity_code' => $entityCode]);
+        return $result ? (int) $result : false;
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -68,7 +68,7 @@ class Mage_Reports_Model_Resource_Wishlist_Collection extends Mage_Core_Model_Re
             ->group('wt.wishlist_id');
         $count = $collection->count();
         $resultSelect = $this->getConnection()->select()
-            ->union([$customersSelect, $count], Zend_Db_Select::SQL_UNION_ALL);
+            ->union([$customersSelect, $count], Maho\Db\Select::SQL_UNION_ALL);
         [$customers, $count] = $this->getConnection()->fetchCol($resultSelect);
 
         return [($count * 100) / $customers, $count];

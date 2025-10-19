@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -194,7 +194,7 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
                     if (isset($eaColumns[$columnName])) {
                         $code = sprintf('scope_%s', $columnName);
                         $expression = $connection->getCheckSql('sa.%s IS NULL', 'ea.%s', 'sa.%s');
-                        $saColumns[$code] = new Zend_Db_Expr(sprintf(
+                        $saColumns[$code] = new Maho\Db\Expr(sprintf(
                             (string) $expression,
                             $columnName,
                             $columnName,
@@ -203,7 +203,7 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
                     } elseif (isset($caColumns[$columnName])) {
                         $code = sprintf('scope_%s', $columnName);
                         $expression = $connection->getCheckSql('sa.%s IS NULL', 'ca.%s', 'sa.%s');
-                        $saColumns[$code] = new Zend_Db_Expr(sprintf(
+                        $saColumns[$code] = new Maho\Db\Expr(sprintf(
                             (string) $expression,
                             $columnName,
                             $columnName,

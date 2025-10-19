@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,39 +19,39 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('wishlist/wishlist'))
-    ->addColumn('wishlist_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('wishlist_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Wishlist ID')
-    ->addColumn('customer_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Customer ID')
-    ->addColumn('shared', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('shared', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Sharing flag (0 or 1)')
-    ->addColumn('sharing_code', Varien_Db_Ddl_Table::TYPE_TEXT, 32, [
+    ->addColumn('sharing_code', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Sharing encrypted code')
-    ->addColumn('updated_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Last updated date')
     ->addIndex($installer->getIdxName('wishlist/wishlist', 'shared'), 'shared')
     ->addIndex(
-        $installer->getIdxName('wishlist/wishlist', 'customer_id', Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName('wishlist/wishlist', 'customer_id', Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         'customer_id',
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName('wishlist/wishlist', 'customer_id', 'customer/entity', 'entity_id'),
         'customer_id',
         $installer->getTable('customer/entity'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Wishlist main Table');
 $installer->getConnection()->createTable($table);
@@ -61,31 +61,31 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('wishlist/item'))
-    ->addColumn('wishlist_item_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('wishlist_item_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Wishlist item ID')
-    ->addColumn('wishlist_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('wishlist_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Wishlist ID')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '0',
     ], 'Product ID')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => true,
     ], 'Store ID')
-    ->addColumn('added_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Add date and time')
-    ->addColumn('description', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('description', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Short description of wish list item')
-    ->addColumn('qty', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ->addColumn('qty', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
         'nullable'  => false,
     ], 'Qty')
     ->addIndex($installer->getIdxName('wishlist/item', 'wishlist_id'), 'wishlist_id')
@@ -94,8 +94,8 @@ $table = $installer->getConnection()
         'wishlist_id',
         $installer->getTable('wishlist/wishlist'),
         'wishlist_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('wishlist/item', 'product_id'), 'product_id')
     ->addForeignKey(
@@ -103,8 +103,8 @@ $table = $installer->getConnection()
         'product_id',
         $installer->getTable('catalog/product'),
         'entity_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('wishlist/item', 'store_id'), 'store_id')
     ->addForeignKey(
@@ -112,8 +112,8 @@ $table = $installer->getConnection()
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Wishlist items');
 $installer->getConnection()->createTable($table);
@@ -123,24 +123,24 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('wishlist/item_option'))
-    ->addColumn('option_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('option_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Option Id')
-    ->addColumn('wishlist_item_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('wishlist_item_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Wishlist Item Id')
-    ->addColumn('product_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('product_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
     ], 'Product Id')
-    ->addColumn('code', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('code', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,
     ], 'Code')
-    ->addColumn('value', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('value', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Value')
     ->addForeignKey(
@@ -148,8 +148,8 @@ $table = $installer->getConnection()
         'wishlist_item_id',
         $installer->getTable('wishlist/item'),
         'wishlist_item_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Wishlist Item Option Table');
 $installer->getConnection()->createTable($table);

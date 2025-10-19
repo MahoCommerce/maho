@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -753,7 +753,7 @@ class Mage_CatalogInventory_Model_Observer
         $stockCollection = Mage::getModel('cataloginventory/stock_item')->getCollection()
             ->addFieldToFilter('product_id', ['in' => $productIds])
             ->addFieldToFilter('manage_stock', ['eq' => 1]);
-        $stockCollection->getSelect()->reset(Zend_Db_Select::COLUMNS)->columns(['product_id']);
+        $stockCollection->getSelect()->reset(Maho\Db\Select::COLUMNS)->columns(['product_id']);
         $productIds = $stockCollection->getColumnValues('product_id');
 
         if (count($productIds)) {
@@ -928,11 +928,11 @@ class Mage_CatalogInventory_Model_Observer
             return $this;
         }
 
-        if (!($entityField instanceof Zend_Db_Expr)) {
-            $entityField = new Zend_Db_Expr($entityField);
+        if (!($entityField instanceof Maho\Db\Expr)) {
+            $entityField = new Maho\Db\Expr($entityField);
         }
-        if (!($websiteField instanceof Zend_Db_Expr)) {
-            $websiteField = new Zend_Db_Expr($websiteField);
+        if (!($websiteField instanceof Maho\Db\Expr)) {
+            $websiteField = new Maho\Db\Expr($websiteField);
         }
 
         Mage::getResourceSingleton('cataloginventory/stock_status')

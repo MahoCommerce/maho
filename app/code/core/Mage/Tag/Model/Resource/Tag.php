@@ -211,7 +211,7 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
                 [
                     'customers' => 'COUNT(DISTINCT main.customer_id)',
                     'products'  => 'COUNT(DISTINCT main.product_id)',
-                    'store_id'  => new Zend_Db_Expr('0'),
+                    'store_id'  => new Maho\Db\Expr('0'),
                     'uses'      => 'COUNT(main.tag_relation_id)',
                 ],
             )
@@ -325,7 +325,7 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
 
         return $writeAdapter->update(
             $this->getTable('tag/summary'),
-            ['products' => new Zend_Db_Expr('products - 1')],
+            ['products' => new Maho\Db\Expr('products - 1')],
             ['tag_id IN (?)' => $tagsId],
         );
     }
@@ -337,7 +337,7 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
      * @param string $field
      * @param mixed $value
      * @param Mage_Core_Model_Abstract|Mage_Tag_Model_Tag $object
-     * @return Zend_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

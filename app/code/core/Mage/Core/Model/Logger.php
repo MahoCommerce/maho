@@ -61,7 +61,7 @@ class Mage_Core_Model_Logger
 
         $level ??= Mage::LOG_DEBUG;
 
-        if (!$logActive && !$forceLog) {
+        if (!Mage::getIsDeveloperMode() && !$logActive && !$forceLog) {
             return;
         }
 

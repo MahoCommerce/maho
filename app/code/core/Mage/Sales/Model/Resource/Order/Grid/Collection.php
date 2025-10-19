@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,7 +37,7 @@ class Mage_Sales_Model_Resource_Order_Grid_Collection extends Mage_Sales_Model_R
     /**
      * Get SQL for get record count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -47,9 +47,9 @@ class Mage_Sales_Model_Resource_Order_Grid_Collection extends Mage_Sales_Model_R
 
             $unionSelect = clone $this->getSelect();
 
-            $unionSelect->reset(Zend_Db_Select::ORDER);
-            $unionSelect->reset(Zend_Db_Select::LIMIT_COUNT);
-            $unionSelect->reset(Zend_Db_Select::LIMIT_OFFSET);
+            $unionSelect->reset(Maho\Db\Select::ORDER);
+            $unionSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+            $unionSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
 
             $countSelect = clone $this->getSelect();
             $countSelect->reset();

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,6 +14,8 @@
  * Category resource collection
  *
  * @package    Mage_Catalog
+ *
+ * @property Maho\Db\Adapter\AdapterInterface $_conn
  *
  * @method Mage_Catalog_Model_Category getFirstItem()
  * @method Mage_Catalog_Model_Category getItemById(string $value)
@@ -249,7 +251,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
                 $select = $this->_conn->select();
                 $select->from(
                     ['main_table' => $this->_productTable],
-                    ['category_id', new Zend_Db_Expr('COUNT(main_table.product_id)')],
+                    ['category_id', new Maho\Db\Expr('COUNT(main_table.product_id)')],
                 )
                     ->where($this->_conn->quoteInto('main_table.category_id IN(?)', $regularIds))
                     ->group('main_table.category_id');
@@ -283,7 +285,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
                     $select = $this->_conn->select();
                     $select->from(
                         ['main_table' => $this->_productTable],
-                        new Zend_Db_Expr('COUNT(DISTINCT main_table.product_id)'),
+                        new Maho\Db\Expr('COUNT(DISTINCT main_table.product_id)'),
                     )
                         ->joinInner(
                             ['e' => $this->getTable('catalog/category')],

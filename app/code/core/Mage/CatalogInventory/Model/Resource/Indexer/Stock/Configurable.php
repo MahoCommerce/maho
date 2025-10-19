@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,7 +30,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Configurable extends Ma
      *
      * @param int|array $entityIds
      * @param bool $usePrimaryTable use primary or temporary index table
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getStockStatusSelect($entityIds = null, $usePrimaryTable = false)
@@ -67,7 +67,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Configurable extends Ma
                 'i.product_id = l.product_id AND cw.website_id = i.website_id AND cis.stock_id = i.stock_id',
                 [],
             )
-            ->columns(['qty' => new Zend_Db_Expr('0')])
+            ->columns(['qty' => new Maho\Db\Expr('0')])
             ->where('cw.website_id != 0')
             ->where('e.type_id = ?', $this->getTypeId())
             ->group(['e.entity_id', 'cw.website_id', 'cis.stock_id']);

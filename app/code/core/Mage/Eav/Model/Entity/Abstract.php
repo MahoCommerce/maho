@@ -15,14 +15,14 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Read connection
      *
-     * @var string|Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract
+     * @var string|Maho\Db\Adapter\AdapterInterface
      */
     protected $_read;
 
     /**
      * Write connection
      *
-     * @var string|Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract
+     * @var string|Maho\Db\Adapter\AdapterInterface
      */
     protected $_write;
 
@@ -155,8 +155,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Set connections for entity operations
      *
-     * @param Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract|string $read
-     * @param Varien_Db_Adapter_Interface|Zend_Db_Adapter_Abstract|string|null $write
+     * @param Maho\Db\Adapter\AdapterInterface|string $read
+     * @param Maho\Db\Adapter\AdapterInterface|string|null $write
      * @return $this
      */
     public function setConnection($read, $write = null)
@@ -173,7 +173,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve connection for read data
      *
-     * @return Varien_Db_Adapter_Interface|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     #[\Override]
     protected function _getReadAdapter()
@@ -187,7 +187,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve connection for write data
      *
-     * @return Varien_Db_Adapter_Interface|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     #[\Override]
     protected function _getWriteAdapter()
@@ -201,7 +201,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve read DB connection
      *
-     * @return Varien_Db_Adapter_Interface|false
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     public function getReadConnection()
     {
@@ -211,7 +211,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve write DB connection
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return Maho\Db\Adapter\AdapterInterface
      */
     public function getWriteConnection()
     {
@@ -982,11 +982,11 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Prepare select object for loading entity attributes values
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _prepareLoadSelect(array $selects)
     {
-        return $this->_getReadAdapter()->select()->union($selects, Zend_Db_Select::SQL_UNION_ALL);
+        return $this->_getReadAdapter()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
     }
 
     /**
@@ -994,7 +994,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param   Varien_Object $object
      * @param   mixed $rowId
-     * @return  Zend_Db_Select
+     * @return  Maho\Db\Select
      */
     protected function _getLoadRowSelect($object, $rowId)
     {
@@ -1008,7 +1008,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param Varien_Object $object
      * @param string $table
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getLoadAttributesSelect($object, $table)
     {
@@ -1020,10 +1020,10 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Adds Columns prepared for union
      *
-     * @param Varien_Db_Select $select
+     * @param Maho\Db\Select $select
      * @param string $table
      * @param string $type
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _addLoadAttributesSelectFields($select, $table, $type)
     {

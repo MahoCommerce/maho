@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -133,7 +133,7 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
         $idxTable   = $this->getIdxTable();
 
         $select = $write->select()
-            ->from($idxTable, null);
+            ->from($idxTable, []);
 
         $condition = $write->quoteInto('=?', Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE);
         $this->_addAttributeToSelect(
@@ -185,12 +185,12 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
          */
         Mage::dispatchEvent('prepare_catalog_product_index_select', [
             'select'        => $select,
-            'entity_field'  => new Zend_Db_Expr('l.parent_id'),
-            'website_field' => new Zend_Db_Expr('cs.website_id'),
-            'store_field'   => new Zend_Db_Expr('cs.store_id'),
+            'entity_field'  => new Maho\Db\Expr('l.parent_id'),
+            'website_field' => new Maho\Db\Expr('cs.website_id'),
+            'store_field'   => new Maho\Db\Expr('cs.store_id'),
         ]);
 
-        $query = $write->insertFromSelect($select, $idxTable, [], Varien_Db_Adapter_Interface::INSERT_IGNORE);
+        $query = $write->insertFromSelect($select, $idxTable, [], Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE);
         $write->query($query);
 
         return $this;

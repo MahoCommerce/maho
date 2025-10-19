@@ -6,6 +6,7 @@
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,7 +45,7 @@ class Mage_Rss_Model_Resource_Order
             $select = $read->select()
                 ->from(['main' => $mainTable], [
                     'entity_id' => 'order_id',
-                    'entity_type_code' => new Zend_Db_Expr("'$entityTypeCode'"),
+                    'entity_type_code' => new Maho\Db\Expr("'$entityTypeCode'"),
                 ])
                 ->join(['slave' => $slaveTable], 'main.entity_id = slave.parent_id', $fields)
                 ->where('main.order_id = ?', $orderId);
@@ -53,14 +54,14 @@ class Mage_Rss_Model_Resource_Order
         $select = $read->select()
             ->from($res->getTableName('sales/order_status_history'), [
                 'entity_id' => 'parent_id',
-                'entity_type_code' => new Zend_Db_Expr("'order'"),
+                'entity_type_code' => new Maho\Db\Expr("'order'"),
             ] + $fields)
             ->where('parent_id = ?', $orderId)
             ->where('is_visible_on_front > 0');
         $commentSelects[] = '(' . $select . ')';
 
         $commentSelect = $read->select()
-            ->union($commentSelects, Zend_Db_Select::SQL_UNION_ALL);
+            ->union($commentSelects, Maho\Db\Select::SQL_UNION_ALL);
 
         $select = $read->select()
             ->from(['orders' => $res->getTableName('sales/order')], ['increment_id'])

@@ -65,7 +65,7 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     public function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getDiscountQty()) {
-            $object->setDiscountQty(new Zend_Db_Expr('NULL'));
+            $object->setDiscountQty(new Maho\Db\Expr('NULL'));
         }
 
         $dateFrom = $object->getFromDate();
@@ -237,7 +237,7 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
         $select = $read->select()
             ->from(
                 ['a' => $this->getTable('salesrule/product_attribute')],
-                new Zend_Db_Expr('DISTINCT ea.attribute_code'),
+                new Maho\Db\Expr('DISTINCT ea.attribute_code'),
             )
             ->joinInner(['ea' => $this->getTable('eav/attribute')], 'ea.attribute_id = a.attribute_id', []);
         return $read->fetchAll($select);

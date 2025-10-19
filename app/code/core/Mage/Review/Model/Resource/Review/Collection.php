@@ -6,7 +6,7 @@
  * @package    Mage_Review
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -234,7 +234,7 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
         $this->_select->joinLeft(
             ['r' => $this->_reviewTable],
             'main_table.entity_pk_value = r.entity_pk_value',
-            ['total_reviews' => new Zend_Db_Expr('COUNT(r.review_id)')],
+            ['total_reviews' => new Maho\Db\Expr('COUNT(r.review_id)')],
         )
         ->group('main_table.review_id');
 

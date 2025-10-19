@@ -104,7 +104,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -121,7 +121,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         };
     }
 
-    protected function buildProductViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductViewCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
@@ -131,7 +131,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildProductNameViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductNameViewCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
@@ -143,7 +143,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildProductSkuViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildProductSkuViewCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
@@ -154,7 +154,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildCategoryViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildCategoryViewCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
@@ -165,7 +165,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildViewCountCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildViewCountCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
@@ -176,7 +176,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildLastViewedCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildLastViewedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
@@ -187,7 +187,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildDaysSinceViewCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildDaysSinceViewCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])

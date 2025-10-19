@@ -6,7 +6,7 @@
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -70,16 +70,16 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
 
     /**
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Select $entitySelect
+     * @param Maho\Db\Select $entitySelect
      * @return float|int
      */
     public function getMaxValue($attribute, $entitySelect)
     {
         $select = clone $entitySelect;
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
 
         $response = new Varien_Object();
         $response->setAdditionalCalculations([]);
@@ -102,22 +102,22 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
             ->where('price_table.website_id = ?', $this->getWebsiteId())
             ->where('price_table.attribute_id = ?', $attribute->getId());
 
-        return $this->_getReadAdapter()->fetchOne($select) * $this->getRate();
+        return (float) $this->_getReadAdapter()->fetchOne($select) * $this->getRate();
     }
 
     /**
      * @param int $range
      * @param Mage_Eav_Model_Entity_Attribute $attribute
-     * @param Zend_Db_Select $entitySelect
+     * @param Maho\Db\Select $entitySelect
      * @return array
      */
     public function getCount($range, $attribute, $entitySelect)
     {
         $select = clone $entitySelect;
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
 
         $select->join(['price_table' => $this->getMainTable()], 'price_table.entity_id=e.entity_id', []);
         $response = new Varien_Object();

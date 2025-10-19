@@ -115,7 +115,7 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Acl/Role.php
 
 		-
-			rawMessage: 'Comparison operation "==" between (Varien_Simplexml_Element|null) and 1 results in an error.'
+			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
 			identifier: equal.invalid
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Config.php
@@ -217,7 +217,7 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Roles.php
 
 		-
-			rawMessage: 'Comparison operation "==" between (Varien_Simplexml_Element|null) and 1 results in an error.'
+			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
 			identifier: equal.invalid
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Roles.php
@@ -421,7 +421,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
 
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Varien_Data_Collection_Db, Varien_Data_Collection given.'
+			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
@@ -1033,7 +1033,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
 
 		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_collection (Mage_Sales_Model_Entity_Sale_Collection) does not accept Varien_Data_Collection_Db.'
+			rawMessage: 'Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_collection (Mage_Sales_Model_Entity_Sale_Collection) does not accept Maho\Data\Collection\Db.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
@@ -1279,7 +1279,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
 
 		-
-			rawMessage: 'Comparison operation "==" between (Varien_Simplexml_Element|null) and 1 results in an error.'
+			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
 			identifier: equal.invalid
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Page/Menu.php
@@ -1561,7 +1561,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
 
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Varien_Data_Collection_Db, Mage_Reports_Model_Resource_Report_Collection given.'
+			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Mage_Reports_Model_Resource_Report_Collection given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
@@ -1633,7 +1633,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Report_Grid_Abstract::getCollection() should return Mage_Core_Model_Resource_Db_Collection_Abstract|Mage_Reports_Model_Grouped_Collection but returns Varien_Data_Collection_Db|null.'
+			rawMessage: 'Method Mage_Adminhtml_Block_Report_Grid_Abstract::getCollection() should return Mage_Core_Model_Resource_Db_Collection_Abstract|Mage_Reports_Model_Grouped_Collection but returns Maho\Data\Collection\Db|null.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
@@ -1657,7 +1657,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
 
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Varien_Data_Collection_Db, Mage_Reports_Model_Grouped_Collection given.'
+			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Mage_Reports_Model_Grouped_Collection given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
@@ -1741,7 +1741,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Product/Viewed.php
 
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Varien_Data_Collection_Db, Varien_Data_Collection given.'
+			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Report/Refresh/Statistics/Grid.php
@@ -2785,25 +2785,25 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Reorder/Renderer/Action.php
 
 		-
-			rawMessage: 'Parameter #1 $order of method Mage_Sales_Helper_Reorder::canReorder() expects Mage_Sales_Model_Order, Varien_Object given.'
+			rawMessage: 'Parameter #1 $order of method Mage_Sales_Helper_Reorder::canReorder() expects Mage_Sales_Model_Order, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Reorder/Renderer/Action.php
 
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Varien_Data_Collection_Db, Varien_Data_Collection given.'
+			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Transactions/Detail/Grid.php
 
 		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset::$_element (Varien_Data_Form_Element_Fieldset) does not accept Varien_Data_Form_Element_Abstract.'
+			rawMessage: 'Property Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset::$_element (Maho\Data\Form\Element\Fieldset) does not accept Maho\Data\Form\Element\AbstractElement.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Store/Switcher/Form/Renderer/Fieldset.php
 
 		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element::$_element (Varien_Data_Form_Element_Fieldset) does not accept Varien_Data_Form_Element_Abstract.'
+			rawMessage: 'Property Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element::$_element (Maho\Data\Form\Element\Fieldset) does not accept Maho\Data\Form\Element\AbstractElement.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Store/Switcher/Form/Renderer/Fieldset/Element.php
@@ -2857,7 +2857,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Method Varien_Object::getCommentText() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::getCommentText() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
@@ -2869,25 +2869,25 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $element of method Mage_Adminhtml_Block_System_Config_Form::_prepareGroupComment() expects Mage_Core_Model_Config_Element, Varien_Simplexml_Element given.'
+			rawMessage: 'Parameter #1 $element of method Mage_Adminhtml_Block_System_Config_Form::_prepareGroupComment() expects Mage_Core_Model_Config_Element, Maho\Simplexml\Element given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $field of method Mage_Adminhtml_Block_System_Config_Form::canUseDefaultValue() expects Varien_Simplexml_Element, int given.'
+			rawMessage: 'Parameter #1 $field of method Mage_Adminhtml_Block_System_Config_Form::canUseDefaultValue() expects Maho\Simplexml\Element, int given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $field of method Mage_Adminhtml_Block_System_Config_Form::canUseWebsiteValue() expects Varien_Simplexml_Element, int given.'
+			rawMessage: 'Parameter #1 $field of method Mage_Adminhtml_Block_System_Config_Form::canUseWebsiteValue() expects Maho\Simplexml\Element, int given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $separator of function explode expects non-empty-string, Varien_Simplexml_Element given.'
+			rawMessage: 'Parameter #1 $separator of function explode expects non-empty-string, Maho\Simplexml\Element given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
@@ -3655,7 +3655,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getRowUrl() expects int|string|null, Varien_Object given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getRowUrl() expects int|string|null, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid.php
@@ -4351,7 +4351,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Config.php
 
 		-
-			rawMessage: 'Property Mage_Adminhtml_Model_Config::$_config (Mage_Core_Model_Config_Base) does not accept Varien_Simplexml_Config.'
+			rawMessage: 'Property Mage_Adminhtml_Model_Config::$_config (Mage_Core_Model_Config_Base) does not accept Maho\Simplexml\Config.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Config.php
@@ -4375,13 +4375,13 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Config/Data.php
 
 		-
-			rawMessage: 'Parameter #1 $field of method Mage_Adminhtml_Model_Config_Data::_isValidField() expects Mage_Core_Model_Config_Element, Varien_Simplexml_Element|false given.'
+			rawMessage: 'Parameter #1 $field of method Mage_Adminhtml_Model_Config_Data::_isValidField() expects Mage_Core_Model_Config_Element, Maho\Simplexml\Element|false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Config/Data.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Object::save().'
+			rawMessage: 'Call to an undefined method Maho\DataObject::save().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Giftmessage/Save.php
@@ -4933,7 +4933,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Backend/Image.php
 
 		-
-			rawMessage: 'Comparison operation "==" between (Varien_Simplexml_Element|null) and 1 results in an error.'
+			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
 			identifier: equal.invalid
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Admin/Page.php
@@ -5983,7 +5983,7 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Acl/Assert/Time.php
 
 		-
-			rawMessage: 'Parameter #2 $resource of method Mage_Api_Model_Config::loadAclResources() expects Mage_Core_Model_Config_Element|null, Varien_Simplexml_Element given.'
+			rawMessage: 'Parameter #2 $resource of method Mage_Api_Model_Config::loadAclResources() expects Mage_Core_Model_Config_Element|null, Maho\Simplexml\Element given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Api/Model/Config.php
@@ -6109,7 +6109,7 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Server/Adapter/Soap.php
 
 		-
-			rawMessage: 'Return type (Varien_Object) of method Mage_Api_Model_Server_Adapter_Soap::getController() should be compatible with return type (Mage_Api_Controller_Action) of method Mage_Api_Model_Server_Adapter_Interface::getController()'
+			rawMessage: 'Return type (Maho\DataObject) of method Mage_Api_Model_Server_Adapter_Soap::getController() should be compatible with return type (Mage_Api_Controller_Action) of method Mage_Api_Model_Server_Adapter_Interface::getController()'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Server/Adapter/Soap.php
@@ -6133,13 +6133,13 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Server/Handler/Abstract.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Object::init().'
+			rawMessage: 'Call to an undefined method Maho\DataObject::init().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api/Model/Server/V2/Adapter/Soap.php
 
 		-
-			rawMessage: 'Return type (Mage_Api_Model_Wsdl_Config) of method Mage_Api_Model_Server_V2_Adapter_Soap::_getWsdlConfig() should be compatible with return type (Varien_Object) of method Mage_Api_Model_Server_Adapter_Soap::_getWsdlConfig()'
+			rawMessage: 'Return type (Mage_Api_Model_Wsdl_Config) of method Mage_Api_Model_Server_V2_Adapter_Soap::_getWsdlConfig() should be compatible with return type (Maho\DataObject) of method Mage_Api_Model_Server_Adapter_Soap::_getWsdlConfig()'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Server/V2/Adapter/Soap.php
@@ -6163,7 +6163,7 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Server/V2/Handler.php
 
 		-
-			rawMessage: 'Return type (Mage_Api_Model_Wsdl_Config) of method Mage_Api_Model_Server_Wsi_Adapter_Soap::_getWsdlConfig() should be compatible with return type (Varien_Object) of method Mage_Api_Model_Server_Adapter_Soap::_getWsdlConfig()'
+			rawMessage: 'Return type (Mage_Api_Model_Wsdl_Config) of method Mage_Api_Model_Server_Wsi_Adapter_Soap::_getWsdlConfig() should be compatible with return type (Maho\DataObject) of method Mage_Api_Model_Server_Adapter_Soap::_getWsdlConfig()'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Server/Wsi/Adapter/Soap.php
@@ -6247,13 +6247,13 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Wsdl/Config/Element.php
 
 		-
-			rawMessage: 'Parameter #1 $source of static method Mage_Api_Model_Wsdl_Config_Element::_getChildren() expects Varien_Simplexml_Element, SimpleXMLElement given.'
+			rawMessage: 'Parameter #1 $source of static method Mage_Api_Model_Wsdl_Config_Element::_getChildren() expects Maho\Simplexml\Element, SimpleXMLElement given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Api/Model/Wsdl/Config/Element.php
 
 		-
-			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Varien_Data_Collection_Db, Varien_Data_Collection given.'
+			rawMessage: 'Parameter #1 $collection of method Mage_Adminhtml_Block_Widget_Grid::setCollection() expects Maho\Data\Collection\Db, Maho\Data\Collection given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Api2/Block/Adminhtml/Attribute/Grid.php
@@ -6295,7 +6295,7 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Acl/Global/Rule/Tree.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Config::getResourceGroup() should return bool|Mage_Core_Model_Config_Element but returns Varien_Simplexml_Element.'
+			rawMessage: 'Method Mage_Api2_Model_Config::getResourceGroup() should return bool|Mage_Core_Model_Config_Element but returns Maho\Simplexml\Element.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Config.php
@@ -6349,7 +6349,7 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Data_Collection_Db::addAttributeToFilter().'
+			rawMessage: 'Call to an undefined method Maho\Data\Collection\Db::addAttributeToFilter().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Resource.php
@@ -6463,7 +6463,7 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource/Acl/Global/Rule.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Varien_Data_Collection::addFilter() expects array|string, int given.'
+			rawMessage: 'Parameter #2 $value of method Maho\Data\Collection::addFilter() expects array|string, int given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Resource/Acl/Global/Rule/Collection.php
@@ -6583,7 +6583,7 @@ parameters:
 			path: app/code/core/Mage/Bundle/Block/Catalog/Product/List/Partof.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getAddToCartUrl() expects int|string|null, Mage_Catalog_Model_Product given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getAddToCartUrl() expects int|string|null, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Bundle/Block/Catalog/Product/Price.php
@@ -6715,7 +6715,7 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Type.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getProduct() expects int|string|null, Mage_Catalog_Model_Product|null given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getProduct() expects int|string|null, Mage_Catalog_Model_Product|null given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Bundle/Model/Product/Type.php
@@ -6865,7 +6865,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
 
 		-
-			rawMessage: 'Property Mage_Catalog_Block_Product_List_Toolbar::$_collection (Mage_Core_Model_Resource_Db_Collection_Abstract) does not accept Varien_Data_Collection.'
+			rawMessage: 'Property Mage_Catalog_Block_Product_List_Toolbar::$_collection (Mage_Core_Model_Resource_Db_Collection_Abstract) does not accept Maho\Data\Collection.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
@@ -6901,7 +6901,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/List/Upsell.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getPriceHtml() expects int|string|null, Mage_Catalog_Model_Product given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getPriceHtml() expects int|string|null, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/Price.php
@@ -7153,7 +7153,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Product/Compare.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product_Option_Type_Default::setConfigurationItemOption() expects Varien_Object, Mage_Catalog_Model_Product_Configuration_Item_Option_Interface given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product_Option_Type_Default::setConfigurationItemOption() expects Maho\DataObject, Mage_Catalog_Model_Product_Configuration_Item_Option_Interface given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Helper/Product/Configuration.php
@@ -7453,7 +7453,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Object::formatUrlKey().'
+			rawMessage: 'Call to an undefined method Maho\DataObject::formatUrlKey().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Attribute/Backend/Urlkey/Abstract.php
@@ -7876,7 +7876,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Layer.php
 
 		-
-			rawMessage: 'Parameter #2 $filterBlock (Varien_Object) of method Mage_Catalog_Model_Layer_Filter_Attribute::apply() should be compatible with parameter $filterBlock (null) of method Mage_Catalog_Model_Layer_Filter_Abstract::apply()'
+			rawMessage: 'Parameter #2 $filterBlock (Maho\DataObject) of method Mage_Catalog_Model_Layer_Filter_Attribute::apply() should be compatible with parameter $filterBlock (null) of method Mage_Catalog_Model_Layer_Filter_Abstract::apply()'
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Attribute.php
@@ -8464,7 +8464,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Type_Configurable::getProductByAttributes() should return Mage_Catalog_Model_Product|null but returns Varien_Object.'
+			rawMessage: 'Method Mage_Catalog_Model_Product_Type_Configurable::getProductByAttributes() should return Mage_Catalog_Model_Product|null but returns Maho\DataObject.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
@@ -8542,7 +8542,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
 
 		-
-			rawMessage: 'Parameter #1 $object of method Mage_Catalog_Model_Resource_Abstract::load() expects Mage_Core_Model_Abstract, Varien_Object given.'
+			rawMessage: 'Parameter #1 $object of method Mage_Catalog_Model_Resource_Abstract::load() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
@@ -8632,12 +8632,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Flat/Collection.php
 
 		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Indexer/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Indexer_Product::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8668,24 +8662,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
 
 		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getCheckSql().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getConcatSql().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getLengthSql().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Tree::_getItemIsActive() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -8696,18 +8672,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Parameter #2 $cols of method Zend_Db_Select::from() expects array|string|Zend_Db_Expr, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
-
-		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Collection/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Config::_construct() has no return type specified.'
@@ -8738,18 +8702,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Decimal.php
-
-		-
-			rawMessage: Binary operation "-" between int and non-falsy-string results in an error.
-			identifier: binaryOp.invalid
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
-
-		-
-			rawMessage: Binary operation "-" between non-falsy-string and 1 results in an error.
-			identifier: binaryOp.invalid
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Layer/Filter/Price.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Layer_Filter_Price::_construct() has no return type specified.'
@@ -8878,12 +8830,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::getProductCountSelect() should return Varien_Db_Select but returns Zend_Db_Select.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Collection::$_urlRewriteCategory (int) does not accept default value of type string.'
 			identifier: property.defaultValue
 			count: 1
@@ -8908,7 +8854,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item/Collection.php
 
 		-
-			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Collection_Abstract::setObject() expects Varien_Object|null, string given.'
+			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Collection_Abstract::setObject() expects Maho\DataObject|null, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item/Collection.php
@@ -9022,12 +8968,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link.php
 
 		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
-
-		-
 			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Link_Collection::$_linkTypeId (Mage_Catalog_Model_Product_Type) does not accept int.'
 			identifier: assign.propertyType
 			count: 1
@@ -9048,12 +8988,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option::_saveValueTitles() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
-
-		-
-			rawMessage: 'Parameter #2 $newOptionId of method Mage_Catalog_Model_Product_Option_Value::duplicate() expects int, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Option.php
 
@@ -9194,24 +9128,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/data/catalog_setup/data-install-1.6.0.0.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::crossUpdateFromSelect().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.12-1.6.0.0.13.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.13-1.6.0.0.14.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.19.1.3-1.6.0.0.19.1.4.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_CatalogIndex_Model_Resource_Attribute::checkCount().'
@@ -9394,12 +9310,6 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Aggregation.php
 
 		-
-			rawMessage: 'Parameter #1 $aggregationId of method Mage_CatalogIndex_Model_Resource_Aggregation::_saveTagRelations() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Aggregation.php
-
-		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Attribute::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9424,20 +9334,8 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Configurable.php
 
 		-
-			rawMessage: 'Parameter #1 $select of method Mage_CatalogIndex_Model_Resource_Data_Abstract::_addAttributeFilter() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Configurable.php
-
-		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Data_Grouped::_prepareLinkFetchSelect() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Grouped.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Mage_CatalogIndex_Model_Resource_Data_Abstract::_addAttributeFilter() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Grouped.php
 
@@ -9694,7 +9592,7 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Item.php
 
 		-
-			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::_initSelect() should return $this(Mage_CatalogInventory_Model_Resource_Stock_Item_Collection) but returns Varien_Db_Select.'
+			rawMessage: 'Method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::_initSelect() should return $this(Mage_CatalogInventory_Model_Resource_Stock_Item_Collection) but returns Maho\Db\Select.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Resource/Stock/Item/Collection.php
@@ -9952,18 +9850,6 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Rule/Condition/Product.php
 
 		-
-			rawMessage: 'Parameter #3 $indexType of method Mage_Core_Model_Resource_Setup::getIdxName() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogRule/sql/catalogrule_setup/install-1.6.0.0.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/CatalogRule/sql/catalogrule_setup/upgrade-1.6.0.1-1.6.0.2.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -10084,7 +9970,7 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
 
 		-
-			rawMessage: 'Parameter #1 $product of method Mage_Catalog_Model_Product_Type_Abstract::getSearchableData() expects Mage_Catalog_Model_Product|null, Varien_Object given.'
+			rawMessage: 'Parameter #1 $product of method Mage_Catalog_Model_Product_Type_Abstract::getSearchableData() expects Mage_Catalog_Model_Product|null, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
@@ -11206,13 +11092,13 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getEscapeMessages() expects int|string|null, true given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getEscapeMessages() expects int|string|null, true given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getMessages() expects int|string|null, true given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getMessages() expects int|string|null, true given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
@@ -11524,13 +11410,13 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Config.php
 
 		-
-			rawMessage: 'Return type (Mage_Core_Model_App) of method Mage_Core_Model_Config::_saveCache() should be compatible with return type (bool) of method Varien_Simplexml_Config::_saveCache()'
+			rawMessage: 'Return type (Mage_Core_Model_App) of method Mage_Core_Model_Config::_saveCache() should be compatible with return type (bool) of method Maho\Simplexml\Config::_saveCache()'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Config.php
 
 		-
-			rawMessage: 'Return type (string) of method Mage_Core_Model_Config::_loadCache() should be compatible with return type (bool) of method Varien_Simplexml_Config::_loadCache()'
+			rawMessage: 'Return type (string) of method Mage_Core_Model_Config::_loadCache() should be compatible with return type (bool) of method Maho\Simplexml\Config::_loadCache()'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Config.php
@@ -11548,7 +11434,7 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Design.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Varien_Simplexml_Config::setNode() expects string, null given.'
+			rawMessage: 'Parameter #2 $value of method Maho\Simplexml\Config::setNode() expects string, null given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Design/Config.php
@@ -11704,7 +11590,7 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Simplexml_Element::getBlockName().'
+			rawMessage: 'Call to an undefined method Maho\Simplexml\Element::getBlockName().'
 			identifier: method.notFound
 			count: 2
 			path: app/code/core/Mage/Core/Model/Layout.php
@@ -11734,19 +11620,13 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			rawMessage: 'Parameter #1 $node of method Varien_Simplexml_Config::setXml() expects Varien_Simplexml_Element, SimpleXMLElement given.'
+			rawMessage: 'Parameter #1 $node of method Maho\Simplexml\Config::setXml() expects Maho\Simplexml\Element, SimpleXMLElement given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			rawMessage: 'Parameter #1 $node of method Varien_Simplexml_Config::setXml() expects Varien_Simplexml_Element, SimpleXMLElement|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			rawMessage: 'Parameter #1 $sourceData of method Varien_Simplexml_Config::__construct() expects string|Varien_Simplexml_Element|null, array given.'
+			rawMessage: 'Parameter #1 $node of method Maho\Simplexml\Config::setXml() expects Maho\Simplexml\Element, SimpleXMLElement|false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
@@ -11848,7 +11728,7 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource::getIdxName() should return Varien_Db_Adapter_Interface|false but returns string.'
+			rawMessage: 'Method Mage_Core_Model_Resource::getIdxName() should return Maho\Db\Adapter\AdapterInterface|false but returns string.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource.php
@@ -11974,13 +11854,13 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Email/Template.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Entity_Abstract::getConfig() should return bool|string but returns Varien_Simplexml_Config.'
+			rawMessage: 'Method Mage_Core_Model_Resource_Entity_Abstract::getConfig() should return bool|string but returns Maho\Simplexml\Config.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Core_Model_Resource_Entity_Abstract::$_config (Varien_Simplexml_Config) does not accept default value of type array.'
+			rawMessage: 'Property Mage_Core_Model_Resource_Entity_Abstract::$_config (Maho\Simplexml\Config) does not accept default value of type array.'
 			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
@@ -12010,12 +11890,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Iterator.php
 
 		-
-			rawMessage: 'Parameter #2 $conn of method Mage_Core_Model_Resource_Iterator::_getStatement() expects Zend_Db_Adapter_Abstract|null, Varien_Db_Adapter_Interface|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Iterator.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Language::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12040,14 +11914,8 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Setup::getIdxName() should return string but returns Varien_Db_Adapter_Interface|false.'
+			rawMessage: 'Method Mage_Core_Model_Resource_Setup::getIdxName() should return string but returns Maho\Db\Adapter\AdapterInterface|false.'
 			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Setup.php
-
-		-
-			rawMessage: 'Parameter #1 $hook of method Varien_Db_Adapter_Pdo_Mysql::setQueryHook() expects array, null given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
@@ -13006,19 +12874,13 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Resource/Address/Collection.php
 
 		-
-			rawMessage: 'Parameter #1 $customer of method Mage_Customer_Model_Resource_Customer::_saveAddresses() expects Mage_Customer_Model_Customer, Varien_Object given.'
+			rawMessage: 'Parameter #1 $customer of method Mage_Customer_Model_Resource_Customer::_saveAddresses() expects Mage_Customer_Model_Customer, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setConfirmation() expects bool|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
-
-		-
-			rawMessage: 'Parameter #2 $entityId of method Mage_Eav_Model_Entity_Abstract::load() expects int, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
@@ -13130,12 +12992,6 @@ parameters:
 			identifier: argument.type
 			count: 3
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Customer/data/customer_setup/data-upgrade-1.6.2.0.4-1.6.2.0.5.php
 
 		-
 			rawMessage: Result of && is always false.
@@ -13430,18 +13286,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Std.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Zend_Db::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Zend/Db.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Zend_Db::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Zend/Db.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Container_Abstract::addException() has no return type specified.'
@@ -14896,7 +14740,7 @@ parameters:
 			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
 
 		-
-			rawMessage: 'Parameter #1 $readonly of method Varien_Data_Form_Abstract::setReadonly() expects bool, int given.'
+			rawMessage: 'Parameter #1 $readonly of method Maho\Data\Form\AbstractForm::setReadonly() expects bool, int given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Block/Adminhtml/Attribute/Edit/Main/Abstract.php
@@ -15106,19 +14950,13 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
 
 		-
-			rawMessage: 'Cannot call method lastInsertId() on Varien_Db_Adapter_Interface|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Abstract::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
 
 		-
-			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Abstract::load() expects Mage_Core_Model_Abstract, Varien_Object given.'
+			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Abstract::load() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
@@ -15262,7 +15100,7 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Source/Table.php
 
 		-
-			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Varien_Db_Adapter_Pdo_Mysql|false given.'
+			rawMessage: 'Parameter #1 $resource of method Mage_Eav_Model_Entity_Collection_Abstract::__construct() expects Mage_Core_Model_Resource_Abstract|null, Maho\Db\Adapter\AdapterInterface|false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Collection.php
@@ -15304,7 +15142,7 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
-			rawMessage: 'Parameter #1 $className of method Varien_Data_Collection::setItemObjectClass() expects string, null given.'
+			rawMessage: 'Parameter #1 $className of method Maho\Data\Collection::setItemObjectClass() expects string, null given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
@@ -15313,12 +15151,6 @@ parameters:
 			rawMessage: 'Parameter #1 $entity of method Mage_Eav_Model_Entity_Collection_Abstract::setEntity() expects Mage_Eav_Model_Entity_Abstract, Mage_Core_Model_Resource_Db_Collection_Abstract|false given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
-			rawMessage: 'Parameter #2 $alias of method Varien_Db_Adapter_Interface::quoteColumnAs() expects string, null given.'
-			identifier: argument.type
-			count: 4
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
@@ -15535,7 +15367,7 @@ parameters:
 			path: app/code/core/Mage/GiftMessage/Model/Api/V2.php
 
 		-
-			rawMessage: 'Method Varien_Object::unsData() invoked with 1 parameter, 0 required.'
+			rawMessage: 'Method Maho\DataObject::unsData() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Entity/Attribute/Backend/Boolean/Config.php
@@ -15655,7 +15487,7 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getTypeInstance() expects int|string|null, true given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getTypeInstance() expects int|string|null, true given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
@@ -15777,18 +15609,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_ImportExport_Model_Resource_Import_Data::_construct() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
-
-		-
-			rawMessage: 'Method Mage_ImportExport_Model_Resource_Import_Data::getIterator() return type with generic class IteratorIterator does not specify its types: TKey, TValue, TIterator'
-			identifier: missingType.generics
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
-
-		-
-			rawMessage: 'Property Mage_ImportExport_Model_Resource_Import_Data::$_iterator with generic class IteratorIterator does not specify its types: TKey, TValue, TIterator'
-			identifier: missingType.generics
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
 
@@ -16069,7 +15889,7 @@ parameters:
 			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Varien_Db_Adapter_Interface) in isset() is not nullable.'
+			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Maho\Db\Adapter\AdapterInterface) in isset() is not nullable.'
 			identifier: isset.property
 			count: 1
 			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
@@ -16195,12 +16015,6 @@ parameters:
 			path: app/code/core/Mage/Log/Model/Resource/Customer.php
 
 		-
-			rawMessage: Binary operation "+" between non-falsy-string and 1 results in an error.
-			identifier: binaryOp.invalid
-			count: 2
-			path: app/code/core/Mage/Log/Model/Resource/Log.php
-
-		-
 			rawMessage: 'Method Mage_Log_Model_Resource_Log::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -16315,12 +16129,6 @@ parameters:
 			path: app/code/core/Mage/Newsletter/controllers/ManageController.php
 
 		-
-			rawMessage: 'Parameter #1 $select of method Varien_Db_Adapter_Interface::deleteFromSelect() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Newsletter/data/newsletter_setup/data-upgrade-1.6.0.0-1.6.0.1.php
-
-		-
 			rawMessage: 'Parameter #1 $e of static method Mage::logException() expects Throwable, string given.'
 			identifier: argument.type
 			count: 1
@@ -16393,7 +16201,7 @@ parameters:
 			path: app/code/core/Mage/Oauth/Model/Resource/Token.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Varien_Data_Collection::addFilter() expects array|string, int given.'
+			rawMessage: 'Parameter #2 $value of method Maho\Data\Collection::addFilter() expects array|string, int given.'
 			identifier: argument.type
 			count: 4
 			path: app/code/core/Mage/Oauth/Model/Resource/Token/Collection.php
@@ -16663,7 +16471,7 @@ parameters:
 			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
 
 		-
-			rawMessage: 'Method Varien_Object::setXAmount() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::setXAmount() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
@@ -16909,7 +16717,7 @@ parameters:
 			path: app/code/core/Mage/Payment/Helper/Data.php
 
 		-
-			rawMessage: 'Method Varien_Object::getConfigData() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::getConfigData() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Payment/Helper/Data.php
@@ -16969,7 +16777,7 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Config.php
 
 		-
-			rawMessage: 'Method Varien_Object::getConfigData() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::getConfigData() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Payment/Model/Config.php
@@ -17707,7 +17515,7 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Object::isNominal().'
+			rawMessage: 'Call to an undefined method Maho\DataObject::isNominal().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Cart.php
@@ -17929,7 +17737,7 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Express.php
 
 		-
-			rawMessage: 'Method Varien_Object::setAdditionalInformation() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::setAdditionalInformation() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Express.php
@@ -18397,7 +18205,7 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
 
 		-
-			rawMessage: 'Parameter #1 $payment of method Mage_Paypal_Model_Method_Agreement::_placeOrder() expects Mage_Sales_Model_Order_Payment, Varien_Object given.'
+			rawMessage: 'Parameter #1 $payment of method Mage_Paypal_Model_Method_Agreement::_placeOrder() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
@@ -18589,7 +18397,7 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
 
 		-
-			rawMessage: 'Parameter #1 $payment of method Mage_Paypal_Model_Payflowpro::void() expects Mage_Sales_Model_Order_Payment, Varien_Object given.'
+			rawMessage: 'Parameter #1 $payment of method Mage_Paypal_Model_Payflowpro::void() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
@@ -18808,19 +18616,19 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Pro.php
 
 		-
-			rawMessage: 'Parameter #2 $payment of method Mage_Paypal_Model_Pro::_importCaptureResultToPayment() expects Mage_Sales_Model_Order_Payment, Varien_Object given.'
+			rawMessage: 'Parameter #2 $payment of method Mage_Paypal_Model_Pro::_importCaptureResultToPayment() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Pro.php
 
 		-
-			rawMessage: 'Parameter #2 $payment of method Mage_Paypal_Model_Pro::_importRefundResultToPayment() expects Mage_Sales_Model_Order_Payment, Varien_Object given.'
+			rawMessage: 'Parameter #2 $payment of method Mage_Paypal_Model_Pro::_importRefundResultToPayment() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Pro.php
 
 		-
-			rawMessage: 'Parameter #2 $to of method Mage_Paypal_Model_Pro::importPaymentInfo() expects Mage_Payment_Model_Info, Varien_Object given.'
+			rawMessage: 'Parameter #2 $to of method Mage_Paypal_Model_Pro::importPaymentInfo() expects Mage_Payment_Model_Info, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Pro.php
@@ -19228,19 +19036,13 @@ parameters:
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Rating_Model_Rating_Option::setVoteId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
-
-		-
 			rawMessage: 'Parameter #2 $entityPkValue of method Mage_Rating_Model_Resource_Rating_Option::aggregateEntityByRatingId() expects int, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Varien_Data_Collection::addFilter() expects array|string, int given.'
+			rawMessage: 'Parameter #2 $value of method Maho\Data\Collection::addFilter() expects array|string, int given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option/Collection.php
@@ -19270,7 +19072,7 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Event/Observer.php
 
 		-
-			rawMessage: 'Property Mage_Reports_Model_Grouped_Collection::$_resourceCollection (Mage_Core_Model_Resource_Db_Collection_Abstract) does not accept Varien_Data_Collection_Db.'
+			rawMessage: 'Property Mage_Reports_Model_Grouped_Collection::$_resourceCollection (Mage_Core_Model_Resource_Db_Collection_Abstract) does not accept Maho\Data\Collection\Db.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Grouped/Collection.php
@@ -19312,19 +19114,13 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Customer/Collection.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Varien_Db_Adapter_Interface::getIfNullSql() expects string, int given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Reports/Model/Resource/Customer/Collection.php
-
-		-
 			rawMessage: 'Property Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract::$_entityCollection (Mage_Eav_Model_Entity_Collection_Abstract) in empty() is not falsy.'
 			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Entity/Summary/Collection/Abstract.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Data_Collection_Db::getResource().'
+			rawMessage: 'Call to an undefined method Maho\Data\Collection\Db::getResource().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Event.php
@@ -19351,18 +19147,6 @@ parameters:
 			rawMessage: 'Parameter #2 $customStart of method Mage_Reports_Model_Resource_Order_Collection::getDateRange() expects string, int given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $interval of method Varien_Db_Adapter_Interface::getDateAddSql() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Varien_Db_Adapter_Interface::getIfNullSql() expects string, int given.'
-			identifier: argument.type
-			count: 20
 			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
 
 		-
@@ -19426,12 +19210,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Product/Sold/Collection.php
 
 		-
-			rawMessage: 'Parameter #3 $cols of method Zend_Db_Select::joinInner() expects array|string, null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Reports/Model/Resource/Quote/Collection.php
-
-		-
 			rawMessage: Property Mage_Reports_Model_Resource_Quote_Collection::$_selectCountSqlType has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -19454,12 +19232,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Report/Product/Viewed.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Mage_Core_Model_Resource_Helper_Mysql4::getQueryUsingAnalyticFunction() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Report/Product/Viewed/Collection.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Reports_Model_Resource_Review_Collection::_joinFields().'
@@ -19981,7 +19753,7 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Rule_Model_Condition_Product_Abstract::getAttributeObject() should return Mage_Catalog_Model_Resource_Eav_Attribute but returns Mage_Eav_Model_Entity_Attribute_Abstract|Varien_Object|false.'
+			rawMessage: 'Method Mage_Rule_Model_Condition_Product_Abstract::getAttributeObject() should return Mage_Catalog_Model_Resource_Eav_Attribute but returns Mage_Eav_Model_Entity_Attribute_Abstract|Maho\DataObject|false.'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
@@ -20161,13 +19933,13 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Billing/Agreement.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Simplexml_Element::getClassName().'
+			rawMessage: 'Call to an undefined method Maho\Simplexml\Element::getClassName().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Config/Ordered.php
 
 		-
-			rawMessage: 'Parameter #3 $totalConfig of method Mage_Sales_Model_Config_Ordered::_initModelInstance() expects array, Varien_Simplexml_Element given.'
+			rawMessage: 'Parameter #3 $totalConfig of method Mage_Sales_Model_Config_Ordered::_initModelInstance() expects array, Maho\Simplexml\Element given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Config/Ordered.php
@@ -20377,7 +20149,7 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Observer.php
 
 		-
-			rawMessage: 'Method Varien_Object::getChildrenIds() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::getChildrenIds() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Observer.php
@@ -21142,7 +20914,7 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
 
 		-
-			rawMessage: 'Method Varien_Object::getRecurringProfileDetails() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::getRecurringProfileDetails() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
@@ -21310,7 +21082,7 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Status.php
 
 		-
-			rawMessage: 'Parameter #3 $object of method Mage_Core_Model_Resource_Db_Abstract::_getLoadSelect() expects Mage_Core_Model_Abstract, Varien_Object given.'
+			rawMessage: 'Parameter #3 $object of method Mage_Core_Model_Resource_Db_Abstract::_getLoadSelect() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Status.php
@@ -21410,12 +21182,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Report/Bestsellers.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Mage_Core_Model_Resource_Helper_Mysql4::getQueryUsingAnalyticFunction() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Report/Bestsellers/Collection.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Resource_Report_Invoiced::_construct() has no return type specified.'
@@ -21536,12 +21302,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/controllers/DownloadController.php
-
-		-
-			rawMessage: 'Parameter #1 $select of method Varien_Db_Adapter_Interface::updateFromSelect() expects Varien_Db_Select, Zend_Db_Select given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/data/sales_setup/data-upgrade-1.6.0.4-1.6.0.5.php
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() has no return type specified.'
@@ -21748,12 +21508,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/Model/Validator.php
 
 		-
-			rawMessage: 'Call to an undefined method Zend_Db_Select::insertFromSelect().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/SalesRule/sql/salesrule_setup/upgrade-1.6.0.2-1.6.0.3.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Shipping_Model_Carrier_Abstract::_getQuotes().'
 			identifier: method.notFound
 			count: 1
@@ -21920,12 +21674,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sitemap/Model/Observer.php
-
-		-
-			rawMessage: 'Call to an undefined method Zend_Db_Adapter_Abstract::getCheckSql().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sitemap/Model/Resource/Catalog/Abstract.php
 
 		-
 			rawMessage: 'Method Mage_Sitemap_Model_Resource_Catalog_Category::_construct() has no return type specified.'
@@ -22120,7 +21868,7 @@ parameters:
 			path: app/code/core/Mage/Tag/Model/Resource/Tag.php
 
 		-
-			rawMessage: 'Parameter #1 $model of method Mage_Tag_Model_Resource_Tag::loadByName() expects Mage_Tag_Model_Tag, Varien_Object given.'
+			rawMessage: 'Parameter #1 $model of method Mage_Tag_Model_Resource_Tag::loadByName() expects Mage_Tag_Model_Tag, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Tag/Model/Resource/Tag.php
@@ -22246,7 +21994,7 @@ parameters:
 			path: app/code/core/Mage/Tax/Helper/Data.php
 
 		-
-			rawMessage: 'Parameter #1 $request of method Mage_Tax_Model_Resource_Calculation::getCalculationProcess() expects Varien_Object, null given.'
+			rawMessage: 'Parameter #1 $request of method Mage_Tax_Model_Resource_Calculation::getCalculationProcess() expects Maho\DataObject, null given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Tax/Model/Calculation.php
@@ -22576,12 +22324,6 @@ parameters:
 			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
 
 		-
-			rawMessage: 'Parameter #3 $indexType of method Mage_Core_Model_Resource_Setup::getIdxName() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
-
-		-
 			rawMessage: 'Method Mage_Usa_Helper_Data::getMeasureDimensionName() has parameter $key with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -22648,19 +22390,19 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Abstract.php
 
 		-
-			rawMessage: Access to an undefined property Varien_Object::$domestic.
+			rawMessage: Access to an undefined property Maho\DataObject::$domestic.
 			identifier: property.notFound
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			rawMessage: Access to an undefined property Varien_Object::$name.
+			rawMessage: Access to an undefined property Maho\DataObject::$name.
 			identifier: property.notFound
 			count: 4
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			rawMessage: Access to an undefined property Varien_Object::$region.
+			rawMessage: Access to an undefined property Maho\DataObject::$region.
 			identifier: property.notFound
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
@@ -22990,19 +22732,19 @@ parameters:
 			path: app/code/core/Mage/Weee/Helper/Data.php
 
 		-
-			rawMessage: 'Parameter #2 $shipping of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Varien_Object|false|null given.'
+			rawMessage: 'Parameter #2 $shipping of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Maho\DataObject|false|null given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Weee/Helper/Data.php
 
 		-
-			rawMessage: 'Parameter #3 $billing of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Varien_Object|false|null given.'
+			rawMessage: 'Parameter #3 $billing of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Maho\DataObject|false|null given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Weee/Helper/Data.php
 
 		-
-			rawMessage: 'Parameter #1 $product of method Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax::deleteProductData() expects Mage_Catalog_Model_Product, Varien_Object given.'
+			rawMessage: 'Parameter #1 $product of method Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax::deleteProductData() expects Mage_Catalog_Model_Product, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Weee/Model/Attribute/Backend/Weee/Tax.php
@@ -23030,18 +22772,6 @@ parameters:
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
-
-		-
-			rawMessage: 'Binary operation "*" between non-falsy-string and int<min, -1>|int<1, max> results in an error.'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
-
-		-
-			rawMessage: 'Binary operation "-" between non-falsy-string and (float|int) results in an error.'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Abstract::_init() invoked with 2 parameters, 1 required.'
@@ -23234,12 +22964,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Widget/controllers/Adminhtml/Widget/InstanceController.php
-
-		-
-			rawMessage: 'Call to an undefined method Varien_Db_Adapter_Interface|Zend_Db_Adapter_Pdo_Abstract::modifyTables().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Widget/sql/widget_setup/install-1.6.0.0.php
 
 		-
 			rawMessage: 'Method Mage_Wishlist_Block_Abstract::addItemPriceBlockType() has no return type specified.'
@@ -23632,7 +23356,7 @@ parameters:
 			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
 
 		-
-			rawMessage: 'Method Varien_Object::getWidgetButtonHtml() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\DataObject::getWidgetButtonHtml() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 4
 			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
@@ -24436,7 +24160,7 @@ parameters:
 			path: app/design/frontend/base/default/template/review/helper/summary_short.phtml
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Object::getStatusHistoryRssUrl() expects int|string|null, Mage_Sales_Model_Order given.'
+			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getStatusHistoryRssUrl() expects int|string|null, Mage_Sales_Model_Order given.'
 			identifier: argument.type
 			count: 1
 			path: app/design/frontend/base/default/template/sales/order/info.phtml
@@ -24466,2383 +24190,1969 @@ parameters:
 			path: app/design/install/default/default/template/install/state.phtml
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Convert_Action::getData().'
+			rawMessage: 'Call to an undefined method Maho\Convert\Action::getData().'
 			identifier: method.notFound
 			count: 1
-			path: lib/Varien/Convert.php
+			path: lib/Maho/Convert.php
 
 		-
-			rawMessage: 'Method Varien_Convert::convert() has no return type specified.'
+			rawMessage: 'Method Maho\Convert::convert() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert.php
+			path: lib/Maho/Convert.php
 
 		-
-			rawMessage: 'Method Varien_Convert::convert() has parameter $class with no type specified.'
+			rawMessage: 'Method Maho\Convert::convert() has parameter $class with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert.php
+			path: lib/Maho/Convert.php
 
 		-
-			rawMessage: 'Method Varien_Convert::convert() has parameter $data with no type specified.'
+			rawMessage: 'Method Maho\Convert::convert() has parameter $data with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert.php
+			path: lib/Maho/Convert.php
 
 		-
-			rawMessage: 'Method Varien_Convert::convert() has parameter $method with no type specified.'
+			rawMessage: 'Method Maho\Convert::convert() has parameter $method with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert.php
+			path: lib/Maho/Convert.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Convert_Action_Abstract::addException().'
-			identifier: method.notFound
-			count: 2
-			path: lib/Varien/Convert/Action/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::addException() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::addException() has parameter $error with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::addException() has parameter $level with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getGridFields() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getGridFields() has parameter $grid with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getPosition() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getVar() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getVar() has parameter $default with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getVar() has parameter $key with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::getVars() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setData() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setPosition() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setPosition() has parameter $position with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setVar() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setVar() has parameter $key with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::setVar() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::validateDataArray() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::validateDataArray() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::validateDataGrid() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::validateDataGrid() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::validateDataString() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Abstract::validateDataString() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: Property Varien_Convert_Container_Abstract::$_data has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: Property Varien_Convert_Container_Abstract::$_position has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: Property Varien_Convert_Container_Abstract::$_profile has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: Property Varien_Convert_Container_Abstract::$_vars has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Convert/Container/Abstract.php
-
-		-
-			rawMessage: 'Call to an undefined method Varien_Convert_Container_Interface::getName().'
+			rawMessage: 'Call to an undefined method Maho\Convert\Action\AbstractAction::addException().'
 			identifier: method.notFound
 			count: 2
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Action/AbstractAction.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::addItem() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getGridFields() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::addItem() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getGridFields() has parameter $grid with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::getItem() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getPosition() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::getItem() has parameter $name with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::hasItem() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getProfile() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::hasItem() has parameter $name with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::setDefaultClass() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getVar() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Container_Collection::setDefaultClass() has parameter $className with no type specified.'
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getVar() has parameter $default with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: Property Varien_Convert_Container_Collection::$_defaultClass has no type specified.
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getVar() has parameter $key with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getVars() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::setPosition() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::setPosition() has parameter $position with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::setVar() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::setVar() has parameter $key with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::setVar() has parameter $value with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::validateDataArray() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::validateDataArray() has parameter $data with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::validateDataGrid() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::validateDataGrid() has parameter $data with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::validateDataString() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::validateDataString() has parameter $data with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: Property Maho\Convert\Container\AbstractContainer::$_data has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: Property Varien_Convert_Container_Collection::$_items has no type specified.
+			rawMessage: Property Maho\Convert\Container\AbstractContainer::$_position has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Container/Collection.php
+			path: lib/Maho/Convert/Container/AbstractContainer.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Exception::getContainer() has no return type specified.'
+			rawMessage: Property Maho\Convert\Container\AbstractContainer::$_profile has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: Property Maho\Convert\Container\AbstractContainer::$_vars has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/Convert/Container/AbstractContainer.php
+
+		-
+			rawMessage: 'Call to an undefined method Maho\Convert\Container\ContainerInterface::getName().'
+			identifier: method.notFound
+			count: 2
+			path: lib/Maho/Convert/Container/Collection.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Container\Collection::addItem() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Exception::getLevel() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Exception.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Exception::getPosition() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Exception.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Exception::setContainer() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Exception.php
-
-		-
-			rawMessage: 'Method Varien_Convert_Exception::setContainer() has parameter $container with no type specified.'
+			rawMessage: 'Method Maho\Convert\Container\Collection::addItem() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Exception::setLevel() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Container\Collection::getItem() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Exception::setLevel() has parameter $level with no type specified.'
+			rawMessage: 'Method Maho\Convert\Container\Collection::getItem() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Exception::setPosition() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Container\Collection::hasItem() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Exception::setPosition() has parameter $position with no type specified.'
+			rawMessage: 'Method Maho\Convert\Container\Collection::hasItem() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Exception::$_container has no type specified.
-			identifier: missingType.property
+			rawMessage: 'Method Maho\Convert\Container\Collection::setDefaultClass() has no return type specified.'
+			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Exception::$_level has no type specified.
-			identifier: missingType.property
+			rawMessage: 'Method Maho\Convert\Container\Collection::setDefaultClass() has parameter $className with no type specified.'
+			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Exception::$_position has no type specified.
+			rawMessage: Property Maho\Convert\Container\Collection::$_defaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Exception.php
+			path: lib/Maho/Convert/Container/Collection.php
+
+		-
+			rawMessage: Property Maho\Convert\Container\Collection::$_items has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/Convert/Container/Collection.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::getContainer() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::getLevel() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::getPosition() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::setContainer() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::setContainer() has parameter $container with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::setLevel() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::setLevel() has parameter $level with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::setPosition() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: 'Method Maho\Convert\Exception::setPosition() has parameter $position with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: Property Maho\Convert\Exception::$_container has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: Property Maho\Convert\Exception::$_level has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/Convert/Exception.php
+
+		-
+			rawMessage: Property Maho\Convert\Exception::$_position has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/Convert/Exception.php
 
 		-
 			rawMessage: Left side of && is always true.
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
-			path: lib/Varien/Convert/Mapper/Column.php
+			path: lib/Maho/Convert/Mapper/Column.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Mapper_Column::map() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Mapper\Column::map() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Mapper/Column.php
+			path: lib/Maho/Convert/Mapper/Column.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Mapper_Interface::map() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Mapper\MapperInterface::map() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Mapper/Interface.php
+			path: lib/Maho/Convert/Mapper/MapperInterface.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Csv::parse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\Csv::parse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Csv.php
+			path: lib/Maho/Convert/Parser/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Csv::parseTest() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\Csv::parseTest() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Csv.php
+			path: lib/Maho/Convert/Parser/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Csv::unparse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\Csv::unparse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Csv.php
+			path: lib/Maho/Convert/Parser/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Interface::parse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\ParserInterface::parse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Interface.php
+			path: lib/Maho/Convert/Parser/ParserInterface.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Interface::unparse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\ParserInterface::unparse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Interface.php
+			path: lib/Maho/Convert/Parser/ParserInterface.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Serialize::parse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\Serialize::parse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Serialize.php
+			path: lib/Maho/Convert/Parser/Serialize.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Serialize::unparse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\Serialize::unparse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Serialize.php
+			path: lib/Maho/Convert/Parser/Serialize.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Xml_Excel::parse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\Xml\Excel::parse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Xml/Excel.php
+			path: lib/Maho/Convert/Parser/Xml/Excel.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Parser_Xml_Excel::unparse() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Parser\Xml\Excel::unparse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Parser/Xml/Excel.php
+			path: lib/Maho/Convert/Parser/Xml/Excel.php
 
 		-
 			rawMessage: Variable $data might not be defined.
 			identifier: variable.undefined
 			count: 3
-			path: lib/Varien/Convert/Parser/Xml/Excel.php
+			path: lib/Maho/Convert/Parser/Xml/Excel.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::addAction() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::addAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::addContainer() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::addContainer() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::addContainer() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::addContainer() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::addException() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::addException() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::getContainer() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::getContainer() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::getContainer() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::getContainer() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::getContainers() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::getContainers() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::getDryRun() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::getDryRun() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::getExceptions() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::getExceptions() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::run() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::run() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::setContainers() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::setContainers() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::setDryRun() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::setDryRun() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Abstract::setDryRun() has parameter $flag with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\AbstractProfile::setDryRun() has parameter $flag with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Abstract::$_actionDefaultClass has no type specified.
+			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_actionDefaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Abstract::$_actions has no type specified.
+			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_actions has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Abstract::$_containerCollectionDefaultClass has no type specified.
+			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_containerCollectionDefaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Abstract::$_containers has no type specified.
+			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_containers has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Abstract::$_dryRun has no type specified.
+			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_dryRun has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Abstract::$_exceptions has no type specified.
+			rawMessage: Property Maho\Convert\Profile\AbstractProfile::$_exceptions has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Abstract.php
+			path: lib/Maho/Convert/Profile/AbstractProfile.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::addContainer() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::addContainer() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::addContainer() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::addContainer() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::addProfile() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::addProfile() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::addProfile() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::addProfile() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getClassNameByType() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getClassNameByType() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getClassNameByType() has parameter $type with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getClassNameByType() has parameter $type with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getContainer() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getContainer() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getContainer() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getContainer() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getContainers() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getContainers() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getProfile() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getProfile() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getProfile() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getProfile() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::getProfiles() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::getProfiles() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::importProfileXml() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::importProfileXml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::importProfileXml() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::importProfileXml() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::importXml() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::importXml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::importXml() has parameter $xml with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::importXml() has parameter $xml with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::run() has no return type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::run() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Convert_Profile_Collection::run() has parameter $profile with no type specified.'
+			rawMessage: 'Method Maho\Convert\Profile\Collection::run() has parameter $profile with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_containerCollectionDefaultClass has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_containerCollectionDefaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_containerDefaultClass has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_containerDefaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_containers has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_containers has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_profileCollectionDefaultClass has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_profileCollectionDefaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_profileDefaultClass has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_profileDefaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_profiles has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_profiles has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_simplexmlDefaultClass has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_simplexmlDefaultClass has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
-			rawMessage: Property Varien_Convert_Profile_Collection::$_xml has no type specified.
+			rawMessage: Property Maho\Convert\Profile\Collection::$_xml has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Convert/Profile/Collection.php
+			path: lib/Maho/Convert/Profile/Collection.php
 
 		-
 			rawMessage: Cannot access property $_items on array.
 			identifier: property.nonObject
 			count: 2
-			path: lib/Varien/Data/Collection.php
+			path: lib/Maho/Data/Collection.php
 
 		-
-			rawMessage: 'Class Varien_Data_Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
+			rawMessage: 'Class Maho\Data\Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
-			path: lib/Varien/Data/Collection.php
+			path: lib/Maho/Data/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Data_Collection::getFilter() should return array|Varien_Object|null but return statement is missing.'
+			rawMessage: 'Method Maho\Data\Collection::getFilter() should return array|Maho\DataObject|null but return statement is missing.'
 			identifier: return.missing
 			count: 1
-			path: lib/Varien/Data/Collection.php
+			path: lib/Maho/Data/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Data_Collection::getLastPageNumber() should return int but returns float.'
+			rawMessage: 'Method Maho\Data\Collection::getLastPageNumber() should return int but returns float.'
 			identifier: return.type
 			count: 1
-			path: lib/Varien/Data/Collection.php
+			path: lib/Maho/Data/Collection.php
 
 		-
-			rawMessage: Property Varien_Data_Collection::$_cacheKey has no type specified.
+			rawMessage: Property Maho\Data\Collection::$_cacheKey has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Collection.php
+			path: lib/Maho/Data/Collection.php
 
 		-
-			rawMessage: Property Varien_Data_Collection::$_cacheLifetime has no type specified.
+			rawMessage: Property Maho\Data\Collection::$_cacheLifetime has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Collection.php
+			path: lib/Maho/Data/Collection.php
 
 		-
-			rawMessage: Property Varien_Data_Collection::$_cacheTags has no type specified.
+			rawMessage: Property Maho\Data\Collection::$_cacheTags has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Collection.php
+			path: lib/Maho/Data/Collection.php
 
 		-
-			rawMessage: 'Call to an undefined method Varien_Data_Collection_Db::_initSelect().'
+			rawMessage: 'Call to an undefined method Maho\Data\Collection\Db::_initSelect().'
 			identifier: method.notFound
 			count: 1
-			path: lib/Varien/Data/Collection/Db.php
+			path: lib/Maho/Data/Collection/Db.php
 
 		-
-			rawMessage: 'Method Varien_Data_Collection_Db::__construct() has parameter $conn with no type specified.'
+			rawMessage: 'Method Maho\Data\Collection\Db::__construct() has parameter $conn with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Data/Collection/Db.php
+			path: lib/Maho/Data/Collection/Db.php
 
 		-
-			rawMessage: 'Method Varien_Data_Collection_Db::_renderFiltersBefore() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Collection\Db::_renderFiltersBefore() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Collection/Db.php
+			path: lib/Maho/Data/Collection/Db.php
 
 		-
-			rawMessage: 'Method Varien_Data_Collection_Db::getConnection() should return Varien_Db_Adapter_Interface but returns Zend_Db_Adapter_Abstract.'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Data/Collection/Db.php
-
-		-
-			rawMessage: 'Method Varien_Data_Collection_Db::initCache() has parameter $object with no type specified.'
+			rawMessage: 'Method Maho\Data\Collection\Db::initCache() has parameter $object with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Data/Collection/Db.php
+			path: lib/Maho/Data/Collection/Db.php
 
 		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): array<int<0, max>, non-empty-string> given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Data/Collection/Db.php
+			path: lib/Maho/Data/Collection/Db.php
 
 		-
-			rawMessage: 'Property Varien_Data_Collection_Db::$_fetchStmt (Zend_Db_Statement_Pdo) does not accept Zend_Db_Statement_Interface.'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Varien/Data/Collection/Db.php
-
-		-
-			rawMessage: 'Property Varien_Data_Collection_Db::$_select (Varien_Db_Select) does not accept Zend_Db_Select.'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Varien/Data/Collection/Db.php
-
-		-
-			rawMessage: 'Method Varien_Data_Collection_Filesystem::_collectRecursive() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Data/Collection/Filesystem.php
-
-		-
-			rawMessage: Property Varien_Data_Collection_Filesystem::$_collectedFiles has no type specified.
+			rawMessage: Property Maho\Data\Form::$_defaultElementRenderer has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Collection/Filesystem.php
+			path: lib/Maho/Data/Form.php
 
 		-
-			rawMessage: Property Varien_Data_Collection_Filesystem::$_filterBrackets has no type specified.
+			rawMessage: Property Maho\Data\Form::$_defaultFieldsetElementRenderer has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Collection/Filesystem.php
+			path: lib/Maho/Data/Form.php
 
 		-
-			rawMessage: Property Varien_Data_Collection_Filesystem::$_filterEvalRendered has no type specified.
+			rawMessage: Property Maho\Data\Form::$_defaultFieldsetRenderer has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Collection/Filesystem.php
+			path: lib/Maho/Data/Form.php
 
 		-
-			rawMessage: Property Varien_Data_Collection_Filesystem::$_filterIncrement has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Collection/Filesystem.php
-
-		-
-			rawMessage: Property Varien_Data_Form::$_defaultElementRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Form.php
-
-		-
-			rawMessage: Property Varien_Data_Form::$_defaultFieldsetElementRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Form.php
-
-		-
-			rawMessage: Property Varien_Data_Form::$_defaultFieldsetRenderer has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Form.php
-
-		-
-			rawMessage: 'Property Varien_Data_Form_Abstract::$_elements (Varien_Data_Form_Element_Collection) in empty() is not falsy.'
+			rawMessage: 'Property Maho\Data\Form\AbstractForm::$_elements (Maho\Data\Form\Element\Collection) in empty() is not falsy.'
 			identifier: empty.property
 			count: 1
-			path: lib/Varien/Data/Form/Abstract.php
+			path: lib/Maho/Data/Form/AbstractForm.php
 
 		-
-			rawMessage: 'Method Varien_Data_Form_Element_Abstract::getValue() invoked with 1 parameter, 0 required.'
+			rawMessage: 'Method Maho\Data\Form\Element\AbstractElement::getValue() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
-			path: lib/Varien/Data/Form/Element/Abstract.php
+			path: lib/Maho/Data/Form/Element/AbstractElement.php
 
 		-
-			rawMessage: Property Varien_Data_Form_Element_Abstract::$_form has no type specified.
+			rawMessage: Property Maho\Data\Form\Element\AbstractElement::$_form has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Form/Element/Abstract.php
+			path: lib/Maho/Data/Form/Element/AbstractElement.php
 
 		-
-			rawMessage: Property Varien_Data_Form_Element_Abstract::$_id has no type specified.
+			rawMessage: Property Maho\Data\Form\Element\AbstractElement::$_id has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Form/Element/Abstract.php
+			path: lib/Maho/Data/Form/Element/AbstractElement.php
 
 		-
-			rawMessage: Property Varien_Data_Form_Element_Abstract::$_type has no type specified.
+			rawMessage: Property Maho\Data\Form\Element\AbstractElement::$_type has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Form/Element/Abstract.php
+			path: lib/Maho/Data/Form/Element/AbstractElement.php
 
 		-
-			rawMessage: 'Class Varien_Data_Form_Element_Collection implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
+			rawMessage: 'Class Maho\Data\Form\Element\Collection implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
-			path: lib/Varien/Data/Form/Element/Collection.php
+			path: lib/Maho/Data/Form/Element/Collection.php
 
 		-
-			rawMessage: 'Class Varien_Data_Form_Element_Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
+			rawMessage: 'Class Maho\Data\Form\Element\Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
-			path: lib/Varien/Data/Form/Element/Collection.php
+			path: lib/Maho/Data/Form/Element/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Data_Form_Element_Collection::getIterator() return type with generic class ArrayIterator does not specify its types: TKey, TValue'
+			rawMessage: 'Method Maho\Data\Form\Element\Collection::getIterator() return type with generic class ArrayIterator does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
-			path: lib/Varien/Data/Form/Element/Collection.php
+			path: lib/Maho/Data/Form/Element/Collection.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Varien_Data_Form_Element_Abstract::setContainer() expects Varien_Data_Form, Varien_Data_Form_Abstract given.'
+			rawMessage: 'Parameter #1 $value of method Maho\Data\Form\Element\AbstractElement::setContainer() expects Maho\Data\Form, Maho\Data\Form\AbstractForm given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Data/Form/Element/Collection.php
+			path: lib/Maho/Data/Form/Element/Collection.php
 
 		-
-			rawMessage: Access to an undefined property Varien_Data_Form_Element_Fieldset::$_sortDirection.
+			rawMessage: Access to an undefined property Maho\Data\Form\Element\Fieldset::$_sortDirection.
 			identifier: property.notFound
 			count: 1
-			path: lib/Varien/Data/Form/Element/Fieldset.php
+			path: lib/Maho/Data/Form/Element/Fieldset.php
 
 		-
-			rawMessage: 'Parameter #1 $idSuffix of method Varien_Data_Form_Element_Abstract::getLabelHtml() expects string, int given.'
+			rawMessage: 'Parameter #1 $idSuffix of method Maho\Data\Form\Element\AbstractElement::getLabelHtml() expects string, int given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Data/Form/Element/Multiline.php
+			path: lib/Maho/Data/Form/Element/Multiline.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Varien_Data_Form_Element_Abstract::getEscapedValue() expects string|null, int<0, max> given.'
+			rawMessage: 'Parameter #1 $index of method Maho\Data\Form\Element\AbstractElement::getEscapedValue() expects string|null, int<0, max> given.'
 			identifier: argument.type
 			count: 2
-			path: lib/Varien/Data/Form/Element/Multiline.php
+			path: lib/Maho/Data/Form/Element/Multiline.php
 
 		-
-			rawMessage: 'Parameter #1 $suffix (int) of method Varien_Data_Form_Element_Multiline::getLabelHtml() should be compatible with parameter $idSuffix (string) of method Varien_Data_Form_Element_Abstract::getLabelHtml()'
+			rawMessage: 'Parameter #1 $suffix (int) of method Maho\Data\Form\Element\Multiline::getLabelHtml() should be compatible with parameter $idSuffix (string) of method Maho\Data\Form\Element\AbstractElement::getLabelHtml()'
 			identifier: method.childParameterType
 			count: 1
-			path: lib/Varien/Data/Form/Element/Multiline.php
+			path: lib/Maho/Data/Form/Element/Multiline.php
 
 		-
-			rawMessage: 'Method Varien_Data_Form_Element_Radios::_optionToHtml() has parameter $selected with no type specified.'
+			rawMessage: 'Method Maho\Data\Form\Element\Radios::_optionToHtml() has parameter $selected with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Data/Form/Element/Radios.php
+			path: lib/Maho/Data/Form/Element/Radios.php
 
 		-
-			rawMessage: 'Method Varien_Data_Form_Element_Select::_prepareOptions() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Form\Element\Select::_prepareOptions() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Form/Element/Select.php
+			path: lib/Maho/Data/Form/Element/Select.php
 
 		-
 			rawMessage: 'Parameter #1 $string of function str_pad expects string, int<0, 23> given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Data/Form/Element/Time.php
+			path: lib/Maho/Data/Form/Element/Time.php
 
 		-
 			rawMessage: 'Parameter #1 $string of function str_pad expects string, int<0, 59> given.'
 			identifier: argument.type
 			count: 2
-			path: lib/Varien/Data/Form/Element/Time.php
+			path: lib/Maho/Data/Form/Element/Time.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::copyNodeTo() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree::copyNodeTo() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::createNode() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree::createNode() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::getChild() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree::getChild() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::getChildren() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree::getChildren() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::load() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree::load() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::loadNode() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree::loadNode() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::moveNodeTo() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree::moveNodeTo() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
 			rawMessage: Variable $node might not be defined.
 			identifier: variable.undefined
 			count: 1
-			path: lib/Varien/Data/Tree.php
+			path: lib/Maho/Data/Tree.php
 
 		-
-			rawMessage: Property Varien_Data_Tree_Db::$_levelField has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Tree/Db.php
-
-		-
-			rawMessage: Property Varien_Data_Tree_Db::$_orderField has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Tree/Db.php
-
-		-
-			rawMessage: Property Varien_Data_Tree_Db::$_parentField has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Data/Tree/Db.php
-
-		-
-			rawMessage: 'Method Varien_Data_Tree_Dbp::_addChildNodes() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree\Dbp::_addChildNodes() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree/Dbp.php
+			path: lib/Maho/Data/Tree/Dbp.php
 
 		-
-			rawMessage: Property Varien_Data_Tree_Dbp::$_levelField has no type specified.
+			rawMessage: Property Maho\Data\Tree\Dbp::$_levelField has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Tree/Dbp.php
+			path: lib/Maho/Data/Tree/Dbp.php
 
 		-
-			rawMessage: Property Varien_Data_Tree_Dbp::$_loaded has no type specified.
+			rawMessage: Property Maho\Data\Tree\Dbp::$_loaded has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Tree/Dbp.php
+			path: lib/Maho/Data/Tree/Dbp.php
 
 		-
-			rawMessage: Property Varien_Data_Tree_Dbp::$_orderField has no type specified.
+			rawMessage: Property Maho\Data\Tree\Dbp::$_orderField has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Tree/Dbp.php
+			path: lib/Maho/Data/Tree/Dbp.php
 
 		-
-			rawMessage: Property Varien_Data_Tree_Dbp::$_pathField has no type specified.
+			rawMessage: Property Maho\Data\Tree\Dbp::$_pathField has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Data/Tree/Dbp.php
+			path: lib/Maho/Data/Tree/Dbp.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree::load() invoked with 2 parameters, 0-1 required.'
+			rawMessage: 'Method Maho\Data\Tree::load() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
 			count: 1
-			path: lib/Varien/Data/Tree/Node.php
+			path: lib/Maho/Data/Tree/Node.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree_Node::isChildOf() has no return type specified.'
+			rawMessage: 'Method Maho\Data\Tree\Node::isChildOf() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Data/Tree/Node.php
+			path: lib/Maho/Data/Tree/Node.php
 
 		-
-			rawMessage: 'Class Varien_Data_Tree_Node_Collection implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
+			rawMessage: 'Class Maho\Data\Tree\Node\Collection implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
-			path: lib/Varien/Data/Tree/Node/Collection.php
+			path: lib/Maho/Data/Tree/Node/Collection.php
 
 		-
-			rawMessage: 'Class Varien_Data_Tree_Node_Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
+			rawMessage: 'Class Maho\Data\Tree\Node\Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
-			path: lib/Varien/Data/Tree/Node/Collection.php
+			path: lib/Maho/Data/Tree/Node/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree_Node_Collection::__construct() has parameter $container with no type specified.'
+			rawMessage: 'Method Maho\Data\Tree\Node\Collection::__construct() has parameter $container with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Data/Tree/Node/Collection.php
+			path: lib/Maho/Data/Tree/Node/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Data_Tree_Node_Collection::searchById() has parameter $nodeId with no type specified.'
+			rawMessage: 'Method Maho\Data\Tree\Node\Collection::searchById() has parameter $nodeId with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Data/Tree/Node/Collection.php
+			path: lib/Maho/Data/Tree/Node/Collection.php
 
 		-
-			rawMessage: 'Parameter #1 $parent of method Varien_Data_Tree_Node::setParent() expects Varien_Data_Tree_Node, Varien_Data_Tree given.'
+			rawMessage: 'Parameter #1 $parent of method Maho\Data\Tree\Node::setParent() expects Maho\Data\Tree\Node, Maho\Data\Tree given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Data/Tree/Node/Collection.php
+			path: lib/Maho/Data/Tree/Node/Collection.php
 
 		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::createTableByDdl() has parameter $newTableName with no type specified.'
+			rawMessage: 'Method Maho\Event\Observer::setCallback() has parameter $data with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
+			path: lib/Maho/Event/Observer.php
 
 		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::createTableByDdl() has parameter $tableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::decodeVarbinary() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Interface::saveDdlCache() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Interface.php
-
-		-
-			rawMessage: Cannot access offset 'Engine' on bool.
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Cannot call method query() on object|resource.'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Cannot call method setAttribute() on object|resource.'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_checkDdlTransaction() has no return type specified.'
+			rawMessage: 'Method Maho\File\Csv::fputcsv() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_debugException() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_debugWriteToFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_getHostInfo() has parameter $hostName with no type specified.'
+			rawMessage: 'Method Maho\File\Csv::fputcsv() has parameter $delimiter with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_getTableName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $hash with no type specified.'
+			rawMessage: 'Method Maho\File\Csv::fputcsv() has parameter $enclosure with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $maxCharacters with no type specified.'
+			rawMessage: 'Method Maho\File\Csv::fputcsv() has parameter $fields with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::_minusSuperfluous() has parameter $prefix with no type specified.'
+			rawMessage: 'Method Maho\File\Csv::fputcsv() has parameter $handle with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::createTableByDdl() has parameter $newTableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::createTableByDdl() has parameter $tableName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::decodeVarbinary() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::decorateTableInfo() has parameter $tableColumnInfo with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::modifyTables() has parameter $tables with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::query() should return Zend_Db_Statement_Pdo but returns PDOStatement|Zend_Db_Statement_Interface.'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Adapter_Pdo_Mysql::saveDdlCache() has parameter $data with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Parameter #4 $result of method Varien_Db_Adapter_Pdo_Mysql::_debugStat() expects Zend_Db_Statement_Pdo|null, PDOStatement|Zend_Db_Statement_Interface given.'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Return type ($this(Varien_Db_Adapter_Pdo_Mysql)) of method Varien_Db_Adapter_Pdo_Mysql::dropTemporaryTable() should be compatible with return type (bool) of method Varien_Db_Adapter_Interface::dropTemporaryTable()'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Return type (array) of method Varien_Db_Adapter_Pdo_Mysql::multiQuery() should be compatible with return type (Varien_Db_Adapter_Interface) of method Varien_Db_Adapter_Interface::multiQuery()'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: Variable $result might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Db_Select::_tableCols() has parameter $correlationName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Db/Select.php
-
-		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_additional has no type specified.
+			rawMessage: Property Maho\File\Csv::$_delimiter has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_dataType has no type specified.
+			rawMessage: Property Maho\File\Csv::$_enclosure has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_driverOptions has no type specified.
+			rawMessage: Property Maho\File\Csv::$_escape has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_isBlob has no type specified.
+			rawMessage: Property Maho\File\Csv::$_lineLength has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
+			path: lib/Maho/File/Csv.php
 
 		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_length has no type specified.
+			rawMessage: 'Method Maho\File\Uploader::__construct() has parameter $fileId with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::_addDirSeparator() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::_addDirSeparator() has parameter $dir with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::_createDestinationFolder() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::_createDestinationFolder() has parameter $destinationFolder with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::_getMimeType() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::_setUploadFileId() has parameter $fileId with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::_validateFile() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::getDispretionPath() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::getDispretionPath() has parameter $fileName with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::getNewFileName() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::getNewFileName() has parameter $destFile with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::setAllowedExtensions() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: 'Method Maho\File\Uploader::setAllowedExtensions() has parameter $extensions with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/File/Uploader.php
+
+		-
+			rawMessage: Property Maho\File\Uploader::$_allowedExtensions has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
+			path: lib/Maho/File/Uploader.php
 
 		-
-			rawMessage: Property Varien_Db_Statement_Parameter::$_value has no type specified.
+			rawMessage: Property Maho\File\Uploader::$_fileExists has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Db/Statement/Parameter.php
+			path: lib/Maho/File/Uploader.php
 
 		-
-			rawMessage: 'Cannot call method bindParam() on object|resource.'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Varien/Db/Statement/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Cannot call method execute() on object|resource.'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Varien/Db/Statement/Pdo/Mysql.php
-
-		-
-			rawMessage: 'Method Varien_Event::getBlock() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Event.php
-
-		-
-			rawMessage: 'Method Varien_Event::setName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Event.php
-
-		-
-			rawMessage: 'Method Varien_Event::setName() has parameter $data with no type specified.'
+			rawMessage: 'Method Maho\Filter\Sprintf::__construct() has parameter $decPoint with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Event.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: 'Method Varien_Event_Observer::setCallback() has parameter $data with no type specified.'
+			rawMessage: 'Method Maho\Filter\Sprintf::__construct() has parameter $decimals with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Event/Observer.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: 'Method Varien_File_Csv::fputcsv() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Csv.php
-
-		-
-			rawMessage: 'Method Varien_File_Csv::fputcsv() has parameter $delimiter with no type specified.'
+			rawMessage: 'Method Maho\Filter\Sprintf::__construct() has parameter $format with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/File/Csv.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: 'Method Varien_File_Csv::fputcsv() has parameter $enclosure with no type specified.'
+			rawMessage: 'Method Maho\Filter\Sprintf::__construct() has parameter $thousandsSep with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/File/Csv.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: 'Method Varien_File_Csv::fputcsv() has parameter $fields with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/File/Csv.php
-
-		-
-			rawMessage: 'Method Varien_File_Csv::fputcsv() has parameter $handle with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/File/Csv.php
-
-		-
-			rawMessage: Property Varien_File_Csv::$_delimiter has no type specified.
+			rawMessage: Property Maho\Filter\Sprintf::$_decPoint has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/File/Csv.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: Property Varien_File_Csv::$_enclosure has no type specified.
+			rawMessage: Property Maho\Filter\Sprintf::$_decimals has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/File/Csv.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: Property Varien_File_Csv::$_escape has no type specified.
+			rawMessage: Property Maho\Filter\Sprintf::$_format has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/File/Csv.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: Property Varien_File_Csv::$_lineLength has no type specified.
+			rawMessage: Property Maho\Filter\Sprintf::$_thousandsSep has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/File/Csv.php
+			path: lib/Maho/Filter/Sprintf.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::__construct() has parameter $fileId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/File/Uploader.php
-
-		-
-			rawMessage: 'Method Varien_File_Uploader::_addDirSeparator() has no return type specified.'
+			rawMessage: 'Method Maho\Filter\Template::dependDirective() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::_addDirSeparator() has parameter $dir with no type specified.'
+			rawMessage: 'Method Maho\Filter\Template::dependDirective() has parameter $construction with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::_createDestinationFolder() has no return type specified.'
+			rawMessage: 'Method Maho\Filter\Template::ifDirective() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::_createDestinationFolder() has parameter $destinationFolder with no type specified.'
+			rawMessage: 'Method Maho\Filter\Template::ifDirective() has parameter $construction with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::_getMimeType() has no return type specified.'
+			rawMessage: 'Method Maho\Filter\Template::includeDirective() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::_setUploadFileId() has parameter $fileId with no type specified.'
+			rawMessage: 'Method Maho\Filter\Template::includeDirective() has parameter $construction with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::_validateFile() has no return type specified.'
+			rawMessage: 'Method Maho\Filter\Template::setIncludeProcessor() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::getDispretionPath() has no return type specified.'
+			rawMessage: 'Method Maho\Filter\Template::setTemplateProcessor() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::getDispretionPath() has parameter $fileName with no type specified.'
+			rawMessage: 'Method Maho\Filter\Template::setVariables() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/Filter/Template.php
+
+		-
+			rawMessage: 'Method Maho\Filter\Template::templateDirective() has parameter $construction with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::getNewFileName() has no return type specified.'
+			rawMessage: 'Method Maho\Filter\Template::varDirective() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::getNewFileName() has parameter $destFile with no type specified.'
+			rawMessage: 'Method Maho\Filter\Template::varDirective() has parameter $construction with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::setAllowedExtensions() has no return type specified.'
+			rawMessage: 'Method Maho\Filter\Template\Tokenizer\AbstractTokenizer::setString() has parameter $value with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/Filter/Template/Tokenizer/AbstractTokenizer.php
+
+		-
+			rawMessage: 'Method Maho\Filter\Template\Tokenizer\AbstractTokenizer::tokenize() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/File/Uploader.php
+			path: lib/Maho/Filter/Template/Tokenizer/AbstractTokenizer.php
 
 		-
-			rawMessage: 'Method Varien_File_Uploader::setAllowedExtensions() has parameter $extensions with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/File/Uploader.php
-
-		-
-			rawMessage: Property Varien_File_Uploader::$_allowedExtensions has no type specified.
+			rawMessage: Property Maho\Filter\Template\Tokenizer\AbstractTokenizer::$_string has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/File/Uploader.php
-
-		-
-			rawMessage: Property Varien_File_Uploader::$_fileExists has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Uploader.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Sprintf::__construct() has parameter $decPoint with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Sprintf::__construct() has parameter $decimals with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Sprintf::__construct() has parameter $format with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Sprintf::__construct() has parameter $thousandsSep with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: Property Varien_Filter_Sprintf::$_decPoint has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: Property Varien_Filter_Sprintf::$_decimals has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: Property Varien_Filter_Sprintf::$_format has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: Property Varien_Filter_Sprintf::$_thousandsSep has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Filter/Sprintf.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::dependDirective() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::dependDirective() has parameter $construction with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::ifDirective() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::ifDirective() has parameter $construction with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::includeDirective() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::includeDirective() has parameter $construction with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::setIncludeProcessor() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::setTemplateProcessor() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::setVariables() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::templateDirective() has parameter $construction with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::varDirective() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template::varDirective() has parameter $construction with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Template.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template_Tokenizer_Abstract::setString() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Filter/Template/Tokenizer/Abstract.php
-
-		-
-			rawMessage: 'Method Varien_Filter_Template_Tokenizer_Abstract::tokenize() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Filter/Template/Tokenizer/Abstract.php
-
-		-
-			rawMessage: Property Varien_Filter_Template_Tokenizer_Abstract::$_string has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Filter/Template/Tokenizer/Abstract.php
+			path: lib/Maho/Filter/Template/Tokenizer/AbstractTokenizer.php
 
 		-
 			rawMessage: Right side of && is always false.
 			identifier: booleanAnd.rightAlwaysFalse
 			count: 1
-			path: lib/Varien/Filter/Template/Tokenizer/Parameter.php
+			path: lib/Maho/Filter/Template/Tokenizer/Parameter.php
 
 		-
 			rawMessage: Left side of || is always false.
 			identifier: booleanOr.leftAlwaysFalse
 			count: 1
-			path: lib/Varien/Filter/Template/Tokenizer/Variable.php
+			path: lib/Maho/Filter/Template/Tokenizer/Variable.php
 
 		-
-			rawMessage: 'Method Varien_Io_Abstract::allowedPath() has no return type specified.'
+			rawMessage: 'Method Maho\Io\AbstractIo::allowedPath() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Abstract.php
+			path: lib/Maho/Io/AbstractIo.php
 
 		-
-			rawMessage: 'Method Varien_Io_Abstract::allowedPath() has parameter $haystackPath with no type specified.'
+			rawMessage: 'Method Maho\Io\AbstractIo::allowedPath() has parameter $haystackPath with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Abstract.php
+			path: lib/Maho/Io/AbstractIo.php
 
 		-
-			rawMessage: 'Method Varien_Io_Abstract::allowedPath() has parameter $needlePath with no type specified.'
+			rawMessage: 'Method Maho\Io\AbstractIo::allowedPath() has parameter $needlePath with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Abstract.php
+			path: lib/Maho/Io/AbstractIo.php
 
 		-
-			rawMessage: 'Method Varien_Io_Abstract::dirsep() has no return type specified.'
+			rawMessage: 'Method Maho\Io\AbstractIo::dirsep() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Abstract.php
+			path: lib/Maho/Io/AbstractIo.php
 
 		-
-			rawMessage: 'Method Varien_Io_Abstract::getCleanPath() has no return type specified.'
+			rawMessage: 'Method Maho\Io\AbstractIo::getCleanPath() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Abstract.php
+			path: lib/Maho/Io/AbstractIo.php
 
 		-
-			rawMessage: 'Method Varien_Io_Abstract::getCleanPath() has parameter $path with no type specified.'
+			rawMessage: 'Method Maho\Io\AbstractIo::getCleanPath() has parameter $path with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Abstract.php
+			path: lib/Maho/Io/AbstractIo.php
 
 		-
-			rawMessage: 'Method Varien_Io_Abstract::getFilteredPath() has parameter $path with no type specified.'
+			rawMessage: 'Method Maho\Io\AbstractIo::getFilteredPath() has parameter $path with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Abstract.php
+			path: lib/Maho/Io/AbstractIo.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::dirname() has no return type specified.'
+			rawMessage: 'Method Maho\Io\File::dirname() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::dirname() has parameter $file with no type specified.'
+			rawMessage: 'Method Maho\Io\File::dirname() has parameter $file with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::dirsep() has no return type specified.'
+			rawMessage: 'Method Maho\Io\File::dirsep() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::fileExists() has no return type specified.'
+			rawMessage: 'Method Maho\Io\File::fileExists() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::fileExists() has parameter $file with no type specified.'
+			rawMessage: 'Method Maho\Io\File::fileExists() has parameter $file with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::fileExists() has parameter $onlyFile with no type specified.'
+			rawMessage: 'Method Maho\Io\File::fileExists() has parameter $onlyFile with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::getDestinationFolder() has no return type specified.'
+			rawMessage: 'Method Maho\Io\File::getDestinationFolder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::getDestinationFolder() has parameter $filepath with no type specified.'
+			rawMessage: 'Method Maho\Io\File::getDestinationFolder() has parameter $filepath with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::getStreamHandler() has no return type specified.'
+			rawMessage: 'Method Maho\Io\File::getStreamHandler() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::isWriteable() has no return type specified.'
+			rawMessage: 'Method Maho\Io\File::isWriteable() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::isWriteable() has parameter $path with no type specified.'
+			rawMessage: 'Method Maho\Io\File::isWriteable() has parameter $path with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::rmdir() has parameter $recursive with no type specified.'
+			rawMessage: 'Method Maho\Io\File::rmdir() has parameter $recursive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::streamLock() has parameter $exclusive with no type specified.'
+			rawMessage: 'Method Maho\Io\File::streamLock() has parameter $exclusive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::streamOpen() has parameter $chmod with no type specified.'
+			rawMessage: 'Method Maho\Io\File::streamOpen() has parameter $chmod with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::streamReadCsv() has parameter $delimiter with no type specified.'
+			rawMessage: 'Method Maho\Io\File::streamReadCsv() has parameter $delimiter with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_File::streamReadCsv() has parameter $enclosure with no type specified.'
+			rawMessage: 'Method Maho\Io\File::streamReadCsv() has parameter $enclosure with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/File.php
+			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Varien_Io_Ftp::_tmpFilename() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Ftp::_tmpFilename() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Ftp::_tmpFilename() has parameter $new with no type specified.'
+			rawMessage: 'Method Maho\Io\Ftp::_tmpFilename() has parameter $new with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Ftp::ls() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Ftp::ls() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Ftp::ls() has parameter $grep with no type specified.'
+			rawMessage: 'Method Maho\Io\Ftp::ls() has parameter $grep with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Ftp::rmdir() has parameter $recursive with no type specified.'
+			rawMessage: 'Method Maho\Io\Ftp::rmdir() has parameter $recursive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Ftp::write() has parameter $mode with no type specified.'
+			rawMessage: 'Method Maho\Io\Ftp::write() has parameter $mode with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
 			rawMessage: 'Parameter #1 $prefix of function uniqid expects string, int<0, max> given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
-			rawMessage: Property Varien_Io_Ftp::$_tmpFilename has no type specified.
+			rawMessage: Property Maho\Io\Ftp::$_tmpFilename has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Io/Ftp.php
+			path: lib/Maho/Io/Ftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::cd() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::cd() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::cd() has parameter $dir with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::cd() has parameter $dir with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::chmod() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::chmod() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::chmod() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::chmod() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::chmod() has parameter $mode with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::chmod() has parameter $mode with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::close() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::close() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::dirsep() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::dirsep() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::ls() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::ls() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::ls() has parameter $grep with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::ls() has parameter $grep with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::mkdir() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::mkdir() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::mkdir() has parameter $dir with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::mkdir() has parameter $dir with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::mkdir() has parameter $mode with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::mkdir() has parameter $mode with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::mkdir() has parameter $recursive with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::mkdir() has parameter $recursive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::mv() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::mv() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::mv() has parameter $dest with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::mv() has parameter $dest with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::mv() has parameter $src with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::mv() has parameter $src with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::open() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::open() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::pwd() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::pwd() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::read() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::read() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::read() has parameter $dest with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::read() has parameter $dest with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::read() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::read() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::rm() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::rm() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::rm() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::rm() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::rmdir() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::rmdir() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::rmdir() has parameter $dir with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::rmdir() has parameter $dir with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::rmdir() has parameter $recursive with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::rmdir() has parameter $recursive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::write() has no return type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::write() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::write() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::write() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::write() has parameter $mode with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::write() has parameter $mode with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Interface::write() has parameter $src with no type specified.'
+			rawMessage: 'Method Maho\Io\IoInterface::write() has parameter $src with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Interface.php
+			path: lib/Maho/Io/IoInterface.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::cd() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::cd() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::cd() has parameter $dir with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::cd() has parameter $dir with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::chmod() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::chmod() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::chmod() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::chmod() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::chmod() has parameter $mode with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::chmod() has parameter $mode with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::ls() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::ls() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::ls() has parameter $grep with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::ls() has parameter $grep with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::mkdir() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::mkdir() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::mkdir() has parameter $dir with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::mkdir() has parameter $dir with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::mkdir() has parameter $mode with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::mkdir() has parameter $mode with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::mkdir() has parameter $recursive with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::mkdir() has parameter $recursive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::mv() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::mv() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::mv() has parameter $dest with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::mv() has parameter $dest with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::mv() has parameter $src with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::mv() has parameter $src with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::pwd() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::pwd() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::rawls() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::rawls() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::read() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::read() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::read() has parameter $dest with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::read() has parameter $dest with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::read() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::read() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::rm() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::rm() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::rm() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::rm() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::rmdir() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::rmdir() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::rmdir() has parameter $dir with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::rmdir() has parameter $dir with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::rmdir() has parameter $recursive with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::rmdir() has parameter $recursive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::write() has no return type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::write() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::write() has parameter $filename with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::write() has parameter $filename with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::write() has parameter $mode with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::write() has parameter $mode with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Method Varien_Io_Sftp::write() has parameter $src with no type specified.'
+			rawMessage: 'Method Maho\Io\Sftp::write() has parameter $src with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Io/Sftp.php
+			path: lib/Maho/Io/Sftp.php
 
 		-
-			rawMessage: 'Class Varien_Object implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
+			rawMessage: 'Class Maho\DataObject implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
-			path: lib/Varien/Object.php
+			path: lib/Maho/DataObject.php
 
 		-
-			rawMessage: 'Method Varien_Object::_addFullNames() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject::_addFullNames() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Object.php
+			path: lib/Maho/DataObject.php
 
 		-
-			rawMessage: 'Method Varien_Object::_initOldFieldsMap() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject::_initOldFieldsMap() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Object.php
+			path: lib/Maho/DataObject.php
 
 		-
-			rawMessage: Property Varien_Object::$_hasDataChanges has no type specified.
+			rawMessage: Property Maho\DataObject::$_hasDataChanges has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Object.php
+			path: lib/Maho/DataObject.php
 
 		-
-			rawMessage: Property Varien_Object::$_syncFieldsMap has no type specified.
+			rawMessage: Property Maho\DataObject::$_syncFieldsMap has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Object.php
+			path: lib/Maho/DataObject.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::debug() has parameter $idx with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $idx with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Object/Cache.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::debug() has parameter $object with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $object with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Object/Cache.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::deleteByTags() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::deleteByTags() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Object/Cache.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::findByClass() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByClass() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Object/Cache.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::findByHash() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Object/Cache.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::findByHash() has parameter $hash with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has parameter $hash with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Object/Cache.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::findByIds() has no return type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Object/Cache.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
-			rawMessage: 'Method Varien_Object_Cache::findByIds() has parameter $ids with no type specified.'
+			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has parameter $ids with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Object/Cache.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::fetch() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::fetch() has parameter $key with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::fetch() has parameter $timerName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::getSqlProfiler() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::getSqlProfiler() has parameter $res with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::getTimers() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::pause() has parameter $timerName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::reset() has parameter $timerName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::resume() has parameter $timerName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::start() has parameter $timerName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: 'Method Varien_Profiler::stop() has parameter $timerName with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: Property Varien_Profiler::$_enabled has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Profiler.php
-
-		-
-			rawMessage: Property Varien_Profiler::$_memory_get_usage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Profiler.php
+			path: lib/Maho/DataObject/Cache.php
 
 		-
 			rawMessage: 'Call to an undefined method SimpleXMLElement::setNode().'
 			identifier: method.notFound
 			count: 1
-			path: lib/Varien/Simplexml/Config.php
+			path: lib/Maho/Simplexml/Config.php
 
 		-
-			rawMessage: 'Method Varien_Simplexml_Config::getXpath() should return array<Varien_Simplexml_Element>|false but returns non-empty-array<SimpleXMLElement>.'
+			rawMessage: 'Method Maho\Simplexml\Config::getXpath() should return array<Maho\Simplexml\Element>|false but returns non-empty-array<SimpleXMLElement>.'
 			identifier: return.type
 			count: 1
-			path: lib/Varien/Simplexml/Config.php
+			path: lib/Maho/Simplexml/Config.php
 
 		-
-			rawMessage: 'Method Varien_Simplexml_Config::loadString() invoked with 2 parameters, 1 required.'
+			rawMessage: 'Method Maho\Simplexml\Config::loadString() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
-			path: lib/Varien/Simplexml/Config.php
+			path: lib/Maho/Simplexml/Config.php
 
 		-
 			rawMessage: 'Parameter #1 $data of function simplexml_load_string expects string, true given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Simplexml/Config.php
+			path: lib/Maho/Simplexml/Config.php
 
 		-
-			rawMessage: Property Varien_Simplexml_Config::$_xpathExtends has no type specified.
+			rawMessage: Property Maho\Simplexml\Config::$_xpathExtends has no type specified.
 			identifier: missingType.property
 			count: 1
-			path: lib/Varien/Simplexml/Config.php
+			path: lib/Maho/Simplexml/Config.php
 
 		-
 			rawMessage: Result of && is always false.
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: lib/Varien/Simplexml/Config.php
+			path: lib/Maho/Simplexml/Config.php
 
 		-
 			rawMessage: 'Strict comparison using === between mixed and false will always evaluate to false.'
 			identifier: identical.alwaysFalse
 			count: 1
-			path: lib/Varien/Simplexml/Config.php
+			path: lib/Maho/Simplexml/Config.php
 
 		-
-			rawMessage: 'Method Varien_Simplexml_Element::getAttribute() has parameter $name with no type specified.'
+			rawMessage: 'Method Maho\Simplexml\Element::getAttribute() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Simplexml/Element.php
+			path: lib/Maho/Simplexml/Element.php
 
 		-
-			rawMessage: 'Method Varien_Simplexml_Element::setNode() has no return type specified.'
+			rawMessage: 'Method Maho\Simplexml\Element::setNode() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: lib/Varien/Simplexml/Element.php
+			path: lib/Maho/Simplexml/Element.php
 
 		-
-			rawMessage: 'Method Varien_Simplexml_Element::setNode() has parameter $overwrite with no type specified.'
+			rawMessage: 'Method Maho\Simplexml\Element::setNode() has parameter $overwrite with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Simplexml/Element.php
+			path: lib/Maho/Simplexml/Element.php
 
 		-
-			rawMessage: 'Method Varien_Simplexml_Element::setNode() has parameter $path with no type specified.'
+			rawMessage: 'Method Maho\Simplexml\Element::setNode() has parameter $path with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Simplexml/Element.php
+			path: lib/Maho/Simplexml/Element.php
 
 		-
-			rawMessage: 'Method Varien_Simplexml_Element::setNode() has parameter $value with no type specified.'
+			rawMessage: 'Method Maho\Simplexml\Element::setNode() has parameter $value with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Varien/Simplexml/Element.php
+			path: lib/Maho/Simplexml/Element.php
 
 		-
-			rawMessage: 'Parameter #1 $filename of method Varien_Simplexml_Element::asNiceXml() expects string, int given.'
+			rawMessage: 'Parameter #1 $filename of method Maho\Simplexml\Element::asNiceXml() expects string, int given.'
 			identifier: argument.type
 			count: 1
-			path: lib/Varien/Simplexml/Element.php
+			path: lib/Maho/Simplexml/Element.php

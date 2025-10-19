@@ -138,7 +138,7 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     public function addSubscriberTypeField()
     {
         $this->getSelect()
-            ->columns(['type' => new Zend_Db_Expr($this->_getMappedField('type'))]);
+            ->columns(['type' => new Maho\Db\Expr($this->_getMappedField('type'))]);
         return $this;
     }
 
@@ -161,14 +161,14 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Returns select count sql
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
     {
         $select = parent::getSelectCountSql();
         $countSelect = clone $this->getSelect();
-        $countSelect->reset(Zend_Db_Select::HAVING);
+        $countSelect->reset(Maho\Db\Select::HAVING);
         return $select;
     }
 

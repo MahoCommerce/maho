@@ -186,7 +186,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
     /**
      * Get product collection select object with applied filters
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getBaseCollectionSql()
     {

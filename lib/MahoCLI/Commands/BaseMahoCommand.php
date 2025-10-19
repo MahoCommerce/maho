@@ -29,7 +29,7 @@ abstract class BaseMahoCommand extends Command
             return '0';
         }
 
-        $i = floor(log($bytes, 1024));
+        $i = (int) floor(log($bytes, 1024));
         return round($bytes / 1024 ** $i, [0, 0, 2, 2, 3][$i]) . ['B', 'kB', 'MB', 'GB', 'TB'][$i];
     }
 }

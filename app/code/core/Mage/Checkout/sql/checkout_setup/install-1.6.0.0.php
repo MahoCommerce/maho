@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,25 +19,25 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('checkout/agreement'))
-    ->addColumn('agreement_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('agreement_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Agreement Id')
-    ->addColumn('name', Varien_Db_Ddl_Table::TYPE_TEXT, 255, [
+    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Name')
-    ->addColumn('content', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('content', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Content')
-    ->addColumn('content_height', Varien_Db_Ddl_Table::TYPE_TEXT, 25, [
+    ->addColumn('content_height', Maho\Db\Ddl\Table::TYPE_TEXT, 25, [
     ], 'Content Height')
-    ->addColumn('checkbox_text', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('checkbox_text', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Checkbox Text')
-    ->addColumn('is_active', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Is Active')
-    ->addColumn('is_html', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('is_html', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
         'default'   => '0',
     ], 'Is Html')
@@ -49,12 +49,12 @@ $installer->getConnection()->createTable($table);
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('checkout/agreement_store'))
-    ->addColumn('agreement_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('agreement_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Agreement Id')
-    ->addColumn('store_id', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
+    ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
@@ -64,16 +64,16 @@ $table = $installer->getConnection()
         'agreement_id',
         $installer->getTable('checkout/agreement'),
         'agreement_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('checkout/agreement_store', 'store_id', 'core/store', 'store_id'),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Checkout Agreement Store');
 $installer->getConnection()->createTable($table);

@@ -920,5 +920,4 @@ final class Mage
     {
         return sodium_bin2hex(sodium_crypto_secretbox_keygen());
     }
-
 }

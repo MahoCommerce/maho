@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,7 +17,7 @@ interface Mage_Catalog_Helper_Product_Url_Rewrite_Interface
      *
      * @param int $categoryId
      * @param int $storeId
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     public function getTableSelect(array $productIds, $categoryId, $storeId);
 
@@ -27,5 +27,5 @@ interface Mage_Catalog_Helper_Product_Url_Rewrite_Interface
      * @param int $storeId
      * @return Mage_Catalog_Helper_Product_Url_Rewrite_Interface
      */
-    public function joinTableToSelect(Varien_Db_Select $select, $storeId);
+    public function joinTableToSelect(\Maho\Db\Select $select, $storeId);
 }

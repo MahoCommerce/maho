@@ -5,7 +5,7 @@
  *
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +18,7 @@ $installer->getConnection()->changeColumn(
     'page_group',
     'page_group',
     [
-        'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'    => 255,
     ],
 );
@@ -28,7 +28,7 @@ $installer->getConnection()->changeColumn(
     'page_for',
     'page_for',
     [
-        'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'    => 255,
     ],
 );

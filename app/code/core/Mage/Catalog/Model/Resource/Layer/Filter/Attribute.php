@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,10 +58,10 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
         // clone select from collection with filters
         $select = clone $filter->getLayer()->getProductCollection()->getSelect();
         // reset columns, order and limitation conditions
-        $select->reset(Zend_Db_Select::COLUMNS);
-        $select->reset(Zend_Db_Select::ORDER);
-        $select->reset(Zend_Db_Select::LIMIT_COUNT);
-        $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
 
         $connection = $this->_getReadAdapter();
         $attribute  = $filter->getAttributeModel();
@@ -76,7 +76,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
             ->join(
                 [$tableAlias => $this->getMainTable()],
                 implode(' AND ', $conditions),
-                ['value', 'count' => new Zend_Db_Expr("COUNT({$tableAlias}.entity_id)")],
+                ['value', 'count' => new Maho\Db\Expr("COUNT({$tableAlias}.entity_id)")],
             )
             ->group("{$tableAlias}.value");
 

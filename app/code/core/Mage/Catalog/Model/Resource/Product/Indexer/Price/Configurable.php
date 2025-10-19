@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -160,7 +160,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Configurable extends Mag
         $roundExpr = "ROUND(i.price * ({$priceExpression} / 100), 4)";
         $roundPriceExpr = $write->getCheckSql("{$percentExpr} = 1", $roundExpr, $priceExpression);
         $priceColumn = $write->getCheckSql("{$priceExpression} IS NULL", '0', $roundPriceExpr);
-        $priceColumn = new Zend_Db_Expr("SUM({$priceColumn})");
+        $priceColumn = new Maho\Db\Expr("SUM({$priceColumn})");
 
         $tierPrice = $priceExpression;
         $tierRoundPriceExp = $write->getCheckSql("{$percentExpr} = 1", $roundExpr, $tierPrice);
@@ -206,8 +206,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Configurable extends Mag
                 [],
             );
         $select->columns([
-            'min_price'   => new Zend_Db_Expr('i.min_price + io.min_price'),
-            'max_price'   => new Zend_Db_Expr('i.max_price + io.max_price'),
+            'min_price'   => new Maho\Db\Expr('i.min_price + io.min_price'),
+            'max_price'   => new Maho\Db\Expr('i.max_price + io.max_price'),
             'tier_price'  => $write->getCheckSql('i.tier_price IS NOT NULL', 'i.tier_price + io.tier_price', 'NULL'),
             'group_price' => $write->getCheckSql(
                 'i.group_price IS NOT NULL',

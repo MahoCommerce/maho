@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,20 +19,20 @@ $installer->startSetup();
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable('importexport/importdata'))
-    ->addColumn('id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Id')
-    ->addColumn('entity', Varien_Db_Ddl_Table::TYPE_TEXT, 50, [
+    ->addColumn('entity', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
         'nullable'  => false,
     ], 'Entity')
-    ->addColumn('behavior', Varien_Db_Ddl_Table::TYPE_TEXT, 10, [
+    ->addColumn('behavior', Maho\Db\Ddl\Table::TYPE_TEXT, 10, [
         'nullable'  => false,
         'default'   => Mage_ImportExport_Model_Import::BEHAVIOR_APPEND,
     ], 'Behavior')
-    ->addColumn('data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('data', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'default'   => '',
     ], 'Data')
     ->setComment('Import Data Table');
@@ -46,10 +46,10 @@ $installer->getConnection()->addIndex(
     $installer->getIdxName(
         'catalog/product_super_link',
         ['product_id', 'parent_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
     ),
     ['product_id', 'parent_id'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+    Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
 );
 
 /**
@@ -60,10 +60,10 @@ $installer->getConnection()->addIndex(
     $installer->getIdxName(
         'catalog/product_super_attribute',
         ['product_id', 'attribute_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
     ),
     ['product_id', 'attribute_id'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+    Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
 );
 
 /**
@@ -74,10 +74,10 @@ $installer->getConnection()->addIndex(
     $installer->getIdxName(
         'catalog/product_super_attribute_pricing',
         ['product_super_attribute_id', 'value_index', 'website_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
     ),
     ['product_super_attribute_id', 'value_index', 'website_id'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+    Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
 );
 
 /**
@@ -88,10 +88,10 @@ $installer->getConnection()->addIndex(
     $installer->getIdxName(
         'catalog/product_link_attribute_int',
         ['product_link_attribute_id', 'link_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
     ),
     ['product_link_attribute_id', 'link_id'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+    Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
 );
 
 /**

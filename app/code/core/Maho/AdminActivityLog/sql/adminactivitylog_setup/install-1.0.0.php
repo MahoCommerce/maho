@@ -15,50 +15,50 @@ $installer->startSetup();
 
 $activityTable = $installer->getConnection()
     ->newTable($installer->getTable('adminactivitylog/activity'))
-    ->addColumn('activity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('activity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Activity ID')
-    ->addColumn('action_group_id', Varien_Db_Ddl_Table::TYPE_TEXT, 64, [
+    ->addColumn('action_group_id', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
         'nullable'  => true,
     ], 'Action Group ID for grouping related activities')
-    ->addColumn('user_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('user_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
     ], 'Admin User ID')
-    ->addColumn('username', Varien_Db_Ddl_Table::TYPE_VARCHAR, 40, [
+    ->addColumn('username', Maho\Db\Ddl\Table::TYPE_VARCHAR, 40, [
         'nullable'  => true,
     ], 'Username')
-    ->addColumn('action_type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 50, [
+    ->addColumn('action_type', Maho\Db\Ddl\Table::TYPE_VARCHAR, 50, [
         'nullable'  => false,
     ], 'Action Type (create, update, delete, mass_update, page_visit)')
-    ->addColumn('entity_type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
+    ->addColumn('entity_type', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable'  => true,
     ], 'Entity Type (Model Class Name)')
-    ->addColumn('entity_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
     ], 'Entity ID')
-    ->addColumn('old_data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('old_data', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Old Data (JSON)')
-    ->addColumn('new_data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('new_data', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'New Data (JSON)')
-    ->addColumn('ip_address', Varien_Db_Ddl_Table::TYPE_VARCHAR, 45, [
+    ->addColumn('ip_address', Maho\Db\Ddl\Table::TYPE_VARCHAR, 45, [
         'nullable'  => true,
     ], 'IP Address')
-    ->addColumn('user_agent', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('user_agent', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'User Agent')
-    ->addColumn('request_url', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('request_url', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Request URL')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Created At')
     ->addIndex(
         $installer->getIdxName('adminactivitylog/activity', ['user_id']),
@@ -89,8 +89,8 @@ $activityTable = $installer->getConnection()
         'user_id',
         $installer->getTable('admin/user'),
         'user_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Admin Activity Log Table');
 
@@ -98,34 +98,34 @@ $installer->getConnection()->createTable($activityTable);
 
 $loginTable = $installer->getConnection()
     ->newTable($installer->getTable('adminactivitylog/login'))
-    ->addColumn('login_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('login_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'identity'  => true,
         'unsigned'  => true,
         'nullable'  => false,
         'primary'   => true,
     ], 'Login ID')
-    ->addColumn('user_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
+    ->addColumn('user_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'nullable'  => true,
     ], 'Admin User ID')
-    ->addColumn('username', Varien_Db_Ddl_Table::TYPE_VARCHAR, 40, [
+    ->addColumn('username', Maho\Db\Ddl\Table::TYPE_VARCHAR, 40, [
         'nullable'  => false,
     ], 'Username')
-    ->addColumn('type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 20, [
+    ->addColumn('type', Maho\Db\Ddl\Table::TYPE_VARCHAR, 20, [
         'nullable'  => false,
     ], 'Type (login, logout, failed)')
-    ->addColumn('ip_address', Varien_Db_Ddl_Table::TYPE_VARCHAR, 45, [
+    ->addColumn('ip_address', Maho\Db\Ddl\Table::TYPE_VARCHAR, 45, [
         'nullable'  => true,
     ], 'IP Address')
-    ->addColumn('user_agent', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+    ->addColumn('user_agent', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'User Agent')
-    ->addColumn('failure_reason', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
+    ->addColumn('failure_reason', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable'  => true,
     ], 'Failure Reason')
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
+    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Created At')
     ->addIndex(
         $installer->getIdxName('adminactivitylog/login', ['user_id']),
@@ -148,8 +148,8 @@ $loginTable = $installer->getConnection()
         'user_id',
         $installer->getTable('admin/user'),
         'user_id',
-        Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Admin Login Activity Log Table');
 

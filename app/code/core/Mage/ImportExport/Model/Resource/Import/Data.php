@@ -6,14 +6,14 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resource_Db_Abstract implements IteratorAggregate
 {
     /**
-     * @var IteratorIterator|null
+     * @var Iterator|null
      */
     protected $_iterator = null;
 
@@ -26,7 +26,7 @@ class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resou
     /**
      * Retrieve an external iterator
      *
-     * @return IteratorIterator
+     * @return Iterator
      */
     #[\ReturnTypeWillChange]
     #[\Override]
@@ -36,14 +36,18 @@ class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resou
         $select = $adapter->select()
             ->from($this->getMainTable(), ['data'])
             ->order('id ASC');
-        $stmt = $adapter->query($select);
+        $result = $adapter->query($select);
 
-        $stmt->setFetchMode(Zend_Db::FETCH_NUM);
-        if ($stmt instanceof IteratorAggregate) {
-            $iterator = $stmt->getIterator();
+        // Doctrine DBAL Result objects support iteration directly
+        if ($result instanceof IteratorAggregate) {
+            $iterator = $result->getIterator();
+            // Ensure we return an Iterator, not just Traversable
+            if (!$iterator instanceof Iterator) {
+                $iterator = new IteratorIterator($iterator);
+            }
         } else {
-            // Statement doesn't support iterating, so fetch all records and create iterator ourself
-            $rows = $stmt->fetchAll();
+            // For Varien statements, fetch all records as numeric arrays (fetch mode 3)
+            $rows = $result->fetchAll(3);
             $iterator = new ArrayIterator($rows);
         }
 

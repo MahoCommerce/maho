@@ -6,7 +6,7 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -149,7 +149,7 @@ class Mage_Index_Model_Observer
         $dateInterval = new DateInterval('PT' . self::OLD_INDEX_EVENT_THRESHOLD_SECONDS . 'S');
         $oldEventsThreshold = $now
             ->sub($dateInterval)
-            ->format(Varien_Db_Adapter_Pdo_Mysql::TIMESTAMP_FORMAT);
+            ->format(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT);
 
         $coreResource = Mage::getSingleton('core/resource');
         $writeConnection = $coreResource->getConnection('core_write');
@@ -174,7 +174,7 @@ class Mage_Index_Model_Observer
             }
 
             if (!empty($eventList)) {
-                $where = new Zend_Db_Expr(
+                $where = new Maho\Db\Expr(
                     sprintf(
                         'event_id in (%s)',
                         implode(',', $eventList),

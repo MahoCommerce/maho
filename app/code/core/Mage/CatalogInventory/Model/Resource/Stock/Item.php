@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,7 +42,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
      * @param string $field
      * @param mixed $value
      * @param Mage_CatalogInventory_Model_Stock_Item $object
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)
@@ -72,7 +72,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
             ['cisi' => 'cataloginventory/stock_item'],
             'product_id=entity_id',
             [
-                'is_saleable' => new Zend_Db_Expr($stockExpr),
+                'is_saleable' => new Maho\Db\Expr($stockExpr),
                 'inventory_in_stock' => 'is_in_stock',
             ],
             null,
@@ -95,9 +95,9 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
         if (!$object->isObjectNew() && $object->getQtyCorrection()) {
             $qty = abs($object->getQtyCorrection());
             if ($object->getQtyCorrection() < 0) {
-                $data['qty'] = new Zend_Db_Expr('qty-' . $qty);
+                $data['qty'] = new Maho\Db\Expr('qty-' . $qty);
             } else {
-                $data['qty'] = new Zend_Db_Expr('qty+' . $object->getQtyCorrection());
+                $data['qty'] = new Maho\Db\Expr('qty+' . $object->getQtyCorrection());
             }
         }
         return $data;

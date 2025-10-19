@@ -92,7 +92,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -105,7 +105,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         return $this->buildAddressAttributeCondition($adapter, $attribute, $operator, $value);
     }
 
-    protected function buildAddressAttributeCondition(Varien_Db_Adapter_Interface $adapter, string $attributeCode, string $operator, mixed $value): string|false
+    protected function buildAddressAttributeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $attributeCode, string $operator, mixed $value): string|false
     {
         $attributeData = $this->getCustomerAddressAttributeTable($attributeCode);
         if (!$attributeData) {
@@ -120,7 +120,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         return 'e.entity_id IN (SELECT ca.parent_id FROM ' . $this->getCustomerAddressTable() . ' ca WHERE ca.entity_id IN (' . $subselect . '))';
     }
 
-    protected function buildRegionCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string|false
+    protected function buildRegionCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string|false
     {
         // Handle region field which can be either text (EAV varchar attribute) or region_id (EAV int attribute)
         $regionAttributeData = $this->getCustomerAddressAttributeTable('region');

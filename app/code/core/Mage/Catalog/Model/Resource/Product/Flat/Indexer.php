@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -336,7 +336,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
     {
         $columns = [];
         $columns['entity_id'] = [
-            'type'      => Varien_Db_Ddl_Table::TYPE_INTEGER,
+            'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
             'length'    => null,
             'unsigned'  => true,
             'nullable'  => false,
@@ -346,7 +346,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
         ];
         if ($this->getFlatHelper()->isAddChildData()) {
             $columns['child_id'] = [
-                'type'      => Varien_Db_Ddl_Table::TYPE_INTEGER,
+                'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
                 'length'    => null,
                 'unsigned'  => true,
                 'nullable'  => true,
@@ -355,7 +355,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 'comment'   => 'Child Id',
             ];
             $columns['is_child'] = [
-                'type'      => Varien_Db_Ddl_Table::TYPE_SMALLINT,
+                'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
                 'length'    => 1,
                 'unsigned'  => true,
                 'nullable'  => false,
@@ -364,7 +364,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
             ];
         }
         $columns['attribute_set_id'] = [
-            'type'      => Varien_Db_Ddl_Table::TYPE_SMALLINT,
+            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
             'length'    => 5,
             'unsigned'  => true,
             'nullable'  => false,
@@ -372,7 +372,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
             'comment'   => 'Attribute Set Id',
         ];
         $columns['type_id'] = [
-            'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
+            'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
             'length'    => 32,
             'unsigned'  => false,
             'nullable'  => false,
@@ -432,29 +432,29 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
 
             if ($this->getFlatHelper()->isAddChildData()) {
                 $this->_indexes['PRIMARY'] = [
-                    'type'   => Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY,
+                    'type'   => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY,
                     'fields' => ['entity_id', 'child_id'],
                 ];
                 $this->_indexes['IDX_CHILD'] = [
-                    'type'   => Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX,
+                    'type'   => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX,
                     'fields' => ['child_id'],
                 ];
                 $this->_indexes['IDX_IS_CHILD'] = [
-                    'type'   => Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX,
+                    'type'   => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX,
                     'fields' => ['entity_id', 'is_child'],
                 ];
             } else {
                 $this->_indexes['PRIMARY'] = [
-                    'type'   => Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY,
+                    'type'   => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY,
                     'fields' => ['entity_id'],
                 ];
             }
             $this->_indexes['IDX_TYPE_ID'] = [
-                'type'   => Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX,
+                'type'   => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX,
                 'fields' => ['type_id'],
             ];
             $this->_indexes['IDX_ATTRIBUTE_SET'] = [
-                'type'   => Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX,
+                'type'   => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX,
                 'fields' => ['attribute_set_id'],
             ];
 
@@ -613,7 +613,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
         // Process indexes to create names for them in MMDB-style and reformat to common index definition
         $indexKeys = [];
         $indexProps = array_values($indexesNeed);
-        $upperPrimaryKey = strtoupper(Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY);
+        $upperPrimaryKey = strtoupper(Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY);
         foreach ($indexProps as $i => $indexProp) {
             $indexName = $adapter->getIndexName($tableName, $indexProp['fields'], $indexProp['type']);
             $indexProp['type'] = strtoupper($indexProp['type']);
@@ -667,8 +667,8 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 'entity_id',
                 $this->getTable('catalog/product'),
                 'entity_id',
-                Varien_Db_Ddl_Table::ACTION_CASCADE,
-                Varien_Db_Ddl_Table::ACTION_CASCADE,
+                Maho\Db\Ddl\Table::ACTION_CASCADE,
+                Maho\Db\Ddl\Table::ACTION_CASCADE,
             );
 
             if ($this->getFlatHelper()->isAddChildData()) {
@@ -677,8 +677,8 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                     'child_id',
                     $this->getTable('catalog/product'),
                     'entity_id',
-                    Varien_Db_Ddl_Table::ACTION_CASCADE,
-                    Varien_Db_Ddl_Table::ACTION_CASCADE,
+                    Maho\Db\Ddl\Table::ACTION_CASCADE,
+                    Maho\Db\Ddl\Table::ACTION_CASCADE,
                 );
             }
             $table->setComment("Catalog Product Flat (Store {$storeId})");
@@ -727,8 +727,8 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 'table_index'   => 'entity_id',
                 'ref_table'     => $this->getTable('catalog/product'),
                 'ref_index'     => 'entity_id',
-                'on_update'     => Varien_Db_Ddl_Table::ACTION_CASCADE,
-                'on_delete'     => Varien_Db_Ddl_Table::ACTION_CASCADE,
+                'on_update'     => Maho\Db\Ddl\Table::ACTION_CASCADE,
+                'on_delete'     => Maho\Db\Ddl\Table::ACTION_CASCADE,
             ];
 
             // Additional data from children
@@ -746,8 +746,8 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                     'table_index'   => 'child_id',
                     'ref_table'     => $this->getTable('catalog/product'),
                     'ref_index'     => 'entity_id',
-                    'on_update'     => Varien_Db_Ddl_Table::ACTION_CASCADE,
-                    'on_delete'     => Varien_Db_Ddl_Table::ACTION_CASCADE,
+                    'on_update'     => Maho\Db\Ddl\Table::ACTION_CASCADE,
+                    'on_delete'     => Maho\Db\Ddl\Table::ACTION_CASCADE,
                 ];
             }
 
@@ -833,7 +833,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
         $colsList   = ['entity_id', 'type_id', 'attribute_set_id'];
         if ($this->getFlatHelper()->isAddChildData()) {
             $fieldList = array_merge($fieldList, ['child_id', 'is_child']);
-            $isChild   = new Zend_Db_Expr('0');
+            $isChild   = new Maho\Db\Expr('0');
             $colsList  = array_merge($colsList, ['entity_id', $isChild]);
         }
 
@@ -916,7 +916,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
         }
         $bind   = ['website_id'    => $websiteId];
         $select = $adapter->select()
-            ->from(['e' => $this->getFlatTableName($storeId)], null)
+            ->from(['e' => $this->getFlatTableName($storeId)], [])
             ->joinLeft(
                 ['wp' => $this->getTable('catalog/product_website')],
                 implode(' AND ', $joinCondition),
@@ -987,7 +987,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
             }
 
             $select = $attribute->getFlatUpdateSelect($storeId);
-            if ($select instanceof Varien_Db_Select) {
+            if ($select instanceof Maho\Db\Select) {
                 if ($productIds !== null) {
                     $select->where('e.entity_id IN(?)', $productIds);
                 }
@@ -1090,7 +1090,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 $select = $adapter->select()
                     ->from(
                         ['t' => $this->getTable($relation->getTable())],
-                        [$relation->getParentFieldName(), $relation->getChildFieldName(), new Zend_Db_Expr('1')],
+                        [$relation->getParentFieldName(), $relation->getChildFieldName(), new Maho\Db\Expr('1')],
                     )
                     ->join(
                         ['e' => $this->getFlatTableName($storeId)],
@@ -1135,7 +1135,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
             if ($columnName === 'entity_id' || $columnName === 'child_id' || $columnName === 'is_child') {
                 continue;
             }
-            $select->columns([$columnName => new Zend_Db_Expr('t1.' . $columnName)]);
+            $select->columns([$columnName => new Maho\Db\Expr('t1.' . $columnName)]);
         }
         $select
             ->joinLeft(
@@ -1193,10 +1193,10 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                     $joinLeftCond[] = $relation->getWhere();
                 }
 
-                $entitySelect = new Zend_Db_Expr($select->__toString());
+                $entitySelect = new Maho\Db\Expr($select->__toString());
 
                 $select = $adapter->select()
-                    ->from(['e' => $this->getFlatTableName($storeId)], null)
+                    ->from(['e' => $this->getFlatTableName($storeId)], [])
                     ->joinLeft(
                         ['t' => $this->getTable($relation->getTable())],
                         implode(' AND ', $joinLeftCond),

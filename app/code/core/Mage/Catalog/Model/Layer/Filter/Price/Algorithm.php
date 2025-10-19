@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -156,7 +157,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
             return ($this->_prices[$limits[0]] < $value) ? $limits[1] : $limits[0];
         }
 
-        $separator = floor(($limits[0] + $limits[1]) / 2);
+        $separator = (int) floor(($limits[0] + $limits[1]) / 2);
         if ($this->_prices[$separator] < $value) {
             $limits[0] = $separator + 1;
         } else {
@@ -465,7 +466,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
                     $roundingFactorCoefficient,
                 );
                 if ($roundPrices) {
-                    $index = round($roundingFactorCoefficient
+                    $index = (int) round($roundingFactorCoefficient
                         / Mage_Catalog_Model_Resource_Layer_Filter_Price::MIN_POSSIBLE_PRICE);
                     $result[$index] = $roundPrices;
                 }

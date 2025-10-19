@@ -82,7 +82,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
     }
 
     #[\Override]
-    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    public function getConditionsSql(\Maho\Db\Adapter\AdapterInterface $adapter, ?int $websiteId = null): string|false
     {
         $attribute = $this->getAttribute();
         $operator = $this->getMappedSqlOperator();
@@ -94,7 +94,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         };
     }
 
-    protected function buildSubscriberStatusCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildSubscriberStatusCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['ns' => $this->getNewsletterSubscriberTable()], ['customer_id'])
@@ -104,7 +104,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Newsletter exte
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildStatusChangeDateCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    protected function buildStatusChangeDateCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $subselect = $adapter->select()
             ->from(['ns' => $this->getNewsletterSubscriberTable()], ['customer_id'])

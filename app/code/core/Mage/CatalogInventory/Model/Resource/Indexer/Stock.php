@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -147,7 +147,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
         $processIds = $data['reindex_stock_product_ids'];
         $select = $adapter->select()
             ->from($this->getTable('catalog/product'), 'COUNT(*)');
-        $pCount = $adapter->fetchOne($select);
+        $pCount = (int) $adapter->fetchOne($select);
 
         // if affected more 30% of all products - run reindex all products
         if ($pCount * 0.3 < count($processIds)) {
@@ -158,11 +158,11 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
         $select = $adapter->select()
             ->from($this->getTable('catalog/product_relation'), 'COUNT(DISTINCT parent_id)')
             ->where('child_id IN(?)', $processIds);
-        $aCount = $adapter->fetchOne($select);
+        $aCount = (int) $adapter->fetchOne($select);
         $select = $adapter->select()
             ->from($this->getTable('catalog/product_relation'), 'COUNT(DISTINCT child_id)')
             ->where('parent_id IN(?)', $processIds);
-        $bCount = $adapter->fetchOne($select);
+        $bCount = (int) $adapter->fetchOne($select);
 
         // if affected with relations more 30% of all products - run reindex all products
         if ($pCount * 0.3 < count($processIds) + $aCount + $bCount) {
@@ -179,9 +179,10 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
         $select = $adapter->select()
             ->from($this->getTable('catalog/product'), ['entity_id', 'type_id'])
             ->where('entity_id IN(?)', $processIds);
-        $query  = $select->query(Zend_Db::FETCH_ASSOC);
+        $result = $select->query();
         $byType = [];
-        while ($row = $query->fetch()) {
+        // Fetch as associative array (default fetch mode)
+        while ($row = $result->fetch()) {
             $byType[$row['type_id']][] = $row['entity_id'];
         }
 

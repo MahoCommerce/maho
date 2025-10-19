@@ -6,7 +6,7 @@
  * @package    Mage_Rating
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -147,8 +147,8 @@ class Mage_Rating_Model_Resource_Rating_Collection extends Mage_Core_Model_Resou
         $inCond = $adapter->prepareSqlCondition('rating_option_vote.rating_id', [
             'in' => $arrRatingId,
         ]);
-        $sumCond = new Zend_Db_Expr("SUM(rating_option_vote.{$adapter->quoteIdentifier('percent')})");
-        $countCond = new Zend_Db_Expr('COUNT(*)');
+        $sumCond = new Maho\Db\Expr("SUM(rating_option_vote.{$adapter->quoteIdentifier('percent')})");
+        $countCond = new Maho\Db\Expr('COUNT(*)');
         $select = $adapter->select()
             ->from(
                 ['rating_option_vote'  => $this->getTable('rating/rating_option_vote')],

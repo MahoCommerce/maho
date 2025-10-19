@@ -5,6 +5,15 @@
  *
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+/**
+ * Maho
+ *
+ * @package    Mage_CatalogSearch
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -34,7 +43,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
     public function addSearchFilter($query)
     {
         $this->_searchQuery = $query;
-        $this->addFieldToFilter('entity_id', ['in' => new Zend_Db_Expr($this->_getSearchEntityIdsSql($query))]);
+        $this->addFieldToFilter('entity_id', ['in' => new Maho\Db\Expr($this->_getSearchEntityIdsSql($query))]);
         return $this;
     }
 
@@ -95,7 +104,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
      * Retrieve SQL for search entities
      *
      * @param string $query
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     protected function _getSearchEntityIdsSql($query)
     {
@@ -150,7 +159,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
             $selects[] = "SELECT * FROM ({$sql}) AS inoptionsql"; // inheritant unions may be inside
         }
 
-        $sql = $this->getConnection()->select()->union($selects, Zend_Db_Select::SQL_UNION_ALL);
+        $sql = $this->getConnection()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
         return $sql;
     }
 
@@ -158,7 +167,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
      * Retrieve SQL for search entities by option
      *
      * @param string $query
-     * @return false|Varien_Db_Select
+     * @return false|Maho\Db\Select
      */
     protected function _getSearchInOptionSql($query)
     {
@@ -250,6 +259,6 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
                 ->where(implode(' OR ', $where))
                 ->where("store_id={$storeId}");
         }
-        return $this->getConnection()->select()->union($selects, Zend_Db_Select::SQL_UNION_ALL);
+        return $this->getConnection()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
     }
 }

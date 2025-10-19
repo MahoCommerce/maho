@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,7 +35,7 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
         $this->getSelect()
             ->from(
                 ['email' => $this->getEntity()->getEntityTable()],
-                ['email_count' => new Zend_Db_Expr('COUNT(email.entity_id)')],
+                ['email_count' => new Maho\Db\Expr('COUNT(email.entity_id)')],
             )
             ->where('email.entity_id = e.entity_id')
             ->group('email.email');
@@ -96,7 +96,7 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
     /**
      * Get SQL for get record count
      *
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     public function getSelectCountSql()
@@ -112,7 +112,7 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
      *
      * @param int $limit
      * @param int $offset
-     * @return Varien_Db_Select
+     * @return Maho\Db\Select
      */
     #[\Override]
     protected function _getAllIdsSelect($limit = null, $offset = null)
