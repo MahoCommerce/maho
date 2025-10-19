@@ -120,7 +120,7 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_M
         // Move all steps after deleted step down by 1
         $adapter->update(
             $this->getMainTable(),
-            ['step_number' => new Zend_Db_Expr('step_number - 1')],
+            ['step_number' => new Maho\Db\Expr('step_number - 1')],
             [
                 'segment_id = ?' => $segmentId,
                 'step_number > ?' => $deletedStepNumber,
