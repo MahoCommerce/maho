@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,45 +16,26 @@
  * @var Mage_Install_Block_Config $this
  */
 ?>
-<script type="text/javascript">
-    let dbTypeIds = [];
-    function showContent(select) {
-        dbTypeIds.forEach(function (name) {
-            document.getElementById(name + '_conn_form').style.display = 'none';
-        });
-        document.getElementById(select.value + '_conn_form').style.display = 'block';
-    }
-</script>
-
-<fieldset class="group-select">
-    <legend><?= $this->__('Connection') ?></legend>
-    <h4 class="legend"><?= $this->__('Database Connection') ?></h4>
+<h4 class="section-title"><?= $this->__('Database Connection') ?></h4>
+<div class="form-list">
     <ul>
         <?php $dbTypeOptions = $this->getDatabaseBlocks(); ?>
         <?php if (count($dbTypeOptions) > 0): ?>
             <li>
-                <div class="input-box">
-                    <label for="prefix"><?= $this->__('Database Type') ?></label><br />
-                    <select name="config[db_model]" onchange="showContent(this)">
-                        <?php foreach($dbTypeOptions as $block): ?>
-                            <option value="<?= $block->getIdPrefix()?>" <?php if($this->getFormData()->getDbModel() == $block->getIdPrefix()):?>selected="selected"<?php endif ?>><?= $block->getTitle() ?></option>
-                        <?php endforeach ?>
-                    </select>
-                </div>
+                <label for="db_model_select"><?= $this->__('Database Type') ?></label>
+                <select name="config[db_model]" id="db_model_select">
+                    <?php foreach($dbTypeOptions as $block): ?>
+                        <option value="<?= $block->getIdPrefix()?>" <?php if($this->getFormData()->getDbModel() == $block->getIdPrefix()):?>selected="selected"<?php endif ?>><?= $block->getTitle() ?></option>
+                    <?php endforeach ?>
+                </select>
             </li>
         <?php endif ?>
 
         <?php foreach ($dbTypeOptions as $block): ?>
-            <script type="text/javascript">
-                dbTypeIds.push("<?= $block->getIdPrefix() ?>");
-            </script>
         <?php $block = $this->getDatabaseBlock($block->getIdPrefix()) ?>
-
-            <div id="<?= $block->getIdPrefix() ?>_conn_form" <?php if($this->getFormData()->getDbModel() != $block->getIdPrefix()):?>style="display:none;"<?php endif ?>>
-                <ul>
-                    <?= $block->toHtml() ?>
-                </ul>
+            <div id="<?= $block->getIdPrefix() ?>_conn_form" class="db-connection-form <?php if($this->getFormData()->getDbModel() != $block->getIdPrefix()):?>hidden<?php endif ?>" data-db-type="<?= $block->getIdPrefix() ?>">
+                <?= $block->toHtml() ?>
             </div>
         <?php endforeach ?>
     </ul>
-</fieldset>
+</div>

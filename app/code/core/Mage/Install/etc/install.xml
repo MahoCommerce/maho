@@ -14,27 +14,27 @@
     <wizard>
         <steps>
             <begin translate="code">
-                <code>License Agreement</code>
+                <code>License</code>
                 <controller>wizard</controller>
                 <action>begin</action>
             </begin>
             <locale translate="code">
-                <code>Localization</code>
+                <code>Locale</code>
                 <controller>wizard</controller>
                 <action>locale</action>
             </locale>
             <config translate="code">
-                <code>Configuration</code>
+                <code>Config</code>
                 <controller>wizard</controller>
                 <action>config</action>
             </config>
             <administrator translate="code">
-                <code>Create Admin Account</code>
+                <code>Admin</code>
                 <controller>wizard</controller>
                 <action>administrator</action>
             </administrator>
             <end translate="code">
-                <code>You're All Set!</code>
+                <code>Complete</code>
                 <controller>wizard</controller>
                 <action>end</action>
             </end>
