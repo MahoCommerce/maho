@@ -11,14 +11,30 @@
 
 /** @var Mage_Install_Block_End $this */
 ?>
-<div class="page-head">
-    <h3><?= $this->__("You're All Set") ?>!</h3>
+<div class="installation-complete">
+    <div class="success-icon" role="img" aria-label="Success">
+        <svg viewBox="0 0 52 52" class="checkmark">
+            <circle cx="26" cy="26" r="25" fill="none"/>
+            <path class="success-checkmark" d="M14 27l7.5 7.5L38 18" fill="none"/>
+        </svg>
+    </div>
+
+    <div class="page-head">
+        <h3><?= $this->__("You're All Set") ?>!</h3>
+    </div>
+
+    <?php if ($this->getIframeSourceUrl()): ?>
+        <iframe id="iframe_box" src="<?= $this->getIframeSourceUrl() ?>" frameborder="0" width="650" height="600" style="border-radius: var(--radius-md); margin: var(--space-xl) 0;"></iframe>
+    <?php endif ?>
+
+    <p><?= $this->__('Get ready to experience Open-Source eCommerce Evolved.') ?></p>
+
+    <div class="button-set">
+        <a target="_blank" href="<?= $this->getUrl('') ?>" class="form-button">
+            <span><?= $this->__('Go to Frontend') ?></span>
+        </a>
+        <a target="_blank" href="<?= $this->getUrl('adminhtml') ?>" class="form-button">
+            <span><?= $this->__('Go to Backend') ?></span>
+        </a>
+    </div>
 </div>
-<?php if ($this->getIframeSourceUrl()): ?>
-    <iframe id="iframe_box" src="<?= $this->getIframeSourceUrl() ?>" frameborder="0" width="650" height="600"></iframe>
-<?php endif ?>
-<p><?= $this->__('Get ready to experience Open-Source eCommerce Evolved.') ?></p>
-<p>
-    <button class="form-button" onclick="window.open('<?= $this->getUrl('') ?>')" type="button"><?= $this->__('Go to Frontend') ?></button>&nbsp;&nbsp;
-    <button class="form-button" onclick="window.open('<?= $this->getUrl('adminhtml') ?>')" type="button"><?= $this->__('Go to Backend') ?></button>
-</p>
