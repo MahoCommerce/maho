@@ -71,12 +71,12 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
         $select = $adapter->select()
             ->from(['p' => $this->getMainTable()])
             ->join(
-                ['s' => $this->getTable('customer_segment_email_sequence')],
+                ['s' => $this->getTable('customersegmentation/emailSequence')],
                 'p.sequence_id = s.sequence_id',
                 ['template_id', 'max_sends', 'generate_coupon', 'coupon_sales_rule_id', 'coupon_prefix', 'coupon_expires_days'],
             )
             ->join(
-                ['seg' => $this->getTable('customer_segment')],
+                ['seg' => $this->getTable('customersegmentation/segment')],
                 'p.segment_id = seg.segment_id',
                 ['segment_name' => 'name'],
             )

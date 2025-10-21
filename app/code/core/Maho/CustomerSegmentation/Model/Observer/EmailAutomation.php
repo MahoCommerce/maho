@@ -376,7 +376,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         $queue->sendPerSubscriber();
 
         // Mark as sent
-        $progress->markAsSent($queue->getId());
+        $progress->markAsSent((int) $queue->getId());
 
         Mage::log(
             "Sent automation email to customer {$customerId}, template {$templateId}, queue {$queue->getId()}",
