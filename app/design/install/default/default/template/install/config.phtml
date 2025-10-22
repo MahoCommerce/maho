@@ -14,69 +14,87 @@
 <div class="page-head">
     <h3><?= $this->__('Configuration') ?></h3>
 </div>
-<?= $this->getMessagesBlock()->toHtml() ?>
+
+<div class="messages">
+    <?= $this->getMessagesBlock()->toHtml() ?>
+</div>
 <?php if($this->getInstaller()->getServerCheckStatus()): ?>
 <form action="<?= $this->getPostUrl() ?>" method="post" id="form-validate">
 <?= $this->getLayout()->getBlock('database')->toHtml() ?>
 
-<fieldset class="group-select">
-    <legend><?= $this->__('Web access options') ?></legend>
-    <h4 class="legend"><?= $this->__('Web access options') ?></h4>
+<h4 class="section-title"><?= $this->__('Web Access Options') ?></h4>
+<div class="form-list">
     <ul>
         <li>
-            <label for="base_url"><?= $this->__('Base URL') ?> <span class="required">*</span></label><br />
+            <label for="base_url"><?= $this->__('Base URL') ?> <span class="required">*</span></label>
             <input type="text" name="config[unsecure_base_url]" id="base_url" value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Base URL')) ?>" class="required-entry validate-url input-text" />
         </li>
         <li>
-            <label for="admin_frontname"><?= $this->__('Admin Path') ?> <span class="required">*</span></label><br />
+            <label for="admin_frontname"><?= $this->__('Admin Path') ?> <span class="required">*</span></label>
             <input type="text" name="config[admin_frontname]" id="admin_frontname" value="<?= $this->getFormData()->getAdminFrontname() ?>" title="<?= $this->quoteEscape($this->__('Admin Path')) ?>" class="required-entry validate-data input-text" />
-            <p style="margin-top:4px; line-height:1.3em; color:#666;">
+            <p class="field-note">
                 <small><?= $this->__('Additional path added after Base URL to access your Administrative Panel (e.g. admin, backend, control etc.).') ?></small>
             </p>
         </li>
         <li>
-            <input type="checkbox" name="config[use_secure]" id="use_secure" value="1" <?php if($this->getFormData()->getUseSecure()): ?>checked="checked"<?php endif ?> onclick="this.checked ? document.getElementById('use_secure_options').style.display = '' : document.getElementById('use_secure_options').style.display = 'none'; return true;" />
-            <label for="use_secure"><?= $this->__('Use Secure URLs (SSL)') ?></label><br />
-            <p style="margin-top:4px; line-height:1.3em; color:#666;">
-                <small><?= $this->__('Enable this option only if you have SSL available.') ?></small>
-            </p>
+            <label for="use_secure" class="checkbox-label">
+                <input type="checkbox" name="config[use_secure]" id="use_secure" value="1" <?php if($this->getFormData()->getUseSecure()): ?>checked="checked"<?php endif ?> />
+                <span><?= $this->__('Use Secure URLs (SSL)') ?></span>
+            </label>
         </li>
     </ul>
-    <ul id="use_secure_options" <?php if(!$this->getFormData()->getUseSecure()): ?>style="display:none"<?php endif ?>>
+    <ul id="use_secure_options" class="<?php if(!$this->getFormData()->getUseSecure()): ?>hidden<?php endif ?>">
         <li>
-            <label for="secure_base_url"><?= $this->__('Secure Base URL') ?> <span class="required">*</span></label><br />
+            <label for="secure_base_url"><?= $this->__('Secure Base URL') ?> <span class="required">*</span></label>
             <input type="text" name="config[secure_base_url]" id="secure_base_url" value="<?= $this->getFormData()->getSecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Secure Base URL')) ?>" class="required-entry validate-url input-text" />
-            <p style="margin-top:4px; line-height:1.3em; color:#666;">
+            <p class="field-note">
                 <small><?= $this->__('Provide a complete base URL for SSL connection. For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?></small>
             </p>
         </li>
         <li>
-            <input type="checkbox" name="config[use_secure_admin]" id="use_secure_admin" value="1" <?php if($this->getFormData()->getUseSecureAdmin()): ?>checked="checked"<?php endif ?> />
-            <label for="use_secure_admin"><?= $this->__('Run admin interface with SSL') ?></label><br />
+            <label for="use_secure_admin" class="checkbox-label">
+                <input type="checkbox" name="config[use_secure_admin]" id="use_secure_admin" value="1" <?php if($this->getFormData()->getUseSecureAdmin()): ?>checked="checked"<?php endif ?> />
+                <span><?= $this->__('Run admin interface with SSL') ?></span>
+            </label>
         </li>
     </ul>
-</fieldset>
+</div>
 
-<fieldset class="group-select">
-    <legend><?= $this->__('Session Storage Options') ?></legend>
-    <h4 class="legend"><?= $this->__('Session Storage Options') ?></h4>
+<h4 class="section-title"><?= $this->__('Session Storage Options') ?></h4>
+<div class="form-list">
     <ul>
         <li>
-            <div class="input-box">
-                <label for="password"><?= $this->__('Save Session Data In') ?></label><br />
-                <?= $this->getSessionSaveSelect() ?>
-            </div>
+            <label for="password"><?= $this->__('Save Session Data In') ?></label>
+            <?= $this->getSessionSaveSelect() ?>
         </li>
     </ul>
-</fieldset>
+</div>
 
 <div class="button-set">
     <p class="required">* <?= $this->__('Required Fields') ?></p>
     <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>
 </div>
 </form>
+
+<div id="installation-overlay" class="installation-overlay" style="display: none;">
+    <div class="installation-overlay-content">
+        <div class="installation-spinner"></div>
+        <h2><?= $this->__('Installing Maho') ?></h2>
+        <p><?= $this->__('Please wait while we set up your store...') ?></p>
+    </div>
+</div>
+
 <script type="text/javascript">
     var dataForm = new VarienForm('form-validate');
+
+    // Show installation overlay on form submit
+    document.getElementById('form-validate').addEventListener('submit', function(e) {
+        // Only show overlay if form is valid
+        if (this.checkValidity()) {
+            document.getElementById('installation-overlay').style.display = 'flex';
+            document.body.classList.add('installation-active');
+        }
+    });
 </script>
 <?php else: ?>
     <div><?= $this->__('Please set all required settings before clicking Continue') ?></div>

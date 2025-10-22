@@ -6,7 +6,7 @@
  * @package    Mage_Uploader
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -182,6 +182,7 @@ class Mage_Uploader_Helper_File extends Mage_Core_Helper_Abstract
             'xgtm' => 'application/vnd.groove-tool-message',
 
             'xsvg' => 'image/svg+xml',
+            'xapng' => 'image/apng',
 
             'xgtw' => 'model/vnd.gtw',
             'xh261' => 'video/h261',

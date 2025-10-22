@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,39 +14,28 @@
 <div class="page-head">
     <h3><?= $this->__("Welcome to Maho's Installation Wizard") ?>!</h3>
 </div>
-<?= $this->getMessagesBlock()->toHtml() ?>
+
+<div class="messages">
+    <?= $this->getMessagesBlock()->toHtml() ?>
+</div>
+
 <?php if (count($this->getMessagesBlock()->getMessages()) == 0): ?>
-    <form action="<?= $this->getPostUrl() ?>" method="post">
-        <div style="height:20em; border:1px solid #ccc; margin-bottom:8px; padding:5px; background:#fff; overflow: auto; overflow-x:hidden; overflow-y:scroll;">
-            <?= $this->getLicenseHtml() ?>
+    <form action="<?= $this->getPostUrl() ?>" method="post" id="licenseForm">
+        <div class="license-container">
+            <div class="license-box" id="licenseBox">
+                <?= $this->getLicenseHtml() ?>
+            </div>
         </div>
 
-        <script type="text/javascript">
-            function changeSubmitStatus(obj) {
-                const submitButton = document.getElementById('submitButton');
-                submitButton.disabled = !obj.checked;
-                if (obj.checked) {
-                    submitButton.style.background = '#f18200';
-                    submitButton.style.borderColor = '';
-                    submitButton.style.cursor = 'pointer';
-                    submitButton.style.color = '#C73615';
-                } else {
-                    submitButton.style.background = '#bbb';
-                    submitButton.style.borderColor = '#bbb';
-                    submitButton.style.cursor = 'default';
-                    submitButton.style.color = 'white';
-                }
-            }
-        </script>
-        <p>
-            <input type="checkbox" name="agree" value="1" id="agree" onclick="changeSubmitStatus(this)" class="checkbox"/>
-            <label for="agree"><?= $this->__('I agree to the above terms and conditions.') ?></label>
-        </p>
+        <label for="agree" class="checkbox-label">
+            <input type="checkbox" name="agree" value="1" id="agree" aria-describedby="licenseBox"/>
+            <span><?= $this->__('I agree to the above terms and conditions.') ?></span>
+        </label>
+
         <div class="button-set">
-            <button class="form-button" type="submit" id="submitButton" disabled="disabled"><span><?= $this->__('Continue') ?></span></button>
+            <button class="form-button" type="submit" id="submitButton" disabled="disabled">
+                <span><?= $this->__('Continue') ?></span>
+            </button>
         </div>
     </form>
-    <script type="text/javascript">
-        changeSubmitStatus(document.getElementById('agree'));
-    </script>
 <?php endif ?>

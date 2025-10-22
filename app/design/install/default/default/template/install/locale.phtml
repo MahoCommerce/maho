@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,31 +14,28 @@
 <div class="page-head">
     <h3><?= $this->__('Localization') ?></h3>
 </div>
-<?= $this->getMessagesBlock()->toHtml() ?>
+
+<div class="messages">
+    <?= $this->getMessagesBlock()->toHtml() ?>
+</div>
 
 <form action="<?= $this->getPostUrl() ?>" method="get" id="form-validate">
-<fieldset class="group-select">
- <legend><?= $this->__('Locale') ?></legend>
-    <h4 class="legend"><?= $this->__('Locale settings') ?></h4>
+<div class="form-list">
     <ul>
         <li>
-            <div class="input-box">
-                <label for="locale"><?= $this->__('Locale') ?> <span class="required">*</span></label><br/>
-                <?= $this->getLocaleSelect() ?>
-            </div>
+            <label for="locale"><?= $this->__('Locale') ?> <span class="required">*</span></label>
+            <?= $this->getLocaleSelect() ?>
         </li>
         <li>
-            <div class="input-box">
-                <label for="timezone"><?= $this->__('Time Zone') ?> <span class="required">*</span></label><br/>
-                <?= $this->getTimezoneSelect() ?>
-            </div>
-            <div class="input-box">
-                <label for="currency"><?= $this->__('Default Currency') ?> <span class="required">*</span></label><br/>
-                <?= $this->getCurrencySelect() ?>
-            </div>
+            <label for="timezone"><?= $this->__('Time Zone') ?> <span class="required">*</span></label>
+            <?= $this->getTimezoneSelect() ?>
+        </li>
+        <li>
+            <label for="currency"><?= $this->__('Default Currency') ?> <span class="required">*</span></label>
+            <?= $this->getCurrencySelect() ?>
         </li>
     </ul>
-</fieldset>
+</div>
 <div class="button-set">
     <p class="required">* <?= $this->__('Required Fields') ?></p>
     <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>

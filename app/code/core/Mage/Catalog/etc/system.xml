@@ -228,8 +228,8 @@
                         <placeholder>
                             <label></label>
                             <frontend_type>image</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_image</backend_model>
-                            <upload_dir config="system/filesystem/media" scope_info="1">catalog/product/placeholder</upload_dir>
+                            <backend_model>adminhtml/system_config_backend_image_placeholder</backend_model>
+                            <upload_dir scope_info="1">catalog/product/placeholder</upload_dir>
                             <base_url type="media" scope_info="1">catalog/product/placeholder</base_url>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
@@ -465,7 +465,7 @@
                             <label>Watermark</label>
                             <frontend_type>image</frontend_type>
                             <backend_model>adminhtml/system_config_backend_image</backend_model>
-                            <upload_dir config="system/filesystem/media" scope_info="1">catalog/product/watermark</upload_dir>
+                            <upload_dir scope_info="1">catalog/product/watermark</upload_dir>
                             <base_url type="media" scope_info="1">catalog/product/watermark</base_url>
                             <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>

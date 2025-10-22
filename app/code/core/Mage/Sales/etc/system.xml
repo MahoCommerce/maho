@@ -121,7 +121,7 @@
                             <label>Logo for PDF Print-outs (200x50)</label>
                             <frontend_type>image</frontend_type>
                             <backend_model>adminhtml/system_config_backend_image_pdf</backend_model>
-                            <upload_dir config="system/filesystem/media" scope_info="1">sales/store/logo</upload_dir>
+                            <upload_dir scope_info="1">sales/store/logo</upload_dir>
                             <base_url type="media" scope_info="1">sales/store/logo</base_url>
                             <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
@@ -133,7 +133,7 @@
                             <label>Logo for HTML Print View</label>
                             <frontend_type>image</frontend_type>
                             <backend_model>adminhtml/system_config_backend_image</backend_model>
-                            <upload_dir config="system/filesystem/media" scope_info="1">sales/store/logo_html</upload_dir>
+                            <upload_dir scope_info="1">sales/store/logo_html</upload_dir>
                             <base_url type="media" scope_info="1">sales/store/logo_html</base_url>
                             <sort_order>150</sort_order>
                             <show_in_default>1</show_in_default>
