@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -106,25 +106,6 @@
         </models>
     </global>
     <default>
-        <system>
-            <filesystem>
-                <base>{{root_dir}}</base>
-                <app>{{root_dir}}/app</app>
-                <code>{{app_dir}}/code</code>
-                <design>{{app_dir}}/design</design>
-                <locale>{{app_dir}}/locale</locale>
-                <etc>{{app_dir}}/etc</etc>
-                <media>{{root_dir}}/media</media>
-                <upload>{{root_dir}}/media/upload</upload>
-                <skin>{{root_dir}}/skin</skin>
-                <var>{{var_dir}}</var>
-                <cache>{{var_dir}}/cache</cache>
-                <session>{{var_dir}}/session</session>
-                <tmp>{{var_dir}}/tmp</tmp>
-                <pear>{{var_dir}}/pear</pear>
-                <export>{{var_dir}}/export</export>
-            </filesystem>
-        </system>
         <dev>
             <template>
                 <allow_symlink>0</allow_symlink>
