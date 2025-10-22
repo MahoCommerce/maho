@@ -179,4 +179,39 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
     {
         $uploader->addValidateCallback('size', $this, 'validateMaxSize');
     }
+
+    /**
+     * Delete physical file after record is deleted
+     */
+    #[\Override]
+    protected function _afterDelete()
+    {
+        // Get the value from database (not from form which could be an array)
+        $value = $this->getOldValue();
+        if (empty($value) || !is_string($value)) {
+            return parent::_afterDelete();
+        }
+
+        // Remove scope prefix if present (e.g., 'default/filename.ico' -> 'filename.ico')
+        if ($this->_addWhetherScopeInfo()) {
+            $parts = explode('/', $value);
+            $filename = array_pop($parts);
+        } else {
+            $filename = $value;
+        }
+
+        try {
+            $uploadDir = $this->_getUploadDir();
+            $filePath = $uploadDir . '/' . $filename;
+
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        } catch (Exception $e) {
+            // Silently fail - file deletion is not critical
+            Mage::logException($e);
+        }
+
+        return parent::_afterDelete();
+    }
 }

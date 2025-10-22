@@ -14,6 +14,8 @@ class Mage_Core_Model_File_Validator_Image
 {
     public const NAME = 'isImage';
 
+    protected ?string $_originalFileName = null;
+
     protected $_allowedImageTypes = [
         IMAGETYPE_WEBP,
         IMAGETYPE_AVIF,
@@ -25,6 +27,18 @@ class Mage_Core_Model_File_Validator_Image
         IMAGETYPE_TIFF_II,
         IMAGETYPE_TIFF_MM,
     ];
+
+    /**
+     * Setter for original filename
+     *
+     * @param string $filename
+     * @return $this
+     */
+    public function setOriginalFileName($filename)
+    {
+        $this->_originalFileName = $filename;
+        return $this;
+    }
 
     /**
      * Setter for allowed image types
@@ -45,6 +59,7 @@ class Mage_Core_Model_File_Validator_Image
             'png' => [IMAGETYPE_PNG],
             'ico' => [IMAGETYPE_ICO],
             'apng' => [IMAGETYPE_PNG],
+            'svg' => [], // SVG is XML-based, not a raster format - handled by separate validator
         ];
 
         $this->_allowedImageTypes = [];
@@ -69,6 +84,15 @@ class Mage_Core_Model_File_Validator_Image
      */
     public function validate($filePath)
     {
+        // Skip SVG files - they are handled by Mage_Core_Model_File_Validator_Svg
+        // Use original filename if available (temp files don't have extensions)
+        $filenameToCheck = $this->_originalFileName ?: $filePath;
+        $extension = strtolower(pathinfo($filenameToCheck, PATHINFO_EXTENSION));
+
+        if ($extension === 'svg') {
+            return null;
+        }
+
         [$imageWidth, $imageHeight, $fileType] = getimagesize($filePath);
         if ($fileType) {
             if ($fileType === IMAGETYPE_ICO) {
