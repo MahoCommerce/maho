@@ -19,15 +19,12 @@
 ?>
 <meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>"/>
 <title><?= htmlspecialchars(html_entity_decode($this->getTitle())) ?></title>
-<link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
-<link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
+<?= Mage::helper('page')->getFaviconHtml() ?>
 
 <script type="text/javascript">
-//<![CDATA[
     var BASE_URL = '<?= $this->getUrl('*') ?>';
     var SKIN_URL = '<?= $this->getSkinUrl() ?>';
     var FORM_KEY = '<?= $this->getFormKey() ?>';
-//]]>
 </script>
 
 <?= $this->getCssJsHtml() ?>

@@ -17,7 +17,7 @@
 "Advanced","Advanced"
 "Advanced Cache Settings","Advanced Cache Settings"
 "Allow Countries","Allow Countries"
-"Allowed file types: ICO, PNG, GIF, JPG, JPEG, APNG. Not all browsers support all these formats!","Allowed file types: ICO, PNG, GIF, JPG, JPEG, APNG. Not all browsers support all these formats!"
+"Allowed file types: ICO, PNG, GIF, JPG, JPEG, APNG, WEBP, AVIF, SVG. Not all browsers support all these formats!","Allowed file types: ICO, PNG, GIF, JPG, JPEG, APNG, WEBP, AVIF, SVG. Not all browsers support all these formats!"
 "Allowed IPs (comma separated)","Allowed IPs (comma separated)"
 "Allow Maho Backend to run in frame","Allow Maho Backend to run in frame"
 "Allow Maho Frontend to run in frame","Allow Maho Frontend to run in frame"

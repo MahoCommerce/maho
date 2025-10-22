@@ -14,8 +14,7 @@
 <meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>"/>
 <meta name="robots" content="noindex, nofollow"/>
 <title><?= htmlspecialchars(html_entity_decode($this->getTitle())) ?></title>
-<link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
-<link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
+<?= Mage::helper('page')->getFaviconHtml() ?>
 
 <script type="text/javascript">
     var BASE_URL = '<?= $this->getUrl('*') ?>';

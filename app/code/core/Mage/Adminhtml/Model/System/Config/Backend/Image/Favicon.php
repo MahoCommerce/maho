@@ -44,14 +44,9 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image_Favicon extends Mage_Admi
         return true;
     }
 
-    /**
-     * Getter for allowed extensions of uploaded files.
-     *
-     * @return array
-     */
     #[\Override]
-    protected function _getAllowedExtensions()
+    protected function _getAllowedExtensions(): array
     {
-        return ['ico', 'png', 'gif', 'jpg', 'jpeg', 'apng'];
+        return ['ico', 'png', 'gif', 'jpg', 'jpeg', 'apng', 'webp', 'avif', 'svg'];
     }
 }

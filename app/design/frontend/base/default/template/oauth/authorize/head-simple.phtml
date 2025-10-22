@@ -17,7 +17,6 @@
 ?>
 <meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>" />
 <title><?= $this->getTitle() ?></title>
-<link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
-<link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
+<?= Mage::helper('page')->getFaviconHtml() ?>
 
 <?= $this->getCssJsHtml() ?>

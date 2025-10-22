@@ -182,6 +182,7 @@ class Mage_Uploader_Helper_File extends Mage_Core_Helper_Abstract
             'xgtm' => 'application/vnd.groove-tool-message',
 
             'xsvg' => 'image/svg+xml',
+            'xapng' => 'image/apng',
 
             'xgtw' => 'model/vnd.gtw',
             'xh261' => 'video/h261',

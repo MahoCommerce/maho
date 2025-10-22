@@ -228,7 +228,7 @@
                         <placeholder>
                             <label></label>
                             <frontend_type>image</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <backend_model>adminhtml/system_config_backend_image_placeholder</backend_model>
                             <upload_dir scope_info="1">catalog/product/placeholder</upload_dir>
                             <base_url type="media" scope_info="1">catalog/product/placeholder</base_url>
                             <sort_order>1</sort_order>

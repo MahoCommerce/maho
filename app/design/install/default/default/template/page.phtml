@@ -20,8 +20,7 @@
     <script type="text/javascript" src="<?= $this->getJsUrl() ?>validation.js"></script>
     <script type="text/javascript" src="<?= $this->getJsUrl() ?>varien/js.js"></script>
     <script type="text/javascript" src="<?= $this->getJsUrl() ?>varien/form.js"></script>
-    <link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
-    <link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
+    <?= Mage::helper('page')->getFaviconHtml() ?>
     <link rel="stylesheet" href="<?= $this->getSkinUrl('css/installer.css') ?>" type="text/css" media="all"/>
 </head>
 
