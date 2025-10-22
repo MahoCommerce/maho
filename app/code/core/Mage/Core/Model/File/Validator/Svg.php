@@ -115,6 +115,11 @@ class Mage_Core_Model_File_Validator_Svg
             $allElements = $xpath->query('//*');
 
             foreach ($allElements as $element) {
+                // Only process DOMElement nodes (skip text nodes, etc.)
+                if (!$element instanceof DOMElement) {
+                    continue;
+                }
+
                 $attributesToRemove = [];
 
                 // Check each attribute

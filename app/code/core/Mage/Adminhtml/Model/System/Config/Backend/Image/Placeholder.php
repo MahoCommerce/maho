@@ -15,11 +15,9 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image_Placeholder extends Mage_
     /**
      * Getter for allowed extensions of uploaded files
      * Includes SVG support for catalog placeholders
-     *
-     * @return array
      */
     #[\Override]
-    protected function _getAllowedExtensions()
+    protected function _getAllowedExtensions(): array
     {
         return array_merge(parent::_getAllowedExtensions(), ['svg']);
     }

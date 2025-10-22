@@ -13,7 +13,7 @@
 class Mage_Adminhtml_Model_System_Config_Backend_Image_Pdf extends Mage_Adminhtml_Model_System_Config_Backend_Image
 {
     #[\Override]
-    protected function _getAllowedExtensions()
+    protected function _getAllowedExtensions(): array
     {
         return ['tif', 'tiff', 'png', 'jpg', 'jpe', 'jpeg'];
     }

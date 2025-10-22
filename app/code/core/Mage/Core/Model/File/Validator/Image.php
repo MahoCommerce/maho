@@ -14,7 +14,7 @@ class Mage_Core_Model_File_Validator_Image
 {
     public const NAME = 'isImage';
 
-    protected $_originalFileName;
+    protected ?string $_originalFileName = null;
 
     protected $_allowedImageTypes = [
         IMAGETYPE_WEBP,
