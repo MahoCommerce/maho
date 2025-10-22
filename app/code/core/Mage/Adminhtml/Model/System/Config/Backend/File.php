@@ -12,8 +12,6 @@
 
 class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Config_Data
 {
-    public const SYSTEM_FILESYSTEM_REGEX = '/{{([a-z_]+)}}(.*)/';
-
     /**
      * Upload max file size in kilobytes
      *
@@ -120,31 +118,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
             $uploadDir = $this->_appendScopeInfo($uploadDir);
         }
 
-        /**
-         * Take root from config
-         */
-        if (!empty($el['config'])) {
-            $uploadRoot = $this->_getUploadRoot((string) $el['config']);
-            $uploadDir = $uploadRoot . '/' . $uploadDir;
-        }
         return $uploadDir;
-    }
-
-    /**
-     * Return the root part of directory path for uploading
-     *
-     * @param string $token
-     * @return string
-     */
-    protected function _getUploadRoot($token)
-    {
-        $value = Mage::getStoreConfig($token) ?? '';
-        if (strlen($value) && preg_match(self::SYSTEM_FILESYSTEM_REGEX, $value, $matches) !== false) {
-            $dir = str_replace('root_dir', 'public_dir', $matches[1]);
-            $path = str_replace('/', DS, $matches[2]);
-            return Mage::getConfig()->getOptions()->getData($dir) . $path;
-        }
-        return Mage::getBaseDir('media');
     }
 
     /**
