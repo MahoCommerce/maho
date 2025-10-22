@@ -44,7 +44,7 @@ class Mage_Page_Helper_Data extends Mage_Core_Helper_Abstract
                 '<link rel="icon" type="%s" href="%s"%s>',
                 $mimeType,
                 $faviconUrl,
-                $sizesAttr
+                $sizesAttr,
             );
         }
 
@@ -58,7 +58,7 @@ class Mage_Page_Helper_Data extends Mage_Core_Helper_Abstract
             '<link rel="icon" type="%s" href="%s"%s>',
             $mimeType,
             $skinUrl,
-            $sizesAttr
+            $sizesAttr,
         );
     }
 }
