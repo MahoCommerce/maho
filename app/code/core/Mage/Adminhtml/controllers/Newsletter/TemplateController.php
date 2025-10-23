@@ -228,6 +228,22 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     }
 
     /**
+     * WYSIWYG variable chooser action for newsletter templates
+     */
+    public function wysiwygVariableAction(): void
+    {
+        $this->getResponse()
+            ->setHeader('Content-Type', 'application/json', true)
+            ->setBody(
+                Mage::helper('core')->jsonEncode(
+                    $this->getLayout()
+                        ->createBlock('adminhtml/newsletter_template_edit_form')
+                        ->getNewsletterVariables()
+                )
+            );
+    }
+
+    /**
      * Controller pre-dispatch method
      *
      * @return Mage_Adminhtml_Controller_Action

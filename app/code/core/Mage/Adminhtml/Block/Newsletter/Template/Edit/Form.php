@@ -90,8 +90,26 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
                 : $identityEmail,
         ]);
 
+        // Add available template variables for the WYSIWYG editor
+        $variables = $this->getNewsletterVariables();
+
+        // Add both 'variables' and 'template_variables' for compatibility
+        $fieldset->addField('variables', 'hidden', [
+            'name' => 'variables',
+            'value' => Mage::helper('core')->jsonEncode($variables),
+        ]);
+
+        $fieldset->addField('template_variables', 'hidden', [
+            'name' => 'template_variables',
+            'value' => Mage::helper('core')->jsonEncode($variables),
+        ]);
+
         $widgetFilters = ['is_email_compatible' => 1];
-        $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig(['widget_filters' => $widgetFilters]);
+        $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig([
+            'widget_filters' => $widgetFilters,
+            'add_variables' => true,
+            'variable_window_url' => Mage::getSingleton('adminhtml/url')->getUrl('*/newsletter_template/wysiwygVariable'),
+        ]);
         if ($model->isPlain()) {
             $wysiwygConfig->setEnabled(false);
         }
@@ -119,5 +137,107 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
         $this->setForm($form);
 
         return parent::_prepareForm();
+    }
+
+    /**
+     * Get available newsletter template variables
+     *
+     * @return array
+     */
+    public function getNewsletterVariables(): array
+    {
+        $variables = [];
+
+        // Store variables
+        $variables[] = Mage::getModel('core/source_email_variables')->toOptionArray(true);
+
+        // Newsletter-specific variables
+        $newsletterVars = [
+            [
+                'value' => '{{var subscriber.getUnsubscriptionLink()}}',
+                'label' => Mage::helper('newsletter')->__('Unsubscribe Link'),
+            ],
+            [
+                'value' => '{{var subscriber.email}}',
+                'label' => Mage::helper('newsletter')->__('Subscriber Email'),
+            ],
+        ];
+
+        // Customer variables (for email automation)
+        $customerVars = [
+            [
+                'value' => '{{var customer.name}}',
+                'label' => Mage::helper('newsletter')->__('Customer Name (Object)'),
+            ],
+            [
+                'value' => '{{var customer_name}}',
+                'label' => Mage::helper('newsletter')->__('Customer Name'),
+            ],
+            [
+                'value' => '{{var customer_firstname}}',
+                'label' => Mage::helper('newsletter')->__('Customer First Name'),
+            ],
+            [
+                'value' => '{{var customer_lastname}}',
+                'label' => Mage::helper('newsletter')->__('Customer Last Name'),
+            ],
+            [
+                'value' => '{{var customer_email}}',
+                'label' => Mage::helper('newsletter')->__('Customer Email'),
+            ],
+        ];
+
+        // Segment & automation variables
+        $automationVars = [
+            [
+                'value' => '{{var segment_name}}',
+                'label' => Mage::helper('newsletter')->__('Segment Name'),
+            ],
+            [
+                'value' => '{{var step_number}}',
+                'label' => Mage::helper('newsletter')->__('Sequence Step Number'),
+            ],
+            [
+                'value' => '{{var coupon_code}}',
+                'label' => Mage::helper('newsletter')->__('Coupon Code'),
+            ],
+            [
+                'value' => '{{var coupon_discount_amount}}',
+                'label' => Mage::helper('newsletter')->__('Coupon Discount Amount'),
+            ],
+            [
+                'value' => '{{var coupon_discount_text}}',
+                'label' => Mage::helper('newsletter')->__('Coupon Discount Description'),
+            ],
+            [
+                'value' => '{{var coupon_description}}',
+                'label' => Mage::helper('newsletter')->__('Coupon Rule Description'),
+            ],
+            [
+                'value' => '{{var coupon_expires_date}}',
+                'label' => Mage::helper('newsletter')->__('Coupon Expiration Date (Raw)'),
+            ],
+            [
+                'value' => '{{var coupon_expires_formatted}}',
+                'label' => Mage::helper('newsletter')->__('Coupon Expiration Date (Formatted)'),
+            ],
+        ];
+
+        $variables[] = [
+            'label' => Mage::helper('newsletter')->__('Newsletter Variables'),
+            'value' => $newsletterVars,
+        ];
+
+        $variables[] = [
+            'label' => Mage::helper('newsletter')->__('Customer Variables'),
+            'value' => $customerVars,
+        ];
+
+        $variables[] = [
+            'label' => Mage::helper('newsletter')->__('Email Automation Variables'),
+            'value' => $automationVars,
+        ];
+
+        return $variables;
     }
 }

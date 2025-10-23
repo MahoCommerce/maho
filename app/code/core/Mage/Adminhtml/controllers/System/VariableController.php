@@ -172,6 +172,21 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     {
         $customVariables = Mage::getModel('core/variable')->getVariablesOptionArray(true);
         $storeContactVariabls = Mage::getModel('core/source_email_variables')->toOptionArray(true);
-        $this->getResponse()->setBodyJson([$storeContactVariabls, $customVariables]);
+
+        $variables = [$storeContactVariabls, $customVariables];
+
+        // Add newsletter-specific variables if target element is from newsletter template
+        $targetId = $this->getRequest()->getParam('variable_target_id');
+        if ($targetId === 'text' && $this->getRequest()->getServer('HTTP_REFERER')) {
+            $referer = $this->getRequest()->getServer('HTTP_REFERER');
+            if (strpos($referer, 'newsletter_template') !== false) {
+                $block = Mage::app()->getLayout()->createBlock('adminhtml/newsletter_template_edit_form');
+                $newsletterVars = $block->getNewsletterVariables();
+                // Merge newsletter variables (skip first element as it's store contact which is already included)
+                $variables = array_merge($variables, array_slice($newsletterVars, 1));
+            }
+        }
+
+        $this->getResponse()->setBodyJson($variables);
     }
 }

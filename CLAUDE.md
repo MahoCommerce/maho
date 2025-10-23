@@ -142,6 +142,7 @@ try {
 - **NEVER use Varien_Date or Zend_Date** - Use native PHP DateTime and `Mage_Core_Model_Locale` methods.
 - **NEVER use Zend_Db or Zend_Db_Select directly** - Use `Maho\Db\Select` and `Maho\Db\Adapter\AdapterInterface`.
 - **NEVER use Varien_ prefixed classes in new code** - All Varien classes have been moved to the Maho namespace. Use the new `Maho\*` classes instead (see Varien Migration section below).
+- **NEVER use TinyMCE** - It has been completely removed from Maho. Use TipTap 3.x (see WYSIWYG Editor section below).
 
 ### General Guidelines
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
@@ -337,6 +338,21 @@ new Maho\Data\Form();
 new Maho\Io\File();
 new Maho\Event\Observer();
 ```
+
+### WYSIWYG Editor (TipTap 3.x)
+
+**Configuration Location:**
+- Extensions: `public/js/mage/adminhtml/wysiwyg/tiptap/extensions.js`
+- Setup: `public/js/mage/adminhtml/wysiwyg/tiptap/setup.js`
+- Styles: `public/js/mage/adminhtml/wysiwyg/tiptap/tiptap.css`
+
+**Features:**
+- All nodes support `class` and `style` attributes
+- Custom Maho extensions for widgets, images, and slideshows
+- Directive support for `{{widget}}` and `{{config}}` syntax
+- HTML5 content conversion to/from plain text
+- Table editing with bubble menu
+- Fullscreen mode
 
 ### Other Components
 
