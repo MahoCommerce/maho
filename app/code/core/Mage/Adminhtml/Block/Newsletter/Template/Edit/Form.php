@@ -141,8 +141,6 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
 
     /**
      * Get available newsletter template variables
-     *
-     * @return array
      */
     public function getNewsletterVariables(): array
     {

@@ -179,7 +179,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
         $targetId = $this->getRequest()->getParam('variable_target_id');
         if ($targetId === 'text' && $this->getRequest()->getServer('HTTP_REFERER')) {
             $referer = $this->getRequest()->getServer('HTTP_REFERER');
-            if (strpos($referer, 'newsletter_template') !== false) {
+            if (str_contains($referer, 'newsletter_template')) {
                 $block = Mage::app()->getLayout()->createBlock('adminhtml/newsletter_template_edit_form');
                 $newsletterVars = $block->getNewsletterVariables();
                 // Merge newsletter variables (skip first element as it's store contact which is already included)
