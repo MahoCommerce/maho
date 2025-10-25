@@ -166,7 +166,7 @@ class EmailTemplateEditForm {
     }
 
     deleteTemplate() {
-        confirmSetLocation(Translator.translate('Are you sure that you want to delete this template?'), this.deleteUrl);
+        confirmSetLocation(Translator.translate('Are you sure that you want to delete this template?'), this.urls.delete);
     }
 
     async load() {

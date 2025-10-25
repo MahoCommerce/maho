@@ -323,13 +323,203 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         );
     }
 
+    /**
+     * Email Sequences Grid AJAX action
+     */
+    public function sequencesGridAction(): void
+    {
+        $segmentId = $this->getRequest()->getParam('id');
+        if (!$segmentId) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
+        if (!$segment->getId()) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        Mage::register('current_customer_segment', $segment);
+
+        $this->getResponse()->setBody(
+            $this->getLayout()
+                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailSequences')
+                ->toHtml(),
+        );
+    }
+
+    /**
+     * New email sequence action
+     */
+    public function newSequenceAction(): void
+    {
+        $this->_forward('editSequence');
+    }
+
+    /**
+     * Edit email sequence action
+     */
+    public function editSequenceAction(): void
+    {
+        $sequenceId = $this->getRequest()->getParam('id');
+        $segmentId = $this->getRequest()->getParam('segment_id');
+
+        $sequence = Mage::getModel('customersegmentation/emailSequence');
+        $segment = Mage::getModel('customersegmentation/segment');
+
+        if ($sequenceId) {
+            $sequence->load($sequenceId);
+            if (!$sequence->getId()) {
+                Mage::getSingleton('adminhtml/session')->addError(
+                    Mage::helper('customersegmentation')->__('This sequence no longer exists.'),
+                );
+                $this->_redirect('*/*/edit', ['id' => $segmentId, 'tab' => 'email_sequences']);
+                return;
+            }
+            $segmentId = $sequence->getSegmentId();
+        }
+
+        if ($segmentId) {
+            $segment->load($segmentId);
+            if (!$segment->getId()) {
+                Mage::getSingleton('adminhtml/session')->addError(
+                    Mage::helper('customersegmentation')->__('Invalid segment.'),
+                );
+                $this->_redirect('*/*/');
+                return;
+            }
+        }
+
+        // Set default values for new sequence
+        if (!$sequence->getId()) {
+            $sequence->setSegmentId($segmentId);
+            $sequence->setIsActive(true);
+            $sequence->setDelayMinutes(0);
+            $sequence->setCouponExpiresDays(30);
+
+            // Get next step number
+            $resource = Mage::getResourceSingleton('customersegmentation/emailSequence');
+            $nextStep = $resource->getNextStepNumber((int) $segmentId);
+            $sequence->setStepNumber($nextStep);
+        }
+
+        $this->_title($this->__('Customers'))
+             ->_title($this->__('Customer Segments'))
+             ->_title($segment->getName())
+             ->_title($sequence->getId() ? $this->__('Edit Sequence') : $this->__('New Sequence'));
+
+        $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
+        if (!empty($data)) {
+            $sequence->setData($data);
+        }
+
+        Mage::register('current_email_sequence', $sequence);
+        Mage::register('current_customer_segment', $segment);
+
+        $this->loadLayout();
+        $this->_setActiveMenu('customer/customersegmentation');
+        $this->renderLayout();
+    }
+
+    /**
+     * Save email sequence action
+     */
+    public function saveSequenceAction(): void
+    {
+        if ($data = $this->getRequest()->getPost()) {
+            $sequence = Mage::getModel('customersegmentation/emailSequence');
+            $sequenceId = $this->getRequest()->getParam('id');
+
+            if ($sequenceId) {
+                $sequence->load($sequenceId);
+                if (!$sequence->getId()) {
+                    Mage::getSingleton('adminhtml/session')->addError(
+                        Mage::helper('customersegmentation')->__('This sequence no longer exists.'),
+                    );
+                    $this->_redirect('*/*/');
+                    return;
+                }
+            }
+
+            try {
+                // Use addData to preserve the sequence_id when editing
+                $sequence->addData($data);
+                $sequence->save();
+
+                Mage::getSingleton('adminhtml/session')->addSuccess(
+                    Mage::helper('customersegmentation')->__('The email sequence has been saved.'),
+                );
+                Mage::getSingleton('adminhtml/session')->setFormData(false);
+
+                if ($this->getRequest()->getParam('back')) {
+                    $this->_redirect('*/*/editSequence', ['id' => $sequence->getId()]);
+                    return;
+                }
+
+                $this->_redirect('*/*/edit', [
+                    'id' => $sequence->getSegmentId(),
+                    'tab' => 'email_sequences',
+                ]);
+                return;
+
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                Mage::getSingleton('adminhtml/session')->setFormData($data);
+                $this->_redirect('*/*/editSequence', ['id' => $sequenceId]);
+                return;
+            }
+        }
+        $this->_redirect('*/*/');
+    }
+
+    /**
+     * Delete email sequence action
+     */
+    public function deleteSequenceAction(): void
+    {
+        $sequenceId = $this->getRequest()->getParam('id');
+        $segmentId = $this->getRequest()->getParam('segment_id');
+
+        if (!$sequenceId || !$segmentId) {
+            Mage::getSingleton('adminhtml/session')->addError(
+                Mage::helper('customersegmentation')->__('Invalid request.'),
+            );
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        try {
+            $sequence = Mage::getModel('customersegmentation/emailSequence');
+            $sequence->load($sequenceId);
+
+            if (!$sequence->getId()) {
+                Mage::getSingleton('adminhtml/session')->addError(
+                    Mage::helper('customersegmentation')->__('Sequence not found.'),
+                );
+                $this->_redirect('*/*/edit', ['id' => $segmentId, 'tab' => 'email_sequences']);
+                return;
+            }
+
+            $sequence->delete();
+
+            Mage::getSingleton('adminhtml/session')->addSuccess(
+                Mage::helper('customersegmentation')->__('The email sequence has been deleted.'),
+            );
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        }
+
+        $this->_redirect('*/*/edit', ['id' => $segmentId, 'tab' => 'email_sequences']);
+    }
+
     #[\Override]
     protected function _isAllowed(): bool
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'save' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
-            'delete', 'massdelete' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete'),
+            'save', 'savesequence' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
+            'delete', 'massdelete', 'deletesequence' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete'),
             'massstatus' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
             'refresh' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/refresh'),
             default => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/manage'),

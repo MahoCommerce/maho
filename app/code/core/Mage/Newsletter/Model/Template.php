@@ -276,7 +276,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
         if (!$this->getData('template_text') && !$this->getId()) {
             $this->setData(
                 'template_text',
-                Mage::helper('newsletter')->__('Follow this link to unsubscribe <!-- This tag is for unsubscribe link  --><a href="{{var subscriber.getUnsubscriptionLink()}}">{{var subscriber.getUnsubscriptionLink()}}</a>'),
+                '<p>' . Mage::helper('newsletter')->__('Follow this link to unsubscribe:') . ' <a href="{{var subscriber.getUnsubscriptionLink()}}">' . Mage::helper('newsletter')->__('Unsubscribe') . '</a></p>',
             );
         }
 
