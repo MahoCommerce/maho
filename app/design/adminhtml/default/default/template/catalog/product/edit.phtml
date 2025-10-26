@@ -115,24 +115,16 @@
             cancel: false,
             extraButtons: [
                 {
-                    id: 'duplicate-no-images',
                     class: 'cancel',
-                    label: '<?= $this->jsQuoteEscape($this->__('No, without images')) ?>'
+                    label: '<?= $this->jsQuoteEscape($this->__('No, without images')) ?>',
+                    onclick: `setLocation('${duplicateUrl}${separator}duplicate_images=0')`
                 },
                 {
-                    id: 'duplicate-with-images',
                     class: 'ok',
-                    label: '<?= $this->jsQuoteEscape($this->__('Yes, with images')) ?>'
+                    label: '<?= $this->jsQuoteEscape($this->__('Yes, with images')) ?>',
+                    onclick: `setLocation('${duplicateUrl}${separator}duplicate_images=1')`
                 }
-            ],
-            onOpen: (dialog) => {
-                dialog.querySelector('#duplicate-with-images').addEventListener('click', () => {
-                    setLocation(duplicateUrl + separator + 'duplicate_images=1');
-                });
-                dialog.querySelector('#duplicate-no-images').addEventListener('click', () => {
-                    setLocation(duplicateUrl + separator + 'duplicate_images=0');
-                });
-            }
+            ]
         });
     }
 
