@@ -324,9 +324,17 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     /**
-     * Email Sequences Grid AJAX action
+     * Email Sequences Grid AJAX action (deprecated - use Enter/Exit specific actions)
      */
     public function sequencesGridAction(): void
+    {
+        $this->_forward('sequencesGridEnter');
+    }
+
+    /**
+     * Email Sequences Enter Grid AJAX action
+     */
+    public function sequencesGridEnterAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
         if (!$segmentId) {
@@ -344,7 +352,33 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
 
         $this->getResponse()->setBody(
             $this->getLayout()
-                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailSequences')
+                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailSequencesEnter')
+                ->toHtml(),
+        );
+    }
+
+    /**
+     * Email Sequences Exit Grid AJAX action
+     */
+    public function sequencesGridExitAction(): void
+    {
+        $segmentId = $this->getRequest()->getParam('id');
+        if (!$segmentId) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
+        if (!$segment->getId()) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        Mage::register('current_customer_segment', $segment);
+
+        $this->getResponse()->setBody(
+            $this->getLayout()
+                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailSequencesExit')
                 ->toHtml(),
         );
     }
@@ -364,6 +398,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     {
         $sequenceId = $this->getRequest()->getParam('id');
         $segmentId = $this->getRequest()->getParam('segment_id');
+        $triggerEvent = $this->getRequest()->getParam('trigger_event');
 
         $sequence = Mage::getModel('customersegmentation/emailSequence');
         $segment = Mage::getModel('customersegmentation/segment');
@@ -374,10 +409,11 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                 Mage::getSingleton('adminhtml/session')->addError(
                     Mage::helper('customersegmentation')->__('This sequence no longer exists.'),
                 );
-                $this->_redirect('*/*/edit', ['id' => $segmentId, 'tab' => 'email_sequences']);
+                $this->_redirect('*/*/edit', ['id' => $segmentId, 'tab' => 'email_sequences_enter']);
                 return;
             }
             $segmentId = $sequence->getSegmentId();
+            $triggerEvent = $sequence->getTriggerEvent();
         }
 
         if ($segmentId) {
@@ -393,14 +429,23 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
 
         // Set default values for new sequence
         if (!$sequence->getId()) {
+            // Validate trigger_event
+            if (!$triggerEvent || !in_array($triggerEvent, [
+                Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER,
+                Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_EXIT,
+            ])) {
+                $triggerEvent = Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER;
+            }
+
             $sequence->setSegmentId($segmentId);
+            $sequence->setTriggerEvent($triggerEvent);
             $sequence->setIsActive(true);
             $sequence->setDelayMinutes(0);
             $sequence->setCouponExpiresDays(30);
 
-            // Get next step number
+            // Get next step number for this trigger type
             $resource = Mage::getResourceSingleton('customersegmentation/emailSequence');
-            $nextStep = $resource->getNextStepNumber((int) $segmentId);
+            $nextStep = $resource->getNextStepNumber((int) $segmentId, $triggerEvent);
             $sequence->setStepNumber($nextStep);
         }
 
@@ -457,9 +502,14 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                     return;
                 }
 
+                // Redirect to appropriate tab based on trigger event
+                $tab = $sequence->getTriggerEvent() === Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_EXIT
+                    ? 'email_sequences_exit'
+                    : 'email_sequences_enter';
+
                 $this->_redirect('*/*/edit', [
                     'id' => $sequence->getSegmentId(),
-                    'tab' => 'email_sequences',
+                    'tab' => $tab,
                 ]);
                 return;
 

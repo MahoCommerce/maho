@@ -11,12 +11,12 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences extends Mage_Adminhtml_Block_Widget_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
+class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesEnter extends Mage_Adminhtml_Block_Widget_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function __construct()
     {
         parent::__construct();
-        $this->setId('email_sequences_grid');
+        $this->setId('email_sequences_enter_grid');
         $this->setDefaultSort('step_number');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(false);
@@ -31,6 +31,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences 
 
         if ($segment->getId()) {
             $collection->addFieldToFilter('segment_id', $segment->getId());
+            $collection->addFieldToFilter('trigger_event', Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER);
         } else {
             // For new segments, show empty grid
             $collection->addFieldToFilter('segment_id', 0);
@@ -105,12 +106,12 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences 
             'actions' => [
                 [
                     'caption' => Mage::helper('customersegmentation')->__('Edit'),
-                    'url' => ['base' => '*/*/editSequence', 'params' => ['segment_id' => $segment->getId()]],
+                    'url' => ['base' => '*/*/editSequence', 'params' => ['segment_id' => $segment->getId(), 'trigger_event' => 'enter']],
                     'field' => 'id',
                 ],
                 [
                     'caption' => Mage::helper('customersegmentation')->__('Delete'),
-                    'url' => ['base' => '*/*/deleteSequence', 'params' => ['segment_id' => $segment->getId()]],
+                    'url' => ['base' => '*/*/deleteSequence', 'params' => ['segment_id' => $segment->getId(), 'trigger_event' => 'enter']],
                     'field' => 'id',
                     'confirm' => Mage::helper('customersegmentation')->__('Are you sure you want to delete this sequence step?'),
                 ],
@@ -135,8 +136,8 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences 
                 'add_sequence_button',
                 $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
-                        'label'   => Mage::helper('customersegmentation')->__('Add New Sequence Step'),
-                        'onclick' => "setLocation('" . $this->getUrl('*/*/newSequence', ['segment_id' => $segment->getId()]) . "')",
+                        'label'   => Mage::helper('customersegmentation')->__('Add Email Step'),
+                        'onclick' => "setLocation('" . $this->getUrl('*/*/newSequence', ['segment_id' => $segment->getId(), 'trigger_event' => 'enter']) . "')",
                         'class'   => 'add',
                     ]),
             );
@@ -160,13 +161,13 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences 
     #[\Override]
     public function getTabLabel(): string
     {
-        return Mage::helper('customersegmentation')->__('Email Sequences');
+        return Mage::helper('customersegmentation')->__('Enter Segment');
     }
 
     #[\Override]
     public function getTabTitle(): string
     {
-        return Mage::helper('customersegmentation')->__('Email Sequence Management');
+        return Mage::helper('customersegmentation')->__('Email Automation - Enter Segment');
     }
 
     #[\Override]
@@ -185,7 +186,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences 
     #[\Override]
     public function getGridUrl()
     {
-        return $this->getUrl('*/*/sequencesGrid', ['_current' => true]);
+        return $this->getUrl('*/*/sequencesGridEnter', ['_current' => true]);
     }
 
     /**
@@ -194,6 +195,6 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences 
     #[\Override]
     public function getRowUrl($row)
     {
-        return $this->getUrl('*/*/editSequence', ['id' => $row->getId()]);
+        return $this->getUrl('*/*/editSequence', ['id' => $row->getId(), 'trigger_event' => 'enter']);
     }
 }

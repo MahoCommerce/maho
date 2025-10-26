@@ -97,14 +97,15 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_M
     }
 
     /**
-     * Get next available step number for a segment
+     * Get next available step number for a segment and trigger event
      */
-    public function getNextStepNumber(int $segmentId): int
+    public function getNextStepNumber(int $segmentId, string $triggerEvent = Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER): int
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
             ->from($this->getMainTable(), 'MAX(step_number)')
-            ->where('segment_id = ?', $segmentId);
+            ->where('segment_id = ?', $segmentId)
+            ->where('trigger_event = ?', $triggerEvent);
 
         $maxStep = (int) $adapter->fetchOne($select);
         return $maxStep + 1;

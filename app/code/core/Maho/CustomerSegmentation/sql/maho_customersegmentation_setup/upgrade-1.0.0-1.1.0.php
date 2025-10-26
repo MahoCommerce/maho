@@ -15,19 +15,7 @@ declare(strict_types=1);
 $installer = $this;
 $installer->startSetup();
 
-// Add email automation fields to customer_segment table
-$installer->getConnection()->addColumn(
-    $installer->getTable('customer_segment'),
-    'auto_email_trigger',
-    [
-        'type'     => Maho\Db\Ddl\Table::TYPE_VARCHAR,
-        'length'   => 10,
-        'nullable' => false,
-        'default'  => 'none',
-        'comment'  => 'Auto Email Trigger Type',
-    ],
-);
-
+// Add email automation field to customer_segment table
 $installer->getConnection()->addColumn(
     $installer->getTable('customer_segment'),
     'auto_email_active',
@@ -53,6 +41,10 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
             'unsigned' => true,
             'nullable' => false,
         ], 'Segment ID')
+        ->addColumn('trigger_event', Maho\Db\Ddl\Table::TYPE_VARCHAR, 10, [
+            'nullable' => false,
+            'default'  => 'enter',
+        ], 'Trigger Event Type (enter/exit)')
         ->addColumn('template_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned' => true,
             'nullable' => false,
@@ -99,6 +91,11 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
             'nullable' => false,
             'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
         ], 'Updated At')
+        ->addIndex(
+            'unique_segment_trigger_step',
+            ['segment_id', 'trigger_event', 'step_number'],
+            ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
+        )
         ->setComment('Customer Segment Email Sequences');
 
     $installer->getConnection()->createTable($sequenceTable);

@@ -15,6 +15,7 @@ declare(strict_types=1);
  * Email Sequence Model
  *
  * @method int getSegmentId()
+ * @method string getTriggerEvent()
  * @method int getTemplateId()
  * @method int getStepNumber()
  * @method int getDelayMinutes()
@@ -27,6 +28,7 @@ declare(strict_types=1);
  * @method string getCreatedAt()
  * @method string getUpdatedAt()
  * @method Maho_CustomerSegmentation_Model_EmailSequence setSegmentId(int $value)
+ * @method Maho_CustomerSegmentation_Model_EmailSequence setTriggerEvent(string $value)
  * @method Maho_CustomerSegmentation_Model_EmailSequence setTemplateId(int $value)
  * @method Maho_CustomerSegmentation_Model_EmailSequence setStepNumber(int $value)
  * @method Maho_CustomerSegmentation_Model_EmailSequence setDelayMinutes(int $value)
@@ -39,6 +41,9 @@ declare(strict_types=1);
  */
 class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abstract
 {
+    public const TRIGGER_ENTER = 'enter';
+    public const TRIGGER_EXIT = 'exit';
+
     #[\Override]
     protected function _construct(): void
     {
@@ -115,6 +120,10 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
             $errors[] = Mage::helper('customersegmentation')->__('Segment ID is required.');
         }
 
+        if (!$this->getTriggerEvent() || !in_array($this->getTriggerEvent(), [self::TRIGGER_ENTER, self::TRIGGER_EXIT])) {
+            $errors[] = Mage::helper('customersegmentation')->__('Trigger event must be either "enter" or "exit".');
+        }
+
         if (!$this->getTemplateId()) {
             $errors[] = Mage::helper('customersegmentation')->__('Template ID is required.');
         }
@@ -170,6 +179,9 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
         // Set default values for new sequences
         if ($this->isObjectNew()) {
+            if (!$this->hasData('trigger_event')) {
+                $this->setTriggerEvent(self::TRIGGER_ENTER);
+            }
             if (!$this->hasData('is_active')) {
                 $this->setIsActive(true);
             }

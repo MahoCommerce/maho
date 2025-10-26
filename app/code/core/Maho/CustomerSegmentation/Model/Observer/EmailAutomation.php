@@ -72,14 +72,28 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         $enteredCustomers = array_diff($currentMatchedCustomers, $previousCustomers);
         $exitedCustomers = array_diff($previousCustomers, $currentMatchedCustomers);
 
+        // Check if segment has enter sequences
+        $hasEnterSequences = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+            ->addFieldToFilter('segment_id', $segmentId)
+            ->addFieldToFilter('trigger_event', Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER)
+            ->addFieldToFilter('is_active', 1)
+            ->getSize() > 0;
+
+        // Check if segment has exit sequences
+        $hasExitSequences = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+            ->addFieldToFilter('segment_id', $segmentId)
+            ->addFieldToFilter('trigger_event', Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_EXIT)
+            ->addFieldToFilter('is_active', 1)
+            ->getSize() > 0;
+
         // Handle customers entering the segment
-        if (!empty($enteredCustomers) && $segment->getAutoEmailTrigger() === Maho_CustomerSegmentation_Model_Segment::EMAIL_TRIGGER_ENTER) {
+        if (!empty($enteredCustomers) && $hasEnterSequences) {
             $this->handleCustomersEntering($segment, $enteredCustomers);
         }
 
         // Handle customers exiting the segment
         if (!empty($exitedCustomers)) {
-            $this->handleCustomersExiting($segment, $exitedCustomers);
+            $this->handleCustomersExiting($segment, $exitedCustomers, $hasExitSequences);
         }
     }
 
@@ -99,7 +113,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             }
 
             // Start email sequence for entering customer
-            $segment->startEmailSequence($customerId, Maho_CustomerSegmentation_Model_Segment::EMAIL_TRIGGER_ENTER);
+            $segment->startEmailSequence($customerId, Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER);
         }
 
         Mage::log(
@@ -115,6 +129,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
     protected function handleCustomersExiting(
         Maho_CustomerSegmentation_Model_Segment $segment,
         array $customerIds,
+        bool $hasExitSequences,
     ): void {
         $resource = Mage::getResourceSingleton('customersegmentation/sequenceProgress');
 
@@ -122,11 +137,11 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         $stoppedEnter = $resource->stopSequencesForCustomers(
             (int) $segment->getId(),
             $customerIds,
-            Maho_CustomerSegmentation_Model_Segment::EMAIL_TRIGGER_ENTER,
+            Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER,
         );
 
         // Start exit sequences if configured
-        if ($segment->getAutoEmailTrigger() === Maho_CustomerSegmentation_Model_Segment::EMAIL_TRIGGER_EXIT) {
+        if ($hasExitSequences) {
             $exitStarted = 0;
             foreach ($customerIds as $customerId) {
                 $customerId = (int) $customerId;
@@ -136,7 +151,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
                     continue;
                 }
 
-                $segment->startEmailSequence($customerId, Maho_CustomerSegmentation_Model_Segment::EMAIL_TRIGGER_EXIT);
+                $segment->startEmailSequence($customerId, Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_EXIT);
                 $exitStarted++;
             }
 

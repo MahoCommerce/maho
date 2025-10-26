@@ -298,14 +298,12 @@ When `generate_coupon` is enabled, these variables are available in newsletter t
 
 ```sql
 ALTER TABLE customer_segment ADD COLUMN (
-    auto_email_trigger enum('none', 'enter', 'exit') DEFAULT 'none',
     auto_email_active tinyint(1) DEFAULT 0
 );
 ```
 
-**Field Descriptions:**
-- `auto_email_trigger`: When to trigger sequence ('none', 'enter', 'exit')
-- `auto_email_active`: Enable/disable automation for this segment
+**Field Description:**
+- `auto_email_active`   : Master on/off switch for email automation on this segment
 
 ### 2. Create `customer_segment_email_sequence` table ✅
 
@@ -313,6 +311,7 @@ ALTER TABLE customer_segment ADD COLUMN (
 CREATE TABLE customer_segment_email_sequence (
     sequence_id int PRIMARY KEY AUTO_INCREMENT,
     segment_id int NOT NULL,
+    trigger_event varchar(10) NOT NULL DEFAULT 'enter',  -- 'enter' or 'exit'
     template_id int NOT NULL,
     step_number int NOT NULL,
     delay_minutes int NOT NULL DEFAULT 0,
@@ -324,7 +323,7 @@ CREATE TABLE customer_segment_email_sequence (
     coupon_expires_days int DEFAULT 30,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_segment_step (segment_id, step_number),
+    UNIQUE KEY unique_segment_trigger_step (segment_id, trigger_event, step_number),
     FOREIGN KEY (segment_id) REFERENCES customer_segment(segment_id) ON DELETE CASCADE,
     FOREIGN KEY (template_id) REFERENCES newsletter_template(template_id),
     FOREIGN KEY (coupon_sales_rule_id) REFERENCES salesrule(rule_id) ON DELETE SET NULL
@@ -411,10 +410,32 @@ The email automation system consists of the following components:
 - **`Maho_CustomerSegmentation_Model_Cron`** - Contains all cron job methods (processScheduledEmails, cleanupOldProgress, cleanupExpiredCoupons, generateAutomationReport)
 
 ### 4. Admin Interface
-- **`Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailAutomation`** - Admin tab for enabling automation and setting trigger type
-- **`Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences`** - Grid showing all sequence steps for a segment
+The admin interface uses a **two-tab approach** for maximum clarity:
+
+- **`Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesEnter`** - Grid showing all "Enter Segment" sequences
+- **`Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesExit`** - Grid showing all "Exit Segment" sequences
 - **`Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit`** - Form for creating/editing individual sequence steps
-- **Controller actions** - In `Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController` for managing sequences
+- **Controller actions** - In `Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController`:
+  - `sequencesGridEnterAction()` - AJAX action for Enter tab
+  - `sequencesGridExitAction()` - AJAX action for Exit tab
+  - `editSequenceAction()` - Handles trigger_event parameter
+  - `saveSequenceAction()` - Redirects to correct tab based on trigger_event
+
+**Tab Structure:**
+```
+Segment Edit Page:
+├── General Properties
+├── Conditions
+├── Matched Customers
+├── Enter Segment (Email Automation)    ← Shows enter sequences
+└── Exit Segment (Email Automation)     ← Shows exit sequences
+```
+
+**Benefits:**
+- **Crystal clear**: No confusion about which sequences run when
+- **Independent configuration**: Configure enter and exit sequences separately
+- **Easy comparison**: See both flows side-by-side
+- **Flexible**: One segment can have both enter AND exit sequences
 
 ### Key Implementation Files
 ```
@@ -437,8 +458,8 @@ app/code/core/Maho/CustomerSegmentation/
 │   └── Coupon.php
 ├── Block/Adminhtml/Segment/
 │   ├── Edit/Tab/
-│   │   ├── EmailAutomation.php
-│   │   └── EmailSequences.php
+│   │   ├── EmailSequencesEnter.php
+│   │   └── EmailSequencesExit.php
 │   └── Sequence/
 │       ├── Edit.php
 │       └── Edit/Form.php
