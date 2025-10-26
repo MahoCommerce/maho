@@ -204,7 +204,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
             if ($object->getDuplicateImages() === true) {
                 $this->duplicate($object);
             }
-            // If not duplicating images, skip all media processing for duplicates
             return;
         }
 
