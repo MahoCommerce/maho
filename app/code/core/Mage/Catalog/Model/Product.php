@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2015-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1309,7 +1309,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return Mage_Catalog_Model_Product
      */
-    public function duplicate()
+    public function duplicate(bool $duplicateImages = true)
     {
         $this->getWebsiteIds();
         $this->getCategoryIds();
@@ -1317,6 +1317,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         /** @var Mage_Catalog_Model_Product $newProduct */
         $newProduct = Mage::getModel('catalog/product')->setData($this->getData())
             ->setIsDuplicate(true)
+            ->setDuplicateImages($duplicateImages)
             ->setOriginalId($this->getId())
             ->setSku(null)
             ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
@@ -1324,6 +1325,14 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
             ->setUpdatedAt(null)
             ->setId(null)
             ->setStoreId(Mage::app()->getStore()->getId());
+
+        // Clear image data if not duplicating images
+        if (!$duplicateImages) {
+            $newProduct->setMediaGallery(['images' => [], 'values' => []]);
+            foreach ($newProduct->getMediaAttributes() as $mediaAttribute) {
+                $newProduct->setData($mediaAttribute->getAttributeCode(), null);
+            }
+        }
 
         Mage::dispatchEvent(
             'catalog_model_product_duplicate',
