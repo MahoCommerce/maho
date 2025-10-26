@@ -1307,9 +1307,10 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Create duplicate
      *
+     * @param bool $duplicateImages Whether to duplicate product images
      * @return Mage_Catalog_Model_Product
      */
-    public function duplicate()
+    public function duplicate(bool $duplicateImages = true)
     {
         $this->getWebsiteIds();
         $this->getCategoryIds();
@@ -1317,6 +1318,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         /** @var Mage_Catalog_Model_Product $newProduct */
         $newProduct = Mage::getModel('catalog/product')->setData($this->getData())
             ->setIsDuplicate(true)
+            ->setDuplicateImages($duplicateImages)
             ->setOriginalId($this->getId())
             ->setSku(null)
             ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
@@ -1324,6 +1326,14 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
             ->setUpdatedAt(null)
             ->setId(null)
             ->setStoreId(Mage::app()->getStore()->getId());
+
+        // Clear image data if not duplicating images
+        if (!$duplicateImages) {
+            $newProduct->setMediaGallery(['images' => [], 'values' => []]);
+            foreach ($newProduct->getMediaAttributes() as $mediaAttribute) {
+                $newProduct->setData($mediaAttribute->getAttributeCode(), null);
+            }
+        }
 
         Mage::dispatchEvent(
             'catalog_model_product_duplicate',

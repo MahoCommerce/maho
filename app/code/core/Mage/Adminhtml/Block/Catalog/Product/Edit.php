@@ -105,7 +105,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit extends Mage_Adminhtml_Block_Wid
                     $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
                         'label'     => Mage::helper('catalog')->__('Duplicate'),
-                        'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getDuplicateUrl()),
+                        'onclick'   => 'productDuplicateConfirm()',
                         'class'     => 'add',
                     ]),
                 );

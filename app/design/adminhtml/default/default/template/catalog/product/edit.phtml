@@ -103,6 +103,39 @@
         return 1;
     }
 
+    function productDuplicateConfirm() {
+        const duplicateUrl = '<?= $this->getDuplicateUrl() ?>';
+        const separator = duplicateUrl.includes('?') ? '&' : '?';
+
+        Dialog.info('<?= $this->jsQuoteEscape($this->__('Do you want to duplicate the product images as well?')) ?>', {
+            title: '<?= $this->jsQuoteEscape($this->__('Duplicate Product')) ?>',
+            width: 400,
+            height: 200,
+            ok: false,
+            cancel: false,
+            extraButtons: [
+                {
+                    id: 'duplicate-no-images',
+                    class: 'cancel',
+                    label: '<?= $this->jsQuoteEscape($this->__('No, without images')) ?>'
+                },
+                {
+                    id: 'duplicate-with-images',
+                    class: 'ok',
+                    label: '<?= $this->jsQuoteEscape($this->__('Yes, with images')) ?>'
+                }
+            ],
+            onOpen: (dialog) => {
+                dialog.querySelector('#duplicate-with-images').addEventListener('click', () => {
+                    setLocation(duplicateUrl + separator + 'duplicate_images=1');
+                });
+                dialog.querySelector('#duplicate-no-images').addEventListener('click', () => {
+                    setLocation(duplicateUrl + separator + 'duplicate_images=0');
+                });
+            }
+        });
+    }
+
 document.addEventListener('DOMContentLoaded', function() {
     const objName = '<?= $this->getSelectedTabId() ?>';
     if (objName) {
