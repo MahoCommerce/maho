@@ -134,18 +134,20 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
                 }
             }
         } else {
-            // For duplicating we need copy original images.
-            $duplicate = [];
-            foreach ($value['images'] as &$image) {
-                if (!isset($image['value_id'])) {
-                    continue;
+            // For duplicating - only copy images if getDuplicateImages() is true
+            if ($object->getDuplicateImages() === true) {
+                $value['duplicate'] = [];
+                foreach ($value['images'] as &$image) {
+                    if (!isset($image['value_id'])) {
+                        continue;
+                    }
+                    $newFile = $this->_copyImage($image['file']);
+                    $newImages[$image['file']] = [
+                        'new_file' => $newFile,
+                        'label' => $image['label'],
+                    ];
+                    $value['duplicate'][$image['value_id']] = $newFile;
                 }
-                $newFile = $this->_copyImage($image['file']);
-                $newImages[$image['file']] = [
-                    'new_file' => $newFile,
-                    'label' => $image['label'],
-                ];
-                $duplicate[$image['value_id']] = $newFile;
             }
         }
 
@@ -199,7 +201,9 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     public function afterSave($object)
     {
         if ($object->getIsDuplicate() == true) {
-            $this->duplicate($object);
+            if ($object->getDuplicateImages() === true) {
+                $this->duplicate($object);
+            }
             return;
         }
 
