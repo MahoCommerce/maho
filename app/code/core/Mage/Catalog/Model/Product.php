@@ -1307,7 +1307,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Create duplicate
      *
-     * @param bool $duplicateImages Whether to duplicate product images
      * @return Mage_Catalog_Model_Product
      */
     public function duplicate(bool $duplicateImages = true)
