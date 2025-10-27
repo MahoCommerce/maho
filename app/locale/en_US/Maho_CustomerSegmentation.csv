@@ -183,7 +183,7 @@
 "Status Change Date","Status Change Date"
 "Step","Step"
 "Step Number","Step Number"
-"Step number %d already exists for this segment.","Step number %d already exists for this segment."
+"Step number %d already exists for this segment %s trigger.","Step number %d already exists for this segment %s trigger."
 "Step number must be greater than 0.","Step number must be greater than 0."
 "Subject","Subject"
 "Subscription Status","Subscription Status"
@@ -211,4 +211,3 @@
 "Wishlist","Wishlist"
 "Wishlist Items Count","Wishlist Items Count"
 "Wishlist Shared","Wishlist Shared"
-"Step number %d already exists for this segment %s trigger.","Step number %d already exists for this segment %s trigger."
