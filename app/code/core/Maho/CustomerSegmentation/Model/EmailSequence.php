@@ -176,8 +176,19 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
             $salesRule = $this->getCouponSalesRule();
             if (!$salesRule || !$salesRule->getId()) {
                 $errors[] = Mage::helper('customersegmentation')->__('Invalid sales rule selected for coupon generation.');
-            } elseif (!$salesRule->getIsActive()) {
-                $errors[] = Mage::helper('customersegmentation')->__('Selected sales rule is not active.');
+            } else {
+                if (!$salesRule->getIsActive()) {
+                    $errors[] = Mage::helper('customersegmentation')->__('Selected sales rule is not active.');
+                }
+
+                // Validate sales rule is configured for auto-generation
+                if ($salesRule->getCouponType() !== Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC) {
+                    $errors[] = Mage::helper('customersegmentation')->__('Selected sales rule must be configured for "Specific Coupon" type.');
+                }
+
+                if (!$salesRule->getUseAutoGeneration()) {
+                    $errors[] = Mage::helper('customersegmentation')->__('Selected sales rule must have "Use Auto Generation" enabled.');
+                }
             }
         }
 

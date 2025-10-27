@@ -168,6 +168,8 @@
 "Segment name is required.","Segment name is required."
 "Segment Refresh Cron Schedule","Segment Refresh Cron Schedule"
 "Selected sales rule is not active.","Selected sales rule is not active."
+"Selected sales rule must be configured for ""Specific Coupon"" type.","Selected sales rule must be configured for ""Specific Coupon"" type."
+"Selected sales rule must have ""Use Auto Generation"" enabled.","Selected sales rule must have ""Use Auto Generation"" enabled."
 "Sent","Sent"
 "Sequence ID is required.","Sequence ID is required."
 "Sequence not found.","Sequence not found."
