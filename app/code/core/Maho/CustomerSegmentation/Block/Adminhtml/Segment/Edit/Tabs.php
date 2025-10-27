@@ -36,12 +36,6 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tabs extends Mage_A
             'content'   => $this->getLayout()->createBlock('customersegmentation/adminhtml_segment_edit_tab_conditions')->toHtml(),
         ]);
 
-        $this->addTab('email_automation', [
-            'label'     => Mage::helper('customersegmentation')->__('Email Automation'),
-            'title'     => Mage::helper('customersegmentation')->__('Email Automation Settings'),
-            'content'   => $this->getLayout()->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailAutomation')->toHtml(),
-        ]);
-
         $segment = Mage::registry('current_customer_segment');
         if ($segment && $segment->getId()) {
             $customerCount = (int) $segment->getMatchedCustomersCount();
@@ -51,6 +45,15 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tabs extends Mage_A
                 'url'       => $this->getUrl('*/*/customersTab', ['_current' => true]),
                 'class'     => 'ajax',
             ]);
+        }
+
+        $this->addTab('email_automation', [
+            'label'     => Mage::helper('customersegmentation')->__('Email Automation'),
+            'title'     => Mage::helper('customersegmentation')->__('Email Automation Settings'),
+            'content'   => $this->getLayout()->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailAutomation')->toHtml(),
+        ]);
+
+        if ($segment && $segment->getId()) {
 
             // Add Email Automation - Enter Segment tab
             $enterSequences = Mage::getResourceModel('customersegmentation/emailSequence_collection')
