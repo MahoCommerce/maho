@@ -985,13 +985,13 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Returns special price
-     *
-     * @return float
+     * Returns special price with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
      */
-    public function getSpecialPrice()
+    public function getSpecialPrice(): ?float
     {
-        return $this->_getData('special_price');
+        $value = $this->_getData('special_price');
+        return $value !== null ? (float) $value : null;
     }
 
     /**

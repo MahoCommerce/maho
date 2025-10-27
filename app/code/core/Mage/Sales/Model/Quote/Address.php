@@ -1339,4 +1339,14 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     {
         return (string) $this->_getData('coupon_code');
     }
+
+    /**
+     * Get shipping amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getShippingAmount(): ?float
+    {
+        $value = $this->getData('shipping_amount');
+        return $value !== null ? (float) $value : null;
+    }
 }

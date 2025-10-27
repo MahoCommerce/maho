@@ -70,10 +70,10 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
             // Generate unique coupon code
             $couponCode = $this->generateUniqueCouponCode($prefix, $customerId);
 
-            // Calculate expiration date
+            // Calculate expiration date in UTC
             $expirationDate = null;
             if ($expireDays > 0) {
-                $expirationDate = new DateTime("+{$expireDays} days");
+                $expirationDate = Mage::app()->getLocale()->utcDate(null, "+{$expireDays} days", true);
             }
 
             // Create coupon

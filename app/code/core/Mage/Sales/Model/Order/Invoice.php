@@ -1014,4 +1014,34 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
 
         return parent::_afterSave();
     }
+
+    /**
+     * Get total quantity with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getTotalQty(): ?float
+    {
+        $value = $this->getData('total_qty');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
+     * Get discount amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getDiscountAmount(): ?float
+    {
+        $value = $this->getData('discount_amount');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
+     * Get shipping amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getShippingAmount(): ?float
+    {
+        $value = $this->getData('shipping_amount');
+        return $value !== null ? (float) $value : null;
+    }
 }

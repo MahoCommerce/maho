@@ -672,4 +672,14 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         }
         return $label;
     }
+
+    /**
+     * Get total quantity with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getTotalQty(): ?float
+    {
+        $value = $this->getData('total_qty');
+        return $value !== null ? (float) $value : null;
+    }
 }

@@ -135,7 +135,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         }
 
         // billing and other amounts
-        if (!$this->getBillingAmount() || 0 >= $this->getBillingAmount()) {
+        if (!$this->getBillingAmount() || $this->getBillingAmount() <= 0) {
             $this->_errors['billing_amount'][] = Mage::helper('payment')->__('Wrong or empty billing amount specified.');
         }
         foreach (['trial_billing_abount', 'shipping_amount', 'tax_amount', 'init_amount'] as $key) {
@@ -618,6 +618,26 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
             $result[] = Mage::helper('payment')->__('Repeats until suspended or canceled.');
         }
         return $result;
+    }
+
+    /**
+     * Get trial billing amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getTrialBillingAmount(): ?float
+    {
+        $value = $this->getData('trial_billing_amount');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
+     * Get billing amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getBillingAmount(): ?float
+    {
+        $value = $this->getData('billing_amount');
+        return $value !== null ? (float) $value : null;
     }
 
 }

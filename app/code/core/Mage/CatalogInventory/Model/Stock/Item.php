@@ -318,10 +318,9 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve Minimum Qty Allowed in Shopping Cart or NULL when there is no limitation
-     *
-     * @return float|null
+     * DBAL returns DECIMAL as string, so we cast to float
      */
-    public function getMinSaleQty()
+    public function getMinSaleQty(): ?float
     {
         $customerGroupId = $this->getCustomerGroupId();
         if (!$customerGroupId) {
@@ -343,10 +342,9 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve Maximum Qty Allowed in Shopping Cart data wrapper
-     *
-     * @return float
+     * DBAL returns DECIMAL as string, so we cast to float
      */
-    public function getMaxSaleQty()
+    public function getMaxSaleQty(): float
     {
         return (float) ($this->getUseConfigMaxSaleQty() ? Mage::getStoreConfig(self::XML_PATH_MAX_SALE_QTY)
             : $this->getData('max_sale_qty'));
@@ -585,7 +583,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
             return $result;
         }
 
-        if ($this->getMaxSaleQty() && $qty > $this->getMaxSaleQty()) {
+        if ($this->getMaxSaleQty() > 0 && $qty > $this->getMaxSaleQty()) {
             $result->setHasError(true)
                 ->setMessage(
                     Mage::helper('cataloginventory')->__('The maximum quantity allowed for purchase is %s.', $this->getMaxSaleQty() * 1),
@@ -937,5 +935,15 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
             $indexer->logEvent($this, self::ENTITY, Mage_Index_Model_Event::TYPE_SAVE);
         }
         return $this;
+    }
+
+    /**
+     * Get quantity correction with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getQtyCorrection(): ?float
+    {
+        $value = $this->getData('qty_correction');
+        return $value !== null ? (float) $value : null;
     }
 }
