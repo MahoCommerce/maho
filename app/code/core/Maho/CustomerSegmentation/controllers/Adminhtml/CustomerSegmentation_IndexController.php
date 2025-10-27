@@ -568,10 +568,13 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'save', 'savesequence' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
-            'delete', 'massdelete', 'deletesequence' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete'),
+            'save' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
+            'delete', 'massdelete' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete'),
             'massstatus' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save'),
             'refresh' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/refresh'),
+            'savesequence' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/email_sequences/save'),
+            'deletesequence' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/email_sequences/delete'),
+            'editsequence', 'newsequence', 'sequencesgrid', 'sequencesgridenter', 'sequencesgridexit' => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/email_sequences/manage'),
             default => Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/manage'),
         };
     }
