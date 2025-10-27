@@ -107,6 +107,27 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
             ['segment_id', 'trigger_event', 'step_number'],
             ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
         )
+        ->addForeignKey(
+            'FK_SEGMENT_EMAIL_SEQUENCE_SEGMENT',
+            'segment_id',
+            $installer->getTable('customer_segment'),
+            'segment_id',
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+        )
+        ->addForeignKey(
+            'FK_SEGMENT_EMAIL_SEQUENCE_TEMPLATE',
+            'template_id',
+            $installer->getTable('newsletter_template'),
+            'template_id',
+            Maho\Db\Ddl\Table::ACTION_RESTRICT,
+        )
+        ->addForeignKey(
+            'FK_SEGMENT_EMAIL_SEQUENCE_SALESRULE',
+            'coupon_sales_rule_id',
+            $installer->getTable('salesrule'),
+            'rule_id',
+            Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        )
         ->setComment('Customer Segment Email Sequences');
 
     $installer->getConnection()->createTable($sequenceTable);
@@ -182,6 +203,54 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
             'nullable' => false,
             'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
         ], 'Created At')
+        ->addIndex(
+            'idx_scheduled_at_status',
+            ['scheduled_at', 'status'],
+            ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX],
+        )
+        ->addIndex(
+            'idx_customer_status',
+            ['customer_id', 'status'],
+            ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX],
+        )
+        ->addIndex(
+            'idx_segment_trigger_status',
+            ['segment_id', 'trigger_type', 'status'],
+            ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX],
+        )
+        ->addIndex(
+            'idx_sequence_id',
+            ['sequence_id'],
+            ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX],
+        )
+        ->addForeignKey(
+            'FK_SEGMENT_PROGRESS_CUSTOMER',
+            'customer_id',
+            $installer->getTable('customer_entity'),
+            'entity_id',
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+        )
+        ->addForeignKey(
+            'FK_SEGMENT_PROGRESS_SEGMENT',
+            'segment_id',
+            $installer->getTable('customer_segment'),
+            'segment_id',
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+        )
+        ->addForeignKey(
+            'FK_SEGMENT_PROGRESS_SEQUENCE',
+            'sequence_id',
+            $installer->getTable('customer_segment_email_sequence'),
+            'sequence_id',
+            Maho\Db\Ddl\Table::ACTION_CASCADE,
+        )
+        ->addForeignKey(
+            'FK_SEGMENT_PROGRESS_QUEUE',
+            'queue_id',
+            $installer->getTable('newsletter_queue'),
+            'queue_id',
+            Maho\Db\Ddl\Table::ACTION_SET_NULL,
+        )
         ->setComment('Customer Segment Sequence Progress Tracking');
 
     $installer->getConnection()->createTable($progressTable);

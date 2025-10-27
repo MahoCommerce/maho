@@ -30,7 +30,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
             ->from($this->getMainTable(), 'customer_id')
             ->where('segment_id = ?', $segmentId)
             ->where('trigger_type = ?', $triggerType)
-            ->where('status = ?', 'scheduled')
+            ->where('status = ?', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
             ->group('customer_id');
 
         return $adapter->fetchCol($select);
@@ -49,12 +49,12 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
         $affected = $adapter->update(
             $this->getMainTable(),
-            ['status' => 'skipped'],
+            ['status' => Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SKIPPED],
             [
                 'segment_id = ?' => $segmentId,
                 'customer_id IN (?)' => $customerIds,
                 'trigger_type = ?' => $triggerType,
-                'status = ?' => 'scheduled',
+                'status = ?' => Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED,
             ],
         );
 
@@ -80,10 +80,21 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
                 'p.segment_id = seg.segment_id',
                 ['segment_name' => 'name'],
             )
-            ->where('p.status = ?', 'scheduled')
+            ->join(
+                ['c' => $this->getTable('customer_entity')],
+                'p.customer_id = c.entity_id',
+                ['customer_email' => 'email', 'customer_firstname' => 'firstname', 'customer_lastname' => 'lastname', 'store_id'],
+            )
+            ->joinLeft(
+                ['sub' => $this->getTable('newsletter_subscriber')],
+                'p.customer_id = sub.customer_id',
+                ['subscriber_status'],
+            )
+            ->where('p.status = ?', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
             ->where('p.scheduled_at <= ?', Mage::getSingleton('core/date')->gmtDate())
             ->where('s.is_active = ?', 1)
             ->where('seg.auto_email_active = ?', 1)
+            ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
             ->limit($limit)
             ->order('p.scheduled_at ASC');
 
@@ -102,7 +113,10 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
             ->where('customer_id = ?', $customerId)
             ->where('segment_id = ?', $segmentId)
             ->where('trigger_type = ?', $triggerType)
-            ->where('status IN (?)', ['scheduled', 'sent']);
+            ->where('status IN (?)', [
+                Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED,
+                Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SENT,
+            ]);
 
         return (int) $adapter->fetchOne($select) > 0;
     }
@@ -118,7 +132,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
             ->from($this->getMainTable(), 'COUNT(*)')
             ->where('customer_id = ?', $customerId)
             ->where('segment_id = ?', $segmentId)
-            ->where('status IN (?)', ['scheduled']);
+            ->where('status IN (?)', [Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED]);
 
         return (int) $adapter->fetchOne($select) > 0;
     }
@@ -133,10 +147,10 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
         $select = $adapter->select()
             ->from($this->getMainTable(), [
                 'total' => 'COUNT(*)',
-                'scheduled' => 'SUM(CASE WHEN status = "scheduled" THEN 1 ELSE 0 END)',
-                'sent' => 'SUM(CASE WHEN status = "sent" THEN 1 ELSE 0 END)',
-                'failed' => 'SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END)',
-                'skipped' => 'SUM(CASE WHEN status = "skipped" THEN 1 ELSE 0 END)',
+                'scheduled' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED) . ' THEN 1 ELSE 0 END)'),
+                'sent' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SENT) . ' THEN 1 ELSE 0 END)'),
+                'failed' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_FAILED) . ' THEN 1 ELSE 0 END)'),
+                'skipped' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SKIPPED) . ' THEN 1 ELSE 0 END)'),
             ])
             ->where('sequence_id = ?', $sequenceId);
 
@@ -153,10 +167,10 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
         $select = $adapter->select()
             ->from($this->getMainTable(), [
                 'total' => 'COUNT(*)',
-                'scheduled' => 'SUM(CASE WHEN status = "scheduled" THEN 1 ELSE 0 END)',
-                'sent' => 'SUM(CASE WHEN status = "sent" THEN 1 ELSE 0 END)',
-                'failed' => 'SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END)',
-                'skipped' => 'SUM(CASE WHEN status = "skipped" THEN 1 ELSE 0 END)',
+                'scheduled' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED) . ' THEN 1 ELSE 0 END)'),
+                'sent' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SENT) . ' THEN 1 ELSE 0 END)'),
+                'failed' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_FAILED) . ' THEN 1 ELSE 0 END)'),
+                'skipped' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SKIPPED) . ' THEN 1 ELSE 0 END)'),
                 'unique_customers' => 'COUNT(DISTINCT customer_id)',
             ])
             ->where('segment_id = ?', $segmentId);
@@ -175,7 +189,11 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
         return $adapter->delete(
             $this->getMainTable(),
             [
-                'status IN (?)' => ['sent', 'failed', 'skipped'],
+                'status IN (?)' => [
+                    Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SENT,
+                    Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_FAILED,
+                    Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SKIPPED,
+                ],
                 'created_at < ?' => $cutoffDate,
             ],
         );
@@ -222,29 +240,39 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
         string $triggerType,
     ): void {
         $adapter = $this->_getWriteAdapter();
-        $data = [];
-        $now = Mage::getSingleton('core/date')->gmtDate();
+        $adapter->beginTransaction();
 
-        foreach ($sequences as $sequence) {
-            $scheduledAt = $now;
-            if ($sequence['delay_minutes'] > 0) {
-                $scheduledAt = date('Y-m-d H:i:s', strtotime("+{$sequence['delay_minutes']} minutes"));
+        try {
+            $data = [];
+            $now = Mage::getSingleton('core/date')->gmtDate();
+
+            foreach ($sequences as $sequence) {
+                $scheduledAt = $now;
+                if ($sequence['delay_minutes'] > 0) {
+                    $scheduledAt = date('Y-m-d H:i:s', strtotime("+{$sequence['delay_minutes']} minutes"));
+                }
+
+                $data[] = [
+                    'customer_id' => $customerId,
+                    'segment_id' => $segmentId,
+                    'sequence_id' => $sequence['sequence_id'],
+                    'step_number' => $sequence['step_number'],
+                    'trigger_type' => $triggerType,
+                    'scheduled_at' => $scheduledAt,
+                    'status' => Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED,
+                    'created_at' => $now,
+                ];
             }
 
-            $data[] = [
-                'customer_id' => $customerId,
-                'segment_id' => $segmentId,
-                'sequence_id' => $sequence['sequence_id'],
-                'step_number' => $sequence['step_number'],
-                'trigger_type' => $triggerType,
-                'scheduled_at' => $scheduledAt,
-                'status' => 'scheduled',
-                'created_at' => $now,
-            ];
-        }
+            if (!empty($data)) {
+                $adapter->insertMultiple($this->getMainTable(), $data);
+            }
 
-        if (!empty($data)) {
-            $adapter->insertMultiple($this->getMainTable(), $data);
+            $adapter->commit();
+        } catch (Exception $e) {
+            $adapter->rollBack();
+            Mage::logException($e);
+            throw $e;
         }
     }
 
@@ -264,7 +292,10 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
                 ->where('customer_id = ?', $object->getCustomerId())
                 ->where('sequence_id = ?', $object->getSequenceId())
                 ->where('trigger_type = ?', $object->getTriggerType())
-                ->where('status IN (?)', ['scheduled', 'sent']);
+                ->where('status IN (?)', [
+                    Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED,
+                    Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SENT,
+                ]);
 
             $existingId = $adapter->fetchOne($select);
             if ($existingId) {

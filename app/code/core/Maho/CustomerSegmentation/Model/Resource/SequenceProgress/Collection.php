@@ -69,7 +69,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress_Collection exten
      */
     public function addReadyToSendFilter(): self
     {
-        $this->addFieldToFilter('status', 'scheduled')
+        $this->addFieldToFilter('status', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
              ->addFieldToFilter('scheduled_at', ['lteq' => Mage::getSingleton('core/date')->gmtDate()]);
         return $this;
     }

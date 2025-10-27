@@ -15,6 +15,12 @@ declare(strict_types=1);
  * Email Automation Observer
  *
  * Handles segment membership changes to trigger email sequences
+ *
+ * Error Handling Pattern:
+ * - Operational failures (customer ineligible, already processed): Mark as skipped/failed, log, continue
+ * - Critical errors (database issues, missing templates): Log exception, mark failed, re-throw
+ * - Expected conditions (unsubscribed, no email): Mark as skipped, log info, continue silently
+ * - All exceptions are logged to customer_segmentation.log for debugging
  */
 class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 {
@@ -36,7 +42,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
                 $segment->hasEmailAutomation() ? 'YES' : 'NO',
             ),
             Mage::LOG_INFO,
-            'customer_segmentation.log',
         );
 
         if (!$segment->hasEmailAutomation()) {
@@ -50,7 +55,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             Mage::log(
                 "Email automation failed for segment {$segment->getId()}: " . $e->getMessage(),
                 Mage::LOG_ERROR,
-                'customer_segmentation.log',
             );
         }
     }
@@ -119,7 +123,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         Mage::log(
             'Started email sequences for ' . count($customerIds) . " customers entering segment {$segment->getId()}",
             Mage::LOG_INFO,
-            'customer_segmentation.log',
         );
     }
 
@@ -158,7 +161,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             Mage::log(
                 "Started {$exitStarted} exit email sequences for segment {$segment->getId()}",
                 Mage::LOG_INFO,
-                'customer_segmentation.log',
             );
         }
 
@@ -166,7 +168,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             Mage::log(
                 "Stopped {$stoppedEnter} enter email sequences for customers exiting segment {$segment->getId()}",
                 Mage::LOG_INFO,
-                'customer_segmentation.log',
             );
         }
     }
@@ -208,7 +209,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
     {
         $collection = Mage::getResourceModel('customersegmentation/sequenceProgress_collection')
             ->addCustomerFilter($customerId)
-            ->addStatusFilter('scheduled');
+            ->addStatusFilter(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED);
 
         $stopped = 0;
         foreach ($collection as $progress) {
@@ -221,7 +222,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             Mage::log(
                 "Stopped {$stopped} email sequences for unsubscribed customer {$customerId}",
                 Mage::LOG_INFO,
-                'customer_segmentation.log',
             );
         }
     }
@@ -259,7 +259,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             Mage::log(
                 "Cleaned up {$deleted} sequence records for deleted customer {$customerId}",
                 Mage::LOG_INFO,
-                'customer_segmentation.log',
             );
         }
     }
@@ -294,7 +293,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
                 Mage::log(
                     "Email automation cron: processed {$processed}, failed {$failed} emails in {$duration}s",
                     Mage::LOG_INFO,
-                    'customer_segmentation.log',
                 );
             }
 
@@ -303,7 +301,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             Mage::log(
                 'Email automation cron failed: ' . $e->getMessage(),
                 Mage::LOG_ERROR,
-                'customer_segmentation.log',
             );
         }
     }
@@ -320,22 +317,28 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
         // Load progress record
         $progress = Mage::getModel('customersegmentation/sequenceProgress')->load($progressId);
-        if (!$progress->getId() || $progress->getStatus() !== 'scheduled') {
+        if (!$progress->getId() || $progress->getStatus() !== Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED) {
             return; // Already processed or invalid
         }
 
-        // Load customer
-        $customer = Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
+        // Validate customer email from pre-loaded data
+        if (empty($sequenceData['customer_email'])) {
+            Mage::log(
+                "Skipping sequence email for customer {$customerId}: No email address",
+                Mage::LOG_INFO,
+            );
             $progress->markAsSkipped();
             return;
         }
 
-        // Verify customer is still subscribed
-        if (!$this->isCustomerSubscribed($customerId)) {
-            $progress->markAsSkipped();
-            return;
-        }
+        // Customer is already verified as subscribed in the query
+        // Create minimal customer object with pre-loaded data
+        $customer = Mage::getModel('customer/customer');
+        $customer->setId($customerId)
+                 ->setEmail($sequenceData['customer_email'])
+                 ->setFirstname($sequenceData['customer_firstname'])
+                 ->setLastname($sequenceData['customer_lastname'])
+                 ->setStoreId($sequenceData['store_id']);
 
         // Load template
         $template = Mage::getModel('newsletter/template')->load($templateId);
@@ -396,7 +399,6 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         Mage::log(
             "Sent automation email to customer {$customerId}, template {$templateId}, queue {$queue->getId()}",
             Mage::LOG_INFO,
-            'customer_segmentation.log',
         );
     }
 

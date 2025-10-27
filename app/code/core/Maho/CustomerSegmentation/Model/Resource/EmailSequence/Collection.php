@@ -116,12 +116,12 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence_Collection extends 
             )
             ->joinLeft(
                 ['progress_sent' => $progressTable],
-                'main_table.sequence_id = progress_sent.sequence_id AND progress_sent.status = "sent"',
+                'main_table.sequence_id = progress_sent.sequence_id AND progress_sent.status = ' . $this->getConnection()->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SENT),
                 [],
             )
             ->joinLeft(
                 ['progress_scheduled' => $progressTable],
-                'main_table.sequence_id = progress_scheduled.sequence_id AND progress_scheduled.status = "scheduled"',
+                'main_table.sequence_id = progress_scheduled.sequence_id AND progress_scheduled.status = ' . $this->getConnection()->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED),
                 [],
             )
             ->columns([
@@ -155,7 +155,7 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence_Collection extends 
             'main_table.sequence_id = progress.sequence_id',
             [],
         )
-        ->where('progress.status = ?', 'scheduled')
+        ->where('progress.status = ?', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
         ->where('progress.scheduled_at <= ?', Mage::getSingleton('core/date')->gmtDate())
         ->group('main_table.sequence_id');
 

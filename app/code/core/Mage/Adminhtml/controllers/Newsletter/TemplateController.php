@@ -196,7 +196,24 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
             ->load($this->getRequest()->getParam('id'));
         if ($template->getId()) {
             try {
+                // Check if template is used by email sequences
+                $sequenceCount = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+                    ->addFieldToFilter('template_id', $template->getId())
+                    ->getSize();
+
+                if ($sequenceCount > 0) {
+                    Mage::throwException(
+                        Mage::helper('newsletter')->__(
+                            'Cannot delete this template. It is currently used by %d email automation sequence(s). Please reassign or delete those sequences first.',
+                            $sequenceCount,
+                        ),
+                    );
+                }
+
                 $template->delete();
+                $this->_getSession()->addSuccess(
+                    Mage::helper('newsletter')->__('The newsletter template has been deleted.'),
+                );
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {

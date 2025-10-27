@@ -24,7 +24,6 @@ class Maho_CustomerSegmentation_Model_Cron
         Mage::log(
             sprintf('Starting segment refresh. Found %d segments to refresh.', $collection->getSize()),
             null,
-            'customer_segmentation.log',
         );
 
         foreach ($collection as $segment) {
@@ -35,7 +34,6 @@ class Maho_CustomerSegmentation_Model_Cron
                 Mage::log(
                     sprintf('Refreshing segment: %s (ID: %d)', $segment->getName(), $segment->getId()),
                     null,
-                    'customer_segmentation.log',
                 );
 
                 $segment->refreshCustomers();
@@ -49,20 +47,20 @@ class Maho_CustomerSegmentation_Model_Cron
                     $executionTime,
                     $memoryUsed / 1024 / 1024,
                     $segment->getMatchedCustomersCount(),
-                ), null, 'customer_segmentation.log');
+                ), null);
 
             } catch (Exception $e) {
                 Mage::log(sprintf(
                     'Error refreshing segment %d: %s',
                     $segment->getId(),
                     $e->getMessage(),
-                ), Mage::LOG_ERROR, 'customer_segmentation.log');
+                ), Mage::LOG_ERROR);
 
                 Mage::logException($e);
             }
         }
 
-        Mage::log('Segment refresh completed.', null, 'customer_segmentation.log');
+        Mage::log('Segment refresh completed.', null);
     }
 
     /**
@@ -99,7 +97,6 @@ class Maho_CustomerSegmentation_Model_Cron
                 Mage::log(
                     "Cleaned up {$deleted} old sequence progress records (older than {$daysOld} days)",
                     Mage::LOG_INFO,
-                    'customer_segmentation.log',
                 );
             }
         } catch (Exception $e) {
@@ -107,7 +104,6 @@ class Maho_CustomerSegmentation_Model_Cron
             Mage::log(
                 'Failed to cleanup old progress records: ' . $e->getMessage(),
                 Mage::LOG_ERROR,
-                'customer_segmentation.log',
             );
         }
     }
@@ -132,7 +128,6 @@ class Maho_CustomerSegmentation_Model_Cron
                 Mage::log(
                     "Cleaned up {$deleted} expired automation coupons (older than {$daysOld} days)",
                     Mage::LOG_INFO,
-                    'customer_segmentation.log',
                 );
             }
         } catch (Exception $e) {
@@ -140,7 +135,6 @@ class Maho_CustomerSegmentation_Model_Cron
             Mage::log(
                 'Failed to cleanup expired coupons: ' . $e->getMessage(),
                 Mage::LOG_ERROR,
-                'customer_segmentation.log',
             );
         }
     }
@@ -164,9 +158,9 @@ class Maho_CustomerSegmentation_Model_Cron
 
             $select = $adapter->select()
                 ->from($resource->getMainTable(), [
-                    'scheduled' => 'SUM(CASE WHEN status = "scheduled" THEN 1 ELSE 0 END)',
-                    'sent' => 'SUM(CASE WHEN status = "sent" AND sent_at >= "' . $yesterday . '" THEN 1 ELSE 0 END)',
-                    'failed' => 'SUM(CASE WHEN status = "failed" AND created_at >= "' . $yesterday . '" THEN 1 ELSE 0 END)',
+                    'scheduled' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED) . ' THEN 1 ELSE 0 END)'),
+                    'sent' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SENT) . ' AND sent_at >= ' . $adapter->quote($yesterday) . ' THEN 1 ELSE 0 END)'),
+                    'failed' => new Maho\Db\Expr('SUM(CASE WHEN status = ' . $adapter->quote(Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_FAILED) . ' AND created_at >= ' . $adapter->quote($yesterday) . ' THEN 1 ELSE 0 END)'),
                     'total_active' => 'COUNT(*)',
                 ])
                 ->where('created_at >= ?', $yesterday);
@@ -178,7 +172,6 @@ class Maho_CustomerSegmentation_Model_Cron
                     "Daily automation report: {$stats['sent']} sent, {$stats['failed']} failed, " .
                     "{$stats['scheduled']} scheduled, {$stats['total_active']} total active",
                     Mage::LOG_INFO,
-                    'customer_segmentation.log',
                 );
             }
 
@@ -187,7 +180,6 @@ class Maho_CustomerSegmentation_Model_Cron
             Mage::log(
                 'Failed to generate automation report: ' . $e->getMessage(),
                 Mage::LOG_ERROR,
-                'customer_segmentation.log',
             );
         }
     }

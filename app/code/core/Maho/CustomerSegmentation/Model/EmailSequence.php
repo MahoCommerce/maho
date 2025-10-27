@@ -14,6 +14,11 @@ declare(strict_types=1);
 /**
  * Email Sequence Model
  *
+ * Error Handling Pattern:
+ * - Getter methods (getTemplate, getCouponSalesRule, getSegment): Return null if not found, log warning
+ * - Validation methods (validate): Throw Mage_Core_Exception with user-friendly message
+ * - Boolean checks (shouldGenerateCoupon): Return false on failure, never throw
+ *
  * @method int getSegmentId()
  * @method string getTriggerEvent()
  * @method int getTemplateId()
@@ -53,11 +58,21 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     /**
      * Get newsletter template for this sequence step
+     *
+     * @return Mage_Newsletter_Model_Template|null Returns null if no template ID is set
      */
     public function getTemplate(): ?Mage_Newsletter_Model_Template
     {
         if ($this->getTemplateId()) {
-            return Mage::getModel('newsletter/template')->load($this->getTemplateId());
+            $template = Mage::getModel('newsletter/template')->load($this->getTemplateId());
+            if (!$template->getId()) {
+                Mage::log(
+                    "Newsletter template {$this->getTemplateId()} not found for sequence {$this->getId()}",
+                    Mage::LOG_WARNING,
+                );
+                return null;
+            }
+            return $template;
         }
         return null;
     }
@@ -89,11 +104,21 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     /**
      * Get the base sales rule for coupon generation
+     *
+     * @return Mage_SalesRule_Model_Rule|null Returns null if no sales rule ID is set
      */
     public function getCouponSalesRule(): ?Mage_SalesRule_Model_Rule
     {
         if ($this->getCouponSalesRuleId()) {
-            return Mage::getModel('salesrule/rule')->load($this->getCouponSalesRuleId());
+            $rule = Mage::getModel('salesrule/rule')->load($this->getCouponSalesRuleId());
+            if (!$rule->getId()) {
+                Mage::log(
+                    "Sales rule {$this->getCouponSalesRuleId()} not found for sequence {$this->getId()}",
+                    Mage::LOG_WARNING,
+                );
+                return null;
+            }
+            return $rule;
         }
         return null;
     }

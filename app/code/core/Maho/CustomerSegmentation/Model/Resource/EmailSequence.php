@@ -27,11 +27,12 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_M
     {
         parent::_beforeSave($object);
 
-        // Check for duplicate step number in same segment
+        // Check for duplicate step number in same segment and trigger event
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
             ->from($this->getMainTable(), 'sequence_id')
             ->where('segment_id = ?', (int) $object->getSegmentId())
+            ->where('trigger_event = ?', $object->getTriggerEvent())
             ->where('step_number = ?', (int) $object->getStepNumber());
 
         if ($object->getId()) {
@@ -43,20 +44,21 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_M
             // Log for debugging
             Mage::log(
                 sprintf(
-                    'Duplicate step validation failed: segment_id=%s, step_number=%s, current_id=%s, found_id=%s',
+                    'Duplicate step validation failed: segment_id=%s, trigger_event=%s, step_number=%s, current_id=%s, found_id=%s',
                     $object->getSegmentId(),
+                    $object->getTriggerEvent(),
                     $object->getStepNumber(),
                     $object->getId(),
                     $existingId,
                 ),
                 Mage::LOG_DEBUG,
-                'customer_segmentation.log',
             );
 
             Mage::throwException(
                 Mage::helper('customersegmentation')->__(
-                    'Step number %d already exists for this segment.',
+                    'Step number %d already exists for this segment %s trigger.',
                     $object->getStepNumber(),
+                    $object->getTriggerEvent(),
                 ),
             );
         }
@@ -73,10 +75,10 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_M
         $adapter = $this->_getWriteAdapter();
         return $adapter->update(
             $progressResource->getMainTable(),
-            ['status' => 'skipped'],
+            ['status' => Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SKIPPED],
             [
                 'sequence_id = ?' => $sequenceId,
-                'status = ?' => 'scheduled',
+                'status = ?' => Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED,
             ],
         );
     }

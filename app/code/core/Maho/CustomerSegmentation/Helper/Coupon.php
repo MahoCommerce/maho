@@ -15,6 +15,12 @@ declare(strict_types=1);
  * Coupon Generation Helper
  *
  * Handles dynamic coupon generation for email sequences
+ *
+ * Error Handling Pattern:
+ * - generateCustomerCoupon(): Returns null on failure, logs warning
+ * - validateSalesRule(): Returns array of errors (empty array if valid)
+ * - getAvailableSalesRules(): Always returns array (empty if none available)
+ * - Never throws exceptions - designed to fail gracefully in automation context
  */
 class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
 {
@@ -29,7 +35,7 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
     ): ?string {
         $rule = Mage::getModel('salesrule/rule')->load($ruleId);
         if (!$rule->getId() || !$rule->getIsActive()) {
-            Mage::log("Invalid or inactive sales rule: {$ruleId}", Mage::LOG_WARNING, 'customer_segmentation.log');
+            Mage::log("Invalid or inactive sales rule: {$ruleId}", Mage::LOG_WARNING);
             return null;
         }
 
@@ -61,7 +67,6 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
             Mage::log(
                 "Generated coupon {$couponCode} for customer {$customerId} using rule {$ruleId}",
                 Mage::LOG_INFO,
-                'customer_segmentation.log',
             );
 
             return $couponCode;
@@ -173,7 +178,6 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
                 Mage::log(
                     "Sales rule {$ruleId} has conditions that may affect coupon usage",
                     Mage::LOG_INFO,
-                    'customer_segmentation.log',
                 );
             }
         }
@@ -285,7 +289,6 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
             Mage::log(
                 "Cleaned up {$count} expired automation coupons",
                 Mage::LOG_INFO,
-                'customer_segmentation.log',
             );
         }
 

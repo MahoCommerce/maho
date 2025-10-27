@@ -422,7 +422,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
                 Mage::log(
                     "Skipping sequence start for customer {$customerId} in segment {$this->getId()}: existing active sequence found and overlapping not allowed",
                     Mage::LOG_INFO,
-                    'customer_segmentation.log',
                 );
                 return;
             }
@@ -432,7 +431,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
                 Mage::log(
                     "Skipping sequence start for customer {$customerId} in segment {$this->getId()}: same trigger sequence already active",
                     Mage::LOG_INFO,
-                    'customer_segmentation.log',
                 );
                 return;
             }
@@ -459,7 +457,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         Mage::log(
             "Started email sequence for customer {$customerId} in segment {$this->getId()} with trigger {$triggerType}",
             Mage::LOG_INFO,
-            'customer_segmentation.log',
         );
     }
 
