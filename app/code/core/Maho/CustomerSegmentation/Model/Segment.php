@@ -307,9 +307,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             }
 
             // Set default values for email automation
-            if (!$this->hasData('auto_email_trigger')) {
-                $this->setAutoEmailTrigger(self::EMAIL_TRIGGER_NONE);
-            }
             if (!$this->hasData('auto_email_active')) {
                 $this->setAutoEmailActive(0);
             }
@@ -365,7 +362,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      */
     public function hasEmailAutomation(): bool
     {
-        if (!(bool) $this->getAutoEmailActive() || $this->getAutoEmailTrigger() === self::EMAIL_TRIGGER_NONE) {
+        if (!(bool) $this->getAutoEmailActive()) {
             return false;
         }
 
@@ -414,7 +411,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      */
     public function startEmailSequence(int $customerId, string $triggerType): void
     {
-        if (!$this->hasEmailAutomation() || $this->getAutoEmailTrigger() !== $triggerType) {
+        if (!$this->hasEmailAutomation()) {
             return;
         }
 
@@ -512,10 +509,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
         if (!$this->getAutoEmailActive()) {
             return $errors; // No validation needed if automation is disabled
-        }
-
-        if ($this->getAutoEmailTrigger() === self::EMAIL_TRIGGER_NONE) {
-            $errors[] = Mage::helper('customersegmentation')->__('Email trigger must be set when automation is enabled.');
         }
 
         // Only check sequences if segment already exists (has ID)

@@ -161,13 +161,13 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesE
     #[\Override]
     public function getTabLabel(): string
     {
-        return Mage::helper('customersegmentation')->__('Exit Segment');
+        return Mage::helper('customersegmentation')->__('E-mails on Exit');
     }
 
     #[\Override]
     public function getTabTitle(): string
     {
-        return Mage::helper('customersegmentation')->__('Email Automation - Exit Segment');
+        return Mage::helper('customersegmentation')->__('E-mails on Exit');
     }
 
     #[\Override]

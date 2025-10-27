@@ -87,22 +87,6 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
             'note'   => Mage::helper('customersegmentation')->__('Leave empty to apply to all customer groups'),
         ]);
 
-        // Email Automation fieldset
-        $emailFieldset = $form->addFieldset('email_automation_fieldset', [
-            'legend' => Mage::helper('customersegmentation')->__('Email Automation'),
-        ]);
-
-        $emailFieldset->addField('auto_email_active', 'select', [
-            'label'  => Mage::helper('customersegmentation')->__('Enable Email Automation'),
-            'title'  => Mage::helper('customersegmentation')->__('Enable Email Automation'),
-            'name'   => 'auto_email_active',
-            'values' => [
-                ['value' => 0, 'label' => Mage::helper('customersegmentation')->__('No')],
-                ['value' => 1, 'label' => Mage::helper('customersegmentation')->__('Yes')],
-            ],
-            'note'   => Mage::helper('customersegmentation')->__('Configure email sequences in the "Enter Segment" and "Exit Segment" tabs'),
-        ]);
-
         if ($model) {
             $form->setValues($model->getData());
         }

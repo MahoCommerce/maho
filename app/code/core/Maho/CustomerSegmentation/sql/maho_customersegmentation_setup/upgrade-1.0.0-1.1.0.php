@@ -15,7 +15,7 @@ declare(strict_types=1);
 $installer = $this;
 $installer->startSetup();
 
-// Add email automation field to customer_segment table
+// Add email automation fields to customer_segment table
 $installer->getConnection()->addColumn(
     $installer->getTable('customer_segment'),
     'auto_email_active',
@@ -24,6 +24,17 @@ $installer->getConnection()->addColumn(
         'nullable' => false,
         'default'  => 0,
         'comment'  => 'Auto Email Active Status',
+    ],
+);
+
+$installer->getConnection()->addColumn(
+    $installer->getTable('customer_segment'),
+    'allow_overlapping_sequences',
+    [
+        'type'     => Maho\Db\Ddl\Table::TYPE_SMALLINT,
+        'nullable' => false,
+        'default'  => 0,
+        'comment'  => 'Allow Overlapping Sequences',
     ],
 );
 

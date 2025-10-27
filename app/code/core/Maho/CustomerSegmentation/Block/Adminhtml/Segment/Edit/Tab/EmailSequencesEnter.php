@@ -161,13 +161,13 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesE
     #[\Override]
     public function getTabLabel(): string
     {
-        return Mage::helper('customersegmentation')->__('Enter Segment');
+        return Mage::helper('customersegmentation')->__('E-mails on Enter');
     }
 
     #[\Override]
     public function getTabTitle(): string
     {
-        return Mage::helper('customersegmentation')->__('Email Automation - Enter Segment');
+        return Mage::helper('customersegmentation')->__('E-mails on Enter');
     }
 
     #[\Override]
