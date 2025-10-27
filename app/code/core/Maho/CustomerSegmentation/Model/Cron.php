@@ -23,7 +23,6 @@ class Maho_CustomerSegmentation_Model_Cron
 
         Mage::log(
             sprintf('Starting segment refresh. Found %d segments to refresh.', $collection->getSize()),
-            null,
         );
 
         foreach ($collection as $segment) {
@@ -33,7 +32,6 @@ class Maho_CustomerSegmentation_Model_Cron
 
                 Mage::log(
                     sprintf('Refreshing segment: %s (ID: %d)', $segment->getName(), $segment->getId()),
-                    null,
                 );
 
                 $segment->refreshCustomers();
@@ -47,7 +45,7 @@ class Maho_CustomerSegmentation_Model_Cron
                     $executionTime,
                     $memoryUsed / 1024 / 1024,
                     $segment->getMatchedCustomersCount(),
-                ), null);
+                ));
 
             } catch (Exception $e) {
                 Mage::log(sprintf(
@@ -60,7 +58,7 @@ class Maho_CustomerSegmentation_Model_Cron
             }
         }
 
-        Mage::log('Segment refresh completed.', null);
+        Mage::log('Segment refresh completed.');
     }
 
     /**

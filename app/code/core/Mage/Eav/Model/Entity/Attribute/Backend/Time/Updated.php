@@ -39,7 +39,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Updated extends Mage_Eav_Mode
 
         // Handle MySQL zero dates and invalid dates
         if (empty($date) || (is_string($date) && preg_match('/^0000-00-00/', $date))) {
-            $object->setData($attributeCode, null);
+            $object->setData($attributeCode);
             parent::afterLoad($object);
             return $this;
         }

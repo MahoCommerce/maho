@@ -371,10 +371,22 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         if ($generateCoupon && !empty($sequenceData['coupon_sales_rule_id'])) {
             $couponCode = $this->generateSequenceCoupon($customerId, $sequenceData);
             if ($couponCode) {
+                // Load the coupon to get expiration date
+                $coupon = Mage::getModel('salesrule/coupon')->loadByCode($couponCode);
+                $expirationDateRaw = $coupon->getExpirationDate();
+
+                // Convert DateTime to string if needed
+                $expirationDate = null;
+                if ($expirationDateRaw instanceof DateTime) {
+                    $expirationDate = $expirationDateRaw->format('Y-m-d H:i:s');
+                } elseif (is_string($expirationDateRaw) && !empty($expirationDateRaw)) {
+                    $expirationDate = $expirationDateRaw;
+                }
+
                 // Add coupon variables to template
                 $couponHelper = Mage::helper('customersegmentation/coupon');
                 $rule = Mage::getModel('salesrule/rule')->load($sequenceData['coupon_sales_rule_id']);
-                $couponVars = $couponHelper->getCouponTemplateVariables($couponCode, null, $rule);
+                $couponVars = $couponHelper->getCouponTemplateVariables($couponCode, $expirationDate, $rule);
                 $variables = array_merge($variables, $couponVars);
             }
         }

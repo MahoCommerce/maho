@@ -92,7 +92,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
      */
     protected function _getCreatedProducts()
     {
-        $products = $this->getRequest()->getPost('new_products', null);
+        $products = $this->getRequest()->getPost('new_products');
         if (!is_array($products)) {
             $products = [];
         }
@@ -148,7 +148,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
 
     protected function _getSelectedProducts()
     {
-        $products = $this->getRequest()->getPost('products', null);
+        $products = $this->getRequest()->getPost('products');
         if (!is_array($products)) {
             /** @var Mage_Catalog_Model_Product_Type_Configurable $productType */
             $productType = $this->_getProduct()->getTypeInstance(true);

@@ -19,7 +19,6 @@ $installer
         Mage_Catalog_Model_Product::ENTITY,
         'special_price',
         'note',
-        null,
     )
     ->updateAttribute(
         Mage_Catalog_Model_Product::ENTITY,

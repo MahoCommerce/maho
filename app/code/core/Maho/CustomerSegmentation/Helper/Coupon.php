@@ -159,7 +159,9 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
             $variables['coupon_description'] = $rule->getDescription();
 
             if ($rule->getSimpleAction() === 'by_percent') {
-                $variables['coupon_discount_text'] = $rule->getDiscountAmount() . '% off';
+                // Format percentage discount (remove trailing zeros and decimal point if whole number)
+                $discountAmount = rtrim(rtrim(number_format((float) $rule->getDiscountAmount(), 4, '.', ''), '0'), '.');
+                $variables['coupon_discount_text'] = $discountAmount . '% off';
             } elseif ($rule->getSimpleAction() === 'by_fixed') {
                 $variables['coupon_discount_text'] = Mage::helper('core')->currency($rule->getDiscountAmount()) . ' off';
             } elseif ($rule->getSimpleAction() === 'cart_fixed') {

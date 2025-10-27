@@ -1330,7 +1330,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         if (!$duplicateImages) {
             $newProduct->setMediaGallery(['images' => [], 'values' => []]);
             foreach ($newProduct->getMediaAttributes() as $mediaAttribute) {
-                $newProduct->setData($mediaAttribute->getAttributeCode(), null);
+                $newProduct->setData($mediaAttribute->getAttributeCode());
             }
         }
 

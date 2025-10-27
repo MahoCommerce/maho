@@ -45,7 +45,7 @@ class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage
      */
     public function saveAction(): void
     {
-        $symbolsDataArray = $this->getRequest()->getParam('custom_currency_symbol', null);
+        $symbolsDataArray = $this->getRequest()->getParam('custom_currency_symbol');
         if (is_array($symbolsDataArray)) {
             foreach ($symbolsDataArray as &$symbolsData) {
                 $symbolsData = Mage::helper('adminhtml')->stripTags($symbolsData);

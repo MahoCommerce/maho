@@ -201,11 +201,11 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
             ],
             [
                 'value' => '{{var coupon_discount_amount}}',
-                'label' => Mage::helper('newsletter')->__('Coupon Discount Amount'),
+                'label' => Mage::helper('newsletter')->__('Coupon Discount Amount (Raw Number)'),
             ],
             [
                 'value' => '{{var coupon_discount_text}}',
-                'label' => Mage::helper('newsletter')->__('Coupon Discount Description'),
+                'label' => Mage::helper('newsletter')->__('Coupon Discount (Formatted Text)'),
             ],
             [
                 'value' => '{{var coupon_description}}',

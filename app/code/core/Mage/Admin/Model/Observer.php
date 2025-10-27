@@ -54,7 +54,7 @@ class Mage_Admin_Model_Observer
                         $password = $postLogin['password'] ?? '';
                         $twofaVerificationCode = $postLogin['twofa_verification_code'] ?? '';
                         $session->login($username, $password, $request, $twofaVerificationCode);
-                        $request->setPost('login', null);
+                        $request->setPost('login');
                     } else {
                         if (!$request->getParam('messageSent')) {
                             Mage::getSingleton('adminhtml/session')->addError(

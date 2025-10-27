@@ -109,7 +109,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     #[\Override]
     protected function _prepareCollection()
     {
-        $filter = $this->getParam($this->getVarNameFilter(), null);
+        $filter = $this->getParam($this->getVarNameFilter());
 
         if (is_null($filter)) {
             $filter = $this->_defaultFilter;
@@ -375,7 +375,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                     $url,
                     [
                         '_current' => true,
-                        'filter' => $this->getParam($this->getVarNameFilter(), null),
+                        'filter' => $this->getParam($this->getVarNameFilter()),
                     ],
                 ),
                 'label' => $label,

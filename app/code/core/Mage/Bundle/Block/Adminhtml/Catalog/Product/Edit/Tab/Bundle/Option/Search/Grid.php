@@ -173,9 +173,9 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search_
      */
     protected function _getProducts()
     {
-        if ($products = $this->getRequest()->getPost('products', null)) {
+        if ($products = $this->getRequest()->getPost('products')) {
             return $products;
-        } elseif ($productss = $this->getRequest()->getParam('productss', null)) {
+        } elseif ($productss = $this->getRequest()->getParam('productss')) {
             return explode(',', $productss);
         } else {
             return [];

@@ -125,7 +125,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             $attributeId = (int) Mage::getSingleton('eav/entity_attribute')
                 ->getIdByCode(Mage_Catalog_Model_Product::ENTITY, $attribute);
             $tableAlias = sprintf('weee_%s_table', $attribute);
-            $quotedTableAlias = $select->getAdapter()->quoteTableAs($tableAlias, null);
+            $quotedTableAlias = $select->getAdapter()->quoteTableAs($tableAlias);
             $attributeSelect = $this->_getSelect();
             $attributeSelect
                 ->from([$tableAlias => Mage::getSingleton('weee/tax')->getResource()->getTable('weee/tax')])
