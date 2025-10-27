@@ -119,6 +119,16 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     }
 
     /**
+     * Get quantity with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getQty(): ?float
+    {
+        $value = $this->getData('qty');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
      * Check if two options array are identical
      *
      * @param array $options1
