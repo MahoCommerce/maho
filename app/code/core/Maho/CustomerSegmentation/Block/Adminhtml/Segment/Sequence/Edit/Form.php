@@ -46,6 +46,11 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit_Form exten
             'value' => $segment->getId(),
         ]);
 
+        $fieldset->addField('trigger_event', 'hidden', [
+            'name' => 'trigger_event',
+            'value' => $sequence->getTriggerEvent(),
+        ]);
+
         $fieldset->addField('step_number', 'text', [
             'name' => 'step_number',
             'label' => Mage::helper('customersegmentation')->__('Step Number'),

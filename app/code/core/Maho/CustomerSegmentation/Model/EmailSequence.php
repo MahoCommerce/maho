@@ -27,8 +27,8 @@ declare(strict_types=1);
  * @method bool getIsActive()
  * @method int getMaxSends()
  * @method bool getGenerateCoupon()
- * @method int getCouponSalesRuleId()
- * @method string getCouponPrefix()
+ * @method int|null getCouponSalesRuleId()
+ * @method string|null getCouponPrefix()
  * @method int getCouponExpiresDays()
  * @method string getCreatedAt()
  * @method string getUpdatedAt()
@@ -40,8 +40,8 @@ declare(strict_types=1);
  * @method Maho_CustomerSegmentation_Model_EmailSequence setIsActive(bool $value)
  * @method Maho_CustomerSegmentation_Model_EmailSequence setMaxSends(int $value)
  * @method Maho_CustomerSegmentation_Model_EmailSequence setGenerateCoupon(bool $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponSalesRuleId(int $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponPrefix(string $value)
+ * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponSalesRuleId(int|null $value)
+ * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponPrefix(string|null $value)
  * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponExpiresDays(int $value)
  */
 class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abstract
@@ -209,6 +209,18 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
     protected function _beforeSave(): self
     {
         parent::_beforeSave();
+
+        // Clean up coupon-related fields
+        // If generate_coupon is disabled, clear coupon fields
+        if (!$this->getGenerateCoupon()) {
+            $this->setCouponSalesRuleId(null);
+            $this->setCouponPrefix(null);
+        }
+
+        // Convert empty string to NULL for coupon_sales_rule_id (prevents FK constraint violation)
+        if ($this->getCouponSalesRuleId() === '' || $this->getCouponSalesRuleId() === 0) {
+            $this->setCouponSalesRuleId(null);
+        }
 
         // Validate data
         $this->validate();

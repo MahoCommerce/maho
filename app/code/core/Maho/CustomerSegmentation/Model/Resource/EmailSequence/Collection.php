@@ -38,6 +38,15 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence_Collection extends 
     }
 
     /**
+     * Filter by trigger event
+     */
+    public function addTriggerFilter(string $triggerEvent): self
+    {
+        $this->addFieldToFilter('trigger_event', $triggerEvent);
+        return $this;
+    }
+
+    /**
      * Order by step number
      */
     public function addStepNumberOrder(string $direction = 'ASC'): self

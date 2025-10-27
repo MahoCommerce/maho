@@ -33,12 +33,14 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         /** @var Maho_CustomerSegmentation_Model_Segment $segment */
         $segment = $observer->getEvent()->getSegment();
         $matchedCustomers = $observer->getEvent()->getMatchedCustomers();
+        $previousCustomers = $observer->getEvent()->getPreviousCustomers();
 
         Mage::log(
             sprintf(
-                'Observer fired: segment_id=%s, matched_customers=%s, has_automation=%s',
+                'Observer fired: segment_id=%s, matched_customers=%s, previous_customers=%s, has_automation=%s',
                 $segment->getId(),
                 implode(',', $matchedCustomers),
+                implode(',', $previousCustomers),
                 $segment->hasEmailAutomation() ? 'YES' : 'NO',
             ),
             Mage::LOG_INFO,
@@ -49,7 +51,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         }
 
         try {
-            $this->processSegmentChanges($segment, $matchedCustomers);
+            $this->processSegmentChanges($segment, $matchedCustomers, $previousCustomers);
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::log(
@@ -65,12 +67,9 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
     protected function processSegmentChanges(
         Maho_CustomerSegmentation_Model_Segment $segment,
         array $currentMatchedCustomers,
+        array $previousCustomers,
     ): void {
         $segmentId = $segment->getId();
-        $resource = Mage::getResourceSingleton('customersegmentation/sequenceProgress');
-
-        // Get previously active customers for this segment
-        $previousCustomers = $resource->getActiveSequenceCustomers((int) $segmentId, 'enter');
 
         // Determine who entered and who exited
         $enteredCustomers = array_diff($currentMatchedCustomers, $previousCustomers);
@@ -331,14 +330,16 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             return;
         }
 
-        // Customer is already verified as subscribed in the query
-        // Create minimal customer object with pre-loaded data
-        $customer = Mage::getModel('customer/customer');
-        $customer->setId($customerId)
-                 ->setEmail($sequenceData['customer_email'])
-                 ->setFirstname($sequenceData['customer_firstname'])
-                 ->setLastname($sequenceData['customer_lastname'])
-                 ->setStoreId($sequenceData['store_id']);
+        // Load customer model to get all attributes (EAV)
+        $customer = Mage::getModel('customer/customer')->load($customerId);
+        if (!$customer->getId()) {
+            Mage::log(
+                "Skipping sequence email for customer {$customerId}: Customer not found",
+                Mage::LOG_INFO,
+            );
+            $progress->markAsSkipped();
+            return;
+        }
 
         // Load template
         $template = Mage::getModel('newsletter/template')->load($templateId);
@@ -347,8 +348,24 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             throw new Exception("Newsletter template {$templateId} not found");
         }
 
+        // Load subscriber
+        $subscriberCollection = Mage::getResourceModel('newsletter/subscriber_collection')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->addFieldToFilter('subscriber_status', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+
+        $subscriber = $subscriberCollection->getFirstItem();
+        if (!$subscriber->getId()) {
+            Mage::log(
+                "Skipping sequence email for customer {$customerId}: Subscriber not found",
+                Mage::LOG_INFO,
+            );
+            $progress->markAsSkipped();
+            return;
+        }
+
         // Generate variables for template
         $variables = $this->getTemplateVariables($customer, $sequenceData);
+        $variables['subscriber'] = $subscriber; // Add subscriber for unsubscribe link
 
         // Generate coupon if needed
         if ($generateCoupon && !empty($sequenceData['coupon_sales_rule_id'])) {
@@ -362,11 +379,17 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             }
         }
 
-        // Create newsletter queue
+        // Process template with variables to get the HTML content
+        $processedText = $template->getProcessedTemplate($variables);
+        $processedSubject = $template->getProcessedTemplateSubject($variables);
+
+        // Create newsletter queue with processed content
         $queue = Mage::getModel('newsletter/queue');
         $queue->setTemplateId($templateId)
               ->setNewsletterType(Mage_Newsletter_Model_Template::TYPE_HTML)
-              ->setNewsletterSubject($template->getTemplateSubject())
+              ->setNewsletterText($processedText)
+              ->setNewsletterStyles($template->getTemplateStyles())
+              ->setNewsletterSubject($processedSubject)
               ->setNewsletterSenderName($template->getTemplateSenderName())
               ->setNewsletterSenderEmail($template->getTemplateSenderEmail())
               ->setQueueStatus(Mage_Newsletter_Model_Queue::STATUS_SENDING)
@@ -376,22 +399,10 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
               ->save();
 
         // Add subscriber to queue
-        $subscriberCollection = Mage::getResourceModel('newsletter/subscriber_collection')
-            ->addFieldToFilter('customer_id', $customerId)
-            ->addFieldToFilter('subscriber_status', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
-
-        foreach ($subscriberCollection as $subscriber) {
-            $queue->addSubscribersToQueue([$subscriber->getId()]);
-            break; // Should only be one
-        }
-
-        // Process template with variables
-        $template->setTemplateFilter(Mage::getModel('core/email_template_filter'))
-                 ->getTemplateFilter()
-                 ->setVariables($variables);
+        $queue->addSubscribersToQueue([$subscriber->getId()]);
 
         // Send the email
-        $queue->sendPerSubscriber();
+        $queue->sendPerSubscriber(1);
 
         // Mark as sent
         $progress->markAsSent((int) $queue->getId());

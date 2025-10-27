@@ -175,6 +175,13 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         ]);
 
         try {
+            // Get current membership BEFORE updating
+            $adapter = $this->getResource()->getReadConnection();
+            $select = $adapter->select()
+                ->from(['sc' => $this->getResource()->getTable('customersegmentation/segment_customer')], 'customer_id')
+                ->where('sc.segment_id = ?', $this->getId());
+            $previousCustomers = $adapter->fetchCol($select);
+
             $matchedCustomers = $this->getMatchingCustomerIds();
             $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
@@ -189,6 +196,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             Mage::dispatchEvent('customer_segment_refresh_after', [
                 'segment' => $this,
                 'matched_customers' => $matchedCustomers,
+                'previous_customers' => $previousCustomers,
             ]);
         } catch (Exception $e) {
             $this->setRefreshStatus(self::STATUS_ERROR)->save();
@@ -436,7 +444,13 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             }
         }
 
-        $sequences = $this->getEmailSequences();
+        // Get sequences for this specific trigger type
+        $sequences = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+            ->addSegmentFilter((int) $this->getId())
+            ->addActiveFilter()
+            ->addTriggerFilter($triggerType)
+            ->addStepNumberOrder('ASC');
+
         if ($sequences->getSize() === 0) {
             return;
         }

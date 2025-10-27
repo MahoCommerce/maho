@@ -81,12 +81,12 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
                 ['segment_name' => 'name'],
             )
             ->join(
-                ['c' => $this->getTable('customer_entity')],
+                ['c' => $this->getTable('customer/entity')],
                 'p.customer_id = c.entity_id',
-                ['customer_email' => 'email', 'customer_firstname' => 'firstname', 'customer_lastname' => 'lastname', 'store_id'],
+                ['customer_email' => 'email', 'store_id'],
             )
             ->joinLeft(
-                ['sub' => $this->getTable('newsletter_subscriber')],
+                ['sub' => $this->getTable('newsletter/subscriber')],
                 'p.customer_id = sub.customer_id',
                 ['subscriber_status'],
             )

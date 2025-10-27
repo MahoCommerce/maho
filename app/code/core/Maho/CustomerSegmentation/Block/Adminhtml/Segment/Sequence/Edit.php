@@ -64,16 +64,18 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit extends Ma
         $sequence = Mage::registry('current_email_sequence');
         $segment = Mage::registry('current_customer_segment');
 
+        $segmentName = ($segment && $segment->getId()) ? $segment->getName() : Mage::helper('customersegmentation')->__('Unknown Segment');
+
         if ($sequence->getId()) {
             return Mage::helper('customersegmentation')->__(
                 'Edit Email Sequence Step %d for "%s"',
                 $sequence->getStepNumber(),
-                $segment->getName(),
+                $segmentName,
             );
         } else {
             return Mage::helper('customersegmentation')->__(
                 'New Email Sequence Step for "%s"',
-                $segment->getName(),
+                $segmentName,
             );
         }
     }
