@@ -537,7 +537,8 @@ td.product-cart-remove a {
 }
 
 .shipping-zip-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     align-items: flex-end;
 }
@@ -545,11 +546,6 @@ td.product-cart-remove a {
 .shipping-zip-row .zip-field {
     display: flex;
     flex-direction: column;
-    flex: 0 0 calc(50% - 6px);
-}
-
-.shipping-zip-row .btn-estimate {
-    margin: 0 auto;
 }
 
 .shipping-zip-row .zip-field label {
@@ -803,13 +799,16 @@ td.product-cart-remove a {
 /* Responsive styles for discount coupon form */
 @media only screen and (max-width: 770px) {
     #discount-coupon-form .coupon-input-group {
-        flex-direction: column;
-        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    #discount-coupon-form .coupon-input {
+        flex: 1 1 100%;
     }
 
     #discount-coupon-form .btn-apply,
     #discount-coupon-form .btn-cancel {
-        width: 100%;
+        flex: 1 1 auto;
         height: 44px;
     }
 
@@ -817,17 +816,7 @@ td.product-cart-remove a {
         grid-template-columns: 1fr;
     }
 
-    .shipping-zip-row {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .shipping-zip-row .zip-field {
-        flex: 1 1 auto;
-    }
-
     .shipping-zip-row .btn-estimate {
-        width: 100%;
         height: 44px;
     }
 }
