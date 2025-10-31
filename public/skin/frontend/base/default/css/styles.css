@@ -652,10 +652,6 @@ a.button:hover {
   color: var(--maho-color-background);
 }
 
-.button2 + .button2 {
-  margin-left: 5px;
-}
-
 @media only screen and (max-width: 770px) {
   .col2-set .buttons-set .button,
   .col2-set .buttons-set .button2 {
