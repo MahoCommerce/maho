@@ -39,9 +39,11 @@
         "altcha-org/altcha": "^1.1.0",
         "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
+        "doctrine/dbal": "^4.0",
         "dompdf/dompdf": "^3.1",
         "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^3.11",
+        "laminas/laminas-permissions-acl": "^2.17",
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^1",
         "mahocommerce/maho-composer-plugin": "^3",
@@ -58,9 +60,7 @@
         "symfony/polyfill-php84": "^1.31",
         "symfony/polyfill-php85": "^1.32",
         "symfony/validator": "^7.3",
-        "symfony/var-dumper": "^7.3",
-        "laminas/laminas-permissions-acl": "^2.17",
-        "doctrine/dbal": "^4.0"
+        "symfony/var-dumper": "^7.3"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

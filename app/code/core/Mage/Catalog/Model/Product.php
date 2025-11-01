@@ -985,13 +985,13 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Returns special price
-     *
-     * @return float
+     * Returns special price with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
      */
-    public function getSpecialPrice()
+    public function getSpecialPrice(): ?float
     {
-        return $this->_getData('special_price');
+        $value = $this->_getData('special_price');
+        return $value !== null ? (float) $value : null;
     }
 
     /**
@@ -1330,7 +1330,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         if (!$duplicateImages) {
             $newProduct->setMediaGallery(['images' => [], 'values' => []]);
             foreach ($newProduct->getMediaAttributes() as $mediaAttribute) {
-                $newProduct->setData($mediaAttribute->getAttributeCode(), null);
+                $newProduct->setData($mediaAttribute->getAttributeCode());
             }
         }
 

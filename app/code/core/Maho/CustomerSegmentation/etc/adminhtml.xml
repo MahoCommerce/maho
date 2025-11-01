@@ -37,6 +37,24 @@
                                         <title>Refresh Segments</title>
                                         <sort_order>40</sort_order>
                                     </refresh>
+                                    <email_sequences translate="title">
+                                        <title>Email Sequences</title>
+                                        <sort_order>50</sort_order>
+                                        <children>
+                                            <manage translate="title">
+                                                <title>Manage Email Sequences</title>
+                                                <sort_order>10</sort_order>
+                                            </manage>
+                                            <save translate="title">
+                                                <title>Save Email Sequences</title>
+                                                <sort_order>20</sort_order>
+                                            </save>
+                                            <delete translate="title">
+                                                <title>Delete Email Sequences</title>
+                                                <sort_order>30</sort_order>
+                                            </delete>
+                                        </children>
+                                    </email_sequences>
                                 </children>
                             </customersegmentation>
                         </children>

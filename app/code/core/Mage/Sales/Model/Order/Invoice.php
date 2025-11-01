@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1013,5 +1013,35 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         }
 
         return parent::_afterSave();
+    }
+
+    /**
+     * Get total quantity with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getTotalQty(): ?float
+    {
+        $value = $this->getData('total_qty');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
+     * Get discount amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getDiscountAmount(): ?float
+    {
+        $value = $this->getData('discount_amount');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
+     * Get shipping amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getShippingAmount(): ?float
+    {
+        $value = $this->getData('shipping_amount');
+        return $value !== null ? (float) $value : null;
     }
 }

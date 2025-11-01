@@ -47,6 +47,41 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tabs extends Mage_A
             ]);
         }
 
+        $this->addTab('email_automation', [
+            'label'     => Mage::helper('customersegmentation')->__('Email Automation'),
+            'title'     => Mage::helper('customersegmentation')->__('Email Automation Settings'),
+            'content'   => $this->getLayout()->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailAutomation')->toHtml(),
+        ]);
+
+        if ($segment && $segment->getId()) {
+
+            // Add Email Automation - Enter Segment tab
+            $enterSequences = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+                ->addFieldToFilter('segment_id', $segment->getId())
+                ->addFieldToFilter('trigger_event', Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_ENTER);
+            $enterCount = $enterSequences->getSize();
+
+            $this->addTab('email_sequences_enter', [
+                'label'     => Mage::helper('customersegmentation')->__('E-mails on Enter') . ($enterCount ? ' (' . $enterCount . ')' : ''),
+                'title'     => Mage::helper('customersegmentation')->__('E-mails on Enter'),
+                'url'       => $this->getUrl('*/*/sequencesGridEnter', ['_current' => true]),
+                'class'     => 'ajax',
+            ]);
+
+            // Add Email Automation - Exit Segment tab
+            $exitSequences = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+                ->addFieldToFilter('segment_id', $segment->getId())
+                ->addFieldToFilter('trigger_event', Maho_CustomerSegmentation_Model_EmailSequence::TRIGGER_EXIT);
+            $exitCount = $exitSequences->getSize();
+
+            $this->addTab('email_sequences_exit', [
+                'label'     => Mage::helper('customersegmentation')->__('E-mails on Exit') . ($exitCount ? ' (' . $exitCount . ')' : ''),
+                'title'     => Mage::helper('customersegmentation')->__('E-mails on Exit'),
+                'url'       => $this->getUrl('*/*/sequencesGridExit', ['_current' => true]),
+                'class'     => 'ajax',
+            ]);
+        }
+
         return parent::_beforeToHtml();
     }
 }

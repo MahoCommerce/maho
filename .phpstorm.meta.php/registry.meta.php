@@ -27,6 +27,7 @@ namespace PHPSTORM_META {
         current_customer,
         current_customer_segment,
         current_dataflow_session_id,
+        current_email_sequence,
         current_email_template,
         current_entity_key,
         current_group,

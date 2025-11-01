@@ -25,6 +25,9 @@ declare(strict_types=1);
  * @method string getRefreshStatus()
  * @method string getRefreshMode()
  * @method int getPriority()
+ * @method string getAutoEmailTrigger()
+ * @method int getAutoEmailActive()
+ * @method int getAllowOverlappingSequences()
  * @method Maho_CustomerSegmentation_Model_Segment setName(string $value)
  * @method Maho_CustomerSegmentation_Model_Segment setDescription(string $value)
  * @method Maho_CustomerSegmentation_Model_Segment setIsActive(int $value)
@@ -36,6 +39,9 @@ declare(strict_types=1);
  * @method Maho_CustomerSegmentation_Model_Segment setRefreshStatus(string $value)
  * @method Maho_CustomerSegmentation_Model_Segment setRefreshMode(string $value)
  * @method Maho_CustomerSegmentation_Model_Segment setPriority(int $value)
+ * @method Maho_CustomerSegmentation_Model_Segment setAutoEmailTrigger(string $value)
+ * @method Maho_CustomerSegmentation_Model_Segment setAutoEmailActive(int $value)
+ * @method Maho_CustomerSegmentation_Model_Segment setAllowOverlappingSequences(int $value)
  * @method Maho_CustomerSegmentation_Model_Resource_Segment getResource()
  * @method Maho_CustomerSegmentation_Model_Resource_Segment _getResource()
  */
@@ -48,6 +54,10 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public const MODE_AUTO   = 'auto';
     public const MODE_MANUAL = 'manual';
+
+    public const EMAIL_TRIGGER_NONE  = 'none';
+    public const EMAIL_TRIGGER_ENTER = 'enter';
+    public const EMAIL_TRIGGER_EXIT  = 'exit';
 
     /**
      * Event prefix for observers
@@ -165,6 +175,13 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         ]);
 
         try {
+            // Get current membership BEFORE updating
+            $adapter = $this->getResource()->getReadConnection();
+            $select = $adapter->select()
+                ->from(['sc' => $this->getResource()->getTable('customersegmentation/segment_customer')], 'customer_id')
+                ->where('sc.segment_id = ?', $this->getId());
+            $previousCustomers = $adapter->fetchCol($select);
+
             $matchedCustomers = $this->getMatchingCustomerIds();
             $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
@@ -179,6 +196,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             Mage::dispatchEvent('customer_segment_refresh_after', [
                 'segment' => $this,
                 'matched_customers' => $matchedCustomers,
+                'previous_customers' => $previousCustomers,
             ]);
         } catch (Exception $e) {
             $this->setRefreshStatus(self::STATUS_ERROR)->save();
@@ -295,6 +313,22 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             if (!$this->hasPriority()) {
                 $this->setPriority(0);
             }
+
+            // Set default values for email automation
+            if (!$this->hasData('auto_email_active')) {
+                $this->setAutoEmailActive(0);
+            }
+            if (!$this->hasData('allow_overlapping_sequences')) {
+                $this->setAllowOverlappingSequences(0);
+            }
+        }
+
+        // Validate email automation if enabled
+        if ($this->getAutoEmailActive()) {
+            $errors = $this->validateEmailAutomation();
+            if (!empty($errors)) {
+                Mage::throwException(implode("\n", $errors));
+            }
         }
 
         return $this;
@@ -326,4 +360,196 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         parent::loadPost($data);
         return $this;
     }
+
+    /**
+     * Email Automation Methods
+     */
+
+    /**
+     * Check if segment has email automation enabled
+     */
+    public function hasEmailAutomation(): bool
+    {
+        if (!(bool) $this->getAutoEmailActive()) {
+            return false;
+        }
+
+        try {
+            return $this->getEmailSequences()->getSize() > 0;
+        } catch (Exception $e) {
+            // Return false if there are database connection issues
+            return false;
+        }
+    }
+
+    /**
+     * Get email sequences for this segment
+     */
+    public function getEmailSequences(): Maho_CustomerSegmentation_Model_Resource_EmailSequence_Collection
+    {
+        try {
+            return Mage::getResourceModel('customersegmentation/emailSequence_collection')
+                ->addSegmentFilter((int) $this->getId())
+                ->addActiveFilter()
+                ->addStepNumberOrder('ASC');
+        } catch (Exception $e) {
+            // Return empty collection if there are issues
+            Mage::log('Failed to load email sequences: ' . $e->getMessage(), Mage::LOG_WARNING);
+            // Create an empty collection of the correct type
+            $collection = Mage::getResourceModel('customersegmentation/emailSequence_collection');
+            $collection->addFieldToFilter('sequence_id', 0); // Force empty result
+            return $collection;
+        }
+    }
+
+    /**
+     * Get automation trigger options for admin form
+     */
+    public function getAutoEmailTriggerOptions(): array
+    {
+        return [
+            self::EMAIL_TRIGGER_NONE => Mage::helper('customersegmentation')->__('Disabled'),
+            self::EMAIL_TRIGGER_ENTER => Mage::helper('customersegmentation')->__('When customer enters segment'),
+            self::EMAIL_TRIGGER_EXIT => Mage::helper('customersegmentation')->__('When customer exits segment'),
+        ];
+    }
+
+    /**
+     * Start email sequence for customer
+     */
+    public function startEmailSequence(int $customerId, string $triggerType): void
+    {
+        if (!$this->hasEmailAutomation()) {
+            return;
+        }
+
+        // Check if overlapping sequences are allowed
+        if (!$this->getAllowOverlappingSequences()) {
+            // If overlapping not allowed, check for any active sequences for this customer/segment
+            if ($this->hasAnyActiveSequence($customerId)) {
+                Mage::log(
+                    "Skipping sequence start for customer {$customerId} in segment {$this->getId()}: existing active sequence found and overlapping not allowed",
+                    Mage::LOG_INFO,
+                );
+                return;
+            }
+        } else {
+            // If overlapping allowed, only check for same trigger type
+            if ($this->hasActiveSequence($customerId, $triggerType)) {
+                Mage::log(
+                    "Skipping sequence start for customer {$customerId} in segment {$this->getId()}: same trigger sequence already active",
+                    Mage::LOG_INFO,
+                );
+                return;
+            }
+        }
+
+        // Get sequences for this specific trigger type
+        $sequences = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+            ->addSegmentFilter((int) $this->getId())
+            ->addActiveFilter()
+            ->addTriggerFilter($triggerType)
+            ->addStepNumberOrder('ASC');
+
+        if ($sequences->getSize() === 0) {
+            return;
+        }
+
+        // Create progress records for all sequences
+        $sequenceData = [];
+        foreach ($sequences as $sequence) {
+            $sequenceData[] = [
+                'sequence_id' => $sequence->getId(),
+                'step_number' => $sequence->getStepNumber(),
+                'delay_minutes' => $sequence->getDelayMinutes(),
+            ];
+        }
+
+        $resource = Mage::getResourceSingleton('customersegmentation/sequenceProgress');
+        $resource->createSequenceProgress($customerId, (int) $this->getId(), $sequenceData, $triggerType);
+
+        Mage::log(
+            "Started email sequence for customer {$customerId} in segment {$this->getId()} with trigger {$triggerType}",
+            Mage::LOG_INFO,
+        );
+    }
+
+    /**
+     * Check if customer has active sequence for this trigger
+     */
+    public function hasActiveSequence(int $customerId, string $triggerType): bool
+    {
+        $resource = Mage::getResourceSingleton('customersegmentation/sequenceProgress');
+        return $resource->hasActiveSequence($customerId, $this->getId(), $triggerType);
+    }
+
+    /**
+     * Check if customer has any active sequence for this segment (regardless of trigger)
+     */
+    public function hasAnyActiveSequence(int $customerId): bool
+    {
+        $resource = Mage::getResourceSingleton('customersegmentation/sequenceProgress');
+        return $resource->hasAnyActiveSequence($customerId, (int) $this->getId());
+    }
+
+    /**
+     * Get email automation statistics for this segment
+     */
+    public function getEmailAutomationStats(): array
+    {
+        if (!$this->getId()) {
+            return [];
+        }
+
+        try {
+            $resource = Mage::getResourceSingleton('customersegmentation/sequenceProgress');
+            return $resource->getSegmentStats((int) $this->getId());
+        } catch (Exception $e) {
+            // Return empty stats if tables don't exist yet or other DB issues
+            Mage::log('Failed to get email automation stats: ' . $e->getMessage(), Mage::LOG_WARNING);
+            return [];
+        }
+    }
+
+    /**
+     * Validate email automation settings
+     */
+    public function validateEmailAutomation(): array
+    {
+        $errors = [];
+
+        if (!$this->getAutoEmailActive()) {
+            return $errors; // No validation needed if automation is disabled
+        }
+
+        // Only check sequences if segment already exists (has ID)
+        if ($this->getId()) {
+            try {
+                // Check if segment has any sequences
+                $sequences = $this->getEmailSequences();
+                if ($sequences->getSize() === 0) {
+                    $errors[] = Mage::helper('customersegmentation')->__('At least one email sequence is required when automation is enabled.');
+                } else {
+                    // Validate each sequence
+                    foreach ($sequences as $sequence) {
+                        try {
+                            $sequence->validate();
+                        } catch (Exception $e) {
+                            $errors[] = Mage::helper('customersegmentation')->__(
+                                'Sequence step %d: %s',
+                                $sequence->getStepNumber(),
+                                $e->getMessage(),
+                            );
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                // Skip sequence validation if there are database connection issues
+                Mage::log('Failed to validate email sequences: ' . $e->getMessage(), Mage::LOG_WARNING);
+            }
+        }
+
+        return $errors;
+    }
+
 }

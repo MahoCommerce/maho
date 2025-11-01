@@ -29,6 +29,7 @@ return RectorConfig::configure()
         CodeQuality\Ternary\SimplifyTautologyTernaryRector::class,
         DeadCode\ClassMethod\RemoveUselessParamTagRector::class,
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
+        DeadCode\MethodCall\RemoveNullArgOnNullDefaultParamRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
         Rector\Php71\Rector\List_\ListToArrayDestructRector::class,

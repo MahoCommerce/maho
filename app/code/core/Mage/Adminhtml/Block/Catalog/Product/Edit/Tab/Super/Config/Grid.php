@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -92,7 +92,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
      */
     protected function _getCreatedProducts()
     {
-        $products = $this->getRequest()->getPost('new_products', null);
+        $products = $this->getRequest()->getPost('new_products');
         if (!is_array($products)) {
             $products = [];
         }
@@ -148,7 +148,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
 
     protected function _getSelectedProducts()
     {
-        $products = $this->getRequest()->getPost('products', null);
+        $products = $this->getRequest()->getPost('products');
         if (!is_array($products)) {
             /** @var Mage_Catalog_Model_Product_Type_Configurable $productType */
             $productType = $this->_getProduct()->getTypeInstance(true);

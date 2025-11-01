@@ -6,9 +6,10 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -195,7 +196,24 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
             ->load($this->getRequest()->getParam('id'));
         if ($template->getId()) {
             try {
+                // Check if template is used by email sequences
+                $sequenceCount = Mage::getResourceModel('customersegmentation/emailSequence_collection')
+                    ->addFieldToFilter('template_id', $template->getId())
+                    ->getSize();
+
+                if ($sequenceCount > 0) {
+                    Mage::throwException(
+                        Mage::helper('newsletter')->__(
+                            'Cannot delete this template. It is currently used by %d email automation sequence(s). Please reassign or delete those sequences first.',
+                            $sequenceCount,
+                        ),
+                    );
+                }
+
                 $template->delete();
+                $this->_getSession()->addSuccess(
+                    Mage::helper('newsletter')->__('The newsletter template has been deleted.'),
+                );
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {
@@ -225,6 +243,22 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
         $this->getLayout()->getBlock('preview_form')->setFormData($data);
         $this->renderLayout();
+    }
+
+    /**
+     * WYSIWYG variable chooser action for newsletter templates
+     */
+    public function wysiwygVariableAction(): void
+    {
+        $this->getResponse()
+            ->setHeader('Content-Type', 'application/json', true)
+            ->setBody(
+                Mage::helper('core')->jsonEncode(
+                    $this->getLayout()
+                        ->createBlock('adminhtml/newsletter_template_edit_form')
+                        ->getNewsletterVariables(),
+                ),
+            );
     }
 
     /**

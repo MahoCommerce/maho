@@ -6,6 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -239,7 +240,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $simple = false;
         if (stristr($this->_getRequest()->getActionName(), 'simple')
-            || !is_null($this->_getRequest()->getParam('simple', null))
+            || !is_null($this->_getRequest()->getParam('simple'))
         ) {
             $simple = true;
         }
@@ -283,6 +284,6 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getOauthToken()
     {
-        return $this->_getRequest()->getParam('oauth_token', null);
+        return $this->_getRequest()->getParam('oauth_token');
     }
 }

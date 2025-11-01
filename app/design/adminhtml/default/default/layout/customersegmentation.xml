@@ -33,4 +33,16 @@
             <block type="customersegmentation/adminhtml_segment_edit_tabs" name="customersegmentation.segment.edit.tabs" />
         </reference>
     </adminhtml_customersegmentation_index_edit>
+
+    <adminhtml_customersegmentation_index_newsequence>
+        <update handle="adminhtml_customersegmentation_index_editsequence" />
+    </adminhtml_customersegmentation_index_newsequence>
+
+    <adminhtml_customersegmentation_index_editsequence>
+        <reference name="content">
+            <block type="customersegmentation/adminhtml_segment_sequence_edit" name="customersegmentation.sequence.edit">
+                <block type="customersegmentation/adminhtml_segment_sequence_edit_form" name="customersegmentation.sequence.edit.form" />
+            </block>
+        </reference>
+    </adminhtml_customersegmentation_index_editsequence>
 </layout>

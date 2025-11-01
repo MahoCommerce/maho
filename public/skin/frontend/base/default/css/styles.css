@@ -598,16 +598,58 @@ a.button:hover {
 }
 
 .button2 {
-  border: 0;
-  padding: 0 5px;
-  margin: 0;
   background: transparent;
+  border: 1px solid var(--maho-color-primary);
+  color: var(--maho-color-primary);
   cursor: pointer;
+  display: inline-block;
+  font-size: 0.813rem;
+  font-weight: normal;
+  line-height: 19px;
+  margin: 0;
+  padding: 6px 14px;
+  text-align: center;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
   vertical-align: middle;
+  white-space: nowrap;
+}
+
+.button2:hover {
+  background: var(--maho-color-primary);
+  color: var(--maho-color-background);
+}
+
+.button2:active {
+  background: var(--maho-color-primary-active);
+  border-color: var(--maho-color-primary-active);
+  color: var(--maho-color-background);
 }
 
 .button2:focus {
+  background: var(--maho-color-primary);
+  border-color: var(--maho-color-primary);
+  color: var(--maho-color-background);
   outline: none;
+}
+
+.button2:disabled,
+.button2.disabled {
+  border-color: var(--maho-color-button-disabled);
+  color: var(--maho-color-button-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button2.cancel-coupon {
+  border-color: #999;
+  color: #666;
+}
+
+.button2.cancel-coupon:hover {
+  background: #666;
+  border-color: #666;
+  color: var(--maho-color-background);
 }
 
 @media only screen and (max-width: 770px) {

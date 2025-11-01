@@ -54,6 +54,7 @@
 "This product is available for purchase in increments of %s only.","This product is available for purchase in increments of %s only."
 "This product is currently out of stock.","This product is currently out of stock."
 "This product is not available in the requested quantity. %s of the items will be backordered.","This product is not available in the requested quantity. %s of the items will be backordered."
+"This product with current option is not available","This product with current option is not available"
 "To Fixed Value","To Fixed Value"
 "To Percentage","To Percentage"
 "Undefined product type.","Undefined product type."

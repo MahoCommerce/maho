@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -253,7 +253,7 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
              ->_title($this->__('Delete Website'));
 
         $session = $this->_getSession();
-        $itemId = $this->getRequest()->getParam('item_id', null);
+        $itemId = $this->getRequest()->getParam('item_id');
         if (!$model = Mage::getModel('core/website')->load($itemId)) {
             $session->addError(Mage::helper('core')->__('Unable to proceed. Please, try again.'));
             $this->_redirect('*/*/');
@@ -284,7 +284,7 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
              ->_title($this->__('Delete Store'));
 
         $session = $this->_getSession();
-        $itemId = $this->getRequest()->getParam('item_id', null);
+        $itemId = $this->getRequest()->getParam('item_id');
         if (!$model = Mage::getModel('core/store_group')->load($itemId)) {
             $session->addError(Mage::helper('core')->__('Unable to proceed. Please, try again.'));
             $this->_redirect('*/*/');
@@ -315,7 +315,7 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
              ->_title($this->__('Delete Store View'));
 
         $session = $this->_getSession();
-        $itemId = $this->getRequest()->getParam('item_id', null);
+        $itemId = $this->getRequest()->getParam('item_id');
         if (!$model = Mage::getModel('core/store')->load($itemId)) {
             $session->addError(Mage::helper('core')->__('Unable to proceed. Please, try again.'));
             $this->_redirect('*/*/');

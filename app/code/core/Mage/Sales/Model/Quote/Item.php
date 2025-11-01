@@ -958,4 +958,14 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
 
         return $this;
     }
+
+    /**
+     * Get discount amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getDiscountAmount(): ?float
+    {
+        $value = $this->getData('discount_amount');
+        return $value !== null ? (float) $value : null;
+    }
 }

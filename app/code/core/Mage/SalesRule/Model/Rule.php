@@ -46,10 +46,8 @@
  * @method string getSimpleAction()
  * @method $this setSimpleAction(string $value)
  * @method $this setDiscountAmount(float $value)
- * @method float getDiscountQty()
  * @method $this setDiscountQty(float $value)
- * @method int getDiscountStep()
- * @method $this setDiscountStep(int $value)
+ * @method $this setDiscountStep(float $value)
  * @method int getSimpleFreeShipping()
  * @method $this setSimpleFreeShipping(int $value)
  * @method int getApplyToShipping()
@@ -537,5 +535,35 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function toArray(array $arrAttributes = [])
     {
         return parent::toArray($arrAttributes);
+    }
+
+    /**
+     * Get discount quantity with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getDiscountQty(): ?float
+    {
+        $value = $this->getData('discount_qty');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
+     * Get discount step with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getDiscountStep(): ?float
+    {
+        $value = $this->getData('discount_step');
+        return $value !== null ? (float) $value : null;
+    }
+
+    /**
+     * Get discount amount with proper float casting
+     * DBAL returns DECIMAL as string, so we cast to float
+     */
+    public function getDiscountAmount(): ?float
+    {
+        $value = $this->getData('discount_amount');
+        return $value !== null ? (float) $value : null;
     }
 }

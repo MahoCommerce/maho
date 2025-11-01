@@ -197,6 +197,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
+        \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'varchar',
         \Maho\Db\Ddl\Table::TYPE_BLOB          => 'blob',
         \Maho\Db\Ddl\Table::TYPE_VARBINARY     => 'blob',
     ];
@@ -2879,6 +2880,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                 $cType .= sprintf('(%d,%d)', $precision, $scale);
                 break;
             case \Maho\Db\Ddl\Table::TYPE_TEXT:
+            case \Maho\Db\Ddl\Table::TYPE_VARCHAR:
             case \Maho\Db\Ddl\Table::TYPE_BLOB:
             case \Maho\Db\Ddl\Table::TYPE_VARBINARY:
                 if (empty($options['LENGTH'])) {
@@ -2887,14 +2889,14 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                     $length = $this->_parseTextSize($options['LENGTH']);
                 }
                 if ($length <= 255) {
-                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'varchar' : 'varbinary';
+                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'varchar' : 'varbinary';
                     $cType = sprintf('%s(%d)', $cType, $length);
                 } elseif ($length <= 65536) {
-                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'text' : 'blob';
+                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'text' : 'blob';
                 } elseif ($length <= 16777216) {
-                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'mediumtext' : 'mediumblob';
+                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'mediumtext' : 'mediumblob';
                 } else {
-                    $cType = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT ? 'longtext' : 'longblob';
+                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'longtext' : 'longblob';
                 }
                 break;
         }

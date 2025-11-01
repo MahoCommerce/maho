@@ -275,7 +275,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
      */
     public function getSelectedProducts()
     {
-        if ($selectedProducts = $this->getRequest()->getParam('selected_products', null)) {
+        if ($selectedProducts = $this->getRequest()->getParam('selected_products')) {
             $this->setSelectedProducts($selectedProducts);
         }
         return $this->_selectedProducts;

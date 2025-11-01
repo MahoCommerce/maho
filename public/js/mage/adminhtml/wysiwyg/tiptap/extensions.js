@@ -6,12 +6,12 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.5';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.5';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.5';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.5';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.5';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.5';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.8';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.8';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.8';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.8';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.8';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.8';
 
 export {
     Editor, Node, Mark, StarterKit, TextAlign,
@@ -27,8 +27,17 @@ const parseDirective = (directiveStr) => {
     if (directiveStr.startsWith('{{') && directiveStr.endsWith('}}')) {
         const [ type, attrStr ] = directiveStr.slice(2, -2).trim().split(/\s(.*)/);
         directiveObj.type = type;
-        for (const match of (attrStr ?? '').matchAll(/([\w\-]+)="(.*?)"/g)) {
-            directiveObj.params[match[1]] = match[2];
+        const trimmedAttr = (attrStr ?? '').trim();
+
+        // Handle {{var variable_name}} format
+        if (type === 'var' && trimmedAttr && !trimmedAttr.includes('=')) {
+            directiveObj.params._value = trimmedAttr;
+        }
+        // Handle normal key="value" format
+        else {
+            for (const match of trimmedAttr.matchAll(/([\w\-]+)="(.*?)"/g)) {
+                directiveObj.params[match[1]] = match[2];
+            }
         }
     }
     return directiveObj;
@@ -39,11 +48,20 @@ const renderDirective = (directiveObj) => {
         return '';
     }
     let directiveStr = '{{' + directiveObj.type;
-    for (const [name, value] of Object.entries(directiveObj.params)) {
-        if (value) {
-            directiveStr += ` ${name}="${value}"`;
-        } else {
-            directiveStr += ` ${name}`;
+
+    // Handle {{var variable_name}} format
+    if (directiveObj.type === 'var' && directiveObj.params._value) {
+        directiveStr += ' ' + directiveObj.params._value;
+    }
+    // Handle normal key="value" format
+    else {
+        for (const [name, value] of Object.entries(directiveObj.params)) {
+            if (name === '_value') continue; // Skip internal _value param
+            if (value) {
+                directiveStr += ` ${name}="${value}"`;
+            } else {
+                directiveStr += ` ${name}`;
+            }
         }
     }
     directiveStr += '}}';
@@ -175,6 +193,8 @@ export const MahoWidgetBlock = Node.create({
 
             if (node.attrs.directiveObj.type === 'var') {
                 icon = 'variable';
+                label = node.attrs.directiveObj.params._value;
+                dblclick = () => editor.commands.insertMahoVariable(node);
             }
             else if (node.attrs.directiveObj.type === 'config') {
                 icon = 'variable';

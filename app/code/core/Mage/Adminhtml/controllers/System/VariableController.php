@@ -41,7 +41,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     {
         $this->_title($this->__('System'))->_title($this->__('Custom Variables'));
 
-        $variableId = $this->getRequest()->getParam('variable_id', null);
+        $variableId = $this->getRequest()->getParam('variable_id');
         $storeId = (int) $this->getRequest()->getParam('store', 0);
         /** @var Mage_Core_Model_Variable $variable */
         $variable = Mage::getModel('core/variable');
@@ -172,6 +172,21 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     {
         $customVariables = Mage::getModel('core/variable')->getVariablesOptionArray(true);
         $storeContactVariabls = Mage::getModel('core/source_email_variables')->toOptionArray(true);
-        $this->getResponse()->setBodyJson([$storeContactVariabls, $customVariables]);
+
+        $variables = [$storeContactVariabls, $customVariables];
+
+        // Add newsletter-specific variables if target element is from newsletter template
+        $targetId = $this->getRequest()->getParam('variable_target_id');
+        if ($targetId === 'text' && $this->getRequest()->getServer('HTTP_REFERER')) {
+            $referer = $this->getRequest()->getServer('HTTP_REFERER');
+            if (str_contains($referer, 'newsletter_template')) {
+                $block = Mage::app()->getLayout()->createBlock('adminhtml/newsletter_template_edit_form');
+                $newsletterVars = $block->getNewsletterVariables();
+                // Merge newsletter variables (skip first element as it's store contact which is already included)
+                $variables = array_merge($variables, array_slice($newsletterVars, 1));
+            }
+        }
+
+        $this->getResponse()->setBodyJson($variables);
     }
 }
