@@ -14,7 +14,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
 {
     /**
      * Internal constructor
-     *
      */
     #[\Override]
     protected function _construct()

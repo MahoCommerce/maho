@@ -14,7 +14,6 @@ class Mage_Adminhtml_Block_Customer_Group extends Mage_Adminhtml_Block_Widget_Gr
 {
     /**
      * Modify header & button labels
-     *
      */
     public function __construct()
     {

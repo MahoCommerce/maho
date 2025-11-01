@@ -93,7 +93,6 @@ class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
 
     /**
      * init model
-     *
      */
     #[\Override]
     protected function _construct()

@@ -13,7 +13,6 @@
 /**
  * Customer account billing agreements block
  *
- *
  * @method $this setBackUrl(string $value)
  * @method $this setCreateUrl(string $value)
  */

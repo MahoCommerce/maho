@@ -13,10 +13,10 @@
 class Mage_CatalogInventory_Model_System_Config_Backend_Minqty extends Mage_Core_Model_Config_Data
 {
     /**
-    * Validate minimum product qty value
-    *
-    * @return $this
-    */
+     * Validate minimum product qty value
+     *
+     * @return $this
+     */
     #[\Override]
     protected function _beforeSave()
     {

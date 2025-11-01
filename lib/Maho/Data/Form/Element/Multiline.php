@@ -17,7 +17,6 @@ use Maho\Data\Form\Element\AbstractElement;
 /**
  * Form multiline text elements
  *
- *
  * @method int getLineCount()
  * @method $this setLineCount(int $value)
  */

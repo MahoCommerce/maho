@@ -36,7 +36,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * View Templates list
-     *
      */
     public function indexAction(): void
     {
@@ -55,7 +54,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * JSON Grid Action
-     *
      */
     public function gridAction(): void
     {
@@ -67,7 +65,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * Create new Newsletter Template
-     *
      */
     public function newAction(): void
     {
@@ -76,7 +73,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * Edit Newsletter Template
-     *
      */
     public function editAction(): void
     {
@@ -118,7 +114,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * Drop Newsletter Template
-     *
      */
     public function dropAction(): void
     {
@@ -132,7 +127,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * Save Newsletter Template
-     *
      */
     public function saveAction(): void
     {
@@ -188,7 +182,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * Delete newsletter Template
-     *
      */
     public function deleteAction(): void
     {
@@ -225,7 +218,6 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
 
     /**
      * Preview Newsletter template
-     *
      */
     public function previewAction()
     {

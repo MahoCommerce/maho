@@ -199,7 +199,6 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
 
     /**
      * Load some inventory configuration settings
-     *
      */
     protected function _initConfig()
     {
@@ -223,7 +222,6 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
 
     /**
      * Set items out of stock basing on their quantities and config settings
-     *
      */
     public function updateSetOutOfStock()
     {
@@ -258,7 +256,6 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
 
     /**
      * Set items in stock basing on their quantities and config settings
-     *
      */
     public function updateSetInStock()
     {
@@ -290,7 +287,6 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
 
     /**
      * Update items low stock date basing on their quantities and config settings
-     *
      */
     public function updateLowStockDate()
     {

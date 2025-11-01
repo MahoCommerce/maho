@@ -13,7 +13,6 @@ class Mage_Sales_Block_Payment_Form_Billing_Agreement extends Mage_Payment_Block
 {
     /**
      * Set custom template
-     *
      */
     public function __construct()
     {

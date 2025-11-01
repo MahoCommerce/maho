@@ -14,7 +14,6 @@ class Mage_Catalog_Model_Resource_Product_Action extends Mage_Catalog_Model_Reso
 {
     /**
      * Initialize connection
-     *
      */
     #[\Override]
     protected function _construct()

@@ -14,7 +14,6 @@ class Mage_Admin_Model_Resource_Permissions_Collection extends Mage_Core_Model_R
 {
     /**
      * Initialize resource
-     *
      */
     #[\Override]
     protected function _construct()

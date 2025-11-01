@@ -21,7 +21,6 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav extends Mage_Catalog_Model
 
     /**
      * Define main index table
-     *
      */
     #[\Override]
     protected function _construct()

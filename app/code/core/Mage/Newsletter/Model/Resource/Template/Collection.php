@@ -14,7 +14,6 @@ class Mage_Newsletter_Model_Resource_Template_Collection extends Mage_Core_Model
 {
     /**
      * Define resource model and model
-     *
      */
     #[\Override]
     protected function _construct()

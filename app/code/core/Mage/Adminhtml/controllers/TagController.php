@@ -49,7 +49,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Show grid action
-     *
      */
     public function indexAction(): void
     {
@@ -65,7 +64,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Action to draw grid loaded by ajax
-     *
      */
     public function ajaxGridAction(): void
     {
@@ -75,7 +73,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Action to draw pending tags grid loaded by ajax
-     *
      */
     public function ajaxPendingGridAction(): void
     {
@@ -85,7 +82,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * New tag action
-     *
      */
     public function newAction(): void
     {
@@ -94,7 +90,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Edit tag action
-     *
      */
     public function editAction()
     {
@@ -125,7 +120,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Save tag action
-     *
      */
     public function saveAction()
     {
@@ -199,7 +193,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Pending tags
-     *
      */
     public function pendingAction(): void
     {
@@ -215,7 +208,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Assigned products (with serializer block)
-     *
      */
     public function assignedAction(): void
     {
@@ -228,7 +220,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Assigned products grid
-     *
      */
     public function assignedGridOnlyAction(): void
     {
@@ -239,7 +230,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Tagged products
-     *
      */
     public function productAction(): void
     {
@@ -250,7 +240,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Customers
-     *
      */
     public function customerAction(): void
     {
@@ -261,7 +250,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Massaction for removing tags
-     *
      */
     public function massDeleteAction(): void
     {
@@ -287,7 +275,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Massaction for changing status of selected tags
-     *
      */
     public function massStatusAction(): void
     {

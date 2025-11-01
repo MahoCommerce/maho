@@ -88,7 +88,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Delete a directory
-     *
      */
     #[\Override]
     public function rmdir($dir, $recursive = false)
@@ -123,7 +122,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Get current working directory
-     *
      */
     #[\Override]
     public function pwd()
@@ -133,7 +131,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Change current working directory
-     *
      */
     #[\Override]
     public function cd($dir)
@@ -143,7 +140,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Read a file
-     *
      */
     #[\Override]
     public function read($filename, $dest = null)
@@ -166,7 +162,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Delete a file
-     *
      */
     #[\Override]
     public function rm($filename)
@@ -176,7 +171,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Rename or move a directory or a file
-     *
      */
     #[\Override]
     public function mv($src, $dest)
@@ -186,7 +180,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Chamge mode of a directory or a file
-     *
      */
     #[\Override]
     public function chmod($filename, $mode)
@@ -196,7 +189,6 @@ class Sftp extends AbstractIo implements IoInterface
 
     /**
      * Get list of cwd subdirectories and files
-     *
      */
     #[\Override]
     public function ls($grep = null)

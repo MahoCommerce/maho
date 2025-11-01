@@ -190,7 +190,6 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * Make condition for using in where section
      * from select statement with single date column
      *
-     *
      * @param Maho\Db\Select|string $select
      * @param string $periodColumn
      * @return string|false
@@ -331,15 +330,15 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
     }
 
     /**
-    * Retrieve query for attribute with timezone conversion
-    *
-    * @param string|array $table
-    * @param string $column
-    * @param mixed $from
-    * @param mixed $to
-    * @param int|string|Mage_Core_Model_Store|null $store
-    * @return string
-    */
+     * Retrieve query for attribute with timezone conversion
+     *
+     * @param string|array $table
+     * @param string $column
+     * @param mixed $from
+     * @param mixed $to
+     * @param int|string|Mage_Core_Model_Store|null $store
+     * @return string
+     */
     public function getStoreTZOffsetQuery($table, $column, $from = null, $to = null, $store = null)
     {
         $column = $this->_getWriteAdapter()->quoteIdentifier($column);

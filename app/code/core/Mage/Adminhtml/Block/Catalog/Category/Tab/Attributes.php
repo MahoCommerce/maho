@@ -24,7 +24,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
     /**
      * Initialize tab
-     *
      */
     public function __construct()
     {
@@ -216,7 +215,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
     /**
      * Get form HTML with additional JavaScript for dynamic rules
-     *
      */
     #[\Override]
     public function getFormHtml(): string

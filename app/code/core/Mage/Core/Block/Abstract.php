@@ -207,7 +207,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * Internal constructor, that is called from real constructor
      *
      * Please override this one instead of overriding real __construct constructor
-     *
      */
     #[\Override]
     protected function _construct()

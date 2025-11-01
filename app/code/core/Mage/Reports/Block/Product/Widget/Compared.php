@@ -14,7 +14,6 @@ class Mage_Reports_Block_Product_Widget_Compared extends Mage_Reports_Block_Prod
 {
     /**
      * Internal constructor
-     *
      */
     #[\Override]
     protected function _construct()

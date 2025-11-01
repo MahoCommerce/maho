@@ -108,7 +108,6 @@ class Mage_Api_Model_Server
 
     /**
      * Run server
-     *
      */
     public function run()
     {

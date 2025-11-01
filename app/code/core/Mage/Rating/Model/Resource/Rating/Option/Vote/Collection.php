@@ -17,7 +17,6 @@ class Mage_Rating_Model_Resource_Rating_Option_Vote_Collection extends Mage_Core
 {
     /**
      * Define model
-     *
      */
     #[\Override]
     protected function _construct()

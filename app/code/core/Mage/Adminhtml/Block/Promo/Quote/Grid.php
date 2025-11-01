@@ -34,7 +34,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
     #[\Override]
     protected function _prepareCollection()
     {
-        /** @var Mage_SalesRule_Model_Resource_Rule_Collection $collection  */
+        /** @var Mage_SalesRule_Model_Resource_Rule_Collection $collection */
         $collection = Mage::getModel('salesrule/rule')
             ->getResourceCollection();
         $collection->addWebsitesToResult();

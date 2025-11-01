@@ -28,7 +28,6 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
 
     /**
      * Initialize main table and the primary key field name
-     *
      */
     #[\Override]
     protected function _construct()

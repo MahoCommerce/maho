@@ -25,7 +25,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Options extends Ma
     /**
      * Get option html block
      *
-     *
      * @return string
      */
     #[\Override]

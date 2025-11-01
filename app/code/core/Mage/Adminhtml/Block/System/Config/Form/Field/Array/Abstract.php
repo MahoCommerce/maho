@@ -49,7 +49,6 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
 
     /**
      * Check if columns are defined, set template
-     *
      */
     public function __construct()
     {

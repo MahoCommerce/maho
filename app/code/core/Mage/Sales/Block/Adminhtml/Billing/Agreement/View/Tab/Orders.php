@@ -14,7 +14,6 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
 {
     /**
      * Initialize grid params
-     *
      */
     public function __construct()
     {

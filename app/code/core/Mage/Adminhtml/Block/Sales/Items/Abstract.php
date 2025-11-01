@@ -41,7 +41,6 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
 
     /**
      * Init block
-     *
      */
     #[\Override]
     protected function _construct()

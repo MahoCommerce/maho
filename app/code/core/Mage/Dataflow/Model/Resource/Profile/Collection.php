@@ -14,7 +14,6 @@ class Mage_Dataflow_Model_Resource_Profile_Collection extends Mage_Core_Model_Re
 {
     /**
      * Define resource model and model
-     *
      */
     #[\Override]
     protected function _construct()

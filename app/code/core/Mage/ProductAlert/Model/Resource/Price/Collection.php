@@ -14,7 +14,6 @@ class Mage_ProductAlert_Model_Resource_Price_Collection extends Mage_Core_Model_
 {
     /**
      * Define price collection
-     *
      */
     #[\Override]
     protected function _construct()

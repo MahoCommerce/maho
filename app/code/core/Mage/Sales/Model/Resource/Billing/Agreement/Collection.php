@@ -28,7 +28,6 @@ class Mage_Sales_Model_Resource_Billing_Agreement_Collection extends Mage_Core_M
 
     /**
      * Collection initialization
-     *
      */
     #[\Override]
     protected function _construct()

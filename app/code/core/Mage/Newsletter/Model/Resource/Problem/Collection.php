@@ -38,7 +38,6 @@ class Mage_Newsletter_Model_Resource_Problem_Collection extends Mage_Core_Model_
 
     /**
      * Define resource model and model
-     *
      */
     #[\Override]
     protected function _construct()
@@ -86,7 +85,6 @@ class Mage_Newsletter_Model_Resource_Problem_Collection extends Mage_Core_Model_
 
     /**
      * Loads customers info to collection
-     *
      */
     protected function _addCustomersData()
     {

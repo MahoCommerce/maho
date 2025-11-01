@@ -133,7 +133,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 
     /**
      * Submit new review action
-     *
      */
     public function postAction(): void
     {
@@ -205,7 +204,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 
     /**
      * Show list of product's reviews
-     *
      */
     public function listAction(): void
     {
@@ -239,7 +237,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 
     /**
      * Show details of one review
-     *
      */
     public function viewAction(): void
     {

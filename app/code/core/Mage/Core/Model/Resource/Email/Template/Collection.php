@@ -21,7 +21,6 @@ class Mage_Core_Model_Resource_Email_Template_Collection extends Mage_Core_Model
 
     /**
      * Define resource table
-     *
      */
     #[\Override]
     public function _construct()

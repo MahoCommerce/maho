@@ -371,7 +371,6 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
 
     /**
      * Initialize convert adapter model for products collection
-     *
      */
     public function __construct()
     {

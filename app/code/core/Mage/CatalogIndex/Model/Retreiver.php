@@ -58,7 +58,6 @@ class Mage_CatalogIndex_Model_Retreiver extends Mage_Core_Model_Abstract
 
     /**
      * Retriever factory init, load retriever settings
-     *
      */
     #[\Override]
     protected function _construct()

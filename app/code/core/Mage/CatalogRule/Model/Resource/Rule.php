@@ -87,7 +87,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Bind catalog rule to customer group(s) and website(s).
      * Update products which are matched for rule.
      *
-     *
      * @return $this
      */
     #[\Override]
@@ -291,7 +290,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
     /**
      * Update products which are matched for rule
-     *
      *
      * @throws Exception
      * @return $this

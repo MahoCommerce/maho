@@ -14,7 +14,6 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
 {
     /**
      * Init class
-     *
      */
     public function __construct()
     {
@@ -25,7 +24,6 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
     }
 
     /**
-     *
      * return Mage_Adminhtml_Block_Widget_Form
      */
     #[\Override]

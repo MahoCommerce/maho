@@ -14,7 +14,6 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
 {
     /**
      * Resource Report Rule constructor
-     *
      */
     #[\Override]
     protected function _construct()

@@ -492,7 +492,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Cancel payment abstract method
      *
-     *
      * @return $this
      */
     public function cancel(Varien_Object $payment)
@@ -517,7 +516,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Void payment abstract method
      *
-     *
      * @return $this
      */
     public function void(Varien_Object $payment)
@@ -530,7 +528,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
 
     /**
      * Whether this method can accept or deny payment
-     *
      *
      * @return bool
      */
@@ -611,10 +608,10 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     }
 
     /**
-      * Prepare info instance for save
-      *
-      * @return $this
-      */
+     * Prepare info instance for save
+     *
+     * @return $this
+     */
     public function prepareSave()
     {
         return $this;

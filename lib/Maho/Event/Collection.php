@@ -40,7 +40,6 @@ class Collection
 
     /**
      * Initializes global observers collection
-     *
      */
     public function __construct()
     {

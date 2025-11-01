@@ -21,7 +21,6 @@ class Mage_Core_Model_Resource_Variable_Collection extends Mage_Core_Model_Resou
 
     /**
      *  Define resource model
-     *
      */
     #[\Override]
     protected function _construct()

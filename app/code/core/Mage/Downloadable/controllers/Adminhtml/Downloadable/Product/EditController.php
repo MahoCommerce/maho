@@ -20,7 +20,6 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
 
     /**
      * Load downloadable tab fieldsets
-     *
      */
     public function formAction(): void
     {

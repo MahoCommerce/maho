@@ -50,7 +50,6 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
 
     /**
      * Init resource
-     *
      */
     #[\Override]
     protected function _construct()

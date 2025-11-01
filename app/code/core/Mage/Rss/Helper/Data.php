@@ -34,7 +34,6 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Authenticate customer on frontend
-     *
      */
     public function authFrontend()
     {
@@ -92,7 +91,6 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Send authenticate failed headers
-     *
      */
     public function authFailed()
     {

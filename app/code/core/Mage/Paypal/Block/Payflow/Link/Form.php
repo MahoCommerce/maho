@@ -14,7 +14,6 @@ class Mage_Paypal_Block_Payflow_Link_Form extends Mage_Payment_Block_Form
 {
     /**
      * Set payment method code
-     *
      */
     #[\Override]
     protected function _construct()

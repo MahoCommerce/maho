@@ -21,7 +21,6 @@ class Mage_Adminhtml_Block_Sales_Transactions_Child_Grid extends Mage_Adminhtml_
 
     /**
      * Disable pager and filter
-     *
      */
     public function __construct()
     {
@@ -48,7 +47,6 @@ class Mage_Adminhtml_Block_Sales_Transactions_Child_Grid extends Mage_Adminhtml_
 
     /**
      * Remove some columns and make other not sortable
-     *
      */
     #[\Override]
     protected function _prepareColumns()

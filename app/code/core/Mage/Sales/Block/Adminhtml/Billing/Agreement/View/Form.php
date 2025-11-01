@@ -14,7 +14,6 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Form extends Mage_Adminh
 {
     /**
      * Define custom template
-     *
      */
     #[\Override]
     protected function _construct()

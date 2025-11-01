@@ -42,15 +42,14 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
      */
     protected $_inlineCssFile = false;
 
-    /** @var Mage_Admin_Model_Variable  */
+    /** @var Mage_Admin_Model_Variable */
     protected $_permissionVariable;
 
-    /** @var Mage_Admin_Model_Block  */
+    /** @var Mage_Admin_Model_Block */
     protected $_permissionBlock;
 
     /**
      * Setup callbacks for filters
-     *
      */
     public function __construct()
     {

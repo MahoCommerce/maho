@@ -32,7 +32,6 @@ class Mage_Reports_Model_Product_Index_Viewed extends Mage_Reports_Model_Product
 
     /**
      * Initialize resource model
-     *
      */
     #[\Override]
     protected function _construct()

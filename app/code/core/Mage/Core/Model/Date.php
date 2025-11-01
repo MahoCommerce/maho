@@ -21,7 +21,6 @@ class Mage_Core_Model_Date
 
     /**
      * Init offset
-     *
      */
     public function __construct()
     {

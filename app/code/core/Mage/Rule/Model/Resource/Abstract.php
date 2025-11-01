@@ -37,7 +37,6 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     /**
      * Prepare rule's active "from" and "to" dates
      *
-     *
      * @return Mage_Rule_Model_Resource_Abstract
      */
     #[\Override]

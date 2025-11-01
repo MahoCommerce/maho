@@ -14,7 +14,6 @@ class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
 {
     /**
      * Initialize template
-     *
      */
     public function __construct()
     {

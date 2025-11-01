@@ -14,7 +14,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
 {
     /**
      * Giftmessages allow section in configuration
-     *
      */
     public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS = 'sales/gift_options/allow_items';
     public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER = 'sales/gift_options/allow_order';

@@ -50,8 +50,8 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-    * Implementation of IteratorAggregate::getIterator()
-    */
+     * Implementation of IteratorAggregate::getIterator()
+     */
     #[\Override]
     public function getIterator(): \Traversable
     {

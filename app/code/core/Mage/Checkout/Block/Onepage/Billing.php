@@ -28,7 +28,6 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
 
     /**
      * Initialize billing address step
-     *
      */
     #[\Override]
     protected function _construct()

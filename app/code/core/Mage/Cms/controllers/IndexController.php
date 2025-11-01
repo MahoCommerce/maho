@@ -32,7 +32,6 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
     /**
      * Default index action (with 404 Not Found headers)
      * Used if default page don't configure or available
-     *
      */
     public function defaultIndexAction(): void
     {
@@ -63,7 +62,6 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
     /**
      * Default no route page action
      * Used if no route page don't configure or available
-     *
      */
     public function defaultNoRouteAction(): void
     {
@@ -76,7 +74,6 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
 
     /**
      * Render Disable cookies page
-     *
      */
     #[\Override]
     public function noCookiesAction(): void
@@ -90,7 +87,6 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
     /**
      * Default no cookies page action
      * Used if no cookies page don't configure or available
-     *
      */
     public function defaultNoCookiesAction(): void
     {

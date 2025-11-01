@@ -14,7 +14,6 @@ class Mage_Cms_Model_Resource_Page_Service extends Mage_Core_Model_Resource_Db_A
 {
     /**
      * Init cms page service model
-     *
      */
     #[\Override]
     protected function _construct()

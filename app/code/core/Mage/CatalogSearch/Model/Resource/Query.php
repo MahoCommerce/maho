@@ -14,7 +14,6 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
 {
     /**
      * Init resource data
-     *
      */
     #[\Override]
     protected function _construct()

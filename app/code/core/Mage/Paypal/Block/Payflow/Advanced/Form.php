@@ -14,7 +14,6 @@ class Mage_Paypal_Block_Payflow_Advanced_Form extends Mage_Paypal_Block_Payflow_
 {
     /**
      * Set payment method code
-     *
      */
     #[\Override]
     protected function _construct()

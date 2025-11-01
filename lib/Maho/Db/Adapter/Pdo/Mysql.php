@@ -545,7 +545,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Parse a source hostname and generate a host info
-     *
      */
     protected function _getHostInfo(string $hostName): \Maho\DataObject
     {
@@ -790,8 +789,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * with named binds.
      *
      * @param \Maho\Db\Select|string $sql
-     * @param-out string $sql
      * @param mixed $bind
+     * @param-out string $sql
      * @return $this
      */
     protected function _prepareQuery(&$sql, &$bind = [])
@@ -1871,7 +1870,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Decorate a table info by detecting and parsing the binary/varbinary fields
-     *
      */
     public function decorateTableInfo(array $tableColumnInfo): array
     {

@@ -97,7 +97,6 @@ class Mage_Core_Model_Resource_File_Storage_File
      *
      * @param  string $dir
      * @return $this
-     *
      */
     public function clear($dir = '')
     {

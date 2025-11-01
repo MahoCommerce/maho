@@ -13,7 +13,6 @@ class Mage_Adminhtml_Block_Dashboard_Grid extends Mage_Adminhtml_Block_Widget_Gr
 {
     /**
      * Setting default for every grid on dashboard
-     *
      */
     public function __construct()
     {
