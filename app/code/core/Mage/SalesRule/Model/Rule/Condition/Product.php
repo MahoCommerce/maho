@@ -27,7 +27,6 @@ class Mage_SalesRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Condit
     /**
      * Validate Product Rule Condition
      *
-     *
      * @return bool
      */
     #[\Override]

@@ -397,7 +397,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
 
     /**
      * Delete store view post action
-     *
      */
     public function deleteStorePostAction(): void
     {

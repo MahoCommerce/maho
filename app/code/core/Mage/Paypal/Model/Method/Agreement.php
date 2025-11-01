@@ -21,7 +21,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
 
     /**
      * Method instance settings
-     *
      */
     protected $_canAuthorize            = true;
     protected $_canCapture              = true;

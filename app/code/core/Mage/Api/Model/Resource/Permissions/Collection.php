@@ -14,7 +14,6 @@ class Mage_Api_Model_Resource_Permissions_Collection extends Mage_Core_Model_Res
 {
     /**
      * Resource collection initialization
-     *
      */
     #[\Override]
     protected function _construct()

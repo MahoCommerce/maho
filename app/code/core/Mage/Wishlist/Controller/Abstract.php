@@ -42,7 +42,6 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
 
     /**
      * Add all items from wishlist to shopping cart
-     *
      */
     public function allcartAction(): void
     {

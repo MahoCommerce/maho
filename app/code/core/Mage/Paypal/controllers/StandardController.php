@@ -49,7 +49,6 @@ class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
 
     /**
      * When a customer chooses Paypal on Checkout/Payment page
-     *
      */
     public function redirectAction(): void
     {

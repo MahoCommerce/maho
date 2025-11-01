@@ -14,7 +14,6 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 {
     /**
      * Initialize table nad PK name
-     *
      */
     #[\Override]
     protected function _construct()

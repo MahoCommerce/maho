@@ -499,11 +499,11 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-    * Init mapping array of short fields to
-    * its full names
-    *
-    * @return Varien_Object
-    */
+     * Init mapping array of short fields to
+     * its full names
+     *
+     * @return Varien_Object
+     */
     #[\Override]
     protected function _initOldFieldsMap()
     {

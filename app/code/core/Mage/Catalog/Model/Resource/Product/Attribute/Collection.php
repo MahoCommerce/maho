@@ -14,7 +14,6 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Collection extends Mage_Eav_
 {
     /**
      * Resource model initialization
-     *
      */
     #[\Override]
     protected function _construct()

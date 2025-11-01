@@ -42,7 +42,6 @@ abstract class Mage_Wishlist_Block_Abstract extends Mage_Catalog_Block_Product_A
 
     /**
      * Internal constructor, that is called from real constructor
-     *
      */
     #[\Override]
     protected function _construct()

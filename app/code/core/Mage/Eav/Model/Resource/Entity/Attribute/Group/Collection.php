@@ -14,7 +14,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group_Collection extends Mage_Cor
 {
     /**
      * Init resource model for collection
-     *
      */
     #[\Override]
     protected function _construct()

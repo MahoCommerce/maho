@@ -21,7 +21,6 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
 
     /**
      * Class constructor
-     *
      */
     #[\Override]
     protected function _construct()

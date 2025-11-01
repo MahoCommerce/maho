@@ -14,7 +14,6 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mag
 {
     /**
      * Disable filters and paging
-     *
      */
     public function __construct()
     {

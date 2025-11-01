@@ -433,8 +433,8 @@ class Mage_Eav_Model_Config
      * Entity_Type->getEntity() which itself requires this class and re-triggers loading.
      *
      * @param Mage_Eav_Model_Entity_Type $entityType
-     * @param int $storeId
      * @param string $attributeCode
+     * @param int $storeId
      * @return Mage_Eav_Model_Entity_Attribute_Abstract|false
      */
     protected function _getDefaultAttributeIfExists($entityType, $attributeCode, $storeId)
@@ -625,7 +625,6 @@ class Mage_Eav_Model_Config
      * @throws Mage_Core_Exception
      * @deprecated Equivalent to getAttribute(...), use getAttribute(...) instead
      * Get attribute object for collection usage
-     *
      */
     public function getCollectionAttribute($entityType, $attribute)
     {
@@ -638,7 +637,6 @@ class Mage_Eav_Model_Config
      * @return  Mage_Eav_Model_Config
      * @deprecated No longer required to preload only collection attributes explicitly
      * Prepare attributes for usage in EAV collection
-     *
      */
     public function loadCollectionAttributes($entityType, $attributes)
     {

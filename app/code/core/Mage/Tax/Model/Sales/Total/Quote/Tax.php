@@ -262,7 +262,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     }
 
     /**
-     *
      * @param float $rate
      * @param array $appliedRates
      * @param string $taxId
@@ -432,7 +431,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     }
 
     /**
-     *
      * @param Mage_Sales_Model_Quote_Address $address
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
      * @param Varien_Object $taxRateRequest
@@ -711,7 +709,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     }
 
     /**
-     *
      * @param Mage_Sales_Model_Quote_Address $address
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
      * @param Varien_Object $taxRateRequest
@@ -1007,7 +1004,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     }
 
     /**
-     *
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
      * @param Varien_Object $taxRateRequest
      * @param array $taxGroups

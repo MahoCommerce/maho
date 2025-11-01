@@ -154,7 +154,6 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
 
     /**
      * Mass rebuild selected processes index
-     *
      */
     public function massReindexAction(): void
     {
@@ -189,7 +188,6 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
 
     /**
      * Mass change index mode of selected processes index
-     *
      */
     public function massChangeModeAction(): void
     {

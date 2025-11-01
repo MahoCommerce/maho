@@ -14,7 +14,6 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable extends Mage_Core_Mo
 {
     /**
      * Init resource
-     *
      */
     #[\Override]
     protected function _construct()

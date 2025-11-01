@@ -18,6 +18,13 @@ return $config
         'nullable_type_declaration_for_default_null_value' => true,
         // Convert double quotes to single quotes for simple strings.
         'single_quote' => true,
+        // PHPdoc stuff
+        'phpdoc_indent' => true,
+        'phpdoc_param_order' => true,
+        'phpdoc_single_line_var_spacing' => true,
+        'phpdoc_trim' => true,
+        'phpdoc_trim_consecutive_blank_line_separation' => true,
+
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

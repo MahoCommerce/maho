@@ -14,7 +14,6 @@ class Mage_Admin_Model_Resource_Acl_Role_Collection extends Mage_Core_Model_Reso
 {
     /**
      * Initialize resource
-     *
      */
     #[\Override]
     protected function _construct()

@@ -34,7 +34,6 @@ class Mage_Paypal_Model_Ipn
     protected $_recurringProfile = null;
 
     /**
-     *
      * @var Mage_Paypal_Model_Config
      */
     protected $_config = null;
@@ -157,7 +156,6 @@ class Mage_Paypal_Model_Ipn
 
     /**
      * Load and validate order, instantiate proper configuration
-     *
      *
      * @return Mage_Sales_Model_Order
      * @throws Exception

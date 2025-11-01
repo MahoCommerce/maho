@@ -28,7 +28,6 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
 
     /**
      * Define main and currency rate tables
-     *
      */
     #[\Override]
     protected function _construct()

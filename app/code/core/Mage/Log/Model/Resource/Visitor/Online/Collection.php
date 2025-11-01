@@ -21,7 +21,6 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
 
     /**
      * Initialize collection model
-     *
      */
     #[\Override]
     protected function _construct()
@@ -108,7 +107,6 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
      * @param null|string|array $condition
      * @return Mage_Core_Model_Resource_Db_Collection_Abstract
      * @see self::_getConditionSql for $condition
-     *
      */
     #[\Override]
     public function addFieldToFilter($field, $condition = null)

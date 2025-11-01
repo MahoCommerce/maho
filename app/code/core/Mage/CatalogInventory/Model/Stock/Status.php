@@ -49,7 +49,6 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
 
     /**
      * Init resource model
-     *
      */
     #[\Override]
     protected function _construct()

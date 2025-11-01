@@ -14,7 +14,6 @@ class Mage_Index_Model_Resource_Event_Collection extends Mage_Core_Model_Resourc
 {
     /**
      * Initialize resource
-     *
      */
     #[\Override]
     protected function _construct()

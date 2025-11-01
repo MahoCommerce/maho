@@ -26,7 +26,6 @@ class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Re
 
     /**
      * Define resource model
-     *
      */
     #[\Override]
     protected function _construct()

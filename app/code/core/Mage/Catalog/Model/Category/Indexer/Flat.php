@@ -239,7 +239,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
 
     /**
      * Rebuild all index data
-     *
      */
     #[\Override]
     public function reindexAll()

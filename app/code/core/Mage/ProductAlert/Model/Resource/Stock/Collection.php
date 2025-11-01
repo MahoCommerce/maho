@@ -14,7 +14,6 @@ class Mage_ProductAlert_Model_Resource_Stock_Collection extends Mage_Core_Model_
 {
     /**
      * Define stock collection
-     *
      */
     #[\Override]
     protected function _construct()

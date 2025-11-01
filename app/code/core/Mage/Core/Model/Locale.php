@@ -282,8 +282,6 @@ class Mage_Core_Model_Locale extends Varien_Object
 
     /**
      * Retrieve days of week option list
-     *
-     *
      */
     public function getOptionWeekdays(bool $preserveCodes = false, bool $ucFirstCode = false): array
     {
@@ -973,7 +971,6 @@ class Mage_Core_Model_Locale extends Varien_Object
 
     /**
      * Get last locale, used before last emulation
-     *
      */
     public function revert(): void
     {

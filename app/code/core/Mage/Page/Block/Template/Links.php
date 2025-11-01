@@ -28,7 +28,6 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
 
     /**
      * Set default template
-     *
      */
     #[\Override]
     protected function _construct()

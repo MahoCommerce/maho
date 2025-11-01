@@ -31,7 +31,6 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
 
     /**
      * Initialize template and cache settings
-     *
      */
     #[\Override]
     protected function _construct()

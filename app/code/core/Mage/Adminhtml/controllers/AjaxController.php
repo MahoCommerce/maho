@@ -14,7 +14,6 @@ class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
 {
     /**
      * Ajax action for inline translation
-     *
      */
     public function translateAction(): void
     {

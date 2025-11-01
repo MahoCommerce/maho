@@ -109,8 +109,8 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
 
         /**
-          * Check order existing
-          */
+         * Check order existing
+         */
         if (!$order->getId()) {
             $this->_fault('order_not_exists');
         }
@@ -317,8 +317,8 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
 
         /**
-          * Check order existing
-          */
+         * Check order existing
+         */
         if (!$order->getId()) {
             $this->_fault('order_not_exists');
         }

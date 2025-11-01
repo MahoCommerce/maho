@@ -28,7 +28,6 @@ class Mage_CatalogIndex_Model_Resource_Aggregation extends Mage_Core_Model_Resou
 
     /**
      * Initialize resource tables
-     *
      */
     #[\Override]
     protected function _construct()

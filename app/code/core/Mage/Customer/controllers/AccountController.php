@@ -779,7 +779,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
     /**
      * Display reset forgotten password form
-     *
      */
     public function changeForgottenAction(): void
     {
@@ -798,7 +797,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Checks reset forgotten password token
      *
      * User is redirected on this action when he clicks on the corresponding link in password reset confirmation email.
-     *
      */
     public function resetPasswordAction(): void
     {

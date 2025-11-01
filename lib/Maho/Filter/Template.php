@@ -258,12 +258,12 @@ class Template
     }
 
     /**
-    * Return variable value for var construction
-    *
-    * @param string $value raw parameters
-    * @param string|null $default default value
-    * @return string
-    */
+     * Return variable value for var construction
+     *
+     * @param string $value raw parameters
+     * @param string|null $default default value
+     * @return string
+     */
     protected function _getVariable($value, $default = '{no_value_defined}')
     {
         \Maho\Profiler::start('email_template_proccessing_variables');

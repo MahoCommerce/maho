@@ -11,7 +11,6 @@
  */
 
 /**
- *
  * Customer reports admin controller
  *
  * @package    Mage_Adminhtml

@@ -48,7 +48,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
 
     /**
      * Show urlrewrites index page
-     *
      */
     public function indexAction(): void
     {
@@ -63,7 +62,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
 
     /**
      * Show urlrewrite edit/create page
-     *
      */
     public function editAction(): void
     {
@@ -79,7 +77,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
 
     /**
      * Ajax products grid action
-     *
      */
     public function productGridAction(): void
     {
@@ -88,7 +85,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
 
     /**
      * Ajax categories tree loader action
-     *
      */
     public function categoriesJsonAction(): void
     {
@@ -100,7 +96,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
 
     /**
      * Urlrewrite save action
-     *
      */
     public function saveAction(): void
     {
@@ -184,7 +179,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
 
     /**
      * Urlrewrite delete action
-     *
      */
     public function deleteAction(): void
     {

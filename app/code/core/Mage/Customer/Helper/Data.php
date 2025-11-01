@@ -47,7 +47,6 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * WSDL of VAT validation service
-     *
      */
     public const VAT_VALIDATION_WSDL_URL = 'https://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl';
 

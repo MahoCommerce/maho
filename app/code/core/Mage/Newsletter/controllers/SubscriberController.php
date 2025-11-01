@@ -13,8 +13,8 @@
 class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Action
 {
     /**
-      * New subscription action
-      */
+     * New subscription action
+     */
     public function newAction(): void
     {
         if (!$this->_validateFormKey()) {

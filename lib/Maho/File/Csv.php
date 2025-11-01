@@ -14,7 +14,6 @@ namespace Maho\File;
 
 /**
  * Csv parse
- *
  */
 class Csv
 {

@@ -58,7 +58,6 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
 
     /**
      * Define module
-     *
      */
     #[\Override]
     protected function _construct()
@@ -269,7 +268,6 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
 
     /**
      * Add store data
-     *
      */
     protected function _addStoreData()
     {

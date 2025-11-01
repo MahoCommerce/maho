@@ -32,7 +32,6 @@ class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
 
     /**
      * Initialize block
-     *
      */
     #[\Override]
     protected function _construct()

@@ -38,7 +38,6 @@ class Mage_Reports_Model_Event extends Mage_Core_Model_Abstract
 
     /**
      * Initialize resource
-     *
      */
     #[\Override]
     protected function _construct()

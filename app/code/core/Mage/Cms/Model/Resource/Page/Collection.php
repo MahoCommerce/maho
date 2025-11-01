@@ -21,7 +21,6 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
 
     /**
      * Define resource model
-     *
      */
     #[\Override]
     protected function _construct()

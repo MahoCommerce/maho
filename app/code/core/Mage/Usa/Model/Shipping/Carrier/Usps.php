@@ -1921,8 +1921,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     }
 
     /**
-      * @deprecated
-      */
+     * @deprecated
+     */
     protected function setTrackingReqeust()
     {
         $this->setTrackingRequest();

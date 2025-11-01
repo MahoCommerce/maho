@@ -33,7 +33,6 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
     /**
      * Init resource model
      * Set flag_code if it is specified in arguments
-     *
      */
     #[\Override]
     protected function _construct()

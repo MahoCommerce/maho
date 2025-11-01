@@ -166,7 +166,6 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
 
     /**
      * WYSIWYG Plugin Action
-     *
      */
     public function wysiwygPluginAction(): void
     {

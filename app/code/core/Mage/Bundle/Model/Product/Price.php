@@ -147,7 +147,6 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @throws Mage_Core_Model_Store_Exception
      * @deprecated after 1.5.1.0
      * @see Mage_Bundle_Model_Product_Price::getTotalPrices()
-     *
      */
     public function getPrices($product, $which = null)
     {
@@ -481,7 +480,6 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @throws Mage_Core_Model_Store_Exception
      * @deprecated after 1.6.2.0
      * @see Mage_Bundle_Model_Product_Price::getSelectionFinalTotalPrice()
-     *
      */
     public function getSelectionPrice($bundleProduct, $selectionProduct, $selectionQty = null, $multiplyQty = true)
     {

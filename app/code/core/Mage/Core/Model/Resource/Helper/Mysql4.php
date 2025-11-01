@@ -46,7 +46,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     }
 
     /**
-     *
      * Returns Insert From Select On Duplicate query with analytic functions
      *
      * @param string $table
@@ -198,7 +197,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     }
 
     /**
-     *
      * @param string $query
      * @param int $limitCount
      * @param int $limitOffset

@@ -453,8 +453,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     }
 
     /**
-    * Build response for refresh input element 'path' in form (AJAX)
-    */
+     * Build response for refresh input element 'path' in form (AJAX)
+     */
     public function refreshPathAction(): void
     {
         try {

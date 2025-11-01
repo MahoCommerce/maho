@@ -23,7 +23,6 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
 
     /**
      * Construct attribute filter
-     *
      */
     public function __construct()
     {
