@@ -189,12 +189,6 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
         ->addColumn('trigger_type', Maho\Db\Ddl\Table::TYPE_VARCHAR, 10, [
             'nullable' => false,
         ], 'Trigger Type (enter/exit)')
-        ->addColumn('scheduled_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-            'nullable' => true,
-        ], 'Scheduled Send Time')
-        ->addColumn('sent_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-            'nullable' => true,
-        ], 'Actual Send Time')
         ->addColumn('status', Maho\Db\Ddl\Table::TYPE_VARCHAR, 20, [
             'nullable' => false,
             'default'  => 'scheduled',
@@ -203,6 +197,12 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
             'nullable' => false,
             'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
         ], 'Created At')
+        ->addColumn('scheduled_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+            'nullable' => true,
+        ], 'Scheduled Send Time')
+        ->addColumn('sent_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+            'nullable' => true,
+        ], 'Actual Send Time')
         ->addIndex(
             'idx_scheduled_at_status',
             ['scheduled_at', 'status'],
