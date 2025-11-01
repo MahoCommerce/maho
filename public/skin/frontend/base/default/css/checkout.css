@@ -594,11 +594,6 @@ td.product-cart-remove a {
 .shipping .sp-methods dd {
     margin-bottom: 10px;
 }
-.shipping .sp-methods label {
-    font-size: 0.75rem;
-    font-style: italic;
-    min-width: 100px;
-}
 .shipping .sp-methods label span {
     font-weight: bold;
     font-style: normal;
@@ -609,8 +604,8 @@ td.product-cart-remove a {
 }
 .shipping #co-shipping-method-form .sp-methods dd label {
     border: 1px solid var(--maho-color-border);
-    background-color: var(--maho-color-background-hover);
-    min-width: 220px;
+    width: 100%;
+    font-size: 0.75rem;
 }
 .shipping #co-shipping-method-form .sp-methods dd label:hover {
     background-color: var(--maho-color-background-hover);
