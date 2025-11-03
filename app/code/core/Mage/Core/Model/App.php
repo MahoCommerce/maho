@@ -327,38 +327,79 @@ class Mage_Core_Model_App
      */
     public function run($params)
     {
-        $options = $params['options'] ?? [];
-        $this->baseInit($options);
-        Mage::register('application_params', $params);
-
-        $this->_initModules();
-        $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
-
-        if ($this->_config->isLocalConfigLoaded()) {
-            $scopeCode = $params['scope_code'] ?? '';
-            $scopeType = $params['scope_type'] ?? 'store';
-            $this->_initCurrentStore($scopeCode, $scopeType);
-            $this->_initRequest();
-            Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
-        }
-
-        $this->getFrontController()->dispatch();
-
-        // Finish the request explicitly, no output allowed beyond this point
-        if (php_sapi_name() == 'fpm-fcgi' && function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        } else {
-            flush();
-        }
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
+        // OpenTelemetry: Start root span immediately for entire request
+        $rootSpan = Mage::getTracer()?->startRootSpan('http.request', [
+            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'CLI',
+            'http.url' => $_SERVER['REQUEST_URI'] ?? '',
+            'http.host' => $_SERVER['HTTP_HOST'] ?? '',
+            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'http.user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        ]);
 
         try {
-            Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            $options = $params['options'] ?? [];
+            $this->baseInit($options);
+            Mage::register('application_params', $params);
+
+            $this->_initModules();
+            $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
+
+            if ($this->_config->isLocalConfigLoaded()) {
+                $scopeCode = $params['scope_code'] ?? '';
+                $scopeType = $params['scope_type'] ?? 'store';
+                $this->_initCurrentStore($scopeCode, $scopeType);
+
+                // OpenTelemetry: Add store context to span
+                if ($rootSpan) {
+                    $rootSpan->setAttributes([
+                        'maho.store_id' => $this->getStore()->getId(),
+                        'maho.store_code' => $this->getStore()->getCode(),
+                        'maho.website_id' => $this->getWebsite()->getId(),
+                    ]);
+                }
+
+                $this->_initRequest();
+                Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+                Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
+            }
+
+            $this->getFrontController()->dispatch();
+
+            // OpenTelemetry: Add response data to span
+            if ($rootSpan) {
+                $rootSpan->setAttributes([
+                    'http.status_code' => http_response_code(),
+                    'http.response_size' => ob_get_length() ?: 0,
+                ]);
+                $rootSpan->setStatus('ok');
+            }
+
+            // Finish the request explicitly, no output allowed beyond this point
+            if (php_sapi_name() == 'fpm-fcgi' && function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            } else {
+                flush();
+            }
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            try {
+                Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
         } catch (Throwable $e) {
-            Mage::logException($e);
+            // OpenTelemetry: Record exception in span
+            if ($rootSpan) {
+                $rootSpan->recordException($e);
+                $rootSpan->setStatus('error', $e->getMessage());
+            }
+            throw $e;
+        } finally {
+            // OpenTelemetry: End span and flush (after response sent - non-blocking)
+            $rootSpan?->end();
+            Mage::getTracer()?->flush();
         }
 
         return $this;

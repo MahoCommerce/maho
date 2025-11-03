@@ -398,7 +398,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 if (!$url) {
                     $url = $this->_defaultGatewayUrl;
                 }
-                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                $client = \Maho\Http\Client::create([
                     'max_redirects' => 0,
                     'timeout' => 30,
                 ]);
@@ -940,7 +940,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 if (!$url) {
                     $url = $this->_defaultGatewayUrl;
                 }
-                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                $client = \Maho\Http\Client::create([
                     'max_redirects' => 0,
                     'timeout' => 30,
                 ]);
@@ -1732,7 +1732,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         if (!$url) {
             $url = $this->_defaultGatewayUrl;
         }
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
+        $client = \Maho\Http\Client::create([
             'max_redirects' => 0,
             'timeout' => 30,
         ]);

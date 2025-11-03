@@ -936,7 +936,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
                 $config['local_cert'] = $this->getApiCertificate();
             }
 
-            $client = \Symfony\Component\HttpClient\HttpClient::create($config);
+            $client = \Maho\Http\Client::create($config);
 
             $httpResponse = $client->request('POST', $this->getApiEndpoint(), [
                 'headers' => $this->_headers,
