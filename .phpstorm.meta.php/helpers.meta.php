@@ -49,6 +49,7 @@ namespace PHPSTORM_META {
         'index/data' => \Mage_Index_Helper_Data::class,
         'log/data' => \Mage_Log_Helper_Data::class,
         'oauth/data' => \Mage_Oauth_Helper_Data::class,
+        'opentelemetry/data' => \Maho_OpenTelemetry_Helper_Data::class,
         'paypaluk/data' => \Mage_PaypalUk_Helper_Data::class,
         'productalert/data' => \Mage_ProductAlert_Helper_Data::class,
         'salesrule/coupon' => \Mage_SalesRule_Helper_Coupon::class,
