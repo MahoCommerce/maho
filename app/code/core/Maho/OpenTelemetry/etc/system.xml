@@ -92,46 +92,6 @@
                                 <enabled>1</enabled>
                             </depends>
                         </custom_headers>
-                        <heading_info translate="label">
-                            <label>Information</label>
-                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
-                            <sort_order>70</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends>
-                                <enabled>1</enabled>
-                            </depends>
-                        </heading_info>
-                        <info translate="label comment">
-                            <label></label>
-                            <frontend_type>label</frontend_type>
-                            <sort_order>80</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <comment><![CDATA[
-                                <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">
-                                    <h4 style="margin-top: 0;">OpenTelemetry Tracing</h4>
-                                    <p><strong>What gets traced automatically:</strong></p>
-                                    <ul>
-                                        <li>All HTTP requests (page loads, API calls)</li>
-                                        <li>Database queries</li>
-                                        <li>Custom spans added in your code</li>
-                                    </ul>
-                                    <p><strong>Performance Impact:</strong> Minimal overhead (&lt;1% CPU with sampling enabled)</p>
-                                    <p><strong>Recommended Settings:</strong></p>
-                                    <ul>
-                                        <li><strong>Development:</strong> Sampling Rate = 1.0 (100%)</li>
-                                        <li><strong>Production:</strong> Sampling Rate = 0.1 (10%) or lower</li>
-                                    </ul>
-                                    <p><strong>Documentation:</strong> See <code>OPENTELEMETRY_USAGE.md</code> for usage examples</p>
-                                </div>
-                            ]]></comment>
-                            <depends>
-                                <enabled>1</enabled>
-                            </depends>
-                        </info>
                     </fields>
                 </opentelemetry>
             </groups>
