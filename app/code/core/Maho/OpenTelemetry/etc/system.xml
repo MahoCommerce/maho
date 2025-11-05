@@ -27,7 +27,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Enable OpenTelemetry distributed tracing. Note: Environment variable <code>OTEL_SDK_DISABLED</code> takes precedence if set.]]></comment>
+                            <comment><![CDATA[Enable OpenTelemetry distributed tracing.]]></comment>
                         </enabled>
                         <service_name translate="label comment">
                             <label>Service Name</label>
@@ -36,7 +36,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Identifier for this service in traces (e.g., "maho-production", "maho-staging"). Environment variable <code>OTEL_SERVICE_NAME</code> takes precedence if set.]]></comment>
+                            <comment><![CDATA[Identifier for this service in traces (e.g., "maho-production", "maho-staging").]]></comment>
                             <depends>
                                 <enabled>1</enabled>
                             </depends>
@@ -48,7 +48,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[OTLP endpoint URL for trace exports (must end with <code>/v1/traces</code>). Example: <code>https://otlp-gateway-prod-eu-west-2.grafana.net/otlp/v1/traces</code>. Environment variable <code>OTEL_EXPORTER_OTLP_ENDPOINT</code> takes precedence if set.]]></comment>
+                            <comment><![CDATA[OTLP endpoint URL for trace exports (must end with <code>/v1/traces</code>). Example: <code>https://otlp-gateway-prod-eu-west-2.grafana.net/otlp/v1/traces</code>]]></comment>
                             <depends>
                                 <enabled>1</enabled>
                             </depends>
@@ -61,7 +61,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Percentage of requests to trace. Enter a value between 0.0 and 1.0 (1.0 = 100%, 0.1 = 10%, 0.01 = 1%). Lower values reduce data volume and costs. Environment variable <code>OTEL_TRACES_SAMPLER_ARG</code> takes precedence if set.]]></comment>
+                            <comment><![CDATA[Percentage of requests to trace. Enter a value between 0.0 and 1.0 (1.0 = 100%, 0.1 = 10%, 0.01 = 1%). Lower values reduce data volume and costs.]]></comment>
                             <depends>
                                 <enabled>1</enabled>
                             </depends>
