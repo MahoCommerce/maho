@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_OpenTelemetry
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <sections>
+        <dev translate="label" module="opentelemetry">
+            <groups>
+                <opentelemetry translate="label" module="opentelemetry">
+                    <label>OpenTelemetry</label>
+                    <sort_order>200</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Tracing</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Enable OpenTelemetry distributed tracing. Note: Environment variable <code>OTEL_SDK_DISABLED</code> takes precedence if set.]]></comment>
+                        </enabled>
+                        <service_name translate="label comment">
+                            <label>Service Name</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Identifier for this service in traces (e.g., "maho-production", "maho-staging"). Environment variable <code>OTEL_SERVICE_NAME</code> takes precedence if set.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </service_name>
+                        <endpoint translate="label comment">
+                            <label>OTLP Endpoint</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[OTLP endpoint URL for trace exports (must end with <code>/v1/traces</code>). Example: <code>https://otlp-gateway-prod-eu-west-2.grafana.net/otlp/v1/traces</code>. Environment variable <code>OTEL_EXPORTER_OTLP_ENDPOINT</code> takes precedence if set.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                            <validate>required-entry validate-url</validate>
+                        </endpoint>
+                        <sampling_rate translate="label comment">
+                            <label>Sampling Rate</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Percentage of requests to trace. Enter a value between 0.0 and 1.0 (1.0 = 100%, 0.1 = 10%, 0.01 = 1%). Lower values reduce data volume and costs. Environment variable <code>OTEL_TRACES_SAMPLER_ARG</code> takes precedence if set.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                            <validate>required-entry validate-number validate-number-range number-range-0.0-1.0</validate>
+                        </sampling_rate>
+                        <auth_header translate="label comment">
+                            <label>Authorization Header</label>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Authorization header value for authentication. For Grafana Cloud, use format: <code>Basic [base64(instance_id:api_token)]</code>. For other services, use their required format.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </auth_header>
+                        <custom_headers translate="label comment">
+                            <label>Custom Headers</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Additional HTTP headers in format <code>Key: Value</code> (one per line). Example:<br/><code>X-Custom-Header: value</code><br/><code>X-Another-Header: another-value</code>]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </custom_headers>
+                        <heading_info translate="label">
+                            <label>Information</label>
+                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </heading_info>
+                        <info translate="label comment">
+                            <label></label>
+                            <frontend_type>label</frontend_type>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[
+                                <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">
+                                    <h4 style="margin-top: 0;">OpenTelemetry Tracing</h4>
+                                    <p><strong>What gets traced automatically:</strong></p>
+                                    <ul>
+                                        <li>All HTTP requests (page loads, API calls)</li>
+                                        <li>Database queries</li>
+                                        <li>Custom spans added in your code</li>
+                                    </ul>
+                                    <p><strong>Performance Impact:</strong> Minimal overhead (&lt;1% CPU with sampling enabled)</p>
+                                    <p><strong>Recommended Settings:</strong></p>
+                                    <ul>
+                                        <li><strong>Development:</strong> Sampling Rate = 1.0 (100%)</li>
+                                        <li><strong>Production:</strong> Sampling Rate = 0.1 (10%) or lower</li>
+                                    </ul>
+                                    <p><strong>Documentation:</strong> See <code>OPENTELEMETRY_USAGE.md</code> for usage examples</p>
+                                </div>
+                            ]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </info>
+                    </fields>
+                </opentelemetry>
+            </groups>
+        </dev>
+    </sections>
+</config>

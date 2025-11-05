@@ -10,11 +10,25 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use OpenTelemetry\API\Trace\TracerInterface;
+use OpenTelemetry\API\Trace\SpanInterface;
+use OpenTelemetry\API\Common\Time\Clock;
+use OpenTelemetry\SDK\Trace\TracerProvider;
+use OpenTelemetry\SDK\Trace\TracerProviderInterface;
+use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
+use OpenTelemetry\SDK\Resource\ResourceInfo;
+use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
+use OpenTelemetry\SDK\Common\Attribute\Attributes;
+use OpenTelemetry\Contrib\Otlp\SpanExporter;
+use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
+use OpenTelemetry\SDK\Common\Export\TransportFactoryInterface;
+use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
+use OpenTelemetry\SDK\Trace\Sampler\TraceIdRatioBasedSampler;
+
 /**
  * OpenTelemetry Tracer Implementation
  *
- * This is a stub implementation that will be enhanced when OpenTelemetry SDK is installed.
- * Currently returns a NullTracer that does nothing (no-op spans).
+ * Integrates the OpenTelemetry SDK to send traces to OTLP endpoints
  */
 class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
 {
@@ -27,6 +41,16 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      * Is tracer enabled and initialized
      */
     private bool $_enabled = false;
+
+    /**
+     * OpenTelemetry TracerProvider
+     */
+    private ?TracerProviderInterface $_tracerProvider = null;
+
+    /**
+     * OpenTelemetry Tracer instance
+     */
+    private ?TracerInterface $_tracer = null;
 
     /**
      * Initialize tracer
@@ -57,13 +81,81 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             return false;
         }
 
-        // TODO: When OpenTelemetry SDK is installed, initialize it here
-        // For now, we just mark as enabled
-        $this->_enabled = true;
+        // Check if SDK is available
+        if (!class_exists(TracerProvider::class)) {
+            Mage::log('OpenTelemetry SDK not installed. Run: composer require open-telemetry/sdk open-telemetry/exporter-otlp', Mage::LOG_WARNING);
+            return false;
+        }
 
-        Mage::log('OpenTelemetry tracer initialized (stub mode)', Mage::LOG_INFO);
+        try {
+            // Create resource with service information
+            $resource = ResourceInfoFactory::emptyResource()->merge(ResourceInfo::create(Attributes::create([
+                'service.name' => $helper->getServiceName(),
+                'service.version' => Mage::getVersion(),
+                'telemetry.sdk.name' => 'opentelemetry',
+                'telemetry.sdk.language' => 'php',
+                'telemetry.sdk.version' => 'php',
+            ])));
 
-        return $this;
+            // Create OTLP exporter
+            $transport = (new OtlpHttpTransportFactory())->create(
+                $endpoint,
+                'application/json',
+                $this->_getHeaders($helper),
+            );
+
+            $exporter = new SpanExporter($transport);
+
+            // Create span processor with batching
+            $spanProcessor = new BatchSpanProcessor(
+                $exporter,
+                Clock::getDefault(),
+            );
+
+            // Create sampler based on sampling rate
+            $samplingRate = $helper->getSamplingRate();
+            $sampler = $samplingRate >= 1.0
+                ? new AlwaysOnSampler()
+                : new TraceIdRatioBasedSampler($samplingRate);
+
+            // Create tracer provider
+            $this->_tracerProvider = TracerProvider::builder()
+                ->addSpanProcessor($spanProcessor)
+                ->setResource($resource)
+                ->setSampler($sampler)
+                ->build();
+
+            // Get tracer instance
+            $this->_tracer = $this->_tracerProvider->getTracer(
+                'maho',
+                Mage::getVersion(),
+            );
+
+            $this->_enabled = true;
+
+            Mage::log('OpenTelemetry tracer initialized successfully', Mage::LOG_INFO);
+
+            return $this;
+        } catch (\Throwable $e) {
+            Mage::log('OpenTelemetry initialization failed: ' . $e->getMessage(), Mage::LOG_ERROR);
+            Mage::logException($e);
+            return false;
+        }
+    }
+
+    /**
+     * Get headers for OTLP exporter
+     */
+    private function _getHeaders(Maho_OpenTelemetry_Helper_Data $helper): array
+    {
+        $headers = $helper->getHeaders();
+        $formatted = [];
+
+        foreach ($headers as $key => $value) {
+            $formatted[$key] = $value;
+        }
+
+        return $formatted;
     }
 
     /**
@@ -82,15 +174,30 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      */
     public function startRootSpan(string $name, array $attributes = []): Maho_OpenTelemetry_Model_Span
     {
-        if (!$this->_enabled) {
+        if (!$this->_enabled || !$this->_tracer) {
             return $this->_createNullSpan();
         }
 
-        // TODO: Create actual root span when SDK is available
-        $span = $this->_createNullSpan();
-        $this->_spanStack[] = $span;
+        try {
+            // Start a new root span (no parent)
+            $spanBuilder = $this->_tracer->spanBuilder($name);
 
-        return $span;
+            // Add attributes
+            foreach ($attributes as $key => $value) {
+                $spanBuilder->setAttribute($key, $value);
+            }
+
+            $sdkSpan = $spanBuilder->startSpan();
+
+            // Wrap in our Span model
+            $span = $this->_createSpan($sdkSpan);
+            $this->_spanStack[] = $span;
+
+            return $span;
+        } catch (\Throwable $e) {
+            Mage::log('Failed to create root span: ' . $e->getMessage(), Mage::LOG_ERROR);
+            return $this->_createNullSpan();
+        }
     }
 
     /**
@@ -98,15 +205,31 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      */
     public function startSpan(string $name, array $attributes = []): Maho_OpenTelemetry_Model_Span
     {
-        if (!$this->_enabled) {
+        if (!$this->_enabled || !$this->_tracer) {
             return $this->_createNullSpan();
         }
 
-        // TODO: Create actual child span when SDK is available
-        $span = $this->_createNullSpan();
-        $this->_spanStack[] = $span;
+        try {
+            $spanBuilder = $this->_tracer->spanBuilder($name);
 
-        return $span;
+            // Parent span is automatically set from current context by OpenTelemetry SDK
+
+            // Add attributes
+            foreach ($attributes as $key => $value) {
+                $spanBuilder->setAttribute($key, $value);
+            }
+
+            $sdkSpan = $spanBuilder->startSpan();
+
+            // Wrap in our Span model
+            $span = $this->_createSpan($sdkSpan);
+            $this->_spanStack[] = $span;
+
+            return $span;
+        } catch (\Throwable $e) {
+            Mage::log('Failed to create span: ' . $e->getMessage(), Mage::LOG_ERROR);
+            return $this->_createNullSpan();
+        }
     }
 
     /**
@@ -145,7 +268,27 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             return [];
         }
 
-        // TODO: Generate W3C Trace Context headers when SDK is available
+        $activeSpan = $this->getActiveSpan();
+        if (!$activeSpan || !$activeSpan->getSdkSpan()) {
+            return [];
+        }
+
+        try {
+            $context = $activeSpan->getSdkSpan()->getContext();
+            if ($context->isValid()) {
+                return [
+                    'traceparent' => sprintf(
+                        '00-%s-%s-%02x',
+                        $context->getTraceId(),
+                        $context->getSpanId(),
+                        $context->getTraceFlags(),
+                    ),
+                ];
+            }
+        } catch (\Throwable $e) {
+            Mage::log('Failed to generate trace headers: ' . $e->getMessage(), Mage::LOG_ERROR);
+        }
+
         return [];
     }
 
@@ -154,11 +297,16 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      */
     public function flush(): void
     {
-        if (!$this->_enabled) {
+        if (!$this->_enabled || !$this->_tracerProvider) {
             return;
         }
 
-        // TODO: Flush spans to OTLP exporter when SDK is available
+        try {
+            $this->_tracerProvider->forceFlush();
+        } catch (\Throwable $e) {
+            Mage::log('Failed to flush telemetry: ' . $e->getMessage(), Mage::LOG_ERROR);
+        }
+
         $this->_spanStack = [];
     }
 
@@ -171,10 +319,34 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Create a span wrapping an SDK span
+     */
+    private function _createSpan(SpanInterface $sdkSpan): Maho_OpenTelemetry_Model_Span
+    {
+        $span = Mage::getModel('opentelemetry/span');
+        $span->setSdkSpan($sdkSpan);
+        return $span;
+    }
+
+    /**
      * Create a null span (no-op implementation)
      */
     private function _createNullSpan(): Maho_OpenTelemetry_Model_Span
     {
         return Mage::getModel('opentelemetry/span');
+    }
+
+    /**
+     * Shutdown tracer provider (called on destruct)
+     */
+    public function __destruct()
+    {
+        if ($this->_tracerProvider) {
+            try {
+                $this->_tracerProvider->shutdown();
+            } catch (\Throwable $e) {
+                // Ignore errors during shutdown
+            }
+        }
     }
 }

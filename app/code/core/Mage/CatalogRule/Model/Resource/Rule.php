@@ -247,9 +247,9 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
             }
         } else {
             if (count($productIds) == 0) {
-                Varien_Profiler::start('__MATCH_PRODUCTS__');
+                \Maho\Profiler::start('__MATCH_PRODUCTS__');
                 $productIds = $rule->getMatchingProductIds();
-                Varien_Profiler::stop('__MATCH_PRODUCTS__');
+                \Maho\Profiler::stop('__MATCH_PRODUCTS__');
             }
 
             $rows = [];

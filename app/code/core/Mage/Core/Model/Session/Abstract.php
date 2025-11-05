@@ -218,7 +218,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             $this->setSessionId($cookie->get($sessionName));
         }
 
-        Varien_Profiler::start(__METHOD__ . '/start');
+        \Maho\Profiler::start(__METHOD__ . '/start');
 
         // Start session using modern Symfony approach
         $symfonySession->start();
@@ -271,7 +271,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             $cookie->set($secureCookieName, $secureCookieValue, null, null, null, true, true);
         }
 
-        Varien_Profiler::stop(__METHOD__ . '/start');
+        \Maho\Profiler::stop(__METHOD__ . '/start');
 
         return $this;
     }

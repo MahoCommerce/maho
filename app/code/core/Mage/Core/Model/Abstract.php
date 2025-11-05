@@ -366,8 +366,8 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
         if (!$this->_hasModelChanged()) {
             return $this;
         }
-        $this->_getResource()->beginTransaction();
 
+        $this->_getResource()->beginTransaction();
         try {
             $this->_beforeSave();
             if ($this->_dataSaveAllowed) {
@@ -382,7 +382,6 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
             $this->_hasDataChanges = true;
             throw $e;
         }
-
         return $this;
     }
 

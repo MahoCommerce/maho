@@ -227,7 +227,7 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
      */
     public function fetchView($fileName)
     {
-        Varien_Profiler::start($fileName);
+        \Maho\Profiler::start($fileName);
 
         // EXTR_SKIP protects from overriding
         // already defined variables
@@ -292,7 +292,7 @@ HTML;
         } else {
             $html = '';
         }
-        Varien_Profiler::stop($fileName);
+        \Maho\Profiler::stop($fileName);
         return $html;
     }
 

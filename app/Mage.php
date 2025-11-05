@@ -412,9 +412,9 @@ final class Mage
      */
     public static function dispatchEvent($name, array $data = [])
     {
-        Varien_Profiler::start('DISPATCH EVENT:' . $name);
+        \Maho\Profiler::start('DISPATCH EVENT:' . $name);
         $result = self::app()->dispatchEvent($name, $data);
-        Varien_Profiler::stop('DISPATCH EVENT:' . $name);
+        \Maho\Profiler::stop('DISPATCH EVENT:' . $name);
         return $result;
     }
 
@@ -612,9 +612,9 @@ final class Mage
             self::_setIsInstalled($options);
             self::_setConfigModel($options);
 
-            Varien_Profiler::start('self::app::init');
+            \Maho\Profiler::start('self::app::init');
             self::$_app->init($code, $type, $options);
-            Varien_Profiler::stop('self::app::init');
+            \Maho\Profiler::stop('self::app::init');
             self::$_app->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
         }
         return self::$_app;
@@ -661,8 +661,16 @@ final class Mage
      */
     public static function run($code = '', $type = 'store', $options = [])
     {
+        $attributes = [
+            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'GET',
+            'http.url' => $_SERVER['REQUEST_URI'] ?? '/',
+            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'http.user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        ];
+
+        \Maho\Profiler::start('http.request', $attributes);
+
         try {
-            Varien_Profiler::start('mage');
             self::setRoot();
             self::$_app = new Mage_Core_Model_App();
             if (isset($options['request'])) {
@@ -679,14 +687,17 @@ final class Mage
                 'scope_type' => $type,
                 'options'    => $options,
             ]);
-            Varien_Profiler::stop('mage');
+            \Maho\Profiler::stop('http.request');
         } catch (Mage_Core_Model_Session_Exception $e) {
+            \Maho\Profiler::stop('http.request');
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
+            \Maho\Profiler::stop('http.request');
             Maho::errorReport([], 404);
             die();
         } catch (Exception $e) {
+            \Maho\Profiler::stop('http.request');
             if (self::isInstalled()) {
                 self::dispatchEvent('mage_run_installed_exception', ['exception' => $e]);
                 self::printException($e);

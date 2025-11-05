@@ -756,7 +756,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      */
     public function currency(string $currency): NumberFormatter
     {
-        Varien_Profiler::start('locale/currency');
+        \Maho\Profiler::start('locale.currency');
         if (!isset(self::$_currencyCache[$this->getLocaleCode()][$currency])) {
             $formatter = new NumberFormatter($this->getLocaleCode(), NumberFormatter::CURRENCY);
 
@@ -796,7 +796,7 @@ class Mage_Core_Model_Locale extends Varien_Object
 
             self::$_currencyCache[$this->getLocaleCode()][$currency] = $formatter;
         }
-        Varien_Profiler::stop('locale/currency');
+        \Maho\Profiler::stop('locale.currency');
         return self::$_currencyCache[$this->getLocaleCode()][$currency];
     }
 

@@ -142,7 +142,7 @@ class Mage_Eav_Model_Config
             return;
         }
 
-        Varien_Profiler::start('EAV: ' . __METHOD__);
+        \Maho\Profiler::start('eav.config.initialize_store');
 
         if ($this->_isCacheEnabled() && $this->_loadFromCache($storeId)) {
             $this->_storeInitialized[$storeId] = true;
@@ -168,7 +168,7 @@ class Mage_Eav_Model_Config
 
         $this->_storeInitialized[$storeId] = true;
 
-        Varien_Profiler::stop('EAV: ' . __METHOD__);
+        \Maho\Profiler::stop('eav.config.initialize_store');
     }
 
     /**
@@ -265,11 +265,11 @@ class Mage_Eav_Model_Config
      */
     protected function _loadFromCache($storeId)
     {
-        Varien_Profiler::start('EAV: ' . __METHOD__);
+        \Maho\Profiler::start('eav.config.load_from_cache');
 
         $cacheData = Mage::app()->loadCache(self::ENTITIES_CACHE_ID . '_' . $storeId);
         if ($cacheData === false) {
-            Varien_Profiler::stop('EAV: ' . __METHOD__);
+            \Maho\Profiler::stop('eav.config.load_from_cache');
             return false;
         }
         $cacheData = unserialize($cacheData);
@@ -299,7 +299,7 @@ class Mage_Eav_Model_Config
 
         $this->_attributeSetInfo = $cacheData['_attributeSetInfo'];
 
-        Varien_Profiler::stop('EAV: ' . __METHOD__);
+        \Maho\Profiler::stop('eav.config.load_from_cache');
         return true;
     }
 
@@ -515,7 +515,7 @@ class Mage_Eav_Model_Config
      */
     public function getAttributes($entityType)
     {
-        Varien_Profiler::start('EAV: ' . __METHOD__);
+        \Maho\Profiler::start('eav.config.get_attributes');
 
         $entityType = $this->getEntityType($entityType);
         $attributes = [];
@@ -525,7 +525,7 @@ class Mage_Eav_Model_Config
             $attributes[] = $this->getAttribute($entityType, $attributeId, $storeId);
         }
 
-        Varien_Profiler::stop('EAV: ' . __METHOD__);
+        \Maho\Profiler::stop('eav.config.get_attributes');
 
         return $attributes;
     }

@@ -29,7 +29,7 @@ abstract class Mage_Core_Controller_Varien_Action
     public const PARAM_NAME_BASE64_URL         = 'r64';
     public const PARAM_NAME_URL_ENCODED        = 'uenc';
 
-    public const PROFILER_KEY                  = 'mage::dispatch::controller::action';
+    public const PROFILER_KEY                  = 'dispatch.controller.action';
 
     /**
      * Request object
@@ -285,9 +285,9 @@ abstract class Mage_Core_Controller_Varien_Action
         );
 
         // load layout updates by specified handles
-        Varien_Profiler::start("$profilerKey::layout_load");
+        \Maho\Profiler::start("$profilerKey.layout.load");
         $this->getLayout()->getUpdate()->load();
-        Varien_Profiler::stop("$profilerKey::layout_load");
+        \Maho\Profiler::stop("$profilerKey.layout.load");
 
         return $this;
     }
@@ -307,9 +307,9 @@ abstract class Mage_Core_Controller_Varien_Action
         }
 
         // generate xml from collected text updates
-        Varien_Profiler::start("$profilerKey::layout_generate_xml");
+        \Maho\Profiler::start("$profilerKey.layout.generate_xml");
         $this->getLayout()->generateXml();
-        Varien_Profiler::stop("$profilerKey::layout_generate_xml");
+        \Maho\Profiler::stop("$profilerKey.layout.generate_xml");
 
         return $this;
     }
@@ -329,9 +329,9 @@ abstract class Mage_Core_Controller_Varien_Action
         }
 
         // generate blocks from xml layout
-        Varien_Profiler::start("$profilerKey::layout_generate_blocks");
+        \Maho\Profiler::start("$profilerKey.layout.generate_blocks");
         $this->getLayout()->generateBlocks();
-        Varien_Profiler::stop("$profilerKey::layout_generate_blocks");
+        \Maho\Profiler::stop("$profilerKey.layout.generate_blocks");
 
         if (!$this->getFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT)) {
             Mage::dispatchEvent(
@@ -363,7 +363,7 @@ abstract class Mage_Core_Controller_Varien_Action
 
         $this->_renderTitles();
 
-        Varien_Profiler::start("$profilerKey::layout_render");
+        \Maho\Profiler::start("$profilerKey.layout.render");
 
         if ($output !== '') {
             $this->getLayout()->addOutputBlock($output);
@@ -378,7 +378,7 @@ abstract class Mage_Core_Controller_Varien_Action
         $output = $this->getLayout()->getOutput();
         Mage::getSingleton('core/translate_inline')->processResponseBody($output);
         $this->getResponse()->appendBody($output);
-        Varien_Profiler::stop("$profilerKey::layout_render");
+        \Maho\Profiler::stop("$profilerKey.layout.render");
 
         return $this;
     }
@@ -394,24 +394,24 @@ abstract class Mage_Core_Controller_Varien_Action
                 $actionMethodName = 'norouteAction';
             }
 
-            Varien_Profiler::start(self::PROFILER_KEY . '::predispatch');
+            \Maho\Profiler::start(self::PROFILER_KEY . '.predispatch');
             $this->preDispatch();
-            Varien_Profiler::stop(self::PROFILER_KEY . '::predispatch');
+            \Maho\Profiler::stop(self::PROFILER_KEY . '.predispatch');
 
             if ($this->getRequest()->isDispatched()) {
                 /**
                  * preDispatch() didn't change the action, so we can continue
                  */
                 if (!$this->getFlag('', self::FLAG_NO_DISPATCH)) {
-                    $profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
+                    $profilerKey = self::PROFILER_KEY . '.' . $this->getFullActionName();
 
-                    Varien_Profiler::start($profilerKey);
+                    \Maho\Profiler::start($profilerKey);
                     $this->$actionMethodName();
-                    Varien_Profiler::stop($profilerKey);
+                    \Maho\Profiler::stop($profilerKey);
 
-                    Varien_Profiler::start(self::PROFILER_KEY . '::postdispatch');
+                    \Maho\Profiler::start(self::PROFILER_KEY . '.postdispatch');
                     $this->postDispatch();
-                    Varien_Profiler::stop(self::PROFILER_KEY . '::postdispatch');
+                    \Maho\Profiler::stop(self::PROFILER_KEY . '.postdispatch');
                 }
             }
         } catch (Mage_Core_Controller_Varien_Exception $e) {
