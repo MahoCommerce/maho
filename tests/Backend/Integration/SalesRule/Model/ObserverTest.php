@@ -44,9 +44,9 @@ describe('SalesRule Observer Integration', function () {
             ->setUsageLimit(1)
             ->save();
 
-        // Verify initial state (times_used might be null initially)
-        expect((int) $rule->getTimesUsed())->toBe(0);
-        expect((int) $coupon->getTimesUsed())->toBe(0);
+        // Verify initial state
+        expect($rule->getTimesUsed() ?? 0)->toBe(0);
+        expect($coupon->getTimesUsed() ?? 0)->toBe(0);
 
         // Create an order with the coupon applied (but no discount amount)
         $order = Mage::getModel('sales/order');
@@ -177,6 +177,55 @@ describe('SalesRule Observer Integration', function () {
 
         expect($rule->getTimesUsed())->toBe(1);
         expect($coupon->getTimesUsed())->toBe(1);
+    });
+
+    test('tracks free shipping coupon usage for guest checkout', function () {
+        // Create a free shipping-only sales rule (no customer restrictions)
+        $rule = Mage::getModel('salesrule/rule');
+        $rule->setName('Guest Free Shipping Test')
+            ->setDescription('Test rule for guest free shipping')
+            ->setIsActive(1)
+            ->setWebsiteIds([1])
+            ->setCustomerGroupIds([0, 1]) // Include guest group (0)
+            ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
+            ->setSimpleAction('by_percent')
+            ->setDiscountAmount(0)
+            ->setSimpleFreeShipping(Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS)
+            ->save();
+
+        $coupon = Mage::getModel('salesrule/coupon');
+        $coupon->setRuleId($rule->getId())
+            ->setCode('GUESTSHIP2025')
+            ->setUsageLimit(5)
+            ->save();
+
+        // Verify initial state
+        expect($rule->getTimesUsed() ?? 0)->toBe(0);
+        expect($coupon->getTimesUsed() ?? 0)->toBe(0);
+
+        // Create a guest order (no customer_id)
+        $order = Mage::getModel('sales/order');
+        $order->setStoreId(1)
+            ->setState(Mage_Sales_Model_Order::STATE_NEW)
+            ->setStatus('pending')
+            ->setAppliedRuleIds((string) $rule->getId())
+            ->setCouponCode('GUESTSHIP2025')
+            ->setDiscountAmount(0) // Free shipping only
+            ->setBaseDiscountAmount(0)
+            ->setGrandTotal(100)
+            ->setBaseGrandTotal(100)
+            ->save();
+
+        // Trigger the observer
+        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+
+        // Reload models to get fresh data
+        $rule->load($rule->getId());
+        $coupon->load($coupon->getId());
+
+        // Verify usage was tracked even without a customer
+        expect($rule->getTimesUsed())->toBe(1, 'Rule times_used should be incremented for guest orders');
+        expect($coupon->getTimesUsed())->toBe(1, 'Coupon times_used should be incremented for guest orders');
     });
 
     test('does not track usage when no rules or coupons applied', function () {
