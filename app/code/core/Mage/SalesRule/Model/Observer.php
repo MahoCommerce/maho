@@ -71,8 +71,9 @@ class Mage_SalesRule_Model_Observer
         $ruleCustomer = null;
         $customerId = $order->getCustomerId();
 
-        // use each rule (and apply to customer, if applicable)
-        if ($order->getDiscountAmount() != 0) {
+        // Track usage if any rules were applied or a coupon was used
+        // This includes free shipping-only rules that don't have a discount amount
+        if ($order->getAppliedRuleIds() || $order->getCouponCode()) {
             foreach ($ruleIds as $ruleId) {
                 if (!$ruleId) {
                     continue;
