@@ -69,17 +69,15 @@
                         <li>
                             <a href="<?= $this->getForgotPasswordUrl() ?>" class="f-left"><?= $this->__('Forgot Your Password?') ?></a>
                         </li>
-                        <?php if (Mage::helper('customer')->isMagicLinkEnabled()): ?>
-                        <li>
-                            <a href="<?= Mage::helper('customer')->getMagicLinkRequestUrl() ?>" class="f-left"><?= $this->__('Login with Magic Link') ?></a>
-                        </li>
-                        <?php endif ?>
                         <?php endif ?>
                         <?= $this->getChildHtml('remember.me') ?>
                     </ul>
                 </fieldset>
                 <div class="buttons-set">
-                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Login')) ?>" name="send" id="send2"><?= $this->__('Login') ?></button>
+                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Login')) ?>" name="send" id="send2"><span><?= $this->__('Login') ?></span></button>
+                    <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD && Mage::helper('customer')->isMagicLinkEnabled()): ?>
+                    <button type="button" class="button" title="<?= $this->quoteEscape($this->__('Login with Magic Link')) ?>" id="magic-link-button"><span><?= $this->__('Login with Magic Link') ?></span></button>
+                    <?php endif ?>
                 </div>
             </div>
         </div>
@@ -89,5 +87,28 @@
     </form>
     <script type="text/javascript">
         var dataForm = new VarienForm('login-form', true);
+
+        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD && Mage::helper('customer')->isMagicLinkEnabled()): ?>
+        document.getElementById('magic-link-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const form = document.getElementById('login-form');
+            const passwordField = document.getElementById('pass');
+
+            // Change form action to magic link request endpoint
+            form.action = '<?= $this->getUrl('customer/account/magicLinkRequestPost') ?>';
+
+            // Remove password validation requirements
+            if (passwordField) {
+                passwordField.removeAttribute('required');
+                passwordField.setAttribute('aria-required', 'false');
+                passwordField.classList.remove('required-entry');
+                passwordField.classList.remove('validate-password');
+            }
+
+            // Submit the form
+            form.submit();
+        });
+        <?php endif ?>
     </script>
 </div>

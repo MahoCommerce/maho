@@ -339,14 +339,6 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Retrieve magic link request URL
-     */
-    public function getMagicLinkRequestUrl(): string
-    {
-        return $this->_getUrl('customer/account/magiclinkrequest');
-    }
-
-    /**
      * Retrieve magic link login URL with token
      */
     public function getMagicLinkUrl(string $token): string

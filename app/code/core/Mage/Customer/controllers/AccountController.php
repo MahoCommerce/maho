@@ -60,7 +60,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             'resetpasswordpost',
             'confirm',
             'confirmation',
-            'magiclinkrequest',
             'magiclinkrequestpost',
             'magiclinklogin',
         ];
@@ -906,22 +905,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $this->_redirect('*/*/changeforgotten');
             return;
         }
-    }
-
-    /**
-     * Display magic link request form
-     */
-    public function magicLinkRequestAction(): void
-    {
-        // Check if magic link is enabled
-        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
-            $this->norouteAction();
-            return;
-        }
-
-        $this->loadLayout();
-        $this->_initLayoutMessages('customer/session');
-        $this->renderLayout();
     }
 
     /**

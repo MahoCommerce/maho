@@ -5192,6 +5192,15 @@ label.offcanvas-trigger {
   text-align: left;
   border-top: 0;
 }
+.customer-account-login .col2-set .col-2 .buttons-set {
+  display: flex;
+  gap: 10px;
+}
+.customer-account-login .col2-set .col-2 .buttons-set button,
+.customer-account-login .col2-set .col-2 .buttons-set .button {
+  flex: 1 1 0;
+  min-width: 0;
+}
 .customer-account-login .col2-set .buttons-set button,
 .customer-account-login .col2-set .buttons-set .button {
   float: none;
