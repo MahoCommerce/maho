@@ -915,11 +915,10 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
     /**
      * Generate magic link token (reuses password reset token)
-     *
-     * @return string
      */
-    public function generateMagicLinkToken()
+    public function generateMagicLinkToken(): string
     {
+        /** @var Mage_Customer_Helper_Data $helper */
         $helper = Mage::helper('customer');
         return $helper->generateResetPasswordLinkToken();
     }
@@ -927,11 +926,10 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Send email with magic login link
      *
-     * @return $this
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function sendMagicLinkEmail()
+    public function sendMagicLinkEmail(): self
     {
         $storeId = Mage::app()->getStore()->getId();
         if (!$storeId) {
@@ -954,11 +952,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
     /**
      * Validate magic link token
-     *
-     * @param string $token
-     * @return bool
      */
-    public function validateMagicLinkToken($token)
+    public function validateMagicLinkToken(string $token): bool
     {
         if (empty($token) || empty($this->getRpToken())) {
             return false;
@@ -970,10 +965,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
     /**
      * Check if magic link token is expired
-     *
-     * @return bool
      */
-    public function isMagicLinkTokenExpired()
+    public function isMagicLinkTokenExpired(): bool
     {
         $tokenCreatedAt = $this->getRpTokenCreatedAt();
 
@@ -1002,10 +995,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
     /**
      * Clear magic link token (reuses rp_token)
-     *
-     * @return $this
      */
-    public function clearMagicLinkToken()
+    public function clearMagicLinkToken(): self
     {
         $this->setRpToken('');
         $this->setRpTokenCreatedAt('');
