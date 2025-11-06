@@ -550,6 +550,15 @@
                 <account_new_email_template>customer_password_link_account_new_email_template</account_new_email_template>
                 <email_template>customer_password_link_email_template</email_template>
             </password_link>
+            <magic_link>
+                <enabled>0</enabled>
+                <token_expiration>10</token_expiration>
+                <rate_limit_email>3</rate_limit_email>
+                <rate_limit_ip>10</rate_limit_ip>
+                <email_identity>general</email_identity>
+                <email_template>customer_magic_link_email_template</email_template>
+                <registration_mode>require_password</registration_mode>
+            </magic_link>
             <address>
                 <street_lines>2</street_lines>
                 <prefix_show/>

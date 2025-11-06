@@ -881,6 +881,158 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     }
 
     /**
+     * Display magic link request form
+     */
+    public function magicLinkRequestAction(): void
+    {
+        // Check if magic link is enabled
+        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
+            $this->norouteAction();
+            return;
+        }
+
+        $this->loadLayout();
+        $this->_initLayoutMessages('customer/session');
+        $this->renderLayout();
+    }
+
+    /**
+     * Process magic link request
+     */
+    public function magicLinkRequestPostAction(): void
+    {
+        // Check if magic link is enabled
+        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
+            $this->norouteAction();
+            return;
+        }
+
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        $email = (string) $this->getRequest()->getPost('email');
+        if ($email) {
+            $flowPassword = Mage::getModel('customer/flowpassword');
+            $flowPassword->setEmail($email)->save();
+
+            if (!$flowPassword->checkMagicLinkFlowEmail($email)) {
+                $this->_getSession()
+                    ->addError($this->__('You have exceeded magic link requests per hour from this email address.'));
+                $this->_redirect('*/*/magiclinkrequest');
+                return;
+            }
+
+            if (!$flowPassword->checkMagicLinkFlowIp()) {
+                $this->_getSession()->addError($this->__('You have exceeded magic link requests per hour from this IP address.'));
+                $this->_redirect('*/*/magiclinkrequest');
+                return;
+            }
+
+            if (!Mage::helper('core')->isValidEmail($email)) {
+                $this->_getSession()->addError($this->__('Invalid email address.'));
+                $this->_redirect('*/*/magiclinkrequest');
+                return;
+            }
+
+            $customer = Mage::getModel('customer/customer')
+                ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
+                ->loadByEmail($email);
+
+            $customerId = $customer->getId();
+            if ($customerId && $customer->getIsActive()) {
+                try {
+                    $customer->sendMagicLinkEmail();
+                } catch (Exception $exception) {
+                    $this->_getSession()->addError($exception->getMessage());
+                    $this->_redirect('*/*/magiclinkrequest');
+                    return;
+                }
+            }
+
+            // Always show success message (security: don't reveal if email exists)
+            $this->_getSession()
+                ->addSuccess(Mage::helper('customer')
+                ->__(
+                    'If there is an account associated with %s you will receive an email with a login link.',
+                    Mage::helper('customer')->escapeHtml($email),
+                ));
+            $this->_redirect('*/*/');
+            return;
+        } else {
+            $this->_getSession()->addError($this->__('Please enter your email.'));
+            $this->_redirect('*/*/magiclinkrequest');
+            return;
+        }
+    }
+
+    /**
+     * Validate magic link token and login customer
+     */
+    public function magicLinkLoginAction(): void
+    {
+        // Check if magic link is enabled
+        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
+            $this->norouteAction();
+            return;
+        }
+
+        if ($this->_getSession()->isLoggedIn()) {
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        $token = (string) $this->getRequest()->getParam('token');
+
+        if (empty($token)) {
+            $this->_getSession()->addError($this->__('Invalid login link.'));
+            $this->_redirect('*/*/login');
+            return;
+        }
+
+        try {
+            // Find customer by token
+            $customerCollection = Mage::getModel('customer/customer')
+                ->getCollection()
+                ->addAttributeToSelect('*')
+                ->addFieldToFilter('rp_token', $token);
+
+            if ($customerCollection->getSize() === 0) {
+                throw new Exception($this->__('Invalid or expired login link.'));
+            }
+
+            /** @var Mage_Customer_Model_Customer $customer */
+            $customer = $customerCollection->getFirstItem();
+
+            // Validate token
+            if (!$customer->validateMagicLinkToken($token) || $customer->isMagicLinkTokenExpired()) {
+                throw new Exception($this->__('Your login link has expired. Please request a new one.'));
+            }
+
+            // Check if account is active
+            if (!$customer->getIsActive()) {
+                throw new Exception($this->__('This account is not active.'));
+            }
+
+            // Login customer
+            $this->_getSession()->setCustomerAsLoggedIn($customer);
+
+            // Clear the token (one-time use)
+            $customer->clearMagicLinkToken();
+            $customer->save();
+
+            $this->_getSession()->addSuccess($this->__('You have been successfully logged in.'));
+
+            // Redirect using same logic as normal login
+            $this->_loginPostRedirect();
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+            $this->_redirect('*/*/login');
+        }
+    }
+
+    /**
      * @return string|false
      */
     protected function getCustomerId()

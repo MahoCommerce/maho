@@ -146,6 +146,23 @@ New customer registration
         </reference>
     </customer_account_forgotpassword>
 
+    <customer_account_magiclinkrequest translate="label">
+        <label>Customer Magic Link Request Form</label>
+        <remove name="right"/>
+        <remove name="left"/>
+
+        <reference name="head">
+            <action method="setTitle" translate="title" module="customer"><title>Login with Magic Link</title></action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+            <action method="setHeaderTitle" translate="title" module="customer"><title>Login with Magic Link</title></action>
+        </reference>
+        <reference name="content">
+            <block type="customer/account_forgotpassword" name="magicLinkRequest" template="customer/form/magic_link_request.phtml" />
+        </reference>
+    </customer_account_magiclinkrequest>
+
     <customer_account_changeforgotten translate="label">
         <label>Reset a Password</label>
         <remove name="right"/>

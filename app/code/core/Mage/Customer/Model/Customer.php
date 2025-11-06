@@ -123,6 +123,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const XML_PATH_PASSWORD_LINK_ACCOUNT_NEW_EMAIL_TEMPLATE = 'customer/password_link/account_new_email_template';
     public const XML_PATH_PASSWORD_LINK_EMAIL_TEMPLATE = 'customer/password_link/email_template';
     public const XML_PATH_PASSWORD_LINK_EMAIL_IDENTITY = 'customer/password_link/email_identity';
+    public const XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE = 'customer/magic_link/email_template';
+    public const XML_PATH_MAGIC_LINK_EMAIL_IDENTITY = 'customer/magic_link/email_identity';
     /**
      * Codes of exceptions related to customer model
      */
@@ -908,6 +910,105 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $storeId,
         );
 
+        return $this;
+    }
+
+    /**
+     * Generate magic link token (reuses password reset token)
+     *
+     * @return string
+     */
+    public function generateMagicLinkToken()
+    {
+        $helper = Mage::helper('customer');
+        return $helper->generateResetPasswordLinkToken();
+    }
+
+    /**
+     * Send email with magic login link
+     *
+     * @return $this
+     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Model_Store_Exception
+     */
+    public function sendMagicLinkEmail()
+    {
+        $storeId = Mage::app()->getStore()->getId();
+        if (!$storeId) {
+            $storeId = $this->_getWebsiteStoreId();
+        }
+
+        // Generate and store token (reuses rp_token field)
+        $token = $this->generateMagicLinkToken();
+        $this->changeResetPasswordLinkToken($token);
+
+        $this->_sendEmailTemplate(
+            self::XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE,
+            self::XML_PATH_MAGIC_LINK_EMAIL_IDENTITY,
+            ['customer' => $this, 'token' => $token],
+            $storeId,
+        );
+
+        return $this;
+    }
+
+    /**
+     * Validate magic link token
+     *
+     * @param string $token
+     * @return bool
+     */
+    public function validateMagicLinkToken($token)
+    {
+        if (empty($token) || empty($this->getRpToken())) {
+            return false;
+        }
+
+        // Timing-safe comparison
+        return hash_equals((string) $this->getRpToken(), (string) $token);
+    }
+
+    /**
+     * Check if magic link token is expired
+     *
+     * @return bool
+     */
+    public function isMagicLinkTokenExpired()
+    {
+        $tokenCreatedAt = $this->getRpTokenCreatedAt();
+
+        if (empty($this->getRpToken()) || empty($tokenCreatedAt)) {
+            return true;
+        }
+
+        // Get expiration period from config (in minutes)
+        $tokenExpirationPeriod = (int) Mage::getStoreConfig('customer/magic_link/token_expiration');
+        if ($tokenExpirationPeriod <= 0) {
+            $tokenExpirationPeriod = 10; // Default to 10 minutes
+        }
+
+        $currentDate = Mage_Core_Model_Locale::now();
+        $currentTimestamp = strtotime($currentDate);
+        $tokenTimestamp = strtotime($tokenCreatedAt);
+
+        if ($tokenTimestamp > $currentTimestamp) {
+            return true;
+        }
+
+        $minutesDifference = floor(($currentTimestamp - $tokenTimestamp) / 60);
+
+        return $minutesDifference >= $tokenExpirationPeriod;
+    }
+
+    /**
+     * Clear magic link token (reuses rp_token)
+     *
+     * @return $this
+     */
+    public function clearMagicLinkToken()
+    {
+        $this->setRpToken('');
+        $this->setRpTokenCreatedAt('');
         return $this;
     }
 

@@ -62,6 +62,11 @@
                         <li>
                             <a href="<?= $this->getForgotPasswordUrl() ?>" class="f-left"><?= $this->__('Forgot Your Password?') ?></a>
                         </li>
+                        <?php if (Mage::helper('customer')->isMagicLinkEnabled()): ?>
+                        <li>
+                            <a href="<?= Mage::helper('customer')->getMagicLinkRequestUrl() ?>" class="f-left"><?= $this->__('Login with Magic Link') ?></a>
+                        </li>
+                        <?php endif ?>
                         <?= $this->getChildHtml('remember.me') ?>
                     </ul>
                 </fieldset>

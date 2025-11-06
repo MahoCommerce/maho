@@ -1,0 +1,35 @@
+<!--@subject Login Link for {{var customer.name}} @-->
+<!--@vars
+{"store url=\"\"":"Store Url",
+"var logo_url":"Email Logo Image Url",
+"var logo_alt":"Email Logo Image Alt",
+"htmlescape var=$customer.name":"Customer Name",
+"store url=\"customer/account/magiclink/\" _query_token=$customer.rp_token":"Magic Link Login URL"}
+@-->
+
+<!--@styles
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td class="action-content">
+            <h1>{{htmlescape var=$customer.name}},</h1>
+            <p>You recently requested a login link for your account.</p>
+            <p>Click the button below to log in to your account:</p>
+            <table cellspacing="0" cellpadding="0" class="action-button" >
+                <tr>
+                    <td>
+                        <a href="{{store url="customer/account/magiclink/" _query_token=$customer.rp_token}}"><span>Login to Your Account</span></a>
+                    </td>
+                </tr>
+            </table>
+            <p><strong>This link will expire in 10 minutes</strong> and can only be used once.</p>
+            <p>If you did not request this login link, you can safely ignore this message.</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}
