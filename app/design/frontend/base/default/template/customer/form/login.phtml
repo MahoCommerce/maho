@@ -25,7 +25,7 @@
     <?= $this->getChildHtml('customer.form.login.extra') ?>
     <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
     <?php $formAction = ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD)
-        ? $this->getUrl('*/*/magicLinkRequestPost')
+        ? $this->getUrl('customer/account/magicLinkRequestPost')
         : $this->getPostActionUrl(); ?>
     <form action="<?= $formAction ?>" method="post" id="login-form" aria-label="<?= $this->__('Login Form') ?>">
         <?= $this->getBlockHtml('formkey') ?>
@@ -79,10 +79,7 @@
                     </ul>
                 </fieldset>
                 <div class="buttons-set">
-                    <?php $buttonText = ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD)
-                        ? $this->__('Send Magic Link')
-                        : $this->__('Login'); ?>
-                    <button type="submit" class="button" title="<?= $this->quoteEscape($buttonText) ?>" name="send" id="send2"><?= $buttonText ?></button>
+                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Login')) ?>" name="send" id="send2"><?= $this->__('Login') ?></button>
                 </div>
             </div>
         </div>

@@ -18,7 +18,6 @@ declare(strict_types=1);
 class Mage_Customer_Model_Config_Registrationmode
 {
     public const MODE_REQUIRE_PASSWORD = 'require_password';
-    public const MODE_OPTIONAL_PASSWORD = 'optional_password';
     public const MODE_NO_PASSWORD = 'no_password';
 
     /**
@@ -30,10 +29,6 @@ class Mage_Customer_Model_Config_Registrationmode
             [
                 'value' => self::MODE_REQUIRE_PASSWORD,
                 'label' => Mage::helper('customer')->__('Require Password (Default)'),
-            ],
-            [
-                'value' => self::MODE_OPTIONAL_PASSWORD,
-                'label' => Mage::helper('customer')->__('Optional Password'),
             ],
             [
                 'value' => self::MODE_NO_PASSWORD,
@@ -48,9 +43,8 @@ class Mage_Customer_Model_Config_Registrationmode
     public function toArray(): array
     {
         return [
-            self::MODE_REQUIRE_PASSWORD  => Mage::helper('customer')->__('Require Password (Default)'),
-            self::MODE_OPTIONAL_PASSWORD => Mage::helper('customer')->__('Optional Password'),
-            self::MODE_NO_PASSWORD       => Mage::helper('customer')->__('No Password (Full Passwordless)'),
+            self::MODE_REQUIRE_PASSWORD => Mage::helper('customer')->__('Require Password (Default)'),
+            self::MODE_NO_PASSWORD      => Mage::helper('customer')->__('No Password (Full Passwordless)'),
         ];
     }
 }

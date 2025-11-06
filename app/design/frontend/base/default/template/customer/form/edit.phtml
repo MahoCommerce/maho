@@ -42,6 +42,8 @@
         <?php if ($_gender->isEnabled()): ?>
             <li><?= $_gender->setGender($this->getCustomer()->getGender())->toHtml() ?></li>
         <?php endif ?>
+        <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
+        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
             <li>
                 <label for="current_password" class="required"><?= $this->quoteEscape($this->__('Current Password')) ?></label>
                 <div class="input-box">
@@ -53,8 +55,10 @@
             <li class="control">
                 <input type="checkbox" name="change_password" id="change_password" value="1" onclick="setPasswordForm(this.checked)" title="<?= $this->quoteEscape($this->__('Change Password')) ?>"<?php if($this->getCustomer()->getChangePassword()==1): ?> checked="checked"<?php endif ?> class="checkbox" /><label for="change_password"><?= $this->__('Change Password') ?></label>
             </li>
+        <?php endif ?>
         </ul>
     </div>
+    <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
     <div class="fieldset" style="display:none;">
         <h2 class="legend"><?= $this->__('Change Password') ?></h2>
         <ul class="form-list">
@@ -83,6 +87,7 @@
             </li>
         </ul>
     </div>
+    <?php endif ?>
     <div class="buttons-set">
         <button type="submit" title="<?= $this->quoteEscape($this->__('Save')) ?>" class="button"><?= $this->__('Save') ?></button>
     </div>

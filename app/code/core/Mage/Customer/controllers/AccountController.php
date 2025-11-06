@@ -60,6 +60,9 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             'resetpasswordpost',
             'confirm',
             'confirmation',
+            'magiclinkrequest',
+            'magiclinkrequestpost',
+            'magiclinklogin',
         ];
         $pattern = '/^(' . implode('|', $openActions) . ')/i';
 
@@ -926,16 +929,30 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      */
     public function magicLinkRequestPostAction(): void
     {
+        Mage::log('=== magicLinkRequestPostAction CALLED ===', Mage::LOG_INFO, 'system.log');
+
         // Check if magic link is enabled
         if (!Mage::helper('customer')->isMagicLinkEnabled()) {
+            Mage::log('Magic link NOT enabled', Mage::LOG_DEBUG, 'magic_link.log');
             $this->norouteAction();
             return;
         }
 
+        Mage::log('Magic link IS enabled', Mage::LOG_DEBUG, 'magic_link.log');
+
+        $formKeyFromPost = $this->getRequest()->getPost('form_key');
+        $formKeyFromSession = Mage::getSingleton('core/session')->getFormKey();
+        Mage::log('Form key from POST: ' . $formKeyFromPost, Mage::LOG_DEBUG, 'magic_link.log');
+        Mage::log('Form key from SESSION: ' . $formKeyFromSession, Mage::LOG_DEBUG, 'magic_link.log');
+
         if (!$this->_validateFormKey()) {
+            Mage::log('Form key validation FAILED', Mage::LOG_DEBUG, 'magic_link.log');
+            Mage::log('All POST data: ' . print_r($this->getRequest()->getPost(), true), Mage::LOG_DEBUG, 'magic_link.log');
             $this->_redirect('*/*/');
             return;
         }
+
+        Mage::log('Form key validation PASSED', Mage::LOG_DEBUG, 'magic_link.log');
 
         // Handle both 'email' field (from magic link request page) and 'login[username]' (from login form)
         $email = (string) $this->getRequest()->getPost('email');
@@ -943,6 +960,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $loginData = $this->getRequest()->getPost('login');
             $email = is_array($loginData) ? (string) ($loginData['username'] ?? '') : '';
         }
+
+        Mage::log('Email from form: ' . $email, Mage::LOG_DEBUG, 'magic_link.log');
 
         if ($email) {
             $flowPassword = Mage::getModel('customer/flowpassword');
@@ -1164,8 +1183,12 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $customerForm->compactData($customerData);
                 $errors = [];
 
-                if (!$customer->validatePassword($this->getRequest()->getPost('current_password'))) {
-                    $errors[] = $this->__('Invalid current password');
+                // Skip password validation in no-password mode
+                $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode();
+                if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD) {
+                    if (!$customer->validatePassword($this->getRequest()->getPost('current_password'))) {
+                        $errors[] = $this->__('Invalid current password');
+                    }
                 }
 
                 // If email change was requested then set flag

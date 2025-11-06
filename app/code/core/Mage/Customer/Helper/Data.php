@@ -351,7 +351,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkUrl(string $token): string
     {
-        return $this->_getUrl('customer/account/magiclink', ['token' => $token]);
+        return $this->_getUrl('customer/account/magiclinklogin', ['token' => $token]);
     }
 
     /**
