@@ -111,9 +111,8 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
      * Check magic link requests to times per hour from 1 e-mail
      *
      * @param string $email
-     * @return bool
      */
-    public function checkMagicLinkFlowEmail(#[\SensitiveParameter] $email)
+    public function checkMagicLinkFlowEmail(#[\SensitiveParameter] $email): bool
     {
         $helper = Mage::helper('customer');
         $limit = $helper->getMagicLinkRateLimitEmail();
@@ -138,10 +137,8 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
 
     /**
      * Check magic link requests to times per hour from 1 IP
-     *
-     * @return bool
      */
-    public function checkMagicLinkFlowIp()
+    public function checkMagicLinkFlowIp(): bool
     {
         $helper = Mage::helper('customer');
         $validatorData = Mage::getSingleton('customer/session')->getValidatorData();

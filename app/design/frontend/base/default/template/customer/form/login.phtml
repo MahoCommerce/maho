@@ -23,7 +23,11 @@
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
     <?= $this->getChildHtml('customer.form.login.extra') ?>
-    <form action="<?= $this->getPostActionUrl() ?>" method="post" id="login-form" aria-label="<?= $this->__('Login Form') ?>">
+    <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
+    <?php $formAction = ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD)
+        ? $this->getUrl('*/*/magicLinkRequestPost')
+        : $this->getPostActionUrl(); ?>
+    <form action="<?= $formAction ?>" method="post" id="login-form" aria-label="<?= $this->__('Login Form') ?>">
         <?= $this->getBlockHtml('formkey') ?>
         <div class="col2-set">
             <?php if ($isRegistrationAllowed): ?>
@@ -51,6 +55,7 @@
                                 <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true" />
                             </div>
                         </li>
+                        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                         <li>
                             <?php $minPasswordLength = $this->getMinPasswordLength(); ?>
                             <label for="pass" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Password') ?></label>
@@ -58,7 +63,9 @@
                                 <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-<?= $minPasswordLength ?>" id="pass" title="<?= $this->quoteEscape($this->__('Password')) ?>" autocomplete="off" aria-required="true" />
                             </div>
                         </li>
+                        <?php endif ?>
                         <?= $this->getChildHtml('form.additional.info') ?>
+                        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                         <li>
                             <a href="<?= $this->getForgotPasswordUrl() ?>" class="f-left"><?= $this->__('Forgot Your Password?') ?></a>
                         </li>
@@ -67,11 +74,15 @@
                             <a href="<?= Mage::helper('customer')->getMagicLinkRequestUrl() ?>" class="f-left"><?= $this->__('Login with Magic Link') ?></a>
                         </li>
                         <?php endif ?>
+                        <?php endif ?>
                         <?= $this->getChildHtml('remember.me') ?>
                     </ul>
                 </fieldset>
                 <div class="buttons-set">
-                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Login')) ?>" name="send" id="send2"><?= $this->__('Login') ?></button>
+                    <?php $buttonText = ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD)
+                        ? $this->__('Send Magic Link')
+                        : $this->__('Login'); ?>
+                    <button type="submit" class="button" title="<?= $this->quoteEscape($buttonText) ?>" name="send" id="send2"><?= $buttonText ?></button>
                 </div>
             </div>
         </div>

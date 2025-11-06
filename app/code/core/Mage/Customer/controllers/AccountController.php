@@ -320,6 +320,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function _successProcessRegistration(Mage_Customer_Model_Customer $customer)
     {
         $session = $this->_getSession();
+        $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode();
+
         if ($customer->isConfirmationRequired()) {
             $app = $this->_getApp();
             $store = $app->getStore();
@@ -335,6 +337,18 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 'Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please <a href="%s">click here</a>.',
                 $customerHelper->getEmailConfirmationUrl($customer->getEmail()),
             ));
+            $url = $this->_getUrl('*/*/index', ['_secure' => true]);
+        } elseif ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD) {
+            // Passwordless mode: send magic link email instead of logging in
+            try {
+                $customer->sendMagicLinkEmail();
+                $session->addSuccess($this->__(
+                    'Thank you for registering! We have sent you an email with a login link to %s.',
+                    Mage::helper('customer')->escapeHtml($customer->getEmail()),
+                ));
+            } catch (Exception $e) {
+                $session->addError($this->__('Registration successful, but we could not send the login link. Please use the login page.'));
+            }
             $url = $this->_getUrl('*/*/index', ['_secure' => true]);
         } else {
             $session->setRememberMe((bool) $this->getRequest()->getPost('remember_me'))
@@ -417,8 +431,19 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $errors = array_merge($customerErrors, $errors);
         } else {
             $customerForm->compactData($customerData);
-            $customer->setPassword($request->getPost('password'));
-            $customer->setPasswordConfirmation($request->getPost('confirmation'));
+
+            // Handle passwordless registration
+            $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode();
+            if ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD) {
+                // Generate a secure random password
+                $randomPassword = Mage::helper('core')->getRandomString(32);
+                $customer->setPassword($randomPassword);
+                $customer->setPasswordConfirmation($randomPassword);
+            } else {
+                $customer->setPassword($request->getPost('password'));
+                $customer->setPasswordConfirmation($request->getPost('confirmation'));
+            }
+
             $customerErrors = $customer->validate();
             if (is_array($customerErrors)) {
                 $errors = array_merge($customerErrors, $errors);
@@ -912,7 +937,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        // Handle both 'email' field (from magic link request page) and 'login[username]' (from login form)
         $email = (string) $this->getRequest()->getPost('email');
+        if (!$email) {
+            $loginData = $this->getRequest()->getPost('login');
+            $email = is_array($loginData) ? (string) ($loginData['username'] ?? '') : '';
+        }
+
         if ($email) {
             $flowPassword = Mage::getModel('customer/flowpassword');
             $flowPassword->setEmail($email)->save();
