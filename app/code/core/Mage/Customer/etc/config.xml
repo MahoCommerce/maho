@@ -562,7 +562,7 @@
                 <rate_limit_ip>10</rate_limit_ip>
                 <email_identity>general</email_identity>
                 <email_template>customer_magic_link_email_template</email_template>
-                <registration_mode>require_password</registration_mode>
+                <registration_mode>no_password</registration_mode>
             </magic_link>
             <address>
                 <street_lines>2</street_lines>
