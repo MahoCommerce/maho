@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -104,6 +104,62 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
                 return false;
             }
         }
+        return true;
+    }
+
+    /**
+     * Check magic link requests to times per hour from 1 e-mail
+     */
+    public function checkMagicLinkFlowEmail(#[\SensitiveParameter] string $email): bool
+    {
+        $helper = Mage::helper('customer');
+        $limit = $helper->getMagicLinkRateLimitEmail();
+
+        if ($limit <= 0) {
+            return true; // No limit
+        }
+
+        $magicLinkRequests = $this->getCollection()
+            ->addFieldToFilter('email', ['eq' => $email])
+            ->addFieldToFilter(
+                'requested_date',
+                ['gt' => Mage::getModel('core/date')->date(null, '-1 hour')],
+            );
+
+        if ($magicLinkRequests->getSize() >= $limit) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check magic link requests to times per hour from 1 IP
+     */
+    public function checkMagicLinkFlowIp(): bool
+    {
+        $helper = Mage::helper('customer');
+        $validatorData = Mage::getSingleton('customer/session')->getValidatorData();
+        $remoteAddr    = $validatorData[Mage_Customer_Model_Session::VALIDATOR_REMOTE_ADDR_KEY];
+        $limit = $helper->getMagicLinkRateLimitIp();
+
+        if ($limit <= 0) {
+            return true; // No limit
+        }
+
+        if ($remoteAddr) {
+            $magicLinkRequests = $this->getCollection()
+                ->addFieldToFilter('ip', ['eq' => $remoteAddr])
+                ->addFieldToFilter(
+                    'requested_date',
+                    ['gt' => Mage::getModel('core/date')->date(null, '-1 hour')],
+                );
+
+            if ($magicLinkRequests->getSize() >= $limit) {
+                return false;
+            }
+        }
+
         return true;
     }
 }
