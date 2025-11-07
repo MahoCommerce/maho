@@ -939,8 +939,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $flowPassword->setEmail($email)->save();
 
         if (!$flowPassword->checkMagicLinkFlowEmail($email)) {
-            $this->_getSession()
-                ->addError($this->__('You have exceeded magic link requests per hour from this email address.'));
+            $this->_getSession()->addError($this->__('You have exceeded magic link requests per hour from this email address.'));
             $this->_redirect('*/*/magiclinkrequest');
             return;
         }
