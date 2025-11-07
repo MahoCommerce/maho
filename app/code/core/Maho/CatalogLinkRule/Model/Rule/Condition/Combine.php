@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,7 +37,7 @@ class Maho_CatalogLinkRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_
         foreach ($productAttributes as $code => $label) {
             $attributes[] = [
                 'value' => 'cataloglinkrule/rule_condition_product|' . $code,
-                'label' => $label
+                'label' => $label,
             ];
         }
 
@@ -44,12 +45,12 @@ class Maho_CatalogLinkRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_
         $conditions = array_merge_recursive($conditions, [
             [
                 'value' => 'cataloglinkrule/rule_condition_combine',
-                'label' => Mage::helper('cataloglinkrule')->__('Conditions Combination')
+                'label' => Mage::helper('cataloglinkrule')->__('Conditions Combination'),
             ],
             [
                 'label' => Mage::helper('cataloglinkrule')->__('Product Attribute'),
-                'value' => $attributes
-            ]
+                'value' => $attributes,
+            ],
         ]);
 
         return $conditions;

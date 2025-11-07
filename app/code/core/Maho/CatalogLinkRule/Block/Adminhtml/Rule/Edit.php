@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -42,7 +43,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit extends Mage_Adminhtml_Bloc
         if (Mage::registry('current_linkrule')->getId()) {
             return Mage::helper('cataloglinkrule')->__(
                 "Edit Rule '%s'",
-                $this->escapeHtml(Mage::registry('current_linkrule')->getName())
+                $this->escapeHtml(Mage::registry('current_linkrule')->getName()),
             );
         } else {
             return Mage::helper('cataloglinkrule')->__('New Rule');

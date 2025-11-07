@@ -22,8 +22,6 @@ class Maho_CatalogLinkRule_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get available sort orders
-     *
-     * @return array
      */
     public function getSortOrders(): array
     {

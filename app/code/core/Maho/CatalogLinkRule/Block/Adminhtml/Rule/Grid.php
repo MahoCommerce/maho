@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -95,8 +96,8 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
                 [
                     'caption' => Mage::helper('cataloglinkrule')->__('Edit'),
                     'url'     => ['base' => '*/*/edit'],
-                    'field'   => 'id'
-                ]
+                    'field'   => 'id',
+                ],
             ],
             'filter'    => false,
             'sortable'  => false,
@@ -114,11 +115,11 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
         $this->getMassactionBlock()->addItem('delete', [
             'label'    => Mage::helper('cataloglinkrule')->__('Delete'),
             'url'      => $this->getUrl('*/*/massDelete'),
-            'confirm'  => Mage::helper('cataloglinkrule')->__('Are you sure?')
+            'confirm'  => Mage::helper('cataloglinkrule')->__('Are you sure?'),
         ]);
 
         $this->getMassactionBlock()->addItem('status', [
-            'label'=> Mage::helper('cataloglinkrule')->__('Change status'),
+            'label' => Mage::helper('cataloglinkrule')->__('Change status'),
             'url'  => $this->getUrl('*/*/massStatus', ['_current' => true]),
             'additional' => [
                 'visibility' => [
@@ -129,9 +130,9 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
                     'values' => [
                         1 => Mage::helper('cataloglinkrule')->__('Enabled'),
                         0 => Mage::helper('cataloglinkrule')->__('Disabled'),
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]);
 
         return $this;

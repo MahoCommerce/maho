@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -74,9 +75,9 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Load post data
      *
-     * @param array $data
      * @return $this
      */
+    #[\Override]
     public function loadPost(array $data)
     {
         $this->addData($data);
@@ -94,8 +95,6 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Get matching source product IDs
-     *
-     * @return array
      */
     public function getMatchingSourceProductIds(): array
     {
@@ -108,7 +107,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         $productIds = [];
         foreach ($productCollection as $product) {
             if ($this->getConditions()->validate($product)) {
-                $productIds[] = (int)$product->getId();
+                $productIds[] = (int) $product->getId();
             }
         }
 
@@ -119,7 +118,6 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
      * Get matching target product IDs with sorting for a specific source product
      *
      * @param Mage_Catalog_Model_Product|null $sourceProduct
-     * @return array
      */
     public function getMatchingTargetProductIds($sourceProduct = null): array
     {
@@ -159,7 +157,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
                 $productIds = [];
                 foreach ($productCollection as $product) {
                     if ($this->getActions()->validate($product)) {
-                        $productIds[] = (int)$product->getId();
+                        $productIds[] = (int) $product->getId();
                     }
                 }
                 shuffle($productIds);
@@ -174,7 +172,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         $productIds = [];
         foreach ($productCollection as $product) {
             if ($this->getActions()->validate($product)) {
-                $productIds[] = (int)$product->getId();
+                $productIds[] = (int) $product->getId();
             }
         }
 

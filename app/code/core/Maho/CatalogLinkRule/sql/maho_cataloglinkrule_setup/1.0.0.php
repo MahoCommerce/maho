@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -68,7 +69,7 @@ $table->addColumn('rule_id', Table::TYPE_INTEGER, null, [
 ], 'Updated At')
 ->addIndex(
     $this->getIdxName('cataloglinkrule/rule', ['is_active', 'priority', 'link_type_id']),
-    ['is_active', 'priority', 'link_type_id']
+    ['is_active', 'priority', 'link_type_id'],
 )
 ->setComment('Catalog Product Link Rules');
 

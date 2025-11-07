@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,9 +19,7 @@ use Maho\Data\Form;
  * @category   Maho
  * @package    Maho_CatalogLinkRule
  */
-class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_TargetConditions
-    extends Mage_Adminhtml_Block_Widget_Form
-    implements Mage_Adminhtml_Block_Widget_Tab_Interface
+class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_TargetConditions extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     #[\Override]
     protected function _prepareForm()
@@ -37,8 +36,8 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_TargetConditions
 
         $fieldset = $form->addFieldset('target_fieldset', [
             'legend' => Mage::helper('cataloglinkrule')->__(
-                'Link to products matching the following conditions (leave blank for all products)'
-            )
+                'Link to products matching the following conditions (leave blank for all products)',
+            ),
         ])->setRenderer($renderer);
 
         $fieldset->addField('target', 'text', [

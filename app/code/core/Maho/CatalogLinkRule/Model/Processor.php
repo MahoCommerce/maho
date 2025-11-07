@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -42,15 +43,12 @@ class Maho_CatalogLinkRule_Model_Processor
 
         // Process each link type separately
         foreach ($rulesByType as $linkTypeId => $typeRules) {
-            $this->processLinkType((int)$linkTypeId, $typeRules);
+            $this->processLinkType((int) $linkTypeId, $typeRules);
         }
     }
 
     /**
      * Process all rules for a specific link type
-     *
-     * @param int $linkTypeId
-     * @param array $rules
      */
     protected function processLinkType(int $linkTypeId, array $rules): void
     {
@@ -88,7 +86,7 @@ class Maho_CatalogLinkRule_Model_Processor
                 // Delete existing links for this batch
                 $adapter->delete($linkTable, [
                     'product_id IN (?)' => $batchProductIds,
-                    'link_type_id = ?' => $linkTypeId
+                    'link_type_id = ?' => $linkTypeId,
                 ]);
 
                 // Process each product in batch
@@ -101,7 +99,7 @@ class Maho_CatalogLinkRule_Model_Processor
                         $positionAttrId,
                         $adapter,
                         $linkTable,
-                        $linkAttrTable
+                        $linkAttrTable,
                     );
                 }
 
@@ -117,13 +115,7 @@ class Maho_CatalogLinkRule_Model_Processor
     /**
      * Apply a rule to a single product
      *
-     * @param int $productId
-     * @param Maho_CatalogLinkRule_Model_Rule $rule
-     * @param int $linkTypeId
-     * @param int $positionAttrId
      * @param Maho\Db\Adapter\AdapterInterface $adapter
-     * @param string $linkTable
-     * @param string $linkAttrTable
      */
     protected function applyRuleToProduct(
         int $productId,
@@ -132,7 +124,7 @@ class Maho_CatalogLinkRule_Model_Processor
         int $positionAttrId,
         $adapter,
         string $linkTable,
-        string $linkAttrTable
+        string $linkAttrTable,
     ): void {
         // Load the source product with all attributes
         $sourceProduct = Mage::getModel('catalog/product')->load($productId);
@@ -158,7 +150,7 @@ class Maho_CatalogLinkRule_Model_Processor
             $adapter->insert($linkTable, [
                 'product_id' => $productId,
                 'linked_product_id' => $targetId,
-                'link_type_id' => $linkTypeId
+                'link_type_id' => $linkTypeId,
             ]);
 
             $linkId = $adapter->lastInsertId();
@@ -167,7 +159,7 @@ class Maho_CatalogLinkRule_Model_Processor
             $adapter->insert($linkAttrTable, [
                 'product_link_attribute_id' => $positionAttrId,
                 'link_id' => $linkId,
-                'value' => $position++
+                'value' => $position++,
             ]);
 
             $linkCount++;
@@ -176,9 +168,6 @@ class Maho_CatalogLinkRule_Model_Processor
 
     /**
      * Get position attribute ID for link type
-     *
-     * @param int $linkTypeId
-     * @return int
      */
     protected function getPositionAttributeId(int $linkTypeId): int
     {
@@ -190,7 +179,7 @@ class Maho_CatalogLinkRule_Model_Processor
             $adapter->select()
                 ->from($table, 'product_link_attribute_id')
                 ->where('link_type_id = ?', $linkTypeId)
-                ->where('product_link_attribute_code = ?', 'position')
+                ->where('product_link_attribute_code = ?', 'position'),
         );
     }
 }

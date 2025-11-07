@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -147,8 +148,6 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
      *
      * @param Varien_Object $targetProduct
      * @param Varien_Object $sourceProduct
-     * @param string $operator
-     * @return bool
      */
     protected function validateCategoryMatch($targetProduct, $sourceProduct, string $operator): bool
     {
@@ -179,6 +178,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
      *
      * @return string
      */
+    #[\Override]
     public function getValueElement()
     {
         // No value input needed for source matching
@@ -200,7 +200,6 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
     /**
      * Get condition as array
      *
-     * @param array $arrAttributes
      * @return array
      */
     #[\Override]

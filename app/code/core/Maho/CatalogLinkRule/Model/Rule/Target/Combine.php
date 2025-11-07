@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,7 +37,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
         foreach ($productAttributes as $code => $label) {
             $attributes[] = [
                 'value' => 'cataloglinkrule/rule_target_product|' . $code,
-                'label' => $label
+                'label' => $label,
             ];
         }
 
@@ -48,7 +49,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
         foreach ($sourceMatchAttributes as $code => $label) {
             $sourceMatchOptions[] = [
                 'value' => 'cataloglinkrule/rule_target_sourceMatch|' . $code,
-                'label' => $label
+                'label' => $label,
             ];
         }
 
@@ -56,16 +57,16 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
         $conditions = array_merge_recursive($conditions, [
             [
                 'value' => 'cataloglinkrule/rule_target_combine',
-                'label' => Mage::helper('cataloglinkrule')->__('Conditions Combination')
+                'label' => Mage::helper('cataloglinkrule')->__('Conditions Combination'),
             ],
             [
                 'label' => Mage::helper('cataloglinkrule')->__('Product Attribute'),
-                'value' => $attributes
+                'value' => $attributes,
             ],
             [
                 'label' => Mage::helper('cataloglinkrule')->__('Match Source Product'),
-                'value' => $sourceMatchOptions
-            ]
+                'value' => $sourceMatchOptions,
+            ],
         ]);
 
         return $conditions;

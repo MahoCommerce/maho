@@ -30,6 +30,7 @@ namespace PHPSTORM_META {
         'captcha/data' => \Maho_Captcha_Helper_Data::class,
         'cataloginventory/data' => \Mage_CatalogInventory_Helper_Data::class,
         'cataloginventory/minsaleqty' => \Mage_CatalogInventory_Helper_Minsaleqty::class,
+        'cataloglinkrule/data' => \Maho_CatalogLinkRule_Helper_Data::class,
         'catalogrule/data' => \Mage_CatalogRule_Helper_Data::class,
         'catalogsearch/data' => \Mage_CatalogSearch_Helper_Data::class,
         'configurableswatches/data' => \Mage_ConfigurableSwatches_Helper_Data::class,

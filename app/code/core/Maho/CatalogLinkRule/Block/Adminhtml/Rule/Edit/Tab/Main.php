@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -12,9 +13,7 @@ declare(strict_types=1);
 
 use Maho\Data\Form;
 
-class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_Main
-    extends Mage_Adminhtml_Block_Widget_Form
-    implements Mage_Adminhtml_Block_Widget_Tab_Interface
+class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_Main extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     #[\Override]
     protected function _prepareForm()
@@ -25,7 +24,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_Main
         $form->setHtmlIdPrefix('rule_');
 
         $fieldset = $form->addFieldset('base_fieldset', [
-            'legend' => Mage::helper('cataloglinkrule')->__('Rule Information')
+            'legend' => Mage::helper('cataloglinkrule')->__('Rule Information'),
         ]);
 
         if ($model->getId()) {
