@@ -89,25 +89,36 @@
         var dataForm = new VarienForm('login-form', true);
 
         <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD && Mage::helper('customer')->isMagicLinkEnabled()): ?>
-        document.getElementById('magic-link-button')?.addEventListener('click', function(e) {
+        const form = document.getElementById('login-form');
+        const passwordField = document.getElementById('pass');
+        const loginButton = document.getElementById('send2');
+        const magicLinkButton = document.getElementById('magic-link-button');
+
+        // Regular login button - restore password validation classes
+        loginButton?.addEventListener('click', function(e) {
+            if (passwordField) {
+                passwordField.classList.add('required-entry');
+                passwordField.classList.add('validate-password');
+            }
+            form.action = '<?= $this->getPostActionUrl() ?>';
+        });
+
+        // Magic link button - remove password validation classes
+        magicLinkButton?.addEventListener('click', function(e) {
             e.preventDefault();
 
-            const form = document.getElementById('login-form');
-            const passwordField = document.getElementById('pass');
-
-            // Change form action to magic link request endpoint
-            form.action = '<?= $this->getUrl('customer/account/magicLinkRequestPost') ?>';
-
-            // Remove password validation requirements
+            // Remove password validation classes
             if (passwordField) {
-                passwordField.removeAttribute('required');
-                passwordField.setAttribute('aria-required', 'false');
                 passwordField.classList.remove('required-entry');
                 passwordField.classList.remove('validate-password');
             }
 
-            // Submit the form
-            form.submit();
+            // Validate the form (will check email)
+            if (dataForm.validator.validate()) {
+                // Change form action to magic link request endpoint
+                form.action = '<?= $this->getUrl('customer/account/magicLinkRequestPost') ?>';
+                form.submit();
+            }
         });
         <?php endif ?>
     </script>
