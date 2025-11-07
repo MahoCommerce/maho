@@ -288,20 +288,15 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     {
         $html = '';
 
-        switch ($this->getAttribute()) {
-            case 'sku':
-            case 'category_ids':
-                $image = Mage::getDesign()->getSkinUrl('images/rule_chooser_trigger.gif');
-                break;
-        }
-
-        if (!empty($image)) {
-            $html = '<a href="javascript:void(0)" class="rule-chooser-trigger"><img src="'
-                . $image
-                . '" alt="" class="v-middle rule-chooser-trigger" title="'
+        $html = match ($this->getAttribute()) {
+            'sku', 'category_ids' => '<a href="javascript:void(0)" class="rule-chooser-trigger" title="'
                 . Mage::helper('core')->quoteEscape(Mage::helper('rule')->__('Open Chooser'))
-                . '" /></a>';
-        }
+                . '">'
+                . Mage::helper('core')->getIconSvg('list-search')
+                . '</a>',
+            default => $html,
+        };
+
         return $html;
     }
 

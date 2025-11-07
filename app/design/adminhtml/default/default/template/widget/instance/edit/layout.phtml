@@ -73,7 +73,7 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
             '<p>' +
                 '<input type="text" class="input-text entities" name="widget_instance[{{id}}][<?= $container['name'] ?>][entities]" value="{{<?= $container['name'] ?>_entities}}" readonly="readonly" />&nbsp;' +
                 '<a class="widget-option-chooser" href="javascript:void(0)" onclick="WidgetInstance.displayEntityChooser(\'<?= $container['code'] ?>\', \'<?= $container['name'] ?>_ids_{{id}}\')"  title="<?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Open Chooser')) ?>">' +
-                    '<img src="<?= Mage::getDesign()->getSkinUrl('images/rule_chooser_trigger.gif') ?>" class="v-middle" alt="<?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Open Chooser')) ?>" />' +
+                    '<?= $this->helper('core')->jsQuoteEscape($this->getIconSvg('list-search')) ?>' +
                 '</a>&nbsp;' +
                 '<a href="javascript:void(0)" onclick="WidgetInstance.hideEntityChooser(\'<?= $container['name'] ?>_ids_{{id}}\')" title="<?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Apply')) ?>">' +
                     '<?= $this->helper('core')->jsQuoteEscape($this->getIconSvg('circle-check')) ?>' +
