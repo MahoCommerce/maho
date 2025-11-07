@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CatalogLinkRule
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_CatalogLinkRule>
+            <version>1.0.0</version>
+        </Maho_CatalogLinkRule>
+    </modules>
+
+    <global>
+        <models>
+            <cataloglinkrule>
+                <class>Maho_CatalogLinkRule_Model</class>
+                <resourceModel>cataloglinkrule_resource</resourceModel>
+            </cataloglinkrule>
+            <cataloglinkrule_resource>
+                <class>Maho_CatalogLinkRule_Model_Resource</class>
+                <entities>
+                    <rule>
+                        <table>catalog_product_link_rule</table>
+                    </rule>
+                </entities>
+            </cataloglinkrule_resource>
+        </models>
+
+        <resources>
+            <maho_cataloglinkrule_setup>
+                <setup>
+                    <module>Maho_CatalogLinkRule</module>
+                    <class>Mage_Core_Model_Resource_Setup</class>
+                </setup>
+            </maho_cataloglinkrule_setup>
+        </resources>
+
+        <helpers>
+            <cataloglinkrule>
+                <class>Maho_CatalogLinkRule_Helper</class>
+            </cataloglinkrule>
+        </helpers>
+
+        <blocks>
+            <cataloglinkrule>
+                <class>Maho_CatalogLinkRule_Block</class>
+            </cataloglinkrule>
+        </blocks>
+    </global>
+
+    <adminhtml>
+        <layout>
+            <updates>
+                <cataloglinkrule>
+                    <file>cataloglinkrule.xml</file>
+                </cataloglinkrule>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Maho_CatalogLinkRule>
+                    <files>
+                        <default>Maho_CatalogLinkRule.csv</default>
+                    </files>
+                </Maho_CatalogLinkRule>
+            </modules>
+        </translate>
+    </adminhtml>
+
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Maho_CatalogLinkRule before="Mage_Adminhtml">Maho_CatalogLinkRule_Adminhtml</Maho_CatalogLinkRule>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+
+    <default>
+        <cataloglinkrule>
+            <cron>
+                <schedule>0 * * * *</schedule>
+            </cron>
+        </cataloglinkrule>
+    </default>
+
+    <crontab>
+        <jobs>
+            <cataloglinkrule_update>
+                <schedule>
+                    <config_path>cataloglinkrule/cron/schedule</config_path>
+                </schedule>
+                <run>
+                    <model>cataloglinkrule/processor::processRules</model>
+                </run>
+            </cataloglinkrule_update>
+        </jobs>
+    </crontab>
+</config>
