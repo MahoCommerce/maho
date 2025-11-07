@@ -14,7 +14,7 @@ declare(strict_types=1);
 class Maho_CatalogLinkRule_Model_Resource_Rule_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('cataloglinkrule/rule');
     }
@@ -24,7 +24,7 @@ class Maho_CatalogLinkRule_Model_Resource_Rule_Collection extends Mage_Core_Mode
      *
      * @return $this
      */
-    public function addDateFilter()
+    public function addDateFilter(): self
     {
         $now = Mage_Core_Model_Locale::now();
 

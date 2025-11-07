@@ -24,11 +24,9 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
 
     /**
      * Get new child select options
-     *
-     * @return array
      */
     #[\Override]
-    public function getNewChildSelectOptions()
+    public function getNewChildSelectOptions(): array
     {
         $productCondition = Mage::getModel('cataloglinkrule/rule_target_product');
         $productAttributes = $productCondition->loadAttributeOptions()->getAttributeOption();
@@ -75,10 +73,9 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
     /**
      * Collect validated attributes
      *
-     * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
-    public function collectValidatedAttributes($productCollection)
+    public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection): self
     {
         foreach ($this->getConditions() as $condition) {
             $condition->collectValidatedAttributes($productCollection);

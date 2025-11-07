@@ -16,7 +16,7 @@ use Maho\Data\Form;
 class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     #[\Override]
-    protected function _prepareForm()
+    protected function _prepareForm(): self
     {
         $form = new Form([
             'id'     => 'edit_form',

@@ -45,29 +45,25 @@ declare(strict_types=1);
 class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('cataloglinkrule/rule');
     }
 
     /**
      * Get rule conditions instance
-     *
-     * @return Maho_CatalogLinkRule_Model_Rule_Condition_Combine
      */
     #[\Override]
-    public function getConditionsInstance()
+    public function getConditionsInstance(): Maho_CatalogLinkRule_Model_Rule_Condition_Combine
     {
         return Mage::getModel('cataloglinkrule/rule_condition_combine');
     }
 
     /**
      * Get rule actions instance (used for target conditions)
-     *
-     * @return Maho_CatalogLinkRule_Model_Rule_Target_Combine
      */
     #[\Override]
-    public function getActionsInstance()
+    public function getActionsInstance(): Maho_CatalogLinkRule_Model_Rule_Target_Combine
     {
         return Mage::getModel('cataloglinkrule/rule_target_combine');
     }
@@ -78,7 +74,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
      * @return $this
      */
     #[\Override]
-    public function loadPost(array $data)
+    public function loadPost(array $data): self
     {
         $this->addData($data);
 
@@ -116,10 +112,8 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Get matching target product IDs with sorting for a specific source product
-     *
-     * @param Mage_Catalog_Model_Product|null $sourceProduct
      */
-    public function getMatchingTargetProductIds($sourceProduct = null): array
+    public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
     {
         $productCollection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect(['name', 'price', 'created_at'])

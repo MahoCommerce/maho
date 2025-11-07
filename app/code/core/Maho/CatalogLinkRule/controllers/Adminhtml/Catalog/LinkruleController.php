@@ -15,7 +15,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 {
     public const ADMIN_RESOURCE = 'catalog/linkrules';
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->loadLayout()
             ->_setActiveMenu('catalog/linkrules')
@@ -24,12 +24,12 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
             ->renderLayout();
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $model = Mage::getModel('cataloglinkrule/rule');
@@ -56,7 +56,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
             ->renderLayout();
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($data = $this->getRequest()->getParam('rule')) {
             try {
@@ -96,7 +96,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         $this->_redirect('*/*/');
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             try {
@@ -114,7 +114,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         $this->_redirect('*/*/');
     }
 
-    public function massDeleteAction()
+    public function massDeleteAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
         if (!is_array($ruleIds)) {
@@ -136,7 +136,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         $this->_redirect('*/*/index');
     }
 
-    public function massStatusAction()
+    public function massStatusAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
         $status = (int) $this->getRequest()->getParam('status');
@@ -160,7 +160,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         $this->_redirect('*/*/index');
     }
 
-    public function newConditionHtmlAction()
+    public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
@@ -185,7 +185,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         $this->getResponse()->setBody($html);
     }
 
-    public function newTargetConditionHtmlAction()
+    public function newTargetConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
@@ -211,7 +211,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
     }
 
     #[\Override]
-    public function preDispatch()
+    public function preDispatch(): bool|Mage_Core_Controller_Varien_Action
     {
         $this->_setForcedFormKeyActions(['delete', 'massDelete', 'massStatus']);
         return parent::preDispatch();

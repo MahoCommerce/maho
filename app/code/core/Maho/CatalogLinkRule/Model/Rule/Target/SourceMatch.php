@@ -187,10 +187,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
 
     /**
      * Get value after element HTML
-     *
-     * @return string
      */
-    public function getValueAfterElementHtml()
+    public function getValueAfterElementHtml(): string
     {
         return '<div style="margin-top: 5px; font-style: italic; color: #666;">'
             . Mage::helper('cataloglinkrule')->__('Target product attribute will be compared to source product')

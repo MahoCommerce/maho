@@ -20,7 +20,7 @@ declare(strict_types=1);
 class Maho_CatalogLinkRule_Model_Resource_Rule extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('cataloglinkrule/rule', 'rule_id');
     }

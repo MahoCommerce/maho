@@ -23,7 +23,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    protected function _prepareCollection()
+    protected function _prepareCollection(): self
     {
         $collection = Mage::getResourceModel('cataloglinkrule/rule_collection');
         $this->setCollection($collection);
@@ -31,7 +31,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    protected function _prepareColumns()
+    protected function _prepareColumns(): self
     {
         $this->addColumn('rule_id', [
             'header'    => Mage::helper('cataloglinkrule')->__('ID'),
@@ -107,7 +107,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    protected function _prepareMassaction()
+    protected function _prepareMassaction(): self
     {
         $this->setMassactionIdField('rule_id');
         $this->getMassactionBlock()->setFormFieldName('rule_ids');
@@ -139,7 +139,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(Varien_Object $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

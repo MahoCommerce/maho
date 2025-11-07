@@ -38,7 +38,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    public function getHeaderText()
+    public function getHeaderText(): string
     {
         if (Mage::registry('current_linkrule')->getId()) {
             return Mage::helper('cataloglinkrule')->__(

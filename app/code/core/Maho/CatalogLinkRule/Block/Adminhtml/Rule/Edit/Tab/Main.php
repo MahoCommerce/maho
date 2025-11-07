@@ -16,7 +16,7 @@ use Maho\Data\Form;
 class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_Main extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     #[\Override]
-    protected function _prepareForm()
+    protected function _prepareForm(): self
     {
         $model = Mage::registry('current_linkrule');
 
@@ -113,25 +113,25 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_Main extends Mage_Admin
     }
 
     #[\Override]
-    public function getTabLabel()
+    public function getTabLabel(): string
     {
         return Mage::helper('cataloglinkrule')->__('Rule Information');
     }
 
     #[\Override]
-    public function getTabTitle()
+    public function getTabTitle(): string
     {
         return Mage::helper('cataloglinkrule')->__('Rule Information');
     }
 
     #[\Override]
-    public function canShowTab()
+    public function canShowTab(): bool
     {
         return true;
     }
 
     #[\Override]
-    public function isHidden()
+    public function isHidden(): bool
     {
         return false;
     }
