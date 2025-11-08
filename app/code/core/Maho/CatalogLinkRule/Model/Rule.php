@@ -54,7 +54,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
      * Get rule conditions instance
      */
     #[\Override]
-    public function getConditionsInstance(): Maho_CatalogLinkRule_Model_Rule_Condition_Combine
+    public function getConditionsInstance()
     {
         return Mage::getModel('cataloglinkrule/rule_condition_combine');
     }
@@ -63,7 +63,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
      * Get rule actions instance (used for target conditions)
      */
     #[\Override]
-    public function getActionsInstance(): Maho_CatalogLinkRule_Model_Rule_Target_Combine
+    public function getActionsInstance()
     {
         return Mage::getModel('cataloglinkrule/rule_target_combine');
     }
@@ -98,11 +98,13 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
-        $this->getConditions()->collectValidatedAttributes($productCollection);
+        /** @var Maho_CatalogLinkRule_Model_Rule_Condition_Combine $conditions */
+        $conditions = $this->getConditions();
+        $conditions->collectValidatedAttributes($productCollection);
 
         $productIds = [];
         foreach ($productCollection as $product) {
-            if ($this->getConditions()->validate($product)) {
+            if ($conditions->validate($product)) {
                 $productIds[] = (int) $product->getId();
             }
         }
@@ -119,7 +121,9 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             ->addAttributeToSelect(['name', 'price', 'created_at'])
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
-        $this->getActions()->collectValidatedAttributes($productCollection);
+        /** @var Maho_CatalogLinkRule_Model_Rule_Target_Combine $actions */
+        $actions = $this->getActions();
+        $actions->collectValidatedAttributes($productCollection);
 
         // Set source product for source-matching conditions
         if ($sourceProduct) {
@@ -150,7 +154,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
                 // For better performance on large catalogs, shuffle in PHP
                 $productIds = [];
                 foreach ($productCollection as $product) {
-                    if ($this->getActions()->validate($product)) {
+                    if ($actions->validate($product)) {
                         $productIds[] = (int) $product->getId();
                     }
                 }
@@ -165,7 +169,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
         $productIds = [];
         foreach ($productCollection as $product) {
-            if ($this->getActions()->validate($product)) {
+            if ($actions->validate($product)) {
                 $productIds[] = (int) $product->getId();
             }
         }

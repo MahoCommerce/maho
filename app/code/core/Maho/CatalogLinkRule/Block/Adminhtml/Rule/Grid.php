@@ -139,7 +139,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    public function getRowUrl(Varien_Object $row): string
+    public function getRowUrl(mixed $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

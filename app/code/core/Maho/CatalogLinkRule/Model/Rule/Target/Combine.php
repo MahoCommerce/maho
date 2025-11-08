@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Condition_Combine
+class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Action_Collection
 {
     /**
      * Initialize the model
@@ -82,5 +82,18 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
         }
 
         return $this;
+    }
+
+    /**
+     * Validate product against target conditions
+     */
+    public function validate(Maho\DataObject $object): bool
+    {
+        foreach ($this->getConditions() as $condition) {
+            if (!$condition->validate($object)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

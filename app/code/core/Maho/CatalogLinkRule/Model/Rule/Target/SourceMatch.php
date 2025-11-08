@@ -108,11 +108,10 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
     /**
      * Validate product against source product
      *
-     * @param Varien_Object $object Target product
-     * @return bool
+     * @param Maho\DataObject $object Target product
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(Maho\DataObject $object): bool
     {
         $sourceProduct = $this->getRule()->getSourceProduct();
 
@@ -145,11 +144,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
 
     /**
      * Validate category match
-     *
-     * @param Varien_Object $targetProduct
-     * @param Varien_Object $sourceProduct
      */
-    protected function validateCategoryMatch($targetProduct, $sourceProduct, string $operator): bool
+    protected function validateCategoryMatch(Maho\DataObject $targetProduct, Maho\DataObject $sourceProduct, string $operator): bool
     {
         $targetCategories = $targetProduct->getCategoryIds();
         $sourceCategories = $sourceProduct->getCategoryIds();
@@ -175,11 +171,9 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
 
     /**
      * Get value element HTML
-     *
-     * @return string
      */
     #[\Override]
-    public function getValueElement()
+    public function getValueElement(): Maho\Data\Form\Element\AbstractElement|string
     {
         // No value input needed for source matching
         return '';

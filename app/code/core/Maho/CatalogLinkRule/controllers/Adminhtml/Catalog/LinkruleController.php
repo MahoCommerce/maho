@@ -172,7 +172,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
             ->setRule(Mage::getModel('cataloglinkrule/rule'))
             ->setPrefix('conditions');
 
-        if (!empty($typeArr[1])) {
+        if (!empty($typeArr[1]) && $model instanceof Mage_Rule_Model_Condition_Abstract) {
             $model->setAttribute($typeArr[1]);
         }
 
@@ -197,7 +197,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
             ->setRule(Mage::getModel('cataloglinkrule/rule'))
             ->setPrefix('target');
 
-        if (!empty($typeArr[1])) {
+        if (!empty($typeArr[1]) && $model instanceof Mage_Rule_Model_Condition_Abstract) {
             $model->setAttribute($typeArr[1]);
         }
 
