@@ -33,12 +33,12 @@
         </models>
 
         <resources>
-            <maho_cataloglinkrule_setup>
+            <cataloglinkrule_setup>
                 <setup>
                     <module>Maho_CatalogLinkRule</module>
                     <class>Mage_Core_Model_Resource_Setup</class>
                 </setup>
-            </maho_cataloglinkrule_setup>
+            </cataloglinkrule_setup>
         </resources>
 
         <helpers>

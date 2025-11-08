@@ -14,9 +14,10 @@ declare(strict_types=1);
 use Maho\Db\Ddl\Table;
 
 /** @var Mage_Core_Model_Resource_Setup $this */
-$this->startSetup();
+$installer = $this;
+$installer->startSetup();
 
-$table = $this->getConnection()->newTable($this->getTable('cataloglinkrule/rule'));
+$table = $installer->getConnection()->newTable($installer->getTable('cataloglinkrule/rule'));
 $table->addColumn('rule_id', Table::TYPE_INTEGER, null, [
     'identity' => true,
     'unsigned' => true,
@@ -55,7 +56,7 @@ $table->addColumn('rule_id', Table::TYPE_INTEGER, null, [
 ->addColumn('to_date', Table::TYPE_DATE, null, [
     'nullable' => true,
 ], 'To Date')
-->addColumn('conditions_serialized', Table::TYPE_TEXT, null, [
+->addColumn('source_conditions_serialized', Table::TYPE_TEXT, null, [
     'nullable' => true,
 ], 'Source product conditions')
 ->addColumn('target_conditions_serialized', Table::TYPE_TEXT, null, [
@@ -70,11 +71,11 @@ $table->addColumn('rule_id', Table::TYPE_INTEGER, null, [
     'default'  => Table::TIMESTAMP_INIT_UPDATE,
 ], 'Updated At')
 ->addIndex(
-    $this->getIdxName('cataloglinkrule/rule', ['is_active', 'priority', 'link_type_id']),
+    $installer->getIdxName('cataloglinkrule/rule', ['is_active', 'priority', 'link_type_id']),
     ['is_active', 'priority', 'link_type_id'],
 )
 ->setComment('Catalog Product Link Rules');
 
-$this->getConnection()->createTable($table);
+$installer->getConnection()->createTable($table);
 
-$this->endSetup();
+$installer->endSetup();
