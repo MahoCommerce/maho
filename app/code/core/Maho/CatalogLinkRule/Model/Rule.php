@@ -132,9 +132,6 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
         // Apply sorting
         switch ($this->getSortOrder()) {
-            case 'price_asc':
-                $productCollection->addAttributeToSort('price', 'ASC');
-                break;
             case 'price_desc':
                 $productCollection->addAttributeToSort('price', 'DESC');
                 break;
@@ -160,10 +157,10 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
                 }
                 shuffle($productIds);
                 return $productIds;
-            case 'position':
+            case 'price_asc':
             default:
-                // Natural order (entity_id)
-                $productCollection->addAttributeToSort('entity_id', 'ASC');
+                // Default: price ascending
+                $productCollection->addAttributeToSort('price', 'ASC');
                 break;
         }
 
