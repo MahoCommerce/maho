@@ -78,12 +78,12 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     {
         $this->addData($data);
 
-        if (isset($data['rule'])) {
+        if (isset($data['rule']['conditions'])) {
             $this->getConditions()->loadArray($data['rule']['conditions']);
         }
 
-        if (isset($data['target'])) {
-            $this->getActions()->loadArray($data['target']['conditions']);
+        if (isset($data['rule']['target'])) {
+            $this->getActions()->loadArray($data['rule']['target']);
         }
 
         return $this;

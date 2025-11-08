@@ -71,13 +71,52 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Act
     }
 
     /**
+     * Override to use __ separators instead of : separators
+     * This makes the HTML compatible with rules.js which expects __ separators
+     */
+    #[\Override]
+    public function getNewChildElement()
+    {
+        $prefix = $this->getPrefix() ?: 'actions';
+        $element = $this->getForm()->addField($prefix . '__' . $this->getId() . '__new_child', 'select', [
+            'name' => 'rule[' . $this->getPrefix() . '][' . $this->getId() . '][new_child]',
+            'values' => $this->getNewChildSelectOptions(),
+            'value_name' => $this->getNewChildName(),
+        ]);
+
+        $renderer = Mage::getBlockSingleton('rule/newchild');
+        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+            $element->setRenderer($renderer);
+        }
+
+        return $element;
+    }
+
+    /**
+     * Override to use __ separators instead of : separators
+     * This makes the HTML compatible with rules.js which expects __ separators
+     */
+    #[\Override]
+    public function asHtmlRecursive()
+    {
+        $prefix = $this->getPrefix() ?: 'actions';
+        $htmlId = $prefix . '__' . $this->getId() . '__children';
+        $html = $this->asHtml() . '<ul id="' . $htmlId . '">';
+        foreach ($this->getActions() as $cond) {
+            $html .= '<li>' . $cond->asHtmlRecursive() . '</li>';
+        }
+        $html .= '<li>' . $this->getNewChildElement()->getHtml() . '</li></ul>';
+        return $html;
+    }
+
+    /**
      * Collect validated attributes
      *
      * @return $this
      */
     public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection): self
     {
-        foreach ($this->getConditions() as $condition) {
+        foreach ($this->getActions() as $condition) {
             $condition->collectValidatedAttributes($productCollection);
         }
 
@@ -89,8 +128,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Act
      */
     public function validate(Maho\DataObject $object): bool
     {
-        foreach ($this->getConditions() as $condition) {
-            if (!$condition->validate($object)) {
+        foreach ($this->getActions() as $action) {
+            if (!$action->validate($object)) {
                 return false;
             }
         }
