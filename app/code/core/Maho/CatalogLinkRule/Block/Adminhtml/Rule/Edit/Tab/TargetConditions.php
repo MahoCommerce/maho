@@ -27,7 +27,6 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_TargetConditions extend
         $model = Mage::registry('current_linkrule');
 
         $form = new Form();
-
         $form->setHtmlIdPrefix('rule_');
 
         $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
