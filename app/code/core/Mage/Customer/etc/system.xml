@@ -356,6 +356,85 @@
                         </email_identity>
                     </fields>
                 </password_link>
+                <magic_link translate="label">
+                    <label>Magic Link (Passwordless Login) Options</label>
+                    <sort_order>37</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Magic Link Login</label>
+                            <comment>Allow customers to login via a secure link sent to their email instead of using a password.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
+                        <token_expiration translate="label comment">
+                            <label>Token Expiration (minutes)</label>
+                            <comment>How long the magic link remains valid. Default: 10 minutes.</comment>
+                            <validate>required-entry validate-digits validate-digits-range digits-range-1-</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </token_expiration>
+                        <rate_limit_email translate="label comment">
+                            <label>Rate Limit - Email (requests per hour)</label>
+                            <comment>Maximum magic link requests per email address per hour. Default: 3.</comment>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </rate_limit_email>
+                        <rate_limit_ip translate="label comment">
+                            <label>Rate Limit - IP (requests per hour)</label>
+                            <comment>Maximum magic link requests per IP address per hour. Default: 10.</comment>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </rate_limit_ip>
+                        <email_template translate="label">
+                            <label>Magic Link Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </email_template>
+                        <email_identity translate="label">
+                            <label>Email Sender</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </email_identity>
+                        <registration_mode translate="label comment">
+                            <label>Registration Password Requirement</label>
+                            <comment>Controls whether password is required during registration.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customer/config_registrationmode</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </registration_mode>
+                    </fields>
+                </magic_link>
                 <address translate="label">
                     <label>Name and Address Options</label>
                     <sort_order>40</sort_order>

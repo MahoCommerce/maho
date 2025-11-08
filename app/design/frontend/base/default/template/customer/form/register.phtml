@@ -139,6 +139,8 @@
             <input type="hidden" name="default_shipping" value="1" />
         </fieldset>
     <?php endif ?>
+        <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
+        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
         <fieldset class="fieldset">
             <legend class="visually-hidden"><?= $this->__('Login Information') ?></legend>
             <ul class="form-list">
@@ -169,6 +171,12 @@
                 <?= $this->getChildHtml('remember.me') ?>
             </ul>
         </fieldset>
+        <?php else: ?>
+        <ul class="form-list">
+            <?= $this->getChildHtml('form.additional.info') ?>
+            <?= $this->getChildHtml('remember.me') ?>
+        </ul>
+        <?php endif ?>
         <div class="buttons-set">
             <p class="back-link"><a href="<?= $this->escapeUrl($this->getBackUrl()) ?>" class="back-link"><small>&laquo; </small><?= $this->__('Back') ?></a></p>
             <button type="submit" title="<?= $this->quoteEscape($this->__('Register')) ?>" class="button"><?= $this->__('Register') ?></button>

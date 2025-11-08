@@ -131,7 +131,7 @@ class VarienRulesForm {
         })
         .then(responseText => {
             if (this._processSuccess(responseText)) {
-                chooser.innerHTML = responseText;
+                updateElementHtmlAndExecuteScripts(chooser, responseText);
                 this.showChooserLoaded(chooser, responseText);
             }
         })
@@ -300,7 +300,7 @@ class VarienRulesForm {
         })
         .then(responseText => {
             if (this._processSuccess(responseText)) {
-                new_elem.innerHTML = responseText;
+                updateElementHtmlAndExecuteScripts(new_elem, responseText);
                 this.onAddNewChildComplete(new_elem);
             }
         })
@@ -448,7 +448,7 @@ class VarienRulesForm {
             if (this._processSuccess(responseText)) {
                 // Create a temporary container for the new HTML
                 const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = responseText;
+                updateElementHtmlAndExecuteScripts(tempDiv, responseText);
 
                 // Store reference to parent before removing current element
                 const parentUl = containerLi.parentNode;

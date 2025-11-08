@@ -23,7 +23,11 @@
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
     <?= $this->getChildHtml('customer.form.login.extra') ?>
-    <form action="<?= $this->getPostActionUrl() ?>" method="post" id="login-form" aria-label="<?= $this->__('Login Form') ?>">
+    <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
+    <?php $formAction = ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD)
+        ? $this->getUrl('customer/account/magicLinkRequestPost')
+        : $this->getPostActionUrl(); ?>
+    <form action="<?= $formAction ?>" method="post" id="login-form" aria-label="<?= $this->__('Login Form') ?>">
         <?= $this->getBlockHtml('formkey') ?>
         <div class="col2-set">
             <?php if ($isRegistrationAllowed): ?>
@@ -51,6 +55,7 @@
                                 <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true" />
                             </div>
                         </li>
+                        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                         <li>
                             <?php $minPasswordLength = $this->getMinPasswordLength(); ?>
                             <label for="pass" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Password') ?></label>
@@ -58,15 +63,21 @@
                                 <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-<?= $minPasswordLength ?>" id="pass" title="<?= $this->quoteEscape($this->__('Password')) ?>" autocomplete="off" aria-required="true" />
                             </div>
                         </li>
+                        <?php endif ?>
                         <?= $this->getChildHtml('form.additional.info') ?>
+                        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                         <li>
                             <a href="<?= $this->getForgotPasswordUrl() ?>" class="f-left"><?= $this->__('Forgot Your Password?') ?></a>
                         </li>
+                        <?php endif ?>
                         <?= $this->getChildHtml('remember.me') ?>
                     </ul>
                 </fieldset>
                 <div class="buttons-set">
-                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Login')) ?>" name="send" id="send2"><?= $this->__('Login') ?></button>
+                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Login')) ?>" name="send" id="send2"><span><?= $this->__('Login') ?></span></button>
+                    <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD && Mage::helper('customer')->isMagicLinkEnabled()): ?>
+                    <button type="button" class="button" title="<?= $this->quoteEscape($this->__('Login with Magic Link')) ?>" id="magic-link-button"><span><?= $this->__('Login with Magic Link') ?></span></button>
+                    <?php endif ?>
                 </div>
             </div>
         </div>
@@ -76,5 +87,39 @@
     </form>
     <script type="text/javascript">
         var dataForm = new VarienForm('login-form', true);
+
+        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD && Mage::helper('customer')->isMagicLinkEnabled()): ?>
+        const form = document.getElementById('login-form');
+        const passwordField = document.getElementById('pass');
+        const loginButton = document.getElementById('send2');
+        const magicLinkButton = document.getElementById('magic-link-button');
+
+        // Regular login button - restore password validation classes
+        loginButton?.addEventListener('click', function(e) {
+            if (passwordField) {
+                passwordField.classList.add('required-entry');
+                passwordField.classList.add('validate-password');
+            }
+            form.action = '<?= $this->getPostActionUrl() ?>';
+        });
+
+        // Magic link button - remove password validation classes
+        magicLinkButton?.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Remove password validation classes
+            if (passwordField) {
+                passwordField.classList.remove('required-entry');
+                passwordField.classList.remove('validate-password');
+            }
+
+            // Validate the form (will check email)
+            if (dataForm.validator.validate()) {
+                // Change form action to magic link request endpoint
+                form.action = '<?= $this->getUrl('customer/account/magicLinkRequestPost') ?>';
+                form.submit();
+            }
+        });
+        <?php endif ?>
     </script>
 </div>

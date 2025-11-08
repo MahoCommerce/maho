@@ -339,6 +339,55 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Retrieve magic link login URL with token
+     */
+    public function getMagicLinkUrl(string $token): string
+    {
+        return $this->_getUrl('customer/account/magiclinklogin', ['token' => $token]);
+    }
+
+    /**
+     * Check if magic link login is enabled
+     */
+    public function isMagicLinkEnabled(?int $storeId = null): bool
+    {
+        return Mage::getStoreConfigFlag('customer/magic_link/enabled', $storeId);
+    }
+
+    /**
+     * Get magic link token expiration period in minutes
+     */
+    public function getMagicLinkTokenExpiration(): int
+    {
+        $expiration = (int) Mage::getStoreConfig('customer/magic_link/token_expiration');
+        return $expiration > 0 ? $expiration : 10; // Default: 10 minutes
+    }
+
+    /**
+     * Get magic link rate limit for email
+     */
+    public function getMagicLinkRateLimitEmail(): int
+    {
+        return (int) Mage::getStoreConfig('customer/magic_link/rate_limit_email') ?: 3;
+    }
+
+    /**
+     * Get magic link rate limit for IP
+     */
+    public function getMagicLinkRateLimitIp(): int
+    {
+        return (int) Mage::getStoreConfig('customer/magic_link/rate_limit_ip') ?: 10;
+    }
+
+    /**
+     * Get magic link registration mode
+     */
+    public function getMagicLinkRegistrationMode(): string
+    {
+        return Mage::getStoreConfig('customer/magic_link/registration_mode') ?: 'require_password';
+    }
+
+    /**
      * Check is confirmation required
      *
      * @return bool

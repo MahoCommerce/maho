@@ -60,6 +60,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             'resetpasswordpost',
             'confirm',
             'confirmation',
+            'magiclinkrequestpost',
+            'magiclinklogin',
         ];
         $pattern = '/^(' . implode('|', $openActions) . ')/i';
 
@@ -320,6 +322,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function _successProcessRegistration(Mage_Customer_Model_Customer $customer)
     {
         $session = $this->_getSession();
+        $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode();
+
         if ($customer->isConfirmationRequired()) {
             $app = $this->_getApp();
             $store = $app->getStore();
@@ -335,6 +339,18 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 'Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please <a href="%s">click here</a>.',
                 $customerHelper->getEmailConfirmationUrl($customer->getEmail()),
             ));
+            $url = $this->_getUrl('*/*/index', ['_secure' => true]);
+        } elseif ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD) {
+            // Passwordless mode: send magic link email instead of logging in
+            try {
+                $customer->sendMagicLinkEmail();
+                $session->addSuccess($this->__(
+                    'Thank you for registering! We have sent you an email with a login link to %s.',
+                    Mage::helper('customer')->escapeHtml($customer->getEmail()),
+                ));
+            } catch (Exception $e) {
+                $session->addError($this->__('Registration successful, but we could not send the login link. Please use the login page.'));
+            }
             $url = $this->_getUrl('*/*/index', ['_secure' => true]);
         } else {
             $session->setRememberMe((bool) $this->getRequest()->getPost('remember_me'))
@@ -417,8 +433,19 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $errors = array_merge($customerErrors, $errors);
         } else {
             $customerForm->compactData($customerData);
-            $customer->setPassword($request->getPost('password'));
-            $customer->setPasswordConfirmation($request->getPost('confirmation'));
+
+            // Handle passwordless registration
+            $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode();
+            if ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD) {
+                // Generate a secure random password
+                $randomPassword = Mage::helper('core')->getRandomString(32);
+                $customer->setPassword($randomPassword);
+                $customer->setPasswordConfirmation($randomPassword);
+            } else {
+                $customer->setPassword($request->getPost('password'));
+                $customer->setPasswordConfirmation($request->getPost('confirmation'));
+            }
+
             $customerErrors = $customer->validate();
             if (is_array($customerErrors)) {
                 $errors = array_merge($customerErrors, $errors);
@@ -881,6 +908,146 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     }
 
     /**
+     * Process magic link request
+     */
+    public function magicLinkRequestPostAction(): void
+    {
+        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
+            $this->norouteAction();
+            return;
+        }
+
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        // Handle both 'email' field (from magic link request page) and 'login[username]' (from login form)
+        $email = (string) $this->getRequest()->getPost('email');
+        if (!$email) {
+            $loginData = $this->getRequest()->getPost('login');
+            $email = is_array($loginData) ? (string) ($loginData['username'] ?? '') : '';
+        }
+
+        if (!$email) {
+            $this->_getSession()->addError($this->__('Please enter your email.'));
+            $this->_redirect('*/*/magiclinkrequest');
+            return;
+        }
+
+        $flowPassword = Mage::getModel('customer/flowpassword');
+        $flowPassword->setEmail($email)->save();
+
+        if (!$flowPassword->checkMagicLinkFlowEmail($email)) {
+            $this->_getSession()->addError($this->__('You have exceeded magic link requests per hour from this email address.'));
+            $this->_redirect('*/*/magiclinkrequest');
+            return;
+        }
+
+        if (!$flowPassword->checkMagicLinkFlowIp()) {
+            $this->_getSession()->addError($this->__('You have exceeded magic link requests per hour from this IP address.'));
+            $this->_redirect('*/*/magiclinkrequest');
+            return;
+        }
+
+        if (!Mage::helper('core')->isValidEmail($email)) {
+            $this->_getSession()->addError($this->__('Invalid email address.'));
+            $this->_redirect('*/*/magiclinkrequest');
+            return;
+        }
+
+        $customer = Mage::getModel('customer/customer')
+            ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
+            ->loadByEmail($email);
+
+        $customerId = $customer->getId();
+        if ($customerId && $customer->getIsActive()) {
+            try {
+                $customer->sendMagicLinkEmail();
+            } catch (Exception $exception) {
+                $this->_getSession()->addError($exception->getMessage());
+                $this->_redirect('*/*/magiclinkrequest');
+                return;
+            }
+        }
+
+        // Always show success message (security: don't reveal if email exists)
+        $this->_getSession()
+            ->addSuccess(Mage::helper('customer')
+                ->__(
+                    'If there is an account associated with %s you will receive an email with a login link.',
+                    Mage::helper('customer')->escapeHtml($email),
+                ));
+        $this->_redirect('*/*/');
+        return;
+    }
+
+    /**
+     * Validate magic link token and login customer
+     */
+    public function magicLinkLoginAction(): void
+    {
+        // Check if magic link is enabled
+        if (!Mage::helper('customer')->isMagicLinkEnabled()) {
+            $this->norouteAction();
+            return;
+        }
+
+        if ($this->_getSession()->isLoggedIn()) {
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        $token = (string) $this->getRequest()->getParam('token');
+
+        if (empty($token)) {
+            $this->_getSession()->addError($this->__('Invalid login link.'));
+            $this->_redirect('*/*/login');
+            return;
+        }
+
+        try {
+            // Find customer by token
+            $customerCollection = Mage::getModel('customer/customer')
+                ->getCollection()
+                ->addAttributeToSelect('*')
+                ->addFieldToFilter('rp_token', $token);
+
+            if ($customerCollection->getSize() === 0) {
+                throw new Exception($this->__('Invalid or expired login link.'));
+            }
+
+            /** @var Mage_Customer_Model_Customer $customer */
+            $customer = $customerCollection->getFirstItem();
+
+            // Validate token
+            if (!$customer->validateMagicLinkToken($token) || $customer->isMagicLinkTokenExpired()) {
+                throw new Exception($this->__('Your login link has expired. Please request a new one.'));
+            }
+
+            // Check if account is active
+            if (!$customer->getIsActive()) {
+                throw new Exception($this->__('This account is not active.'));
+            }
+
+            // Login customer
+            $this->_getSession()->setCustomerAsLoggedIn($customer);
+
+            // Clear the token (one-time use)
+            $customer->clearMagicLinkToken();
+            $customer->save();
+
+            $this->_getSession()->addSuccess($this->__('You have been successfully logged in.'));
+
+            // Redirect using same logic as normal login
+            $this->_loginPostRedirect();
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+            $this->_redirect('*/*/login');
+        }
+    }
+
+    /**
      * @return string|false
      */
     protected function getCustomerId()
@@ -981,8 +1148,12 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $customerForm->compactData($customerData);
                 $errors = [];
 
-                if (!$customer->validatePassword($this->getRequest()->getPost('current_password'))) {
-                    $errors[] = $this->__('Invalid current password');
+                // Skip password validation in no-password mode
+                $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode();
+                if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD) {
+                    if (!$customer->validatePassword($this->getRequest()->getPost('current_password'))) {
+                        $errors[] = $this->__('Invalid current password');
+                    }
                 }
 
                 // If email change was requested then set flag
