@@ -16,6 +16,9 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CatalogLinkRule
+ *
+ * @property Maho_CatalogLinkRule_Model_Rule_Source_Combine $_conditions
+ * @property Maho_CatalogLinkRule_Model_Rule_Target_Combine $_actions
  */
 class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
@@ -66,20 +69,20 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function getConditionsInstance()
+    public function getConditionsInstance(): Mage_Rule_Model_Condition_Combine
     {
         return Mage::getModel('cataloglinkrule/rule_source_combine');
     }
 
     #[\Override]
-    public function getActionsInstance()
+    public function getActionsInstance(): Maho_CatalogLinkRule_Model_Rule_Target_Combine
     {
         return Mage::getModel('cataloglinkrule/rule_target_combine');
     }
 
-    public function getSourceConditions()
+    public function getSourceConditions(): Maho_CatalogLinkRule_Model_Rule_Source_Combine
     {
-        if (empty($this->_conditions)) {
+        if ($this->_conditions === null) {
             $this->_resetConditions();
         }
 
@@ -98,9 +101,9 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this->_conditions;
     }
 
-    public function getTargetConditions()
+    public function getTargetConditions(): Maho_CatalogLinkRule_Model_Rule_Target_Combine
     {
-        if (!$this->_actions) {
+        if ($this->_actions === null) {
             $this->_resetActions();
         }
 
@@ -123,16 +126,14 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     protected function _beforeSave()
     {
         // Serialize source conditions
-        if ($this->getSourceConditions()) {
-            $this->setConditionsSerialized(serialize($this->getSourceConditions()->asArray()));
-            $this->unsetData('_conditions');
-        }
+        $sourceConditions = $this->getSourceConditions();
+        $this->setConditionsSerialized(serialize($sourceConditions->asArray()));
+        $this->unsetData('_conditions');
 
         // Serialize target conditions
-        if ($this->getTargetConditions()) {
-            $this->setActionsSerialized(serialize($this->getTargetConditions()->asArray()));
-            $this->unsetData('_actions');
-        }
+        $targetConditions = $this->getTargetConditions();
+        $this->setActionsSerialized(serialize($targetConditions->asArray()));
+        $this->unsetData('_actions');
 
         // Skip parent's _beforeSave and call grandparent instead
         return Mage_Core_Model_Abstract::_beforeSave();

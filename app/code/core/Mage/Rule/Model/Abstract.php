@@ -76,7 +76,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Getter for rule actions collection instance
      *
-     * @return Mage_Rule_Model_Action_Collection
+     * @return Mage_Rule_Model_Action_Collection|Mage_Rule_Model_Condition_Combine
      */
     abstract public function getActionsInstance();
 

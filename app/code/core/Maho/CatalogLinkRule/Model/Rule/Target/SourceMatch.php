@@ -187,7 +187,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
     }
 
     #[\Override]
-    public function asArray(array $arrAttributes = []): self
+    public function asArray(array $arrAttributes = []): array
     {
         $out = parent::asArray($arrAttributes);
         $out['value'] = ''; // No value for source matching
