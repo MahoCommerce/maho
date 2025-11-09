@@ -58,9 +58,10 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getUserParam('rule')) {
+        if ($this->getRequest()->getPost()) {
+            $data = $this->getRequest()->getPost();
             try {
-                $id = $this->getRequest()->getUserParam('id');
+                $id = $this->getRequest()->getParam('id');
                 $model = Mage::getModel('cataloglinkrule/rule');
 
                 if ($id) {
@@ -74,7 +75,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                     Mage::helper('cataloglinkrule')->__('The rule has been saved.'),
                 );
 
-                if ($this->getRequest()->getUserParam('back')) {
+                if ($this->getRequest()->getParam('back')) {
                     $this->_redirect('*/*/edit', ['id' => $model->getId()]);
                     return;
                 }
@@ -85,7 +86,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 Mage::logException($e);
 
-                if ($id = $this->getRequest()->getUserParam('id')) {
+                if ($id = $this->getRequest()->getParam('id')) {
                     $this->_redirect('*/*/edit', ['id' => $id]);
                 } else {
                     $this->_redirect('*/*/new');

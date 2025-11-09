@@ -28,13 +28,13 @@ class Maho_CatalogLinkRule_Helper_Data extends Mage_Core_Helper_Abstract
     public function getSortOrders(): array
     {
         return [
-            'price_asc'  => $this->__('Price: Low to High (Default)'),
+            'random'     => $this->__('Random (Default)'),
+            'price_asc'  => $this->__('Price: Low to High'),
             'price_desc' => $this->__('Price: High to Low'),
             'name_asc'   => $this->__('Name: A-Z'),
             'name_desc'  => $this->__('Name: Z-A'),
             'newest'     => $this->__('Newest First'),
             'oldest'     => $this->__('Oldest First'),
-            'random'     => $this->__('Random'),
         ];
     }
 }

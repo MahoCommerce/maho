@@ -195,8 +195,12 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             case 'oldest':
                 $productCollection->addAttributeToSort('created_at', 'ASC');
                 break;
+            case 'price_asc':
+                $productCollection->addAttributeToSort('price', 'ASC');
+                break;
             case 'random':
-                // For better performance on large catalogs, shuffle in PHP
+            default:
+                // Default: random order (for better performance on large catalogs, shuffle in PHP)
                 $productIds = [];
                 foreach ($productCollection as $product) {
                     if ($targetConditions->validate($product)) {
@@ -205,11 +209,6 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
                 }
                 shuffle($productIds);
                 return $productIds;
-            case 'price_asc':
-            default:
-                // Default: price ascending
-                $productCollection->addAttributeToSort('price', 'ASC');
-                break;
         }
 
         $productIds = [];

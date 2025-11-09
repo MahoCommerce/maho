@@ -44,7 +44,7 @@ $table->addColumn('rule_id', Table::TYPE_INTEGER, null, [
 ], 'Priority (Lower number = higher priority)')
 ->addColumn('sort_order', Table::TYPE_VARCHAR, 50, [
     'nullable' => false,
-    'default'  => 'position',
+    'default'  => 'random',
 ], 'Sort Order')
 ->addColumn('max_links', Table::TYPE_INTEGER, null, [
     'unsigned' => true,
