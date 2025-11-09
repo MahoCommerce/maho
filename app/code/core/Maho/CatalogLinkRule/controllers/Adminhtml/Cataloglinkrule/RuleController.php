@@ -38,7 +38,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             $model->load($id);
             if (!$model->getId()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('cataloglinkrule')->__('This rule no longer exists.')
+                    Mage::helper('cataloglinkrule')->__('This rule no longer exists.'),
                 );
                 $this->_redirect('*/*/');
                 return;
@@ -71,7 +71,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                 $model->save();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('cataloglinkrule')->__('The rule has been saved.')
+                    Mage::helper('cataloglinkrule')->__('The rule has been saved.'),
                 );
 
                 if ($this->getRequest()->getUserParam('back')) {
@@ -104,7 +104,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                 $model->delete();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('cataloglinkrule')->__('The rule has been deleted.')
+                    Mage::helper('cataloglinkrule')->__('The rule has been deleted.'),
                 );
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -119,7 +119,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $ruleIds = $this->getRequest()->getUserParam('rule_ids');
         if (!is_array($ruleIds)) {
             Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('cataloglinkrule')->__('Please select rule(s).')
+                Mage::helper('cataloglinkrule')->__('Please select rule(s).'),
             );
         } else {
             try {
@@ -128,7 +128,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                     $model->delete();
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('cataloglinkrule')->__('Total of %d record(s) were deleted.', count($ruleIds))
+                    Mage::helper('cataloglinkrule')->__('Total of %d record(s) were deleted.', count($ruleIds)),
                 );
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -145,7 +145,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
         if (!is_array($ruleIds)) {
             Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('cataloglinkrule')->__('Please select rule(s).')
+                Mage::helper('cataloglinkrule')->__('Please select rule(s).'),
             );
         } else {
             try {
@@ -154,7 +154,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                     $model->setIsActive($status)->save();
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('cataloglinkrule')->__('Total of %d record(s) were updated.', count($ruleIds))
+                    Mage::helper('cataloglinkrule')->__('Total of %d record(s) were updated.', count($ruleIds)),
                 );
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
