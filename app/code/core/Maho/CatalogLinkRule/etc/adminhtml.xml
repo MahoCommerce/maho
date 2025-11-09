@@ -16,7 +16,7 @@
                 <linkrules translate="title" module="cataloglinkrule">
                     <title>Product Relationship Rules</title>
                     <sort_order>1</sort_order>
-                    <action>adminhtml/catalog_linkrule</action>
+                    <action>adminhtml/cataloglinkrule_rule</action>
                 </linkrules>
             </children>
         </catalog>
@@ -26,14 +26,15 @@
         <resources>
             <admin>
                 <children>
-                    <catalog>
+                    <cataloglinkrule translate="title" module="cataloglinkrule">
+                        <title>Product Relationship Rules</title>
+                        <sort_order>70</sort_order>
                         <children>
-                            <linkrules translate="title" module="cataloglinkrule">
-                                <title>Product Relationship Rules</title>
-                                <sort_order>1</sort_order>
-                            </linkrules>
+                            <rules translate="title">
+                                <title>Manage Rules</title>
+                            </rules>
                         </children>
-                    </catalog>
+                    </cataloglinkrule>
                 </children>
             </admin>
         </resources>

@@ -10,17 +10,17 @@
  */
 -->
 <layout>
-    <adminhtml_catalog_linkrule_index>
+    <adminhtml_cataloglinkrule_rule_index>
         <reference name="content">
             <block type="cataloglinkrule/adminhtml_rule" name="linkrule" />
         </reference>
-    </adminhtml_catalog_linkrule_index>
+    </adminhtml_cataloglinkrule_rule_index>
 
-    <adminhtml_catalog_linkrule_new>
-        <update handle="adminhtml_catalog_linkrule_edit" />
-    </adminhtml_catalog_linkrule_new>
+    <adminhtml_cataloglinkrule_rule_new>
+        <update handle="adminhtml_cataloglinkrule_rule_edit" />
+    </adminhtml_cataloglinkrule_rule_new>
 
-    <adminhtml_catalog_linkrule_edit>
+    <adminhtml_cataloglinkrule_rule_edit>
         <update handle="editor"/>
         <reference name="head">
             <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name></action>
@@ -38,5 +38,5 @@
                 <action method="addTab"><name>target_section</name><block>linkrule_edit_tab_target</block></action>
             </block>
         </reference>
-    </adminhtml_catalog_linkrule_edit>
+    </adminhtml_cataloglinkrule_rule_edit>
 </layout>
