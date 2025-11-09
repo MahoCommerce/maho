@@ -31,7 +31,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 
     public function editAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
+        $id = $this->getRequest()->getUserParam('id');
         $model = Mage::getModel('cataloglinkrule/rule');
 
         if ($id) {
@@ -58,9 +58,9 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getParam('rule')) {
+        if ($data = $this->getRequest()->getUserParam('rule')) {
             try {
-                $id = $this->getRequest()->getParam('id');
+                $id = $this->getRequest()->getUserParam('id');
                 $model = Mage::getModel('cataloglinkrule/rule');
 
                 if ($id) {
@@ -74,7 +74,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
                     Mage::helper('cataloglinkrule')->__('The rule has been saved.'),
                 );
 
-                if ($this->getRequest()->getParam('back')) {
+                if ($this->getRequest()->getUserParam('back')) {
                     $this->_redirect('*/*/edit', ['id' => $model->getId()]);
                     return;
                 }
@@ -85,7 +85,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 Mage::logException($e);
 
-                if ($id = $this->getRequest()->getParam('id')) {
+                if ($id = $this->getRequest()->getUserParam('id')) {
                     $this->_redirect('*/*/edit', ['id' => $id]);
                 } else {
                     $this->_redirect('*/*/new');
@@ -98,7 +98,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
+        if ($id = $this->getRequest()->getUserParam('id')) {
             try {
                 $model = Mage::getModel('cataloglinkrule/rule')->load($id);
                 $model->delete();
@@ -116,7 +116,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 
     public function massDeleteAction(): void
     {
-        $ruleIds = $this->getRequest()->getParam('rule_ids');
+        $ruleIds = $this->getRequest()->getUserParam('rule_ids');
         if (!is_array($ruleIds)) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('Please select rule(s).'));
         } else {
@@ -138,8 +138,8 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 
     public function massStatusAction(): void
     {
-        $ruleIds = $this->getRequest()->getParam('rule_ids');
-        $status = (int) $this->getRequest()->getParam('status');
+        $ruleIds = $this->getRequest()->getUserParam('rule_ids');
+        $status = (int) $this->getRequest()->getUserParam('status');
 
         if (!is_array($ruleIds)) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('Please select rule(s).'));
@@ -162,8 +162,8 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 
     public function newConditionHtmlAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
-        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
+        $id = $this->getRequest()->getUserParam('id');
+        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getUserParam('type')));
         $type = $typeArr[0];
 
         $model = Mage::getModel($type)
@@ -177,7 +177,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         }
 
         if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
-            $model->setJsFormObject($this->getRequest()->getParam('form'));
+            $model->setJsFormObject($this->getRequest()->getUserParam('form'));
             $html = $model->asHtmlRecursive();
         } else {
             $html = '';
@@ -187,8 +187,8 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
 
     public function newActionHtmlAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
-        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
+        $id = $this->getRequest()->getUserParam('id');
+        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getUserParam('type')));
         $type = $typeArr[0];
 
         $model = Mage::getModel($type)
@@ -202,7 +202,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         }
 
         if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
-            $model->setJsFormObject($this->getRequest()->getParam('form'));
+            $model->setJsFormObject($this->getRequest()->getUserParam('form'));
             $html = $model->asHtmlRecursive();
         } else {
             $html = '';
