@@ -80,13 +80,14 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         return Mage::getModel('cataloglinkrule/rule_target_combine');
     }
 
-    public function getSourceConditions(): Maho_CatalogLinkRule_Model_Rule_Source_Combine
+    public function getSourceConditions(): Mage_Rule_Model_Condition_Combine
     {
         return $this->getConditions();
     }
 
-    public function getTargetConditions(): Maho_CatalogLinkRule_Model_Rule_Target_Combine
+    public function getTargetConditions(): Mage_Rule_Model_Condition_Combine
     {
+        /** @var Maho_CatalogLinkRule_Model_Rule_Target_Combine */
         return $this->getActions();
     }
 
@@ -99,6 +100,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
+        /** @var Maho_CatalogLinkRule_Model_Rule_Source_Combine $sourceConditions */
         $sourceConditions = $this->getSourceConditions();
         $sourceConditions->collectValidatedAttributes($productCollection);
 
@@ -121,6 +123,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             ->addAttributeToSelect(['name', 'price', 'created_at'])
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
+        /** @var Maho_CatalogLinkRule_Model_Rule_Target_Combine $targetConditions */
         $targetConditions = $this->getTargetConditions();
         $targetConditions->collectValidatedAttributes($productCollection);
 
