@@ -60,12 +60,23 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     {
         if ($this->getRequest()->getPost()) {
             $data = $this->getRequest()->getPost();
+
             try {
                 $id = $this->getRequest()->getParam('id');
                 $model = Mage::getModel('cataloglinkrule/rule');
 
                 if ($id) {
                     $model->load($id);
+                }
+
+                // Merge rule conditions/actions into root level for loadPost
+                if (isset($data['rule'])) {
+                    if (isset($data['rule']['conditions'])) {
+                        $data['conditions'] = $data['rule']['conditions'];
+                    }
+                    if (isset($data['rule']['actions'])) {
+                        $data['actions'] = $data['rule']['actions'];
+                    }
                 }
 
                 $model->loadPost($data);
@@ -167,52 +178,40 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
     public function newConditionHtmlAction(): void
     {
-        $id = $this->getRequest()->getUserParam('id');
-        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getUserParam('type')));
-        $type = $typeArr[0];
-
-        $model = Mage::getModel($type)
-            ->setId($id)
-            ->setType($type)
-            ->setRule(Mage::getModel('cataloglinkrule/rule'))
-            ->setPrefix('conditions');
-
-        if (!empty($typeArr[1]) && $model instanceof Mage_Rule_Model_Condition_Abstract) {
-            $model->setAttribute($typeArr[1]);
-        }
-
-        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
-            $model->setJsFormObject($this->getRequest()->getUserParam('form'));
-            $html = $model->asHtmlRecursive();
-        } else {
-            $html = '';
-        }
-        $this->getResponse()->setBody($html);
+        $this->_renderRuleHtml('conditions');
     }
 
     public function newActionHtmlAction(): void
     {
+        $this->_renderRuleHtml('actions');
+    }
+
+    private function _renderRuleHtml(string $prefix): void
+    {
         $id = $this->getRequest()->getUserParam('id');
-        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getUserParam('type')));
+        // Type format from JS: "model-class-name" or "model-class-name|attribute"
+        // Convert dashes back to slashes and split model from attribute
+        $type = str_replace('-', '/', (string) $this->getRequest()->getUserParam('type'));
+        $typeArr = explode('|', $type);
         $type = $typeArr[0];
 
-        $model = Mage::getModel($type)
-            ->setId($id)
+        $model = Mage::getModel($type);
+        if (!$model || !$model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        $model->setId($id)
             ->setType($type)
             ->setRule(Mage::getModel('cataloglinkrule/rule'))
-            ->setPrefix('actions');
+            ->setPrefix($prefix)
+            ->setJsFormObject($this->getRequest()->getUserParam('form'));
 
-        if (!empty($typeArr[1]) && $model instanceof Mage_Rule_Model_Condition_Abstract) {
+        if (!empty($typeArr[1])) {
             $model->setAttribute($typeArr[1]);
         }
 
-        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
-            $model->setJsFormObject($this->getRequest()->getUserParam('form'));
-            $html = $model->asHtmlRecursive();
-        } else {
-            $html = '';
-        }
-        $this->getResponse()->setBody($html);
+        $this->getResponse()->setBody($model->asHtmlRecursive());
     }
 
     #[\Override]
