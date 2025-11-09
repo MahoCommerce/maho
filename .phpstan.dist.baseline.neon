@@ -21442,12 +21442,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/Model/Rule.php
 
 		-
-			rawMessage: 'Return type (Mage_SalesRule_Model_Rule_Condition_Product_Combine) of method Mage_SalesRule_Model_Rule::getActionsInstance() should be compatible with return type (Mage_Rule_Model_Action_Collection) of method Mage_Rule_Model_Abstract::getActionsInstance()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Rule.php
-
-		-
 			rawMessage: 'Method Mage_SalesRule_Model_Rule_Condition_Product::_addSpecialAttributes() has no return type specified.'
 			identifier: missingType.return
 			count: 1
