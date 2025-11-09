@@ -11,20 +11,25 @@
 
 declare(strict_types=1);
 
-class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Action_Collection
+class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Condition_Combine
 {
-    /**
-     * Initialize the model
-     */
     public function __construct()
     {
         parent::__construct();
         $this->setType('cataloglinkrule/rule_target_combine');
     }
 
-    /**
-     * Get new child select options
-     */
+    #[\Override]
+    public function asHtml()
+    {
+        $html = $this->getTypeElement()->getHtml() .
+                Mage::helper('cataloglinkrule')->__('Target products matching %s of these conditions are %s:', $this->getAggregatorElement()->getHtml(), $this->getValueElement()->getHtml());
+        if ($this->getId() != '1') {
+            $html .= $this->getRemoveLinkHtml();
+        }
+        return $html;
+    }
+
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
@@ -70,69 +75,12 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Act
         return $conditions;
     }
 
-    /**
-     * Override to use __ separators instead of : separators
-     * This makes the HTML compatible with rules.js which expects __ separators
-     */
-    #[\Override]
-    public function getNewChildElement()
-    {
-        $prefix = $this->getPrefix() ?: 'actions';
-        $element = $this->getForm()->addField($prefix . '__' . $this->getId() . '__new_child', 'select', [
-            'name' => 'rule[' . $this->getPrefix() . '][' . $this->getId() . '][new_child]',
-            'values' => $this->getNewChildSelectOptions(),
-            'value_name' => $this->getNewChildName(),
-        ]);
-
-        $renderer = Mage::getBlockSingleton('rule/newchild');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            $element->setRenderer($renderer);
-        }
-
-        return $element;
-    }
-
-    /**
-     * Override to use __ separators instead of : separators
-     * This makes the HTML compatible with rules.js which expects __ separators
-     */
-    #[\Override]
-    public function asHtmlRecursive()
-    {
-        $prefix = $this->getPrefix() ?: 'actions';
-        $htmlId = $prefix . '__' . $this->getId() . '__children';
-        $html = $this->asHtml() . '<ul id="' . $htmlId . '">';
-        foreach ($this->getActions() as $cond) {
-            $html .= '<li>' . $cond->asHtmlRecursive() . '</li>';
-        }
-        $html .= '<li>' . $this->getNewChildElement()->getHtml() . '</li></ul>';
-        return $html;
-    }
-
-    /**
-     * Collect validated attributes
-     *
-     * @return $this
-     */
     public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection): self
     {
-        foreach ($this->getActions() as $condition) {
+        foreach ($this->getConditions() as $condition) {
             $condition->collectValidatedAttributes($productCollection);
         }
 
         return $this;
-    }
-
-    /**
-     * Validate product against target conditions
-     */
-    public function validate(Maho\DataObject $object): bool
-    {
-        foreach ($this->getActions() as $action) {
-            if (!$action->validate($object)) {
-                return false;
-            }
-        }
-        return true;
     }
 }

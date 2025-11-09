@@ -16,31 +16,6 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CatalogLinkRule
- *
- * @method int getRuleId()
- * @method $this setRuleId(int $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method int getLinkTypeId()
- * @method $this setLinkTypeId(int $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method int getPriority()
- * @method $this setPriority(int $value)
- * @method string getSortOrder()
- * @method $this setSortOrder(string $value)
- * @method int|null getMaxLinks()
- * @method $this setMaxLinks(int|null $value)
- * @method string|null getFromDate()
- * @method $this setFromDate(string|null $value)
- * @method string|null getToDate()
- * @method $this setToDate(string|null $value)
- * @method string getConditionsSerialized()
- * @method $this setConditionsSerialized(string $value)
- * @method string getTargetConditionsSerialized()
- * @method $this setTargetConditionsSerialized(string $value)
  */
 class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
@@ -50,43 +25,117 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         $this->_init('cataloglinkrule/rule');
     }
 
-    /**
-     * Get rule conditions instance
-     */
+    public function hasConditionsSerialized(): bool
+    {
+        return $this->hasData('source_conditions_serialized');
+    }
+
+    public function getConditionsSerialized(): string
+    {
+        return (string) $this->getData('source_conditions_serialized');
+    }
+
+    public function setConditionsSerialized(string $value): self
+    {
+        return $this->setData('source_conditions_serialized', $value);
+    }
+
+    public function unsConditionsSerialized(): self
+    {
+        return $this->unsetData('source_conditions_serialized');
+    }
+
+    public function hasActionsSerialized(): bool
+    {
+        return $this->hasData('target_conditions_serialized');
+    }
+
+    public function getActionsSerialized(): string
+    {
+        return (string) $this->getData('target_conditions_serialized');
+    }
+
+    public function setActionsSerialized(string $value): self
+    {
+        return $this->setData('target_conditions_serialized', $value);
+    }
+
+    public function unsActionsSerialized(): self
+    {
+        return $this->unsetData('target_conditions_serialized');
+    }
+
     #[\Override]
     public function getConditionsInstance()
     {
-        return Mage::getModel('cataloglinkrule/rule_condition_combine');
+        return Mage::getModel('cataloglinkrule/rule_source_combine');
     }
 
-    /**
-     * Get rule actions instance (used for target conditions)
-     */
     #[\Override]
     public function getActionsInstance()
     {
         return Mage::getModel('cataloglinkrule/rule_target_combine');
     }
 
-    /**
-     * Load post data
-     *
-     * @return $this
-     */
-    #[\Override]
-    public function loadPost(array $data): self
+    public function getSourceConditions()
     {
-        $this->addData($data);
-
-        if (isset($data['rule']['conditions'])) {
-            $this->getConditions()->loadArray($data['rule']['conditions']);
+        if (empty($this->_conditions)) {
+            $this->_resetConditions();
         }
 
-        if (isset($data['rule']['target'])) {
-            $this->getActions()->loadArray($data['rule']['target']);
+        // Load rule conditions if it is applicable
+        if ($this->hasConditionsSerialized()) {
+            $conditions = $this->getConditionsSerialized();
+            if (!empty($conditions)) {
+                $conditions = Mage::helper('core/unserializeArray')->unserialize($conditions);
+                if (is_array($conditions) && !empty($conditions)) {
+                    $this->_conditions->loadArray($conditions);
+                }
+            }
+            $this->unsConditionsSerialized();
         }
 
-        return $this;
+        return $this->_conditions;
+    }
+
+    public function getTargetConditions()
+    {
+        if (!$this->_actions) {
+            $this->_resetActions();
+        }
+
+        // Load rule actions if it is applicable
+        if ($this->hasActionsSerialized()) {
+            $actions = $this->getActionsSerialized();
+            if (!empty($actions)) {
+                $actions = Mage::helper('core/unserializeArray')->unserialize($actions);
+                if (is_array($actions) && !empty($actions)) {
+                    $this->_actions->loadArray($actions);
+                }
+            }
+            $this->unsActionsSerialized();
+        }
+
+        return $this->_actions;
+    }
+
+    #[\Override]
+    protected function _beforeSave()
+    {
+        // Serialize source conditions
+        if ($this->getSourceConditions()) {
+            $this->setConditionsSerialized(serialize($this->getSourceConditions()->asArray()));
+            $this->unsetData('_conditions');
+        }
+
+        // Serialize target conditions
+        if ($this->getTargetConditions()) {
+            $this->setActionsSerialized(serialize($this->getTargetConditions()->asArray()));
+            $this->unsetData('_actions');
+        }
+
+        // Skip parent's _beforeSave and call grandparent instead
+        return Mage_Core_Model_Abstract::_beforeSave();
     }
 
     /**
@@ -98,13 +147,12 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
-        /** @var Maho_CatalogLinkRule_Model_Rule_Condition_Combine $conditions */
-        $conditions = $this->getConditions();
-        $conditions->collectValidatedAttributes($productCollection);
+        $sourceConditions = $this->getSourceConditions();
+        $sourceConditions->collectValidatedAttributes($productCollection);
 
         $productIds = [];
         foreach ($productCollection as $product) {
-            if ($conditions->validate($product)) {
+            if ($sourceConditions->validate($product)) {
                 $productIds[] = (int) $product->getId();
             }
         }
@@ -121,9 +169,8 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             ->addAttributeToSelect(['name', 'price', 'created_at'])
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
-        /** @var Maho_CatalogLinkRule_Model_Rule_Target_Combine $actions */
-        $actions = $this->getActions();
-        $actions->collectValidatedAttributes($productCollection);
+        $targetConditions = $this->getTargetConditions();
+        $targetConditions->collectValidatedAttributes($productCollection);
 
         // Set source product for source-matching conditions
         if ($sourceProduct) {
@@ -151,7 +198,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
                 // For better performance on large catalogs, shuffle in PHP
                 $productIds = [];
                 foreach ($productCollection as $product) {
-                    if ($actions->validate($product)) {
+                    if ($targetConditions->validate($product)) {
                         $productIds[] = (int) $product->getId();
                     }
                 }
@@ -166,7 +213,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
         $productIds = [];
         foreach ($productCollection as $product) {
-            if ($actions->validate($product)) {
+            if ($targetConditions->validate($product)) {
                 $productIds[] = (int) $product->getId();
             }
         }

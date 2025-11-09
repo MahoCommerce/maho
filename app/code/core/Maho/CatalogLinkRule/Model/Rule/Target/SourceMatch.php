@@ -179,9 +179,6 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
         return '';
     }
 
-    /**
-     * Get value after element HTML
-     */
     public function getValueAfterElementHtml(): string
     {
         return '<div style="margin-top: 5px; font-style: italic; color: #666;">'
@@ -189,13 +186,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
             . '</div>';
     }
 
-    /**
-     * Get condition as array
-     *
-     * @return array
-     */
     #[\Override]
-    public function asArray(array $arrAttributes = [])
+    public function asArray(array $arrAttributes = []): self
     {
         $out = parent::asArray($arrAttributes);
         $out['value'] = ''; // No value for source matching

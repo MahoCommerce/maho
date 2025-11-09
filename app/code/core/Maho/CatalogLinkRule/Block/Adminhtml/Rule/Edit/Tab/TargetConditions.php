@@ -31,16 +31,16 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_TargetConditions extend
 
         $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
             ->setTemplate('promo/fieldset.phtml')
-            ->setNewChildUrl($this->getUrl('*/*/newTargetConditionHtml/form/rule_target_fieldset'));
+            ->setNewChildUrl($this->getUrl('*/*/newActionHtml/form/rule_actions_fieldset'));
 
-        $fieldset = $form->addFieldset('target_fieldset', [
+        $fieldset = $form->addFieldset('actions_fieldset', [
             'legend' => Mage::helper('cataloglinkrule')->__(
-                'Link to products matching the following conditions (leave blank for all products)',
+                'Link to target products matching the following conditions (leave blank for all products)',
             ),
         ])->setRenderer($renderer);
 
-        $fieldset->addField('target', 'text', [
-            'name'     => 'target',
+        $fieldset->addField('actions', 'text', [
+            'name'     => 'actions',
             'label'    => Mage::helper('cataloglinkrule')->__('Target Conditions'),
             'title'    => Mage::helper('cataloglinkrule')->__('Target Conditions'),
             'required' => true,

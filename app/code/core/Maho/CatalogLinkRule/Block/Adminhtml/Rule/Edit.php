@@ -32,7 +32,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit extends Mage_Adminhtml_Bloc
 
         $this->_formScripts[] = "
             function saveAndContinueEdit() {
-                editForm.submit($('edit_form').action + 'back/edit/');
+                editForm.submit(document.getElementById('edit_form').action + 'back/edit/');
             }
         ";
     }

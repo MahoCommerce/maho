@@ -185,7 +185,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
         $this->getResponse()->setBody($html);
     }
 
-    public function newTargetConditionHtmlAction(): void
+    public function newActionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
@@ -195,7 +195,7 @@ class Maho_CatalogLinkRule_Adminhtml_Catalog_LinkruleController extends Mage_Adm
             ->setId($id)
             ->setType($type)
             ->setRule(Mage::getModel('cataloglinkrule/rule'))
-            ->setPrefix('target');
+            ->setPrefix('actions');
 
         if (!empty($typeArr[1]) && $model instanceof Mage_Rule_Model_Condition_Abstract) {
             $model->setAttribute($typeArr[1]);

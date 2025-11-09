@@ -29,7 +29,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit_Tab_Conditions extends Mage
 
         $fieldset = $form->addFieldset('conditions_fieldset', [
             'legend' => Mage::helper('cataloglinkrule')->__(
-                'Apply to products matching the following conditions (leave blank for all products)',
+                'Apply rule to source products matching the following conditions (leave blank for all products)',
             ),
         ])->setRenderer($renderer);
 

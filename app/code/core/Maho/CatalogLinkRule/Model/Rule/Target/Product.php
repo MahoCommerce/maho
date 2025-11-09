@@ -11,17 +11,8 @@
 
 declare(strict_types=1);
 
-/**
- * Target Product Condition
- *
- * @category   Maho
- * @package    Maho_CatalogLinkRule
- */
 class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Model_Rule_Condition_Product
 {
-    /**
-     * Initialize the model
-     */
     public function __construct()
     {
         parent::__construct();

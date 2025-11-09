@@ -11,30 +11,35 @@
 
 declare(strict_types=1);
 
-class Maho_CatalogLinkRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condition_Combine
+class Maho_CatalogLinkRule_Model_Rule_Source_Combine extends Mage_Rule_Model_Condition_Combine
 {
-    /**
-     * Initialize the model
-     */
     public function __construct()
     {
         parent::__construct();
-        $this->setType('cataloglinkrule/rule_condition_combine');
+        $this->setType('cataloglinkrule/rule_source_combine');
     }
 
-    /**
-     * Get new child select options
-     */
+    #[\Override]
+    public function asHtml()
+    {
+        $html = $this->getTypeElement()->getHtml() .
+                Mage::helper('cataloglinkrule')->__('Source products matching %s of these conditions are %s:', $this->getAggregatorElement()->getHtml(), $this->getValueElement()->getHtml());
+        if ($this->getId() != '1') {
+            $html .= $this->getRemoveLinkHtml();
+        }
+        return $html;
+    }
+
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
-        $productCondition = Mage::getModel('cataloglinkrule/rule_condition_product');
+        $productCondition = Mage::getModel('cataloglinkrule/rule_source_product');
         $productAttributes = $productCondition->loadAttributeOptions()->getAttributeOption();
 
         $attributes = [];
         foreach ($productAttributes as $code => $label) {
             $attributes[] = [
-                'value' => 'cataloglinkrule/rule_condition_product|' . $code,
+                'value' => 'cataloglinkrule/rule_source_product|' . $code,
                 'label' => $label,
             ];
         }
@@ -42,7 +47,7 @@ class Maho_CatalogLinkRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_
         $conditions = parent::getNewChildSelectOptions();
         $conditions = array_merge_recursive($conditions, [
             [
-                'value' => 'cataloglinkrule/rule_condition_combine',
+                'value' => 'cataloglinkrule/rule_source_combine',
                 'label' => Mage::helper('cataloglinkrule')->__('Conditions Combination'),
             ],
             [
@@ -54,11 +59,6 @@ class Maho_CatalogLinkRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_
         return $conditions;
     }
 
-    /**
-     * Collect validated attributes
-     *
-     * @return $this
-     */
     public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection): self
     {
         foreach ($this->getConditions() as $condition) {
