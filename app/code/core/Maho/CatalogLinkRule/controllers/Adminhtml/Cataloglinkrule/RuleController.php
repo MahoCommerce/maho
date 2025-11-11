@@ -188,10 +188,13 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
     private function _renderRuleHtml(string $prefix): void
     {
-        $id = $this->getRequest()->getUserParam('id');
+        $id = $this->getRequest()->getParam('id');
+        $typeParam = $this->getRequest()->getParam('type');
+        $formParam = $this->getRequest()->getParam('form');
+
         // Type format from JS: "model-class-name" or "model-class-name|attribute"
         // Convert dashes back to slashes and split model from attribute
-        $type = str_replace('-', '/', (string) $this->getRequest()->getUserParam('type'));
+        $type = str_replace('-', '/', (string) $typeParam);
         $typeArr = explode('|', $type);
         $type = $typeArr[0];
 
@@ -205,7 +208,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             ->setType($type)
             ->setRule(Mage::getModel('cataloglinkrule/rule'))
             ->setPrefix($prefix)
-            ->setJsFormObject($this->getRequest()->getUserParam('form'));
+            ->setJsFormObject($formParam);
 
         if (!empty($typeArr[1])) {
             $model->setAttribute($typeArr[1]);
