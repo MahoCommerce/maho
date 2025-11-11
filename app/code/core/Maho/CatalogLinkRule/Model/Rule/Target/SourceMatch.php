@@ -106,6 +106,23 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
     }
 
     /**
+     * Collect validated attributes
+     *
+     * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
+     * @return $this
+     */
+    public function collectValidatedAttributes($productCollection)
+    {
+        $attribute = $this->getAttribute();
+        if ($attribute === 'category_ids') {
+            $productCollection->addCategoryIds();
+        } elseif ($attribute !== 'attribute_set_id') {
+            $productCollection->addAttributeToSelect($attribute);
+        }
+        return $this;
+    }
+
+    /**
      * Validate product against source product
      *
      * @param Maho\DataObject $object Target product
