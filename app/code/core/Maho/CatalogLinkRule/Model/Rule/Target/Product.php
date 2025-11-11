@@ -20,6 +20,17 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     }
 
     /**
+     * Add status and visibility to special attributes for target products
+     */
+    #[\Override]
+    protected function _addSpecialAttributes(array &$attributes): void
+    {
+        parent::_addSpecialAttributes($attributes);
+        $attributes['status'] = Mage::helper('cataloglinkrule')->__('Status');
+        $attributes['visibility'] = Mage::helper('cataloglinkrule')->__('Visibility');
+    }
+
+    /**
      * Add source matching operators to default operator options
      */
     #[\Override]
