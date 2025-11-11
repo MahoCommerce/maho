@@ -44,18 +44,6 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
             ];
         }
 
-        // Add source matching conditions
-        $sourceMatchCondition = Mage::getModel('cataloglinkrule/rule_target_sourceMatch');
-        $sourceMatchAttributes = $sourceMatchCondition->loadAttributeOptions()->getAttributeOption();
-
-        $sourceMatchOptions = [];
-        foreach ($sourceMatchAttributes as $code => $label) {
-            $sourceMatchOptions[] = [
-                'value' => 'cataloglinkrule/rule_target_sourceMatch|' . $code,
-                'label' => $label,
-            ];
-        }
-
         $conditions = parent::getNewChildSelectOptions();
         $conditions = array_merge_recursive($conditions, [
             [
@@ -65,10 +53,6 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
             [
                 'label' => Mage::helper('cataloglinkrule')->__('Product Attribute'),
                 'value' => $attributes,
-            ],
-            [
-                'label' => Mage::helper('cataloglinkrule')->__('Match Source Product'),
-                'value' => $sourceMatchOptions,
             ],
         ]);
 

@@ -95,14 +95,14 @@
 
     <crontab>
         <jobs>
-            <cataloglinkrule_update>
+            <cataloglinkrule_apply_all>
                 <schedule>
                     <config_path>cataloglinkrule/cron/schedule</config_path>
                 </schedule>
                 <run>
                     <model>cataloglinkrule/processor::processRules</model>
                 </run>
-            </cataloglinkrule_update>
+            </cataloglinkrule_apply_all>
         </jobs>
     </crontab>
 </config>
