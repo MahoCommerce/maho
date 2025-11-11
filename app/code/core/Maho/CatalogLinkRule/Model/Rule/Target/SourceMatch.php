@@ -190,7 +190,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
      * Get value element HTML
      */
     #[\Override]
-    public function getValueElement(): Maho\Data\Form\Element\AbstractElement|string
+    public function getValueElementHtml(): string
     {
         // No value input needed for source matching
         return '';

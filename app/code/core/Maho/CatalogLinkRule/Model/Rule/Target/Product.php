@@ -137,7 +137,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
      * Hide value input for source matching operators
      */
     #[\Override]
-    public function getValueElement(): Maho\Data\Form\Element\AbstractElement|string
+    public function getValueElementHtml(): string
     {
         $operator = $this->getOperator();
 
@@ -146,7 +146,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
             return '';
         }
 
-        return parent::getValueElement();
+        return parent::getValueElementHtml();
     }
 
     /**
