@@ -88,7 +88,7 @@
     <default>
         <catalog>
             <linkrule>
-                <schedule>0 2 * * *</schedule>
+                <schedule>0 3 * * *</schedule>
             </linkrule>
         </catalog>
     </default>
