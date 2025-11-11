@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'cataloglinkrule/rules';
+    public const ADMIN_RESOURCE = 'catalog/linkrules';
 
     public function indexAction(): void
     {
