@@ -22,7 +22,7 @@
                     <fields>
                         <schedule translate="label comment">
                             <label>Cron Schedule</label>
-                            <comment><![CDATA[Cron expression for rule processing. Default: <strong>0 3 * * *</strong> (daily at 3am). Examples: <strong>0 * * * *</strong> (hourly), <strong>*/15 * * * *</strong> (every 15 minutes).]]></comment>
+                            <comment><![CDATA[Cron expression for rule processing. Default: <strong>0 3 * * *</strong> (daily at 3am).]]></comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>

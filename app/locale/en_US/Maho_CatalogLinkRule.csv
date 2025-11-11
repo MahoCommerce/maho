@@ -7,7 +7,7 @@
 "Change status","Change status"
 "Conditions","Conditions"
 "Conditions Combination","Conditions Combination"
-"Cron expression for rule processing. Default: <strong>0 * * * *</strong> (hourly). Examples: <strong>*/15 * * * *</strong> (every 15 minutes), <strong>0 2 * * *</strong> (daily at 2am).","Cron expression for rule processing. Default: <strong>0 * * * *</strong> (hourly). Examples: <strong>*/15 * * * *</strong> (every 15 minutes), <strong>0 2 * * *</strong> (daily at 2am)."
+"Cron expression for rule processing. Default: <strong>0 3 * * *</strong> (daily at 3am).","Cron expression for rule processing. Default: <strong>0 3 * * *</strong> (daily at 3am)."
 "Cron Schedule","Cron Schedule"
 "Cross-sell Products","Cross-sell Products"
 "Delete","Delete"
