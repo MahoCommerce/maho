@@ -11,8 +11,7 @@
 }
 
 .cart-forms,
-.cart-totals-wrapper,
-.crosssell {
+.cart-totals-wrapper {
     float: right;
     clear: right;
     width: 40%;
@@ -49,18 +48,12 @@
     padding-right: 10px;
     padding-left: 0;
 }
-.display-both-prices .cart-totals-wrapper,
-.display-both-prices .crosssell {
+.display-both-prices .cart-totals-wrapper {
     padding-left: 10px;
 }
 .display-both-prices .cart-forms,
-.display-both-prices .cart-totals-wrapper,
-.display-both-prices .crosssell {
+.display-both-prices .cart-totals-wrapper {
     width: 50%;
-}
-.display-both-prices .crosssell {
-    clear: right;
-    float: right;
 }
 
 td.product-cart-remove a {
@@ -77,18 +70,12 @@ td.product-cart-remove a {
         padding-right: 10px;
         padding-left: 0;
     }
-    .display-single-price .cart-totals-wrapper,
-    .display-single-price .crosssell {
+    .display-single-price .cart-totals-wrapper {
         padding-left: 10px;
     }
     .display-single-price .cart-forms,
-    .display-single-price .cart-totals-wrapper,
-    .display-single-price .crosssell {
+    .display-single-price .cart-totals-wrapper {
         width: 50%;
-    }
-    .display-single-price .crosssell {
-        clear: right;
-        float: right;
     }
 }
 @media only screen and (max-width: 599px) {
@@ -98,10 +85,8 @@ td.product-cart-remove a {
 
     .display-both-prices .cart-forms,
     .display-both-prices .cart-totals-wrapper,
-    .display-both-prices .crosssell,
     .display-single-price .cart-forms,
-    .display-single-price .cart-totals-wrapper,
-    .display-single-price .crosssell {
+    .display-single-price .cart-totals-wrapper {
         padding-top: 0;
         padding-left: 0;
         padding-right: 0;
@@ -819,49 +804,57 @@ td.product-cart-remove a {
 /* ============================================ *
  * Checkout - Cart Cross sell
  * ============================================ */
+.crosssell {
+    clear: both;
+    padding: 30px 20px;
+}
+
 .crosssell h2 {
     color: var(--maho-color-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-wrap: balance;
 }
+
+.crosssell #crosssell-products-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
 .crosssell .item a.product-image {
     width: auto;
     float: left;
 }
 
-/* Change the layout to 2 columns at a breakpoint that is higher than a 3 columns layout would normally break */
+/* Responsive crosssell grid */
 @media only screen and (max-width: 979px) {
     .crosssell {
-        /* Undo three-column config */
+        padding: 20px 15px;
     }
-    .crosssell .products-grid > li:nth-child(even),
-    .crosssell .products-grid > li:nth-child(3n),
-    .crosssell .products-grid > li {
-        width: 47.72727%;
-        margin-right: 4.54545%;
-    }
-    .crosssell .products-grid > li:nth-child(odd) {
-        clear: left;
-    }
-    .crosssell .products-grid > li:nth-child(even) {
-        margin-right: 0;
-    }
-    .crosssell .products-grid > li:nth-child(3n+1) {
-        clear: none;
+    .crosssell #crosssell-products-list {
+        gap: 15px;
     }
 }
+
 @media only screen and (max-width: 599px) {
+    .crosssell {
+        padding: 15px 10px;
+        margin: 20px 0;
+    }
+    .crosssell #crosssell-products-list {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
     .cart-table .cart-tax-total:after {
         right: -9px;
     }
     .cart-table .cart-tax-total.cart-tax-total-expanded:after {
         right: -13px;
-    }
-}
-@media only screen and (max-width: 320px) {
-    .crosssell ul .item {
-        padding: 0 0px 40px;
-    }
-    .crosssell ul .product-details .crosssell-actions {
-        padding: 0 5px;
     }
 }
 /* ============================================ *
