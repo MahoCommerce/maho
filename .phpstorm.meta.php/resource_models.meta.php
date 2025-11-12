@@ -145,6 +145,8 @@ namespace PHPSTORM_META {
         'cataloginventory_resource/stock_item' => \Mage_CatalogInventory_Model_Resource_Stock_Item::class,
         'cataloginventory_resource/stock_item_collection' => \Mage_CatalogInventory_Model_Resource_Stock_Item_Collection::class,
         'cataloginventory_resource/stock_status' => \Mage_CatalogInventory_Model_Resource_Stock_Status::class,
+        'cataloglinkrule_resource/rule' => \Maho_CatalogLinkRule_Model_Resource_Rule::class,
+        'cataloglinkrule_resource/rule_collection' => \Maho_CatalogLinkRule_Model_Resource_Rule_Collection::class,
         'catalogrule_resource/rule' => \Mage_CatalogRule_Model_Resource_Rule::class,
         'catalogrule_resource/rule_collection' => \Mage_CatalogRule_Model_Resource_Rule_Collection::class,
         'catalogrule_resource/rule_product_price' => \Mage_CatalogRule_Model_Resource_Rule_Product_Price::class,

@@ -11584,15 +11584,15 @@ parameters:
 			path: app/code/core/Mage/Core/Model/File/Validator/Image.php
 
 		-
-			rawMessage: 'Call to an undefined method SimpleXMLElement::getAttribute().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
 			rawMessage: 'Call to an undefined method Maho\Simplexml\Element::getBlockName().'
 			identifier: method.notFound
 			count: 2
+			path: app/code/core/Mage/Core/Model/Layout.php
+
+		-
+			rawMessage: 'Call to an undefined method SimpleXMLElement::getAttribute().'
+			identifier: method.notFound
+			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
@@ -19651,7 +19651,7 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
 
 		-
-			rawMessage: 'Strict comparison using === between ''''|''0''|null and 0 will always evaluate to false.'
+			rawMessage: 'Strict comparison using === between ''''|''0'' and 0 will always evaluate to false.'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
@@ -21438,12 +21438,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_SalesRule_Model_Coupon::setIsPrimary() expects int, true given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Rule.php
-
-		-
-			rawMessage: 'Return type (Mage_SalesRule_Model_Rule_Condition_Product_Combine) of method Mage_SalesRule_Model_Rule::getActionsInstance() should be compatible with return type (Mage_Rule_Model_Action_Collection) of method Mage_Rule_Model_Abstract::getActionsInstance()'
-			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Rule.php
 
@@ -25162,6 +25156,84 @@ parameters:
 			path: lib/Maho/Data/Tree/Node/Collection.php
 
 		-
+			rawMessage: 'Class Maho\DataObject implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
+			identifier: missingType.generics
+			count: 1
+			path: lib/Maho/DataObject.php
+
+		-
+			rawMessage: 'Method Maho\DataObject::_addFullNames() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/DataObject.php
+
+		-
+			rawMessage: 'Method Maho\DataObject::_initOldFieldsMap() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/DataObject.php
+
+		-
+			rawMessage: Property Maho\DataObject::$_hasDataChanges has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/DataObject.php
+
+		-
+			rawMessage: Property Maho\DataObject::$_syncFieldsMap has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: lib/Maho/DataObject.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $idx with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $object with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::deleteByTags() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::findByClass() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has parameter $hash with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
+			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has parameter $ids with no type specified.'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Maho/DataObject/Cache.php
+
+		-
 			rawMessage: 'Method Maho\Event\Observer::setCallback() has parameter $data with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -26000,84 +26072,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/Io/Sftp.php
-
-		-
-			rawMessage: 'Class Maho\DataObject implements generic interface ArrayAccess but does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Maho/DataObject.php
-
-		-
-			rawMessage: 'Method Maho\DataObject::_addFullNames() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/DataObject.php
-
-		-
-			rawMessage: 'Method Maho\DataObject::_initOldFieldsMap() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/DataObject.php
-
-		-
-			rawMessage: Property Maho\DataObject::$_hasDataChanges has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/DataObject.php
-
-		-
-			rawMessage: Property Maho\DataObject::$_syncFieldsMap has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: lib/Maho/DataObject.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $idx with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::debug() has parameter $object with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::deleteByTags() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::findByClass() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::findByHash() has parameter $hash with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
-
-		-
-			rawMessage: 'Method Maho\DataObject\Cache::findByIds() has parameter $ids with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/DataObject/Cache.php
 
 		-
 			rawMessage: 'Call to an undefined method SimpleXMLElement::setNode().'

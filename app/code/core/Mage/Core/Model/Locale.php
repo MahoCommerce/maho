@@ -639,6 +639,9 @@ class Mage_Core_Model_Locale extends Varien_Object
 
         // Native DateTime handling
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
+        if (empty($timezone)) {
+            $timezone = self::DEFAULT_TIMEZONE;
+        }
 
         if ($date instanceof DateTime) {
             // Date is already a DateTime object, use as-is
