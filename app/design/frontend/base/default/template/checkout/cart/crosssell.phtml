@@ -14,7 +14,7 @@
 <?php if($this->getItemCount()): ?>
 <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
 <div class="crosssell">
-    <h2><?= $this->__('Based on your selection, you may be interested in the following items:') ?></h2>
+    <h2><?= $this->__('You may be interested in the following items') ?></h2>
     <ul id="crosssell-products-list" class="products-grid products-grid--max-3-col">
     <?php foreach ($this->getItems() as $_item): ?>
         <li class="item">
