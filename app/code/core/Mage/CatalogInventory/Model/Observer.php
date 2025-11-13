@@ -16,15 +16,6 @@ class Mage_CatalogInventory_Model_Observer
      * Product qty's checked
      * data is valid if you check quote item qty and use singleton instance
      *
-     * @deprecated after 1.4.2.0-rc1
-     * @var array
-     */
-    protected $_checkedProductsQty = [];
-
-    /**
-     * Product qty's checked
-     * data is valid if you check quote item qty and use singleton instance
-     *
      * @var array
      */
     protected $_checkedQuoteItems = [];
@@ -553,25 +544,6 @@ class Mage_CatalogInventory_Model_Observer
      * Get product qty includes information from all quote items
      * Need be used only in sungleton mode
      *
-     * @param int $productId
-     * @param float $itemQty
-     * @return float|mixed
-     * @deprecated after 1.4.2.0-rc1
-     */
-    protected function _getProductQtyForCheck($productId, $itemQty)
-    {
-        $qty = $itemQty;
-        if (isset($this->_checkedProductsQty[$productId])) {
-            $qty += $this->_checkedProductsQty[$productId];
-        }
-        $this->_checkedProductsQty[$productId] = $qty;
-        return $qty;
-    }
-
-    /**
-     * Get product qty includes information from all quote items
-     * Need be used only in sungleton mode
-     *
      * @param int   $productId
      * @param int   $quoteItemId
      * @param float $itemQty
@@ -938,84 +910,6 @@ class Mage_CatalogInventory_Model_Observer
         Mage::getResourceSingleton('cataloginventory/stock_status')
             ->prepareCatalogProductIndexSelect($select, $entityField, $websiteField);
 
-        return $this;
-    }
-
-    /**
-     * Lock DB rows for order products
-     *
-     * We need do it for resolving problems with inventory on placing
-     * some orders in one time
-     * @deprecated after 1.4
-     * @param   Varien_Event_Observer $observer
-     * @return  $this
-     */
-    public function lockOrderInventoryData($observer)
-    {
-        /** @var Mage_Sales_Model_Order $order */
-        $order = $observer->getEvent()->getOrder();
-        $productIds = [];
-
-        /**
-         * Do lock only for new order
-         */
-        if ($order->getId()) {
-            return $this;
-        }
-
-        if ($order) {
-            foreach ($order->getAllItems() as $item) {
-                $productIds[] = $item->getProductId();
-            }
-        }
-
-        if (!empty($productIds)) {
-            Mage::getSingleton('cataloginventory/stock')->lockProductItems($productIds);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Register saving order item
-     *
-     * @deprecated after 1.4
-     * @param   Varien_Event_Observer $observer
-     * @return  $this
-     */
-    public function createOrderItem($observer)
-    {
-        /** @var Mage_Sales_Model_Order_Item $item */
-        $item = $observer->getEvent()->getItem();
-        /**
-         * Before creating order item need subtract ordered qty from product stock
-         */
-
-        $children = $item->getChildrenItems();
-
-        if (!$item->getId() && empty($children)) {
-            Mage::getSingleton('cataloginventory/stock')->registerItemSale($item);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Back refunded item qty to stock
-     *
-     * @deprecated after 1.4
-     * @param   Varien_Event_Observer $observer
-     * @return  $this
-     */
-    public function refundOrderItem($observer)
-    {
-        /** @var Mage_Sales_Model_Order_Creditmemo_Item $item */
-        $item = $observer->getEvent()->getCreditmemoItem();
-        if ($item->getId() && $item->getBackToStock() && ($productId = $item->getProductId())
-            && ($qty = $item->getQty())
-        ) {
-            Mage::getSingleton('cataloginventory/stock')->backItemQty($productId, $qty);
-        }
         return $this;
     }
 
