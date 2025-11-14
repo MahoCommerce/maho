@@ -148,20 +148,18 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
         } else {
             $where = ['sample_id = ?'  => $items];
         }
-        if ($where) {
-            $writeAdapter->delete(
-                $this->getMainTable(),
-                $where,
-            );
-            $writeAdapter->delete(
-                $this->getTable('downloadable/link_title'),
-                $where,
-            );
-            $writeAdapter->delete(
-                $this->getTable('downloadable/link_price'),
-                $where,
-            );
-        }
+        $writeAdapter->delete(
+            $this->getMainTable(),
+            $where,
+        );
+        $writeAdapter->delete(
+            $this->getTable('downloadable/link_title'),
+            $where,
+        );
+        $writeAdapter->delete(
+            $this->getTable('downloadable/link_price'),
+            $where,
+        );
         return $this;
     }
 

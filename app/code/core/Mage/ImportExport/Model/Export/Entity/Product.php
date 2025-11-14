@@ -848,12 +848,10 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                         } else {
                             $row['_custom_option_row_title'] = $value['title'];
                         }
-                        if ($row) {
-                            if ($defaultStoreId != $storeId) {
-                                $row['_custom_option_store'] = $this->_storeIdToCode[$storeId];
-                            }
-                            $customOptionsDataPre[$option['product_id']][$option['option_id']][] = $row;
+                        if ($defaultStoreId != $storeId) {
+                            $row['_custom_option_store'] = $this->_storeIdToCode[$storeId];
                         }
+                        $customOptionsDataPre[$option['product_id']][$option['option_id']][] = $row;
                     }
                     $option = null;
                 }

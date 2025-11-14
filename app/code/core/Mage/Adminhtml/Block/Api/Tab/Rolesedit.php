@@ -83,23 +83,20 @@ class Mage_Adminhtml_Block_Api_Tab_Rolesedit extends Mage_Adminhtml_Block_Widget
             return $item;
         }
 
-        if ($children) {
-            $item['children'] = [];
-            //$item['cls'] = 'fiche-node';
-            foreach ($children as $child) {
-                if ($child->getName() != 'title' && $child->getName() != 'sort_order' && $child->attributes()->module) {
-                    if ($level != 0) {
-                        $item['children'][] = $this->_getNodeJson($child, $level + 1);
-                    } else {
-                        $item = $this->_getNodeJson($child, $level + 1);
-                    }
+        $item['children'] = [];
+        foreach ($children as $child) {
+            if ($child->getName() != 'title' && $child->getName() != 'sort_order' && $child->attributes()->module) {
+                if ($level != 0) {
+                    $item['children'][] = $this->_getNodeJson($child, $level + 1);
+                } else {
+                    $item = $this->_getNodeJson($child, $level + 1);
                 }
             }
-            if (empty($item['children'])) {
-                unset($item['children']);
-            } else {
-                usort($item['children'], [$this, '_sortTree']);
-            }
+        }
+        if (empty($item['children'])) {
+            unset($item['children']);
+        } else {
+            usort($item['children'], [$this, '_sortTree']);
         }
         return $item;
     }

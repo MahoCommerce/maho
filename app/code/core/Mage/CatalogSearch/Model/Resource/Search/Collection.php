@@ -253,12 +253,10 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
         foreach ($options as $option) {
             $where[] = sprintf('(attribute_id=%d AND value=%d)', $option['attribute_id'], $option['option_id']);
         }
-        if ($where) {
-            $selects[] = (string) $this->getConnection()->select()
-                ->from($resource->getTableName('catalogindex/eav'), 'entity_id')
-                ->where(implode(' OR ', $where))
-                ->where("store_id={$storeId}");
-        }
+        $selects[] = (string) $this->getConnection()->select()
+            ->from($resource->getTableName('catalogindex/eav'), 'entity_id')
+            ->where(implode(' OR ', $where))
+            ->where("store_id={$storeId}");
         return $this->getConnection()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
     }
 }
