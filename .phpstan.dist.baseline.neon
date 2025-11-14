@@ -6703,12 +6703,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
-			rawMessage: 'Call to function is_array() with string will always evaluate to false.'
-			identifier: function.impossibleType
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Product/Type.php
-
-		-
 			rawMessage: Left side of && is always true.
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
@@ -8458,12 +8452,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Abstract.php
 
 		-
-			rawMessage: 'Call to function is_array() with string will always evaluate to false.'
-			identifier: function.impossibleType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Type_Configurable::getProductByAttributes() should return Mage_Catalog_Model_Product|null but returns Maho\DataObject.'
 			identifier: return.type
 			count: 1
@@ -8486,12 +8474,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
-			rawMessage: 'Call to function is_array() with string will always evaluate to false.'
-			identifier: function.impossibleType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Grouped.php
 
 		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
@@ -9170,12 +9152,6 @@ parameters:
 			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Data/Virtual.php
-
-		-
-			rawMessage: 'Call to function is_array() with mixed will always evaluate to false.'
-			identifier: function.impossibleType
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Indexer.php
 
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Indexer_Abstract::cleanup() has no return type specified.'
@@ -15727,12 +15703,6 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Resource/Abstract.php
 
 		-
-			rawMessage: 'Call to function is_array() with '''' will always evaluate to false.'
-			identifier: function.impossibleType
-			count: 1
-			path: app/code/core/Mage/Index/Model/Resource/Event.php
-
-		-
 			rawMessage: 'Method Mage_Index_Model_Resource_Event::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -16103,12 +16073,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Newsletter/Model/Resource/Template.php
-
-		-
-			rawMessage: 'Call to function is_null() with bool will always evaluate to false.'
-			identifier: function.impossibleType
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Subscriber.php
 
 		-
 			rawMessage: 'Method Mage_Newsletter_Model_Subscriber::unsubscribe() has no return type specified.'
