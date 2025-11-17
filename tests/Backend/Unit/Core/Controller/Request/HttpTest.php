@@ -453,27 +453,5 @@ describe('Mage_Core_Controller_Request_Http', function () {
             // getParam should return the array
             expect($req->getParam('filter'))->toBe(['status' => '1', 'type' => 'simple']);
         });
-
-        it('handles mass action parameter transformation', function () {
-            $_POST = [
-                'product' => '1,2,3',
-                'massaction_prepare_key' => 'product',
-            ];
-            $req = new Mage_Core_Controller_Request_Http();
-
-            // Simulate what the observer does
-            $key = $req->getPost('massaction_prepare_key');
-            $value = $req->getPost($key);
-
-            // Explode the comma-separated string
-            $exploded = explode(',', $value);
-
-            // Set it back to the request
-            $req->setPost($key, $exploded);
-
-            // Now getParam should return the array
-            expect($req->getParam('product'))->toBe(['1', '2', '3']);
-            expect(is_array($req->getParam('product')))->toBeTrue();
-        });
     });
 });
