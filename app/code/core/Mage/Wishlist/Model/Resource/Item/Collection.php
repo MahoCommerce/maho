@@ -153,7 +153,7 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
      */
     protected function _assignProducts()
     {
-        Varien_Profiler::start('WISHLIST:' . __METHOD__);
+        \Maho\Profiler::start('WISHLIST:' . __METHOD__);
 
         $productIds = [];
         foreach ($this as $item) {
@@ -202,7 +202,7 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
             }
         }
 
-        Varien_Profiler::stop('WISHLIST:' . __METHOD__);
+        \Maho\Profiler::stop('WISHLIST:' . __METHOD__);
 
         return $this;
     }

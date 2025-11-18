@@ -89,14 +89,14 @@ class Mage_Core_Model_Url_Rewrite_Request
         }
 
         if (!$this->_request->isStraight()) {
-            Varien_Profiler::start('mage::dispatch::db_url_rewrite');
+            \Maho\Profiler::start('dispatch.db_url_rewrite');
             $this->_rewriteDb();
-            Varien_Profiler::stop('mage::dispatch::db_url_rewrite');
+            \Maho\Profiler::stop('dispatch.db_url_rewrite');
         }
 
-        Varien_Profiler::start('mage::dispatch::config_url_rewrite');
+        \Maho\Profiler::start('dispatch.config_url_rewrite');
         $this->_rewriteConfig();
-        Varien_Profiler::stop('mage::dispatch::config_url_rewrite');
+        \Maho\Profiler::stop('dispatch.config_url_rewrite');
 
         return true;
     }

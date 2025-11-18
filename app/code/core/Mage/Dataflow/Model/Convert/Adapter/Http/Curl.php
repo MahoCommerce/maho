@@ -24,7 +24,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http_Curl extends Mage_Dataflow_Model_
         }
 
         // use Symfony HttpClient
-        $client = \Symfony\Component\HttpClient\HttpClient::create();
+        $client = \Maho\Http\Client::create();
 
         try {
             // send GET request and read the remote file

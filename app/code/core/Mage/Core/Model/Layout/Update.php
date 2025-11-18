@@ -334,8 +334,8 @@ class Mage_Core_Model_Layout_Update
      */
     public function fetchPackageLayoutUpdates($handle)
     {
-        $profilerKey = 'layout/package_update: ' . $handle;
-        Varien_Profiler::start($profilerKey);
+        $profilerKey = 'layout.package_update.' . $handle;
+        \Maho\Profiler::start($profilerKey);
         if (empty($this->_packageLayout)) {
             $this->fetchFileLayoutUpdates();
         }
@@ -344,7 +344,7 @@ class Mage_Core_Model_Layout_Update
             $this->fetchRecursiveUpdates($updateXml);
             $this->addUpdate($updateXml->innerXml());
         }
-        Varien_Profiler::stop($profilerKey);
+        \Maho\Profiler::stop($profilerKey);
 
         return true;
     }
@@ -355,11 +355,11 @@ class Mage_Core_Model_Layout_Update
      */
     public function fetchDbLayoutUpdates($handle)
     {
-        $profilerKey = 'layout/db_update: ' . $handle;
-        Varien_Profiler::start($profilerKey);
+        $profilerKey = 'layout.db_update.' . $handle;
+        \Maho\Profiler::start($profilerKey);
         $updateStr = $this->_getUpdateString($handle);
         if (!$updateStr) {
-            Varien_Profiler::stop($profilerKey);
+            \Maho\Profiler::stop($profilerKey);
             return false;
         }
         $updateStr = '<update_xml>' . $updateStr . '</update_xml>';
@@ -369,7 +369,7 @@ class Mage_Core_Model_Layout_Update
         $this->fetchRecursiveUpdates($updateXml);
         $this->addUpdate($updateXml->innerXml());
 
-        Varien_Profiler::stop($profilerKey);
+        \Maho\Profiler::stop($profilerKey);
         return true;
     }
 

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,11 +53,11 @@ class Mage_Catalog_Model_Category_Url
             return $url;
         }
 
-        Varien_Profiler::start('REWRITE: ' . __METHOD__);
+        \Maho\Profiler::start('REWRITE: ' . __METHOD__);
 
         if ($category->hasData('request_path') && $category->getData('request_path') != '') {
             $category->setData('url', $this->_getDirectUrl($category));
-            Varien_Profiler::stop('REWRITE: ' . __METHOD__);
+            \Maho\Profiler::stop('REWRITE: ' . __METHOD__);
             return $category->getData('url');
         }
 
@@ -65,11 +65,11 @@ class Mage_Catalog_Model_Category_Url
         if ($requestPath) {
             $category->setRequestPath($requestPath);
             $category->setData('url', $this->_getDirectUrl($category));
-            Varien_Profiler::stop('REWRITE: ' . __METHOD__);
+            \Maho\Profiler::stop('REWRITE: ' . __METHOD__);
             return $category->getData('url');
         }
 
-        Varien_Profiler::stop('REWRITE: ' . __METHOD__);
+        \Maho\Profiler::stop('REWRITE: ' . __METHOD__);
 
         $category->setData('url', $category->getCategoryIdUrl());
         return $category->getData('url');

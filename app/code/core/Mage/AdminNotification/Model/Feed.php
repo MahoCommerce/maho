@@ -123,7 +123,7 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
      */
     public function getFeedData()
     {
-        $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 2]);
+        $client = \Maho\Http\Client::create(['timeout' => 2]);
 
         try {
             $response = $client->request('GET', $this->getFeedUrl());

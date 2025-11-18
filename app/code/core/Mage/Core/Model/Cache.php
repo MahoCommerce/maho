@@ -183,9 +183,9 @@ class Mage_Core_Model_Cache
 
         if (is_array($tags) && count($tags) > 0) {
             return $this->cacheAdapter->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
+        } else {
+            return $this->flush();
         }
-
-        return $this->flush();
     }
 
     public function prune(): bool

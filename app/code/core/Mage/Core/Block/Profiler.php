@@ -25,8 +25,8 @@ class Mage_Core_Block_Profiler extends Mage_Core_Block_Abstract
             return '';
         }
 
-        $timers = Varien_Profiler::getTimers();
-        $sqlProfiler = Varien_Profiler::getSqlProfiler(Mage::getSingleton('core/resource')->getConnection('core_write'));
+        $timers = \Maho\Profiler::getTimers();
+        $sqlProfiler = \Maho\Profiler::getSqlProfiler(Mage::getSingleton('core/resource')->getConnection('core_write'));
 
         if (!$timers && !$sqlProfiler) {
             return '';
@@ -45,10 +45,10 @@ class Mage_Core_Block_Profiler extends Mage_Core_Block_Abstract
             $out .= '<table border="1" cellspacing="0" cellpadding="2" style="width:auto">';
             $out .= '<tr><th>Code Profiler</th><th>Time</th><th>Cnt</th><th>Emalloc</th><th>RealMem</th></tr>';
             foreach (array_keys($timers) as $name) {
-                $sum = Varien_Profiler::fetch($name, 'sum');
-                $count = Varien_Profiler::fetch($name, 'count');
-                $realmem = Varien_Profiler::fetch($name, 'realmem');
-                $emalloc = Varien_Profiler::fetch($name, 'emalloc');
+                $sum = \Maho\Profiler::fetch($name, 'sum');
+                $count = \Maho\Profiler::fetch($name, 'count');
+                $realmem = \Maho\Profiler::fetch($name, 'realmem');
+                $emalloc = \Maho\Profiler::fetch($name, 'emalloc');
                 if ($sum < .0010 && $count < 10 && $emalloc < 10000) {
                     continue;
                 }

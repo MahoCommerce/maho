@@ -323,7 +323,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
     {
         try {
             $url = self::DATA_BASE_URL . $countryCode . '.json';
-            $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
+            $client = \Maho\Http\Client::create(['timeout' => 30]);
             $response = $client->request('GET', $url);
 
             // Check if file exists (404 means no regions for this country)

@@ -492,14 +492,14 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      */
     public function getCategoryIdUrl()
     {
-        Varien_Profiler::start('REGULAR: ' . __METHOD__);
+        \Maho\Profiler::start('REGULAR: ' . __METHOD__);
         $locale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $this->getStoreId());
         $urlKey = $this->getUrlKey() ?: $this->formatUrlKey($this->getName(), $locale);
         $url = $this->getUrlInstance()->getUrl('catalog/category/view', [
             's'  => $urlKey,
             'id' => $this->getId(),
         ]);
-        Varien_Profiler::stop('REGULAR: ' . __METHOD__);
+        \Maho\Profiler::stop('REGULAR: ' . __METHOD__);
         return $url;
     }
 

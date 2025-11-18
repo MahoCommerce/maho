@@ -423,7 +423,7 @@ class Mage_Core_Model_Design_Package
      */
     public function getFilename($file, array $params)
     {
-        Varien_Profiler::start(__METHOD__);
+        \Maho\Profiler::start(__METHOD__);
 
         // Prevent reading files outside of the proper directory while still allowing symlinked files
         if (str_contains($file, '..')) {
@@ -441,7 +441,7 @@ class Mage_Core_Model_Design_Package
                 $params['_theme'],
             ),
         );
-        Varien_Profiler::stop(__METHOD__);
+        \Maho\Profiler::stop(__METHOD__);
         return $result;
     }
 
@@ -484,7 +484,7 @@ class Mage_Core_Model_Design_Package
      */
     public function getSkinUrl($file = null, array $params = [])
     {
-        Varien_Profiler::start(__METHOD__);
+        \Maho\Profiler::start(__METHOD__);
 
         // Prevent reading files outside of the proper directory while still allowing symlinked files
         if (str_contains((string) $file, '..')) {
@@ -513,7 +513,7 @@ class Mage_Core_Model_Design_Package
         }
         $result = $this->getSkinBaseUrl($params) . (empty($file) ? '' : $file);
 
-        Varien_Profiler::stop(__METHOD__);
+        \Maho\Profiler::stop(__METHOD__);
         return $result;
     }
 

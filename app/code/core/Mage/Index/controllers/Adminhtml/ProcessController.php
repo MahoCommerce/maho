@@ -6,7 +6,7 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -118,10 +118,10 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
         $process = $this->_initProcess();
         if ($process) {
             try {
-                Varien_Profiler::start('__INDEX_PROCESS_REINDEX_ALL__');
+                \Maho\Profiler::start('__INDEX_PROCESS_REINDEX_ALL__');
 
                 $process->reindexEverything();
-                Varien_Profiler::stop('__INDEX_PROCESS_REINDEX_ALL__');
+                \Maho\Profiler::stop('__INDEX_PROCESS_REINDEX_ALL__');
                 $this->_getSession()->addSuccess(
                     Mage::helper('index')->__('%s index was rebuilt.', $process->getIndexer()->getName()),
                 );

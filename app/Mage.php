@@ -113,6 +113,23 @@ final class Mage
     private static $_isInstalled;
 
     /**
+     * OpenTelemetry tracer instance (lazy loaded)
+     * - null = not initialized yet
+     * - false = module not installed or disabled
+     * - Tracer = tracer active and ready
+     *
+     * @var Maho_OpenTelemetry_Model_Tracer|false|null
+     */
+    private static $_tracer = null;
+
+    /**
+     * Flag to prevent infinite recursion during tracer initialization
+     *
+     * @var bool
+     */
+    private static $_tracerInitializing = false;
+
+    /**
      * Gets the current Maho version string
      */
     public static function getVersion(): string
@@ -133,6 +150,8 @@ final class Mage
         self::$_objects         = null;
         self::$_isDeveloperMode = false;
         self::$_isInstalled     = null;
+        self::$_tracer          = null;
+        self::$_tracerInitializing = false;
         // do not reset $headersSentThrowsException
     }
 
@@ -393,9 +412,9 @@ final class Mage
      */
     public static function dispatchEvent($name, array $data = [])
     {
-        Varien_Profiler::start('DISPATCH EVENT:' . $name);
+        \Maho\Profiler::start('DISPATCH EVENT:' . $name);
         $result = self::app()->dispatchEvent($name, $data);
-        Varien_Profiler::stop('DISPATCH EVENT:' . $name);
+        \Maho\Profiler::stop('DISPATCH EVENT:' . $name);
         return $result;
     }
 
@@ -593,9 +612,9 @@ final class Mage
             self::_setIsInstalled($options);
             self::_setConfigModel($options);
 
-            Varien_Profiler::start('self::app::init');
+            \Maho\Profiler::start('self::app::init');
             self::$_app->init($code, $type, $options);
-            Varien_Profiler::stop('self::app::init');
+            \Maho\Profiler::stop('self::app::init');
             self::$_app->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
         }
         return self::$_app;
@@ -642,8 +661,16 @@ final class Mage
      */
     public static function run($code = '', $type = 'store', $options = [])
     {
+        $attributes = [
+            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'GET',
+            'http.url' => $_SERVER['REQUEST_URI'] ?? '/',
+            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'http.user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        ];
+
+        \Maho\Profiler::start('http.request', $attributes);
+
         try {
-            Varien_Profiler::start('mage');
             self::setRoot();
             self::$_app = new Mage_Core_Model_App();
             if (isset($options['request'])) {
@@ -660,14 +687,17 @@ final class Mage
                 'scope_type' => $type,
                 'options'    => $options,
             ]);
-            Varien_Profiler::stop('mage');
+            \Maho\Profiler::stop('http.request');
         } catch (Mage_Core_Model_Session_Exception $e) {
+            \Maho\Profiler::stop('http.request');
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
+            \Maho\Profiler::stop('http.request');
             Maho::errorReport([], 404);
             die();
         } catch (Exception $e) {
+            \Maho\Profiler::stop('http.request');
             if (self::isInstalled()) {
                 self::dispatchEvent('mage_run_installed_exception', ['exception' => $e]);
                 self::printException($e);
@@ -795,7 +825,92 @@ final class Mage
         if (!self::getConfig()) {
             return;
         }
+
+        // Record exception in active span if tracer available
+        self::getTracer()?->recordException($e);
+
         self::log("\n" . $e->__toString(), self::LOG_ERROR, 'exception.log');
+    }
+
+    /**
+     * Get OpenTelemetry tracer instance (lazy loaded, cached statically)
+     *
+     * Returns the tracer if the Maho_OpenTelemetry module is installed and enabled.
+     * Returns null if module is not installed or telemetry is disabled.
+     *
+     * Performance: First call ~100μs, subsequent calls ~0.01μs (null check only)
+     */
+    public static function getTracer(): ?Maho_OpenTelemetry_Model_Tracer
+    {
+        // Fast path: Already initialized (null check + static variable access = ~0.01μs)
+        if (self::$_tracer !== null) {
+            return self::$_tracer ?: null;
+        }
+
+        // Prevent infinite recursion
+        if (self::$_tracerInitializing) {
+            return null;
+        }
+
+        // Slow path: Initialize tracer (happens once per request)
+        // Check if config is loaded and OpenTelemetry module exists
+        if (!self::getConfig()) {
+            self::$_tracer = false;
+            return null;
+        }
+
+        try {
+            self::$_tracerInitializing = true;
+
+            // Check if module is installed and active
+            $modules = self::getConfig()->getNode('modules');
+            if (!$modules) {
+                self::$_tracer = false;
+                return null;
+            }
+
+            $moduleConfig = $modules->Maho_OpenTelemetry;
+            if (!$moduleConfig || !isset($moduleConfig->active) || (string) $moduleConfig->active !== 'true') {
+                self::$_tracer = false;
+                return null;
+            }
+
+            // Initialize tracer from module
+            $tracer = self::getSingleton('opentelemetry/tracer');
+            if (!$tracer || !($tracer instanceof Maho_OpenTelemetry_Model_Tracer)) {
+                self::$_tracer = false;
+                return null;
+            }
+
+            $initialized = $tracer->initialize();
+            if ($initialized) {
+                self::$_tracer = $initialized;
+                return self::$_tracer;
+            }
+
+            self::$_tracer = false;
+            return null;
+        } catch (\Throwable $e) {
+            // Log for debugging, but don't break the application
+            error_log('OpenTelemetry initialization error: ' . $e->getMessage());
+            self::$_tracer = false;
+            return null;
+        } finally {
+            self::$_tracerInitializing = false;
+        }
+    }
+
+    /**
+     * Start a new span (convenience method)
+     *
+     * Shorthand for Mage::getTracer()?->startSpan($name, $attributes)
+     *
+     * @param string $name Span name (e.g., 'db.query', 'http.client.request')
+     * @param array $attributes Initial span attributes
+     */
+    public static function startSpan(string $name, array $attributes = []): ?Maho_OpenTelemetry_Model_Span
+    {
+        return self::getTracer()?->startSpan($name, $attributes);
     }
 
     /**

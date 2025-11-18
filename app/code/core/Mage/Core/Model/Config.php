@@ -360,9 +360,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadModulesCache()
     {
         if ($this->_canUseCacheForInit()) {
-            Varien_Profiler::start('mage::app::init::config::load_cache');
+            \Maho\Profiler::start('app.init.config.load_cache');
             $loaded = $this->loadCache();
-            Varien_Profiler::stop('mage::app::init::config::load_cache');
+            \Maho\Profiler::stop('app.init.config.load_cache');
             if ($loaded) {
                 $this->_useCache = true;
                 return true;
@@ -378,7 +378,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadModules()
     {
-        Varien_Profiler::start('config/load-modules');
+        \Maho\Profiler::start('config.load_modules');
         $this->_loadDeclaredModules();
 
         $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
@@ -390,7 +390,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         $this->applyExtends();
-        Varien_Profiler::stop('config/load-modules');
+        \Maho\Profiler::stop('config.load_modules');
         return $this;
     }
 
@@ -412,10 +412,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadDb()
     {
         if ($this->_isLocalConfigLoaded && Mage::isInstalled()) {
-            Varien_Profiler::start('config/load-db');
+            \Maho\Profiler::start('config.load_db');
             $dbConf = $this->getResourceModel();
             $dbConf->loadToXml($this);
-            Varien_Profiler::stop('config/load-db');
+            \Maho\Profiler::stop('config.load_db');
         }
         return $this;
     }
@@ -426,11 +426,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadEnv(): Mage_Core_Model_Config
     {
         if ($this->_isLocalConfigLoaded && Mage::isInstalled()) {
-            Varien_Profiler::start('config/load-env');
+            \Maho\Profiler::start('config.load_env');
             /** @var Mage_Core_Helper_EnvironmentConfigLoader $environmentConfigLoaderHelper */
             $environmentConfigLoaderHelper = Mage::helper('core/environmentConfigLoader');
             $environmentConfigLoaderHelper->overrideEnvironment($this);
-            Varien_Profiler::stop('config/load-env');
+            \Maho\Profiler::stop('config.load_env');
         }
         return $this;
     }
@@ -682,9 +682,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $sectionKey = implode('_', $sectionPath);
 
         if (!isset($this->_cacheLoadedSections[$sectionKey])) {
-            Varien_Profiler::start('init_config_section:' . $sectionKey);
+            \Maho\Profiler::start('config.init_section.' . $sectionKey);
             $this->_cacheLoadedSections[$sectionKey] = $this->_loadSectionCache($sectionKey);
-            Varien_Profiler::stop('init_config_section:' . $sectionKey);
+            \Maho\Profiler::stop('config.init_section.' . $sectionKey);
         }
         return $this->_cacheLoadedSections[$sectionKey];
     }
@@ -855,7 +855,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             return ;
         }
 
-        Varien_Profiler::start('config/load-modules-declaration');
+        \Maho\Profiler::start('config.load_modules_declaration');
 
         $unsortedConfig = new Mage_Core_Model_Config_Base();
         $unsortedConfig->loadString('<config/>');
@@ -906,7 +906,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         $this->extend($sortedConfig);
 
-        Varien_Profiler::stop('config/load-modules-declaration');
+        \Maho\Profiler::stop('config.load_modules_declaration');
         return $this;
     }
 
@@ -1355,9 +1355,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
         $obj = new $className();
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('core.create_object');
         return $obj;
     }
 
@@ -1370,9 +1370,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($className === false || !class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
         $obj = new $className($moduleAlias);
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('core.create_object');
         return $obj;
     }
 
@@ -1428,9 +1428,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
         $obj = new $className($constructArguments);
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('core.create_object');
         return $obj;
     }
 
@@ -1474,9 +1474,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($className === false || !class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
         $obj = new $className($constructArguments);
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('core.create_object');
         return $obj;
     }
 

@@ -378,7 +378,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
                 . $this->getConfigData('proxy_port');
         }
 
-        $client = \Symfony\Component\HttpClient\HttpClient::create($_config);
+        $client = \Maho\Http\Client::create($_config);
 
         $headers = [
             'X-VPS-VIT-CLIENT-CERTIFICATION-ID' => '33baf5893fc2123d8b191d2d011b7fdc',

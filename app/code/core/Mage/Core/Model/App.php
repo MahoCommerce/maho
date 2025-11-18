@@ -252,13 +252,13 @@ class Mage_Core_Model_App
             $options = ['etc_dir' => $options];
         }
 
-        Varien_Profiler::start('mage::app::init::config');
+        \Maho\Profiler::start('app.init.config');
         $this->_config = Mage::getConfig();
         $this->_config->setOptions($options);
         $this->_initBaseConfig();
         $this->_initCache();
         $this->_config->init($options);
-        Varien_Profiler::stop('mage::app::init::config');
+        \Maho\Profiler::stop('app.init.config');
 
         if ($this->_isInstalled === null) {
             $this->_isInstalled = Mage::isInstalled($options);
@@ -327,38 +327,79 @@ class Mage_Core_Model_App
      */
     public function run($params)
     {
-        $options = $params['options'] ?? [];
-        $this->baseInit($options);
-        Mage::register('application_params', $params);
-
-        $this->_initModules();
-        $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
-
-        if ($this->_config->isLocalConfigLoaded()) {
-            $scopeCode = $params['scope_code'] ?? '';
-            $scopeType = $params['scope_type'] ?? 'store';
-            $this->_initCurrentStore($scopeCode, $scopeType);
-            $this->_initRequest();
-            Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
-        }
-
-        $this->getFrontController()->dispatch();
-
-        // Finish the request explicitly, no output allowed beyond this point
-        if (php_sapi_name() == 'fpm-fcgi' && function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        } else {
-            flush();
-        }
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
+        // OpenTelemetry: Start root span immediately for entire request
+        $rootSpan = Mage::getTracer()?->startRootSpan('http.request', [
+            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'CLI',
+            'http.url' => $_SERVER['REQUEST_URI'] ?? '',
+            'http.host' => $_SERVER['HTTP_HOST'] ?? '',
+            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'http.user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        ]);
 
         try {
-            Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            $options = $params['options'] ?? [];
+            $this->baseInit($options);
+            Mage::register('application_params', $params);
+
+            $this->_initModules();
+            $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
+
+            if ($this->_config->isLocalConfigLoaded()) {
+                $scopeCode = $params['scope_code'] ?? '';
+                $scopeType = $params['scope_type'] ?? 'store';
+                $this->_initCurrentStore($scopeCode, $scopeType);
+
+                // OpenTelemetry: Add store context to span
+                if ($rootSpan) {
+                    $rootSpan->setAttributes([
+                        'maho.store_id' => $this->getStore()->getId(),
+                        'maho.store_code' => $this->getStore()->getCode(),
+                        'maho.website_id' => $this->getWebsite()->getId(),
+                    ]);
+                }
+
+                $this->_initRequest();
+                Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+                Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
+            }
+
+            $this->getFrontController()->dispatch();
+
+            // OpenTelemetry: Add response data to span
+            if ($rootSpan) {
+                $rootSpan->setAttributes([
+                    'http.status_code' => http_response_code(),
+                    'http.response_size' => ob_get_length() ?: 0,
+                ]);
+                $rootSpan->setStatus('ok');
+            }
+
+            // Finish the request explicitly, no output allowed beyond this point
+            if (php_sapi_name() == 'fpm-fcgi' && function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            } else {
+                flush();
+            }
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            try {
+                Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
         } catch (Throwable $e) {
-            Mage::logException($e);
+            // OpenTelemetry: Record exception in span
+            if ($rootSpan) {
+                $rootSpan->recordException($e);
+                $rootSpan->setStatus('error', $e->getMessage());
+            }
+            throw $e;
+        } finally {
+            // OpenTelemetry: End span and flush (after response sent - non-blocking)
+            $rootSpan?->end();
+            Mage::getTracer()?->flush();
         }
 
         return $this;
@@ -384,9 +425,9 @@ class Mage_Core_Model_App
      */
     protected function _initBaseConfig()
     {
-        Varien_Profiler::start('mage::app::init::system_config');
+        \Maho\Profiler::start('app.init.system_config');
         $this->_config->loadBase();
-        Varien_Profiler::stop('mage::app::init::system_config');
+        \Maho\Profiler::stop('app.init.system_config');
         return $this;
     }
 
@@ -423,9 +464,9 @@ class Mage_Core_Model_App
                 if (!$this->_config->loadModulesCache()) {
                     $this->_config->loadModules();
                     if ($this->_config->isLocalConfigLoaded() && !$this->_shouldSkipProcessModulesUpdates()) {
-                        Varien_Profiler::start('mage::app::init::apply_db_schema_updates');
+                        \Maho\Profiler::start('app.init.apply_db_schema_updates');
                         Mage_Core_Model_Resource_Setup::applyAllUpdates();
-                        Varien_Profiler::stop('mage::app::init::apply_db_schema_updates');
+                        \Maho\Profiler::stop('app.init.apply_db_schema_updates');
                     }
                     $this->_config->loadDb();
                     $this->_config->loadEnv();
@@ -477,9 +518,9 @@ class Mage_Core_Model_App
      */
     protected function _initCurrentStore($scopeCode, $scopeType)
     {
-        Varien_Profiler::start('mage::app::init::stores');
+        \Maho\Profiler::start('app.init.stores');
         $this->_initStores();
-        Varien_Profiler::stop('mage::app::init::stores');
+        \Maho\Profiler::stop('app.init.stores');
 
         if (empty($scopeCode) && !is_null($this->_website)) {
             $scopeCode = $this->_website->getCode();
@@ -767,9 +808,9 @@ class Mage_Core_Model_App
     {
         $this->_frontController = new Mage_Core_Controller_Varien_Front();
         Mage::register('controller', $this->_frontController);
-        Varien_Profiler::start('mage::app::init_front_controller');
+        \Maho\Profiler::start('app.init.front_controller');
         $this->_frontController->init();
-        Varien_Profiler::stop('mage::app::init_front_controller');
+        \Maho\Profiler::stop('app.init.front_controller');
         return $this;
     }
 
@@ -1411,7 +1452,7 @@ class Mage_Core_Model_App
                     ...$obs['args'], // Default config.xml <args>
                     ...$args,        // Mage::dispatchEvent() $args
                 ]);
-                Varien_Profiler::start('OBSERVER: ' . $obsName);
+                \Maho\Profiler::start('observer.execute', ['observer.name' => $obsName]);
                 switch ($obs['type']) {
                     case 'disabled':
                         break;
@@ -1427,7 +1468,7 @@ class Mage_Core_Model_App
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                 }
-                Varien_Profiler::stop('OBSERVER: ' . $obsName);
+                \Maho\Profiler::stop('observer.execute');
             }
         }
         return $this;

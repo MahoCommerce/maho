@@ -20,6 +20,12 @@ class Profiler
     private static bool $_enabled = false;
     private static bool $_memory_get_usage = false;
 
+    /**
+     * Stack of active OpenTelemetry spans indexed by timer name
+     * @var array<string, mixed>
+     */
+    private static array $_spans = [];
+
     public static function enable(): void
     {
         self::$_enabled = true;
@@ -59,9 +65,20 @@ class Profiler
         self::$_timers[$timerName]['count']++;
     }
 
-    public static function start(string $timerName): void
+    /**
+     * Start profiling timer and create OpenTelemetry span
+     *
+     * @param string $timerName The name for the profiler timer (will be used as span name)
+     * @param array $attributes Optional OpenTelemetry span attributes
+     */
+    public static function start(string $timerName, array $attributes = []): void
     {
         self::resume($timerName);
+
+        // OpenTelemetry: Create span if not already exists for this timer
+        if (!isset(self::$_spans[$timerName])) {
+            self::$_spans[$timerName] = \Mage::startSpan($timerName, $attributes);
+        }
     }
 
     public static function pause(string $timerName): void
@@ -85,9 +102,21 @@ class Profiler
         }
     }
 
+    /**
+     * Stop profiling timer and end OpenTelemetry span
+     *
+     * @param string $timerName The name of the profiler timer
+     */
     public static function stop(string $timerName): void
     {
         self::pause($timerName);
+
+        // OpenTelemetry: End span if exists
+        if (isset(self::$_spans[$timerName])) {
+            self::$_spans[$timerName]->setStatus('ok');
+            self::$_spans[$timerName]->end();
+            unset(self::$_spans[$timerName]);
+        }
     }
 
     public static function fetch(string $timerName, string $key = 'sum'): false|array|int|float

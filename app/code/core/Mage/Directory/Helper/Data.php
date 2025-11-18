@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -138,7 +138,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRegionJsonByStore($storeId = null)
     {
-        Varien_Profiler::start('TEST: ' . __METHOD__);
+        \Maho\Profiler::start('TEST: ' . __METHOD__);
         if (!$this->_regionJson) {
             $store = $this->_app->getStore($storeId);
             $cacheKey = 'DIRECTORY_REGIONS_JSON_STORE' . (string) $store->getId();
@@ -158,7 +158,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             $this->_regionJson = $json;
         }
 
-        Varien_Profiler::stop('TEST: ' . __METHOD__);
+        \Maho\Profiler::stop('TEST: ' . __METHOD__);
         return $this->_regionJson;
     }
 

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -97,18 +97,18 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
     protected function _afterLoad()
     {
         parent::_afterLoad();
-        Varien_Profiler::start('TTT1:' . __METHOD__);
+        \Maho\Profiler::start('TTT1:' . __METHOD__);
         $this->_addProductAttributes();
-        Varien_Profiler::stop('TTT1:' . __METHOD__);
-        Varien_Profiler::start('TTT2:' . __METHOD__);
+        \Maho\Profiler::stop('TTT1:' . __METHOD__);
+        \Maho\Profiler::start('TTT2:' . __METHOD__);
         $this->_addAssociatedProductFilters();
-        Varien_Profiler::stop('TTT2:' . __METHOD__);
-        Varien_Profiler::start('TTT3:' . __METHOD__);
+        \Maho\Profiler::stop('TTT2:' . __METHOD__);
+        \Maho\Profiler::start('TTT3:' . __METHOD__);
         $this->_loadLabels();
-        Varien_Profiler::stop('TTT3:' . __METHOD__);
-        Varien_Profiler::start('TTT4:' . __METHOD__);
+        \Maho\Profiler::stop('TTT3:' . __METHOD__);
+        \Maho\Profiler::start('TTT4:' . __METHOD__);
         $this->_loadPrices();
-        Varien_Profiler::stop('TTT4:' . __METHOD__);
+        \Maho\Profiler::stop('TTT4:' . __METHOD__);
         return $this;
     }
 
