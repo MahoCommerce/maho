@@ -459,11 +459,6 @@ small {
   background-color: #fff;
   padding-left: 10px;
   min-width: 250px;
-  transition: width 100ms;
-  transition-delay: 200ms;
-}
-.header-right fieldset input.input-text:focus {
-  width: calc(100vw - 160px);
 }
 .footer {
   background: #eee;
