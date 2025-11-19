@@ -71,7 +71,7 @@ jobs:
 
             # Check if file contains the copyright string with current year
             # Pattern matches either:
-            # @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+            # @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
             # @copyright  Copyright (c) (2024-)2024 Maho (https://mahocommerce.com)
             if ! grep -E -q "Copyright \(c\) (2024-)?${CURRENT_YEAR} Maho \(https://mahocommerce\.com\)" "$file"; then
               echo "❌ Copyright notice missing in: $file"

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -805,10 +805,10 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     <style>
         @page { margin: 0; }
         body { margin: 0; padding: 0; }
-        .shipping-label { 
-            width: 100%; 
-            height: auto; 
-            display: block; 
+        .shipping-label {
+            width: 100%;
+            height: auto;
+            display: block;
             margin: 0 auto;
         }
     </style>
