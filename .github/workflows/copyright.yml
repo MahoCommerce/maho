@@ -35,6 +35,7 @@ jobs:
         run: |
           # Get current year
           CURRENT_YEAR=$(date +%Y)
+          CURRENT_YEAR=2026
 
           # Initialize error flag
           ERROR=0
