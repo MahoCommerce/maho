@@ -624,7 +624,7 @@ div.main-col-inner { float:left; /* Fixes some inner clears in the liquid main-c
     margin-left:1.3em;
     }
 
-#global_search_indicator { position:absolute; margin-left:-20px; }
+#global_search_indicator { position:absolute; left: 235px; top: 5px; transform: scale(0.8); }
 
 /* Search autocomplete */
 div.autocomplete {
