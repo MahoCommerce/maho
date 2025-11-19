@@ -10,16 +10,12 @@
  */
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td style="width:50%;"><h3><?= $header ?></h3></td>
-            <td class="form-buttons">
-                <?= $this->getBackButtonHtml() ?>
-                <?= $this->getResetButtonHtml() ?>
-                <?= $this->getSaveButtonHtml() ?>
-            </td>
-        </tr>
-    </table>
+    <h3><?= $header ?></h3>
+    <p class="content-buttons form-buttons">
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getResetButtonHtml() ?>
+        <?= $this->getSaveButtonHtml() ?>
+    </p>
 </div>
 <?php if( $form ): ?>
 <?= $form->toHtml() ?>
