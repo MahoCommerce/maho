@@ -1,6 +1,6 @@
 /*
  * @copyright  Copyright (c) 2007 Andrew Tetlaw
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/license/mit.php
  */
 
