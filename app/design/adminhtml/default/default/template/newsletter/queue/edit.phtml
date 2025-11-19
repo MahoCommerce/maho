@@ -12,22 +12,18 @@
 /** @var Mage_Adminhtml_Block_Newsletter_Queue_Edit $this */
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td><h3><?= $this->getHeaderText() ?></h3></td>
-            <td class="form-buttons">
-                <?= $this->getBackButtonHtml() ?>
-                <?= $this->getPreviewButtonHtml() ?>
-                <?php if(!$this->getIsPreview()): ?>
-                    <?= $this->getResetButtonHtml() ?>
-                    <?= $this->getSaveButtonHtml() ?>
-                <?php endif ?>
-                <?php if($this->getCanResume()): ?>
-                    <?= $this->getResumeButtonHtml() ?>
-                <?php endif ?>
-            </td>
-        </tr>
-    </table>
+    <h3><?= $this->getHeaderText() ?></h3>
+    <p class="content-buttons form-buttons">
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getPreviewButtonHtml() ?>
+        <?php if(!$this->getIsPreview()): ?>
+            <?= $this->getResetButtonHtml() ?>
+            <?= $this->getSaveButtonHtml() ?>
+        <?php endif ?>
+        <?php if($this->getCanResume()): ?>
+            <?= $this->getResumeButtonHtml() ?>
+        <?php endif ?>
+    </p>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="queue_edit_form">
     <?= $this->getBlockHtml('formkey') ?>

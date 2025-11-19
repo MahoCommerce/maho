@@ -445,10 +445,7 @@ span.delete-file                { padding:0; }
 
 /* Form Button */
 .content-buttons.form-buttons,
-.content-header .form-buttons   { text-align:right; margin-bottom:0; }
-.content-header .content-buttons-placeholder { display:inline !important; }
-.content-header .form-buttons   { float:right; }
-.content-header td.form-buttons   { float:none; }
+.content-header .form-buttons   { text-align:right; }
 .content-header .form-buttons button { margin-bottom:3px; }
 .sub-btn-set { border:1px solid #ddd; border-width:0 1px; background:url(images/sub_button_bg.gif) repeat; padding:3px 10px; text-align:right; }
 button::-moz-focus-inner { padding:0; border:0; } /* FF Fix */
@@ -659,12 +656,10 @@ div.autocomplete ul li { padding:.5em .7em; min-height:32px; cursor:pointer; tex
     border-bottom:4px solid #dfdfdf;
     padding-bottom:.25em;
     }
-.content-header table           { width:100%; }
 .content-header h3              { float:left; margin:.3em .5em 0 0; color:#eb5e00; font-size:1.25em; line-height:1.2em; }
 .content-header .head h3        { float:none; }
 .content-header .button-set     { white-space:nowrap; text-align:right; }
-.content-header .content-buttons  { white-space:nowrap!important; margin:0; }
-.content-header td.content-buttons  { width:13%;white-space:nowrap!important; margin:0; }
+.content-header .content-buttons  { white-space:nowrap!important; }
 .content-buttons button,
 .content-header button,
 .filter-actions button          { margin:0 0 0 5px; }
