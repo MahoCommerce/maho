@@ -94,16 +94,12 @@ function checkVisibility(element) {
 
 function imagePreview(element){
     const el = typeof element === 'string' ? document.getElementById(element) : element;
-    if(el){
-        const win = window.open('', 'preview', 'width=400,height=400,resizable=1,scrollbars=1');
-        win.document.open();
-        win.document.write('<body style="padding:0;margin:0"><img src="'+escapeHtml(el.src, true)+'" id="image_preview"/></body>');
-        win.document.close();
-        win.addEventListener('load', function(){
-            const img = win.document.getElementById('image_preview');
-            win.resizeTo(img.width+40, img.height+80);
-        });
-    }
+    if (!el) return;
+
+    Dialog.info(`<img src="${escapeHtml(el.src, true)}" style="max-width: 100%; margin: 0 auto;">`, {
+        title: Translator.translate('Image Preview'),
+        className: 'image-preview-dialog'
+    });
 }
 
 function checkByProductPriceType(elem) {
