@@ -430,4 +430,28 @@ describe('Mage_Core_Controller_Request_Http', function () {
             expect($req->isHead())->toBeTrue();
         });
     });
+
+    describe('Mass Action Support', function () {
+        it('syncs setPost with getParam for array values', function () {
+            $_POST = [];
+            $req = new Mage_Core_Controller_Request_Http();
+
+            // Simulate mass action observer setting array after request creation
+            $req->setPost('product', ['1', '2', '3']);
+
+            // getParam should now return the array
+            expect($req->getParam('product'))->toBe(['1', '2', '3']);
+        });
+
+        it('syncs setQuery with getParam for array values', function () {
+            $_GET = [];
+            $req = new Mage_Core_Controller_Request_Http();
+
+            // Set array via setQuery
+            $req->setQuery('filter', ['status' => '1', 'type' => 'simple']);
+
+            // getParam should return the array
+            expect($req->getParam('filter'))->toBe(['status' => '1', 'type' => 'simple']);
+        });
+    });
 });

@@ -358,8 +358,10 @@ class Mage_Core_Controller_Request_Http
     {
         if (is_array($spec)) {
             $_GET = $spec;
+            $this->symfonyRequest->query->replace($spec);
         } else {
             $_GET[$spec] = $value;
+            $this->symfonyRequest->query->set($spec, $value);
         }
         return $this;
     }
@@ -376,8 +378,10 @@ class Mage_Core_Controller_Request_Http
     {
         if (is_array($spec)) {
             $_POST = $spec;
+            $this->symfonyRequest->request->replace($spec);
         } else {
             $_POST[$spec] = $value;
+            $this->symfonyRequest->request->set($spec, $value);
         }
         return $this;
     }
