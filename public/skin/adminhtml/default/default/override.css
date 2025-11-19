@@ -17,7 +17,7 @@
   background: #f6f6f6;
 }
 
-.content-header-floating .content-header, .footer-content, .middle, #nav, .header-top {
+.footer-content, .middle, #nav, .header-top {
   padding-left: 15px;
   padding-right: 15px;
   box-sizing: border-box;
@@ -220,21 +220,11 @@ small {
   flex-grow: 1;
 }
 
-.content-header-floating {
-  opacity: 0.9;
-  border-bottom: solid 1px #c8c8c8;
-}
-.content-header-floating h3 {
-  font-size: 18px;
-}
-.content-header-floating td {
-  padding-right: 0;
-}
-.content-header-floating .form-buttons {
-  padding-right: 0;
-}
-
 .content-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #f6f6f6;
   margin-bottom: 0;
   padding-bottom: 0;
 }

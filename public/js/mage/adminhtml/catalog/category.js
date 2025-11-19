@@ -310,7 +310,6 @@ class CategoryEditForm {
         } catch (error) {
             setMessagesDiv(error.message, 'error');
         }
-        toolbarToggle.start();
     }
 
     async switchStore(event, switcher) {
@@ -346,7 +345,6 @@ class CategoryEditForm {
         } catch (error) {
             setMessagesDiv(error.message, 'error');
         }
-        toolbarToggle.start();
     }
 
     async moveCategory(event) {
