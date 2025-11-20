@@ -106,13 +106,13 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
      * Get data array for building filter items
      *
      * result array should have next structure:
-     * array(
-     *      $index => array(
+     * [
+     *      $index => [
      *          'label' => $label,
      *          'value' => $value,
      *          'count' => $count
-     *      )
-     * )
+     *      ]
+     * ]
      *
      * @return array
      */

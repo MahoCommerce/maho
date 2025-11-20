@@ -530,10 +530,10 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * This method will return following array:
      *
-     * array(
+     * [
      *     'rows'  => count of written rows,
      *     'value' => path to created file
-     * )
+     * ]
      *
      * @return array
      */

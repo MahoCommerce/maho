@@ -57,17 +57,17 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     /**
      * Array of SKU to array of super attribute values for all products.
      *
-     * array (
-     *     attr_set_name_1 => array(
-     *         product_id_1 => array(
+     * [
+     *     attr_set_name_1 => [
+     *         product_id_1 => [
      *             super_attribute_code_1 => attr_value_1,
      *             ...
      *             super_attribute_code_n => attr_value_n
-     *         ),
+     *         ],
      *         ...
-     *     ),
+     *     ],
      *   ...
-     * )
+     * ]
      *
      * @var array
      */
@@ -76,17 +76,17 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     /**
      * Array of SKU to array of super attributes data for validation new associated products.
      *
-     * array (
-     *     product_id_1 => array(
-     *         super_attribute_id_1 => array(
+     * [
+     *     product_id_1 => [
+     *         super_attribute_id_1 => [
      *             value_index_1 => TRUE,
      *             ...
      *             value_index_n => TRUE
-     *         ),
+     *         ],
      *         ...
-     *     ),
+     *     ],
      *   ...
-     * )
+     * ]
      *
      * @var array
      */

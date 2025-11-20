@@ -6,6 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -99,8 +100,8 @@ class Mage_Sales_Model_Order_Creditmemo_Api extends Mage_Sales_Model_Api_Resourc
      * Create new credit memo for order
      *
      * @param string $orderIncrementId
-     * @param array $creditmemoData array('qtys' => array('sku1' => qty1, ... , 'skuN' => qtyN),
-     *      'shipping_amount' => value, 'adjustment_positive' => value, 'adjustment_negative' => value)
+     * @param array $creditmemoData ['qtys' => ['sku1' => qty1, ... , 'skuN' => qtyN],
+     *      'shipping_amount' => value, 'adjustment_positive' => value, 'adjustment_negative' => value]
      * @param string|null $comment
      * @param bool $notifyCustomer
      * @param bool $includeComment

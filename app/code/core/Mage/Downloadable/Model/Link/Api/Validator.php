@@ -37,7 +37,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
             'is_unlimited' => 'Unlimited',              // 1|0 $4
             'is_shareable' => 'Shareable',              // 1|0|2 (2) $5
             'type' => 'UploadType',                     // file|url (file) $6
-            'file' => 'File',                           // array(name, base64_content) $7
+            'file' => 'File',                           // [name, base64_content] $7
             'link_url' => 'Url',                        // URL $8
             'sort_order' => 'Order',                    // int (0) $9
             'sample' => [
@@ -49,7 +49,7 @@ class Mage_Downloadable_Model_Link_Api_Validator
         'sample' => [
             'title' => 'Title',                         // $1
             'type' => 'UploadType',                     // file|url (file) $6
-            'file' => 'File',                           // array(name, base64_content) $7
+            'file' => 'File',                           // [name, base64_content] $7
             'sample_url' => 'Url',                      // URL $8
             'sort_order' => 'Order',                     // int (0) $9
         ],

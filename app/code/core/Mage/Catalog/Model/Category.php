@@ -353,7 +353,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     /**
      * Retrieve array of product id's for category
      *
-     * array($productId => $position)
+     * [$productId => $position]
      *
      * @return array
      */

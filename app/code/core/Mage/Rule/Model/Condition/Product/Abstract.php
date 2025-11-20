@@ -27,15 +27,15 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * All attribute values as array in form:
-     * array(
-     *   [entity_id_1] => array(
+     * [
+     *   [entity_id_1] => [
      *          [store_id_1] => store_value_1,
      *          [store_id_2] => store_value_2,
      *          ...
      *          [store_id_n] => store_value_n
-     *   ),
+     *   ],
      *   ...
-     * )
+     * ]
      *
      * Will be set only for not global scope attribute
      *
@@ -193,8 +193,8 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Prepares values options to be used as select options or hashed array
      * Result is stored in following keys:
-     *  'value_select_options' - normal select array: array(array('value' => $value, 'label' => $label), ...)
-     *  'value_option' - hashed array: array($value => $label, ...),
+     *  'value_select_options' - normal select array: [['value' => $value, 'label' => $label], ...]
+     *  'value_option' - hashed array: [$value => $label, ...],
      *
      * @return $this
      */

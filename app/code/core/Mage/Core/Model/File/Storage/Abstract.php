@@ -36,12 +36,12 @@ abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abs
     /**
      * Collect file info
      *
-     * Return array(
+     * Return [
      *  filename    => string
      *  content     => string|bool
      *  update_time => string
      *  directory   => string
-     * )
+     * ]
      *
      * @param  string $path
      * @return array

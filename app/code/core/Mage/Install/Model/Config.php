@@ -32,7 +32,7 @@ class Mage_Install_Model_Config extends Varien_Simplexml_Config
     /**
      * Get array of wizard steps
      *
-     * array($inndex => Varien_Object )
+     * [$inndex => Varien_Object ]
      *
      * @return array
      */
@@ -50,14 +50,14 @@ class Mage_Install_Model_Config extends Varien_Simplexml_Config
     /**
      * Retrieve writable path for checking
      *
-     * array(
-     *      ['writeable'] => array(
-     *          [$index] => array(
+     * [
+     *      ['writeable'] => [
+     *          [$index] => [
      *              ['path']
      *              ['recursive']
-     *          )
-     *      )
-     * )
+     *          ]
+     *      ]
+     * ]
      *
      * @deprecated since 1.7.1.0
      *

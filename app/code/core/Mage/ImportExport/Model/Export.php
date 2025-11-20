@@ -158,11 +158,11 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
      *
      * This method will return following array:
      *
-     * array(
+     * [
      *     'rows'  => count of written rows,
      *     'value' => path to created file,
      *     'type'  => 'file'
-     * )
+     * ]
      *
      * @throws Mage_Core_Exception
      * @return array

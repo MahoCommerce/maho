@@ -91,16 +91,16 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
 
     /**
      * Main table unique keys field names
-     * could array(
-     *   array('field' => 'db_field_name1', 'title' => 'Field 1 should be unique')
-     *   array('field' => 'db_field_name2', 'title' => 'Field 2 should be unique')
-     *   array(
-     *      'field' => array('db_field_name3', 'db_field_name3'),
+     * could [
+     *   ['field' => 'db_field_name1', 'title' => 'Field 1 should be unique']
+     *   ['field' => 'db_field_name2', 'title' => 'Field 2 should be unique']
+     *   [
+     *      'field' => ['db_field_name3', 'db_field_name3'],
      *      'title' => 'Field 3 and Field 4 combination should be unique'
-     *   )
-     * )
+     *   ]
+     * ]
      * or string 'my_field_name' - will be autoconverted to
-     *      array( array( 'field' => 'my_field_name', 'title' => 'my_field_name' ) )
+     *      [ [ 'field' => 'my_field_name', 'title' => 'my_field_name' ] ]
      *
      * @var array|null
      */
@@ -108,13 +108,13 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
 
     /**
      * Serializable fields declaration
-     * Structure: array(
-     *     <field_name> => array(
+     * Structure: [
+     *     <field_name> => [
      *         <default_value_for_serialization>,
      *         <default_for_unserialization>,
      *         <whether_to_unset_empty_when serializing> // optional parameter
-     *     ),
-     * )
+     *     ],
+     * ]
      *
      * @var array
      */

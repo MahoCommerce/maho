@@ -99,9 +99,9 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
 
     /**
      * Retrieve Required children ids
-     * Return grouped array, ex array(
-     *   group => array(ids)
-     * )
+     * Return grouped array, ex [
+     *   group => [ids]
+     * ]
      *
      * @param  int $parentId
      * @param  bool $required
@@ -490,9 +490,9 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
 
     /**
      * Retrieve used product by attribute values
-     *  $attrbutesInfo = array(
+     *  $attrbutesInfo = [
      *      $attributeId => $attributeValue
-     *  )
+     *  ]
      *
      * @param  array $attributesInfo
      * @param  Mage_Catalog_Model_Product $product
@@ -591,7 +591,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
             if (is_array($result)) {
                 $product = $this->getProduct($product);
                 /**
-                 * $attributes = array($attributeId=>$attributeValue)
+                 * $attributes = [$attributeId=>$attributeValue]
                  */
                 $subProduct = true;
                 if ($this->_isStrictProcessMode($processMode)) {

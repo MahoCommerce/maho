@@ -64,11 +64,11 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
     /**
      * Customer attributes parameters.
      *
-     *  [attr_code_1] => array(
-     *      'options' => array(),
+     *  [attr_code_1] => [
+     *      'options' => [],
      *      'type' => 'text', 'price', 'textarea', 'select', etc.
      *      'id' => ..
-     *  ),
+     *  ],
      *  ...
      *
      * @var array
@@ -146,12 +146,12 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
     /**
      * Existing customers information. In form of:
      *
-     * [customer e-mail] => array(
+     * [customer e-mail] => [
      *    [website code 1] => customer_id 1,
      *    [website code 2] => customer_id 2,
      *           ...       =>     ...      ,
      *    [website code n] => customer_id n,
-     * )
+     * ]
      *
      * @var array
      */

@@ -15,14 +15,14 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
     /**
      * Product type attribute sets and attributes parameters.
      *
-     * [attr_set_name_1] => array(
-     *     [attr_code_1] => array(
-     *         'options' => array(),
+     * [attr_set_name_1] => [
+     *     [attr_code_1] => [
+     *         'options' => [],
      *         'type' => 'text', 'price', 'textarea', 'select', etc.
      *         'id' => ..
-     *     ),
+     *     ],
      *     ...
-     * ),
+     * ],
      * ...
      *
      * @var array

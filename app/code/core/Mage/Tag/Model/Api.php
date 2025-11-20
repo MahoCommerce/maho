@@ -6,6 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,8 +46,8 @@ class Mage_Tag_Model_Api extends Mage_Catalog_Model_Api_Resource
     }
 
     /**
-     * Retrieve tag info as array('name'-> .., 'status' => ..,
-     * 'base_popularity' => .., 'products' => array($productId => $popularity, ...))
+     * Retrieve tag info as ['name'-> .., 'status' => ..,
+     * 'base_popularity' => .., 'products' => [$productId => $popularity, ...]]
      *
      * @param int $tagId
      * @param string|int $store
@@ -64,7 +65,7 @@ class Mage_Tag_Model_Api extends Mage_Catalog_Model_Api_Resource
         $result['status'] = $tag->getStatus();
         $result['name'] = $tag->getName();
         $result['base_popularity'] = (is_numeric($tag->getBasePopularity())) ? $tag->getBasePopularity() : 0;
-        // retrieve array($productId => $popularity, ...)
+        // retrieve [$productId => $popularity, ...]
         $result['products'] = [];
         $relatedProductsCollection = $tag->getEntityCollection()->addTagFilter($tagId)
             ->addStoreFilter($storeId)->addPopularity($tagId);
@@ -78,7 +79,7 @@ class Mage_Tag_Model_Api extends Mage_Catalog_Model_Api_Resource
 
     /**
      * Add tag(s) to product.
-     * Return array of added/updated tags as array($tagName => $tagId, ...)
+     * Return array of added/updated tags as [$tagName => $tagId, ...]
      *
      * @param array $data
      * @return array

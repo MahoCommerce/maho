@@ -221,7 +221,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      *
      * @param array $joinField   Variable should be have view:
      *     Example:
-     *         array(
+     *         [
      *            'alias'     => 'alias_table',
      *            'attribute' => 'table_name', //table name, must be used path of table like 'module/table_name'
      *            'field'     => 'field_name', //selected field name (optional)
@@ -232,7 +232,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      *            'bind'      => 'self_item_id=other_id',
      *            'cond'      => 'alias_table.entity_id = e.entity_id', //additional condition (optional)
      *            'joinType'  => 'LEFT'
-     *         )
+     *         ]
      *     NOTE: Optional key must be have NULL at least
      */
     public function setJoinField($joinField)

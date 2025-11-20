@@ -24,9 +24,9 @@ declare(strict_types=1);
  * Example:
  * <code>
  * //set available path
- * $validator->setAvailablePath(array('/path/to/?/*fileMask.xml'));
+ * $validator->setAvailablePath(['/path/to/?/*fileMask.xml']);
  * $validator->isValid('/path/to/MyDir/Some-fileMask.xml'); //return true
- * $validator->setAvailablePath(array('/path/to/{@*}*.xml'));
+ * $validator->setAvailablePath(['/path/to/{@*}*.xml']);
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
  */

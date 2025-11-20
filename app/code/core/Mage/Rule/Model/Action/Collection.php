@@ -29,10 +29,10 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
      * Returns array containing actions in the collection
      *
      * Output example:
-     * array(
+     * [
      *   {action::asArray},
      *   {action::asArray}
-     * )
+     * ]
      *
      * @return array
      */

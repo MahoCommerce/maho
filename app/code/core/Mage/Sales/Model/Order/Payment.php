@@ -223,7 +223,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
     /**
      * Transactions registry to spare resource calls
-     * array(txn_id => sales/order_payment_transaction)
+     * [txn_id => sales/order_payment_transaction]
      * @var array
      */
     protected $_transactionsLookup = [];
@@ -1361,7 +1361,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
     /**
      * Totals updater utility method
-     * Updates self totals by keys in data array('key' => $delta)
+     * Updates self totals by keys in data ['key' => $delta]
      *
      * @param array $data
      */

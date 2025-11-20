@@ -313,12 +313,12 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Dry-ran products information from import file.
      *
-     * [SKU] => array(
+     * [SKU] => [
      *     'type_id'        => (string) product type
      *     'attr_set_id'    => (int) product attribute set ID
      *     'entity_id'      => (int) product ID (value for new products will be set after entity save)
      *     'attr_set_code'  => (string) attribute set code
-     * )
+     * ]
      *
      * @var array
      */
@@ -327,12 +327,12 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Existing products SKU-related information in form of array:
      *
-     * [SKU] => array(
+     * [SKU] => [
      *     'type_id'        => (string) product type
      *     'attr_set_id'    => (int) product attribute set ID
      *     'entity_id'      => (int) product ID
      *     'supported_type' => (bool) is product type supported by current version of import module
-     * )
+     * ]
      *
      * @var array
      */
@@ -829,7 +829,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             'time'      => ['price', 'sku'],
             'field'     => ['price', 'sku', 'max_characters'],
             'area'      => ['price', 'sku', 'max_characters'],
-            //'file'      => array('price', 'sku', 'file_extension', 'image_size_x', 'image_size_y'),
+            //'file'      => ['price', 'sku', 'file_extension', 'image_size_x', 'image_size_y'],
             'drop_down' => true,
             'radio'     => true,
             'checkbox'  => true,

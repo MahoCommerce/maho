@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Columns array
      *
-     * array(
+     * [
      *      'header'    => string,
      *      'width'     => int,
      *      'sortable'  => bool,
@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *      //'renderer'  => Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface,
      *      'format'    => string
      *      'total'     => string (sum, avg)
-     * )
+     * ]
      * @var array
      */
     protected $_columns = [];

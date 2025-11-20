@@ -135,7 +135,7 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
                 $mixed = get_object_vars($mixed);
                 /*
                  * Processing an associative arrays.
-                 * $mixed->key = '2'; $mixed->value = '3'; turns to array(2 => '3');
+                 * $mixed->key = '2'; $mixed->value = '3'; turns to [2 => '3'];
                  */
                 $mixed = [$mixed['key'] => $mixed['value']];
             }
@@ -235,7 +235,7 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
      * Parse filters and format them to be applicable for collection filtration
      *
      * @param null|object|array $filters
-     * @param array $fieldsMap Map of field names in format: array('field_name_in_filter' => 'field_name_in_db')
+     * @param array $fieldsMap Map of field names in format: ['field_name_in_filter' => 'field_name_in_db']
      * @return array
      */
     public function parseFilters($filters, $fieldsMap = null)

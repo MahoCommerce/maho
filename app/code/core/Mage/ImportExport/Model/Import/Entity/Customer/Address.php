@@ -31,11 +31,11 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Customer address attributes parameters.
      *
-     *  [attr_code_1] => array(
-     *      'options' => array(),
+     *  [attr_code_1] => [
+     *      'options' => [],
      *      'type' => 'text', 'price', 'textarea', 'select', etc.
      *      'id' => ..
-     *  ),
+     *  ],
      *  ...
      *
      * @var array
@@ -45,16 +45,16 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Countrys and its regions.
      *
-     * array(
-     *   [country_id_lowercased_1] => array(
+     * [
+     *   [country_id_lowercased_1] => [
      *     [region_code_lowercased_1]         => region_id_1,
      *     [region_default_name_lowercased_1] => region_id_1,
      *     ...,
      *     [region_code_lowercased_n]         => region_id_n,
      *     [region_default_name_lowercased_n] => region_id_n
-     *   ),
+     *   ],
      *   ...
-     * )
+     * ]
      *
      * @var array
      */

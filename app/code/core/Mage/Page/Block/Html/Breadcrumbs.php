@@ -15,15 +15,15 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     /**
      * Array of breadcrumbs
      *
-     * array(
-     *  [$index] => array(
+     * [
+     *  [$index] => [
      *                  ['label']
      *                  ['title']
      *                  ['link']
      *                  ['first']
      *                  ['last']
-     *              )
-     * )
+     *              ]
+     * ]
      *
      * @var array
      */

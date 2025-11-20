@@ -366,7 +366,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
 
     /**
      * Retrieves list of all saved additional messages for different instances (e.g. quote items) in checkout session
-     * Returned: array(itemKey => messageCollection, ...)
+     * Returned: [itemKey => messageCollection, ...]
      * where itemKey is a unique hash (e.g 'quote_item17') to distinguish item messages among message collections
      *
      * @param bool $clear

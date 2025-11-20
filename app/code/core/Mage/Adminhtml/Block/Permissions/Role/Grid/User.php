@@ -107,19 +107,19 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
 
         /*
          $this->addColumn('grid_actions',
-             array(
+             [
                  'header'=>Mage::helper('adminhtml')->__('Actions'),
                  'width'=>5,
                  'sortable'=>false,
                  'filter'    =>false,
                  'type' => 'action',
-                 'actions'   => array(
-                                     array(
+                 'actions'   => [
+                                     [
                                          'caption' => Mage::helper('adminhtml')->__('Remove'),
                                          'onClick' => 'role.deleteFromRole($role_id);'
-                                     )
-                                 )
-             )
+                                     ]
+                                 ]
+             ]
          );
          */
 

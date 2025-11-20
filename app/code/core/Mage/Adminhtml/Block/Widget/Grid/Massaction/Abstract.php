@@ -85,13 +85,13 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
     /**
      * Add new massaction item
      *
-     * $item = array(
+     * $item = [
      *      'label'    => string,
      *      'complete' => string, // Only for ajax enabled grid (optional)
      *      'url'      => string,
      *      'confirm'  => string, // text of confirmation of this action (optional)
      *      'additional' => string|array|Mage_Core_Block_Abstract // (optional)
-     * );
+     * ];
      *
      * @param string $itemId
      * @return Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract

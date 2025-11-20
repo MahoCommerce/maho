@@ -26,10 +26,10 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
 
     /**
      * Getter for schedule info
-     * array(
-     *     <title> => array('blah-blah', 'bla-bla-blah', ...)
+     * [
+     *     <title> => ['blah-blah', 'bla-bla-blah', ...]
      *     <title2> => ...
-     * )
+     * ]
      * @return array
      */
     public function getScheduleInfo()

@@ -1254,7 +1254,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Save object collected data
      *
-     * @param   array $saveData array('newObject', 'entityRow', 'insert', 'update', 'delete')
+     * @param   array $saveData ['newObject', 'entityRow', 'insert', 'update', 'delete']
      * @return  $this
      */
     protected function _processSaveData($saveData)

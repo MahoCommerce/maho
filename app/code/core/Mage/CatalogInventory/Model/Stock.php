@@ -90,7 +90,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare array($productId=>$qty) based on array($productId => array('qty'=>$qty, 'item'=>$stockItem))
+     * Prepare [$productId=>$qty] based on [$productId => ['qty'=>$qty, 'item'=>$stockItem]]
      *
      * @param array $items
      * @return array

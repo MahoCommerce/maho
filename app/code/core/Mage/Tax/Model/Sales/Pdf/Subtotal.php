@@ -14,13 +14,13 @@ class Mage_Tax_Model_Sales_Pdf_Subtotal extends Mage_Sales_Model_Order_Pdf_Total
 {
     /**
      * Get array of arrays with totals information for display in PDF
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'amount'   => $amount,
      *      'label'    => $label,
      *      'font_size'=> $fontSize
-     *  )
-     * )
+     *  ]
+     * ]
      * @return array
      */
     #[\Override]

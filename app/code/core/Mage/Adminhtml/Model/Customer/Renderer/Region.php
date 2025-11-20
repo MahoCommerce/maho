@@ -15,9 +15,9 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements Varien_Data_Form_
     /**
      * Country region collections
      *
-     * array(
+     * [
      *      [$countryId] => Varien_Data_Collection_Db
-     * )
+     * ]
      *
      * @var array
      */

@@ -204,16 +204,16 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      * Returns array containing conditions in the collection
      *
      * Output example:
-     * array(
+     * [
      *   'type'=>'combine',
      *   'operator'=>'ALL',
      *   'value'=>'TRUE',
-     *   'conditions'=>array(
+     *   'conditions'=>[
      *     {condition::asArray},
      *     {combine::asArray},
      *     {quote_item_combine::asArray}
-     *   )
-     * )
+     *   ]
+     * ]
      *
      * @return array
      */

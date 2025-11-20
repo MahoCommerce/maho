@@ -215,8 +215,8 @@ abstract class Mage_Uploader_Block_Abstract extends Mage_Adminhtml_Block_Widget
     /**
      * Prepare actual elements ids from suffixes
      *
-     * @param array $targets $type => array($idsSuffixes)
-     * @return array $type => array($htmlIds)
+     * @param array $targets $type => [$idsSuffixes]
+     * @return array $type => [$htmlIds]
      */
     protected function _prepareElementsIds($targets)
     {
