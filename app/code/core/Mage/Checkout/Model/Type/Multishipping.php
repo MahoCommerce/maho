@@ -180,12 +180,12 @@ class Mage_Checkout_Model_Type_Multishipping extends Mage_Checkout_Model_Type_Ab
      * Assign quote items to addresses and specify items qty
      *
      * array structure:
-     * array(
-     *      $quoteItemId => array(
+     * [
+     *      $quoteItemId => [
      *          'qty'       => $qty,
      *          'address'   => $customerAddressId
-     *      )
-     * )
+     *      ]
+     * ]
      *
      * @param array $info
      * @return $this
@@ -265,7 +265,7 @@ class Mage_Checkout_Model_Type_Multishipping extends Mage_Checkout_Model_Type_Ab
      * Add quote item to specific shipping address based on customer address id
      *
      * @param int $quoteItemId
-     * @param array $data array('qty'=>$qty, 'address'=>$customerAddressId)
+     * @param array $data ['qty'=>$qty, 'address'=>$customerAddressId]
      * @return $this
      */
     protected function _addShippingItem($quoteItemId, $data)

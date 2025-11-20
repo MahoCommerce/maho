@@ -181,9 +181,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
 
         /**
          * Get information about product types
-         * array (
-         *      $productType => array()
-         * )
+         * [$productType => []]
          */
         $products = Mage::getSingleton('catalogindex/retreiver')->assignProductTypes($products);
         if (is_null($forcedId)) {

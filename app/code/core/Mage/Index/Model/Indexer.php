@@ -36,7 +36,7 @@ class Mage_Index_Model_Indexer
 
     /**
      * Current processing event(s)
-     * In array case it should be array(Entity type, Event type)
+     * In array case it should be [Entity type, Event type]
      *
      * @var null|Mage_Index_Model_Event|array
      */

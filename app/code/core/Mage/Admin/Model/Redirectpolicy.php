@@ -18,7 +18,7 @@ class Mage_Admin_Model_Redirectpolicy
     protected $_urlModel;
 
     /**
-     * @param array $parameters array('urlModel' => object)
+     * @param array $parameters ['urlModel' => object]
      */
     public function __construct($parameters = [])
     {

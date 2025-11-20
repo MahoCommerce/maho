@@ -61,7 +61,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
 
     /**
      * Map of session enabled hosts
-     * @example array('host.name' => true)
+     * @example ['host.name' => true]
      */
     protected array $_sessionHosts = [];
 

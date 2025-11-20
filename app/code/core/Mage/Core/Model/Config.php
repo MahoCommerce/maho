@@ -90,9 +90,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
     /**
      * Instructions for spitting config cache
-     * array(
-     *      $sectionName => $recursionLevel
-     * )
+     * [$sectionName => $recursionLevel]
      * Recursion level provide availability cache sub-nodes separately
      *
      * @var array
@@ -1530,7 +1528,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * if empty $allowValues then retrieve all stores values
      *
-     * return array($storeId=>$pathValue)
+     * return [$storeId=>$pathValue]
      *
      * @param string $path
      * @param array $allowValues

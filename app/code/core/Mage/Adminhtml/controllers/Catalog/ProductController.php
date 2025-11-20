@@ -754,7 +754,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
 
     /**
      * Duplicates product attributes between stores.
-     * @param array $stores list of store pairs: array(fromStore => toStore, fromStore => toStore,..)
+     * @param array $stores list of store pairs: [fromStore => toStore, fromStore => toStore,..]
      * @param Mage_Catalog_Model_Product $product whose attributes should be copied
      * @return $this
      * @throws Throwable

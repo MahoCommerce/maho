@@ -522,11 +522,11 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      * @param array $arrAttributes
      *
      * Output example:
-     * array(
+     * [
      *   'name'=>'Example rule',
      *   'conditions'=>{condition_combine::toArray}
      *   'actions'=>{action_collection::toArray}
-     * )
+     * ]
      *
      * @return array
      */

@@ -627,12 +627,12 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Adds stock item qty to $items (creates new entry or increments existing one)
      * $items is array with following structure:
-     * array(
-     *  $productId  => array(
+     * [
+     *  $productId  => [
      *      'qty'   => $qty,
      *      'item'  => $stockItems|null
-     *  )
-     * )
+     *  ]
+     * ]
      *
      * @param Mage_Sales_Model_Quote_Item $quoteItem
      * @param array $items
@@ -660,12 +660,12 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Prepare array with information about used product qty and product stock item
      * result is:
-     * array(
-     *  $productId  => array(
+     * [
+     *  $productId  => [
      *      'qty'   => $qty,
      *      'item'  => $stockItems|null
-     *  )
-     * )
+     *  ]
+     * ]
      * @param array $relatedItems
      * @return array
      */

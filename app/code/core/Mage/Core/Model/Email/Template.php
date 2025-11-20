@@ -23,10 +23,10 @@ use Symfony\Component\Mime\Address;
  * // Loading of template
  * $emailTemplate  = Mage::getModel('core/email_template')
  *    ->load(Mage::getStoreConfig('path_to_email_template_id_config'));
- * $variables = array(
+ * $variables = [
  *    'someObject' => Mage::getSingleton('some_model')
  *    'someString' => 'Some string value'
- * );
+ * ];
  * $emailTemplate->send('some@domain.com', 'Name Of User', $variables);
  *
  * @method Mage_Core_Model_Resource_Email_Template _getResource()

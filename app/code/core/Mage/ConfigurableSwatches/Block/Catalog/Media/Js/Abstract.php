@@ -50,7 +50,7 @@ abstract class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Abstract extends
 
     /**
      * Get image fallbacks by product as
-     * array(product ID => array( product => product, image_fallback => image fallback ) )
+     * [product ID => [ product => product, image_fallback => image fallback ] ]
      *
      * @param bool|null $keepFrame
      * @return array

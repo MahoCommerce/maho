@@ -152,9 +152,9 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
      * @param mixed $optionValue
      * Method works well with these $optionValue format:
      *      1. String
-     *      2. Indexed array e.g. array(val1, val2, ...)
+     *      2. Indexed array e.g. [val1, val2, ...]
      *      3. Associative array, containing additional option info, including option value, e.g.
-     *          array
+     *          [
      *          (
      *              [label] => ...,
      *              [value] => ...,

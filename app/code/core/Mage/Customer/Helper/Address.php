@@ -190,13 +190,13 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     /**
      * Convert streets array to new street lines count
      * Examples of use:
-     *  $origStreets = array('street1', 'street2', 'street3', 'street4')
+     *  $origStreets = ['street1', 'street2', 'street3', 'street4']
      *  $toCount = 3
      *  Result:
-     *   array('street1 street2', 'street3', 'street4')
+     *   ['street1 street2', 'street3', 'street4']
      *  $toCount = 2
      *  Result:
-     *   array('street1 street2', 'street3 street4')
+     *   ['street1 street2', 'street3 street4']
      *
      * @param array $origStreets
      * @param int   $toCount

@@ -313,7 +313,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
 
     /**
      * Add attribute expression (SUM, COUNT, etc)
-     * Example: ('sub_total', 'SUM({{attribute}})', array('attribute' => 'revenue'))
+     * Example: ('sub_total', 'SUM({{attribute}})', ['attribute' => 'revenue'])
      * Example: ('sub_total', 'SUM({{revenue}})', 'revenue')
      * For some functions like SUM use groupByAttribute.
      *

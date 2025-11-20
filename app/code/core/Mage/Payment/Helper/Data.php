@@ -198,16 +198,16 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * Possible output:
      * 1) assoc array as <code> => <title>
-     * 2) array of array('label' => <title>, 'value' => <code>)
-     * 3) array of array(
-     *                 array('value' => <code>, 'label' => <title>),
-     *                 array('value' => array(
-     *                     'value' => array(array(<code1> => <title1>, <code2> =>...),
+     * 2) array of ['label' => <title>, 'value' => <code>]
+     * 3) array of [
+     *                 ['value' => <code>, 'label' => <title>],
+     *                 ['value' => [
+     *                     'value' => [['code1' => <title1>, <code2> =>...],
      *                     'label' => <group name>
-     *                 )),
-     *                 array('value' => <code>, 'label' => <title>),
+     *                 ]],
+     *                 ['value' => <code>, 'label' => <title>],
      *                 ...
-     *             )
+     *             ]
      *
      * @param bool $sorted
      * @param bool $asLabelValue

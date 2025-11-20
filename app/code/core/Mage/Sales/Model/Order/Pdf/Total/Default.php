@@ -23,13 +23,13 @@ class Mage_Sales_Model_Order_Pdf_Total_Default extends Varien_Object
 {
     /**
      * Get array of arrays with totals information for display in PDF
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'amount'   => $amount,
      *      'label'    => $label,
      *      'font_size'=> $fontSize
-     *  )
-     * )
+     *  ]
+     * ]
      * @return array
      */
     public function getTotalsForDisplay()
@@ -64,13 +64,13 @@ class Mage_Sales_Model_Order_Pdf_Total_Default extends Varien_Object
 
     /**
      * Get array of arrays with tax information for display in PDF
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'amount'   => $amount,
      *      'label'    => $label,
      *      'font_size'=> $fontSize
-     *  )
-     * )
+     *  ]
+     * ]
      * @return array
      */
     public function getFullTaxInfo()

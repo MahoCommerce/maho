@@ -85,9 +85,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
 
     /**
      * Retrieve Required children ids
-     * Return grouped array, ex array(
-     *   group => array(ids)
-     * )
+     * Return grouped array, ex [
+     *   group => [ids]
+     * ]
      *
      * @param int $parentId
      * @param bool $required

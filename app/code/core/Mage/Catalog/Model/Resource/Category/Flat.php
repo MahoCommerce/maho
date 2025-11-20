@@ -1130,9 +1130,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
 
     /**
      * Prepare array of category data to insert or update.
-     * array(
-     *  'field_name' => 'value'
-     * )
+     * ['field_name' => 'value']
      *
      * @param Varien_Object $category
      * @param array $replaceFields

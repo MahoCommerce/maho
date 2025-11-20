@@ -14,13 +14,13 @@ class Mage_Tax_Model_Sales_Pdf_Tax extends Mage_Sales_Model_Order_Pdf_Total_Defa
 {
     /**
      * Check if tax amount should be included to grandtotal block
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'amount'   => $amount,
      *      'label'    => $label,
      *      'font_size'=> $fontSize
-     *  )
-     * )
+     *  ]
+     * ]
      * @return array
      */
     #[\Override]

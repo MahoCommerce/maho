@@ -180,7 +180,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
      * Converts old pre-MMDB column definition for MySQL to new cross-db column DDL definition.
      * Used to convert data from 3rd party extensions that hasn't been updated to MMDB style yet.
      *
-     * E.g. Converts type 'varchar(255)' to array('type' => Maho\Db\Ddl\Table::TYPE_TEXT, 'length' => 255)
+     * E.g. Converts type 'varchar(255)' to ['type' => Maho\Db\Ddl\Table::TYPE_TEXT, 'length' => 255]
      *
      * @param array $column
      * @return array

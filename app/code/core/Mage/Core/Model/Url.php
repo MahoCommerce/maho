@@ -35,10 +35,10 @@
  * - route_name: 'module'
  * - controller_name: 'controller'
  * - action_name: 'action'
- * - route_params: array('param1'=>'value1', 'param2'=>'value2')
+ * - route_params: ['param1'=>'value1', 'param2'=>'value2']
  *
  * - query: (?)'param1=value1&param2=value2'
- * - query_array: array('param1'=>'value1', 'param2'=>'value2')
+ * - query_array: ['param1'=>'value1', 'param2'=>'value2']
  * - fragment: (#)'fragment-anchor'
  *
  * URL structure:

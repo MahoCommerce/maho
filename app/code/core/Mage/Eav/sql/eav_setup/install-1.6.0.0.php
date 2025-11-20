@@ -160,7 +160,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('eav/entity_value_prefix', 'datetime')
+ * Create table ['eav/entity_value_prefix', 'datetime']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'datetime']))
@@ -269,7 +269,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('eav/entity_value_prefix', 'decimal')
+ * Create table ['eav/entity_value_prefix', 'decimal']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'decimal']))
@@ -378,7 +378,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('eav/entity_value_prefix', 'int')
+ * Create table ['eav/entity_value_prefix', 'int']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'int']))
@@ -487,7 +487,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('eav/entity_value_prefix', 'text')
+ * Create table ['eav/entity_value_prefix', 'text']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'text']))
@@ -587,7 +587,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('eav/entity_value_prefix', 'varchar')
+ * Create table ['eav/entity_value_prefix', 'varchar']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['eav/entity_value_prefix', 'varchar']))

@@ -16,19 +16,19 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      * Store associated with rule entities information map
      *
      * Example:
-     * array(
-     *    'entity_type1' => array(
+     * [
+     *    'entity_type1' => [
      *        'associations_table' => 'table_name',
      *        'rule_id_field'      => 'rule_id',
      *        'entity_id_field'    => 'entity_id'
-     *    ),
-     *    'entity_type2' => array(
+     *    ],
+     *    'entity_type2' => [
      *        'associations_table' => 'table_name',
      *        'rule_id_field'      => 'rule_id',
      *        'entity_id_field'    => 'entity_id'
-     *    )
+     *    ]
      *    ....
-     * )
+     * ]
      *
      * @var array
      */

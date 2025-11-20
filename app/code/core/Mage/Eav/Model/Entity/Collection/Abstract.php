@@ -261,10 +261,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * Add attribute filter to collection
      *
      * If $attribute is an array will add OR condition with following format:
-     * array(
-     *     array('attribute'=>'firstname', 'like'=>'test%'),
-     *     array('attribute'=>'lastname', 'like'=>'test%'),
-     * )
+     * [
+     *     ['attribute'=>'firstname', 'like'=>'test%'],
+     *     ['attribute'=>'lastname', 'like'=>'test%'],
+     * ]
      *
      * @see self::_getConditionSql for $condition
      * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|array $attribute
@@ -663,7 +663,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param string $table 'directory/country_name'
      * @param string $field 'name'
      * @param string $bind 'PK(country_id)=FK(shipping_country_id)'
-     * @param string|array $cond "{{table}}.language_code='en'" OR array('language_code'=>'en')
+     * @param string|array $cond "{{table}}.language_code='en'" OR ['language_code'=>'en']
      * @param string $joinType 'left'
      * @return $this
      */

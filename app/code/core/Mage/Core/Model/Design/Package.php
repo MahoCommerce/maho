@@ -551,7 +551,7 @@ class Mage_Core_Model_Design_Package
     /**
      * Get regex rules from config and check user-agent against them
      *
-     * Rules must be stored in config as a serialized array(['regexp']=>'...', ['value'] => '...')
+     * Rules must be stored in config as a serialized [['regexp']=>'...', ['value'] => '...']
      * Will return false or found string.
      *
      * @param string $regexpsConfigPath

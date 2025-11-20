@@ -157,9 +157,9 @@ class Mage_Catalog_Model_Resource_Product_Link extends Mage_Core_Model_Resource_
 
     /**
      * Retrieve Required children ids
-     * Return grouped array, ex array(
-     *   group => array(ids)
-     * )
+     * Return grouped array, ex [
+     *   group => [ids]
+     * ]
      *
      * @param int $parentId
      * @param int $typeId

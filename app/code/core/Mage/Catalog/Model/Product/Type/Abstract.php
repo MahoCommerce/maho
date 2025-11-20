@@ -138,9 +138,9 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
 
     /**
      * Retrieve Required children ids
-     * Return grouped array, ex array(
-     *   group => array(ids)
-     * )
+     * Return grouped array, ex [
+     *   group => [ids]
+     * ]
      *
      * @param int $parentId
      * @param bool $required

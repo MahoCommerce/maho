@@ -67,9 +67,9 @@ class Mage_Bundle_Model_Resource_Selection extends Mage_Core_Model_Resource_Db_A
 
     /**
      * Retrieve Required children ids
-     * Return grouped array, ex array(
-     *   group => array(ids)
-     * )
+     * Return grouped array, ex [
+     *   group => [ids]
+     * ]
      *
      * @param int $parentId
      * @param bool $required

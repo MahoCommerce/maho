@@ -63,7 +63,7 @@ class Mage_Core_Model_Layout_Update
     protected $_handles = [];
 
     /**
-     * Substitution values in structure array('from'=>array(), 'to'=>array())
+     * Substitution values in structure ['from'=>[], 'to'=>[]]
      *
      * @var array
      */

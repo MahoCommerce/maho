@@ -82,7 +82,7 @@ class Mage_Payment_Block_Info extends Mage_Core_Block_Template
     }
 
     /**
-     * Get some specific information in format of array($label => $value)
+     * Get some specific information in format of [$label => $value]
      *
      * @return array
      */

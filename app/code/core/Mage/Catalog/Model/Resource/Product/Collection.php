@@ -801,15 +801,15 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * Return all attribute values as array in form:
-     * array(
-     *   [entity_id_1] => array(
+     * [
+     *   [entity_id_1] => [
      *          [store_id_1] => store_value_1,
      *          [store_id_2] => store_value_2,
      *          ...
      *          [store_id_n] => store_value_n
-     *   ),
+     *   ],
      *   ...
-     * )
+     * ]
      *
      * @param string $attribute attribute code
      * @return array

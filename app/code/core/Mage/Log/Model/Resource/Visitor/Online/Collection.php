@@ -98,10 +98,10 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
     /**
      * Add field filter to collection
      * If $attribute is an array will add OR condition with following format:
-     * array(
-     *     array('attribute'=>'firstname', 'like'=>'test%'),
-     *     array('attribute'=>'lastname', 'like'=>'test%'),
-     * )
+     * [
+     *     ['attribute'=>'firstname', 'like'=>'test%'],
+     *     ['attribute'=>'lastname', 'like'=>'test%'],
+     * ]
      *
      * @param string $field
      * @param null|string|array $condition

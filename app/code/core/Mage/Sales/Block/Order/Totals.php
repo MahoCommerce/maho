@@ -14,9 +14,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
 {
     /**
      * Associated array of totals
-     * array(
-     *  $totalCode => $totalObject
-     * )
+     * [$totalCode => $totalObject]
      *
      * @var array
      */
@@ -244,9 +242,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
     /**
      * Apply sort orders to totals array.
      * Array should have next structure
-     * array(
-     *  $totalCode => $totalSortOrder
-     * )
+     * [$totalCode => $totalSortOrder]
      *
      * @param   array $order
      * @return  Mage_Sales_Block_Order_Totals
