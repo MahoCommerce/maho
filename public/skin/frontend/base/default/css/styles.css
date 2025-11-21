@@ -5238,6 +5238,7 @@ body:is(.customer-account-login, .customer-account-create) #main-content {
             }
         }
 
+        /* Both pages: tab-login first, tab-register last */
         #tab-login:checked ~ .login-tabs li:first-child label,
         #tab-register:checked ~ .login-tabs li:last-child label {
             color: var(--maho-color-primary, #3399cc);
@@ -5248,10 +5249,12 @@ body:is(.customer-account-login, .customer-account-create) #main-content {
         .tab-content {
             display: none;
         }
-        #tab-login:checked ~ form #login-tab {
+        #tab-login:checked ~ form #login-tab,
+        #tab-login:checked ~ #login-tab {
             display: block;
         }
-        #tab-register:checked ~ form #register-tab {
+        #tab-register:checked ~ form #register-tab,
+        #tab-register:checked ~ #register-tab {
             display: block;
         }
     }

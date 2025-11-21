@@ -124,6 +124,9 @@ New customer registration
                 <block type="page/html_wrapper" name="customer.form.register.fields.before" as="form_fields_before" translate="label">
                     <label>Form Fields Before</label>
                 </block>
+                <block type="customer/form_login" name="customer_form_login_embedded" as="login_form" template="customer/form/login/embedded.phtml">
+                    <block type="customer/form_remember" name="remember.me.embedded" template="customer/form/remember.phtml" />
+                </block>
             </block>
         </reference>
     </customer_account_create>

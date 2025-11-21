@@ -17,13 +17,26 @@
  */
 ?>
 <div class="account-create">
-    <div class="page-title">
-        <h1><?= $this->__('Create an account') ?></h1>
-    </div>
     <?= $this->getChildHtml('form_fields_before') ?>
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
     <?= $this->getChildHtml('customer.form.register.extra') ?>
+
+    <!-- Radio inputs for tab selection -->
+    <input type="radio" name="account-tab" id="tab-login" class="tab-selector">
+    <input type="radio" name="account-tab" id="tab-register" class="tab-selector" checked>
+
+    <!-- Tab labels -->
+    <ul class="login-tabs">
+        <li><label for="tab-login"><?= $this->__('Login') ?></label></li>
+        <li><label for="tab-register"><?= $this->__('Create an account') ?></label></li>
+    </ul>
+
+    <div id="login-tab" class="tab-content">
+        <?= $this->getChildHtml('login_form') ?>
+    </div>
+
+    <div id="register-tab" class="tab-content">
     <form action="<?= $this->getPostActionUrl() ?>" method="post" id="form-validate" enctype="multipart/form-data" novalidate aria-label="<?= $this->__('Registration Form') ?>">
         <fieldset class="fieldset">
             <legend class="visually-hidden"><?= $this->__('Personal Information') ?></legend>
@@ -190,4 +203,5 @@
         new RegionUpdater('country', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'zip');
         <?php endif ?>
     </script>
+    </div>
 </div>
