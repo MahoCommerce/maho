@@ -13,49 +13,43 @@
 ?>
 <?php $isRegistrationAllowed = $this->helper('customer')->isRegistrationAllowed() ?>
 <div class="account-login<?php if (!$isRegistrationAllowed) echo ' login-only' ?>">
-    <div class="page-title">
-    <?php if ($isRegistrationAllowed): ?>
-        <h1><?= $this->__('Login or Create an Account') ?></h1>
-    <?php else: ?>
-        <h1><?= $this->__('Login') ?></h1>
-    <?php endif ?>
-    </div>
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
     <?= $this->getChildHtml('customer.form.login.extra') ?>
-    <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
-    <?php $formAction = ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD)
+    <?php $isMagicLinkEnabled = Mage::helper('customer')->isMagicLinkEnabled(); ?>
+    <?php $magicLinkMode = $isMagicLinkEnabled ? Mage::helper('customer')->getMagicLinkRegistrationMode() : null; ?>
+    <?php $formAction = ($isMagicLinkEnabled && $magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD)
         ? $this->getUrl('customer/account/magicLinkRequestPost')
         : $this->getPostActionUrl(); ?>
+
+    <?php if ($isRegistrationAllowed): ?>
+    <!-- Radio inputs for tab selection -->
+    <input type="radio" name="account-tab" id="tab-login" class="tab-selector" checked>
+    <input type="radio" name="account-tab" id="tab-register" class="tab-selector">
+
+    <!-- Tab labels -->
+    <ul class="login-tabs">
+        <li><label for="tab-login"><?= $this->__('Login') ?></label></li>
+        <li><label for="tab-register"><?= $this->__('Create an account') ?></label></li>
+    </ul>
+    <?php endif ?>
+
     <form action="<?= $formAction ?>" method="post" id="login-form" aria-label="<?= $this->__('Login Form') ?>">
         <?= $this->getBlockHtml('formkey') ?>
-        <div class="col2-set">
-            <?php if ($isRegistrationAllowed): ?>
-            <div class="col-1 new-users">
-                <div class="content">
-                    <h2><?= $this->__('New Customers') ?></h2>
-                    <p><?= $this->__('By creating an account with our store, you will be able to move through the checkout process faster, store multiple shipping addresses, view and track your orders in your account and more.') ?></p>
-                </div>
-                <div class="buttons-set">
-                    <a title="<?= $this->quoteEscape($this->__('Create an Account')) ?>" class="button" href="<?= $this->getCreateAccountUrlContext() ?>"><?= $this->__('Create an Account') ?></a>
-                </div>
-            </div>
-            <?php endif ?>
-            <?php // This column should be col-1 if the registration column is not displayed ?>
-            <div class="<?= $isRegistrationAllowed ? 'col-2' : 'col-1'?> registered-users">
+
+        <div id="login-tab" class="tab-content">
+            <div class="registered-users">
                 <fieldset class="content fieldset">
                     <legend class="visually-hidden"><?= $this->__('Login Form') ?></legend>
-                    <h2><?= $this->__('Registered Customers') ?></h2>
-                    <p class="form-instructions"><?= $this->__('If you have an account with us, please log in.') ?></p>
                     <p class="required"><?= $this->__('* Required Fields') ?></p>
                     <ul class="form-list">
                         <li>
                             <label for="email" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Email Address') ?></label>
                             <div class="input-box">
-                                <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true" />
+                                <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true" />
                             </div>
                         </li>
-                        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
+                        <?php if (!$isMagicLinkEnabled || $magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                         <li>
                             <?php $minPasswordLength = $this->getMinPasswordLength(); ?>
                             <label for="pass" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Password') ?></label>
@@ -65,7 +59,7 @@
                         </li>
                         <?php endif ?>
                         <?= $this->getChildHtml('form.additional.info') ?>
-                        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
+                        <?php if (!$isMagicLinkEnabled || $magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                         <li>
                             <a href="<?= $this->getForgotPasswordUrl() ?>" class="f-left"><?= $this->__('Forgot Your Password?') ?></a>
                         </li>
@@ -75,12 +69,25 @@
                 </fieldset>
                 <div class="buttons-set">
                     <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Login')) ?>" name="send" id="send2"><span><?= $this->__('Login') ?></span></button>
-                    <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD && Mage::helper('customer')->isMagicLinkEnabled()): ?>
+                    <?php if ($isMagicLinkEnabled && $magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                     <button type="button" class="button" title="<?= $this->quoteEscape($this->__('Login with Magic Link')) ?>" id="magic-link-button"><span><?= $this->__('Login with Magic Link') ?></span></button>
                     <?php endif ?>
                 </div>
             </div>
         </div>
+
+        <?php if ($isRegistrationAllowed): ?>
+        <div id="register-tab" class="tab-content">
+            <div class="new-users">
+                <div class="content">
+                    <p><?= $this->__('By creating an account with our store, you will be able to move through the checkout process faster, store multiple shipping addresses, view and track your orders in your account and more.') ?></p>
+                </div>
+                <div class="buttons-set">
+                    <a title="<?= $this->quoteEscape($this->__('Create an account')) ?>" class="button" href="<?= $this->getCreateAccountUrlContext() ?>"><?= $this->__('Create an Account') ?></a>
+                </div>
+            </div>
+        </div>
+        <?php endif ?>
         <?php if (Mage::helper('checkout')->isContextCheckout()): ?>
             <input name="context" type="hidden" value="checkout" />
         <?php endif ?>
@@ -88,7 +95,7 @@
     <script type="text/javascript">
         var dataForm = new VarienForm('login-form', true);
 
-        <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD && Mage::helper('customer')->isMagicLinkEnabled()): ?>
+        <?php if ($isMagicLinkEnabled && $magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
         const form = document.getElementById('login-form');
         const passwordField = document.getElementById('pass');
         const loginButton = document.getElementById('send2');

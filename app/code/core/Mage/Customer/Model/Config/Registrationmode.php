@@ -20,9 +20,6 @@ class Mage_Customer_Model_Config_Registrationmode
     public const MODE_REQUIRE_PASSWORD = 'require_password';
     public const MODE_NO_PASSWORD = 'no_password';
 
-    /**
-     * Options array
-     */
     public function toOptionArray(): array
     {
         return [
@@ -37,9 +34,6 @@ class Mage_Customer_Model_Config_Registrationmode
         ];
     }
 
-    /**
-     * Get options in "key-value" format
-     */
     public function toArray(): array
     {
         return [
