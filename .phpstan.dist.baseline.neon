@@ -925,12 +925,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Filter_Status::$_statuses has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Newsletter/Grid/Filter/Status.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Action::_actionsToHtml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
