@@ -340,8 +340,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
                     return false;
                 }
             }
-            $this->_filter = $this->getLayout()->createBlock($filterClass)
-                ->setColumn($this);
+            $filter = $this->getLayout()->createBlock($filterClass);
+            if ($filter === false) {
+                return false;
+            }
+            $this->_filter = $filter->setColumn($this);
         }
 
         return $this->_filter;

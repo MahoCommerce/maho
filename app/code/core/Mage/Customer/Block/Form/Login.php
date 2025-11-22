@@ -99,7 +99,7 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
         }
 
         // Set redirect URL after login
-        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)) {
+        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
             $url = Mage::helper('customer')->getDashboardUrl();
         } else {
             $pathInfo = $this->getRequest()->getOriginalPathInfo();
