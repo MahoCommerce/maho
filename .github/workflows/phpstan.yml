@@ -10,14 +10,19 @@ on:
 
 jobs:
   phpstan:
-    name: Analyze
+    name: Analyze PHP ${{ matrix.php-versions }}
     runs-on: [ubuntu-latest]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.3', '8.4', '8.5']
 
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: latest
+          php-version: ${{ matrix.php-versions }}
 
       - uses: actions/checkout@v5
 
@@ -29,8 +34,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          key: ${{ runner.os }}-composer-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.php-versions }}-
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
@@ -40,10 +45,10 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: var
-          key: phpstan-result-cache-${{ github.ref_name }}-${{ github.run_id }}
+          key: phpstan-result-cache-${{ matrix.php-versions }}-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
-            phpstan-result-cache-${{ github.ref_name }}
-            phpstan-result-cache-main
+            phpstan-result-cache-${{ matrix.php-versions }}-${{ github.ref_name }}
+            phpstan-result-cache-${{ matrix.php-versions }}-main
 
       - name: PHPStan Static Analysis
         run: XDEBUG_MODE=off php vendor/bin/phpstan.phar analyze -vvv
