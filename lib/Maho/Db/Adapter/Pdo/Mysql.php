@@ -3324,13 +3324,12 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                     $from  = $this->_prepareSqlDateCondition($condition, 'from');
                     $query = $this->_prepareQuotedSqlCondition($conditionKeyMap['from'], $from, $fieldName);
                 }
-
                 if (isset($condition['to'])) {
                     $query .= empty($query) ? '' : ' AND ';
                     $to     = $this->_prepareSqlDateCondition($condition, 'to');
                     $query = $query . $this->_prepareQuotedSqlCondition($conditionKeyMap['to'], $to, $fieldName);
                 }
-            } elseif (array_key_exists($key, $conditionKeyMap)) {
+            } elseif ($key !== null && array_key_exists($key, $conditionKeyMap)) {
                 $value = $condition[$key];
                 if (($key == 'seq') || ($key == 'sneq')) {
                     $key = $this->_transformStringSqlCondition($key, $value);
@@ -3341,7 +3340,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                 foreach ($condition as $orCondition) {
                     $queries[] = sprintf('(%s)', $this->prepareSqlCondition($fieldName, $orCondition));
                 }
-
                 $query = sprintf('(%s)', implode(' OR ', $queries));
             }
         } elseif ($condition === null) {

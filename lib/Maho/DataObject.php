@@ -236,11 +236,12 @@ class DataObject implements ArrayAccess, JsonSerializable
      */
     public function setData($key, $value = null)
     {
-        $this->_hasDataChanges = true;
         if (is_array($key)) {
+            $this->_hasDataChanges = true;
             $this->_data = $key;
             $this->_addFullNames();
-        } else {
+        } elseif ($key !== null) {
+            $this->_hasDataChanges = true;
             $this->_data[$key] = $value;
             if (isset($this->_syncFieldsMap[$key])) {
                 $fullFieldName = $this->_syncFieldsMap[$key];
