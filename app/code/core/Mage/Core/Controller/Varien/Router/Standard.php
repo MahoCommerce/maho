@@ -392,6 +392,9 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
     #[\Override]
     public function getFrontNameByRoute($routeName)
     {
+        if ($routeName === null) {
+            return false;
+        }
         return $this->_routes[$routeName] ?? false;
     }
 

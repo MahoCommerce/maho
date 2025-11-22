@@ -724,6 +724,9 @@ class Collection implements IteratorAggregate, Countable
     public function getItemById($idValue)
     {
         $this->load();
+        if ($idValue === null) {
+            return null;
+        }
         return $this->_items[$idValue] ?? null;
     }
 
