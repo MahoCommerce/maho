@@ -83,6 +83,13 @@ Layout for customer login page
         <reference name="content">
             <block type="customer/form_login" name="customer_form_login" template="customer/form/login.phtml">
                 <block type="customer/form_remember" name="remember.me" template="customer/form/remember.phtml" />
+                <block type="customer/account_forgotpassword" name="customer_forgotpassword_embedded" as="forgotpassword_form" template="customer/form/forgotpassword.phtml" />
+                <block type="customer/form_register" name="customer_form_register_embedded" as="register_form" template="customer/form/register.phtml">
+                    <block type="customer/form_remember" name="remember.me.register" template="customer/form/remember.phtml" />
+                    <block type="page/html_wrapper" name="customer.form.register.fields.before.embedded" as="form_fields_before" translate="label">
+                        <label>Form Fields Before</label>
+                    </block>
+                </block>
             </block>
         </reference>
     </customer_account_login>
@@ -144,7 +151,6 @@ New customer registration
             <action method="setHeaderTitle" translate="title" module="customer"><title>Password forgotten</title></action>
         </reference>
         <reference name="content">
-            <!--<block type="core/template" name="forgotPassword" template="customer/form/forgotpassword.phtml"/>-->
             <block type="customer/account_forgotpassword" name="forgotPassword" template="customer/form/forgotpassword.phtml" />
         </reference>
     </customer_account_forgotpassword>

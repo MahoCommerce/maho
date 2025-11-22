@@ -12,6 +12,8 @@
 /** @var Mage_Customer_Block_Form_Login $this */
 ?>
 <?php $isRegistrationAllowed = $this->helper('customer')->isRegistrationAllowed() ?>
+<?php $showRegister = (bool)$this->getRequest()->getParam('show_register') ?>
+<?php $showForgot = (bool)$this->getRequest()->getParam('show_forgot') ?>
 <div class="account-login<?php if (!$isRegistrationAllowed) echo ' login-only' ?>">
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
@@ -24,8 +26,8 @@
 
     <?php if ($isRegistrationAllowed): ?>
     <!-- Radio inputs for tab selection -->
-    <input type="radio" name="account-tab" id="tab-login" class="tab-selector" checked>
-    <input type="radio" name="account-tab" id="tab-register" class="tab-selector">
+    <input type="radio" name="account-tab" id="tab-login" class="tab-selector"<?php if (!$showRegister) echo ' checked' ?>>
+    <input type="radio" name="account-tab" id="tab-register" class="tab-selector"<?php if ($showRegister) echo ' checked' ?>>
 
     <!-- Tab labels -->
     <ul class="login-tabs">
@@ -61,7 +63,7 @@
                         <?= $this->getChildHtml('form.additional.info') ?>
                         <?php if (!$isMagicLinkEnabled || $magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
                         <li>
-                            <a href="<?= $this->getForgotPasswordUrl() ?>" class="f-left"><?= $this->__('Forgot Your Password?') ?></a>
+                            <a href="#" id="show-forgot-password" class="f-left"><?= $this->__('Forgot Your Password?') ?></a>
                         </li>
                         <?php endif ?>
                         <?= $this->getChildHtml('remember.me') ?>
@@ -75,23 +77,22 @@
                 </div>
             </div>
         </div>
-
-        <?php if ($isRegistrationAllowed): ?>
-        <div id="register-tab" class="tab-content">
-            <div class="new-users">
-                <div class="content">
-                    <p><?= $this->__('By creating an account with our store, you will be able to move through the checkout process faster, store multiple shipping addresses, view and track your orders in your account and more.') ?></p>
-                </div>
-                <div class="buttons-set">
-                    <a title="<?= $this->quoteEscape($this->__('Create an account')) ?>" class="button" href="<?= $this->getCreateAccountUrlContext() ?>"><?= $this->__('Create an account') ?></a>
-                </div>
-            </div>
-        </div>
-        <?php endif ?>
         <?php if (Mage::helper('checkout')->isContextCheckout()): ?>
             <input name="context" type="hidden" value="checkout" />
         <?php endif ?>
     </form>
+
+    <?php if ($isRegistrationAllowed): ?>
+    <div id="register-tab" class="tab-content">
+        <?= $this->getChildHtml('register_form') ?>
+    </div>
+    <?php endif ?>
+
+    <!-- Forgot Password Dialog -->
+    <dialog id="forgot-password-dialog">
+        <?= $this->getChildHtml('forgotpassword_form') ?>
+    </dialog>
+
     <script type="text/javascript">
         var dataForm = new VarienForm('login-form', true);
 
@@ -127,6 +128,32 @@
                 form.submit();
             }
         });
+        <?php endif ?>
+
+        // Forgot password dialog
+        const showForgotLink = document.getElementById('show-forgot-password');
+        const backToLoginLink = document.getElementById('back-to-login');
+        const dialogCloseBtn = document.getElementById('dialog-close-btn');
+        const forgotDialog = document.getElementById('forgot-password-dialog');
+
+        showForgotLink?.addEventListener('click', function(e) {
+            e.preventDefault();
+            forgotDialog?.showModal();
+        });
+
+        backToLoginLink?.addEventListener('click', function(e) {
+            e.preventDefault();
+            forgotDialog?.close();
+        });
+
+        dialogCloseBtn?.addEventListener('click', function(e) {
+            e.preventDefault();
+            forgotDialog?.close();
+        });
+
+        <?php if ($showForgot): ?>
+        // Auto-open forgot password dialog when accessed via /customer/account/forgotpassword
+        forgotDialog?.showModal();
         <?php endif ?>
     </script>
 </div>

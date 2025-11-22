@@ -5186,7 +5186,7 @@ label.offcanvas-trigger {
  * Customer
  * ============================================ */
 
-body:is(.customer-account-login, .customer-account-create) #main-content {
+body.customer-account-login #main-content {
     max-width: 400px;
     margin: auto;
 
@@ -5200,7 +5200,7 @@ body:is(.customer-account-login, .customer-account-create) #main-content {
         margin: 0;
     }
 
-    :is(.account-login, .account-create) {
+    .account-login {
         .tab-selector {
             position: absolute;
             opacity: 0;
@@ -5223,9 +5223,9 @@ body:is(.customer-account-login, .customer-account-create) #main-content {
             label {
                 display: block;
                 padding-bottom: 10px;
-                border-bottom: 3px solid transparent;
+                border-bottom: 2px solid transparent;
                 color: var(--maho-color-text-primary);
-                font-size: 16px;
+                font-size: 1.1em;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -5234,7 +5234,7 @@ body:is(.customer-account-login, .customer-account-create) #main-content {
             }
 
             label:hover {
-                color: var(--maho-color-primary, #3399cc);
+                color: var(--maho-color-primary);
             }
         }
 
@@ -5257,6 +5257,44 @@ body:is(.customer-account-login, .customer-account-create) #main-content {
         #tab-register:checked ~ #register-tab {
             display: block;
         }
+
+    }
+
+    #forgot-password-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 400px;
+        border: none;
+        border-radius: 8px;
+        padding: 30px;
+
+        .buttons-set {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h2 {
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .dialog-close {
+            position: absolute;
+            border: none;
+            background: none;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+        }
+
+        &::backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
     }
 }
 
@@ -5264,30 +5302,6 @@ body:is(.customer-account-login, .customer-account-create) #main-content {
   font-style: italic;
   font-size: 0.813rem;
   color: var(--maho-color-text-secondary);
-}
-
-.customer-account-create .fieldset .hidden {
-  display: none;
-}
-
-.customer-account-forgotpassword #form-validate {
-    display: flex;
-    flex-direction: column;
-    place-items: center;
-}
-.customer-account-forgotpassword .fieldset,
-.customer-account-forgotpassword .buttons-set {
-  width: 100%;
-  max-width: 400px;
-}
-@media only screen and (max-width: 479px) {
-  .customer-account-forgotpassword .fieldset,
-  .customer-account-forgotpassword .buttons-set {
-    margin-left: 0;
-  }
-}
-.customer-account-forgotpassword .fieldset .input-box input.input-text {
-  width: 100%;
 }
 
 /* ============================================ *

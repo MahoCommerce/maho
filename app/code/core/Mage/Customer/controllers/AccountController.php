@@ -245,6 +245,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
     /**
      * Customer register form page
+     * Forwards to login page which now includes registration form in tabs
      */
     public function createAction(): void
     {
@@ -253,9 +254,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        $this->loadLayout();
-        $this->_initLayoutMessages('customer/session');
-        $this->renderLayout();
+        // Set parameter to show register tab by default
+        $this->getRequest()->setParam('show_register', true);
+
+        // Forward to login action - registration form is now in tabs
+        $this->_forward('login');
     }
 
     /**
@@ -724,18 +727,15 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
     /**
      * Forgot customer password page
+     * Forwards to login page which now includes forgot password in dialog
      */
     public function forgotPasswordAction(): void
     {
-        $this->loadLayout();
+        // Set parameter to auto-open forgot password dialog
+        $this->getRequest()->setParam('show_forgot', true);
 
-        $this->getLayout()->getBlock('forgotPassword')->setEmailValue(
-            $this->_getSession()->getForgottenEmail(),
-        );
-        $this->_getSession()->unsForgottenEmail();
-
-        $this->_initLayoutMessages('customer/session');
-        $this->renderLayout();
+        // Forward to login action - forgot password is now a dialog
+        $this->_forward('login');
     }
 
     /**
