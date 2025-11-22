@@ -144,8 +144,8 @@
             <captcha>
                 <selectors>.checkout-onepage-index #co-billing-form
 .contacts-index-index #contactForm
-.customer-account-create #form-validate
-.customer-account-forgotpassword #form-validate
+.customer-account-login #form-validate-register
+.customer-account-login #form-validate-forgot
 #newsletter-validate-detail
 .catalog-product-view #review-form
 .review-product-list #review-form
