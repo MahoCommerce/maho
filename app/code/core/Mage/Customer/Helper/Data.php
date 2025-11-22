@@ -25,7 +25,12 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Config name for Redirect Customer to Account Dashboard after Logging in setting
      */
-    public const XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = 'customer/startup/redirect_dashboard';
+    public const XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD = 'customer/login/redirect_dashboard';
+
+    /**
+     * @deprecated Since 26.1.0. Use XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD instead
+     */
+    public const XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD;
 
     /**
      * Config paths to VAT related customer groups
@@ -223,7 +228,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
 
         $referer = $this->_getRequest()->getParam(self::REFERER_QUERY_PARAM_NAME);
 
-        if (!$referer && !Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)
+        if (!$referer && !Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)
             && !Mage::getSingleton('customer/session')->getNoReferer()
         ) {
             $referer = Mage::getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]);
@@ -351,7 +356,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isMagicLinkEnabled(?int $storeId = null): bool
     {
-        return Mage::getStoreConfigFlag('customer/magic_link/enabled', $storeId);
+        return Mage::getStoreConfigFlag('customer/login/magic_link_enabled', $storeId);
     }
 
     /**
@@ -359,7 +364,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkTokenExpiration(): int
     {
-        $expiration = (int) Mage::getStoreConfig('customer/magic_link/token_expiration');
+        $expiration = (int) Mage::getStoreConfig('customer/login/magic_link_token_expiration');
         return $expiration > 0 ? $expiration : 10; // Default: 10 minutes
     }
 
@@ -368,7 +373,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkRateLimitEmail(): int
     {
-        return (int) Mage::getStoreConfig('customer/magic_link/rate_limit_email') ?: 3;
+        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_email') ?: 3;
     }
 
     /**
@@ -376,7 +381,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkRateLimitIp(): int
     {
-        return (int) Mage::getStoreConfig('customer/magic_link/rate_limit_ip') ?: 10;
+        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_ip') ?: 10;
     }
 
     /**
@@ -384,7 +389,13 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkRegistrationMode(): string
     {
-        return Mage::getStoreConfig('customer/magic_link/registration_mode') ?: 'require_password';
+        // If magic link is disabled, always require password regardless of configuration
+        if (!$this->isMagicLinkEnabled()) {
+            return Mage_Customer_Model_Config_Registrationmode::MODE_REQUIRE_PASSWORD;
+        }
+
+        return Mage::getStoreConfig('customer/login/magic_link_registration_mode')
+            ?: Mage_Customer_Model_Config_Registrationmode::MODE_REQUIRE_PASSWORD;
     }
 
     /**

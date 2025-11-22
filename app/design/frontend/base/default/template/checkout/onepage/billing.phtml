@@ -40,7 +40,7 @@
                     <div class="field">
                         <label for="billing:email" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Email Address') ?></label>
                         <div class="input-box">
-                            <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="billing[email]" id="billing:email" value="<?= $this->escapeHtml($this->getAddress()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" aria-required="true" />
+                            <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="billing[email]" id="billing:email" value="<?= $this->escapeHtml($this->getAddress()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" aria-required="true" />
                         </div>
                     </div>
         <?php endif ?>

@@ -123,8 +123,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const XML_PATH_PASSWORD_LINK_ACCOUNT_NEW_EMAIL_TEMPLATE = 'customer/password_link/account_new_email_template';
     public const XML_PATH_PASSWORD_LINK_EMAIL_TEMPLATE = 'customer/password_link/email_template';
     public const XML_PATH_PASSWORD_LINK_EMAIL_IDENTITY = 'customer/password_link/email_identity';
-    public const XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE = 'customer/magic_link/email_template';
-    public const XML_PATH_MAGIC_LINK_EMAIL_IDENTITY = 'customer/magic_link/email_identity';
+    public const XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE = 'customer/login/magic_link_email_template';
+    public const XML_PATH_MAGIC_LINK_EMAIL_IDENTITY = 'customer/login/magic_link_email_identity';
     /**
      * Codes of exceptions related to customer model
      */
@@ -975,7 +975,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         }
 
         // Get expiration period from config (in minutes)
-        $tokenExpirationPeriod = (int) Mage::getStoreConfig('customer/magic_link/token_expiration');
+        $tokenExpirationPeriod = (int) Mage::getStoreConfig('customer/login/magic_link_token_expiration');
         if ($tokenExpirationPeriod <= 0) {
             $tokenExpirationPeriod = 10; // Default to 10 minutes
         }

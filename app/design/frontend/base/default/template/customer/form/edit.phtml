@@ -27,7 +27,7 @@
             <li>
                 <label for="email" class="required"><?= $this->__('Email Address') ?></label>
                 <div class="input-box">
-                    <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email" value="<?= $this->escapeHtml($this->getCustomer()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" />
+                    <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email" value="<?= $this->escapeHtml($this->getCustomer()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" />
                 </div>
             </li>
         <?php $_dob = $this->getLayout()->createBlock('customer/widget_dob') ?>

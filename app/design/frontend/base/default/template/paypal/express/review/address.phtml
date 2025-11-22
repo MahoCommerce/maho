@@ -28,7 +28,7 @@
                     <div class="field">
                         <label for="<?= $prefix ?>:email" class="required"><?= $this->__('Email Address') ?></label>
                         <div class="input-box">
-                            <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="<?= $prefix ?>[email]" id="<?= $prefix ?>:email" value="<?= $this->escapeHtml($this->getAddress()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" />
+                            <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="<?= $prefix ?>[email]" id="<?= $prefix ?>:email" value="<?= $this->escapeHtml($this->getAddress()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" />
                         </div>
                     </div>
         <?php endif ?>
