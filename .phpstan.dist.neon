@@ -13,10 +13,6 @@ parameters:
     checkMissingOverrideMethodAttribute: true
     treatPhpDocTypesAsCertain: false
 
-    phpVersion:
-        min: 80300
-        max: 80599
-
     fileExtensions:
         - php
         - phtml

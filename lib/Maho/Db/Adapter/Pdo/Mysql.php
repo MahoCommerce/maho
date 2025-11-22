@@ -640,7 +640,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         $driverOptions = [];
         if (!$this->_connectionFlagsSet) {
             $driverOptions[\PDO::ATTR_EMULATE_PREPARES] = true;
-            $driverOptions[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
+            // Use Pdo\Mysql class constants (PHP 8.4+) or fallback to PDO constants (PHP 8.3)
+            $driverOptions[class_exists(\Pdo\Mysql::class) ? \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY : \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
         }
         if (!empty($driverOptions)) {
             $params['driverOptions'] = $driverOptions;
