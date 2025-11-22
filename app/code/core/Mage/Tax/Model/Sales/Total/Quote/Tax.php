@@ -1056,7 +1056,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
                 $this->_calculateWeeeAmountInclTax($item, $appliedRates, true);
             }
         }
-        if ($rate > 0) {
+        if ($rate > 0 && $item->getId() !== null) {
             $itemTaxGroups[$item->getId()] = $appliedRates;
         }
     }
