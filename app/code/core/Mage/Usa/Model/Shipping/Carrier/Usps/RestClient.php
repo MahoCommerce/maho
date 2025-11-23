@@ -49,13 +49,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
     }
 
     /**
-     * Get tracking information
+     * Get tracking information with detailed events
      */
     public function getTracking(string $trackingNumber): array
     {
         return $this->makeRequest(
             'GET',
-            self::ENDPOINT_TRACKING . '/' . $trackingNumber,
+            self::ENDPOINT_TRACKING . '/' . urlencode($trackingNumber) . '?expand=DETAIL',
             null,
         );
     }

@@ -375,41 +375,25 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         try {
             $restClient = $this->getRestClient();
 
-            // Get all mail classes to request based on allowed methods
-            $mailClasses = $this->getMailClassesForShippingOptions($r);
+            // Build single request with mailClass: 'ALL' to get all available services
+            $requestData = $this->buildShippingOptionsRequest($r);
 
-            // Collect all responses
-            $allResponses = [];
-            foreach ($mailClasses as $mailClass) {
-                try {
-                    $requestData = $this->buildShippingOptionsRequest($r, $mailClass);
-                    $responseData = $restClient->getShippingOptions($requestData);
+            // Cache the response
+            $cacheKey = Mage::helper('core')->jsonEncode($requestData);
+            $cachedResponse = $this->_getCachedQuotes($cacheKey);
 
-                    if (!empty($responseData['pricingOptions'])) {
-                        $allResponses[] = $responseData;
-                    }
-                } catch (Exception $e) {
-                    if ($this->getConfigData('debug')) {
-                        Mage::log('Error fetching rates for ' . $mailClass . ': ' . $e->getMessage(), Mage::LOG_DEBUG, 'usps_rest_api.log');
-                    }
-                }
+            if ($cachedResponse) {
+                $response = Mage::helper('core')->jsonDecode($cachedResponse);
+                return $this->_parseRestResponse($response);
             }
 
-            // Merge all responses
-            $mergedResponse = ['pricingOptions' => []];
-            foreach ($allResponses as $response) {
-                if (!empty($response['pricingOptions'])) {
-                    $mergedResponse['pricingOptions'] = array_merge(
-                        $mergedResponse['pricingOptions'],
-                        $response['pricingOptions'],
-                    );
-                }
-            }
+            // Make single API call
+            $response = $restClient->getShippingOptions($requestData);
 
-            // Cache the response (use serialized mail classes as cache key)
-            $this->_setCachedQuotes(serialize($mailClasses), Mage::helper('core')->jsonEncode($mergedResponse));
+            // Cache the response
+            $this->_setCachedQuotes($cacheKey, Mage::helper('core')->jsonEncode($response));
 
-            return $this->_parseRestResponse($mergedResponse);
+            return $this->_parseRestResponse($response);
 
         } catch (Exception $e) {
             Mage::logException($e);
@@ -418,55 +402,18 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     }
 
     /**
-     * Get mail classes to request for shipping options based on allowed methods
-     */
-    protected function getMailClassesForShippingOptions(Maho\DataObject $r): array
-    {
-        // Check if this is international
-        $isInternational = !$this->_isUSCountry($r->getDestCountryId());
-
-        if ($isInternational) {
-            // International - return international mail classes
-            return ['PRIORITY_MAIL_INTERNATIONAL', 'PRIORITY_MAIL_EXPRESS_INTERNATIONAL'];
-        }
-
-        // Domestic - map allowed methods to mail classes
-        $allowedMethods = explode(',', $this->getConfigData('allowed_methods'));
-        $methodToMailClass = [
-            '1' => 'PRIORITY_MAIL',
-            '3' => 'PRIORITY_MAIL_EXPRESS',
-            '4' => 'USPS_RETAIL_GROUND',
-            '6' => 'MEDIA_MAIL',
-            '7' => 'LIBRARY_MAIL',
-            '13' => 'PRIORITY_MAIL_EXPRESS',
-            '53' => 'FIRST_CLASS_PACKAGE_SERVICE',
-            '1058' => 'USPS_GROUND_ADVANTAGE',
-        ];
-
-        $mailClasses = [];
-        foreach ($allowedMethods as $methodCode) {
-            if (isset($methodToMailClass[$methodCode])) {
-                $mailClasses[$methodToMailClass[$methodCode]] = true;
-            }
-        }
-
-        // Return unique mail classes, or default to Priority Mail if none configured
-        return !empty($mailClasses) ? array_keys($mailClasses) : ['PRIORITY_MAIL'];
-    }
-
-    /**
      * Map method code to REST API mail class for label generation
+     * Note: Not used for rate requests (we use mailClass: 'ALL')
      */
     protected function mapServiceToMailClass(string $service): string
     {
         $mapping = [
             '1' => 'PRIORITY_MAIL',
             '3' => 'PRIORITY_MAIL_EXPRESS',
-            '4' => 'USPS_RETAIL_GROUND',
             '6' => 'MEDIA_MAIL',
             '7' => 'LIBRARY_MAIL',
             '13' => 'PRIORITY_MAIL_EXPRESS',
-            '53' => 'FIRST_CLASS_PACKAGE_SERVICE',
+            '53' => 'FIRST-CLASS_PACKAGE_SERVICE', // Note: hyphen, not underscore
             '1058' => 'USPS_GROUND_ADVANTAGE',
             'INT_1' => 'PRIORITY_MAIL_EXPRESS_INTERNATIONAL',
             'INT_2' => 'PRIORITY_MAIL_INTERNATIONAL',
@@ -477,8 +424,9 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
 
     /**
      * Build Shipping Options API request (for both domestic and international)
+     * Uses mailClass: 'ALL' to get all available services in a single API call
      */
-    protected function buildShippingOptionsRequest(Maho\DataObject $r, string $mailClass): array
+    protected function buildShippingOptionsRequest(Maho\DataObject $r): array
     {
         $weight = (float) $r->getWeightPounds() + ($r->getWeightOunces() / 16);
         $length = $this->convertDimensionToInches((float) ($r->getLength() ?: 12));
@@ -497,7 +445,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 'length' => $length,
                 'width' => $width,
                 'height' => $height,
-                'mailClass' => $mailClass,
+                'mailClass' => 'ALL', // Get all available services in one call
             ],
         ];
 
@@ -529,20 +477,38 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     protected function extractMethodCodeFromDescription(string $description): string
     {
         // Map REST API descriptions back to our method codes
+        // Order matters: most specific patterns first!
         $mapping = [
-            'Priority Mail' => '1',
+            // International (must come before domestic)
+            'Priority Mail Express International' => 'INT_1',
+            'Priority Mail International' => 'INT_2',
+
+            // Priority Mail Express variations (must come before regular Priority Mail)
+            'Priority Mail Express Padded Flat Rate Envelope' => '62',
+            'Priority Mail Express Flat Rate Envelope' => '13',
+            'Priority Mail Express Sunday/Holiday Delivery' => '23',
             'Priority Mail Express' => '3',
+
+            // Priority Mail variations (most specific first)
+            'Priority Mail Padded Flat Rate Envelope' => '29',
+            'Priority Mail Large Flat Rate Box' => '22',
+            'Priority Mail Medium Flat Rate Box' => '17',
+            'Priority Mail Small Flat Rate Box' => '28',
+            'Priority Mail Flat Rate Envelope' => '16',
+            'Priority Mail Regional Rate Box' => '47', // Covers A, B, C
+            'Priority Mail' => '1',
+
+            // Other services
             'First-Class Package Service' => '53',
             'USPS Ground Advantage' => '1058',
             'USPS Retail Ground' => '4',
+            'Retail Ground' => '4',
             'Media Mail' => '6',
             'Library Mail' => '7',
-            'Priority Mail International' => 'INT_2',
-            'Priority Mail Express International' => 'INT_1',
         ];
 
-        foreach ($mapping as $desc => $code) {
-            if (stripos($description, $desc) !== false) {
+        foreach ($mapping as $pattern => $code) {
+            if (stripos($description, $pattern) !== false) {
                 return $code;
             }
         }
@@ -560,13 +526,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
 
         // Extract rates from Shipping Options API response structure
         $allRates = [];
+
         if (!empty($response['pricingOptions'])) {
             foreach ($response['pricingOptions'] as $pricingOption) {
                 if (!empty($pricingOption['shippingOptions'])) {
                     foreach ($pricingOption['shippingOptions'] as $shippingOption) {
                         if (!empty($shippingOption['rateOptions'])) {
                             foreach ($shippingOption['rateOptions'] as $rateOption) {
-                                // Each rateOption can have multiple rates - add them all
                                 if (!empty($rateOption['rates'])) {
                                     foreach ($rateOption['rates'] as $rateData) {
                                         $allRates[] = array_merge($rateData, [
@@ -1073,7 +1039,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     }
 
     /**
-     * Parse REST tracking response
+     * Parse REST tracking response with detailed events
      */
     protected function _parseRestTrackingResponse(string $trackingValue, array $response): void
     {
@@ -1087,14 +1053,34 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             $tracking->setCarrierTitle($this->getConfigData('title'));
             $tracking->setTracking($trackingValue);
 
-            // Get latest event summary
-            $latestEvent = $response['trackingEvents'][0] ?? [];
-            $summary = $latestEvent['eventType'] ?? 'In Transit';
-            if (!empty($latestEvent['eventDescription'])) {
-                $summary .= ': ' . $latestEvent['eventDescription'];
+            // Use statusSummary if available, otherwise build from latest event
+            if (!empty($response['statusSummary'])) {
+                $summary = $response['statusSummary'];
+            } else {
+                $latestEvent = $response['trackingEvents'][0] ?? [];
+                $summary = $latestEvent['eventType'] ?? 'In Transit';
+                if (!empty($latestEvent['eventDescription'])) {
+                    $summary .= ': ' . $latestEvent['eventDescription'];
+                }
             }
 
             $tracking->setTrackSummary($summary);
+
+            // Process all tracking events for detailed progress
+            $progressDetail = [];
+            foreach ($response['trackingEvents'] as $event) {
+                $progressDetail[] = [
+                    'activity' => $event['eventDescription'] ?? $event['eventType'] ?? '',
+                    'deliverydate' => $event['eventDate'] ?? '',
+                    'deliverytime' => $event['eventTime'] ?? '',
+                    'deliverylocation' => $this->formatTrackingLocation($event),
+                ];
+            }
+
+            if (!empty($progressDetail)) {
+                $tracking->setProgressdetail($progressDetail);
+            }
+
             $this->_result->append($tracking);
         } else {
             $error = Mage::getModel('shipping/tracking_result_error');
@@ -1104,6 +1090,29 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             $error->setErrorMessage(Mage::helper('usa')->__('Unable to retrieve tracking'));
             $this->_result->append($error);
         }
+    }
+
+    /**
+     * Format tracking event location
+     */
+    protected function formatTrackingLocation(array $event): string
+    {
+        $parts = [];
+
+        if (!empty($event['eventCity'])) {
+            $parts[] = $event['eventCity'];
+        }
+        if (!empty($event['eventState'])) {
+            $parts[] = $event['eventState'];
+        }
+        if (!empty($event['eventZIP'])) {
+            $parts[] = $event['eventZIP'];
+        }
+        if (!empty($event['eventCountry'])) {
+            $parts[] = $event['eventCountry'];
+        }
+
+        return implode(', ', $parts);
     }
 
     /**
