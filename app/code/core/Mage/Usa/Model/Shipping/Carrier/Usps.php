@@ -401,7 +401,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 if (!empty($response['pricingOptions'])) {
                     $mergedResponse['pricingOptions'] = array_merge(
                         $mergedResponse['pricingOptions'],
-                        $response['pricingOptions']
+                        $response['pricingOptions'],
                     );
                 }
             }
@@ -614,7 +614,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             $rate->setCarrier('usps');
             $rate->setCarrierTitle($this->getConfigData('title'));
             $rate->setMethod($methodCode);
-            $rate->setMethodTitle($rateData['description']);
+            $rate->setMethodTitle($this->getCode('method', $methodCode) ?: $rateData['description']);
             $rate->setCost($rateData['totalPrice']);
             $rate->setPrice($this->getMethodPrice($rateData['totalPrice'], $methodCode));
 
