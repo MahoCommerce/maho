@@ -244,7 +244,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
                             $errorMessage = $this->extractErrorMessage($errorData);
                             throw new Exception($errorMessage, $e->getCode(), $e);
                         }
-                    } catch (Mage_Core_Exception_Json $jsonEx) {
+                    } catch (Exception $jsonEx) {
                         // Not JSON, use original exception
                     }
                 } catch (Exception $ex) {
