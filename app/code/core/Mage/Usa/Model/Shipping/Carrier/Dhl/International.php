@@ -1539,7 +1539,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param array $trackings
      */
-    protected function _getXMLTracking($trackings)
+    protected function _getXMLTracking($trackings): void
     {
         $xmlStr = '<?xml version="1.0" encoding="UTF-8"?>'
             . '<req:KnownTrackingRequest'

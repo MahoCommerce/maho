@@ -22316,13 +22316,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Dhl_International::_getXMLTracking() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
 		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Dhl_International::_makePieces() has no return type specified.'
 			identifier: missingType.return
@@ -22516,12 +22509,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/UpsAuth.php
 
 		-
-			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Usps::_getXmlTracking() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
-
-		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Usps::_methodsMapper() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -22582,23 +22569,10 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setCost() expects float, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
-
-		-
 			rawMessage: 'Parameter #1 $weight of method Mage_Shipping_Model_Carrier_Abstract::getTotalNumOfBoxes() expects int, float given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
-
-		-
-			rawMessage: 'Parameter #2 $serviceType of method Mage_Usa_Model_Shipping_Carrier_Usps::_formUsSignatureConfirmationShipmentRequest() expects string, array|bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
-
 		-
 			rawMessage: 'Method Mage_Weee_Block_Renderer_Weee_Tax::_setAddButton() has no return type specified.'
 			identifier: missingType.return

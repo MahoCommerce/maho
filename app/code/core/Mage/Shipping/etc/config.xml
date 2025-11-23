@@ -131,7 +131,7 @@
                 <price>5.00</price>
                 <title>Flat Rate</title>
                 <type>I</type>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>
                 <handling_type>F</handling_type>
             </flatrate>
             <freeshipping>
@@ -141,7 +141,7 @@
                 <model>shipping/carrier_freeshipping</model>
                 <name>Free</name>
                 <title>Free Shipping</title>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>
             </freeshipping>
             <tablerate>
                 <active>0</active>
@@ -151,7 +151,7 @@
                 <model>shipping/carrier_tablerate</model>
                 <name>Table Rate</name>
                 <title>Best Way</title>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>
                 <handling_type>F</handling_type>
             </tablerate>
         </carriers>
