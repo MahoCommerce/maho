@@ -1525,10 +1525,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
 
         if (!$accountType || !$accountNumber || !$crid || !$mid) {
             Mage::throwException(
-                Mage::helper('usa')->__(
-                    'Payment account configuration is incomplete. Please configure Account Type, '
-                    . 'Account Number, CRID, and MID in System > Configuration > USPS.',
-                ),
+                Mage::helper('usa')->__('Payment account configuration is incomplete. Please configure Account Type, Account Number, CRID, and MID in System > Configuration > USPS.'),
             );
         }
 
