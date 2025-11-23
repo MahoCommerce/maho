@@ -594,6 +594,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
 
         $allowedMethods = explode(',', $this->getConfigData('allowed_methods'));
 
+        // Group rates by method code and keep only the lowest price for each
+        $methodRates = [];
         foreach ($allRates as $rateData) {
             $methodCode = $this->extractMethodCodeFromDescription($rateData['description']);
 
@@ -610,6 +612,14 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 }
             }
 
+            // Keep only the lowest price for each method code
+            if (!isset($methodRates[$methodCode]) || $rateData['totalPrice'] < $methodRates[$methodCode]['totalPrice']) {
+                $methodRates[$methodCode] = $rateData;
+            }
+        }
+
+        // Add the lowest rate for each method to the result
+        foreach ($methodRates as $methodCode => $rateData) {
             $rate = Mage::getModel('shipping/rate_result_method');
             $rate->setCarrier('usps');
             $rate->setCarrierTitle($this->getConfigData('title'));
