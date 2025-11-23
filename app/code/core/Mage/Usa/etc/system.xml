@@ -673,12 +673,22 @@
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
                         </api_environment>
+                        <commercial_pricing translate="label comment">
+                            <label>Use Commercial Pricing</label>
+                            <comment>Enable to receive discounted commercial rates instead of retail counter pricing. Recommended for online label printing.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>55</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </commercial_pricing>
                         <payment_account_type translate="label comment">
                             <label>Payment Account Type</label>
                             <comment>Required for shipping label generation. EPS (Enterprise Payment System) or PERMIT.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>usa/shipping_carrier_usps_source_accounttype</source_model>
-                            <sort_order>55</sort_order>
+                            <sort_order>56</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -688,7 +698,7 @@
                             <label>Payment Account Number</label>
                             <comment>Your EPS or PERMIT account number for paying postage.</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>56</sort_order>
+                            <sort_order>57</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -698,7 +708,7 @@
                             <label>Permit ZIP Code</label>
                             <comment>Required only for PERMIT account type.</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>57</sort_order>
+                            <sort_order>58</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -708,7 +718,7 @@
                             <label>CRID (Customer Registration ID)</label>
                             <comment>Your USPS Customer Registration ID for label generation.</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>58</sort_order>
+                            <sort_order>59</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -718,7 +728,7 @@
                             <label>MID (Mailer ID)</label>
                             <comment>Your USPS Mailer ID for label generation.</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>59</sort_order>
+                            <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>

@@ -153,6 +153,7 @@
                 <client_id backend_model="adminhtml/system_config_backend_encrypted"/>
                 <client_secret backend_model="adminhtml/system_config_backend_encrypted"/>
                 <api_environment>production</api_environment>
+                <commercial_pricing>1</commercial_pricing>
                 <payment_account_type/>
                 <payment_account_number backend_model="adminhtml/system_config_backend_encrypted"/>
                 <payment_permit_zip/>

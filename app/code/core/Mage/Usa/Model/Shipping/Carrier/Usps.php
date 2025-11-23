@@ -489,7 +489,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             'originZIPCode' => substr($r->getOrigPostal(), 0, 5),
             'pricingOptions' => [
                 [
-                    'priceType' => 'RETAIL', // or 'COMMERCIAL' if configured
+                    'priceType' => $this->getConfigData('commercial_pricing') ? 'COMMERCIAL' : 'RETAIL',
                 ],
             ],
             'packageDescription' => [

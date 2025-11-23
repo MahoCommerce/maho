@@ -48,9 +48,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient
     private function fetchNewToken(): string
     {
         $client = \Symfony\Component\HttpClient\HttpClient::create([
-            'timeout' => 30,
+            'timeout' => 10,  // OAuth endpoints should respond quickly
         ]);
-
         $response = $client->request('POST', $this->tokenEndpoint, [
             'json' => [
                 'client_id' => $this->clientId,
