@@ -413,13 +413,71 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             '6' => 'MEDIA_MAIL',
             '7' => 'LIBRARY_MAIL',
             '13' => 'PRIORITY_MAIL_EXPRESS',
+            '16' => 'PRIORITY_MAIL', // Flat Rate Envelope
+            '17' => 'PRIORITY_MAIL', // Medium Flat Rate Box
+            '22' => 'PRIORITY_MAIL', // Large Flat Rate Box
+            '28' => 'PRIORITY_MAIL', // Small Flat Rate Box
+            '29' => 'PRIORITY_MAIL', // Padded Flat Rate Envelope
             '53' => 'FIRST-CLASS_PACKAGE_SERVICE', // Note: hyphen, not underscore
+            '62' => 'PRIORITY_MAIL_EXPRESS', // Padded Flat Rate Envelope
             '1058' => 'USPS_GROUND_ADVANTAGE',
             'INT_1' => 'PRIORITY_MAIL_EXPRESS_INTERNATIONAL',
             'INT_2' => 'PRIORITY_MAIL_INTERNATIONAL',
         ];
 
         return $mapping[$service] ?? 'PRIORITY_MAIL';
+    }
+
+    /**
+     * Get rate indicator for specific service
+     */
+    protected function getRateIndicator(string $service): string
+    {
+        $mapping = [
+            '1' => 'SP',    // Priority Mail Single-Piece
+            '3' => 'SP',    // Priority Mail Express Single-Piece
+            '6' => 'SP',    // Media Mail
+            '7' => 'SP',    // Library Mail
+            '13' => 'FE',   // Priority Mail Express Flat Rate Envelope
+            '16' => 'FE',   // Priority Mail Flat Rate Envelope
+            '17' => 'FB',   // Priority Mail Medium Flat Rate Box
+            '22' => 'PL',   // Priority Mail Large Flat Rate Box
+            '28' => 'FS',   // Priority Mail Small Flat Rate Box
+            '29' => 'FP',   // Priority Mail Padded Flat Rate Envelope
+            '53' => 'SP',   // First-Class Package Service
+            '62' => 'FP',   // Priority Mail Express Padded Flat Rate Envelope
+            '1058' => 'SP', // USPS Ground Advantage
+            'INT_1' => 'SP',
+            'INT_2' => 'SP',
+        ];
+
+        return $mapping[$service] ?? 'DR'; // Default to DR (Dimensional Rectangular)
+    }
+
+    /**
+     * Get processing category for specific service
+     */
+    protected function getProcessingCategory(string $service): string
+    {
+        $mapping = [
+            '1' => 'MACHINABLE',
+            '3' => 'MACHINABLE',
+            '6' => 'MACHINABLE',
+            '7' => 'MACHINABLE',
+            '13' => 'FLATS',    // Flat Rate Envelope
+            '16' => 'FLATS',    // Flat Rate Envelope
+            '17' => 'MACHINABLE', // Flat Rate Box
+            '22' => 'MACHINABLE', // Flat Rate Box
+            '28' => 'MACHINABLE', // Flat Rate Box
+            '29' => 'FLATS',    // Padded Flat Rate Envelope
+            '53' => 'MACHINABLE',
+            '62' => 'FLATS',    // Padded Flat Rate Envelope
+            '1058' => 'MACHINABLE',
+            'INT_1' => 'MACHINABLE',
+            'INT_2' => 'MACHINABLE',
+        ];
+
+        return $mapping[$service] ?? 'MACHINABLE';
     }
 
     /**
@@ -1564,14 +1622,14 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             ],
             'packageDescription' => [
                 'mailClass' => $mailClass,
-                'rateIndicator' => 'DR',
+                'rateIndicator' => $this->getRateIndicator($serviceCode),
                 'weightUOM' => 'LB',
                 'weight' => round($weightInPounds, 2),
                 'dimensionsUOM' => 'IN',
                 'length' => (float) $length,
                 'width' => (float) $width,
                 'height' => (float) $height,
-                'processingCategory' => $packageParams->getMachinable() === 'true' ? 'MACHINABLE' : 'NON_MACHINABLE',
+                'processingCategory' => $this->getProcessingCategory($serviceCode),
                 'mailingDate' => date('Y-m-d'),
                 'destinationEntryFacilityType' => 'NONE',
             ],
@@ -1612,6 +1670,10 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $width = $this->convertDimensionToInches($packageParams->getWidth() ?: 8);
         $height = $this->convertDimensionToInches($packageParams->getHeight() ?: 6);
 
+        // Map service type
+        $serviceCode = $request->getShippingMethod();
+        $mailClass = $this->mapServiceToMailClass($serviceCode);
+
         $labelData = [
             'imageInfo' => [
                 'imageType' => 'PDF',
@@ -1631,15 +1693,17 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             'toAddress' => [
                 'streetAddress' => $recipientAddress->getStreet1(),
                 'city' => $recipientAddress->getCity(),
-                'countryCode' => $recipientAddress->getCountryId(),
+                'province' => $recipientAddress->getRegionCode() ?: '',
                 'postalCode' => $recipientAddress->getPostcode(),
+                'country' => $recipientAddress->getCountryId(),
                 'firstName' => $recipientAddress->getFirstname(),
                 'lastName' => $recipientAddress->getLastname(),
                 'firm' => $recipientAddress->getCompany() ?: '',
                 'phone' => $recipientAddress->getPhone() ?: '',
             ],
             'packageDescription' => [
-                'mailClass' => 'PRIORITY_MAIL_INTERNATIONAL',
+                'mailClass' => $mailClass,
+                'rateIndicator' => 'I',  // International rate indicator
                 'weightUOM' => 'LB',
                 'weight' => round($weightInPounds, 2),
                 'dimensionsUOM' => 'IN',
@@ -1648,8 +1712,15 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 'height' => (float) $height,
                 'mailingDate' => date('Y-m-d'),
             ],
-            'customsInfo' => [
-                'contentType' => $packageParams->getContentType() ?: 'MERCHANDISE',
+            'customsForm' => [
+                'customsContentType' => $packageParams->getContentType() ?: 'MERCHANDISE',
+                'contentsExplanation' => $packageParams->getContentsExplanation() ?: 'Merchandise',
+                'restriction' => 'NONE',
+                'sendersCustomsReference' => $request->getOrderShipment()
+                    ? $request->getOrderShipment()->getOrder()->getIncrementId()
+                    : '',
+                'importersReference' => '',
+                'importersContact' => '',
                 'customsItems' => $this->buildCustomsItems($request),
             ],
         ];
@@ -1672,10 +1743,9 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 'description' => 'Package Contents',
                 'quantity' => 1,
                 'value' => (float) ($packageParams->getCustomsValue() ?: 100),
-                'weightUOM' => 'LB',
                 'weight' => (float) $request->getPackageWeight(),
-                'originCountryCode' => 'US',
-                'hSTariffNumber' => '0000.00.0000',
+                'originCountry' => 'US',
+                'tariffNumber' => '',
             ];
         } else {
             foreach ($packageItems as $item) {
@@ -1683,10 +1753,9 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                     'description' => substr($item['name'], 0, 50),
                     'quantity' => (int) $item['qty'],
                     'value' => (float) $item['customs_value'],
-                    'weightUOM' => 'LB',
                     'weight' => (float) $item['weight'],
-                    'originCountryCode' => $item['country_of_manufacture'] ?? 'US',
-                    'hSTariffNumber' => $item['hs_code'] ?? '0000.00.0000',
+                    'originCountry' => $item['country_of_manufacture'] ?? 'US',
+                    'tariffNumber' => $item['hs_code'] ?? '',
                 ];
             }
         }
