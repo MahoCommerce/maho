@@ -122,6 +122,35 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
     }
 
     /**
+     * Extract error message from USPS API error response
+     */
+    private function extractErrorMessage(array $errorData): string
+    {
+        // Handle nested error structure: response['error']['errors'][]
+        if (isset($errorData['error']['errors']) && is_array($errorData['error']['errors'])) {
+            $messages = [];
+            foreach ($errorData['error']['errors'] as $error) {
+                if (isset($error['message'])) {
+                    $messages[] = $error['message'];
+                } elseif (isset($error['detail'])) {
+                    $messages[] = $error['detail'];
+                }
+            }
+            if (!empty($messages)) {
+                return 'USPS API Error: ' . implode('; ', $messages);
+            }
+        }
+
+        // Handle simple error message
+        if (isset($errorData['error']['message'])) {
+            return 'USPS API Error: ' . $errorData['error']['message'];
+        }
+
+        // Fallback
+        return 'USPS API Error: ' . (isset($errorData['error']) ? json_encode($errorData['error']) : 'Unknown error');
+    }
+
+    /**
      * Make HTTP request to USPS REST API
      */
     private function makeRequest(string $method, string $endpoint, ?array $data, array $additionalHeaders = []): array
@@ -159,11 +188,25 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
 
         try {
             $response = $client->request($method, $this->baseUrl . $endpoint, $options);
+            $statusCode = $response->getStatusCode();
+
+            // Validate successful response
+            if ($statusCode !== 200 && $statusCode !== 201) {
+                throw new Exception(
+                    sprintf('USPS API returned unexpected status code: %d', $statusCode),
+                );
+            }
+
             $contentType = $response->getHeaders()['content-type'][0] ?? '';
 
             // Handle JSON responses
             if (str_contains($contentType, 'application/json')) {
                 $responseData = Mage::helper('core')->jsonDecode($response->getContent());
+
+                // Check for error responses in successful HTTP responses
+                if (isset($responseData['error'])) {
+                    throw new Exception($this->extractErrorMessage($responseData));
+                }
             } else {
                 // Handle binary responses (labels)
                 $responseData = [
@@ -191,7 +234,19 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
             if (method_exists($e, 'getResponse')) {
                 try {
                     $errorResponse = $e->getResponse();
-                    $debugData['error']['response_body'] = $errorResponse->getContent(false);
+                    $errorContent = $errorResponse->getContent(false);
+                    $debugData['error']['response_body'] = $errorContent;
+
+                    // Try to extract structured error message
+                    try {
+                        $errorData = Mage::helper('core')->jsonDecode($errorContent);
+                        if (isset($errorData['error'])) {
+                            $errorMessage = $this->extractErrorMessage($errorData);
+                            throw new Exception($errorMessage, $e->getCode(), $e);
+                        }
+                    } catch (Mage_Core_Exception_Json $jsonEx) {
+                        // Not JSON, use original exception
+                    }
                 } catch (Exception $ex) {
                     // Ignore if we can't get the response body
                 }
