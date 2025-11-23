@@ -269,7 +269,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     #[\Override]
     public function isShippingLabelsAvailable()
     {
-        return false;
+        return true;
     }
 
     /**
