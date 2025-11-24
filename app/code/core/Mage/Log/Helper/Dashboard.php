@@ -293,18 +293,18 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
             $devices = ['mobile' => 0, 'desktop' => 0];
             $browsers = [];
+            $browserDetect = new \cbschuld\Browser();
 
             foreach ($visitors as $visitor) {
                 $ua = $visitor['http_user_agent'] ?? '';
-                $parsed = \donatj\UserAgent\parse_user_agent($ua);
+                $browserDetect->setUserAgent($ua);
 
-                // Device detection based on platform
-                $platform = $parsed[\donatj\UserAgent\PLATFORM] ?? '';
-                $device = $this->_classifyDevice($platform);
+                // Device detection
+                $device = $browserDetect->isMobile() || $browserDetect->isTablet() ? 'mobile' : 'desktop';
                 $devices[$device]++;
 
                 // Browser detection
-                $browser = $parsed[\donatj\UserAgent\BROWSER] ?? 'Other';
+                $browser = $browserDetect->getBrowser() ?: 'Other';
                 $browsers[$browser] = ($browsers[$browser] ?? 0) + 1;
             }
 
@@ -362,35 +362,6 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
         return 'referral';
     }
 
-    /**
-     * Classify device type based on platform from user agent parser
-     *
-     * @see \donatj\UserAgent\Platforms for available platform constants
-     */
-    protected function _classifyDevice(string $platform): string
-    {
-        // Mobile devices (includes tablets - in 2025 the distinction is less relevant)
-        $mobile = [
-            \donatj\UserAgent\Platforms::IPHONE,
-            \donatj\UserAgent\Platforms::IPOD,
-            \donatj\UserAgent\Platforms::IPAD,
-            \donatj\UserAgent\Platforms::ANDROID,
-            \donatj\UserAgent\Platforms::WINDOWS_PHONE,
-            \donatj\UserAgent\Platforms::BLACKBERRY,
-            \donatj\UserAgent\Platforms::KINDLE,
-            \donatj\UserAgent\Platforms::KINDLE_FIRE,
-            \donatj\UserAgent\Platforms::PLAYBOOK,
-            \donatj\UserAgent\Platforms::SYMBIAN,
-            \donatj\UserAgent\Platforms::TIZEN,
-            \donatj\UserAgent\Platforms::SAILFISH,
-        ];
-
-        if (in_array($platform, $mobile, true)) {
-            return 'mobile';
-        }
-
-        return 'desktop';
-    }
 
     /**
      * Get database read adapter
