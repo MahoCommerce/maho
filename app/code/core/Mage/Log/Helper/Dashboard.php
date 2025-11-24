@@ -12,9 +12,19 @@ declare(strict_types=1);
 
 class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 {
+    protected $_moduleName = 'Mage_Log';
+
     public const CACHE_TAG = 'log_dashboard';
     public const CACHE_LIFETIME_REALTIME = 300;   // 5 minutes
     public const CACHE_LIFETIME_HOURLY = 3600;    // 1 hour
+
+    /**
+     * Generate cache key with store ID for multi-store support
+     */
+    protected function _getCacheKey(string $suffix): string
+    {
+        return 'log_dashboard_' . Mage::app()->getStore()->getId() . '_' . $suffix;
+    }
 
     /**
      * Get online visitor count (real-time)
@@ -29,7 +39,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getTodayCount(): int
     {
-        $cacheKey = 'log_dashboard_today_count_' . date('Y-m-d');
+        $cacheKey = $this->_getCacheKey('today_count_' . date('Y-m-d'));
         $count = Mage::app()->getCache()->load($cacheKey);
 
         if ($count === false) {
@@ -55,7 +65,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getWeekCount(): int
     {
-        $cacheKey = 'log_dashboard_week_count_' . date('Y-W');
+        $cacheKey = $this->_getCacheKey('week_count_' . date('Y-W'));
         $count = Mage::app()->getCache()->load($cacheKey);
 
         if ($count === false) {
@@ -84,7 +94,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getVisitorTrends(int $days = 30): array
     {
-        $cacheKey = 'log_dashboard_trends_' . $days;
+        $cacheKey = $this->_getCacheKey('trends_' . $days);
         $result = Mage::app()->getCache()->load($cacheKey);
 
         if ($result === false) {
@@ -138,23 +148,23 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getTopPages(int $days = 7, int $limit = 10): array
     {
-        $cacheKey = 'log_dashboard_top_pages_' . $days . '_' . $limit;
+        $cacheKey = $this->_getCacheKey('top_pages_' . $days . '_' . $limit);
         $result = Mage::app()->getCache()->load($cacheKey);
 
         if ($result === false) {
             $adapter = $this->_getReadAdapter();
 
             $select = $adapter->select()
-                ->from(['url' => 'log_url_info'], ['url', 'views' => 'COUNT(*)'])
+                ->from(['lu' => 'log_url'], ['views' => 'COUNT(*)'])
                 ->join(
-                    ['visitor' => 'log_visitor'],
-                    'visitor.last_url_id = url.url_id',
-                    [],
+                    ['lui' => 'log_url_info'],
+                    'lu.url_id = lui.url_id',
+                    ['url'],
                 )
-                ->where('visitor.last_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
-                ->where('url.url IS NOT NULL')
-                ->where('url.url != ?', '')
-                ->group('url.url')
+                ->where('lu.visit_time >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('lui.url IS NOT NULL')
+                ->where('lui.url != ?', '')
+                ->group('lui.url')
                 ->order('views DESC')
                 ->limit($limit);
 
@@ -177,7 +187,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getTrafficSources(int $days = 7): array
     {
-        $cacheKey = 'log_dashboard_sources_' . $days;
+        $cacheKey = $this->_getCacheKey('sources_' . $days);
         $result = Mage::app()->getCache()->load($cacheKey);
 
         if ($result === false) {
@@ -228,7 +238,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getDeviceBreakdown(int $days = 7): array
     {
-        $cacheKey = 'log_dashboard_devices_' . $days;
+        $cacheKey = $this->_getCacheKey('devices_' . $days);
         $result = Mage::app()->getCache()->load($cacheKey);
 
         if ($result === false) {
