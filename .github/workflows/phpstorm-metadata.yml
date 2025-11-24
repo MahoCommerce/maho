@@ -19,7 +19,7 @@ jobs:
         with:
           php-version: latest
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Get composer cache directory
         id: composer-cache
