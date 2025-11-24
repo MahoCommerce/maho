@@ -6,15 +6,10 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Mage_Log
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Visitor trends chart block for dashboard
- */
 class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Graph
 {
     public function __construct()
@@ -43,9 +38,6 @@ class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Gra
         // Don't call parent as we're handling data differently
     }
 
-    /**
-     * Get axis labels
-     */
     #[\Override]
     public function getAxisLabels(string $axis = 'x'): array
     {
@@ -55,9 +47,6 @@ class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Gra
         return $this->_axisLabels[$axis] ?? [];
     }
 
-    /**
-     * Get all series data
-     */
     #[\Override]
     public function getAllSeries(): array
     {
@@ -67,9 +56,6 @@ class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Gra
         return $this->_allSeries;
     }
 
-    /**
-     * Check if we have data to display
-     */
     #[\Override]
     public function getCount(): bool
     {
@@ -77,9 +63,6 @@ class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Gra
         return !empty($series['visitors']) && array_sum($series['visitors']) > 0;
     }
 
-    /**
-     * Required by parent class
-     */
     #[\Override]
     public function processData(): array
     {

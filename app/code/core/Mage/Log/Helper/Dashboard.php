@@ -6,20 +6,16 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Mage_Log
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Log dashboard helper for analytics data
- */
 class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 {
     public const CACHE_TAG = 'log_dashboard';
     public const CACHE_LIFETIME_REALTIME = 300;   // 5 minutes
     public const CACHE_LIFETIME_HOURLY = 3600;    // 1 hour
+
     /**
      * Get online visitor count (real-time)
      */
