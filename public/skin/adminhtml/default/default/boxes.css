@@ -609,7 +609,6 @@ div.main-col-inner { float:left; /* Fixes some inner clears in the liquid main-c
 *******************************************************************************/
 
 .logo                                   { float:left; margin:7px 20px 5px 32px; height:30px; }
-.header-top                             { border-bottom:1px solid #5F767F; }
 
 /* Header right */
 .header-right                           { padding:10px 25px 0 15px; font-size:.95em; color:#fff; }

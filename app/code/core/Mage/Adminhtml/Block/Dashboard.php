@@ -67,6 +67,29 @@ class Mage_Adminhtml_Block_Dashboard extends Mage_Adminhtml_Block_Template
             $this->getLayout()->createBlock('adminhtml/dashboard_grids'),
         );
 
+        // Add visitor analytics blocks if visitor logging is enabled
+        if (Mage::helper('log')->isVisitorLogEnabled()) {
+            $this->setChild(
+                'visitorStats',
+                $this->getLayout()->createBlock('log/dashboard_stats'),
+            );
+
+            $this->setChild(
+                'topPages',
+                $this->getLayout()->createBlock('log/dashboard_toppages'),
+            );
+
+            $this->setChild(
+                'trafficSources',
+                $this->getLayout()->createBlock('log/dashboard_sources'),
+            );
+
+            $this->setChild(
+                'devices',
+                $this->getLayout()->createBlock('log/dashboard_devices'),
+            );
+        }
+
         return parent::_prepareLayout();
     }
 

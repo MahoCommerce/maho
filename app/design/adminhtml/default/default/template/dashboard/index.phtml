@@ -123,6 +123,24 @@ function toggleCal(id) {
                     <div class="entry-edit-head"><h4><?= $this->__('Top 5 Search Terms') ?></h4></div>
                     <fieldset class="np"><?= $this->getChildHtml('topSearches') ?></fieldset>
                 </div>
+                <?php if ($this->getChild('visitorStats')): ?>
+                <div class="entry-edit">
+                    <div class="entry-edit-head"><h4><?= $this->__('Visitor Stats') ?></h4></div>
+                    <fieldset class="np"><?= $this->getChildHtml('visitorStats') ?></fieldset>
+                </div>
+                <div class="entry-edit">
+                    <div class="entry-edit-head"><h4><?= $this->__('Top Pages (Last 7 Days)') ?></h4></div>
+                    <fieldset class="np"><?= $this->getChildHtml('topPages') ?></fieldset>
+                </div>
+                <div class="entry-edit">
+                    <div class="entry-edit-head"><h4><?= $this->__('Traffic Sources (Last 7 Days)') ?></h4></div>
+                    <fieldset class="np"><?= $this->getChildHtml('trafficSources') ?></fieldset>
+                </div>
+                <div class="entry-edit">
+                    <div class="entry-edit-head"><h4><?= $this->__('Devices & Browsers (Last 7 Days)') ?></h4></div>
+                    <fieldset class="np"><?= $this->getChildHtml('devices') ?></fieldset>
+                </div>
+                <?php endif ?>
             </td>
             <td>
                 <div class="entry-edit" style="border:1px solid #ccc;">

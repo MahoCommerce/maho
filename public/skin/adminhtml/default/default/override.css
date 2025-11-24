@@ -1,25 +1,14 @@
-/* ! Do not edit css files !
-   Edit scss version and compile with sass from scss folder like this:
-   $ sass override.scss ../override.css
- */
-/*
- 205 = default,
-   0 = red,
-  60 = yellow,
- 120 = green,
- 180 = turquoise,
- 240 = blue,
- 300 = purple
-*/
 .popup-window .content-header, body {
   color: #2f2f2f;
   font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   background: #f6f6f6;
 }
 
+.middle {
+    padding-top: 10px;
+}
 .footer-content, .middle, #nav, .header-top {
-  padding-left: 15px;
-  padding-right: 15px;
+  padding-inline: 10px;
   box-sizing: border-box;
   width: 100%;
 }
@@ -41,8 +30,10 @@ dl.accordion dt, .entry-edit .entry-edit-head {
 .box, .entry-edit .fieldset, .entry-edit fieldset {
   border: 1px solid lightgrey;
   background: #eee;
-  border-top: 1px solid lightgrey;
+  border-top: 0;
 }
+
+#dashboard_diagram_totals {border-top: 1px solid lightgray}
 
 .grid tr.headings th a.sort-arrow-asc, .grid tr.headings th a.sort-arrow-desc {
   background: none;
@@ -209,10 +200,6 @@ small {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-
-.header-top {
-  border: 0;
 }
 
 .middle {
@@ -419,19 +406,12 @@ small {
   background: black;
   position: relative;
 }
-
-.header-top {
-  border-bottom: none !important;
-  height: 10px;
-}
 .header-top .logo {
   position: absolute;
-  display: block;
-  top: 8px;
+  top: -1px;
   left: 0;
   margin: 0;
-  height: 40px;
-  padding: 0 27px;
+  padding-left: 6px;
 }
 .header-top .logo svg {
   height: 40px;
@@ -440,7 +420,7 @@ small {
 
 .header-right {
   position: absolute;
-  top: 10px;
+  top: 0;
   right: 0;
   padding: 0;
   color: inherit;
@@ -479,7 +459,7 @@ ul.tabs-horiz {
 }
 ul.tabs-horiz li {
   border: none;
-  margin: 0 10px 0 0;
+  margin: 0 1px 0 0;
 }
 ul.tabs-horiz li a {
   background: #eee;

@@ -1,0 +1,79 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Sources $this */
+$sources = $this->getSources();
+$total = array_sum($sources);
+?>
+<div class="dashboard-traffic-sources">
+    <?php if ($total > 0): ?>
+        <?php
+        $colors = [
+            'direct' => '#4CAF50',
+            'organic' => '#2196F3',
+            'social' => '#9C27B0',
+            'email' => '#FF9800',
+            'referral' => '#607D8B'
+        ];
+        ?>
+        <?php foreach ($sources as $type => $count): ?>
+            <?php if ($count > 0): ?>
+                <?php $percentage = $this->calculatePercentage($count, $total); ?>
+                <div class="source-row">
+                    <div class="source-info">
+                        <span class="source-label"><?= $this->getSourceLabel($type) ?></span>
+                        <span class="source-stats"><?= (int)$count ?> (<?= $percentage ?>%)</span>
+                    </div>
+                    <div class="source-bar">
+                        <div class="source-bar-fill" style="width: <?= $percentage ?>%; background-color: <?= $colors[$type] ?? '#999' ?>;"></div>
+                    </div>
+                </div>
+            <?php endif ?>
+        <?php endforeach ?>
+    <?php else: ?>
+        <p class="a-center" style="padding: 20px; color: #999;">
+            <?= $this->__('No traffic source data available') ?>
+        </p>
+    <?php endif ?>
+</div>
+
+<style>
+.dashboard-traffic-sources {
+    padding: 10px;
+}
+.dashboard-traffic-sources .source-row {
+    margin-bottom: 15px;
+}
+.dashboard-traffic-sources .source-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+.dashboard-traffic-sources .source-label {
+    font-weight: 500;
+    color: #333;
+}
+.dashboard-traffic-sources .source-stats {
+    color: #666;
+}
+.dashboard-traffic-sources .source-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.dashboard-traffic-sources .source-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+</style>

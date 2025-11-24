@@ -1,0 +1,55 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Toppages $this */
+$pages = $this->getTopPages();
+?>
+<div class="dashboard-top-pages">
+    <?php if (!empty($pages)): ?>
+        <table class="data">
+            <thead>
+                <tr>
+                    <th><?= $this->__('Page') ?></th>
+                    <th class="a-right"><?= $this->__('Views') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($pages as $page): ?>
+                    <tr>
+                        <td class="page-url" title="<?= $this->escapeHtml($page['url']) ?>">
+                            <?= $this->escapeHtml($this->formatUrl($page['url'], 60)) ?>
+                        </td>
+                        <td class="a-right">
+                            <strong><?= (int)$page['views'] ?></strong>
+                        </td>
+                    </tr>
+                <?php endforeach ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p class="a-center" style="padding: 20px; color: #999;">
+            <?= $this->__('No page view data available') ?>
+        </p>
+    <?php endif ?>
+</div>
+
+<style>
+.dashboard-top-pages table.data {
+    width: 100%;
+    font-size: 12px;
+}
+.dashboard-top-pages .page-url {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+</style>

@@ -1,0 +1,65 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Stats $this */
+?>
+<div class="dashboard-visitor-stats">
+    <div class="stat-row stat-online">
+        <span class="stat-icon">🟢</span>
+        <span class="stat-value"><?= $this->getOnlineCount() ?></span>
+        <span class="stat-label"><?= $this->__('online now') ?></span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-value"><?= $this->getTodayCount() ?></span>
+        <span class="stat-label"><?= $this->__('visits today') ?></span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-value"><?= $this->getWeekCount() ?></span>
+        <span class="stat-label"><?= $this->__('visits this week') ?></span>
+    </div>
+</div>
+
+<style>
+.dashboard-visitor-stats {
+    padding: 10px;
+}
+.dashboard-visitor-stats .stat-row {
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+.dashboard-visitor-stats .stat-row:last-child {
+    border-bottom: none;
+}
+.dashboard-visitor-stats .stat-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    margin-right: 8px;
+    display: inline-block;
+    min-width: 40px;
+}
+.dashboard-visitor-stats .stat-label {
+    color: #666;
+    font-size: 13px;
+}
+.dashboard-visitor-stats .stat-icon {
+    font-size: 16px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.dashboard-visitor-stats .stat-online .stat-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+</style>
