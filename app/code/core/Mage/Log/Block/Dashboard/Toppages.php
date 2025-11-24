@@ -21,7 +21,7 @@ class Mage_Log_Block_Dashboard_Toppages extends Mage_Adminhtml_Block_Dashboard_A
 
     public function getTopPages(): array
     {
-        return Mage::helper('log/dashboard')->getTopPages(7, 10);
+        return Mage::helper('log/dashboard')->getTopPages(7, 20);
     }
 
     /**

@@ -39,7 +39,6 @@ class Mage_Log_Block_Dashboard_Devices extends Mage_Adminhtml_Block_Dashboard_Ab
     {
         $icons = [
             'mobile' => '📱',
-            'tablet' => '📲',
             'desktop' => '💻',
         ];
         return $icons[$device] ?? '';

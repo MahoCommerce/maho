@@ -23,7 +23,23 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     protected function _getCacheKey(string $suffix): string
     {
-        return 'log_dashboard_' . Mage::app()->getStore()->getId() . '_' . $suffix;
+        $storeId = $this->_getStoreIdForFilter();
+        return 'log_dashboard_' . $storeId . '_' . $suffix;
+    }
+
+    /**
+     * Get store ID for filtering, respecting admin store switcher
+     */
+    protected function _getStoreIdForFilter(): int
+    {
+        // In admin, check for store switcher parameter
+        $storeId = (int) Mage::app()->getRequest()->getParam('store', 0);
+        if ($storeId > 0) {
+            return $storeId;
+        }
+
+        // Fall back to current store (0 for admin = all stores)
+        return (int) Mage::app()->getStore()->getId();
     }
 
     /**
@@ -214,7 +230,8 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'v.visitor_id = vi.visitor_id',
                     ['http_referer'],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")));
+                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->limit(10000);
 
             $this->_addStoreFilter($select, 'v');
 
@@ -267,13 +284,14 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'v.visitor_id = vi.visitor_id',
                     ['http_user_agent'],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")));
+                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->limit(10000);
 
             $this->_addStoreFilter($select, 'v');
 
             $visitors = $adapter->fetchAll($select);
 
-            $devices = ['mobile' => 0, 'tablet' => 0, 'desktop' => 0];
+            $devices = ['mobile' => 0, 'desktop' => 0];
             $browsers = [];
 
             foreach ($visitors as $visitor) {
@@ -351,29 +369,21 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     protected function _classifyDevice(string $platform): string
     {
-        // Tablets - check first as some overlap with mobile
-        $tablets = [
-            \donatj\UserAgent\Platforms::IPAD,
-            \donatj\UserAgent\Platforms::KINDLE_FIRE,
-            \donatj\UserAgent\Platforms::PLAYBOOK,
-        ];
-
-        // Mobile devices
+        // Mobile devices (includes tablets - in 2025 the distinction is less relevant)
         $mobile = [
             \donatj\UserAgent\Platforms::IPHONE,
             \donatj\UserAgent\Platforms::IPOD,
+            \donatj\UserAgent\Platforms::IPAD,
             \donatj\UserAgent\Platforms::ANDROID,
             \donatj\UserAgent\Platforms::WINDOWS_PHONE,
             \donatj\UserAgent\Platforms::BLACKBERRY,
             \donatj\UserAgent\Platforms::KINDLE,
+            \donatj\UserAgent\Platforms::KINDLE_FIRE,
+            \donatj\UserAgent\Platforms::PLAYBOOK,
             \donatj\UserAgent\Platforms::SYMBIAN,
             \donatj\UserAgent\Platforms::TIZEN,
             \donatj\UserAgent\Platforms::SAILFISH,
         ];
-
-        if (in_array($platform, $tablets, true)) {
-            return 'tablet';
-        }
 
         if (in_array($platform, $mobile, true)) {
             return 'mobile';
@@ -408,7 +418,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     protected function _addStoreFilter($select, string $tableAlias = ''): void
     {
-        $storeId = (int) Mage::app()->getStore()->getId();
+        $storeId = $this->_getStoreIdForFilter();
         if ($storeId > 0) {
             $column = $tableAlias ? "{$tableAlias}.store_id" : 'store_id';
             $select->where("{$column} = ?", $storeId);
