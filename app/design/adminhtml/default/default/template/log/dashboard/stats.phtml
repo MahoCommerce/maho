@@ -11,51 +11,54 @@
 /** @var Mage_Log_Block_Dashboard_Stats $this */
 ?>
 <div class="dashboard-visitor-stats">
-    <div class="stat-row stat-online">
-        <span class="stat-icon">🟢</span>
-        <span class="stat-value"><?= $this->getOnlineCount() ?></span>
-        <span class="stat-label"><?= $this->__('online now') ?></span>
+    <div class="stat-col stat-online">
+        <div class="stat-indicator">🟢</div>
+        <div class="stat-value"><?= $this->getOnlineCount() ?></div>
+        <div class="stat-label"><?= $this->__('Online') ?></div>
     </div>
-    <div class="stat-row">
-        <span class="stat-value"><?= $this->getTodayCount() ?></span>
-        <span class="stat-label"><?= $this->__('visits today') ?></span>
+    <div class="stat-col">
+        <div class="stat-value"><?= $this->getTodayCount() ?></div>
+        <div class="stat-label"><?= $this->__('Today') ?></div>
     </div>
-    <div class="stat-row">
-        <span class="stat-value"><?= $this->getWeekCount() ?></span>
-        <span class="stat-label"><?= $this->__('visits this week') ?></span>
+    <div class="stat-col">
+        <div class="stat-value"><?= $this->getWeekCount() ?></div>
+        <div class="stat-label"><?= $this->__('This week') ?></div>
     </div>
 </div>
 
 <style>
 .dashboard-visitor-stats {
+    display: flex;
+    gap: 10px;
     padding: 10px;
 }
-.dashboard-visitor-stats .stat-row {
-    padding: 10px 0;
-    border-bottom: 1px solid #e5e5e5;
+.dashboard-visitor-stats .stat-col {
+    flex: 1;
+    text-align: center;
+    padding: 10px 5px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    position: relative;
 }
-.dashboard-visitor-stats .stat-row:last-child {
-    border-bottom: none;
+.dashboard-visitor-stats .stat-indicator {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 10px;
+    animation: pulse 2s ease-in-out infinite;
 }
 .dashboard-visitor-stats .stat-value {
     font-size: 22px;
     font-weight: bold;
     color: #333;
-    margin-right: 8px;
-    display: inline-block;
-    min-width: 40px;
+    margin-bottom: 2px;
+    line-height: 1;
 }
 .dashboard-visitor-stats .stat-label {
     color: #666;
-    font-size: 13px;
-}
-.dashboard-visitor-stats .stat-icon {
-    font-size: 16px;
-    margin-right: 6px;
-    vertical-align: middle;
-}
-.dashboard-visitor-stats .stat-online .stat-icon {
-    animation: pulse 2s ease-in-out infinite;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 @keyframes pulse {
     0%, 100% { opacity: 1; }

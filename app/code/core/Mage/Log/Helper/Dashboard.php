@@ -294,6 +294,13 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
         $host = parse_url($referer, PHP_URL_HOST);
 
+        // Internal referrer (same domain) = direct traffic
+        $storeUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+        $storeHost = parse_url($storeUrl, PHP_URL_HOST);
+        if ($host === $storeHost) {
+            return 'direct';
+        }
+
         // Search engines
         if (preg_match('/(google|bing|yahoo|duckduckgo|baidu|yandex)/i', $host)) {
             return 'organic';

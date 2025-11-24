@@ -45,6 +45,20 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
         ]);
 
         // load other tabs with ajax
+        $this->addTab('customers', [
+            'label'     => $this->__('Customers'),
+            'url'       => $this->getUrl('*/*/customersMost', ['_current' => true]),
+            'class'     => 'ajax',
+        ]);
+
+        // Add analytics tabs if visitor logging is enabled
+        if (Mage::helper('log')->isVisitorLogEnabled()) {
+            $this->addTab('devices_browsers', [
+                'label'     => $this->__('Devices & Browsers'),
+                'content'   => $this->getLayout()->createBlock('log/dashboard_devices')->toHtml(),
+            ]);
+        }
+
         $this->addTab('reviewed_products', [
             'label'     => $this->__('Most Viewed Products'),
             'url'       => $this->getUrl('*/*/productsViewed', ['_current' => true]),
@@ -57,11 +71,18 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
             'class'     => 'ajax',
         ]);
 
-        $this->addTab('customers', [
-            'label'     => $this->__('Customers'),
-            'url'       => $this->getUrl('*/*/customersMost', ['_current' => true]),
-            'class'     => 'ajax',
-        ]);
+        // Add analytics tabs if visitor logging is enabled
+        if (Mage::helper('log')->isVisitorLogEnabled()) {
+            $this->addTab('top_pages', [
+                'label'     => $this->__('Top Pages'),
+                'content'   => $this->getLayout()->createBlock('log/dashboard_toppages')->toHtml(),
+            ]);
+
+            $this->addTab('traffic_sources', [
+                'label'     => $this->__('Traffic Sources'),
+                'content'   => $this->getLayout()->createBlock('log/dashboard_sources')->toHtml(),
+            ]);
+        }
 
         return parent::_prepareLayout();
     }
