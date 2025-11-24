@@ -45,8 +45,10 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
         if ($count === false) {
             $adapter = $this->_getReadAdapter();
             $select = $adapter->select()
-                ->from('log_visitor', ['count' => 'COUNT(*)'])
+                ->from($this->_getTable('log_visitor'), ['count' => 'COUNT(*)'])
                 ->where('DATE(first_visit_at) = ?', Mage_Core_Model_Locale::today());
+
+            $this->_addStoreFilter($select);
 
             $count = $adapter->fetchOne($select);
             Mage::app()->getCache()->save(
@@ -71,8 +73,10 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
         if ($count === false) {
             $adapter = $this->_getReadAdapter();
             $select = $adapter->select()
-                ->from('log_visitor', ['count' => 'COUNT(*)'])
+                ->from($this->_getTable('log_visitor'), ['count' => 'COUNT(*)'])
                 ->where('first_visit_at >= ?', date('Y-m-d 00:00:00', strtotime('-7 days')));
+
+            $this->_addStoreFilter($select);
 
             $count = $adapter->fetchOne($select);
             Mage::app()->getCache()->save(
@@ -102,9 +106,11 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
             // Get daily aggregated data from log_summary
             $select = $adapter->select()
-                ->from('log_summary', ['add_date', 'visitor_count'])
+                ->from($this->_getTable('log_summary'), ['add_date', 'visitor_count'])
                 ->where('add_date >= ?', date('Y-m-d H:00:00', strtotime("-{$days} days")))
                 ->order('add_date ASC');
+
+            $this->_addStoreFilter($select);
 
             $rows = $adapter->fetchAll($select);
 
@@ -155,16 +161,24 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             $adapter = $this->_getReadAdapter();
 
             $select = $adapter->select()
-                ->from(['lu' => 'log_url'], ['views' => 'COUNT(*)'])
+                ->from(['lu' => $this->_getTable('log_url')], ['views' => 'COUNT(*)'])
                 ->join(
-                    ['lui' => 'log_url_info'],
+                    ['lui' => $this->_getTable('log_url_info')],
                     'lu.url_id = lui.url_id',
                     ['url'],
                 )
+                ->join(
+                    ['lv' => $this->_getTable('log_visitor')],
+                    'lu.visitor_id = lv.visitor_id',
+                    [],
+                )
                 ->where('lu.visit_time >= ?', date('Y-m-d', strtotime("-{$days} days")))
                 ->where('lui.url IS NOT NULL')
-                ->where('lui.url != ?', '')
-                ->group('lui.url')
+                ->where('lui.url != ?', '');
+
+            $this->_addStoreFilter($select, 'lv');
+
+            $select->group('lui.url')
                 ->order('views DESC')
                 ->limit($limit);
 
@@ -194,13 +208,15 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             $adapter = $this->_getReadAdapter();
 
             $select = $adapter->select()
-                ->from(['v' => 'log_visitor'], ['visitor_id'])
+                ->from(['v' => $this->_getTable('log_visitor')], ['visitor_id'])
                 ->join(
-                    ['vi' => 'log_visitor_info'],
+                    ['vi' => $this->_getTable('log_visitor_info')],
                     'v.visitor_id = vi.visitor_id',
                     ['http_referer'],
                 )
                 ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")));
+
+            $this->_addStoreFilter($select, 'v');
 
             $visitors = $adapter->fetchAll($select);
 
@@ -245,13 +261,15 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             $adapter = $this->_getReadAdapter();
 
             $select = $adapter->select()
-                ->from(['v' => 'log_visitor'], ['visitor_id'])
+                ->from(['v' => $this->_getTable('log_visitor')], ['visitor_id'])
                 ->join(
-                    ['vi' => 'log_visitor_info'],
+                    ['vi' => $this->_getTable('log_visitor_info')],
                     'v.visitor_id = vi.visitor_id',
                     ['http_user_agent'],
                 )
                 ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")));
+
+            $this->_addStoreFilter($select, 'v');
 
             $visitors = $adapter->fetchAll($select);
 
@@ -259,19 +277,16 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             $browsers = [];
 
             foreach ($visitors as $visitor) {
-                $ua = $visitor['http_user_agent'];
+                $ua = $visitor['http_user_agent'] ?? '';
+                $parsed = \donatj\UserAgent\parse_user_agent($ua);
 
-                // Device detection
-                if (preg_match('/mobile|android|iphone/i', $ua)) {
-                    $devices['mobile']++;
-                } elseif (preg_match('/tablet|ipad/i', $ua)) {
-                    $devices['tablet']++;
-                } else {
-                    $devices['desktop']++;
-                }
+                // Device detection based on platform
+                $platform = $parsed[\donatj\UserAgent\PLATFORM] ?? '';
+                $device = $this->_classifyDevice($platform);
+                $devices[$device]++;
 
                 // Browser detection
-                $browser = $this->_detectBrowser($ua);
+                $browser = $parsed[\donatj\UserAgent\BROWSER] ?? 'Other';
                 $browsers[$browser] = ($browsers[$browser] ?? 0) + 1;
             }
 
@@ -330,26 +345,41 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Detect browser from user agent
+     * Classify device type based on platform from user agent parser
+     *
+     * @see \donatj\UserAgent\Platforms for available platform constants
      */
-    protected function _detectBrowser(string $userAgent): string
+    protected function _classifyDevice(string $platform): string
     {
-        if (preg_match('/Edg/i', $userAgent)) {
-            return 'Edge';
+        // Tablets - check first as some overlap with mobile
+        $tablets = [
+            \donatj\UserAgent\Platforms::IPAD,
+            \donatj\UserAgent\Platforms::KINDLE_FIRE,
+            \donatj\UserAgent\Platforms::PLAYBOOK,
+        ];
+
+        // Mobile devices
+        $mobile = [
+            \donatj\UserAgent\Platforms::IPHONE,
+            \donatj\UserAgent\Platforms::IPOD,
+            \donatj\UserAgent\Platforms::ANDROID,
+            \donatj\UserAgent\Platforms::WINDOWS_PHONE,
+            \donatj\UserAgent\Platforms::BLACKBERRY,
+            \donatj\UserAgent\Platforms::KINDLE,
+            \donatj\UserAgent\Platforms::SYMBIAN,
+            \donatj\UserAgent\Platforms::TIZEN,
+            \donatj\UserAgent\Platforms::SAILFISH,
+        ];
+
+        if (in_array($platform, $tablets, true)) {
+            return 'tablet';
         }
-        if (preg_match('/Chrome/i', $userAgent)) {
-            return 'Chrome';
+
+        if (in_array($platform, $mobile, true)) {
+            return 'mobile';
         }
-        if (preg_match('/Safari/i', $userAgent)) {
-            return 'Safari';
-        }
-        if (preg_match('/Firefox/i', $userAgent)) {
-            return 'Firefox';
-        }
-        if (preg_match('/Opera|OPR/i', $userAgent)) {
-            return 'Opera';
-        }
-        return 'Other';
+
+        return 'desktop';
     }
 
     /**
@@ -360,6 +390,29 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
     protected function _getReadAdapter()
     {
         return Mage::getSingleton('core/resource')->getConnection('core_read');
+    }
+
+    /**
+     * Get table name with prefix
+     */
+    protected function _getTable(string $tableName): string
+    {
+        return Mage::getSingleton('core/resource')->getTableName($tableName);
+    }
+
+    /**
+     * Add store filter to select query if a specific store is selected
+     *
+     * @param Maho\Db\Select $select
+     * @param string $tableAlias Table alias to use for store_id column
+     */
+    protected function _addStoreFilter($select, string $tableAlias = ''): void
+    {
+        $storeId = (int) Mage::app()->getStore()->getId();
+        if ($storeId > 0) {
+            $column = $tableAlias ? "{$tableAlias}.store_id" : 'store_id';
+            $select->where("{$column} = ?", $storeId);
+        }
     }
 
     /**

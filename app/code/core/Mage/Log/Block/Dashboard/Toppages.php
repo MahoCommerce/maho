@@ -29,9 +29,9 @@ class Mage_Log_Block_Dashboard_Toppages extends Mage_Adminhtml_Block_Dashboard_A
      */
     public function formatUrl(string $url, int $maxLength = 50): string
     {
-        if (strlen($url) <= $maxLength) {
+        if (mb_strlen($url) <= $maxLength) {
             return $url;
         }
-        return substr($url, 0, $maxLength - 3) . '...';
+        return mb_substr($url, 0, $maxLength - 3) . '...';
     }
 }
