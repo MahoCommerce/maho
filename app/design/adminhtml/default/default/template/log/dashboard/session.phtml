@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Session $this */
+$metrics = $this->getMetrics();
+?>
+<div class="dashboard-session-metrics">
+    <div class="metrics-grid">
+        <div class="metric-item">
+            <div class="metric-value"><?= $this->formatDuration($metrics['avg_duration'] ?? 0) ?></div>
+            <div class="metric-label"><?= $this->__('Average Duration') ?></div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-value"><?= $metrics['avg_pages'] ?? 0 ?></div>
+            <div class="metric-label"><?= $this->__('Average Pages') ?></div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-value"><?= $metrics['bounce_rate'] ?? 0 ?>%</div>
+            <div class="metric-label"><?= $this->__('Bounce Rate') ?></div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-value"><?= number_format($metrics['total_sessions'] ?? 0) ?></div>
+            <div class="metric-label"><?= $this->__('Sessions') ?></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-session-metrics {
+    padding: 10px;
+}
+.dashboard-session-metrics .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+.dashboard-session-metrics .metric-item {
+    text-align: center;
+    padding: 12px 8px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+.dashboard-session-metrics .metric-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+.dashboard-session-metrics .metric-label {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+</style>

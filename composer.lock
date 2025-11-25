@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "97e36d480d3901746a79987d6cb24998",
+    "content-hash": "2a1e16eacdec214a5074025d1948e12b",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -107,6 +107,59 @@
                 "source": "https://github.com/Bacon/BaconQrCode/tree/v3.0.3"
             },
             "time": "2025-11-19T17:15:36+00:00"
+        },
+        {
+            "name": "cbschuld/browser.php",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cbschuld/Browser.php.git",
+                "reference": "bf4be5f0b2d4d6d4bc328be58b1d9d7397561f82"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cbschuld/Browser.php/zipball/bf4be5f0b2d4d6d4bc328be58b1d9d7397561f82",
+                "reference": "bf4be5f0b2d4d6d4bc328be58b1d9d7397561f82",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.6"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "legacy/Browser.php"
+                ],
+                "psr-4": {
+                    "cbschuld\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Schuld",
+                    "email": "chris@chrisschuld.com",
+                    "homepage": "https://chrisschuld.com"
+                }
+            ],
+            "description": "A PHP Class to detect a user's Browser.  This encapsulation provides a breakdown of the browser and the version of the browser using the browser's user-agent string.  This is not a guaranteed solution but provides an overall accurate way to detect what browser a user is using.",
+            "homepage": "https://chrisschuld.com/projects/browser-php-detecting-a-users-browser-from-php/",
+            "keywords": [
+                "browser",
+                "detection",
+                "user agent"
+            ],
+            "support": {
+                "issues": "https://github.com/cbschuld/Browser.php/issues",
+                "source": "https://github.com/cbschuld/Browser.php"
+            },
+            "time": "2025-09-04T16:15:06+00:00"
         },
         {
             "name": "dasprid/enum",
@@ -5285,16 +5338,16 @@
         },
         {
             "name": "phpdocumentor/type-resolver",
-            "version": "1.11.1",
+            "version": "1.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "f626740b38009078de0dc8b2b9dc4e7f749c6eba"
+                "reference": "92a98ada2b93d9b201a613cb5a33584dde25f195"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/f626740b38009078de0dc8b2b9dc4e7f749c6eba",
-                "reference": "f626740b38009078de0dc8b2b9dc4e7f749c6eba",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/92a98ada2b93d9b201a613cb5a33584dde25f195",
+                "reference": "92a98ada2b93d9b201a613cb5a33584dde25f195",
                 "shasum": ""
             },
             "require": {
@@ -5337,9 +5390,9 @@
             "description": "A PSR-5 based resolver of Class names, Types and Structural Element Names",
             "support": {
                 "issues": "https://github.com/phpDocumentor/TypeResolver/issues",
-                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.11.1"
+                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.12.0"
             },
-            "time": "2025-11-21T11:31:57+00:00"
+            "time": "2025-11-21T15:09:14+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
