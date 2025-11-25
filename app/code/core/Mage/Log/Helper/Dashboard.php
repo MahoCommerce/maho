@@ -754,7 +754,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             }
 
             // For each unique IP, check if they visited before the date range
-            foreach ($ipFirstVisit as $ip => $firstVisit) {
+            foreach (array_keys($ipFirstVisit) as $ip) {
                 $checkSelect = $adapter->select()
                     ->from(['v' => $this->_getTable('log_visitor')], ['count' => new \Maho\Db\Expr('COUNT(*)')])
                     ->join(
