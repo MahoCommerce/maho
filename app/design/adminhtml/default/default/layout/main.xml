@@ -219,6 +219,42 @@ Base preview layout
         </block>
     </adminhtml_dashboard_productsviewed>
 
+    <adminhtml_dashboard_devices>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_devices" name="adminhtml.dashboard.tab.devices"/>
+        </block>
+    </adminhtml_dashboard_devices>
+
+    <adminhtml_dashboard_engagement>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_engagement" name="adminhtml.dashboard.tab.engagement"/>
+        </block>
+    </adminhtml_dashboard_engagement>
+
+    <adminhtml_dashboard_entryexit>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_entryexit" name="adminhtml.dashboard.tab.entryexit"/>
+        </block>
+    </adminhtml_dashboard_entryexit>
+
+    <adminhtml_dashboard_languages>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_languages" name="adminhtml.dashboard.tab.languages"/>
+        </block>
+    </adminhtml_dashboard_languages>
+
+    <adminhtml_dashboard_toppages>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_toppages" name="adminhtml.dashboard.tab.toppages"/>
+        </block>
+    </adminhtml_dashboard_toppages>
+
+    <adminhtml_dashboard_trafficsources>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_sources" name="adminhtml.dashboard.tab.trafficsources"/>
+        </block>
+    </adminhtml_dashboard_trafficsources>
+
     <adminhtml_index_login>
         <block type="core/text_list" name="root" output="toHtml">
             <block type="adminhtml/template" name="content" template="login.phtml">

@@ -55,22 +55,26 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
         if ($visitorLogEnabled) {
             $this->addTab('devices_browsers', [
                 'label'     => $this->__('Devices & Browsers'),
-                'content'   => $this->getLayout()->createBlock('log/dashboard_devices')->toHtml(),
+                'url'       => $this->getUrl('*/*/devices', ['_current' => true]),
+                'class'     => 'ajax',
             ]);
 
             $this->addTab('engagement', [
                 'label'     => $this->__('Engagement'),
-                'content'   => $this->getLayout()->createBlock('log/dashboard_engagement')->toHtml(),
+                'url'       => $this->getUrl('*/*/engagement', ['_current' => true]),
+                'class'     => 'ajax',
             ]);
 
             $this->addTab('entry_exit_pages', [
                 'label'     => $this->__('Entry & Exit Pages'),
-                'content'   => $this->getLayout()->createBlock('log/dashboard_entryexit')->toHtml(),
+                'url'       => $this->getUrl('*/*/entryExit', ['_current' => true]),
+                'class'     => 'ajax',
             ]);
 
             $this->addTab('languages', [
                 'label'     => $this->__('Languages'),
-                'content'   => $this->getLayout()->createBlock('log/dashboard_languages')->toHtml(),
+                'url'       => $this->getUrl('*/*/languages', ['_current' => true]),
+                'class'     => 'ajax',
             ]);
         }
 
@@ -89,12 +93,14 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
         if ($visitorLogEnabled) {
             $this->addTab('top_pages', [
                 'label'     => $this->__('Top Pages'),
-                'content'   => $this->getLayout()->createBlock('log/dashboard_toppages')->toHtml(),
+                'url'       => $this->getUrl('*/*/topPages', ['_current' => true]),
+                'class'     => 'ajax',
             ]);
 
             $this->addTab('traffic_sources', [
                 'label'     => $this->__('Traffic Sources'),
-                'content'   => $this->getLayout()->createBlock('log/dashboard_sources')->toHtml(),
+                'url'       => $this->getUrl('*/*/trafficSources', ['_current' => true]),
+                'class'     => 'ajax',
             ]);
         }
 
