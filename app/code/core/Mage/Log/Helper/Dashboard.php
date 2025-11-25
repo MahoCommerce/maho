@@ -43,6 +43,55 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Get current date in UTC for database queries
+     */
+    protected function _getUtcDate(string $modifier = ''): string
+    {
+        $date = new DateTime('now', new DateTimeZone('UTC'));
+        if ($modifier) {
+            $date->modify($modifier);
+        }
+        return $date->format('Y-m-d');
+    }
+
+    /**
+     * Get current datetime in UTC for database queries
+     */
+    protected function _getUtcDateTime(string $modifier = ''): string
+    {
+        $date = new DateTime('now', new DateTimeZone('UTC'));
+        if ($modifier) {
+            $date->modify($modifier);
+        }
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Get today's date in UTC
+     */
+    protected function _getUtcToday(): string
+    {
+        return $this->_getUtcDate();
+    }
+
+    /**
+     * Get date N days ago in UTC for database queries
+     */
+    protected function _getUtcDaysAgo(int $days): string
+    {
+        return $this->_getUtcDate("-{$days} days");
+    }
+
+    /**
+     * Format date for display using store locale
+     */
+    protected function _formatDateForDisplay(string $date, string $format = 'M j'): string
+    {
+        $dateTime = new DateTime($date, new DateTimeZone('UTC'));
+        return $dateTime->format($format);
+    }
+
+    /**
      * Get online visitor count (real-time)
      */
     public function getOnlineCount(): int
@@ -55,14 +104,15 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getTodayCount(): int
     {
-        $cacheKey = $this->_getCacheKey('today_count_' . date('Y-m-d'));
+        $today = $this->_getUtcToday();
+        $cacheKey = $this->_getCacheKey('today_count_' . $today);
         $count = Mage::app()->getCache()->load($cacheKey);
 
         if ($count === false) {
             $adapter = $this->_getReadAdapter();
             $select = $adapter->select()
                 ->from($this->_getTable('log_visitor'), ['count' => 'COUNT(*)'])
-                ->where('DATE(first_visit_at) = ?', Mage_Core_Model_Locale::today());
+                ->where('DATE(first_visit_at) = ?', $today);
 
             $this->_addStoreFilter($select);
 
@@ -83,14 +133,15 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
      */
     public function getWeekCount(): int
     {
-        $cacheKey = $this->_getCacheKey('week_count_' . date('Y-W'));
+        $weekStart = $this->_getUtcDaysAgo(7);
+        $cacheKey = $this->_getCacheKey('week_count_' . $weekStart);
         $count = Mage::app()->getCache()->load($cacheKey);
 
         if ($count === false) {
             $adapter = $this->_getReadAdapter();
             $select = $adapter->select()
                 ->from($this->_getTable('log_visitor'), ['count' => 'COUNT(*)'])
-                ->where('first_visit_at >= ?', date('Y-m-d 00:00:00', strtotime('-7 days')));
+                ->where('first_visit_at >= ?', $weekStart . ' 00:00:00');
 
             $this->_addStoreFilter($select);
 
@@ -119,11 +170,12 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
         if ($result === false) {
             $adapter = $this->_getReadAdapter();
+            $startDate = $this->_getUtcDateTime("-{$days} days");
 
             // Get daily aggregated data from log_summary
             $select = $adapter->select()
                 ->from($this->_getTable('log_summary'), ['add_date', 'visitor_count'])
-                ->where('add_date >= ?', date('Y-m-d H:00:00', strtotime("-{$days} days")))
+                ->where('add_date >= ?', $startDate)
                 ->order('add_date ASC');
 
             $this->_addStoreFilter($select);
@@ -133,7 +185,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             // Group by day
             $dailyData = [];
             foreach ($rows as $row) {
-                $day = date('Y-m-d', strtotime($row['add_date']));
+                $day = $this->_formatDateForDisplay($row['add_date'], 'Y-m-d');
                 if (!isset($dailyData[$day])) {
                     $dailyData[$day] = 0;
                 }
@@ -144,8 +196,8 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             $labels = [];
             $data = [];
             for ($i = $days - 1; $i >= 0; $i--) {
-                $date = date('Y-m-d', strtotime("-{$i} days"));
-                $labels[] = date('M j', strtotime($date));
+                $date = $this->_getUtcDate("-{$i} days");
+                $labels[] = $this->_formatDateForDisplay($date, 'M j');
                 $data[] = $dailyData[$date] ?? 0;
             }
 
@@ -188,7 +240,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'lu.visitor_id = lv.visitor_id',
                     [],
                 )
-                ->where('lu.visit_time >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('lu.visit_time >= ?', $this->_getUtcDaysAgo($days))
                 ->where('lui.url IS NOT NULL')
                 ->where('lui.url != ?', '');
 
@@ -230,7 +282,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'v.visitor_id = vi.visitor_id',
                     ['http_referer'],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days))
                 ->limit(10000);
 
             $this->_addStoreFilter($select, 'v');
@@ -289,7 +341,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'v.visitor_id = vi.visitor_id',
                     ['http_user_agent'],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days))
                 ->limit(10000);
 
             $this->_addStoreFilter($select, 'v');
@@ -354,7 +406,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'visitor_id',
                     'duration' => new \Maho\Db\Expr('TIMESTAMPDIFF(SECOND, v.first_visit_at, v.last_visit_at)'),
                 ])
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days))
                 ->where('v.first_visit_at != v.last_visit_at'); // Exclude single-page sessions for duration
 
             $this->_addStoreFilter($select, 'v');
@@ -372,7 +424,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'lu.visitor_id = v.visitor_id',
                     [],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days))
                 ->group('lu.visitor_id');
 
             $this->_addStoreFilter($pageSelect, 'v');
@@ -456,7 +508,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'v.visitor_id = vi.visitor_id',
                     ['http_accept_language'],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days))
                 ->where('vi.http_accept_language IS NOT NULL')
                 ->where('vi.http_accept_language != ?', '')
                 ->limit(10000);
@@ -577,7 +629,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'lu.visitor_id = v.visitor_id',
                     [],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")));
+                ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days));
 
             $this->_addStoreFilter($firstUrlSelect, 'v');
             $firstUrlSelect->group('lu.visitor_id');
@@ -631,7 +683,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'v.last_url_id = lui.url_id',
                     ['url'],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days))
                 ->where('v.last_url_id > 0')
                 ->where('lui.url IS NOT NULL')
                 ->where('lui.url != ?', '');
@@ -669,10 +721,12 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
         if ($result === false) {
             $adapter = $this->_getReadAdapter();
 
+            $startDate = $this->_getUtcDaysAgo($days);
+
             // Total visitors
             $visitorSelect = $adapter->select()
                 ->from($this->_getTable('log_visitor'), ['count' => new \Maho\Db\Expr('COUNT(*)')])
-                ->where('first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")));
+                ->where('first_visit_at >= ?', $startDate);
 
             $this->_addStoreFilter($visitorSelect);
             $totalVisitors = (int) $adapter->fetchOne($visitorSelect);
@@ -685,7 +739,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'lc.visitor_id = v.visitor_id',
                     [],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")));
+                ->where('v.first_visit_at >= ?', $startDate);
 
             $this->_addStoreFilter($customerSelect, 'lc');
             $customers = (int) $adapter->fetchOne($customerSelect);
@@ -722,6 +776,8 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
         if ($result === false) {
             $adapter = $this->_getReadAdapter();
 
+            $startDate = $this->_getUtcDaysAgo($days);
+
             // Get visitors with their IP addresses in the date range
             $select = $adapter->select()
                 ->from(['v' => $this->_getTable('log_visitor')], ['visitor_id', 'first_visit_at'])
@@ -730,7 +786,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                     'v.visitor_id = vi.visitor_id',
                     ['remote_addr'],
                 )
-                ->where('v.first_visit_at >= ?', date('Y-m-d', strtotime("-{$days} days")))
+                ->where('v.first_visit_at >= ?', $startDate)
                 ->where('vi.remote_addr IS NOT NULL');
 
             $this->_addStoreFilter($select, 'v');
@@ -740,7 +796,6 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             // Check which IPs had previous visits
             $returning = 0;
             $new = 0;
-            $startDate = date('Y-m-d', strtotime("-{$days} days"));
 
             // Group visitors by IP to check for previous visits
             $ipFirstVisit = [];
@@ -796,10 +851,8 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
     /**
      * Get database read adapter
-     *
-     * @return Maho\Db\Adapter\AdapterInterface
      */
-    protected function _getReadAdapter()
+    protected function _getReadAdapter(): \Maho\Db\Adapter\AdapterInterface
     {
         return Mage::getSingleton('core/resource')->getConnection('core_read');
     }
@@ -814,11 +867,8 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
     /**
      * Add store filter to select query if a specific store is selected
-     *
-     * @param Maho\Db\Select $select
-     * @param string $tableAlias Table alias to use for store_id column
      */
-    protected function _addStoreFilter($select, string $tableAlias = ''): void
+    protected function _addStoreFilter(\Maho\Db\Select $select, string $tableAlias = ''): void
     {
         $storeId = $this->_getStoreIdForFilter();
         if ($storeId > 0) {

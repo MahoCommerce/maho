@@ -10,32 +10,18 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Entry and exit pages block for dashboard
- */
-class Mage_Log_Block_Dashboard_Entryexit extends Mage_Adminhtml_Block_Dashboard_Abstract
+class Mage_Log_Block_Dashboard_TopPages extends Mage_Adminhtml_Block_Dashboard_Abstract
 {
     #[\Override]
     protected function _construct()
     {
         parent::_construct();
-        $this->setTemplate('log/dashboard/entryexit.phtml');
+        $this->setTemplate('log/dashboard/top_pages.phtml');
     }
 
-    /**
-     * Get entry (landing) pages
-     */
-    public function getEntryPages(): array
+    public function getTopPages(): array
     {
-        return Mage::helper('log/dashboard')->getEntryPages(7, 10);
-    }
-
-    /**
-     * Get exit pages
-     */
-    public function getExitPages(): array
-    {
-        return Mage::helper('log/dashboard')->getExitPages(7, 10);
+        return Mage::helper('log/dashboard')->getTopPages(7, 20);
     }
 
     /**
