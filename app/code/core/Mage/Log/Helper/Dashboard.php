@@ -291,7 +291,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
             $visitors = $adapter->fetchAll($select);
 
-            $devices = ['mobile' => 0, 'desktop' => 0];
+            $devices = ['desktop' => 0, 'tablet' => 0, 'mobile' => 0];
             $browsers = [];
             $browserDetect = new \cbschuld\Browser();
 
@@ -300,7 +300,13 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                 $browserDetect->setUserAgent($ua);
 
                 // Device detection
-                $device = $browserDetect->isMobile() || $browserDetect->isTablet() ? 'mobile' : 'desktop';
+                if ($browserDetect->isTablet()) {
+                    $device = 'tablet';
+                } elseif ($browserDetect->isMobile()) {
+                    $device = 'mobile';
+                } else {
+                    $device = 'desktop';
+                }
                 $devices[$device]++;
 
                 // Browser detection

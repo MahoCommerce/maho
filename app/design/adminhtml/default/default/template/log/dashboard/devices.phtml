@@ -48,6 +48,7 @@ $browserTotal = array_sum($browsers);
                     <?php if ($count++ >= 5) break; // Show top 5 ?>
                     <?php $percentage = $this->calculatePercentage($browserCount, $browserTotal); ?>
                     <div class="browser-row">
+                        <span class="browser-icon"><?= $this->getBrowserIcon($browser) ?></span>
                         <span class="browser-label"><?= $this->escapeHtml($browser) ?></span>
                         <span class="browser-value"><?= $percentage ?>%</span>
                     </div>
@@ -89,9 +90,16 @@ $browserTotal = array_sum($browsers);
 .dashboard-devices .browser-row:last-child {
     border-bottom: none;
 }
-.dashboard-devices .device-icon {
+.dashboard-devices .device-icon,
+.dashboard-devices .browser-icon {
+    display: flex;
+    align-items: center;
     margin-right: 8px;
-    font-size: 14px;
+}
+.dashboard-devices .device-icon svg,
+.dashboard-devices .browser-icon svg {
+    width: 16px;
+    height: 16px;
 }
 .dashboard-devices .device-label,
 .dashboard-devices .browser-label {

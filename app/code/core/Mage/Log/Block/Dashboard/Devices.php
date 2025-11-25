@@ -38,9 +38,18 @@ class Mage_Log_Block_Dashboard_Devices extends Mage_Adminhtml_Block_Dashboard_Ab
     public function getDeviceIcon(string $device): string
     {
         $icons = [
-            'mobile' => '📱',
-            'desktop' => '💻',
+            'desktop' => 'device-desktop',
+            'tablet' => 'device-tablet',
+            'mobile' => 'device-mobile',
         ];
-        return $icons[$device] ?? '';
+        $iconName = $icons[$device] ?? null;
+        return $iconName ? $this->getIconSvg($iconName) : '';
+    }
+
+    public function getBrowserIcon(string $browser): string
+    {
+        $iconName = 'brand-' . strtolower(str_replace(' ', '', $browser));
+        $icon = $this->getIconSvg($iconName);
+        return $icon ?: $this->getIconSvg('browser');
     }
 }
