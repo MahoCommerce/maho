@@ -1,3 +1,14 @@
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
 #nav ul li.active, #nav ul li {
   float: none;
   height: auto;
@@ -225,6 +236,3 @@
   font-weight: 600;
   background: #273169;
 }
-
-
-/*# sourceMappingURL=menu.css.map */

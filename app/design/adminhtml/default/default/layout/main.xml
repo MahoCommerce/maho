@@ -55,12 +55,11 @@ Default layout, loads most of the pages
                 <action method="addJs"><script>mage/adminhtml/uploader.js</script></action>
                 <action method="addJs"><script>mage/adminhtml/product.js</script></action>
 
-                <action method="addCss"><name>reset.css</name></action>
-                <action method="addCss"><name>boxes.css</name></action>
-                <action method="addCss"><name>print.css</name><params>media="print"</params></action>
-                <action method="addItem"><type>skin_css</type><name>menu.css</name><params>media="screen, projection"</params></action>
-                <action method="addItem"><type>skin_css</type><name>override.css</name></action>
+
+                <action method="addItem"><type>skin_css</type><name>base.css</name></action>
                 <action method="addItem"><type>skin_css</type><name>form.css</name></action>
+                <action method="addItem"><type>skin_css</type><name>menu.css</name><params>media="screen, projection"</params></action>
+                <action method="addCss"><name>print.css</name><params>media="print"</params></action>
 
                 <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name><params/><if/><condition>can_load_rules_js</condition></action>
             </block>
