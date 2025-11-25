@@ -27,7 +27,7 @@ class Mage_Log_Block_Dashboard_Sources extends Mage_Adminhtml_Block_Dashboard_Ab
      */
     public function getSources(): array
     {
-        return Mage::helper('log/dashboard')->getTrafficSources(7);
+        return Mage::helper('log/dashboard')->getTrafficSources(7, 10);
     }
 
     /**
@@ -42,17 +42,13 @@ class Mage_Log_Block_Dashboard_Sources extends Mage_Adminhtml_Block_Dashboard_Ab
     }
 
     /**
-     * Get label for source type
+     * Format domain for display
      */
-    public function getSourceLabel(string $type): string
+    public function formatDomain(string $domain): string
     {
-        $labels = [
-            'direct' => $this->__('Direct'),
-            'organic' => $this->__('Search Engines'),
-            'social' => $this->__('Social Media'),
-            'email' => $this->__('Email'),
-            'referral' => $this->__('Referral'),
-        ];
-        return $labels[$type] ?? ucfirst($type);
+        if ($domain === 'direct') {
+            return $this->__('Direct / No referrer');
+        }
+        return $domain;
     }
 }

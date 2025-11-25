@@ -14,28 +14,17 @@ $total = array_sum($sources);
 ?>
 <div class="dashboard-traffic-sources">
     <?php if ($total > 0): ?>
-        <?php
-        $colors = [
-            'direct' => '#4CAF50',
-            'organic' => '#2196F3',
-            'social' => '#9C27B0',
-            'email' => '#FF9800',
-            'referral' => '#607D8B'
-        ];
-        ?>
-        <?php foreach ($sources as $type => $count): ?>
-            <?php if ($count > 0): ?>
-                <?php $percentage = $this->calculatePercentage($count, $total); ?>
-                <div class="source-row">
-                    <div class="source-info">
-                        <span class="source-label"><?= $this->getSourceLabel($type) ?></span>
-                        <span class="source-stats"><?= (int)$count ?> (<?= $percentage ?>%)</span>
-                    </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: <?= $percentage ?>%; background-color: <?= $colors[$type] ?? '#999' ?>;"></div>
-                    </div>
+        <?php foreach ($sources as $domain => $count): ?>
+            <?php $percentage = $this->calculatePercentage($count, $total); ?>
+            <div class="source-row">
+                <div class="source-info">
+                    <span class="source-label"><?= $this->escapeHtml($this->formatDomain($domain)) ?></span>
+                    <span class="source-stats"><?= (int)$count ?> (<?= $percentage ?>%)</span>
                 </div>
-            <?php endif ?>
+                <div class="source-bar">
+                    <div class="source-bar-fill" style="width: <?= $percentage ?>%;"></div>
+                </div>
+            </div>
         <?php endforeach ?>
     <?php else: ?>
         <p class="a-center" style="padding: 20px; color: #999;">
@@ -73,6 +62,7 @@ $total = array_sum($sources);
 }
 .dashboard-traffic-sources .source-bar-fill {
     height: 100%;
+    background-color: #2196F3;
     transition: width 0.3s ease;
 }
 </style>

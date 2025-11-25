@@ -213,11 +213,11 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get traffic sources breakdown
+     * Get traffic sources breakdown by referrer domain
      */
-    public function getTrafficSources(int $days = 7): array
+    public function getTrafficSources(int $days = 7, int $limit = 10): array
     {
-        $cacheKey = $this->_getCacheKey('sources_' . $days);
+        $cacheKey = $this->_getCacheKey('sources_' . $days . '_' . $limit);
         $result = Mage::app()->getCache()->load($cacheKey);
 
         if ($result === false) {
@@ -237,19 +237,24 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
             $visitors = $adapter->fetchAll($select);
 
-            $sources = [
-                'direct' => 0,
-                'organic' => 0,
-                'social' => 0,
-                'email' => 0,
-                'referral' => 0,
-            ];
+            $storeHost = parse_url(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), PHP_URL_HOST);
+            $sources = [];
 
             foreach ($visitors as $visitor) {
-                $referer = $visitor['http_referer'];
-                $type = $this->_classifyReferrer($referer);
-                $sources[$type]++;
+                $referer = $visitor['http_referer'] ?? '';
+                $host = !empty($referer) ? parse_url($referer, PHP_URL_HOST) : null;
+
+                // Skip internal referrers (same domain)
+                if ($host === $storeHost) {
+                    continue;
+                }
+
+                $domain = $host ?: 'direct';
+                $sources[$domain] = ($sources[$domain] ?? 0) + 1;
             }
+
+            arsort($sources);
+            $sources = array_slice($sources, 0, $limit, true);
 
             $result = Mage::helper('core')->jsonEncode($sources);
 
@@ -329,45 +334,6 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
         return Mage::helper('core')->jsonDecode($result);
     }
-
-    /**
-     * Classify referrer into category
-     *
-     * @param string $referer
-     */
-    protected function _classifyReferrer(?string $referer): string
-    {
-        if (empty($referer)) {
-            return 'direct';
-        }
-
-        $host = parse_url($referer, PHP_URL_HOST);
-
-        // Internal referrer (same domain) = direct traffic
-        $storeUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
-        $storeHost = parse_url($storeUrl, PHP_URL_HOST);
-        if ($host === $storeHost) {
-            return 'direct';
-        }
-
-        // Search engines
-        if (preg_match('/(google|bing|yahoo|duckduckgo|baidu|yandex)/i', $host)) {
-            return 'organic';
-        }
-
-        // Social media
-        if (preg_match('/(facebook|twitter|instagram|linkedin|pinterest|tiktok|reddit)/i', $host)) {
-            return 'social';
-        }
-
-        // Email
-        if (preg_match('/(mail\.|webmail|outlook)/i', $host)) {
-            return 'email';
-        }
-
-        return 'referral';
-    }
-
 
     /**
      * Get database read adapter
