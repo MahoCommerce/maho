@@ -52,4 +52,12 @@ $connection->addIndex(
     'index',
 );
 
+// Index for IP address lookups (new vs returning visitors)
+$connection->addIndex(
+    'log_visitor_info',
+    'IDX_LOG_VISITOR_INFO_REMOTE_ADDR',
+    ['remote_addr'],
+    'index',
+);
+
 $installer->endSetup();
