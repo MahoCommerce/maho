@@ -67,11 +67,15 @@ class Mage_Adminhtml_Block_Dashboard extends Mage_Adminhtml_Block_Template
             $this->getLayout()->createBlock('adminhtml/dashboard_grids'),
         );
 
-        // Add visitor stats block for left sidebar if visitor logging is enabled
+        // Add visitor analytics blocks for left sidebar if visitor logging is enabled
         if (Mage::helper('log')->isVisitorLogEnabled()) {
             $this->setChild(
                 'visitorStats',
                 $this->getLayout()->createBlock('log/dashboard_stats'),
+            );
+            $this->setChild(
+                'sessionMetrics',
+                $this->getLayout()->createBlock('log/dashboard_session'),
             );
         }
 

@@ -1,0 +1,171 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Engagement $this */
+$conversion = $this->getConversion();
+$newReturning = $this->getNewVsReturning();
+$newPercent = $this->calculatePercentage($newReturning['new'] ?? 0, $newReturning['total'] ?? 0);
+$returningPercent = $this->calculatePercentage($newReturning['returning'] ?? 0, $newReturning['total'] ?? 0);
+?>
+<div class="dashboard-engagement">
+    <div class="engagement-container">
+        <!-- Conversion -->
+        <div class="engagement-section">
+            <h5><?= $this->__('Login Conversion') ?></h5>
+            <div class="conversion-stats">
+                <div class="conversion-rate">
+                    <span class="rate-value"><?= $conversion['conversion_rate'] ?? 0 ?>%</span>
+                    <span class="rate-label"><?= $this->__('of visitors logged in') ?></span>
+                </div>
+                <div class="conversion-numbers">
+                    <div class="number-item">
+                        <span class="number-value"><?= number_format($conversion['customers'] ?? 0) ?></span>
+                        <span class="number-label"><?= $this->__('Logged in') ?></span>
+                    </div>
+                    <div class="number-item">
+                        <span class="number-value"><?= number_format($conversion['visitors'] ?? 0) ?></span>
+                        <span class="number-label"><?= $this->__('Total visitors') ?></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New vs Returning -->
+        <div class="engagement-section">
+            <h5><?= $this->__('New vs Returning') ?></h5>
+            <?php if (($newReturning['total'] ?? 0) > 0): ?>
+                <div class="visitors-bar">
+                    <div class="visitors-new" style="width: <?= $newPercent ?>%"></div>
+                    <div class="visitors-returning" style="width: <?= $returningPercent ?>%"></div>
+                </div>
+                <div class="visitors-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot legend-new"></span>
+                        <span class="legend-label"><?= $this->__('New') ?></span>
+                        <span class="legend-value"><?= number_format($newReturning['new'] ?? 0) ?> (<?= $newPercent ?>%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot legend-returning"></span>
+                        <span class="legend-label"><?= $this->__('Returning') ?></span>
+                        <span class="legend-value"><?= number_format($newReturning['returning'] ?? 0) ?> (<?= $returningPercent ?>%)</span>
+                    </div>
+                </div>
+            <?php else: ?>
+                <p class="no-data"><?= $this->__('No data') ?></p>
+            <?php endif ?>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-engagement {
+    padding: 10px;
+}
+.dashboard-engagement h5 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+.dashboard-engagement .engagement-container {
+    display: flex;
+    gap: 30px;
+}
+.dashboard-engagement .engagement-section {
+    flex: 1;
+}
+.dashboard-engagement .conversion-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.dashboard-engagement .conversion-rate {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.dashboard-engagement .rate-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4a90d9;
+}
+.dashboard-engagement .rate-label {
+    font-size: 12px;
+    color: #666;
+}
+.dashboard-engagement .conversion-numbers {
+    display: flex;
+    gap: 20px;
+}
+.dashboard-engagement .number-item {
+    display: flex;
+    flex-direction: column;
+}
+.dashboard-engagement .number-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+.dashboard-engagement .number-label {
+    font-size: 10px;
+    color: #999;
+    text-transform: uppercase;
+}
+.dashboard-engagement .visitors-bar {
+    display: flex;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f0f0f0;
+    margin-bottom: 12px;
+}
+.dashboard-engagement .visitors-new {
+    background: #67b26f;
+    transition: width 0.3s ease;
+}
+.dashboard-engagement .visitors-returning {
+    background: #4a90d9;
+    transition: width 0.3s ease;
+}
+.dashboard-engagement .visitors-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dashboard-engagement .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+.dashboard-engagement .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.dashboard-engagement .legend-new {
+    background: #67b26f;
+}
+.dashboard-engagement .legend-returning {
+    background: #4a90d9;
+}
+.dashboard-engagement .legend-label {
+    color: #333;
+}
+.dashboard-engagement .legend-value {
+    color: #666;
+    margin-left: auto;
+}
+.dashboard-engagement .no-data {
+    color: #999;
+    font-size: 12px;
+    padding: 10px 0;
+}
+</style>

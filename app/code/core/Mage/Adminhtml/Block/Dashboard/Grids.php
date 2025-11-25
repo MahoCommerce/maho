@@ -37,25 +37,40 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
     #[\Override]
     protected function _prepareLayout()
     {
-        // load this active tab statically
+        $visitorLogEnabled = Mage::helper('log')->isVisitorLogEnabled();
+
+        // Tabs in alphabetical order
         $this->addTab('ordered_products', [
             'label'     => $this->__('Bestsellers'),
             'content'   => $this->getLayout()->createBlock('adminhtml/dashboard_tab_products_ordered')->toHtml(),
             'active'    => true,
         ]);
 
-        // load other tabs with ajax
         $this->addTab('customers', [
             'label'     => $this->__('Customers'),
             'url'       => $this->getUrl('*/*/customersMost', ['_current' => true]),
             'class'     => 'ajax',
         ]);
 
-        // Add analytics tabs if visitor logging is enabled
-        if (Mage::helper('log')->isVisitorLogEnabled()) {
+        if ($visitorLogEnabled) {
             $this->addTab('devices_browsers', [
                 'label'     => $this->__('Devices & Browsers'),
                 'content'   => $this->getLayout()->createBlock('log/dashboard_devices')->toHtml(),
+            ]);
+
+            $this->addTab('engagement', [
+                'label'     => $this->__('Engagement'),
+                'content'   => $this->getLayout()->createBlock('log/dashboard_engagement')->toHtml(),
+            ]);
+
+            $this->addTab('entry_exit_pages', [
+                'label'     => $this->__('Entry & Exit Pages'),
+                'content'   => $this->getLayout()->createBlock('log/dashboard_entryexit')->toHtml(),
+            ]);
+
+            $this->addTab('languages', [
+                'label'     => $this->__('Languages'),
+                'content'   => $this->getLayout()->createBlock('log/dashboard_languages')->toHtml(),
             ]);
         }
 
@@ -71,8 +86,7 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
             'class'     => 'ajax',
         ]);
 
-        // Add analytics tabs if visitor logging is enabled
-        if (Mage::helper('log')->isVisitorLogEnabled()) {
+        if ($visitorLogEnabled) {
             $this->addTab('top_pages', [
                 'label'     => $this->__('Top Pages'),
                 'content'   => $this->getLayout()->createBlock('log/dashboard_toppages')->toHtml(),

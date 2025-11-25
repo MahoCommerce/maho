@@ -113,8 +113,14 @@ function toggleCal(id) {
             <td>
                 <?php if ($this->getChild('visitorStats')): ?>
                 <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Visitor Stats') ?></h4></div>
+                    <div class="entry-edit-head"><h4><?= $this->__('Visitors') ?></h4></div>
                     <fieldset class="np"><?= $this->getChildHtml('visitorStats') ?></fieldset>
+                </div>
+                <?php endif ?>
+                <?php if ($this->getChild('sessionMetrics')): ?>
+                <div class="entry-edit">
+                    <div class="entry-edit-head"><h4><?= $this->__('Session Metrics') ?></h4></div>
+                    <fieldset class="np"><?= $this->getChildHtml('sessionMetrics') ?></fieldset>
                 </div>
                 <?php endif ?>
                 <?= $this->getChildHtml('sales') ?>

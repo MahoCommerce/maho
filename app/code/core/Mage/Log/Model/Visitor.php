@@ -162,12 +162,25 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     /**
      * Retrieve url from model data
      *
+     * Uses the original (friendly) URL before rewriting, not the internal rewritten URL
+     *
      * @return string
      */
     public function getUrl()
     {
         $url = 'http' . ($this->getHttpSecure() ? 's' : '') . '://';
-        $url .= $this->getHttpHost() . $this->getRequestUri();
+        $url .= $this->getHttpHost();
+
+        // Use original path info (before URL rewrite) for friendlier URLs in analytics
+        $request = Mage::app()->getRequest();
+        $originalPath = $request->getOriginalPathInfo();
+
+        if (!empty($originalPath)) {
+            $url .= $originalPath;
+        } else {
+            $url .= $this->getRequestUri();
+        }
+
         return $url;
     }
 
@@ -277,6 +290,14 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         if ($customer) {
             $this->setDoCustomerLogin(true);
             $this->setCustomerId($customer->getId());
+
+            // Update session_id after session regeneration to prevent duplicate visitor creation
+            $newSessionId = $this->_session->getSessionId();
+            if ($this->getId() && $this->getSessionId() !== $newSessionId) {
+                $this->setSessionId($newSessionId);
+                // Update session data with new session_id so next request finds this visitor
+                $this->_session->setVisitorData($this->getData());
+            }
         }
         return $this;
     }

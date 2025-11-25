@@ -109,11 +109,12 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         } else {
             if ($this->_urlLoggingCondition->isAllVisitorLoggingEnabled()) {
                 $this->_saveVisitorUrl($visitor);
+            }
+            if ($this->_urlLoggingCondition->isVisitorLogEnabled()) {
+                // Track customer login/logout for analytics even in "Visitors only" mode
                 if ($visitor->getDoCustomerLogin() || $visitor->getDoCustomerLogout()) {
                     $this->_saveCustomerInfo($visitor);
                 }
-            }
-            if ($this->_urlLoggingCondition->isVisitorLogEnabled()) {
                 if ($visitor->getDoQuoteCreate() || $visitor->getDoQuoteDestroy()) {
                     $this->_saveQuoteInfo($visitor);
                 }
