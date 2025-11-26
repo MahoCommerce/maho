@@ -412,10 +412,6 @@ table.actions td {
     vertical-align: middle
 }
 
-.grid tr.headings {
-    background: url(images/sort_row_bg.gif)0 50%repeat-x
-}
-
 .grid tr.headings th {
     border-width: 1px;
     border-color: #f9f9f9 #d1cfcf #f9f9f9 #f9f9f9;
@@ -2022,13 +2018,48 @@ div.autocomplete ul li {
     }
 }
 
-.dashboard-container {
-    border: 1px solid #ccc
-}
-
 .dashboard-container .switcher {
     margin-bottom: 0;
     border: 0
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(400px, 30%) 1fr;
+    gap: 20px;
+}
+
+.dashboard-grid .entry-edit,
+.dashboard-grid .entry-edit fieldset {
+    margin: 0;
+}
+
+.dashboard-col-left,
+.dashboard-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dashboard-grid .entry-edit table tr:first-child th,
+.dashboard-grid .entry-edit table tr:last-child td {
+    border-block: 0;
+}
+
+.dashboard-grid .entry-edit table :is(th, td):first-child {
+    border-left: 0;
+}
+
+.dashboard-grid .entry-edit table :is(th, td):last-child {
+    border-right: 0;
+}
+
+.dashboard-diagrams-box {
+    border: 1px solid #ccc;
+}
+
+.dashboard-totals-wrapper {
+    margin: 20px;
 }
 
 .adminhtml-system-store-deletestore .content-footer .content-buttons,.adminhtml-system-store-deletegroup .content-footer .content-buttons,.adminhtml-system-store-deletewebsite .content-footer .content-buttons {
@@ -4515,11 +4546,45 @@ dl.accordion dt,.entry-edit .entry-edit-head {
 .box,.entry-edit .fieldset,.entry-edit fieldset {
     border: 1px solid #d3d3d3;
     background: #eee;
-    border-top: 0
+    border-top: 0;
 }
 
 #dashboard_diagram_totals {
     border-top: 1px solid #d3d3d3
+}
+
+.dashboard-totals-stats {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+}
+
+.dashboard-totals-stats .stat-col {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    min-width: 0;
+}
+
+.dashboard-totals-stats .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #EA7601;
+    margin-bottom: 4px;
+}
+
+.dashboard-totals-stats .stat-decimals {
+    font-size: 14px;
+    color: #DE8946;
+}
+
+.dashboard-totals-stats .stat-label {
+    color: #666;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .grid tr.headings th a.sort-arrow-asc,.grid tr.headings th a.sort-arrow-desc {
@@ -4711,10 +4776,6 @@ small {
 .content-header h3 {
     margin: 0 0 .3em;
     line-height: 32px
-}
-
-.dashboard-container {
-    border: 0
 }
 
 .columns {

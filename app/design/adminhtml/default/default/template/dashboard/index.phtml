@@ -108,50 +108,48 @@ function toggleCal(id) {
 </div>
 <div class="dashboard-container">
     <?= $this->getChildHtml('store_switcher') ?>
-    <table cellspacing="25" width="100%">
-        <tr>
-            <td>
-                <?php if ($this->getChild('visitorStats')): ?>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Visitors') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('visitorStats') ?></fieldset>
-                </div>
+    <div class="dashboard-grid">
+        <div class="dashboard-col-left">
+            <?php if ($this->getChild('visitorStats')): ?>
+            <div class="entry-edit">
+                <div class="entry-edit-head"><h4><?= $this->__('Visitors') ?></h4></div>
+                <fieldset class="np"><?= $this->getChildHtml('visitorStats') ?></fieldset>
+            </div>
+            <?php endif ?>
+            <?php if ($this->getChild('sessionMetrics')): ?>
+            <div class="entry-edit">
+                <div class="entry-edit-head"><h4><?= $this->__('Session Metrics') ?></h4></div>
+                <fieldset class="np"><?= $this->getChildHtml('sessionMetrics') ?></fieldset>
+            </div>
+            <?php endif ?>
+            <?= $this->getChildHtml('sales') ?>
+            <div class="entry-edit">
+                <div class="entry-edit-head"><h4><?= $this->__('Last 5 Orders') ?></h4></div>
+                <fieldset class="np"><?= $this->getChildHtml('lastOrders') ?></fieldset>
+            </div>
+            <div class="entry-edit">
+                <div class="entry-edit-head"><h4><?= $this->__('Last 5 Search Terms') ?></h4></div>
+                <fieldset class="np"><?= $this->getChildHtml('lastSearches') ?></fieldset>
+            </div>
+            <div class="entry-edit">
+                <div class="entry-edit-head"><h4><?= $this->__('Top 5 Search Terms') ?></h4></div>
+                <fieldset class="np"><?= $this->getChildHtml('topSearches') ?></fieldset>
+            </div>
+        </div>
+        <div class="dashboard-col-right">
+            <div class="entry-edit dashboard-diagrams-box">
+                <?= $this->getChildHtml('diagrams') ?>
+                <?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
+                    <div id="diagram_tab_content"></div>
                 <?php endif ?>
-                <?php if ($this->getChild('sessionMetrics')): ?>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Session Metrics') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('sessionMetrics') ?></fieldset>
+                <div class="dashboard-totals-wrapper">
+                    <?= $this->getChildHtml('totals') ?>
                 </div>
-                <?php endif ?>
-                <?= $this->getChildHtml('sales') ?>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Last 5 Orders') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('lastOrders') ?></fieldset>
-                </div>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Last 5 Search Terms') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('lastSearches') ?></fieldset>
-                </div>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Top 5 Search Terms') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('topSearches') ?></fieldset>
-                </div>
-            </td>
-            <td>
-                <div class="entry-edit" style="border:1px solid #ccc;">
-                    <?= $this->getChildHtml('diagrams') ?>
-                    <?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
-                        <div id="diagram_tab_content"></div>
-                    <?php endif ?>
-                    <div style="margin:20px;">
-                        <?= $this->getChildHtml('totals') ?>
-                    </div>
-                </div>
-                <div class="entry-edit" style="margin-top:20px;">
-                    <?= $this->getChildHtml('grids') ?>
-                    <div id="grid_tab_content"></div>
-                </div>
-            </td>
-        </tr>
-    </table>
+            </div>
+            <div class="entry-edit dashboard-grids-box">
+                <?= $this->getChildHtml('grids') ?>
+                <div id="grid_tab_content"></div>
+            </div>
+        </div>
+    </div>
 </div>
