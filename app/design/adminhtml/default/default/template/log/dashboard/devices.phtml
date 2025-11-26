@@ -1,0 +1,119 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Devices $this */
+$breakdown = $this->getBreakdown();
+$devices = $breakdown['devices'] ?? [];
+$browsers = $breakdown['browsers'] ?? [];
+$deviceTotal = array_sum($devices);
+$browserTotal = array_sum($browsers);
+?>
+<div class="dashboard-devices">
+    <div class="devices-browsers-container">
+        <!-- Devices -->
+        <div class="half-column">
+            <h5><?= $this->__('Devices') ?></h5>
+            <?php if ($deviceTotal > 0): ?>
+                <?php foreach ($devices as $device => $count): ?>
+                    <?php if ($count > 0): ?>
+                        <?php $percentage = $this->calculatePercentage($count, $deviceTotal); ?>
+                        <div class="device-row">
+                            <span class="device-icon"><?= $this->getDeviceIcon($device) ?></span>
+                            <span class="device-label"><?= ucfirst($device) ?></span>
+                            <span class="device-value"><?= $percentage ?>%</span>
+                        </div>
+                    <?php endif ?>
+                <?php endforeach ?>
+            <?php else: ?>
+                <p class="no-data"><?= $this->__('No data') ?></p>
+            <?php endif ?>
+        </div>
+
+        <!-- Browsers -->
+        <div class="half-column">
+            <h5><?= $this->__('Browsers') ?></h5>
+            <?php if ($browserTotal > 0): ?>
+                <?php
+                arsort($browsers);
+                $count = 0;
+                ?>
+                <?php foreach ($browsers as $browser => $browserCount): ?>
+                    <?php if ($count++ >= 5) break; // Show top 5 ?>
+                    <?php $percentage = $this->calculatePercentage($browserCount, $browserTotal); ?>
+                    <div class="browser-row">
+                        <span class="browser-icon"><?= $this->getBrowserIcon($browser) ?></span>
+                        <span class="browser-label"><?= $this->escapeHtml($browser) ?></span>
+                        <span class="browser-value"><?= $percentage ?>%</span>
+                    </div>
+                <?php endforeach ?>
+            <?php else: ?>
+                <p class="no-data"><?= $this->__('No data') ?></p>
+            <?php endif ?>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-devices {
+    padding: 10px;
+}
+.dashboard-devices h5 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+.devices-browsers-container {
+    display: flex;
+    gap: 20px;
+}
+.devices-browsers-container .half-column {
+    flex: 1;
+}
+.dashboard-devices .device-row,
+.dashboard-devices .browser-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
+}
+.dashboard-devices .device-row:last-child,
+.dashboard-devices .browser-row:last-child {
+    border-bottom: none;
+}
+.dashboard-devices .device-icon,
+.dashboard-devices .browser-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+}
+.dashboard-devices .device-icon svg,
+.dashboard-devices .browser-icon svg {
+    width: 16px;
+    height: 16px;
+}
+.dashboard-devices .device-label,
+.dashboard-devices .browser-label {
+    flex: 1;
+    color: #333;
+}
+.dashboard-devices .device-value,
+.dashboard-devices .browser-value {
+    font-weight: 600;
+    color: #666;
+}
+.dashboard-devices .no-data {
+    color: #999;
+    font-size: 12px;
+    padding: 10px 0;
+}
+</style>

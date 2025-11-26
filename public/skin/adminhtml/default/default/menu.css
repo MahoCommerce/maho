@@ -1,16 +1,14 @@
-/* ! Do not edit css files !
-   Edit scss version and compile with sass from scss folder like this:
-   $ sass menu.scss ../menu.css
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-/*
- 205 = default,
-   0 = red,
-  60 = yellow,
- 120 = green,
- 180 = turquoise,
- 240 = blue,
- 300 = purple
-*/
+
 #nav ul li.active, #nav ul li {
   float: none;
   height: auto;
@@ -46,16 +44,7 @@
 
 .nav-bar {
   background: black;
-  padding: 0 350px 0 70px;
-}
-.nav-bar:after {
-  content: ".";
-  display: block;
-  clear: both;
-  font-size: 0;
-  line-height: 0;
-  height: 0;
-  overflow: hidden;
+  padding: 0 350px 0 55px;
 }
 
 #nav {
@@ -247,6 +236,3 @@
   font-weight: 600;
   background: #273169;
 }
-
-
-/*# sourceMappingURL=menu.css.map */

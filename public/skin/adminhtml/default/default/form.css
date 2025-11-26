@@ -1,17 +1,14 @@
-@charset "UTF-8";
-/* ! Do not edit css files !
-   Edit scss version and compile with sass from scss folder like this:
-   $ sass form.scss ../form.css
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-/*
- 205 = default,
-   0 = red,
-  60 = yellow,
- 120 = green,
- 180 = turquoise,
- 240 = blue,
- 300 = purple
-*/
+
 input.input-text, textarea, select {
   font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   display: inline-block;
@@ -278,5 +275,3 @@ td:has(input.swatch-disabled) {
     opacity: 0; }
   td:has(input.swatch-disabled) .swatch-delete {
     display: none; }
-
-/*# sourceMappingURL=form.css.map */

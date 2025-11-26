@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_EntryExit $this */
+$entryPages = $this->getEntryPages();
+$exitPages = $this->getExitPages();
+?>
+<div class="dashboard-entryexit">
+    <div class="entryexit-container">
+        <!-- Entry Pages -->
+        <div class="half-column">
+            <h5><?= $this->__('Landing Pages') ?></h5>
+            <?php if (!empty($entryPages)): ?>
+            <div class="grid">
+                <table cellspacing="0">
+                    <thead>
+                        <tr class="headings">
+                            <th><span class="nobr"><?= $this->__('Page') ?></span></th>
+                            <th style="width: 50px;"><span class="nobr"><?= $this->__('Visits') ?></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach (array_slice($entryPages, 0, 8) as $page): ?>
+                            <tr>
+                                <td title="<?= $this->escapeHtml($page['url']) ?>">
+                                    <?= $this->escapeHtml($this->getDisplayPath($page['url'])) ?>
+                                </td>
+                                <td class="a-right"><?= (int) $page['visits'] ?></td>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php else: ?>
+                <p class="no-data"><?= $this->__('No data') ?></p>
+            <?php endif ?>
+        </div>
+
+        <!-- Exit Pages -->
+        <div class="half-column">
+            <h5><?= $this->__('Exit Pages') ?></h5>
+            <?php if (!empty($exitPages)): ?>
+            <div class="grid">
+                <table cellspacing="0">
+                    <thead>
+                        <tr class="headings">
+                            <th><span class="nobr"><?= $this->__('Page') ?></span></th>
+                            <th style="width: 50px;"><span class="nobr"><?= $this->__('Exits') ?></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach (array_slice($exitPages, 0, 8) as $page): ?>
+                            <tr>
+                                <td title="<?= $this->escapeHtml($page['url']) ?>">
+                                    <?= $this->escapeHtml($this->getDisplayPath($page['url'])) ?>
+                                </td>
+                                <td class="a-right"><?= (int) $page['exits'] ?></td>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php else: ?>
+                <p class="no-data"><?= $this->__('No data') ?></p>
+            <?php endif ?>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-entryexit h5 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+.dashboard-entryexit .entryexit-container {
+    display: flex;
+    gap: 20px;
+}
+.dashboard-entryexit .half-column {
+    flex: 1;
+    min-width: 0;
+}
+.dashboard-entryexit .no-data {
+    color: #999;
+    font-size: 12px;
+    padding: 10px 0;
+}
+</style>

@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Stats $this */
+?>
+<div class="dashboard-visitor-stats">
+    <div class="stat-col stat-online">
+        <div class="stat-indicator">🟢</div>
+        <div class="stat-value"><?= $this->getOnlineCount() ?></div>
+        <div class="stat-label"><?= $this->__('Online') ?></div>
+    </div>
+    <div class="stat-col">
+        <div class="stat-value"><?= $this->getTodayCount() ?></div>
+        <div class="stat-label"><?= $this->__('Today') ?></div>
+    </div>
+    <div class="stat-col">
+        <div class="stat-value"><?= $this->getWeekCount() ?></div>
+        <div class="stat-label"><?= $this->__('Week') ?></div>
+    </div>
+</div>
+
+<style>
+.dashboard-visitor-stats {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+}
+.dashboard-visitor-stats .stat-col {
+    flex: 1;
+    text-align: center;
+    padding: 10px 5px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    position: relative;
+}
+.dashboard-visitor-stats .stat-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    animation: pulse 2s ease-in-out infinite;
+}
+.dashboard-visitor-stats .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 2px;
+    line-height: 1;
+}
+.dashboard-visitor-stats .stat-label {
+    color: #666;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+</style>

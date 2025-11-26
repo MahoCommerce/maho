@@ -55,7 +55,15 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
      */
     public function format($price)
     {
-        return $this->getCurrency()->format($price);
+        $formatted = $this->getCurrency()->format($price, [], false);
+        $formatter = new NumberFormatter(Mage::app()->getLocale()->getLocaleCode(), NumberFormatter::DECIMAL);
+        $decimalSeparator = $formatter->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL) ?: '.';
+
+        if (str_contains($formatted, $decimalSeparator)) {
+            $formatted = strstr($formatted, $decimalSeparator, true);
+        }
+
+        return $formatted;
     }
 
     /**

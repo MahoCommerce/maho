@@ -33,6 +33,15 @@ class Mage_Adminhtml_Block_Dashboard_Diagrams extends Mage_Adminhtml_Block_Widge
             'label'     => $this->__('Amounts'),
             'content'   => $this->getLayout()->createBlock('adminhtml/dashboard_tab_amounts')->toHtml(),
         ]);
+
+        // Add Visitors tab if visitor logging is enabled
+        if (Mage::helper('log')->isVisitorLogEnabled()) {
+            $this->addTab('visitors', [
+                'label'     => $this->__('Visitors'),
+                'content'   => $this->getLayout()->createBlock('log/dashboard_trends')->toHtml(),
+            ]);
+        }
+
         return parent::_prepareLayout();
     }
 }

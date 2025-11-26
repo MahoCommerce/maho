@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Languages $this */
+$data = $this->getLanguages();
+$languages = $data['languages'] ?? [];
+$total = $data['total'] ?? 0;
+?>
+<div class="dashboard-languages">
+    <?php if (!empty($languages)): ?>
+        <div class="languages-list">
+            <?php foreach ($languages as $code => $count): ?>
+                <?php $percentage = $this->calculatePercentage($count, $total); ?>
+                <div class="language-row">
+                    <span class="language-flag"><?= $this->getLanguageFlag($code) ?></span>
+                    <span class="language-name"><?= $this->escapeHtml($this->getLanguageName($code)) ?></span>
+                    <div class="language-bar-container">
+                        <div class="language-bar" style="width: <?= $percentage ?>%"></div>
+                    </div>
+                    <span class="language-percentage"><?= $percentage ?>%</span>
+                </div>
+            <?php endforeach ?>
+        </div>
+    <?php else: ?>
+        <p class="no-data"><?= $this->__('No language data available') ?></p>
+    <?php endif ?>
+</div>
+
+<style>
+.dashboard-languages {
+    padding: 10px;
+}
+.dashboard-languages .languages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.dashboard-languages .language-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+}
+.dashboard-languages .language-flag {
+    font-size: 16px;
+    width: 24px;
+    text-align: center;
+}
+.dashboard-languages .language-name {
+    width: 80px;
+    color: #333;
+}
+.dashboard-languages .language-bar-container {
+    flex: 1;
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.dashboard-languages .language-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4a90d9, #67b26f);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+.dashboard-languages .language-percentage {
+    width: 45px;
+    text-align: right;
+    font-weight: 600;
+    color: #666;
+}
+.dashboard-languages .no-data {
+    color: #999;
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+}
+</style>
