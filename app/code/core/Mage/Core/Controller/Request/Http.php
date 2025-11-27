@@ -399,7 +399,10 @@ class Mage_Core_Controller_Request_Http
         if ($key === null) {
             return $this->symfonyRequest->cookies->all();
         }
-        return $this->symfonyRequest->cookies->get($key, $default);
+        if (!$this->symfonyRequest->cookies->has($key)) {
+            return $default;
+        }
+        return $this->symfonyRequest->cookies->get($key);
     }
 
     public function getServer(string|null $key = null, mixed $default = null): mixed
