@@ -166,7 +166,7 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
         $_tierPrices = [];
         $_tierPricesInclTax = [];
         foreach ($product->getTierPrice() as $tierPrice) {
-           // Skip tier prices >= lower of final price or group price
+            // Skip tier prices >= lower of final price or group price
             $comparePrice = $_finalPrice;
             $groupPrice = $product->getGroupPrice();
             if ($groupPrice !== null && $groupPrice < $comparePrice) {
