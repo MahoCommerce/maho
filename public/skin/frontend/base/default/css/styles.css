@@ -1368,12 +1368,10 @@ a.button:hover {
 /* -------------------------------------------- *
  * Price Box - Standard
  */
-.price-box {
-  margin: 7px 0;
-}
-
-.price-box p {
-  margin-bottom: 0;
+.price-box, .old-price {
+  display: inline-flex;
+  gap: 0.5em;
+  place-items: center;
 }
 
 .price-notice {
@@ -1403,10 +1401,6 @@ a.button:hover {
 /* -------------------------------------------- *
  * Price Box - Special
  */
-.price-box .old-price,
-.price-box .special-price {
-  display: inline-block;
-}
 .price-box .old-price .price-label,
 .price-box .special-price .price-label {
   display: none;
@@ -1421,12 +1415,16 @@ a.button:hover {
   text-decoration: line-through;
 }
 
-.price-box .special-price {
-  color: var(--maho-color-primary);
-  padding-left: 1em;
-}
 .price-box .special-price .price-label {
   color: var(--maho-color-special-price);
+}
+
+.price-box .discount-percent {
+  background-color: var(--maho-color-primary);
+  color: white;
+  padding: 0.1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 600;
 }
 
 /* -------------------------------------------- *
@@ -3339,13 +3337,14 @@ p.product-name a:hover {
   box-shadow: rgba(0, 0, 0, 0.04) 0px 8px 24px;
   transition: transform 0.3s ease;
 }
-.products-grid > li:has(.ratings,.actions) {
+.products-grid > li:has(.actions *) {
     padding-bottom: 0.5rem;
 }
 .products-grid > li:hover {
   transform: scale(1.05);
 }
 .products-grid > li .product-info {
+  position: relative;
   flex-grow: 1;
 }
 
@@ -3411,7 +3410,14 @@ p.product-name a:hover {
 .products-grid .price-box {
   color: var(--maho-color-text-secondary);
   font-size: 0.813rem;
-  margin: 0;
+}
+
+.products-grid .discount-percent {
+  position: absolute;
+  top: -31px;
+  right: 0;
+  font-size: 0.75rem;
+  padding: 0.2em 0.5em;
 }
 
 .add-to-links {
@@ -3427,6 +3433,12 @@ p.product-name a:hover {
   height: 40px;
   border: 1px solid var(--maho-color-border);
   color: var(--maho-color-text);
+  background: var(--maho-color-background);
+  font-size: 0;
+}
+.add-to-links a svg {
+  width: 20px;
+  height: 20px;
 }
 .add-to-links a:hover {
   border-color: var(--maho-color-primary);
@@ -3507,6 +3519,10 @@ p.product-name a:hover {
 .products-list .product-shop .price-box .price {
   font-size: 1.125rem;
 }
+.products-list .discount-percent {
+  margin-left: 0.5em;
+  border-radius: 0.25rem;
+}
 .products-list .product-shop .action {
   margin: 7px 0;
 }
@@ -3544,10 +3560,6 @@ p.product-name a:hover {
   }
 }
 @media only screen and (max-width: 600px) {
-  .products-list .product-shop .price-box .special-price {
-    padding-left: 0;
-  }
-
   .products-list .product-shop .product-primary,
   .products-list .product-shop .product-secondary,
   .products-list .product-shop .desc {
@@ -3824,9 +3836,6 @@ p.product-name a:hover {
 }
 .product-view .product-shop .availability {
   font-size: 1rem;
-}
-.product-view .product-shop .price-box {
-  margin-top: 0;
 }
 .product-view .product-shop .price-box .old-price,
 .product-view .product-shop .price-box .special-price,
