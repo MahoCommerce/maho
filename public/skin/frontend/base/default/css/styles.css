@@ -3337,13 +3337,14 @@ p.product-name a:hover {
   box-shadow: rgba(0, 0, 0, 0.04) 0px 8px 24px;
   transition: transform 0.3s ease;
 }
-.products-grid > li:has(.ratings,.actions) {
+.products-grid > li:has(.actions *) {
     padding-bottom: 0.5rem;
 }
 .products-grid > li:hover {
   transform: scale(1.05);
 }
 .products-grid > li .product-info {
+  position: relative;
   flex-grow: 1;
 }
 
@@ -3411,6 +3412,14 @@ p.product-name a:hover {
   font-size: 0.813rem;
 }
 
+.products-grid .discount-percent {
+  position: absolute;
+  top: -31px;
+  right: 0;
+  font-size: 0.75rem;
+  padding: 0.2em 0.5em;
+}
+
 .add-to-links {
   display: inline-flex;
   place-content: center;
@@ -3424,6 +3433,12 @@ p.product-name a:hover {
   height: 40px;
   border: 1px solid var(--maho-color-border);
   color: var(--maho-color-text);
+  background: var(--maho-color-background);
+  font-size: 0;
+}
+.add-to-links a svg {
+  width: 20px;
+  height: 20px;
 }
 .add-to-links a:hover {
   border-color: var(--maho-color-primary);
@@ -3503,6 +3518,10 @@ p.product-name a:hover {
 }
 .products-list .product-shop .price-box .price {
   font-size: 1.125rem;
+}
+.products-list .discount-percent {
+  margin-left: 0.5em;
+  border-radius: 0.25rem;
 }
 .products-list .product-shop .action {
   margin: 7px 0;
