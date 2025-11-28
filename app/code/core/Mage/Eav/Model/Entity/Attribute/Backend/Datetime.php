@@ -60,6 +60,11 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
             return null;
         }
 
+        // Handle DateTime/DateTimeImmutable objects
+        if ($date instanceof DateTimeInterface) {
+            return $date->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        }
+
         // Handle MySQL zero dates and invalid dates
         if (is_string($date) && preg_match('/^0000-00-00/', $date)) {
             return null;
