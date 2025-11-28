@@ -14,7 +14,7 @@
 $_product = $this->getProduct();
 
 if (Mage::helper('configurableswatches')->isEnabled() && $_product && $_product->getId()
-    && ($_attrValues = $_product->getListSwatchAttrValues()) && count($_attrValues) > 0):
+    && ($_attrValues = $_product->getListSwatchAttrValues()) && count($_attrValues) > 1):
     $_attrStockValues = $_product->getListSwatchAttrStockValues();
     $_swatchAttribute = Mage::helper('configurableswatches/productlist')->getSwatchAttribute();
 

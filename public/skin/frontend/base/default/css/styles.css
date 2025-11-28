@@ -1368,12 +1368,10 @@ a.button:hover {
 /* -------------------------------------------- *
  * Price Box - Standard
  */
-.price-box {
-  margin: 7px 0;
-}
-
-.price-box p {
-  margin-bottom: 0;
+.price-box, .old-price {
+  display: inline-flex;
+  gap: 0.5em;
+  place-items: center;
 }
 
 .price-notice {
@@ -1403,10 +1401,6 @@ a.button:hover {
 /* -------------------------------------------- *
  * Price Box - Special
  */
-.price-box .old-price,
-.price-box .special-price {
-  display: inline-block;
-}
 .price-box .old-price .price-label,
 .price-box .special-price .price-label {
   display: none;
@@ -1421,12 +1415,16 @@ a.button:hover {
   text-decoration: line-through;
 }
 
-.price-box .special-price {
-  color: var(--maho-color-primary);
-  padding-left: 1em;
-}
 .price-box .special-price .price-label {
   color: var(--maho-color-special-price);
+}
+
+.price-box .discount-percent {
+  background-color: var(--maho-color-primary);
+  color: white;
+  padding: 0.1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 600;
 }
 
 /* -------------------------------------------- *
@@ -3411,7 +3409,6 @@ p.product-name a:hover {
 .products-grid .price-box {
   color: var(--maho-color-text-secondary);
   font-size: 0.813rem;
-  margin: 0;
 }
 
 .add-to-links {
@@ -3544,10 +3541,6 @@ p.product-name a:hover {
   }
 }
 @media only screen and (max-width: 600px) {
-  .products-list .product-shop .price-box .special-price {
-    padding-left: 0;
-  }
-
   .products-list .product-shop .product-primary,
   .products-list .product-shop .product-secondary,
   .products-list .product-shop .desc {
@@ -3824,9 +3817,6 @@ p.product-name a:hover {
 }
 .product-view .product-shop .availability {
   font-size: 1rem;
-}
-.product-view .product-shop .price-box {
-  margin-top: 0;
 }
 .product-view .product-shop .price-box .old-price,
 .product-view .product-shop .price-box .special-price,
