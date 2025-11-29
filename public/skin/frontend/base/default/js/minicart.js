@@ -4,7 +4,7 @@
  * @package    rwd_default
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -198,14 +198,39 @@ class Minicart {
     }
 
     updateContentOnRemove(result, el) {
-        el.style.display = 'none';
-        document.querySelector(this.selectors.container).innerHTML = result.content;
-        this.showMessage(result);
+        this.updateContent(result);
     }
 
     updateContentOnUpdate(result) {
-        document.querySelector(this.selectors.container).innerHTML = result.content;
-        this.showMessage(result);
+        this.updateContent(result);
+    }
+
+    updateContent(result) {
+        // Find the container holding the minicart (works for both offcanvas and original location)
+        const wrapper = document.querySelector('.minicart-wrapper');
+        const container = wrapper?.parentNode;
+        if (container) {
+            container.innerHTML = result.content;
+            this.showMessageIn(container, result);
+        }
+    }
+
+    showMessageIn(container, result) {
+        if (result.notice) {
+            this.showMsg(container, this.selectors.error, result.notice);
+        } else if (result.error) {
+            this.showMsg(container, this.selectors.error, result.error);
+        } else if (result.message) {
+            this.showMsg(container, this.selectors.success, result.message);
+        }
+    }
+
+    showMsg(container, selector, message) {
+        const el = container.querySelector(selector);
+        if (el) {
+            el.textContent = message;
+            el.style.display = 'block';
+        }
     }
 
     updateCartQty(qty) {
@@ -236,21 +261,23 @@ class Minicart {
         }
     }
 
+    getMessageContainer() {
+        const wrapper = document.querySelector('.minicart-wrapper');
+        return wrapper?.parentNode || document;
+    }
+
     hideMessage() {
-        document.querySelector(this.selectors.error).style.display = 'none';
-        document.querySelector(this.selectors.success).style.display = 'none';
+        const container = this.getMessageContainer();
+        container.querySelector(this.selectors.error)?.style.setProperty('display', 'none');
+        container.querySelector(this.selectors.success)?.style.setProperty('display', 'none');
     }
 
     showError(message) {
-        const errorElement = document.querySelector(this.selectors.error);
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
+        this.showMsg(this.getMessageContainer(), this.selectors.error, message);
     }
 
     showSuccess(message) {
-        const successElement = document.querySelector(this.selectors.success);
-        successElement.textContent = message;
-        successElement.style.display = 'block';
+        this.showMsg(this.getMessageContainer(), this.selectors.success, message);
     }
 
     refreshIfOnCartPage() {
