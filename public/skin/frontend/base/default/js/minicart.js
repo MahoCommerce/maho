@@ -100,7 +100,7 @@ class Minicart {
                     if (result.success) {
                         this.refreshIfOnCartPage();
                         this.updateCartQty(result.qty);
-                        this.updateContentOnRemove(result, el.closest('li'));
+                        this.updateContentOnRemove(result);
                     } else {
                         this.showMessage(result);
                     }
@@ -182,7 +182,7 @@ class Minicart {
                     if (quantity !== 0) {
                         this.updateContentOnUpdate(result);
                     } else {
-                        this.updateContentOnRemove(result, input.closest('li'));
+                        this.updateContentOnRemove(result);
                     }
                 } else {
                     this.showMessage(result);
@@ -197,7 +197,7 @@ class Minicart {
         return false;
     }
 
-    updateContentOnRemove(result, el) {
+    updateContentOnRemove(result) {
         this.updateContent(result);
     }
 
@@ -206,31 +206,9 @@ class Minicart {
     }
 
     updateContent(result) {
-        // Find the container holding the minicart (works for both offcanvas and original location)
-        const wrapper = document.querySelector('.minicart-wrapper');
-        const container = wrapper?.parentNode;
-        if (container) {
-            container.innerHTML = result.content;
-            this.showMessageIn(container, result);
-        }
-    }
-
-    showMessageIn(container, result) {
-        if (result.notice) {
-            this.showMsg(container, this.selectors.error, result.notice);
-        } else if (result.error) {
-            this.showMsg(container, this.selectors.error, result.error);
-        } else if (result.message) {
-            this.showMsg(container, this.selectors.success, result.message);
-        }
-    }
-
-    showMsg(container, selector, message) {
-        const el = container.querySelector(selector);
-        if (el) {
-            el.textContent = message;
-            el.style.display = 'block';
-        }
+        const container = this.getMessageContainer();
+        container.innerHTML = result.content;
+        this.showMessage(result);
     }
 
     updateCartQty(qty) {
@@ -262,8 +240,7 @@ class Minicart {
     }
 
     getMessageContainer() {
-        const wrapper = document.querySelector('.minicart-wrapper');
-        return wrapper?.parentNode || document;
+        return document.querySelector(this.selectors.overlay)?.parentNode || document;
     }
 
     hideMessage() {
@@ -273,11 +250,19 @@ class Minicart {
     }
 
     showError(message) {
-        this.showMsg(this.getMessageContainer(), this.selectors.error, message);
+        const el = this.getMessageContainer().querySelector(this.selectors.error);
+        if (el) {
+            el.textContent = message;
+            el.style.display = 'block';
+        }
     }
 
     showSuccess(message) {
-        this.showMsg(this.getMessageContainer(), this.selectors.success, message);
+        const el = this.getMessageContainer().querySelector(this.selectors.success);
+        if (el) {
+            el.textContent = message;
+            el.style.display = 'block';
+        }
     }
 
     refreshIfOnCartPage() {
