@@ -251,18 +251,16 @@ class Minicart {
 
     showError(message) {
         const el = this.getMessageContainer().querySelector(this.selectors.error);
-        if (el) {
-            el.textContent = message;
-            el.style.display = 'block';
-        }
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
     }
 
     showSuccess(message) {
         const el = this.getMessageContainer().querySelector(this.selectors.success);
-        if (el) {
-            el.textContent = message;
-            el.style.display = 'block';
-        }
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
     }
 
     refreshIfOnCartPage() {
