@@ -76,9 +76,6 @@
                     <div class="add-to-box">
                         <?php if($_product->isSaleable()): ?>
                             <?= $this->getChildHtml('addtocart') ?>
-                            <?php if( $this->helper('wishlist')->isAllow() || $_compareUrl=$this->helper('catalog/product_compare')->getAddUrl($_product)): ?>
-                                <span class="or"><?= $this->__('OR') ?></span>
-                            <?php endif ?>
                         <?php endif ?>
                         <?= $this->getChildHtml('addto') ?>
                         <?= $this->getChildHtml('sharing') ?>
