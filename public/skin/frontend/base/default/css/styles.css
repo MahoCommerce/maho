@@ -7659,3 +7659,19 @@ input[type="datetime-local"]:focus {
 #offcanvas .minicart-wrapper .skip-link-close {
   display: none;
 }
+
+#offcanvas .minicart-message {
+    display: none;
+    padding: 7px 10px;
+    font-size: 0.938rem;
+    background: var(--maho-color-background-alt);
+    border-bottom: 1px solid var(--maho-color-border);
+}
+
+#offcanvas #minicart-success-message {
+    border-left: 5px solid var(--maho-color-success);
+}
+
+#offcanvas #minicart-error-message {
+    border-left: 5px solid var(--maho-color-error);
+}
