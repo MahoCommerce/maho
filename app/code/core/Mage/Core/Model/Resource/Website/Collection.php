@@ -17,11 +17,6 @@
 class Mage_Core_Model_Resource_Website_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**
-     * @deprecated since 1.5.0.0
-     */
-    protected $_loadDefault    = false;
-
-    /**
      * Map field to alias
      *
      * @var array

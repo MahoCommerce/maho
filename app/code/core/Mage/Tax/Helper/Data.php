@@ -1043,18 +1043,6 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Retrieve a value from registry by a key
-     *
-     * @param string $key
-     * @return mixed
-     * @deprecated use Mage::registry()
-     */
-    protected function _getFromRegistry($key)
-    {
-        return Mage::registry($key);
-    }
-
-    /**
      * Get calculated Shipping & Handling Tax
      *
      * This method returns array with format:

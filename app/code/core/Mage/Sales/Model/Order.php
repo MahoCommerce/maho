@@ -1147,22 +1147,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * Add status change information to history
-     * @deprecated after 1.4.0.0-alpha3
-     *
-     * @param  string $status
-     * @param  string $comment
-     * @param  bool $isCustomerNotified
-     * @return $this
-     */
-    public function addStatusToHistory($status, $comment = '', $isCustomerNotified = false)
-    {
-        $history = $this->addStatusHistoryComment($comment, $status)
-            ->setIsCustomerNotified($isCustomerNotified);
-        return $this;
-    }
-
-    /**
      * Add a comment to order
      * Different or default status may be specified
      *
