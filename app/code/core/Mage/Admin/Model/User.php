@@ -648,18 +648,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Returns helper instance
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
-    }
-
-    /**
      * Find first menu item that user is able to access
      *
      * @param Mage_Core_Model_Config_Element|Varien_Simplexml_Element $parent
