@@ -138,18 +138,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     }
 
     /**
-     * Returns JSON-encoded array of category children
-     *
-     * @param int $categoryId
-     * @return string
-     * @deprecated use self::getTreeJson()
-     */
-    public function getCategoryChildrenJson($categoryId)
-    {
-        return $this->getTreeJson($categoryId);
-    }
-
-    /**
      * Returns URL for loading tree
      *
      * @param null $expanded deprecated
@@ -159,43 +147,5 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     public function getLoadTreeUrl($expanded = null)
     {
         return $this->getUrl('*/*/categoriesJson', ['_current' => ['id', 'store']]);
-    }
-
-    /**
-     * Return distinct path ids of selected categories
-     *
-     * @param mixed $rootId Root category Id for context
-     * @return array
-     * @deprecated Mage_Catalog_Model_Resource_Category_Tree::loadByIds() already loads parent ids
-     */
-    public function getSelectedCategoriesPathIds($rootId = false)
-    {
-        $ids = [];
-        $categoryIds = $this->getCategoryIds();
-        if (empty($categoryIds)) {
-            return [];
-        }
-        $collection = Mage::getResourceModel('catalog/category_collection');
-
-        if ($rootId) {
-            $collection->addFieldToFilter([
-                ['attribute' => 'parent_id', 'eq' => $rootId],
-                ['attribute' => 'entity_id', 'in' => $categoryIds],
-            ]);
-        } else {
-            $collection->addFieldToFilter('entity_id', ['in' => $categoryIds]);
-        }
-
-        foreach ($collection as $item) {
-            if ($rootId && !in_array($rootId, $item->getPathIds())) {
-                continue;
-            }
-            foreach ($item->getPathIds() as $id) {
-                if (!in_array($id, $ids)) {
-                    $ids[] = $id;
-                }
-            }
-        }
-        return $ids;
     }
 }
