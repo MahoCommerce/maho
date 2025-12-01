@@ -55,22 +55,4 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return $this->_logLevel == Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel::LOG_LEVEL_NONE;
     }
-
-    /**
-     * @deprecated Use isAllVisitorLoggingEnabled() instead
-     * @return bool
-     */
-    public function isLogEnabled()
-    {
-        return $this->isAllVisitorLoggingEnabled();
-    }
-
-    /**
-     * @deprecated Use isVisitorLoggingDisabled() instead
-     * @return bool
-     */
-    public function isLogDisabled()
-    {
-        return $this->isVisitorLoggingDisabled();
-    }
 }
