@@ -100,7 +100,7 @@ class Minicart {
                     if (result.success) {
                         this.refreshIfOnCartPage();
                         this.updateCartQty(result.qty);
-                        this.updateContentOnRemove(result, el.closest('li'));
+                        this.updateContentOnRemove(result);
                     } else {
                         this.showMessage(result);
                     }
@@ -182,7 +182,7 @@ class Minicart {
                     if (quantity !== 0) {
                         this.updateContentOnUpdate(result);
                     } else {
-                        this.updateContentOnRemove(result, input.closest('li'));
+                        this.updateContentOnRemove(result);
                     }
                 } else {
                     this.showMessage(result);
@@ -197,14 +197,17 @@ class Minicart {
         return false;
     }
 
-    updateContentOnRemove(result, el) {
-        el.style.display = 'none';
-        document.querySelector(this.selectors.container).innerHTML = result.content;
-        this.showMessage(result);
+    updateContentOnRemove(result) {
+        this.updateContent(result);
     }
 
     updateContentOnUpdate(result) {
-        document.querySelector(this.selectors.container).innerHTML = result.content;
+        this.updateContent(result);
+    }
+
+    updateContent(result) {
+        const container = this.getMessageContainer();
+        container.innerHTML = result.content;
         this.showMessage(result);
     }
 
@@ -236,21 +239,28 @@ class Minicart {
         }
     }
 
+    getMessageContainer() {
+        return document.querySelector(this.selectors.overlay)?.parentNode || document;
+    }
+
     hideMessage() {
-        document.querySelector(this.selectors.error).style.display = 'none';
-        document.querySelector(this.selectors.success).style.display = 'none';
+        const container = this.getMessageContainer();
+        container.querySelector(this.selectors.error)?.style.setProperty('display', 'none');
+        container.querySelector(this.selectors.success)?.style.setProperty('display', 'none');
     }
 
     showError(message) {
-        const errorElement = document.querySelector(this.selectors.error);
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
+        const el = this.getMessageContainer().querySelector(this.selectors.error);
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
     }
 
     showSuccess(message) {
-        const successElement = document.querySelector(this.selectors.success);
-        successElement.textContent = message;
-        successElement.style.display = 'block';
+        const el = this.getMessageContainer().querySelector(this.selectors.success);
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
     }
 
     refreshIfOnCartPage() {
