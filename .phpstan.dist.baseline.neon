@@ -409,12 +409,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Category_Edit_Form::getProductsJson() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Edit/Form.php
-
-		-
 			rawMessage: 'Cannot call method addAttributeToSelect() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: method.nonObject
 			count: 1
@@ -2661,12 +2655,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default::getItem() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Items/Renderer/Default.php
-
-		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default::$_giftMessage (Mage_GiftMessage_Model_Message) does not accept default value of type array.'
-			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Items/Renderer/Default.php
 
