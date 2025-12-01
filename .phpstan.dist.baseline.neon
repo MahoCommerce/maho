@@ -22306,12 +22306,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			rawMessage: Access to an undefined property Mage_Usa_Model_Shipping_Carrier_Fedex::$_defaultGatewayUrl.
-			identifier: property.notFound
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: Access to an undefined property Mage_Usa_Model_Shipping_Carrier_Fedex::$_rawTrackingRequest.
 			identifier: property.notFound
 			count: 1
@@ -22325,12 +22319,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Fedex::_parseTrackingResponse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
-			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Fedex::_parseXmlTrackingResponse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
@@ -22372,15 +22360,9 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			rawMessage: 'Parameter #3 $value of function curl_setopt expects bool, int given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: 'Property Mage_Usa_Model_Shipping_Carrier_Fedex::$_result (Mage_Shipping_Model_Rate_Result|null) does not accept Mage_Shipping_Model_Tracking_Result.'
 			identifier: assign.propertyType
-			count: 2
+			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
