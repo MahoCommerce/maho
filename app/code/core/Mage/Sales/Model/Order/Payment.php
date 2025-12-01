@@ -1376,23 +1376,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     }
 
     /**
-     * Prevent double processing of the same transaction by a payment notification
-     * Uses either specified txn_id or the transaction id that was set before
-     *
-     * @deprecated after 1.4.0.1
-     * @param string $txnId
-     * @throws Mage_Core_Exception
-     */
-    protected function _avoidDoubleTransactionProcessing($txnId = null)
-    {
-        if ($this->_isTransactionExists($txnId)) {
-            Mage::throwException(
-                Mage::helper('sales')->__('Transaction "%s" was already processed.', $txnId),
-            );
-        }
-    }
-
-    /**
      * Check transaction existence by specified transaction id
      *
      * @param string $txnId
