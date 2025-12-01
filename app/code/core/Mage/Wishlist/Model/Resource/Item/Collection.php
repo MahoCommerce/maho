@@ -234,17 +234,6 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     }
 
     /**
-     * Add filter by wishlist object
-     *
-     * @return $this
-     * @deprecated use self::setWishlist($wishlist) instead
-     */
-    public function addWishlistFilter(Mage_Wishlist_Model_Wishlist $wishlist)
-    {
-        return $this->setWishlist($wishlist);
-    }
-
-    /**
      * Add filtration by customer id
      *
      * @param int $customerId
@@ -291,22 +280,6 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
             'store_name' => 'name',
             'item_store_id' => 'store_id',
         ]);
-        return $this;
-    }
-
-    /**
-     * Add wishlist sort order
-     *
-     * @deprecated after 1.6.0.0-rc2
-     * @see Varien_Data_Collection_Db::setOrder() is used instead
-     *
-     * @param string $attribute
-     * @param string $dir
-     * @return $this
-     */
-    public function addWishListSortOrder($attribute = 'added_at', $dir = 'desc')
-    {
-        $this->setOrder($attribute, $dir);
         return $this;
     }
 
@@ -365,18 +338,6 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     public function setDaysInWishlist(bool $flag): self
     {
         $this->_addDaysInWishlist = $flag;
-        return $this;
-    }
-
-    /**
-     * Set add days in wishlist
-     *
-     * @return $this
-     * @deprecated use self::setDaysInWishlist($flag)
-     */
-    public function addDaysInWishlist()
-    {
-        $this->setDaysInWishlist(true);
         return $this;
     }
 

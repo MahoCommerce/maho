@@ -295,18 +295,6 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     /**
      * Retrieve wishlist item collection
      *
-     * @return Mage_Wishlist_Model_Resource_Item_Collection
-     * @throws Mage_Core_Model_Store_Exception
-     * @deprecated use self::getItemsCollection()
-     */
-    public function getItemCollection()
-    {
-        return $this->getItemsCollection();
-    }
-
-    /**
-     * Retrieve wishlist item collection
-     *
      * @throws Mage_Core_Model_Store_Exception
      */
     public function getItemsCollection(): Mage_Wishlist_Model_Resource_Item_Collection
@@ -355,21 +343,6 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     public function getItemsCount()
     {
         return $this->getItemsCollection()->getSize();
-    }
-
-    /**
-     * Retrieve wishlist item collection
-     *
-     * @param int $itemId
-     * @return Mage_Wishlist_Model_Item|false
-     * @deprecated use self::getItemById(int)
-     */
-    public function getItem($itemId)
-    {
-        if (!$itemId) {
-            return false;
-        }
-        return $this->getItemsCollection()->getItemById($itemId);
     }
 
     /**
