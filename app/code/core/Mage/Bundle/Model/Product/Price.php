@@ -139,38 +139,6 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     }
 
     /**
-     * Retrieve Price
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param string $which
-     * @return float|array
-     * @throws Mage_Core_Model_Store_Exception
-     * @deprecated after 1.5.1.0
-     * @see Mage_Bundle_Model_Product_Price::getTotalPrices()
-     */
-    public function getPrices($product, $which = null)
-    {
-        return $this->getTotalPrices($product, $which);
-    }
-
-    /**
-     * Retrieve Prices depending on tax
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param string $which
-     * @param bool|null $includeTax
-     * @return float|array
-     * @throws Mage_Core_Model_Store_Exception
-     * @see Mage_Bundle_Model_Product_Price::getTotalPrices()
-     *
-     * @deprecated after 1.5.1.0
-     */
-    public function getPricesDependingOnTax($product, $which = null, $includeTax = null)
-    {
-        return $this->getTotalPrices($product, $which, $includeTax);
-    }
-
-    /**
      * Retrieve Price considering tier price
      *
      * @param Mage_Catalog_Model_Product $product
@@ -470,23 +438,6 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     }
 
     /**
-     * Calculate price of selection
-     *
-     * @param Mage_Catalog_Model_Product $bundleProduct
-     * @param Mage_Catalog_Model_Product $selectionProduct
-     * @param float|null $selectionQty
-     * @param null|bool $multiplyQty Whether to multiply selection's price by its quantity
-     * @return float
-     * @throws Mage_Core_Model_Store_Exception
-     * @deprecated after 1.6.2.0
-     * @see Mage_Bundle_Model_Product_Price::getSelectionFinalTotalPrice()
-     */
-    public function getSelectionPrice($bundleProduct, $selectionProduct, $selectionQty = null, $multiplyQty = true)
-    {
-        return $this->getSelectionFinalTotalPrice($bundleProduct, $selectionProduct, 0, $selectionQty, $multiplyQty);
-    }
-
-    /**
      * Calculate selection price for front view (with applied special of bundle)
      *
      * @param Mage_Catalog_Model_Product $bundleProduct
@@ -498,36 +449,6 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     public function getSelectionPreFinalPrice($bundleProduct, $selectionProduct, $qty = null)
     {
         return $this->getSelectionFinalTotalPrice($bundleProduct, $selectionProduct, 0, $qty);
-    }
-
-    /**
-     * Calculate final price of selection
-     *
-     * @param Mage_Catalog_Model_Product $bundleProduct
-     * @param Mage_Catalog_Model_Product $selectionProduct
-     * @param float $bundleQty
-     * @param float $selectionQty
-     * @param bool $multiplyQty
-     * @return float
-     * @throws Mage_Core_Model_Store_Exception
-     * @see Mage_Bundle_Model_Product_Price::getSelectionFinalTotalPrice()
-     *
-     * @deprecated after 1.5.1.0
-     */
-    public function getSelectionFinalPrice(
-        $bundleProduct,
-        $selectionProduct,
-        $bundleQty,
-        $selectionQty = null,
-        $multiplyQty = true,
-    ) {
-        return $this->getSelectionFinalTotalPrice(
-            $bundleProduct,
-            $selectionProduct,
-            $bundleQty,
-            $selectionQty,
-            $multiplyQty,
-        );
     }
 
     /**
