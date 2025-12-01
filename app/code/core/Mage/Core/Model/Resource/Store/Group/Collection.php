@@ -17,14 +17,6 @@
 class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**
-     * Load default flag
-     *
-     * @deprecated since 1.5.0.0
-     * @var bool
-     */
-    protected $_loadDefault = false;
-
-    /**
      * Define resource model
      */
     #[\Override]
