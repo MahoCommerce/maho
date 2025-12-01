@@ -252,23 +252,6 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
     }
 
     /**
-     * Check if discount should be applied to weee and add weee to discounted price
-     *
-     * @deprecated since 1.8
-     * @param   Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param   float $value
-     * @param   float $baseValue
-     * @return  $this
-     */
-    protected function _processDiscountSettings($item, $value, $baseValue)
-    {
-        if ($this->_helper->isDiscounted($this->_store)) {
-            Mage::helper('salesrule')->addItemDiscountPrices($item, $baseValue, $value);
-        }
-        return $this;
-    }
-
-    /**
      * Add extra amount which should be taxable by regular tax
      *
      * @param   Mage_Sales_Model_Quote_Item_Abstract $item
