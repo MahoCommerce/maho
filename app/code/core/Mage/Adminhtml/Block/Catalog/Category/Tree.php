@@ -216,15 +216,4 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
 
         return (bool) $options->getIsAllow();
     }
-
-    /**
-     * Check if page loaded by outside link to category edit
-     *
-     * @return bool
-     * @deprecated
-     */
-    public function isClearEdit()
-    {
-        return (bool) $this->getRequest()->getParam('clear');
-    }
 }
