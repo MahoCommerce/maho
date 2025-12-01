@@ -11116,12 +11116,6 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
 
 		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
 			rawMessage: Property Mage_Core_Controller_Varien_Router_Standard::$_dispatchData has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -11298,18 +11292,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $fileName of method Mage_Core_Model_Config::loadModulesConfiguration() expects string, array<int, string> given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Config::$_baseDirCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Config::$_customEtcDir has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Config.php
 
@@ -11513,12 +11495,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Layout::generateBlocks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Layout::validateAgainstBlacklist() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php

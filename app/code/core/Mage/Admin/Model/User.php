@@ -314,17 +314,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Send email with new user password
-     *
-     * @return $this
-     * @deprecated deprecated since version 1.6.1.0
-     */
-    public function sendNewPasswordEmail()
-    {
-        return $this;
-    }
-
-    /**
      * Send email with reset password confirmation link
      *
      * @return $this

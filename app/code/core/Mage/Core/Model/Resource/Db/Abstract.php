@@ -76,13 +76,6 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     protected $_useIsObjectNew = false;
 
     /**
-     * Fields List for update in forsedSave
-     *
-     * @var array
-     */
-    protected $_fieldsForUpdate = [];
-
-    /**
      * Fields of main table
      *
      * @var array
@@ -451,33 +444,6 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         }
 
         $this->unserializeFields($object);
-        $this->_afterSave($object);
-
-        return $this;
-    }
-
-    /**
-     * Forced save object data
-     * forced update If duplicate unique key data
-     *
-     * @deprecated
-     * @return $this
-     */
-    public function forsedSave(Mage_Core_Model_Abstract $object)
-    {
-        $this->_beforeSave($object);
-        $bind = $this->_prepareDataForSave($object);
-        $adapter = $this->_getWriteAdapter();
-        // update
-        if (!is_null($object->getId()) && $this->_isPkAutoIncrement) {
-            unset($bind[$this->getIdFieldName()]);
-            $condition = $adapter->quoteInto($this->getIdFieldName() . '=?', $object->getId());
-            $adapter->update($this->getMainTable(), $bind, $condition);
-        } else {
-            $adapter->insertOnDuplicate($this->getMainTable(), $bind, $this->_fieldsForUpdate);
-            $object->setId($adapter->lastInsertId($this->getMainTable()));
-        }
-
         $this->_afterSave($object);
 
         return $this;
