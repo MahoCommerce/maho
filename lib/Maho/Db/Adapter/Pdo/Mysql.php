@@ -1331,6 +1331,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Returns list of tables in the database
+     *
+     * @return string[] List of table names
      */
     #[\Override]
     public function listTables(?string $schemaName = null): array
@@ -1343,7 +1345,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             $originalDb = $this->_connection->getDatabase();
             try {
                 $this->_connection->executeStatement('USE ' . $this->quoteIdentifier($schemaName));
-                $tables = $schemaManager->introspectTableNames();
+                $tableNames = $schemaManager->introspectTableNames();
                 $this->_connection->executeStatement('USE ' . $this->quoteIdentifier($originalDb));
             } catch (\Exception $e) {
                 // Restore original database even on error
@@ -1351,10 +1353,13 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                 throw $e;
             }
         } else {
-            $tables = $schemaManager->introspectTableNames();
+            $tableNames = $schemaManager->introspectTableNames();
         }
 
-        return $tables;
+        return array_map(
+            fn($name) => $name->getUnqualifiedName()->getValue(),
+            $tableNames,
+        );
     }
 
     /**
@@ -1930,7 +1935,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             if ($pkConstraint) {
                 $pkColumns = $pkConstraint->getColumnNames();
                 foreach ($pkColumns as $index => $columnNameObj) {
-                    $columnName = $columnNameObj->toString();
+                    $columnName = $columnNameObj->getIdentifier()->getValue();
                     $primaryKey[] = $columnName;
                     $primaryKeyPositions[$columnName] = $index + 1;
                 }
@@ -1940,7 +1945,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             $position = 1;
 
             foreach ($table->getColumns() as $column) {
-                $columnName = $column->getObjectName()->toString();
+                $columnName = $column->getObjectName()->getIdentifier()->getValue();
 
                 // Get the SQL declaration and parse it to extract MySQL type
                 $sqlDeclaration = $column->getType()->getSQLDeclaration($column->toArray(), $platform);
