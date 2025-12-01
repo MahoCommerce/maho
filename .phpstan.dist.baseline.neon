@@ -1765,42 +1765,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Tag/Popular/Grid.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$conversions_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$customer_with_wishlist has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$items_bought has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$referrals_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$shared_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$wishlists_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
 			rawMessage: 'Return type (int) of method Mage_Adminhtml_Block_Review_Grid_Filter_Type::getCondition() should be compatible with return type (array|null) of method Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select::getCondition()'
 			identifier: method.childReturnType
 			count: 1
@@ -19066,27 +19030,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Tax/Collection.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setStore().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
-
-		-
-			rawMessage: '''
-				Class Mage_Reports_Model_Resource_Wishlist_Product_Collection extends deprecated class Mage_Wishlist_Model_Resource_Product_Collection:
-				after 1.4.2.0
-			'''
-			identifier: class.extendsDeprecatedClass
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Wishlist_Product_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
-
-		-
 			rawMessage: 'Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported.'
 			identifier: foreach.nonIterable
 			count: 1
@@ -22746,15 +22689,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Wishlist_Helper_Data::setCustomer() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Helper/Data.php
-
-		-
-			rawMessage: '''
-				Property $_productCollection references deprecated class Mage_Wishlist_Model_Resource_Product_Collection in its type:
-				after 1.4.2.0
-			'''
-			identifier: property.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Wishlist/Helper/Data.php
 

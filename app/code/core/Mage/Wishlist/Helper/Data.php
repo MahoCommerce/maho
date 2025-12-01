@@ -39,13 +39,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_wishlist = null;
 
     /**
-     * Wishlist Product Items Collection
-     *
-     * @var Mage_Wishlist_Model_Resource_Product_Collection|null
-     */
-    protected $_productCollection = null;
-
-    /**
      * Wishlist Items Collection
      *
      * @var Mage_Wishlist_Model_Resource_Item_Collection|null
