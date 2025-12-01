@@ -11860,12 +11860,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Website.php
 
 		-
-			rawMessage: Property Mage_Core_Model_Resource_Website_Collection::$_loadDefault has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Website/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Session::renewFormKey() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -17347,12 +17341,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Standard::debugRequest() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Api_Standard::getStandardCheckoutRequest() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18139,24 +18127,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_addTransaction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_getDocumentFromResponse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_process() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_processOrder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18164,12 +18134,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_processTokenErrors() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::prepareOrderReview() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
