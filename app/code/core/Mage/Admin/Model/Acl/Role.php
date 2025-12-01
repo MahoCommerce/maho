@@ -11,8 +11,6 @@
  */
 
 /**
- * @method Mage_Admin_Model_Resource_Acl_Role _getResource()
- * @method Mage_Admin_Model_Resource_Acl_Role getResource()
  * @method int getParentId()
  * @method $this setParentId(int $value)
  * @method int getTreeLevel()

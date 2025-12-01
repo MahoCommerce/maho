@@ -2033,43 +2033,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Return re-sized image URL
-     *
-     * @deprecated since 1.1.5
-     * @return string
-     */
-    public function getImageUrl()
-    {
-        return (string) $this->_getImageHelper()->init($this, 'image')->resize(265);
-    }
-
-    /**
-     * Return re-sized small image URL
-     *
-     * @deprecated since 1.1.5
-     * @param int $width
-     * @param int $height
-     * @return string
-     */
-    public function getSmallImageUrl($width = 88, $height = 77)
-    {
-        return (string) $this->_getImageHelper()->init($this, 'small_image')->resize($width, $height);
-    }
-
-    /**
-     * Return re-sized thumbnail image URL
-     *
-     * @deprecated since 1.1.5
-     * @param int $width
-     * @param int $height
-     * @return string
-     */
-    public function getThumbnailUrl($width = 75, $height = 75)
-    {
-        return (string) $this->_getImageHelper()->init($this, 'thumbnail')->resize($width, $height);
-    }
-
-    /**
      *  Returns system reserved attribute codes
      *
      *  @return array Reserved attribute names

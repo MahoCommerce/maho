@@ -2,7 +2,6 @@
 namespace PHPSTORM_META {
     override(\Mage::getResourceModel(0), map([
         'admin_resource/acl' => \Mage_Admin_Model_Resource_Acl::class,
-        'admin_resource/acl_role' => \Mage_Admin_Model_Resource_Acl_Role::class,
         'admin_resource/acl_role_collection' => \Mage_Admin_Model_Resource_Acl_Role_Collection::class,
         'admin_resource/block' => \Mage_Admin_Model_Resource_Block::class,
         'admin_resource/block_collection' => \Mage_Admin_Model_Resource_Block_Collection::class,
