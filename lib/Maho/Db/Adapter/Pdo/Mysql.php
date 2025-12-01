@@ -1343,7 +1343,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             $originalDb = $this->_connection->getDatabase();
             try {
                 $this->_connection->executeStatement('USE ' . $this->quoteIdentifier($schemaName));
-                $tables = $schemaManager->listTableNames();
+                $tables = $schemaManager->introspectTableNames();
                 $this->_connection->executeStatement('USE ' . $this->quoteIdentifier($originalDb));
             } catch (\Exception $e) {
                 // Restore original database even on error
@@ -1351,7 +1351,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
                 throw $e;
             }
         } else {
-            $tables = $schemaManager->listTableNames();
+            $tables = $schemaManager->introspectTableNames();
         }
 
         return $tables;
@@ -1920,7 +1920,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
             // Use Doctrine DBAL SchemaManager for table introspection
             $schemaManager = $this->_connection->createSchemaManager();
-            $table = $schemaManager->introspectTable($fullTableName);
+            $table = $schemaManager->introspectTableByUnquotedName($fullTableName);
             $platform = $this->_connection->getDatabasePlatform();
 
             // Get primary key information
@@ -1940,8 +1940,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             $position = 1;
 
             foreach ($table->getColumns() as $column) {
-                /** @phpstan-ignore method.internalClass */
-                $columnName = $column->getName();
+                $columnName = $column->getObjectName()->toString();
 
                 // Get the SQL declaration and parse it to extract MySQL type
                 $sqlDeclaration = $column->getType()->getSQLDeclaration($column->toArray(), $platform);
