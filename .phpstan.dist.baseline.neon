@@ -7450,18 +7450,6 @@ parameters:
 			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
 			identifier: mage.invalidType
 			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Catalog.php
-
-		-
-			rawMessage: 'Property Mage_Dataflow_Model_Convert_Adapter_Abstract::$_resource (object) does not accept false.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Catalog.php
-
-		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
@@ -7577,12 +7565,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setStore().'
@@ -12443,12 +12425,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
-
-		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setStore().'
