@@ -21,16 +21,4 @@ class Mage_Weee_Model_Config_Source_Fpt_Tax
             ['value' => 2, 'label' => $weeeHelper->__('Loaded and Displayed with Tax')],
         ];
     }
-
-    /**
-     * Return helper corresponding to given name
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
-    }
 }

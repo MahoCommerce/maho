@@ -344,18 +344,6 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get helper instance
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
-    }
-
-    /**
      * Validate user attribute values.
      *
      * @return array|true

@@ -216,19 +216,6 @@ class Mage_Paypal_Model_Express_Checkout
     }
 
     /**
-     * Setter for customer Id
-     *
-     * @param int $id
-     * @return $this
-     * @deprecated please use self::setCustomer
-     */
-    public function setCustomerId($id)
-    {
-        $this->_customerId = $id;
-        return $this;
-    }
-
-    /**
      * Set flag that forces to use BillMeLater
      *
      * @param bool $isBml

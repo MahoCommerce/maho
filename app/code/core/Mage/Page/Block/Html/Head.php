@@ -59,36 +59,6 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     }
 
     /**
-     * Add CSS file for Internet Explorer only to HEAD entity
-     *
-     * @param string $name
-     * @param string $params
-     * @param string $referenceName
-     * @param bool $before
-     * @return $this
-     * @deprecated
-     */
-    public function addCssIe($name, $params = '', $referenceName = '*', $before = null)
-    {
-        return $this;
-    }
-
-    /**
-     * Add JavaScript file for Internet Explorer only to HEAD entity
-     *
-     * @param string $name
-     * @param string $params
-     * @param string $referenceName
-     * @param bool $before
-     * @return $this
-     * @deprecated
-     */
-    public function addJsIe($name, $params = '', $referenceName = '*', $before = null)
-    {
-        return $this;
-    }
-
-    /**
      * Add Link element to HEAD entity
      *
      * @param string $rel forward link types

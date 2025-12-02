@@ -831,6 +831,8 @@ interface AdapterInterface
 
     /**
      * Retrieve the list of all tables in the database
+     *
+     * @return string[] List of table names
      */
     public function listTables(?string $schemaName = null): array;
 

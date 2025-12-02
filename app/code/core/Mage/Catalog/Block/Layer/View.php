@@ -70,18 +70,6 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
         $this->_decimalFilterBlockName      = 'catalog/layer_filter_decimal';
     }
 
-    /**
-     * Get attribute filter block name
-     *
-     * @deprecated after 1.4.1.0
-     *
-     * @return string
-     */
-    protected function _getAttributeFilterBlockName()
-    {
-        return 'catalog/layer_filter_attribute';
-    }
-
     #[\Override]
     protected function _prepareLayout()
     {

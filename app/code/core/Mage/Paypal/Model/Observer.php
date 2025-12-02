@@ -34,17 +34,6 @@ class Mage_Paypal_Model_Observer
     }
 
     /**
-     * Clean unfinished transaction
-     *
-     * @deprecated since 1.6.2.0
-     * @return $this
-     */
-    public function cleanTransactions()
-    {
-        return $this;
-    }
-
-    /**
      * Save order into registry to use it in the overloaded controller.
      *
      * @return $this

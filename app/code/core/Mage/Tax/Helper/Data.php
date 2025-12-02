@@ -402,18 +402,6 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get all tax rates JSON for all product tax classes
-     *
-     * [value_{$productTaxClassId} => $rate]
-     * @deprecated after 1.4 - please use getAllRatesByProductClass
-     * @return string
-     */
-    public function getTaxRatesByProductClass()
-    {
-        return $this->_getAllRatesByProductClass();
-    }
-
-    /**
      * Get all tax rates JSON for all product tax classes of specific store
      *
      * [value_{$productTaxClassId} => $rate]
@@ -1052,18 +1040,6 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     protected function _getTaxRateSubtotals($order)
     {
         return Mage::getModel('tax/sales_order_tax')->getCollection()->loadByOrder($order)->toArray();
-    }
-
-    /**
-     * Retrieve a value from registry by a key
-     *
-     * @param string $key
-     * @return mixed
-     * @deprecated use Mage::registry()
-     */
-    protected function _getFromRegistry($key)
-    {
-        return Mage::registry($key);
     }
 
     /**

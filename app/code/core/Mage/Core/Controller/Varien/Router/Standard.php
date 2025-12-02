@@ -311,42 +311,6 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
     }
 
     /**
-     * @param string $controllerFileName
-     * @param string $controllerClassName
-     * @return bool
-     * @throws Mage_Core_Exception
-     * @deprecated
-     * @see _includeControllerClass()
-     */
-    protected function _inludeControllerClass($controllerFileName, $controllerClassName)
-    {
-        return $this->_includeControllerClass($controllerFileName, $controllerClassName);
-    }
-
-    /**
-     * Include the file containing controller class if this class is not defined yet
-     *
-     * @param string $controllerFileName
-     * @param string $controllerClassName
-     * @return bool
-     * @deprecated
-     */
-    protected function _includeControllerClass($controllerFileName, $controllerClassName)
-    {
-        if (!class_exists($controllerClassName, false)) {
-            if (!file_exists($controllerFileName)) {
-                return false;
-            }
-            include $controllerFileName;
-
-            if (!class_exists($controllerClassName, false)) {
-                throw Mage::exception('Mage_Core', Mage::helper('core')->__('Controller file was loaded but class does not exist'));
-            }
-        }
-        return true;
-    }
-
-    /**
      * @param string $frontName
      * @param array $moduleNames
      * @param string $routeName
@@ -406,38 +370,6 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
     public function getRouteByFrontName($frontName)
     {
         return array_search($frontName, $this->_routes);
-    }
-
-    /**
-     * @param string $realModule
-     * @param string $controller
-     * @return string
-     * @deprecated
-     */
-    public function getControllerFileName($realModule, $controller)
-    {
-        $parts = explode('_', $realModule);
-        $realModule = implode('_', array_splice($parts, 0, 2));
-        $file = Mage::getModuleDir('controllers', $realModule);
-        if (count($parts)) {
-            $file .= DS . implode(DS, $parts);
-        }
-        $file .= DS . uc_words($controller, DS) . 'Controller.php';
-        $file = Maho::findFile($file);
-        return $file;
-    }
-
-    /**
-     * @param string $fileName
-     * @return bool
-     * @deprecated
-     */
-    public function validateControllerFileName($fileName)
-    {
-        if ($fileName && is_readable($fileName) && !str_contains($fileName, '//')) {
-            return true;
-        }
-        return false;
     }
 
     /**

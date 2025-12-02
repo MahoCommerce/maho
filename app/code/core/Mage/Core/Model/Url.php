@@ -1017,19 +1017,6 @@ class Mage_Core_Model_Url extends Varien_Object
     }
 
     /**
-     * Return singleton model instance
-     *
-     * @param string $name
-     * @param array $arguments
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getSingleton()
-     */
-    protected function _getSingletonModel($name, $arguments = [])
-    {
-        return Mage::getSingleton($name, $arguments);
-    }
-
-    /**
      * Check and add session id to URL
      *
      * @param string $url

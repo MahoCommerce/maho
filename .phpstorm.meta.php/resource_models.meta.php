@@ -2,7 +2,6 @@
 namespace PHPSTORM_META {
     override(\Mage::getResourceModel(0), map([
         'admin_resource/acl' => \Mage_Admin_Model_Resource_Acl::class,
-        'admin_resource/acl_role' => \Mage_Admin_Model_Resource_Acl_Role::class,
         'admin_resource/acl_role_collection' => \Mage_Admin_Model_Resource_Acl_Role_Collection::class,
         'admin_resource/block' => \Mage_Admin_Model_Resource_Block::class,
         'admin_resource/block_collection' => \Mage_Admin_Model_Resource_Block_Collection::class,
@@ -400,7 +399,6 @@ namespace PHPSTORM_META {
         'reports_resource/tag_product_collection' => \Mage_Reports_Model_Resource_Tag_Product_Collection::class,
         'reports_resource/tax_collection' => \Mage_Reports_Model_Resource_Tax_Collection::class,
         'reports_resource/wishlist_collection' => \Mage_Reports_Model_Resource_Wishlist_Collection::class,
-        'reports_resource/wishlist_product_collection' => \Mage_Reports_Model_Resource_Wishlist_Product_Collection::class,
         'review_resource/review' => \Mage_Review_Model_Resource_Review::class,
         'review_resource/review_collection' => \Mage_Review_Model_Resource_Review_Collection::class,
         'review_resource/review_product_collection' => \Mage_Review_Model_Resource_Review_Product_Collection::class,
@@ -582,7 +580,6 @@ namespace PHPSTORM_META {
         'wishlist_resource/item_collection' => \Mage_Wishlist_Model_Resource_Item_Collection::class,
         'wishlist_resource/item_option' => \Mage_Wishlist_Model_Resource_Item_Option::class,
         'wishlist_resource/item_option_collection' => \Mage_Wishlist_Model_Resource_Item_Option_Collection::class,
-        'wishlist_resource/product_collection' => \Mage_Wishlist_Model_Resource_Product_Collection::class,
         'wishlist_resource/wishlist' => \Mage_Wishlist_Model_Resource_Wishlist::class,
         'wishlist_resource/wishlist_collection' => \Mage_Wishlist_Model_Resource_Wishlist_Collection::class,
     ]));

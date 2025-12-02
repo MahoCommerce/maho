@@ -82,12 +82,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public const XML_PATH_NOTIFICATION_EMAILS_TEMPLATE  = 'admin/emails/admin_notification_email_template';
 
     /**
-     * Minimum length of admin password
-     * @deprecated Use getMinAdminPasswordLength() method instead
-     */
-    public const MIN_PASSWORD_LENGTH = 14;
-
-    /**
      * Configuration path for minimum length of admin password
      */
     public const XML_PATH_MIN_ADMIN_PASSWORD_LENGTH = 'admin/security/min_admin_password_length';
@@ -311,17 +305,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function getCollection()
     {
         return Mage::getResourceModel('admin/user_collection');
-    }
-
-    /**
-     * Send email with new user password
-     *
-     * @return $this
-     * @deprecated deprecated since version 1.6.1.0
-     */
-    public function sendNewPasswordEmail()
-    {
-        return $this;
     }
 
     /**
@@ -656,18 +639,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     protected function _getEncodedPassword(#[\SensitiveParameter] $password)
     {
         return Mage::helper('core')->getHash($password, self::HASH_SALT_LENGTH);
-    }
-
-    /**
-     * Returns helper instance
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
     }
 
     /**

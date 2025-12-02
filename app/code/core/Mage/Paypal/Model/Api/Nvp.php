@@ -1245,19 +1245,6 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
     }
 
     /**
-     * Prepare request data basing on provided address
-     *
-     * @deprecated after 1.4.2.0-beta1, use _importAddresses() instead
-     *
-     * @return array
-     */
-    protected function _importAddress(Varien_Object $address, array $to)
-    {
-        $this->setAddress($address);
-        return $this->_importAddresses($to);
-    }
-
-    /**
      * Prepare request data basing on provided addresses
      *
      * @return array

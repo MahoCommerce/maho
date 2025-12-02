@@ -90,17 +90,6 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
     }
 
     /**
-     * Return swf object url
-     *
-     * @return string
-     * @deprecated v19.4.16
-     */
-    public function getObjectUrl()
-    {
-        return $this->_getHelper()->getPopupObjectUrl();
-    }
-
-    /**
      * Retrieve Last Notice object
      *
      * @return Mage_AdminNotification_Model_Inbox

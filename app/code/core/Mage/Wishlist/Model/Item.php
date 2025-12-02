@@ -40,14 +40,6 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
 {
     public const EXCEPTION_CODE_NOT_SALABLE            = 901;
     public const EXCEPTION_CODE_HAS_REQUIRED_OPTIONS   = 902;
-
-    /**
-     * We can store product store product configuration
-     * and add grouped attributes after 1.4.2.0
-     *
-     * @deprecated after 1.4.2.0
-     */
-    public const EXCEPTION_CODE_IS_GROUPED_PRODUCT     = 903;
     public const EXCEPTION_CODE_NOT_SPECIFIED_PRODUCT  = 904;
 
     /**
@@ -273,24 +265,6 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
         }
 
         return $this;
-    }
-
-    /**
-     * Retrieve wishlist item data as array
-     *
-     * @deprecated since 1.4.0.0
-     * @return array
-     */
-    public function getDataForSave()
-    {
-        $data = [];
-        $data['product_id']  = $this->getProductId();
-        $data['wishlist_id'] = $this->getWishlistId();
-        $data['added_at']    = $this->getAddedAt() ?: Mage::getSingleton('core/date')->gmtDate();
-        $data['description'] = $this->getDescription();
-        $data['store_id']    = $this->getStoreId() ?: Mage::app()->getStore()->getId();
-
-        return $data;
     }
 
     /**

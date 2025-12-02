@@ -902,25 +902,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     }
 
     /**
-     * Retrieve all ids sql
-     *
-     * @deprecated
-     * @return Maho\Db\Select
-     */
-    public function getAllIdsSql()
-    {
-        $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Maho\Db\Select::ORDER);
-        $idsSelect->reset(Maho\Db\Select::LIMIT_COUNT);
-        $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
-        $idsSelect->reset(Maho\Db\Select::COLUMNS);
-        $idsSelect->reset(Maho\Db\Select::GROUP);
-        $idsSelect->columns('e.' . $this->getEntity()->getIdFieldName());
-
-        return $idsSelect;
-    }
-
-    /**
      * Save all the entities in the collection
      *
      * @todo make batch save directly from collection

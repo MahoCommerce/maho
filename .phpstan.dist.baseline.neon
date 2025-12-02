@@ -103,18 +103,6 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Acl/Assert/Time.php
 
 		-
-			rawMessage: 'PHPDoc tag @method for _getResource() references deprecated class Mage_Admin_Model_Resource_Acl_Role.'
-			identifier: methodTag.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Acl/Role.php
-
-		-
-			rawMessage: 'PHPDoc tag @method for getResource() references deprecated class Mage_Admin_Model_Resource_Acl_Role.'
-			identifier: methodTag.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Acl/Role.php
-
-		-
 			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
 			identifier: equal.invalid
 			count: 1
@@ -137,12 +125,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Resource/Acl.php
-
-		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Acl_Role::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Acl/Role.php
 
 		-
 			rawMessage: 'Method Mage_Admin_Model_Resource_Block::_construct() has no return type specified.'
@@ -425,12 +407,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Category_Edit_Form::getProductsJson() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Edit/Form.php
 
 		-
 			rawMessage: 'Cannot call method addAttributeToSelect() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
@@ -1789,42 +1765,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Tag/Popular/Grid.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$conversions_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$customer_with_wishlist has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$items_bought has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$referrals_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$shared_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Report_Wishlist::$wishlists_count has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Wishlist.php
-
-		-
 			rawMessage: 'Return type (int) of method Mage_Adminhtml_Block_Review_Grid_Filter_Type::getCondition() should be compatible with return type (array|null) of method Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select::getCondition()'
 			identifier: method.childReturnType
 			count: 1
@@ -2679,12 +2619,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default::getItem() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Items/Renderer/Default.php
-
-		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default::$_giftMessage (Mage_GiftMessage_Model_Message) does not accept default value of type array.'
-			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Items/Renderer/Default.php
 
@@ -11074,12 +11008,6 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Front.php
 
 		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Front::rewrite() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Front.php
-
-		-
 			rawMessage: Property Mage_Core_Controller_Varien_Front::$_defaults has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -11136,12 +11064,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Core_Controller_Varien_Router_Standard::fetchDefault() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
 
@@ -11322,18 +11244,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $fileName of method Mage_Core_Model_Config::loadModulesConfiguration() expects string, array<int, string> given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Config::$_baseDirCache has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Config::$_customEtcDir has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Config.php
 
@@ -11537,12 +11447,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Layout::generateBlocks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Layout::validateAgainstBlacklist() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
@@ -11906,12 +11810,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Website.php
-
-		-
-			rawMessage: Property Mage_Core_Model_Resource_Website_Collection::$_loadDefault has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Website/Collection.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Session::renewFormKey() has no return type specified.'
@@ -17395,12 +17293,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Standard::debugRequest() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Api_Standard::getStandardCheckoutRequest() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18187,24 +18079,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_addTransaction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_getDocumentFromResponse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_process() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_processOrder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18212,12 +18086,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_processTokenErrors() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::prepareOrderReview() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
@@ -19160,27 +19028,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Tax/Collection.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setStore().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
-
-		-
-			rawMessage: '''
-				Class Mage_Reports_Model_Resource_Wishlist_Product_Collection extends deprecated class Mage_Wishlist_Model_Resource_Product_Collection:
-				after 1.4.2.0
-			'''
-			identifier: class.extendsDeprecatedClass
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Wishlist_Product_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
 
 		-
 			rawMessage: 'Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported.'
@@ -20293,12 +20140,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Payment.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Order_Payment::_avoidDoubleTransactionProcessing() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Payment.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Order_Payment::_createBillingAgreement() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -21143,12 +20984,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Service_Quote::_submitRecurringPaymentProfiles() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Service_Quote::submit() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
@@ -22096,18 +21931,6 @@ parameters:
 			path: app/code/core/Mage/Tax/Model/Resource/Sales/Order/Tax/Item.php
 
 		-
-			rawMessage: 'Method Mage_Tax_Model_Resource_Setup::convertOldTaxData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Resource/Setup.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Sales_Total_Quote_Shipping::_processShippingAmount() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Sales/Total/Quote/Shipping.php
-
-		-
 			rawMessage: 'Parameter #2 $rate of method Mage_Tax_Model_Sales_Total_Quote_Shipping::_round() expects string, float given.'
 			identifier: argument.type
 			count: 4
@@ -22347,12 +22170,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			rawMessage: Access to an undefined property Mage_Usa_Model_Shipping_Carrier_Fedex::$_defaultGatewayUrl.
-			identifier: property.notFound
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: Access to an undefined property Mage_Usa_Model_Shipping_Carrier_Fedex::$_rawTrackingRequest.
 			identifier: property.notFound
 			count: 1
@@ -22366,12 +22183,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Fedex::_parseTrackingResponse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
-			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Fedex::_parseXmlTrackingResponse() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
@@ -22413,15 +22224,9 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			rawMessage: 'Parameter #3 $value of function curl_setopt expects bool, int given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: 'Property Mage_Usa_Model_Shipping_Carrier_Fedex::$_result (Mage_Shipping_Model_Rate_Result|null) does not accept Mage_Shipping_Model_Tracking_Result.'
 			identifier: assign.propertyType
-			count: 2
+			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
@@ -22694,30 +22499,6 @@ parameters:
 			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item_Abstract::setBaseWeeeTaxDisposition() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item_Abstract::setBaseWeeeTaxRowDisposition() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item_Abstract::setWeeeTaxDisposition() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item_Abstract::setWeeeTaxRowDisposition() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
-
-		-
 			rawMessage: 'Method Mage_Widget_Block_Adminhtml_Widget_Instance_Edit::_preparelayout() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -22838,22 +22619,10 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Block/Abstract.php
 
 		-
-			rawMessage: Property Mage_Wishlist_Block_Customer_Wishlist::$_optionsCfg has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Wishlist/Block/Customer/Wishlist.php
-
-		-
 			rawMessage: 'Method Mage_Wishlist_Block_Customer_Wishlist_Item_Column::_beforeChildToHtml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Wishlist/Block/Customer/Wishlist/Item/Column.php
-
-		-
-			rawMessage: 'Method Mage_Wishlist_Block_Links::initLinkProperties() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Block/Links.php
 
 		-
 			rawMessage: 'Method Mage_Wishlist_Block_Render_Item_Price::getCleanProductPriceHtml() has no return type specified.'
@@ -22882,15 +22651,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Wishlist_Helper_Data::setCustomer() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Helper/Data.php
-
-		-
-			rawMessage: '''
-				Property $_productCollection references deprecated class Mage_Wishlist_Model_Resource_Product_Collection in its type:
-				after 1.4.2.0
-			'''
-			identifier: property.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Wishlist/Helper/Data.php
 
@@ -23036,15 +22796,6 @@ parameters:
 			rawMessage: '''
 				Call to deprecated method getGridUrl() of class Mage_Adminhtml_Block_Widget_Grid:
 				after 1.3.2.3 Use getAbsoluteGridUrl() method instead
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/dashboard/grid.phtml
-
-		-
-			rawMessage: '''
-				Call to deprecated method getRowId() of class Mage_Adminhtml_Block_Widget_Grid:
-				since 1.1.7
 			'''
 			identifier: method.deprecated
 			count: 1

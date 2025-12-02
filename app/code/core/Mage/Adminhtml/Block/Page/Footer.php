@@ -73,23 +73,6 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
 
     /**
      * @return $this
-     * @deprecated see setReportIssuesUrl()
-     */
-    public function setBugreportUrl(string $url)
-    {
-        return $this->setReportIssuesUrl($url);
-    }
-
-    /**
-     * @deprecated see getReportIssuesUrl()
-     */
-    public function getBugreportUrl(): string
-    {
-        return $this->getReportIssuesUrl();
-    }
-
-    /**
-     * @return $this
      */
     public function setReportIssuesUrl(string $url)
     {

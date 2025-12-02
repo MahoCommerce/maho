@@ -243,18 +243,6 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Replace '_' to '/', if was set from request(GET request)
-     *
-     * @deprecated after 1.6.1.0-alpha1
-     *
-     * @return $this
-     */
-    protected function _preparePackageTheme()
-    {
-        return $this;
-    }
-
-    /**
      * Getter.
      * If not set return default
      *

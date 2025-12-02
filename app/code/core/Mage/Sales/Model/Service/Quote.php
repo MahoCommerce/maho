@@ -96,16 +96,6 @@ class Mage_Sales_Model_Service_Quote
     }
 
     /**
-     * @deprecated after 1.4.0.1
-     * @see submitOrder()
-     * @see submitAll()
-     */
-    public function submit()
-    {
-        return $this->submitOrder();
-    }
-
-    /**
      * Submit the quote. Quote submit process will create the order based on quote data
      *
      * @return Mage_Sales_Model_Order
