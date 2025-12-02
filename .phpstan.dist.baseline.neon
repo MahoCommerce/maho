@@ -22819,15 +22819,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/customer/tab/addresses.phtml
 
 		-
-			rawMessage: '''
-				Call to deprecated method getGridUrl() of class Mage_Adminhtml_Block_Widget_Grid:
-				after 1.3.2.3 Use getAbsoluteGridUrl() method instead
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/dashboard/grid.phtml
-
-		-
 			rawMessage: Variable $this might not be defined.
 			identifier: variable.undefined
 			count: 3
@@ -23077,15 +23068,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/rating/stars/detailed.phtml
 
 		-
-			rawMessage: '''
-				Call to deprecated method getGridUrl() of class Mage_Adminhtml_Block_Widget_Grid:
-				after 1.3.2.3 Use getAbsoluteGridUrl() method instead
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/grid.phtml
-
-		-
 			rawMessage: 'Comparison operation ">" between int<1, max> and 0 is always true.'
 			identifier: greater.alwaysTrue
 			count: 1
@@ -23288,15 +23270,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
-
-		-
-			rawMessage: '''
-				Call to deprecated method getGridUrl() of class Mage_Adminhtml_Block_Widget_Grid:
-				after 1.3.2.3 Use getAbsoluteGridUrl() method instead
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/grid.phtml
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Grid::getEmptyCellColspan() invoked with 1 parameter, 0 required.'

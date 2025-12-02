@@ -70,18 +70,6 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * Get form object
-     *
-     * @deprecated deprecated since version 1.2
-     * @see getForm()
-     * @return Varien_Data_Form
-     */
-    public function getFormObject()
-    {
-        return $this->getForm();
-    }
-
-    /**
      * Get form HTML
      *
      * @return string

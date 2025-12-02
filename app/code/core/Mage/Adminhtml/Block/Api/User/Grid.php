@@ -80,7 +80,6 @@ class Mage_Adminhtml_Block_Api_User_Grid extends Mage_Adminhtml_Block_Widget_Gri
     #[\Override]
     public function getGridUrl()
     {
-        //$uid = $this->getRequest()->getParam('user_id');
         return $this->getUrl('*/*/roleGrid', []);
     }
 }
