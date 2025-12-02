@@ -4489,18 +4489,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Model_Sales_Order_Create::_putCustomerIntoQuote() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Model_Sales_Order_Create::_saveCustomerAfterOrder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Model_Sales_Order_Create::applyCoupon() has no return type specified.'
 			identifier: missingType.return
 			count: 1
