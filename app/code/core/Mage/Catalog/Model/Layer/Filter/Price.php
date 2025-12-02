@@ -199,25 +199,6 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     }
 
     /**
-     * Get price aggreagation data cache key
-     * @deprecated after 1.4
-     * @return string
-     */
-    protected function _getCacheKey()
-    {
-        $key = $this->getLayer()->getStateKey()
-            . '_PRICES_GRP_' . Mage::getSingleton('customer/session')->getCustomerGroupId()
-            . '_CURR_' . Mage::app()->getStore()->getCurrentCurrencyCode()
-            . '_ATTR_' . $this->getAttributeModel()->getAttributeCode()
-            . '_LOC_'
-        ;
-        $taxReq = Mage::getSingleton('tax/calculation')->getDefaultRateRequest();
-        $key .= implode('_', $taxReq->getData());
-
-        return $key;
-    }
-
-    /**
      * Get additional request param data
      *
      * @return string

@@ -10342,18 +10342,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Onepage::validateOrder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, null given.'
 			identifier: argument.type
 			count: 1
@@ -15095,12 +15083,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Api/V2.php
-
-		-
-			rawMessage: 'Method Maho\DataObject::unsData() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Model/Entity/Attribute/Backend/Boolean/Config.php
 
 		-
 			rawMessage: 'Method Mage_GiftMessage_Model_Message::getEntityModelByType() should return Mage_Eav_Model_Entity_Abstract but returns Mage_Core_Model_Abstract|false.'

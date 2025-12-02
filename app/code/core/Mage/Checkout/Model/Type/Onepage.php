@@ -773,41 +773,6 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
-     * Validate quote state to be able submitted from one page checkout page
-     *
-     * @throws Mage_Core_Exception
-     * @deprecated after 1.4 - service model doing quote validation
-     */
-    protected function validateOrder()
-    {
-        if ($this->getQuote()->getIsMultiShipping()) {
-            Mage::throwException(Mage::helper('checkout')->__('Invalid checkout type.'));
-        }
-
-        if (!$this->getQuote()->isVirtual()) {
-            $address = $this->getQuote()->getShippingAddress();
-            $addressValidation = $address->validate();
-            if ($addressValidation !== true) {
-                Mage::throwException(Mage::helper('checkout')->__('Please check shipping address information.'));
-            }
-            $method = $address->getShippingMethod();
-            $rate  = $address->getShippingRateByCode($method);
-            if (!$this->getQuote()->isVirtual() && (!$method || !$rate)) {
-                Mage::throwException(Mage::helper('checkout')->__('Please specify shipping method.'));
-            }
-        }
-
-        $addressValidation = $this->getQuote()->getBillingAddress()->validate();
-        if ($addressValidation !== true) {
-            Mage::throwException(Mage::helper('checkout')->__('Please check billing address information.'));
-        }
-
-        if (!($this->getQuote()->getPayment()->getMethod())) {
-            Mage::throwException(Mage::helper('checkout')->__('Please select valid payment method.'));
-        }
-    }
-
-    /**
      * Check if customer email exists
      *
      * @param string $email
