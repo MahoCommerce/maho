@@ -1389,25 +1389,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * @deprecated from 1.3.0
-     */
-    protected function _addTaxPercents()
-    {
-        $classToRate = [];
-        $request = Mage::getSingleton('tax/calculation')->getRateRequest();
-        foreach ($this as &$item) {
-            if ($item->getTaxClassId() === null) {
-                $item->setTaxClassId($item->getMinimalTaxClassId());
-            }
-            if (!isset($classToRate[$item->getTaxClassId()])) {
-                $request->setProductClassId($item->getTaxClassId());
-                $classToRate[$item->getTaxClassId()] = Mage::getSingleton('tax/calculation')->getRate($request);
-            }
-            $item->setTaxPercent($classToRate[$item->getTaxClassId()]);
-        }
-    }
-
-    /**
      * Adding product custom options to result collection
      *
      * @return $this

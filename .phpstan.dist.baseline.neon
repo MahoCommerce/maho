@@ -8674,12 +8674,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_addTaxPercents() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_addUrlRewrite() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12577,15 +12571,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
 
 		-
-			rawMessage: '''
-				Access to deprecated property $_addresses of class Mage_Customer_Model_Customer:
-				after 1.4.0.0-rc1
-			'''
-			identifier: property.deprecated
-			count: 4
-			path: app/code/core/Mage/Customer/Model/Customer.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Customer::cleanAllAddresses() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -15106,30 +15091,6 @@ parameters:
 			path: app/code/core/Mage/GiftMessage/Block/Adminhtml/Sales/Order/View/Items.php
 
 		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_entity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_giftMessage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_scriptIncluded has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_type has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
 			rawMessage: Property Mage_GiftMessage_Block_Message_Inline::$_entity has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -15146,33 +15107,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Block/Message/Inline.php
-
-		-
-			rawMessage: '''
-				Call to method setCanDisplayContainer() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Helper/Message.php
-
-		-
-			rawMessage: '''
-				Call to method setEntity() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Helper/Message.php
-
-		-
-			rawMessage: '''
-				Call to method setType() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Helper/Message.php
 
 		-
 			rawMessage: 'Return type (stdClass) of method Mage_GiftMessage_Model_Api_V2::_setGiftMessage() should be compatible with return type (array) of method Mage_GiftMessage_Model_Api::_setGiftMessage()'
@@ -15203,24 +15137,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Resource/Message.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setGiftMessageId().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/GiftMessage/controllers/IndexController.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_GiftMessage_IndexController::_getMappedType().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/GiftMessage/controllers/IndexController.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Abstract::load() invoked with 1 parameter, 2-3 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/GiftMessage/controllers/IndexController.php
 
 		-
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
@@ -22843,172 +22759,10 @@ parameters:
 			path: app/design/adminhtml/default/default/template/empty.phtml
 
 		-
-			rawMessage: '''
-				Call to method getButtonUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getEditUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getEscapedForJs() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getMessage() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getRemoveUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getSaveUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getUniqueId() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				PHPDoc tag @var references deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: varTag.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
 			rawMessage: Variable $this might not be defined.
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/giftmessage/giftoptionsform.phtml
-
-		-
-			rawMessage: 'Call to an undefined method Mage_GiftMessage_Block_Message_Helper::prepareAsIs().'
-			identifier: method.notFound
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getEditUrl() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getJsObjectName() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getMessage() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getScriptIncluded() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getType() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method hasGiftMessage() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 4
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method setScriptIncluded() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: 'Method Maho\DataObject::getWidgetButtonHtml() invoked with 2 parameters, 0-1 required.'
-			identifier: arguments.count
-			count: 4
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				PHPDoc tag @var references deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: varTag.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_GiftMessage_Block_Message_Helper::setScriptIncluded() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
 
 		-
 			rawMessage: Variable $this might not be defined.
