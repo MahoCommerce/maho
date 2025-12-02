@@ -161,15 +161,4 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
     {
         return true;
     }
-
-    /**
-     * Check if form_key validation enabled on checkout process
-     *
-     * @deprecated
-     * @return bool
-     */
-    protected function isFormkeyValidationOnCheckoutEnabled()
-    {
-        return true;
-    }
 }

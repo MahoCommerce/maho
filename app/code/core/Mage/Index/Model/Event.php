@@ -220,18 +220,6 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get event old data array
-     *
-     * @deprecated since 1.6.2.0
-     * @param bool $useNamespace
-     * @return array
-     */
-    public function getOldData($useNamespace = true)
-    {
-        return [];
-    }
-
-    /**
      * Get event new data array
      *
      * @param bool $useNamespace
@@ -249,19 +237,6 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
             return $data[$this->_dataNamespace] ?? [];
         }
         return $data;
-    }
-
-    /**
-     * Add new values to old data array (overwrite if value with same key exist)
-     *
-     * @param array|string $key
-     * @param null|mixed $value
-     * @return $this
-     * @deprecated since 1.6.2.0
-     */
-    public function addOldData($key, $value = null)
-    {
-        return $this;
     }
 
     /**

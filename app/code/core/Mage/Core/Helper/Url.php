@@ -269,19 +269,6 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Return singleton model instance
-     *
-     * @param string $name
-     * @param array $arguments
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getSingleton()
-     */
-    protected function _getSingletonModel($name, $arguments = [])
-    {
-        return Mage::getSingleton($name, $arguments);
-    }
-
-    /**
      * Retrieve encoding domain name in punycode
      *
      * @param string $url encode url to Punycode

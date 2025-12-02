@@ -1692,17 +1692,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     }
 
     /**
-     * After set config process
-     *
-     * @deprecated
-     * @return $this
-     */
-    protected function _afterSetConfig()
-    {
-        return $this;
-    }
-
-    /**
      * Check is attribute value empty
      *
      * @param mixed $value

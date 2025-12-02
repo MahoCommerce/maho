@@ -251,39 +251,4 @@ class Mage_Bundle_Model_Observer
         $block->addOptionsRenderCfg('bundle', 'bundle/catalog_product_configuration');
         return $this;
     }
-
-    /**
-     * Add price index to bundle product after load
-     *
-     * @deprecated since 1.4.0.0
-     *
-     * @return $this
-     */
-    public function catalogProductLoadAfter(Varien_Event_Observer $observer)
-    {
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = $observer->getEvent()->getProduct();
-        if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
-            Mage::getSingleton('bundle/price_index')
-                ->addPriceIndexToProduct($product);
-        }
-
-        return $this;
-    }
-
-    /**
-     * CatalogIndex Indexer after plain reindex process
-     *
-     * @deprecated since 1.4.0.0
-     * @see Mage_Bundle_Model_Resource_Indexer_Price
-     *
-     * @return $this
-     */
-    public function catalogIndexPlainReindexAfter(Varien_Event_Observer $observer)
-    {
-        $products = $observer->getEvent()->getProducts();
-        Mage::getSingleton('bundle/price_index')->reindex($products);
-
-        return $this;
-    }
 }

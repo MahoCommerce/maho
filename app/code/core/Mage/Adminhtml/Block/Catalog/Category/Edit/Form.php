@@ -235,15 +235,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
     }
 
     /**
-     * @deprecated use self::getProductsInfoJson()
-     */
-    public function getProductsJson()
-    {
-        $products = $this->getCategory()->getProductsPosition();
-        return Mage::helper('core')->jsonEncode((object) $products);
-    }
-
-    /**
      * Return JSON for category edit product grid
      *
      * @return string

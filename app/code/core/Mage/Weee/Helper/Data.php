@@ -671,16 +671,4 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         }
         return $baseWeeeAmountInclDiscount;
     }
-
-    /**
-     * Get The Helper with the name provider
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
-    }
 }

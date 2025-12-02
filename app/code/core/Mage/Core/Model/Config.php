@@ -209,14 +209,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected $_isLocalConfigLoaded = false;
 
     /**
-     * Deprecated properties
-     *
-     * @deprecated
-     */
-    protected $_baseDirCache = [];
-    protected $_customEtcDir = null;
-
-    /**
      * Active modules array per namespace
      * @var array
      */

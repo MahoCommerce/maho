@@ -13,13 +13,6 @@
 abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
-     * Fields List for update in forsedSave
-     *
-     * @var array
-     */
-    protected $_fieldsForUpdate    = ['store_id', 'added_at'];
-
-    /**
      * Update Customer from visitor (Customer logged in)
      *
      * @return Mage_Reports_Model_Resource_Product_Index_Abstract

@@ -371,15 +371,4 @@ HTML;
             'template' => $this->getTemplate(),
         ];
     }
-
-    /**
-     * Get is allowed symlinks flag
-     *
-     * @deprecated
-     * @return bool
-     */
-    protected function _getAllowSymlinks()
-    {
-        return false;
-    }
 }

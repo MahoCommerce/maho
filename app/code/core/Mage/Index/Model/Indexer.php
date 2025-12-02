@@ -20,14 +20,6 @@ class Mage_Index_Model_Indexer
     protected $_processesCollection;
 
     /**
-     * Indexer processes lock flag
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_lockFlag = false;
-
-    /**
      * Whether table changes are allowed
      *
      * @var bool
@@ -140,41 +132,6 @@ class Mage_Index_Model_Indexer
     public function getErrors()
     {
         return $this->_errors;
-    }
-
-    /**
-     * Lock indexer actions
-     * @deprecated after 1.6.1.0
-     *
-     * @return $this
-     */
-    public function lockIndexer()
-    {
-        $this->_lockFlag = true;
-        return $this;
-    }
-
-    /**
-     * Unlock indexer actions
-     * @deprecated after 1.6.1.0
-     *
-     * @return $this
-     */
-    public function unlockIndexer()
-    {
-        $this->_lockFlag = false;
-        return $this;
-    }
-
-    /**
-     * Check if object actions are locked
-     *
-     * @deprecated after 1.6.1.0
-     * @return bool
-     */
-    public function isLocked()
-    {
-        return $this->_lockFlag;
     }
 
     /**

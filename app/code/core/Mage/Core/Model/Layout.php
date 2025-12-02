@@ -341,24 +341,6 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
     }
 
     /**
-     * @param string                   $method
-     * @param string[]                 $args
-     * @throws Mage_Core_Exception
-     * @deprecated
-     * @see Mage_Core_Helper_Security::validateAgainstBlockMethodBlacklist()
-     */
-    protected function validateAgainstBlacklist(Mage_Core_Block_Abstract $block, $method, array $args)
-    {
-        foreach ($this->invalidActions as $action) {
-            if ($block instanceof $action['block'] && $action['method'] === strtolower($method)) {
-                Mage::throwException(
-                    sprintf('Action with combination block %s and method %s is forbidden.', $block::class, $method),
-                );
-            }
-        }
-    }
-
-    /**
      * Translate layout node
      *
      * @param Varien_Simplexml_Element $node

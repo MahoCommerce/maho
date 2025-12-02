@@ -13,12 +13,6 @@
 class Mage_Api2_Model_Route_ApiType extends Mage_Api2_Model_Route_Abstract implements Mage_Api2_Model_Route_Interface
 {
     /**
-     * API url template with API type variable
-     * @deprecated
-     */
-    public const API_ROUTE = 'api/:api_type';
-
-    /**
      * Matches a Request with parts defined by a map. Assigns and
      * returns an array of variables on a successful match.
      *

@@ -91,18 +91,6 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
     }
 
     /**
-     * Create temporary table for index data pregeneration
-     *
-     * @deprecated since 1.5.0.0
-     * @param bool $asOriginal
-     * @return Mage_Index_Model_Resource_Abstract
-     */
-    public function cloneIndexTable($asOriginal = false)
-    {
-        return $this;
-    }
-
-    /**
      * Copy data from source table of read adapter to destination table of index adapter
      *
      * @param string $sourceTable
