@@ -306,9 +306,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Update entity attribute value
      *
-     * @deprecated after 1.5.1.0
-     * @see Mage_Catalog_Model_Resource_Abstract::_saveAttributeValue()
-     *
      * @param Varien_Object $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $valueId
@@ -458,56 +455,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         $this->load($origObject, $object->getData($this->getEntityIdField()));
 
         return $origObject;
-    }
-
-    /**
-     * Collect original data
-     *
-     * @deprecated after 1.5.1.0
-     *
-     * @param Varien_Object $object
-     * @return array
-     */
-    protected function _collectOrigData($object)
-    {
-        $this->loadAllAttributes($object);
-
-        if ($this->getUseDataSharing()) {
-            $storeId = $object->getStoreId();
-        } else {
-            $storeId = $this->getStoreId();
-        }
-
-        $data = [];
-        foreach ($this->getAttributesByTable() as $table => $attributes) {
-            $select = $this->_getReadAdapter()->select()
-                ->from($table)
-                ->where($this->getEntityIdField() . '=?', $object->getId());
-
-            $where = $this->_getReadAdapter()->quoteInto('store_id=?', $storeId);
-
-            $globalAttributeIds = [];
-            foreach ($attributes as $attr) {
-                if ($attr->getIsGlobal()) {
-                    $globalAttributeIds[] = $attr->getId();
-                }
-            }
-            if (!empty($globalAttributeIds)) {
-                $where .= ' or ' . $this->_getReadAdapter()->quoteInto('attribute_id in (?)', $globalAttributeIds);
-            }
-            $select->where($where);
-
-            $values = $this->_getReadAdapter()->fetchAll($select);
-
-            if (empty($values)) {
-                continue;
-            }
-
-            foreach ($values as $row) {
-                $data[$this->getAttribute($row['attribute_id'])->getName()][$row['store_id']] = $row;
-            }
-        }
-        return $data;
     }
 
     /**

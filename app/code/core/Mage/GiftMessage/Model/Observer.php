@@ -62,21 +62,6 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
     }
 
     /**
-     * Geter for available gift messages value from product
-     *
-     * @deprecated after 1.5.0.0
-     * @param Mage_Catalog_Model_Product|integer $product
-     * @return int|null
-     */
-    protected function _getAvailable($product)
-    {
-        if (is_object($product)) {
-            return $product->getGiftMessageAvailable();
-        }
-        return Mage::getModel('catalog/product')->load($product)->getGiftMessageAvailable();
-    }
-
-    /**
      * Operate with gift messages on checkout process
      *
      * @return $this

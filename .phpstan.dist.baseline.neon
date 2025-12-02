@@ -7675,15 +7675,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
 
 		-
-			rawMessage: '''
-				Return type of method Mage_Catalog_Model_Convert_Parser_Product::getResource() has typehint with deprecated class Mage_Catalog_Model_Mysql4_Convert:
-				after 1.5.0.1
-			'''
-			identifier: return.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Category::getParentDesignCategory() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -12526,15 +12517,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
 
 		-
-			rawMessage: '''
-				Return type of method Mage_Customer_Model_Convert_Parser_Customer::getResource() has typehint with deprecated class Mage_Catalog_Model_Mysql4_Convert:
-				after 1.5.0.1
-			'''
-			identifier: return.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
-
-		-
 			rawMessage: Variable $regionId might not be defined.
 			identifier: variable.undefined
 			count: 1
@@ -13963,180 +13945,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Validator/Interface.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::addProductToStore() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::addProductToStore() has parameter $productId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::addProductToStore() has parameter $storeId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportAttributeOptions() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportAttributeSets() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportAttributes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportCategories() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportImageGallery() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProductLinks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProducts() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProductsInCategories() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProductsInStores() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getConnection() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductAttributeOption() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductAttributeOption() has parameter $attribute with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductAttributeOption() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductEntity() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductEntity() has parameter $field with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductIdBySku() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductIdBySku() has parameter $sku with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getSelect() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getSkuAttribute() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getSkuAttribute() has parameter $field with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getTable() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getTable() has parameter $table with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::importProducts() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Mysql4_Convert::$_productEntity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Mysql4_Convert::$_productsBySku has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Mysql4_Convert::$_skuAttribute has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Profile::_parseGuiData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -15549,12 +15357,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Install_Model_Installer_Db_Abstract::getVersion().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Install/Model/Installer/Db.php
-
-		-
-			rawMessage: 'Method Mage_Install_Model_Installer_Db::checkDatabase() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Install/Model/Installer/Db.php
 

@@ -80,7 +80,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
     }
 
     /**
-     * @return Mage_Catalog_Model_Mysql4_Convert
+     * @return mixed
      */
     public function getResource()
     {

@@ -174,7 +174,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
     }
 
     /**
-     * @return Mage_Catalog_Model_Mysql4_Convert
+     * @return mixed
      */
     public function getResource()
     {
