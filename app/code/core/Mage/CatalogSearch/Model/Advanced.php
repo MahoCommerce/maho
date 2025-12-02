@@ -113,20 +113,6 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare search condition for attribute
-     *
-     * @deprecated after 1.4.1.0 - use Mage_CatalogSearch_Model_Resource_Advanced->_prepareCondition()
-     *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
-     * @param string|array $value
-     * @return mixed
-     */
-    protected function _prepareCondition($attribute, $value)
-    {
-        return $this->_getResource()->prepareCondition($attribute, $value, $this->getProductCollection());
-    }
-
-    /**
      * Add advanced search filters to product collection
      *
      * @param   array $values
