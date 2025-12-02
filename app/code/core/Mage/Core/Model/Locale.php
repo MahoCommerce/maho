@@ -52,10 +52,6 @@ class Mage_Core_Model_Locale extends Varien_Object
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
     public const XML_PATH_DEFAULT_TIMEZONE = 'general/locale/timezone';
-    /**
-     * @deprecated since 1.4.1.0
-     */
-    public const XML_PATH_DEFAULT_COUNTRY  = 'general/country/default';
     public const XML_PATH_ALLOW_CODES      = 'global/locale/allow/codes';
     public const XML_PATH_ALLOW_CURRENCIES = 'global/locale/allow/currencies';
     public const XML_PATH_ALLOW_CURRENCIES_INSTALLED = 'system/currency/installed';
