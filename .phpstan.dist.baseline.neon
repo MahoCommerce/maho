@@ -18088,24 +18088,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Resource/Cert.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Payment_Transaction::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Payment_Transaction::_unserializeField() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Payment_Transaction::loadObjectByTxnId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Payment/Transaction.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Resource_Report_Settlement::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
