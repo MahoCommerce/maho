@@ -138,18 +138,6 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
     }
 
     /**
-     * Set giftmessage available default value to product
-     * on catalog products collection load
-     *
-     * @deprecated after 1.4.2.0-beta1
-     * @return $this
-     */
-    public function catalogEventProductCollectionAfterLoad(Varien_Event_Observer $observer)
-    {
-        return $this;
-    }
-
-    /**
      * Duplicates giftmessage from order to quote on import or reorder
      *
      * @return $this

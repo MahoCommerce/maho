@@ -8968,12 +8968,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Url.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_ProductController::_applyCustomDesignSettings() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/controllers/ProductController.php
-
-		-
 			rawMessage: 'Parameter #2 $attributeSetId of method Mage_Eav_Model_Entity_Setup::getDefaultAttributeGroupId() expects int|null, string given.'
 			identifier: argument.type
 			count: 1
