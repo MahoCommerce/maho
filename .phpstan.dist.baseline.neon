@@ -22645,22 +22645,10 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Block/Abstract.php
 
 		-
-			rawMessage: Property Mage_Wishlist_Block_Customer_Wishlist::$_optionsCfg has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Wishlist/Block/Customer/Wishlist.php
-
-		-
 			rawMessage: 'Method Mage_Wishlist_Block_Customer_Wishlist_Item_Column::_beforeChildToHtml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Wishlist/Block/Customer/Wishlist/Item/Column.php
-
-		-
-			rawMessage: 'Method Mage_Wishlist_Block_Links::initLinkProperties() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Wishlist/Block/Links.php
 
 		-
 			rawMessage: 'Method Mage_Wishlist_Block_Render_Item_Price::getCleanProductPriceHtml() has no return type specified.'
