@@ -190,7 +190,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Customer addresses array
      *
      * @var Mage_Customer_Model_Address[]|null
-     * @deprecated after 1.4.0.0-rc1
      */
     protected $_addresses = null;
 

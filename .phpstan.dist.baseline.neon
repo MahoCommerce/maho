@@ -4489,18 +4489,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Model_Sales_Order_Create::_putCustomerIntoQuote() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Model_Sales_Order_Create::_saveCustomerAfterOrder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Model_Sales_Order_Create::applyCoupon() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7462,18 +7450,6 @@ parameters:
 			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
 			identifier: mage.invalidType
 			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Catalog.php
-
-		-
-			rawMessage: 'Property Mage_Dataflow_Model_Convert_Adapter_Abstract::$_resource (object) does not accept false.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Catalog.php
-
-		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
@@ -7591,12 +7567,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setStore().'
 			identifier: method.notFound
 			count: 1
@@ -7683,15 +7653,6 @@ parameters:
 		-
 			rawMessage: Property Mage_Catalog_Model_Convert_Parser_Product::$_systemFields has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
-
-		-
-			rawMessage: '''
-				Return type of method Mage_Catalog_Model_Convert_Parser_Product::getResource() has typehint with deprecated class Mage_Catalog_Model_Mysql4_Convert:
-				after 1.5.0.1
-			'''
-			identifier: return.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
 
@@ -8674,12 +8635,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_addTaxPercents() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_addUrlRewrite() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8984,12 +8939,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Url.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_ProductController::_applyCustomDesignSettings() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/controllers/ProductController.php
 
 		-
 			rawMessage: 'Parameter #2 $attributeSetId of method Mage_Eav_Model_Entity_Setup::getDefaultAttributeGroupId() expects int|null, string given.'
@@ -10362,18 +10311,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Type_Onepage::validate() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Onepage::validateOrder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
@@ -12490,12 +12427,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
 
 		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setStore().'
 			identifier: method.notFound
 			count: 1
@@ -12562,28 +12493,10 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
 
 		-
-			rawMessage: '''
-				Return type of method Mage_Customer_Model_Convert_Parser_Customer::getResource() has typehint with deprecated class Mage_Catalog_Model_Mysql4_Convert:
-				after 1.5.0.1
-			'''
-			identifier: return.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
-
-		-
 			rawMessage: Variable $regionId might not be defined.
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
-
-		-
-			rawMessage: '''
-				Access to deprecated property $_addresses of class Mage_Customer_Model_Customer:
-				after 1.4.0.0-rc1
-			'''
-			identifier: property.deprecated
-			count: 4
-			path: app/code/core/Mage/Customer/Model/Customer.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Model_Customer::cleanAllAddresses() has no return type specified.'
@@ -14008,180 +13921,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Validator/Interface.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::addProductToStore() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::addProductToStore() has parameter $productId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::addProductToStore() has parameter $storeId with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportAttributeOptions() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportAttributeSets() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportAttributes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportCategories() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportImageGallery() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProductLinks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProducts() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProductsInCategories() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::exportProductsInStores() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getConnection() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductAttributeOption() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductAttributeOption() has parameter $attribute with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductAttributeOption() has parameter $value with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductEntity() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductEntity() has parameter $field with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductIdBySku() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getProductIdBySku() has parameter $sku with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getSelect() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getSkuAttribute() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getSkuAttribute() has parameter $field with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getTable() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::getTable() has parameter $table with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Mysql4_Convert::importProducts() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Mysql4_Convert::$_productEntity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Mysql4_Convert::$_productsBySku has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Mysql4_Convert::$_skuAttribute has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Mysql4/Catalogold.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Profile::_parseGuiData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -15106,30 +14845,6 @@ parameters:
 			path: app/code/core/Mage/GiftMessage/Block/Adminhtml/Sales/Order/View/Items.php
 
 		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_entity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_giftMessage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_scriptIncluded has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
-			rawMessage: Property Mage_GiftMessage_Block_Message_Helper::$_type has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Message/Helper.php
-
-		-
 			rawMessage: Property Mage_GiftMessage_Block_Message_Inline::$_entity has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -15148,43 +14863,10 @@ parameters:
 			path: app/code/core/Mage/GiftMessage/Block/Message/Inline.php
 
 		-
-			rawMessage: '''
-				Call to method setCanDisplayContainer() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Helper/Message.php
-
-		-
-			rawMessage: '''
-				Call to method setEntity() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Helper/Message.php
-
-		-
-			rawMessage: '''
-				Call to method setType() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Helper/Message.php
-
-		-
 			rawMessage: 'Return type (stdClass) of method Mage_GiftMessage_Model_Api_V2::_setGiftMessage() should be compatible with return type (array) of method Mage_GiftMessage_Model_Api::_setGiftMessage()'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Api/V2.php
-
-		-
-			rawMessage: 'Method Maho\DataObject::unsData() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Model/Entity/Attribute/Backend/Boolean/Config.php
 
 		-
 			rawMessage: 'Method Mage_GiftMessage_Model_Message::getEntityModelByType() should return Mage_Eav_Model_Entity_Abstract but returns Mage_Core_Model_Abstract|false.'
@@ -15203,24 +14885,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Resource/Message.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::setGiftMessageId().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/GiftMessage/controllers/IndexController.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_GiftMessage_IndexController::_getMappedType().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/GiftMessage/controllers/IndexController.php
-
-		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Abstract::load() invoked with 1 parameter, 2-3 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/GiftMessage/controllers/IndexController.php
 
 		-
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
@@ -15669,12 +15333,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Install_Model_Installer_Db_Abstract::getVersion().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Install/Model/Installer/Db.php
-
-		-
-			rawMessage: 'Method Mage_Install_Model_Installer_Db::checkDatabase() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Install/Model/Installer/Db.php
 
@@ -22819,15 +22477,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/customer/tab/addresses.phtml
 
 		-
-			rawMessage: '''
-				Call to deprecated method getGridUrl() of class Mage_Adminhtml_Block_Widget_Grid:
-				after 1.3.2.3 Use getAbsoluteGridUrl() method instead
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/dashboard/grid.phtml
-
-		-
 			rawMessage: Variable $this might not be defined.
 			identifier: variable.undefined
 			count: 3
@@ -22852,172 +22501,10 @@ parameters:
 			path: app/design/adminhtml/default/default/template/empty.phtml
 
 		-
-			rawMessage: '''
-				Call to method getButtonUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getEditUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getEscapedForJs() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getMessage() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getRemoveUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getSaveUrl() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				Call to method getUniqueId() of deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
-			rawMessage: '''
-				PHPDoc tag @var references deprecated class Mage_GiftMessage_Block_Message_Form:
-				after 1.3.2.4
-			'''
-			identifier: varTag.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
-
-		-
 			rawMessage: Variable $this might not be defined.
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/giftmessage/giftoptionsform.phtml
-
-		-
-			rawMessage: 'Call to an undefined method Mage_GiftMessage_Block_Message_Helper::prepareAsIs().'
-			identifier: method.notFound
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getEditUrl() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getJsObjectName() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getMessage() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getScriptIncluded() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method getType() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method hasGiftMessage() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 4
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				Call to method setScriptIncluded() of deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: 'Method Maho\DataObject::getWidgetButtonHtml() invoked with 2 parameters, 0-1 required.'
-			identifier: arguments.count
-			count: 4
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: '''
-				PHPDoc tag @var references deprecated class Mage_GiftMessage_Block_Message_Helper:
-				after 1.3.2.4
-			'''
-			identifier: varTag.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_GiftMessage_Block_Message_Helper::setScriptIncluded() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
 
 		-
 			rawMessage: Variable $this might not be defined.
@@ -23075,15 +22562,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/adminhtml/default/default/template/rating/stars/detailed.phtml
-
-		-
-			rawMessage: '''
-				Call to deprecated method getGridUrl() of class Mage_Adminhtml_Block_Widget_Grid:
-				after 1.3.2.3 Use getAbsoluteGridUrl() method instead
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/grid.phtml
 
 		-
 			rawMessage: 'Comparison operation ">" between int<1, max> and 0 is always true.'
@@ -23288,15 +22766,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
-
-		-
-			rawMessage: '''
-				Call to deprecated method getGridUrl() of class Mage_Adminhtml_Block_Widget_Grid:
-				after 1.3.2.3 Use getAbsoluteGridUrl() method instead
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/grid.phtml
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Grid::getEmptyCellColspan() invoked with 1 parameter, 0 required.'

@@ -434,41 +434,6 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * @deprecated after 1.11.2.0
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    #[\Override]
-    public function toString($format = '')
-    {
-        return '';
-    }
-
-    /**
-     * Returns rule as an array for admin interface
-     *
-     * @deprecated after 1.11.2.0
-     *
-     * @param array $arrAttributes
-     *
-     * Output example:
-     * [
-     *   'name'=>'Example rule',
-     *   'conditions'=>{condition_combine::toArray}
-     *   'actions'=>{action_collection::toArray}
-     * ]
-     *
-     * @return array
-     */
-    #[\Override]
-    public function toArray(array $arrAttributes = [])
-    {
-        return parent::toArray($arrAttributes);
-    }
-
-    /**
      * Load matched product rules to the product
      *
      * @return $this

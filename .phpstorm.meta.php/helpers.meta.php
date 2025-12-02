@@ -44,7 +44,6 @@ namespace PHPSTORM_META {
         'customersegmentation/data' => \Maho_CustomerSegmentation_Helper_Data::class,
         'giftmessage/data' => \Mage_GiftMessage_Helper_Data::class,
         'giftmessage/message' => \Mage_GiftMessage_Helper_Message::class,
-        'giftmessage/url' => \Mage_GiftMessage_Helper_Url::class,
         'googleanalytics/data' => \Mage_GoogleAnalytics_Helper_Data::class,
         'importexport/data' => \Mage_ImportExport_Helper_Data::class,
         'index/data' => \Mage_Index_Helper_Data::class,

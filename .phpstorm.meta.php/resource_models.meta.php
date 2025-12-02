@@ -260,7 +260,6 @@ namespace PHPSTORM_META {
         'directory_resource/country_format' => \Mage_Directory_Model_Resource_Country_Format::class,
         'directory_resource/country_format_collection' => \Mage_Directory_Model_Resource_Country_Format_Collection::class,
         'directory_resource/currency' => \Mage_Directory_Model_Resource_Currency::class,
-        'directory_resource/currency_collection' => \Mage_Directory_Model_Resource_Currency_Collection::class,
         'directory_resource/region' => \Mage_Directory_Model_Resource_Region::class,
         'directory_resource/region_collection' => \Mage_Directory_Model_Resource_Region_Collection::class,
         'downloadable_resource/indexer_price' => \Mage_Downloadable_Model_Resource_Indexer_Price::class,
