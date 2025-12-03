@@ -142,14 +142,14 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
         $user = $session->getData('user');
         if (!$user) {
             $session->addError($this->__('Please login to proceed authorization.'));
-            $url = $helper->getAuthorizeUrl(Mage_Oauth_Model_Token::USER_TYPE_ADMIN);
+            $url = $helper->getAuthorizeUrl();
             $this->_redirectUrl($url);
             return $this;
         }
 
         $this->loadLayout();
 
-        /** @var Mage_Oauth_Block_Adminhtml_Oauth_Authorize $block */
+        /** @var Mage_Core_Block_Template $block */
         $block = $this->getLayout()->getBlock('content')->getChild('oauth.authorize.confirm');
         $block->setIsSimple($simple);
 
@@ -196,7 +196,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
 
         $this->loadLayout();
 
-        /** @var Mage_Oauth_Block_Authorize $block */
+        /** @var Mage_Core_Block_Template $block */
         $block = $this->getLayout()->getBlock('oauth.authorize.reject');
         $block->setIsSimple($simple);
 
