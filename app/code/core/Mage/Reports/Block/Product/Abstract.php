@@ -169,15 +169,4 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
         }
         return $this->getItemsCollection()->count();
     }
-
-    /**
-     * Get products collection and apply recent events log to it
-     *
-     * @return Mage_Reports_Model_Resource_Product_Index_Collection_Abstract
-     * @deprecated
-     */
-    protected function _getRecentProductsCollection()
-    {
-        return $this->getItemsCollection();
-    }
 }

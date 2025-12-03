@@ -13,42 +13,6 @@
 class Mage_SalesRule_Model_Observer
 {
     /**
-     * Sales Rule Validator
-     *
-     * @var Mage_SalesRule_Model_Validator
-     */
-    protected $_validator;
-
-    /**
-     * Get quote item validator/processor object
-     *
-     * @deprecated
-     * @param   Varien_Event $event
-     * @return  Mage_SalesRule_Model_Validator
-     */
-    public function getValidator($event)
-    {
-        if (!$this->_validator) {
-            $this->_validator = Mage::getModel('salesrule/validator')
-                ->init($event->getWebsiteId(), $event->getCustomerGroupId(), $event->getCouponCode());
-        }
-        return $this->_validator;
-    }
-
-    /**
-     * Process quote item (apply discount to item)
-     *
-     * @deprecated process call moved to total model
-     * @param Varien_Event_Observer $observer
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function sales_quote_address_discount_item($observer)
-    {
-        $this->getValidator($observer->getEvent())
-            ->process($observer->getEvent()->getItem());
-    }
-
-    /**
      * Registered callback: called after an order is placed
      *
      * @param Varien_Event_Observer $observer

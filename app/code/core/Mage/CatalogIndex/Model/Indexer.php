@@ -732,23 +732,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Add indexable attributes to product collection select
-     *
-     * @deprecated
-     * @param   Mage_Catalog_Model_Resource_Product_Collection $collection
-     * @return  Mage_CatalogIndex_Model_Indexer
-     */
-    protected function _addFilterableAttributesToCollection($collection)
-    {
-        $attributeCodes = $this->_getIndexableAttributeCodes();
-        foreach ($attributeCodes as $code) {
-            $collection->addAttributeToSelect($code);
-        }
-
-        return $this;
-    }
-
-    /**
      * Prepare Catalog Product Flat Columns
      *
      * @return $this

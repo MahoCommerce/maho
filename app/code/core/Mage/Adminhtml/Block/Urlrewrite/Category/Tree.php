@@ -103,18 +103,6 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
     }
 
     /**
-     * Convert categories tree to array recursively
-     *
-     * @param  Varien_Data_Tree_Node $node
-     * @return array
-     * @deprecated use self::_getNodeJson()
-     */
-    protected function _getNodesArray($node)
-    {
-        return $this->_getNodeJson($node);
-    }
-
-    /**
      * Returns URL for loading tree
      *
      * @param null $expanded deprecated

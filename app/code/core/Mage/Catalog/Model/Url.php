@@ -644,22 +644,6 @@ class Mage_Catalog_Model_Url
      *
      * Will try to get unique path by adding -1 -2 etc. between url_key and optional url_suffix
      *
-     * @deprecated use $this->getUnusedPathByUrlKey() instead
-     * @param int $storeId
-     * @param string $requestPath
-     * @param string $idPath
-     * @return string
-     */
-    public function getUnusedPath($storeId, $requestPath, $idPath)
-    {
-        return $this->getUnusedPathByUrlKey($storeId, $requestPath, $idPath, '');
-    }
-
-    /**
-     * Get requestPath that was not used yet.
-     *
-     * Will try to get unique path by adding -1 -2 etc. between url_key and optional url_suffix
-     *
      * @param int $storeId
      * @param string $requestPath
      * @param string $idPath

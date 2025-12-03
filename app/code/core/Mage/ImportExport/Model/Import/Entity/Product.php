@@ -1828,42 +1828,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     }
 
     /**
-     * Returns resource model
-     *
-     * @param string $resourceModelName
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
-     * @deprecated use Mage::getResourceModel()
-     */
-    protected function getResourceModel($resourceModelName)
-    {
-        return Mage::getResourceModel($resourceModelName);
-    }
-
-    /**
-     * Returns helper
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function getHelper($helperName)
-    {
-        return Mage::helper($helperName);
-    }
-
-    /**
-     * Returns model
-     *
-     * @param string $modelName
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getModel()
-     */
-    protected function getModel($modelName)
-    {
-        return Mage::getModel($modelName);
-    }
-
-    /**
      * Stock item saving.
      *
      * @return $this

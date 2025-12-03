@@ -59,18 +59,6 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
 
     /**
      * @return string
-     * @deprecated Use SVG or srcset
-     */
-    public function getLogoSrcSmall()
-    {
-        if (empty($this->_data['logo_src_small'])) {
-            $this->_data['logo_src_small'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_src_small'));
-        }
-        return $this->getSkinUrl($this->_data['logo_src_small']);
-    }
-
-    /**
-     * @return string
      */
     public function getLogoAlt()
     {

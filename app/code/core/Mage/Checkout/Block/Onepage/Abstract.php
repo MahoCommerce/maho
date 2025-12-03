@@ -179,32 +179,6 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
     }
 
     /**
-     * @deprecated
-     * @return bool|mixed
-     * @throws Mage_Core_Model_Store_Exception
-     */
-    public function getCountryOptions()
-    {
-        $options    = false;
-        $useCache   = Mage::app()->useCache('config');
-        if ($useCache) {
-            $cacheId    = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
-            $cacheTags  = ['config'];
-            if ($optionsCache = Mage::app()->loadCache($cacheId)) {
-                $options = $optionsCache;
-            }
-        }
-
-        if ($options == false) {
-            $options = $this->getCountryCollection()->toOptionArray();
-            if ($useCache) {
-                Mage::app()->saveCache($options, $cacheId, $cacheTags);
-            }
-        }
-        return $options;
-    }
-
-    /**
      * Get checkout steps codes
      *
      * @return array

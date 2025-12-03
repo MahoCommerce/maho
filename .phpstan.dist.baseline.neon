@@ -4249,12 +4249,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Helper/Data.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Helper_Data::$_pageHelpUrl has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Helper/Data.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Model_Config::_initSectionsAndTabs() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8521,12 +8515,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Config.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Resource_Eav_Attribute::initLabels() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Eav/Attribute.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Layer_Filter_Attribute::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10621,12 +10609,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Helper/Mediafallback.php
 
 		-
-			rawMessage: 'Method Mage_ConfigurableSwatches_Helper_Mediafallback::attachConfigurableProductChildrenAttributeMapping() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Helper/Mediafallback.php
-
-		-
 			rawMessage: 'Method Mage_ConfigurableSwatches_Helper_Mediafallback::attachGallerySetToCollection() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12483,12 +12465,6 @@ parameters:
 		-
 			rawMessage: Property Mage_Customer_Model_Convert_Parser_Customer::$_stores has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
-
-		-
-			rawMessage: Variable $regionId might not be defined.
-			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
 
@@ -14913,7 +14889,7 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
-			count: 4
+			count: 2
 			path: app/code/core/Mage/ImportExport/Block/Adminhtml/Export/Filter.php
 
 		-
@@ -20134,18 +20110,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Item.php
 
 		-
-			rawMessage: 'Parameter #4 $shippingAddress of method Mage_Tax_Helper_Data::getPrice() expects Mage_Customer_Model_Address|null, Mage_Sales_Model_Quote_Address given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Sales/Model/Quote/Item/Abstract.php
-
-		-
-			rawMessage: 'Parameter #5 $billingAddress of method Mage_Tax_Helper_Data::getPrice() expects Mage_Customer_Model_Address|null, Mage_Sales_Model_Quote_Address given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Sales/Model/Quote/Item/Abstract.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Quote_Item_Option::$_item has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -20633,12 +20597,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Observer::sales_order_paymentCancel() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_SalesRule_Model_Observer::sales_quote_address_discount_item() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Observer.php

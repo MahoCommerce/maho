@@ -43,16 +43,4 @@ class Mage_Rss_Controller_Abstract extends Mage_Core_Controller_Front_Action
         $this->_forward('nofeed', 'index', 'rss');
         return false;
     }
-
-    /**
-     * Retrieve helper instance
-     *
-     * @param string $name
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($name)
-    {
-        return Mage::helper($name);
-    }
 }

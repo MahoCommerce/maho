@@ -2044,17 +2044,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * Retrieve order website currency for working with base prices
-     * @deprecated  please use getBaseCurrency instead.
-     *
-     * @return Mage_Directory_Model_Currency
-     */
-    public function getStoreCurrency()
-    {
-        return $this->getData('store_currency');
-    }
-
-    /**
      * @param float $price
      * @return string
      */
