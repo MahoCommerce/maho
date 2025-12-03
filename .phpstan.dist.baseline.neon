@@ -15595,12 +15595,6 @@ parameters:
 			path: app/code/core/Mage/Oauth/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Oauth_Model_Observer::afterCustomerLogin() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Oauth/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Oauth_Model_Resource_Consumer::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1

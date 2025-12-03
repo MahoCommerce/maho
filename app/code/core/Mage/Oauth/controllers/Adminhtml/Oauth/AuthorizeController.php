@@ -149,7 +149,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
 
         $this->loadLayout();
 
-        /** @var Mage_Oauth_Block_Adminhtml_Oauth_Authorize $block */
+        /** @var Mage_Core_Block_Template $block */
         $block = $this->getLayout()->getBlock('content')->getChild('oauth.authorize.confirm');
         $block->setIsSimple($simple);
 
@@ -196,7 +196,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
 
         $this->loadLayout();
 
-        /** @var Mage_Oauth_Block_Authorize $block */
+        /** @var Mage_Core_Block_Template $block */
         $block = $this->getLayout()->getBlock('oauth.authorize.reject');
         $block->setIsSimple($simple);
 

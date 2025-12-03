@@ -23,22 +23,6 @@ class Mage_Oauth_Model_Observer
     }
 
     /**
-     * Redirect customer to callback page after login
-     */
-    public function afterCustomerLogin(Varien_Event_Observer $observer)
-    {
-        if ($this->_getOauthToken() !== null) {
-            $userType = Mage_Oauth_Model_Token::USER_TYPE_CUSTOMER;
-            $url = Mage::helper('oauth')->getAuthorizeUrl($userType);
-            Mage::app()->getResponse()
-                ->setRedirect($url)
-                ->sendHeaders()
-                ->sendResponse();
-            exit();
-        }
-    }
-
-    /**
      * Redirect admin to authorize controller after login success
      */
     public function afterAdminLogin(Varien_Event_Observer $observer)
