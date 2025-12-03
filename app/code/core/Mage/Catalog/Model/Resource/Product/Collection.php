@@ -1098,32 +1098,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * Add minimal price data to result
-     *
-     * @deprecated use addPriceData
-     * @see Mage_Catalog_Model_Resource_Product_Collection::addPriceData
-     *
-     * @return $this
-     */
-    public function addMinimalPrice()
-    {
-        return $this->addPriceData();
-    }
-
-    /**
-     * Add price data for calculate final price
-     *
-     * @deprecated use addPriceData
-     * @see Mage_Catalog_Model_Resource_Product_Collection::addPriceData
-     *
-     * @return $this
-     */
-    public function addFinalPrice()
-    {
-        return $this->addPriceData();
-    }
-
-    /**
      * Join prices from price rules to products collection
      *
      * @return $this

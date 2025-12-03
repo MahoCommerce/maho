@@ -283,42 +283,6 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     }
 
     /**
-     * Get Attribute translated label for store
-     *
-     * @deprecated
-     * @return string
-     */
-    protected function _getLabelForStore()
-    {
-        return $this->getFrontendLabel();
-    }
-
-    /**
-     * Initialize store Labels for attributes
-     *
-     * @deprecated
-     * @param int $storeId
-     */
-    public static function initLabels($storeId = null)
-    {
-        if (is_null(self::$_labels)) {
-            if (is_null($storeId)) {
-                $storeId = Mage::app()->getStore()->getId();
-            }
-            $attributeLabels = [];
-            $attributes = Mage::getResourceSingleton('catalog/product')->getAttributesByCode();
-            foreach ($attributes as $attribute) {
-                if ((string) $attribute->getData('frontend_label') !== '') {
-                    $attributeLabels[] = $attribute->getData('frontend_label');
-                }
-            }
-
-            self::$_labels = Mage::app()->getTranslator()->getResource()
-                ->getTranslationArrayByStrings($attributeLabels, $storeId);
-        }
-    }
-
-    /**
      * Get default attribute source model
      *
      * @return string

@@ -569,6 +569,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                     $regions = Mage::getResourceModel('directory/region_collection')
                         ->addRegionNameFilter($row['shipping_region'])
                         ->load();
+                    $regionId = null;
                     if ($regions) {
                         foreach ($regions as $region) {
                             $regionId = $region->getId();

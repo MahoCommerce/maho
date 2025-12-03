@@ -47,29 +47,4 @@ class Mage_Customer_Model_Resource_Address extends Mage_Eav_Model_Entity_Abstrac
         }
         return $this;
     }
-
-    /**
-     * Return customer id
-     * @deprecated
-     *
-     * @param Mage_Customer_Model_Address $object
-     * @return int
-     */
-    public function getCustomerId($object)
-    {
-        return $object->getData('customer_id') ?: $object->getParentId();
-    }
-
-    /**
-     * Set customer id
-     * @deprecated
-     *
-     * @param Mage_Customer_Model_Address $object
-     * @param int $id
-     * @return $this
-     */
-    public function setCustomerId($object, $id)
-    {
-        return $this;
-    }
 }

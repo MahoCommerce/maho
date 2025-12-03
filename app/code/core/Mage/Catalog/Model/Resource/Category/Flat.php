@@ -1499,16 +1499,4 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
         }
         return $this;
     }
-
-    /**
-     * Check if Catalog Category Flat Data has been initialized
-     *
-     * @deprecated use Mage_Catalog_Model_Resource_Category_Flat::isBuilt() instead
-     *
-     * @return bool
-     */
-    public function isRebuilt()
-    {
-        return $this->isBuilt();
-    }
 }

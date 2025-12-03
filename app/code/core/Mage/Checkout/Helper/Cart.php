@@ -47,18 +47,6 @@ class Mage_Checkout_Helper_Cart extends Mage_Core_Helper_Url
     }
 
     /**
-     * Return helper instance
-     *
-     * @param  string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelperInstance($helperName)
-    {
-        return Mage::helper($helperName);
-    }
-
-    /**
      * Retrieve url for remove product from cart
      *
      * @param   Mage_Sales_Model_Quote_Item $item

@@ -604,25 +604,6 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     }
 
     /**
-     * Show item update result from loadBlockAction
-     * to prevent popup alert with resend data question
-     *
-     * @return false|void
-     * @deprecated use `$this->getResponse()->setBodyJson()`
-     */
-    public function showUpdateResultAction()
-    {
-        $session = Mage::getSingleton('adminhtml/session');
-        if ($session->hasUpdateResult() && is_scalar($session->getUpdateResult())) {
-            $this->getResponse()->setBody($session->getUpdateResult());
-            $session->unsUpdateResult();
-        } else {
-            $session->unsUpdateResult();
-            return false;
-        }
-    }
-
-    /**
      * Process data and display index page
      */
     public function processDataAction(): void
