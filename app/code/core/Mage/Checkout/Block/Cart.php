@@ -23,47 +23,6 @@
  */
 class Mage_Checkout_Block_Cart extends Mage_Checkout_Block_Cart_Abstract
 {
-    /**
-     * Prepare cart items URLs
-     *
-     * @deprecated after 1.7.0.2
-     */
-    public function prepareItemUrls()
-    {
-        $products = [];
-        foreach ($this->getItems() as $item) {
-            $product    = $item->getProduct();
-            $option     = $item->getOptionByCode('product_type');
-            if ($option) {
-                $product = $option->getProduct();
-            }
-
-            if ($item->getStoreId() != Mage::app()->getStore()->getId()
-                && !$item->getRedirectUrl()
-                && !$product->isVisibleInSiteVisibility()
-            ) {
-                $products[$product->getId()] = $item->getStoreId();
-            }
-        }
-
-        if ($products) {
-            $products = Mage::getResourceSingleton('catalog/url')
-                ->getRewriteByProductStore($products);
-            foreach ($this->getItems() as $item) {
-                $product    = $item->getProduct();
-                $option     = $item->getOptionByCode('product_type');
-                if ($option) {
-                    $product = $option->getProduct();
-                }
-
-                if (isset($products[$product->getId()])) {
-                    $object = new Varien_Object($products[$product->getId()]);
-                    $item->getProduct()->setUrlDataObject($object);
-                }
-            }
-        }
-    }
-
     public function chooseTemplate()
     {
         $itemsCount = $this->getItemsCount() ?: $this->getQuote()->getItemsCount();

@@ -46,15 +46,6 @@ class Mage_Catalog_Helper_Product_Flat extends Mage_Catalog_Helper_Flat_Abstract
     protected $_process = null;
 
     /**
-     * Store flags which defines if Catalog Product Flat functionality is enabled
-     *
-     * @deprecated after 1.7.0.0
-     *
-     * @var array
-     */
-    protected $_isEnabled = [];
-
-    /**
      * Catalog Product Flat Flag object
      *
      * @var Mage_Catalog_Model_Product_Flat_Flag|null

@@ -109,10 +109,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         return $this;
     }
 
-    #[\Override]
     public function asArray(array $arrAttributes = []): array
     {
-        $out = parent::asArray($arrAttributes);
+        $out = [];
         $out['conditions'] = $this->getConditions()->asArray();
 
         return $out;

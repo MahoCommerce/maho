@@ -54,14 +54,6 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     protected $_code = self::CODE;
 
     /**
-     * Destination Zip Code required flag
-     *
-     * @var bool
-     * @deprecated since 1.7.0 functionality implemented in Mage_Usa_Model_Shipping_Carrier_Abstract
-     */
-    protected $_isZipCodeRequired;
-
-    /**
      * Rate request data
      *
      * @var Mage_Shipping_Model_Rate_Request|null

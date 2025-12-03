@@ -407,7 +407,6 @@ namespace PHPSTORM_META {
         'review_resource/review_summary_collection' => \Mage_Review_Model_Resource_Review_Summary_Collection::class,
         'rss_resource/order' => \Mage_Rss_Model_Resource_Order::class,
         'rule_resource/abstract' => \Mage_Rule_Model_Resource_Abstract::class,
-        'rule_resource/rule' => \Mage_Rule_Model_Resource_Rule::class,
         'rule_resource/rule_collection' => \Mage_Rule_Model_Resource_Rule_Collection::class,
         'rule_resource/rule_collection_abstract' => \Mage_Rule_Model_Resource_Rule_Collection_Abstract::class,
         'rule_resource/rule_condition_sqlbuilder' => \Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder::class,
