@@ -5380,16 +5380,14 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
   padding-bottom: 7px;
 }
 .dashboard .box-head h2 {
+  display: flex;
+  place-items: center;
+  gap: 0.5rem;
   font-size: 0.938rem;
   font-weight: 600;
-  display: inline-block;
   margin-bottom: 0;
 }
-.dashboard .box-head a {
-  padding: 10px;
-}
-.dashboard .box-title a,
-.dashboard .box-head a {
+.dashboard .box-title a {
   text-transform: uppercase;
   font-size: 0.75rem;
 }
@@ -5414,13 +5412,12 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
 .dashboard .col2-set .col-1 .box-title h3,
 .dashboard .col2-set .col-2 .box-title h2,
 .dashboard .col2-set .col-2 .box-title h3 {
+  display: flex;
+  place-items: center;
+  gap: 0.5rem;
   font-weight: 600;
   font-size: 0.875rem;
   margin-bottom: 0;
-}
-.dashboard .col2-set .col-1 .box-title a,
-.dashboard .col2-set .col-2 .box-title a {
-  line-height: 19.6px;
 }
 .dashboard .box-reviews.box-account {
   padding-bottom: 0;
