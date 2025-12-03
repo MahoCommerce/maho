@@ -5778,15 +5778,9 @@ ol#cart-sidebar-reorder p.product-name {
 /* ============================================ *
  * Newsletter Subscriptions
  * ============================================ */
-body.newsletter-manage-index .my-account .fieldset {
-  margin-bottom: 20px;
-}
-body.newsletter-manage-index .my-account .fieldset h2 {
-  display: none;
-}
-body.newsletter-manage-index .my-account .form-list {
-  border-top: 1px solid var(--maho-color-border-light);
-  padding-top: 10px;
+body.newsletter-manage-index .newsletter-description {
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
 }
 
 /* ============================================ *
