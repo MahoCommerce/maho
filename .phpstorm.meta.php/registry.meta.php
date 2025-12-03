@@ -31,6 +31,7 @@ namespace PHPSTORM_META {
         current_email_template,
         current_entity_key,
         current_group,
+        current_imported_inventory,
         current_index_process,
         current_invoice,
         current_layer,
