@@ -47,9 +47,6 @@
                     <cert>
                         <table>paypal_cert</table>
                     </cert>
-                    <payment_transaction>
-                        <table>paypal_payment_transaction</table>
-                    </payment_transaction>
                 </entities>
             </paypal_resource>
         </models>

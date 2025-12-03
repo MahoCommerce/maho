@@ -336,15 +336,6 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
     }
 
     /**
-     * Export process.
-     *
-     * @deprecated after ver 1.9.2.4 use $this->exportFile() instead
-     *
-     * @return string
-     */
-    abstract public function export();
-
-    /**
      * Export data and return temporary file through array.
      *
      * This method will return following array:

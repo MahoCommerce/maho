@@ -167,28 +167,6 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
     }
 
     /**
-     * Export process.
-     *
-     * @return string
-     */
-    #[\Override]
-    public function export()
-    {
-        // Prepare headers
-        $writer = $this->getWriter();
-        $validAttrCodes = $this->_getExportAttrCodes();
-        $writer->setHeaderCols(array_merge(
-            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE],
-            $validAttrCodes,
-        ));
-
-        // Export data
-        $this->_exportCategories();
-
-        return $writer->getContents();
-    }
-
-    /**
      * Export data and return temporary file.
      *
      * @return array

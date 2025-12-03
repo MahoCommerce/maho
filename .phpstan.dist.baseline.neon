@@ -17923,45 +17923,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
 
 		-
-			rawMessage: '''
-				Call to method loadObjectByTxnId() of deprecated class Mage_Paypal_Model_Resource_Payment_Transaction:
-				since 1.6.2.0
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payment_Transaction::_verifyThisTransactionExists() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payment_Transaction::_verifyTxnId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: '''
-				PHPDoc tag @method for _getResource() references deprecated class Mage_Paypal_Model_Resource_Payment_Transaction:
-				since 1.6.2.0
-			'''
-			identifier: methodTag.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: '''
-				PHPDoc tag @method for getResource() references deprecated class Mage_Paypal_Model_Resource_Payment_Transaction:
-				since 1.6.2.0
-			'''
-			identifier: methodTag.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Pro::_importCaptureResultToPayment() has no return type specified.'
 			identifier: missingType.return
 			count: 1

@@ -430,21 +430,6 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
     }
 
     /**
-     * Export process and return contents of temporary file.
-     *
-     * @deprecated after ver 1.9.2.4 use $this->exportFile() instead
-     *
-     * @return string
-     */
-    #[\Override]
-    public function export()
-    {
-        $this->_prepareExport();
-
-        return $this->getWriter()->getContents();
-    }
-
-    /**
      * Export process and return temporary file through array.
      *
      * This method will return following array:
