@@ -54,53 +54,6 @@ class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Initialize requested category object
-     *
-     * @return Mage_Catalog_Model_Category
-     * @throws Mage_Core_Exception
-     * @deprecated use method _initCategory
-     */
-    protected function _initCatagory()
-    {
-        return $this->_initCategory();
-    }
-
-    /**
-     * Recursively apply custom design settings to category if it's option
-     * custom_use_parent_settings is set to 1 while parent option is not
-     *
-     * @deprecated after 1.4.2.0-beta1, functionality moved to Mage_Catalog_Model_Design
-     * @param Mage_Catalog_Model_Category $category
-     * @param Mage_Core_Model_Layout_Update $update
-     *
-     * @return $this
-     */
-    protected function _applyCustomDesignSettings($category, $update)
-    {
-        if ($category->getCustomUseParentSettings() && $category->getLevel() > 1) {
-            $parentCategory = $category->getParentCategory();
-            if ($parentCategory && $parentCategory->getId()) {
-                return $this->_applyCustomDesignSettings($parentCategory, $update);
-            }
-        }
-
-        $validityDate = $category->getCustomDesignDate();
-
-        if (array_key_exists('from', $validityDate) &&
-            array_key_exists('to', $validityDate) &&
-            Mage::app()->getLocale()->isStoreDateInInterval(null, $validityDate['from'], $validityDate['to'])
-        ) {
-            if ($category->getPageLayout()) {
-                $this->getLayout()->helper('page/layout')
-                    ->applyHandle($category->getPageLayout());
-            }
-            $update->addUpdate($category->getCustomLayoutUpdate());
-        }
-
-        return $this;
-    }
-
-    /**
      * Category view action
      * @throws Mage_Core_Exception
      */

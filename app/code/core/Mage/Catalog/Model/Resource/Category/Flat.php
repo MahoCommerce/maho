@@ -74,15 +74,6 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
     protected $_isBuilt = [];
 
     /**
-     * Store flag which defines if Catalog Category Flat Data has been initialized
-     *
-     * @deprecated after 1.7.0.0 use $this->_isBuilt instead
-     *
-     * @var bool|null
-     */
-    protected $_isRebuilt = null;
-
-    /**
      * array with root category id per store
      *
      * @var array|null
@@ -1507,17 +1498,5 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             throw $e;
         }
         return $this;
-    }
-
-    /**
-     * Check if Catalog Category Flat Data has been initialized
-     *
-     * @deprecated use Mage_Catalog_Model_Resource_Category_Flat::isBuilt() instead
-     *
-     * @return bool
-     */
-    public function isRebuilt()
-    {
-        return $this->isBuilt();
     }
 }

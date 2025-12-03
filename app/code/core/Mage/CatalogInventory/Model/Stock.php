@@ -26,10 +26,6 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     public const BACKORDERS_YES_NONOTIFY   = 1;
     public const BACKORDERS_YES_NOTIFY     = 2;
 
-    /* @deprecated */
-    public const BACKORDERS_BELOW          = 1;
-    public const BACKORDERS_YES            = 2;
-
     public const STOCK_OUT_OF_STOCK        = 0;
     public const STOCK_IN_STOCK            = 1;
 

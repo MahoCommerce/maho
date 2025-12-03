@@ -61,13 +61,6 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
     protected $_ignoreFields = [];
 
     /**
-     * @deprecated after 1.5.0.0-alpha2
-     *
-     * @var array
-     */
-    protected $_imageFields = [];
-
-    /**
      * Inventory Fields array
      *
      * @var array

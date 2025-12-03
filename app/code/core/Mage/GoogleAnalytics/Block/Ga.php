@@ -71,34 +71,6 @@ gtag('set', 'user_id', '{$customer->getId()}');
     }
 
     /**
-     * Render regular page tracking javascript code
-     * The custom "page name" may be set from layout or somewhere else. It must start from slash.
-     *
-     * @param string $accountId
-     * @return string
-     * @deprecated
-     */
-    protected function _getPageTrackingCodeUniversal($accountId)
-    {
-        return '';
-    }
-
-    /**
-     * Render regular page tracking javascript code
-     * The custom "page name" may be set from layout or somewhere else. It must start from slash.
-     *
-     * @link http://code.google.com/apis/analytics/docs/gaJS/gaJSApiBasicConfiguration.html#_gat.GA_Tracker_._trackPageview
-     * @link http://code.google.com/apis/analytics/docs/gaJS/gaJSApi_gaq.html
-     * @param string $accountId
-     * @return string
-     * @deprecated
-     */
-    protected function _getPageTrackingCodeAnalytics($accountId)
-    {
-        return '';
-    }
-
-    /**
      * Render information about specified orders and their items
      *
      * @return string

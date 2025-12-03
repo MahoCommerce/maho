@@ -159,7 +159,6 @@
  * @method $this setSameAsBilling(int $value)
  * @method int getSaveInAddressBook()
  * @method $this setSaveInAddressBook(int $value)
- * @method float getShippingAmount()
  * @method float getShippingAmountForDiscount()
  * @method $this setShippingAmountForDiscount(float|int $value)
  * @method float getShippingDiscountAmount()

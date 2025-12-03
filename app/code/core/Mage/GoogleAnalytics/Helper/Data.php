@@ -69,18 +69,6 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Whether GA IP Anonymization is enabled
-     *
-     * @param null|string|bool|int|Mage_Core_Model_Store $store $store
-     * @return bool
-     * @deprecated
-     */
-    public function isIpAnonymizationEnabled($store = null)
-    {
-        return false;
-    }
-
-    /**
      * Get GA account id
      *
      * @param string $store
@@ -100,18 +88,6 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     public function getGoogleTagManagerContainerId($store = null)
     {
         return Mage::getStoreConfig(self::XML_PATH_GTM_CONTAINER_ID, $store);
-    }
-
-    /**
-     * Returns true if should use Google Universal Analytics
-     *
-     * @param string $store
-     * @return bool
-     * @deprecated
-     */
-    public function isUseUniversalAnalytics($store = null)
-    {
-        return false;
     }
 
     /**

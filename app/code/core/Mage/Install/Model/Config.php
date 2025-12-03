@@ -48,35 +48,6 @@ class Mage_Install_Model_Config extends Varien_Simplexml_Config
     }
 
     /**
-     * Retrieve writable path for checking
-     *
-     * [
-     *      ['writeable'] => [
-     *          [$index] => [
-     *              ['path']
-     *              ['recursive']
-     *          ]
-     *      ]
-     * ]
-     *
-     * @deprecated since 1.7.1.0
-     *
-     * @return array
-     */
-    public function getPathForCheck()
-    {
-        $res = [];
-
-        $items = (array) $this->getNode(self::XML_PATH_CHECK_WRITEABLE);
-
-        foreach ($items as $item) {
-            $res['writeable'][] = (array) $item;
-        }
-
-        return $res;
-    }
-
-    /**
      * Retrieve writable full paths for checking
      *
      * @return array

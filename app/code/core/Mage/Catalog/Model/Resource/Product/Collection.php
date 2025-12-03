@@ -511,39 +511,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * Prepare Url Data object
-     *
-     * @return $this
-     * @deprecated after 1.7.0.2
-     */
-    protected function _prepareUrlDataObject()
-    {
-        $objects = [];
-        /** @var Mage_Catalog_Model_Product $item */
-        foreach ($this->_items as $item) {
-            if ($this->getFlag('do_not_use_category_id')) {
-                $item->setDoNotUseCategoryId(true);
-            }
-            if (!$item->isVisibleInSiteVisibility() && $item->getItemStoreId()) {
-                $objects[$item->getEntityId()] = $item->getItemStoreId();
-            }
-        }
-
-        if ($objects && $this->hasFlag('url_data_object')) {
-            $objects = Mage::getResourceSingleton('catalog/url')
-                ->getRewriteByProductStore($objects);
-            foreach ($this->_items as $item) {
-                if (isset($objects[$item->getEntityId()])) {
-                    $object = new Varien_Object($objects[$item->getEntityId()]);
-                    $item->setUrlDataObject($object);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * Add collection filters by identifiers
      *
      * @param mixed $productId
@@ -1055,25 +1022,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * Joins url rewrite rules to collection
-     *
-     * @deprecated after 1.7.0.2. Method is not used anywhere in the code.
-     * @return $this
-     */
-    public function joinUrlRewrite()
-    {
-        $this->joinTable(
-            'core/url_rewrite',
-            'entity_id=entity_id',
-            ['request_path'],
-            '{{table}}.type = ' . Mage_Core_Model_Url_Rewrite::TYPE_PRODUCT,
-            'left',
-        );
-
-        return $this;
-    }
-
-    /**
      * Add URL rewrites data to product
      * If collection loadded - run processing else set flag
      *
@@ -1147,32 +1095,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 $item->setData('request_path', false);
             }
         }
-    }
-
-    /**
-     * Add minimal price data to result
-     *
-     * @deprecated use addPriceData
-     * @see Mage_Catalog_Model_Resource_Product_Collection::addPriceData
-     *
-     * @return $this
-     */
-    public function addMinimalPrice()
-    {
-        return $this->addPriceData();
-    }
-
-    /**
-     * Add price data for calculate final price
-     *
-     * @deprecated use addPriceData
-     * @see Mage_Catalog_Model_Resource_Product_Collection::addPriceData
-     *
-     * @return $this
-     */
-    public function addFinalPrice()
-    {
-        return $this->addPriceData();
     }
 
     /**
@@ -1386,25 +1308,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     public function requireTaxPercent()
     {
         return $this->_addTaxPercents;
-    }
-
-    /**
-     * @deprecated from 1.3.0
-     */
-    protected function _addTaxPercents()
-    {
-        $classToRate = [];
-        $request = Mage::getSingleton('tax/calculation')->getRateRequest();
-        foreach ($this as &$item) {
-            if ($item->getTaxClassId() === null) {
-                $item->setTaxClassId($item->getMinimalTaxClassId());
-            }
-            if (!isset($classToRate[$item->getTaxClassId()])) {
-                $request->setProductClassId($item->getTaxClassId());
-                $classToRate[$item->getTaxClassId()] = Mage::getSingleton('tax/calculation')->getRate($request);
-            }
-            $item->setTaxPercent($classToRate[$item->getTaxClassId()]);
-        }
     }
 
     /**

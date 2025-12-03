@@ -88,17 +88,6 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
     }
 
     /**
-     * retrieve current store
-     *
-     * @deprecated
-     * @return Mage_Core_Model_Store
-     */
-    public function getCurrentStore()
-    {
-        return $this->_getHelper()->getCurrentStore();
-    }
-
-    /**
      * Returns additional values for js config, con be overridden by descendants
      *
      * @return array
@@ -279,57 +268,6 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
             return true;
         }
         return false;
-    }
-
-    /**
-     * Calculation real price
-     *
-     * @deprecated
-     * @param float $price
-     * @param bool $isPercent
-     * @return mixed
-     */
-    protected function _preparePrice($price, $isPercent = false)
-    {
-        return $this->_getHelper()->preparePrice($this->getProduct(), $price, $isPercent);
-    }
-
-    /**
-     * Calculation price before special price
-     *
-     * @deprecated
-     * @param float $price
-     * @param bool $isPercent
-     * @return mixed
-     */
-    protected function _prepareOldPrice($price, $isPercent = false)
-    {
-        return $this->_getHelper()->prepareOldPrice($this->getProduct(), $price, $isPercent);
-    }
-
-    /**
-     * Replace ',' on '.' for js
-     *
-     * @deprecated
-     * @param float $price
-     * @return string
-     */
-    protected function _registerJsPrice($price)
-    {
-        return $this->_getHelper()->registerJsPrice($price);
-    }
-
-    /**
-     * Convert price from default currency to current currency
-     *
-     * @deprecated
-     * @param float $price
-     * @param bool $round
-     * @return float
-     */
-    protected function _convertPrice($price, $round = false)
-    {
-        return $this->_getHelper()->convertPrice($price, $round);
     }
 
     /**

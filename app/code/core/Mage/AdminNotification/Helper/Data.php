@@ -6,6 +6,7 @@
  * @package    Mage_AdminNotification
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -52,17 +53,5 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
             $this->_unreadNoticeCounts = Mage::getModel('adminnotification/inbox')->getNoticeStatus();
         }
         return $this->_unreadNoticeCounts[$severity] ?? 0;
-    }
-
-    /**
-     * Retrieve Widget Popup Notification Object URL
-     *
-     * @param bool $withExt
-     * @return string
-     * @deprecated v19.4.16
-     */
-    public function getPopupObjectUrl($withExt = false)
-    {
-        return '';
     }
 }

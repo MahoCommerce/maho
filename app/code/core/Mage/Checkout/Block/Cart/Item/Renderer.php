@@ -295,22 +295,6 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
     }
 
     /**
-     * Check item is in stock
-     *
-     * @deprecated after 1.4.2.0-beta1
-     * @return bool
-     */
-    public function getIsInStock()
-    {
-        if ($this->getItem()->getProduct()->isSaleable()) {
-            if ($this->getItem()->getProduct()->getStockItem()->getQty() >= $this->getItem()->getQty()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Get checkout session
      *
      * @return Mage_Checkout_Model_Session

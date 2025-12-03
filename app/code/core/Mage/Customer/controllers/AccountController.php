@@ -472,18 +472,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Get Helper
-     *
-     * @param string $path
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($path)
-    {
-        return Mage::helper($path);
-    }
-
-    /**
      * Get App
      *
      * @return Mage_Core_Model_App
@@ -536,31 +524,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $errors = array_merge($errors, $addressErrors);
         }
         return $errors;
-    }
-
-    /**
-     * Get model by path
-     *
-     * @param string $path
-     * @param ?array $arguments
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getModel()
-     */
-    public function _getModel($path, $arguments = [])
-    {
-        return Mage::getModel($path, $arguments);
-    }
-
-    /**
-     * Get model from registry by path
-     *
-     * @param string $path
-     * @return mixed
-     * @deprecated use Mage::registry()
-     */
-    protected function _getFromRegistry($path)
-    {
-        return Mage::registry($path);
     }
 
     /**

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3bab93ce42b8ceac8bb2fa5d2dac1496",
+    "content-hash": "cb56ad9ad56816d11b3e4963081a8534",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -4210,16 +4210,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.91.1",
+            "version": "v3.91.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "b075d845594a90763c480589174f7f90b3aec15f"
+                "reference": "f171dc216bc8a4192d5a0876a899cce6f9e379d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/b075d845594a90763c480589174f7f90b3aec15f",
-                "reference": "b075d845594a90763c480589174f7f90b3aec15f",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/f171dc216bc8a4192d5a0876a899cce6f9e379d6",
+                "reference": "f171dc216bc8a4192d5a0876a899cce6f9e379d6",
                 "shasum": ""
             },
             "require": {
@@ -4275,7 +4275,7 @@
                     "PhpCsFixer\\": "src/"
                 },
                 "exclude-from-classmap": [
-                    "src/Fixer/Internal/*"
+                    "src/**/Internal/"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -4301,7 +4301,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.91.1"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.91.2"
             },
             "funding": [
                 {
@@ -4309,7 +4309,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-01T11:09:57+00:00"
+            "time": "2025-12-01T20:56:13+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
@@ -4373,16 +4373,16 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v4.0.0",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "394e60fd4006722baf0645a324ea1093da75b1e1"
+                "reference": "7fab439259a13fa6096043c920caee6dee725a53"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/394e60fd4006722baf0645a324ea1093da75b1e1",
-                "reference": "394e60fd4006722baf0645a324ea1093da75b1e1",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/7fab439259a13fa6096043c920caee6dee725a53",
+                "reference": "7fab439259a13fa6096043c920caee6dee725a53",
                 "shasum": ""
             },
             "require": {
@@ -4412,9 +4412,9 @@
             ],
             "description": "Extension for PHPStan to allow static analysis of Maho projects.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v4.0.0"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v4.1.0"
             },
-            "time": "2025-10-18T17:31:09+00:00"
+            "time": "2025-12-02T22:17:59+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -6645,16 +6645,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "2.2.10",
+            "version": "2.2.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "2abbf73dc953fdc5a556c0c3d5c47aa4da47d34c"
+                "reference": "7bd21a40b0332b93d4bfee284093d7400696902d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/2abbf73dc953fdc5a556c0c3d5c47aa4da47d34c",
-                "reference": "2abbf73dc953fdc5a556c0c3d5c47aa4da47d34c",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/7bd21a40b0332b93d4bfee284093d7400696902d",
+                "reference": "7bd21a40b0332b93d4bfee284093d7400696902d",
                 "shasum": ""
             },
             "require": {
@@ -6693,7 +6693,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/2.2.10"
+                "source": "https://github.com/rectorphp/rector/tree/2.2.11"
             },
             "funding": [
                 {
@@ -6701,7 +6701,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-01T10:59:13+00:00"
+            "time": "2025-12-02T11:23:46+00:00"
         },
         {
             "name": "sebastian/cli-parser",

@@ -665,17 +665,6 @@ class Mage_Paypal_Model_Express_Checkout
     }
 
     /**
-     * Get checkout method
-     *
-     * @return string
-     * @deprecated use Mage::helper('checkout')->getCheckoutMethod($quote) or $quote->getCheckoutMethod()
-     */
-    public function getCheckoutMethod()
-    {
-        return Mage::helper('checkout')->getCheckoutMethod($this->_quote);
-    }
-
-    /**
      * Sets address data from exported address
      *
      * @param Mage_Sales_Model_Quote_Address $address

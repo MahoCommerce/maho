@@ -509,20 +509,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     }
 
     /**
-     * Process product custom defined options for cart
-     *
-     * @deprecated after 1.4.2.0
-     * @see _prepareOptions()
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @return array
-     */
-    protected function _prepareOptionsForCart(Varien_Object $buyRequest, $product = null)
-    {
-        return $this->_prepareOptions($buyRequest, $product, self::PROCESS_MODE_FULL);
-    }
-
-    /**
      * Check if product can be bought
      *
      * @param  Mage_Catalog_Model_Product $product

@@ -577,7 +577,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
      */
     public function buildEntityPriceFilter($attributes, $values, &$filteredAttributes, $productCollection)
     {
-        $additionalCalculations = [];
         $filter = [];
         $store = Mage::app()->getStore()->getId();
         $website = Mage::app()->getStore()->getWebsiteId();
@@ -603,17 +602,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                                 $filter[$code]->from($table, ['entity_id']);
                                 $filter[$code]->distinct(true);
 
-                                $response = new Varien_Object();
-                                $response->setAdditionalCalculations([]);
-                                $args = [
-                                    'select' => $filter[$code],
-                                    'table' => $table,
-                                    'store_id' => $store,
-                                    'response_object' => $response,
-                                ];
-                                Mage::dispatchEvent('catalogindex_prepare_price_select', $args);
-                                $additionalCalculations[$code] = $response->getAdditionalCalculations();
-
                                 if ($indexer->isAttributeIdUsed()) {
                                     //$filter[$code]->where("$table.attribute_id = ?", $attribute->getId());
                                 }
@@ -633,16 +621,14 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
 
                                     if ((string) $values[$code]['from'] !== '') {
                                         $filter[$code]->where(
-                                            "($table.min_price"
-                                            . implode('', $additionalCalculations[$code]) . ")*{$rateConversion} >= ?",
+                                            "($table.min_price)*{$rateConversion} >= ?",
                                             $values[$code]['from'],
                                         );
                                     }
 
                                     if ((string) $values[$code]['to'] !== '') {
                                         $filter[$code]->where(
-                                            "($table.min_price"
-                                            . implode('', $additionalCalculations[$code]) . ")*{$rateConversion} <= ?",
+                                            "($table.min_price)*{$rateConversion} <= ?",
                                             $values[$code]['to'],
                                         );
                                     }
@@ -743,23 +729,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
     protected function _getSelect()
     {
         return $this->_getResource()->getReadConnection()->select();
-    }
-
-    /**
-     * Add indexable attributes to product collection select
-     *
-     * @deprecated
-     * @param   Mage_Catalog_Model_Resource_Product_Collection $collection
-     * @return  Mage_CatalogIndex_Model_Indexer
-     */
-    protected function _addFilterableAttributesToCollection($collection)
-    {
-        $attributeCodes = $this->_getIndexableAttributeCodes();
-        foreach ($attributeCodes as $code) {
-            $collection->addAttributeToSelect($code);
-        }
-
-        return $this;
     }
 
     /**

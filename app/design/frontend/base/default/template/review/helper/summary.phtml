@@ -19,7 +19,7 @@
             </div>
         <?php endif ?>
         <p class="rating-links">
-            <a href="#product-tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
+            <a href="#tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
         </p>
     </div>
 <?php elseif ($this->getDisplayIfEmpty()): ?>

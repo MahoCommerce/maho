@@ -143,12 +143,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const CACHE_TAG = 'customer';
 
     /**
-     * Minimum Password Length
-     * @deprecated Use getMinPasswordLength() method instead
-     */
-    public const MINIMUM_PASSWORD_LENGTH = Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH;
-
-    /**
      * Configuration path for minimum length of password
      */
     public const XML_PATH_MIN_PASSWORD_LENGTH = 'customer/password/min_password_length';
@@ -190,7 +184,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Customer addresses array
      *
      * @var Mage_Customer_Model_Address[]|null
-     * @deprecated after 1.4.0.0-rc1
      */
     protected $_addresses = null;
 
@@ -509,18 +502,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         /** @var Mage_Core_Helper_Data $helper */
         $helper = Mage::helper('core');
         return $helper->getHash(trim($password), (bool) $salt ? $salt : Mage_Admin_Model_User::HASH_SALT_LENGTH);
-    }
-
-    /**
-     * Get helper instance
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
     }
 
     /**

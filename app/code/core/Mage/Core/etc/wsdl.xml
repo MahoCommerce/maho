@@ -25,8 +25,6 @@
             <complexType name="mahoInfoEntity">
                 <all>
                     <element name="maho_version" type="xsd:string" />
-                    <element name="magento_version" type="xsd:string" minOccurs="0" />
-                    <element name="magento_edition" type="xsd:string" minOccurs="0" />
                 </all>
             </complexType>
         </schema>
@@ -66,11 +64,6 @@
             <input message="typens:mahoInfoRequest" />
             <output message="typens:mahoInfoResponse" />
         </operation>
-        <operation name="magentoInfo">
-            <documentation>(deprecated) Info about current Magento installation</documentation>
-            <input message="typens:mahoInfoRequest" />
-            <output message="typens:mahoInfoResponse" />
-        </operation>
     </portType>
     <binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
         <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
@@ -93,15 +86,6 @@
             </output>
         </operation>
         <operation name="mahoInfo">
-            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
-            <input>
-                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
-            </input>
-            <output>
-                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
-            </output>
-        </operation>
-        <operation name="magentoInfo">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
                 <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />

@@ -6,6 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -93,27 +94,7 @@ class Mage_Tax_Model_Config
     /**
      * @deprecated
      */
-    public const CONFIG_XML_PATH_SHOW_IN_CATALOG = 'tax/display/show_in_catalog';
-
-    /**
-     * @deprecated
-     */
-    public const CONFIG_XML_PATH_DEFAULT_PRODUCT_TAX_GROUP = 'catalog/product/default_tax_group';
-
-    /**
-     * @deprecated
-     */
     public const CONFIG_XML_PATH_DISPLAY_TAX_COLUMN = 'tax/display/column_in_summary';
-
-    /**
-     * @deprecated
-     */
-    public const CONFIG_XML_PATH_DISPLAY_FULL_SUMMARY = 'tax/display/full_summary';
-
-    /**
-     * @deprecated
-     */
-    public const CONFIG_XML_PATH_DISPLAY_ZERO_TAX = 'tax/display/zero_tax';
 
     /**
      * Flag which notify what we need use prices exclude tax for calculations
@@ -324,30 +305,6 @@ class Mage_Tax_Model_Config
     {
         $this->_shippingPriceIncludeTax = $flag;
         return $this;
-    }
-
-    /**
-     * Check if we need display full tax summary information in totals block
-     *
-     * @deprecated please use displayCartFullSummary or displaySalesFullSummary
-     * @param   null|string|bool|int|Mage_Core_Model_Store $store
-     * @return  bool
-     */
-    public function displayFullSummary($store = null)
-    {
-        return $this->displayCartFullSummary($store);
-    }
-
-    /**
-     * Check if we need display zero tax in subtotal
-     *
-     * @deprecated please use displayCartZeroTax or displaySalesZeroTax
-     * @param   null|string|bool|int|Mage_Core_Model_Store $store
-     * @return  bool
-     */
-    public function displayZeroTax($store = null)
-    {
-        return $this->displayCartZeroTax($store);
     }
 
     /**
