@@ -9835,12 +9835,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Cart.php
 
 		-
-			rawMessage: 'Method Mage_Checkout_Block_Cart::prepareItemUrls() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Cart.php
-
-		-
 			rawMessage: 'Method Mage_Checkout_Model_Session::getContinueShoppingUrl() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -17929,45 +17923,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
 
 		-
-			rawMessage: '''
-				Call to method loadObjectByTxnId() of deprecated class Mage_Paypal_Model_Resource_Payment_Transaction:
-				since 1.6.2.0
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payment_Transaction::_verifyThisTransactionExists() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payment_Transaction::_verifyTxnId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: '''
-				PHPDoc tag @method for _getResource() references deprecated class Mage_Paypal_Model_Resource_Payment_Transaction:
-				since 1.6.2.0
-			'''
-			identifier: methodTag.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
-			rawMessage: '''
-				PHPDoc tag @method for getResource() references deprecated class Mage_Paypal_Model_Resource_Payment_Transaction:
-				since 1.6.2.0
-			'''
-			identifier: methodTag.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Pro::_importCaptureResultToPayment() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18086,24 +18041,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Resource/Cert.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Payment_Transaction::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Payment_Transaction::_unserializeField() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Payment/Transaction.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Payment_Transaction::loadObjectByTxnId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Payment/Transaction.php
 
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Resource_Report_Settlement::_construct() has no return type specified.'
@@ -19166,12 +19103,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Rule_Model_Resource_Rule::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Resource/Rule.php
 
 		-
 			rawMessage: Property Mage_Sales_Block_Order_Creditmemo_Totals::$_creditmemo has no type specified.
@@ -22511,15 +22442,6 @@ parameters:
 			identifier: variable.undefined
 			count: 11
 			path: app/design/adminhtml/default/default/template/overlay_popup.phtml
-
-		-
-			rawMessage: '''
-				PHPDoc tag @var references deprecated class Mage_Page_Block_Js_Translate:
-				since 1.7.0.0 (used in adminhtml/default/default/layout/main.xml)
-			'''
-			identifier: varTag.deprecatedClass
-			count: 1
-			path: app/design/adminhtml/default/default/template/page/js/translate.phtml
 
 		-
 			rawMessage: Variable $this might not be defined.

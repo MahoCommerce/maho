@@ -128,16 +128,6 @@ class Mage_Paypal_Model_Config
     public const PAYMENT_ACTION_AUTH  = 'Authorization';
 
     /**
-     * Authorization amounts for Account Verification
-     *
-     * @deprecated since 1.6.2.0
-     * @var int
-     */
-    public const AUTHORIZATION_AMOUNT_ZERO = 0;
-    public const AUTHORIZATION_AMOUNT_ONE = 1;
-    public const AUTHORIZATION_AMOUNT_FULL = 2;
-
-    /**
      * Require Billing Address
      * @var int
      */
@@ -1372,17 +1362,6 @@ class Mage_Paypal_Model_Config
             self::PAYMENT_ACTION_ORDER => Mage_Payment_Model_Method_Abstract::ACTION_ORDER,
             default => null,
         };
-    }
-
-    /**
-     * Returns array of possible Authorization Amounts for Account Verification
-     *
-     * @deprecated since 1.6.2.0
-     * @return array
-     */
-    public function getAuthorizationAmounts()
-    {
-        return [];
     }
 
     /**

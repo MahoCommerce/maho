@@ -519,24 +519,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     }
 
     /**
-     * Generate catalog price rules prices for specified date range
-     * If from date is not defined - will be used previous day by UTC
-     * If to date is not defined - will be used next day by UTC
-     *
-     * @param int|string|null $fromDate
-     * @param int|string|null $toDate
-     * @param int $productId
-     *
-     * @deprecated after 1.7.0.2 use method applyAllRules
-     *
-     * @return $this
-     */
-    public function applyAllRulesForDateRange($fromDate = null, $toDate = null, $productId = null)
-    {
-        return $this->applyAllRules($productId);
-    }
-
-    /**
      * Run reindex
      *
      * @param int|Mage_Catalog_Model_Product $product

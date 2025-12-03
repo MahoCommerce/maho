@@ -511,39 +511,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * Prepare Url Data object
-     *
-     * @return $this
-     * @deprecated after 1.7.0.2
-     */
-    protected function _prepareUrlDataObject()
-    {
-        $objects = [];
-        /** @var Mage_Catalog_Model_Product $item */
-        foreach ($this->_items as $item) {
-            if ($this->getFlag('do_not_use_category_id')) {
-                $item->setDoNotUseCategoryId(true);
-            }
-            if (!$item->isVisibleInSiteVisibility() && $item->getItemStoreId()) {
-                $objects[$item->getEntityId()] = $item->getItemStoreId();
-            }
-        }
-
-        if ($objects && $this->hasFlag('url_data_object')) {
-            $objects = Mage::getResourceSingleton('catalog/url')
-                ->getRewriteByProductStore($objects);
-            foreach ($this->_items as $item) {
-                if (isset($objects[$item->getEntityId()])) {
-                    $object = new Varien_Object($objects[$item->getEntityId()]);
-                    $item->setUrlDataObject($object);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * Add collection filters by identifiers
      *
      * @param mixed $productId
@@ -1052,25 +1019,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $select->distinct(true);
         $select->columns('type_id');
         return $this->getConnection()->fetchCol($select);
-    }
-
-    /**
-     * Joins url rewrite rules to collection
-     *
-     * @deprecated after 1.7.0.2. Method is not used anywhere in the code.
-     * @return $this
-     */
-    public function joinUrlRewrite()
-    {
-        $this->joinTable(
-            'core/url_rewrite',
-            'entity_id=entity_id',
-            ['request_path'],
-            '{{table}}.type = ' . Mage_Core_Model_Url_Rewrite::TYPE_PRODUCT,
-            'left',
-        );
-
-        return $this;
     }
 
     /**

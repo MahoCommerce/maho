@@ -119,41 +119,6 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
     }
 
     /**
-     * Export data and return contents of temporary file.
-     *
-     * @deprecated after ver 1.9.2.4 use $this->exportFile() instead
-     *
-     * @throws Mage_Core_Exception
-     * @return string
-     */
-    public function export()
-    {
-        if (isset($this->_data[self::FILTER_ELEMENT_GROUP])) {
-            $this->addLogComment(Mage::helper('importexport')->__('Begin export of %s', $this->getEntity()));
-            $result = $this->_getEntityAdapter()
-                ->setWriter($this->_getWriter())
-                ->export();
-            $countRows = substr_count(trim($result), "\n");
-            if (!$countRows) {
-                Mage::throwException(
-                    Mage::helper('importexport')->__('There is no data for export'),
-                );
-            }
-            if ($result) {
-                $this->addLogComment([
-                    Mage::helper('importexport')->__('Exported %s rows.', $countRows),
-                    Mage::helper('importexport')->__('Export has been done.'),
-                ]);
-            }
-            return $result;
-        } else {
-            Mage::throwException(
-                Mage::helper('importexport')->__('No filter data provided'),
-            );
-        }
-    }
-
-    /**
      * Export data and return temporary file through array.
      *
      * This method will return following array:

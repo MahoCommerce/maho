@@ -117,15 +117,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     protected $_eventObject = 'rule';
 
     /**
-     * Contain sores labels
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @var array
-     */
-    protected $_labels = [];
-
-    /**
      * Rule's primary coupon
      *
      * @var Mage_SalesRule_Model_Coupon
@@ -485,55 +476,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
             return $address->getId();
         }
         return $address;
-    }
-
-    /**
-     * Collect all product attributes used in serialized rule's action or condition
-     *
-     * @deprecated after 1.6.2.0 use Mage_SalesRule_Model_Resource_Rule::getProductAttributes() instead
-     *
-     * @param string $serializedString
-     *
-     * @return array
-     */
-    protected function _getUsedAttributes($serializedString)
-    {
-        return $this->_getResource()->getProductAttributes($serializedString);
-    }
-
-    /**
-     * @deprecated after 1.6.2.0
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    #[\Override]
-    public function toString($format = '')
-    {
-        return '';
-    }
-
-    /**
-     * Returns rule as an array for admin interface
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @param array $arrAttributes
-     *
-     * Output example:
-     * [
-     *   'name'=>'Example rule',
-     *   'conditions'=>{condition_combine::toArray}
-     *   'actions'=>{action_collection::toArray}
-     * ]
-     *
-     * @return array
-     */
-    #[\Override]
-    public function toArray(array $arrAttributes = [])
-    {
-        return parent::toArray($arrAttributes);
     }
 
     /**

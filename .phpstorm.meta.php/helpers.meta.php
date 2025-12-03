@@ -18,7 +18,6 @@ namespace PHPSTORM_META {
         'adminhtml/data' => \Mage_Adminhtml_Helper_Data::class,
         'adminhtml/help_mapping' => \Mage_Adminhtml_Helper_Help_Mapping::class,
         'adminhtml/js' => \Mage_Adminhtml_Helper_Js::class,
-        'adminhtml/media_js' => \Mage_Adminhtml_Helper_Media_Js::class,
         'adminhtml/rss' => \Mage_Adminhtml_Helper_Rss::class,
         'adminhtml/sales' => \Mage_Adminhtml_Helper_Sales::class,
         'adminnotification/data' => \Mage_AdminNotification_Helper_Data::class,
