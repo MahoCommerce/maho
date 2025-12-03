@@ -112,7 +112,7 @@ class Mage_Customer_Block_Account_Dashboard extends Mage_Core_Block_Template
             return Mage::helper('customer')->__('You are currently subscribed to our newsletter.');
         }
 
-        return Mage::helper('customer')->__('You are currently not subscribed to our newsletter.');
+        return Mage::helper('customer')->__('You are not subscribed to our newsletter.');
     }
 
     /**
