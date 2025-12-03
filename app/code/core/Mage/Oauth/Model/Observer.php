@@ -28,8 +28,7 @@ class Mage_Oauth_Model_Observer
     public function afterAdminLogin(Varien_Event_Observer $observer)
     {
         if ($this->_getOauthToken() !== null) {
-            $userType = Mage_Oauth_Model_Token::USER_TYPE_ADMIN;
-            $url = Mage::helper('oauth')->getAuthorizeUrl($userType);
+            $url = Mage::helper('oauth')->getAuthorizeUrl();
             Mage::app()->getResponse()
                 ->setRedirect($url)
                 ->sendHeaders()
@@ -48,8 +47,7 @@ class Mage_Oauth_Model_Observer
             $session = Mage::getSingleton('admin/session');
             $session->addError($observer->getException()->getMessage());
 
-            $userType = Mage_Oauth_Model_Token::USER_TYPE_ADMIN;
-            $url = Mage::helper('oauth')->getAuthorizeUrl($userType);
+            $url = Mage::helper('oauth')->getAuthorizeUrl();
             Mage::app()->getResponse()
                 ->setRedirect($url)
                 ->sendHeaders()
