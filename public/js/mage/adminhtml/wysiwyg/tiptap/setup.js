@@ -258,13 +258,13 @@ class tiptapWysiwygSetup {
                         variable_target_id: this.id,
                     }),
                 }),
-                TiptapModules.MahoSlideshow.configure({
+                ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
                         store: this.storeId,
                         filetype: 'image',
                     }),
-                }),
+                })] : []),
                 TiptapModules.Table.configure({
                     resizable: true
                 }),
@@ -371,7 +371,7 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
             { type: 'button', title: 'Insert Table', icon: 'table', command: 'insertTable', args: [{rows:3, cols:3, withHeaderRow:true}] },
             { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
-            { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images },
+            { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images && this.config.add_slideshows !== false },
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
             { type: 'button', title: 'Insert Variable', icon: 'variable', command: 'insertMahoVariable', enabled: this.config.add_variables},
             { type: 'spacer' },
