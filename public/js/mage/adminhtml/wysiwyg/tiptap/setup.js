@@ -286,6 +286,14 @@ class tiptapWysiwygSetup {
                 }),
                 TiptapModules.MahoDiv,
                 TiptapModules.MahoFullscreen,
+                TiptapModules.DragHandle.configure({
+                    render: () => {
+                        const el = document.createElement('div');
+                        el.classList.add('tiptap-drag-handle');
+                        el.innerHTML = this.getIcon('drag-handle');
+                        return el;
+                    },
+                }),
             ],
             onTransaction: ({ editor }) => {
                 if (editor.isInitialized) {
@@ -575,6 +583,7 @@ class tiptapWysiwygSetup {
         'hamburger': '<path d="M4 6l16 0"></path><path d="M4 12l16 0"></path><path d="M4 18l16 0"></path>',
         'fullscreen-maximize': '<path d="M16 4l4 0l0 4"/><path d="M14 10l6 -6"/><path d="M8 20l-4 0l0 -4"/><path d="M4 20l6 -6"/><path d="M16 20l4 0l0 -4"/><path d="M14 14l6 6"/><path d="M8 4l-4 0l0 4"/><path d="M4 4l6 6"/>',
         'fullscreen-minimize': '<path d="M5 9l4 0l0 -4"/><path d="M3 3l6 6"/><path d="M5 15l4 0l0 4"/><path d="M3 21l6 -6"/><path d="M19 9l-4 0l0 -4"/><path d="M15 9l6 -6"/><path d="M19 15l-4 0l0 4"/><path d="M15 15l6 6"/>',
+        'drag-handle': '<path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
     };
 }
 
