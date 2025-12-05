@@ -799,3 +799,15 @@
     outline: none !important;
     box-shadow: none !important;
 }
+
+/* Drag Handle */
+.tiptap-drag-handle {
+    cursor: grab;
+    color: #6b7280;
+    margin-top: 3px;
+}
+
+.tiptap-drag-handle svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
