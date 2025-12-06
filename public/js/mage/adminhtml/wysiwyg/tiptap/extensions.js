@@ -236,26 +236,13 @@ export const MahoWidgetBlock = Node.create({
                 const { from, to } = state.selection;
                 const type = getWidgetTypeForSelection(state);
 
-                console.log('TipTap calling widgetTools.openDialog with:', this.options.widgetUrl);
-                console.log('TipTap options being passed:', {
-                    onOpen: () => {
-                        widgetTools.initOptionValues(node?.attrs.directiveObj.params);
-                    },
-                    onOk: async () => {
-                        console.log('TipTap onOk called');
-                        // ... rest of onOk
-                    }
-                });
                 widgetTools.openDialog(this.options.widgetUrl, {
                     onOpen: () => {
                         widgetTools.initOptionValues(node?.attrs.directiveObj.params);
                     },
                     onOk: async () => {
-                        console.log('TipTap onOk called');
                         try {
-                            // Get directive from insertWidget method
-                            const directive = await window.wWidget.insertWidget();
-                            console.log('TipTap directive received:', directive);
+                            const directive = await window.wWidget.insertWidget(true);
                             if (directive) {
                                 const directiveObj = parseDirective(directive);
                                 editor.commands.insertContentAt({ from, to }, {
@@ -263,10 +250,10 @@ export const MahoWidgetBlock = Node.create({
                                     attrs: { directiveObj },
                                 });
                             }
-                            return true; // Allow dialog to close
-                        } catch(error) {
-                            console.log('TipTap onOk error:', error);
-                            return false; // Prevent dialog close on error
+                            return true;
+                        } catch (error) {
+                            console.error('Error inserting widget:', error);
+                            return false;
                         }
                     },
                 });
@@ -432,15 +419,16 @@ export const MahoImage = Image.extend({
 
                 const url = setRouteParams(this.options.browserUrl, params);
                 MediabrowserUtility.openDialog(url, null, null, this.options.title, {
-                    onOk: (dialog) => {
-                        //  Parse out the directive and alt text
-                        let match;
+                    ok: false, // Use Insert File button, not dialog OK button
+                    onClose: (dialog) => {
+                        // Dialog was cancelled or closed without selecting a file
                         const returnValue = dialog.returnValue || '';
-
                         if (!returnValue) {
-                            console.error('No return value from media browser dialog');
                             return;
                         }
+
+                        // Parse out the directive and alt text
+                        let match;
 
                         match = returnValue.match(/src="({{.*?}})"/);
                         const directiveObj = parseDirective(match?.[1]);
