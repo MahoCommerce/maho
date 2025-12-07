@@ -673,15 +673,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ==============================================
-// PDP - Product Media Manager with Fullscreen Gallery
-// ==============================================
-
 var ProductMediaManager = {
     overlay: null,
-    eventHandlers: {},
+    handlers: {},
 
-    getGalleryImages: function() {
+    getGalleryImages: () => {
         const images = [...document.querySelectorAll('.product-image-gallery .gallery-image')];
         return images.length > 1 ? images.slice(1) : images;
     },
@@ -690,127 +686,93 @@ var ProductMediaManager = {
         const images = this.getGalleryImages();
         if (!images.length) return;
 
-        const overlay = document.createElement('div');
-        overlay.className = 'fullscreen-gallery';
-        overlay.innerHTML = `
-            <button class="fg-close" aria-label="Close">&times;</button>
-            <div class="fg-scroll"></div>
-        `;
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="fullscreen-gallery">
+                <button class="fg-close" aria-label="Close">&times;</button>
+                <div class="fg-scroll">
+                    ${images.map(img => `<div class="fg-slide"><img src="${img.dataset.zoomImage || img.src}" alt="${img.alt}" draggable="false"></div>`).join('')}
+                </div>
+            </div>
+        `);
 
-        const container = overlay.querySelector('.fg-scroll');
-
-        images.forEach(img => {
-            const slide = document.createElement('div');
-            slide.className = 'fg-slide';
-            slide.innerHTML = `<img src="${img.dataset.zoomImage || img.src}" alt="${img.alt}" draggable="false">`;
-            container.appendChild(slide);
-        });
-
-        document.body.appendChild(overlay);
+        this.overlay = document.body.lastElementChild;
+        const container = this.overlay.querySelector('.fg-scroll');
         document.body.style.overflow = 'hidden';
-        this.overlay = overlay;
 
-        requestAnimationFrame(() => {
-            const slideWidth = container.firstElementChild.offsetWidth;
-            container.scrollLeft = startIndex * slideWidth;
-        });
-
-        this.wireFullscreenEvents(overlay, container);
+        requestAnimationFrame(() => container.scrollLeft = startIndex * container.firstElementChild.offsetWidth);
+        this.wireEvents(container);
     },
 
     closeFullscreen: function() {
         const self = ProductMediaManager;
         if (!self.overlay) return;
-
-        document.removeEventListener('keydown', self.eventHandlers.keydown);
-        document.removeEventListener('mouseup', self.eventHandlers.mouseup);
-        document.removeEventListener('mousemove', self.eventHandlers.mousemove);
-
+        ['keydown', 'mouseup', 'mousemove'].forEach(e => document.removeEventListener(e, self.handlers[e]));
         self.overlay.remove();
         self.overlay = null;
         document.body.style.overflow = '';
     },
 
-    wireFullscreenEvents: function(overlay, container) {
+    wireEvents: function(container) {
         const self = this;
-        let isDragging = false, hasDragged = false, startX = 0, scrollStart = 0;
+        let dragging = false, dragged = false, startX = 0, scrollStart = 0;
 
-        overlay.querySelector('.fg-close').addEventListener('click', self.closeFullscreen);
-
-        overlay.addEventListener('click', e => {
-            if (hasDragged) { hasDragged = false; return; }
-            if (e.target.closest('.fg-slide') || e.target === container) {
-                self.closeFullscreen();
-            }
+        self.overlay.querySelector('.fg-close').addEventListener('click', self.closeFullscreen);
+        self.overlay.addEventListener('click', e => {
+            if (dragged) { dragged = false; return; }
+            if (e.target.closest('.fg-slide') || e.target === container) self.closeFullscreen();
         });
 
-        self.eventHandlers.keydown = e => { if (e.key === 'Escape') self.closeFullscreen(); };
-        document.addEventListener('keydown', self.eventHandlers.keydown);
+        self.handlers.keydown = e => e.key === 'Escape' && self.closeFullscreen();
+        document.addEventListener('keydown', self.handlers.keydown);
 
         container.addEventListener('mousedown', e => {
-            isDragging = true;
-            hasDragged = false;
+            dragging = true; dragged = false;
             container.classList.add('dragging');
-            startX = e.clientX;
-            scrollStart = container.scrollLeft;
+            startX = e.clientX; scrollStart = container.scrollLeft;
         });
 
-        self.eventHandlers.mouseup = e => {
-            if (!isDragging) return;
-            isDragging = false;
-
-            const dx = e.clientX - startX;
-            const slideWidth = container.firstElementChild.offsetWidth;
-            const currentSlide = Math.round(scrollStart / slideWidth);
-            const maxSlide = container.children.length - 1;
-            let targetSlide = currentSlide + (dx < -50 ? 1 : dx > 50 ? -1 : 0);
-            targetSlide = Math.max(0, Math.min(targetSlide, maxSlide));
-
-            container.scrollTo({ left: targetSlide * slideWidth, behavior: 'smooth' });
+        self.handlers.mouseup = e => {
+            if (!dragging) return;
+            dragging = false;
+            const dx = e.clientX - startX, w = container.firstElementChild.offsetWidth;
+            const curr = Math.round(scrollStart / w), max = container.children.length - 1;
+            const target = Math.max(0, Math.min(curr + (dx < -50 ? 1 : dx > 50 ? -1 : 0), max));
+            container.scrollTo({ left: target * w, behavior: 'smooth' });
             container.addEventListener('scrollend', () => container.classList.remove('dragging'), { once: true });
         };
-        document.addEventListener('mouseup', self.eventHandlers.mouseup);
+        document.addEventListener('mouseup', self.handlers.mouseup);
 
-        self.eventHandlers.mousemove = e => {
-            if (!isDragging) return;
+        self.handlers.mousemove = e => {
+            if (!dragging) return;
             const dx = e.clientX - startX;
-            if (Math.abs(dx) > 5) hasDragged = true;
+            if (Math.abs(dx) > 5) dragged = true;
             container.scrollLeft = scrollStart - dx;
         };
-        document.addEventListener('mousemove', self.eventHandlers.mousemove);
+        document.addEventListener('mousemove', self.handlers.mousemove);
     },
 
-    swapImage: function(targetImage) {
-        const gallery = document.querySelector('.product-image-gallery');
-        gallery.querySelectorAll('.gallery-image').forEach(img => img.classList.remove('visible'));
-        targetImage.classList.add('gallery-image', 'visible');
-        targetImage.removeAttribute('loading');
+    swapImage: function(target) {
+        document.querySelectorAll('.product-image-gallery .gallery-image').forEach(img => img.classList.remove('visible'));
+        target.classList.add('gallery-image', 'visible');
+        target.removeAttribute('loading');
     },
 
-    wireThumbnails: function() {
-        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(link => {
-            link.addEventListener('click', e => {
-                e.preventDefault();
-                const target = document.querySelector('#image-' + link.dataset.imageIndex);
-                ProductMediaManager.swapImage(target);
-            });
-        });
-    },
-
-    wireMainImage: function() {
+    init: function() {
         const gallery = document.querySelector('.product-image-gallery');
         if (!gallery) return;
 
         gallery.addEventListener('click', () => {
-            const visible = gallery.querySelector('.gallery-image.visible');
-            const match = visible?.id?.match(/image-(\d+)/);
+            const match = gallery.querySelector('.gallery-image.visible')?.id?.match(/image-(\d+)/);
             ProductMediaManager.openFullscreen(match ? parseInt(match[1]) : 0);
         });
-    },
 
-    init: function() {
-        this.wireThumbnails();
-        this.wireMainImage();
+        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                ProductMediaManager.swapImage(document.querySelector('#image-' + link.dataset.imageIndex));
+            });
+        });
+
         document.dispatchEvent(new CustomEvent('product-media-loaded', { detail: this }));
     }
 };
