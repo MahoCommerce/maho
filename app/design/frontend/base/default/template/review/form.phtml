@@ -14,7 +14,7 @@
 <dialog id="review-dialog">
     <div class="d-header">
         <h2><?= $this->__("You're reviewing:") ?> <?= $this->escapeHtml($this->getProductInfo()->getName()) ?></h2>
-        <button type="button" class="d-close" onclick="this.closest('dialog').close()" title="<?= $this->quoteEscape($this->__('Close')) ?>">&times;</button>
+        <button type="button" class="d-close" onclick="this.closest('dialog').close()" aria-label="<?= $this->quoteEscape($this->__('Close')) ?>"><span aria-hidden="true">&times;</span></button>
     </div>
     <div class="d-content">
         <?php if ($this->getAllowWriteReviewFlag()): ?>
