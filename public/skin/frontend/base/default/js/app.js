@@ -674,123 +674,148 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==============================================
-// PDP - image zoom - needs to be available outside document.ready scope
+// PDP - Product Media Manager with Fullscreen Gallery
 // ==============================================
 
 var ProductMediaManager = {
-    IMAGE_ZOOM_THRESHOLD: 20,
-    imageWrapper: null,
+    overlay: null,
+    eventHandlers: {},
 
-    createZoom: function(image) {
-        if (PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE
-            || window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches) {
-            return;
-        }
+    getGalleryImages: function() {
+        const images = [...document.querySelectorAll('.product-image-gallery .gallery-image')];
+        return images.length > 1 ? images.slice(1) : images;
+    },
 
-        if (!image) {
-            return;
-        }
+    openFullscreen: function(startIndex = 0) {
+        const images = this.getGalleryImages();
+        if (!images.length) return;
 
-        if (image.naturalWidth && image.naturalHeight) {
-            let widthDiff = image.naturalWidth - image.width - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
-            let heightDiff = image.naturalHeight - image.height - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
-            let parentImage = image.closest('.product-image');
+        const overlay = document.createElement('div');
+        overlay.className = 'fullscreen-gallery';
+        overlay.innerHTML = `
+            <button class="fg-close" aria-label="Close">&times;</button>
+            <div class="fg-scroll"></div>
+        `;
 
-            if (widthDiff < 0 && heightDiff < 0) {
-                parentImage.classList.remove('zoom-available');
-                return;
-            } else {
-                parentImage.classList.add('zoom-available');
+        const container = overlay.querySelector('.fg-scroll');
+
+        images.forEach(img => {
+            const slide = document.createElement('div');
+            slide.className = 'fg-slide';
+            slide.innerHTML = `<img src="${img.dataset.zoomImage || img.src}" alt="${img.alt}" draggable="false">`;
+            container.appendChild(slide);
+        });
+
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        this.overlay = overlay;
+
+        requestAnimationFrame(() => {
+            const slideWidth = container.firstElementChild.offsetWidth;
+            container.scrollLeft = startIndex * slideWidth;
+        });
+
+        this.wireFullscreenEvents(overlay, container);
+    },
+
+    closeFullscreen: function() {
+        const self = ProductMediaManager;
+        if (!self.overlay) return;
+
+        document.removeEventListener('keydown', self.eventHandlers.keydown);
+        document.removeEventListener('mouseup', self.eventHandlers.mouseup);
+        document.removeEventListener('mousemove', self.eventHandlers.mousemove);
+
+        self.overlay.remove();
+        self.overlay = null;
+        document.body.style.overflow = '';
+    },
+
+    wireFullscreenEvents: function(overlay, container) {
+        const self = this;
+        let isDragging = false, hasDragged = false, startX = 0, scrollStart = 0;
+
+        overlay.querySelector('.fg-close').addEventListener('click', self.closeFullscreen);
+
+        overlay.addEventListener('click', e => {
+            if (hasDragged) { hasDragged = false; return; }
+            if (e.target.closest('.fg-slide') || e.target === container) {
+                self.closeFullscreen();
             }
-        }
+        });
 
-        const container = document.querySelector(".product-image-gallery");
-        container.addEventListener("mousemove", onZoom);
-        container.addEventListener("mouseover", onZoom);
-        container.addEventListener("mouseleave", offZoom);
+        self.eventHandlers.keydown = e => { if (e.key === 'Escape') self.closeFullscreen(); };
+        document.addEventListener('keydown', self.eventHandlers.keydown);
 
-        function onZoom(e) {
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const img = document.querySelector(".product-image-gallery img.visible");
-            img.style.transformOrigin = `${x}px ${y}px`;
-            img.style.transform = "scale(2.5)";
-        }
+        container.addEventListener('mousedown', e => {
+            isDragging = true;
+            hasDragged = false;
+            container.classList.add('dragging');
+            startX = e.clientX;
+            scrollStart = container.scrollLeft;
+        });
 
-        function offZoom(e) {
-            const img = document.querySelector(".product-image-gallery img.visible");
-            img.style.transformOrigin = `center center`;
-            img.style.transform = "scale(1)";
-        }
+        self.eventHandlers.mouseup = e => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const dx = e.clientX - startX;
+            const slideWidth = container.firstElementChild.offsetWidth;
+            const currentSlide = Math.round(scrollStart / slideWidth);
+            const maxSlide = container.children.length - 1;
+            let targetSlide = currentSlide + (dx < -50 ? 1 : dx > 50 ? -1 : 0);
+            targetSlide = Math.max(0, Math.min(targetSlide, maxSlide));
+
+            container.scrollTo({ left: targetSlide * slideWidth, behavior: 'smooth' });
+            container.addEventListener('scrollend', () => container.classList.remove('dragging'), { once: true });
+        };
+        document.addEventListener('mouseup', self.eventHandlers.mouseup);
+
+        self.eventHandlers.mousemove = e => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            if (Math.abs(dx) > 5) hasDragged = true;
+            container.scrollLeft = scrollStart - dx;
+        };
+        document.addEventListener('mousemove', self.eventHandlers.mousemove);
     },
 
     swapImage: function(targetImage) {
-        targetImage.classList.add('gallery-image');
-        const imageGallery = document.querySelector('.product-image-gallery');
-
-        const swapAndZoom = () => {
-            imageGallery.querySelectorAll('.gallery-image').forEach(image => {
-                image.classList.remove('visible');
-            });
-
-            // Append targetImage to the gallery
-            imageGallery.appendChild(targetImage);
-            targetImage.classList.add('visible');
-            ProductMediaManager.createZoom(targetImage);
-        };
-
-        // Remove the loading attribute
-        targetImage.removeAttribute('loading'); // Remove lazy load
-        if (targetImage.complete) {
-            // Image already loaded, swap immediately
-            swapAndZoom();
-        } else {
-            // Need to wait for image to load
-            imageGallery.classList.add('loading');
-            imageGallery.appendChild(targetImage);
-
-            targetImage.onload = function() {
-                imageGallery.classList.remove('loading');
-                swapAndZoom();
-            };
-        }
+        const gallery = document.querySelector('.product-image-gallery');
+        gallery.querySelectorAll('.gallery-image').forEach(img => img.classList.remove('visible'));
+        targetImage.classList.add('gallery-image', 'visible');
+        targetImage.removeAttribute('loading');
     },
 
     wireThumbnails: function() {
-        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(function(link) {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(link => {
+            link.addEventListener('click', e => {
                 e.preventDefault();
-                let imageIndex = link.getAttribute('data-image-index');
-                let target = document.querySelector('#image-' + imageIndex);
+                const target = document.querySelector('#image-' + link.dataset.imageIndex);
                 ProductMediaManager.swapImage(target);
             });
         });
     },
 
-    initZoom: function() {
-        ProductMediaManager.createZoom(document.querySelector(".gallery-image.visible"));
+    wireMainImage: function() {
+        const gallery = document.querySelector('.product-image-gallery');
+        if (!gallery) return;
+
+        gallery.addEventListener('click', () => {
+            const visible = gallery.querySelector('.gallery-image.visible');
+            const match = visible?.id?.match(/image-(\d+)/);
+            ProductMediaManager.openFullscreen(match ? parseInt(match[1]) : 0);
+        });
     },
 
     init: function() {
-        ProductMediaManager.imageWrapper = document.querySelector('.product-img-box');
-
-        // Re-initialize zoom on viewport size change since resizing causes problems with zoom and since smaller
-        // viewport sizes shouldn't have zoom
-        window.addEventListener('delayed-resize', function(e) {
-            ProductMediaManager.initZoom();
-        });
-
-        ProductMediaManager.initZoom();
-        ProductMediaManager.wireThumbnails();
-        const event = new CustomEvent('product-media-loaded', { detail: ProductMediaManager });
-        document.dispatchEvent(event);
+        this.wireThumbnails();
+        this.wireMainImage();
+        document.dispatchEvent(new CustomEvent('product-media-loaded', { detail: this }));
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    ProductMediaManager.init();
-});
+document.addEventListener('DOMContentLoaded', () => ProductMediaManager.init());
 
 // Slideshow management
 document.addEventListener('DOMContentLoaded', () => {

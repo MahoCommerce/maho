@@ -13,11 +13,9 @@
 ?>
 <?php
 $_product = $this->getProduct();
-$_helper = $this->helper('catalog/output');
-$catalogImageHelper = $this->helper('catalog/image');
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 ?>
-    <div class="product-image product-image-zoom" role="region" aria-label="<?= $this->__('Product Images') ?>">
+    <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>">
         <div class="product-image-gallery">
             <img id="image-main"
                 class="gallery-image visible"
