@@ -687,16 +687,20 @@ var ProductMediaManager = {
         if (!images.length) return;
 
         document.body.insertAdjacentHTML('beforeend', `
-            <div class="fullscreen-gallery">
+            <div class="fullscreen-gallery" role="dialog" aria-modal="true">
                 <button class="fg-close" aria-label="Close">&times;</button>
                 <div class="fg-scroll">
-                    ${images.map(img => `<div class="fg-slide"><img src="${img.dataset.zoomImage || img.src}" alt="${img.alt}" draggable="false"></div>`).join('')}
+                    ${images.map(() => `<div class="fg-slide"><img draggable="false"></div>`).join('')}
                 </div>
             </div>
         `);
 
         this.overlay = document.body.lastElementChild;
         const container = this.overlay.querySelector('.fg-scroll');
+        container.querySelectorAll('img').forEach((imgEl, i) => {
+            imgEl.src = images[i].dataset.zoomImage || images[i].src;
+            imgEl.alt = images[i].alt;
+        });
         document.body.style.overflow = 'hidden';
 
         requestAnimationFrame(() => container.scrollLeft = startIndex * container.firstElementChild.offsetWidth);
