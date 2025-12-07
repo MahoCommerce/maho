@@ -16,27 +16,27 @@
 <?php $userIcon = $this->getIconSvg('user') ?>
 <div class="box-collateral box-reviews" id="customer-reviews">
     <?php if (count($_items)): ?>
-        <div class="reviews-header">
-            <span class="reviews-count"><?= $this->__('%d Review(s)', count($_items)) ?></span>
+        <div class="rv-header">
+            <span class="rv-count"><?= $this->__('%d Review(s)', count($_items)) ?></span>
             <button type="button" class="button" onclick="document.getElementById('review-dialog').showModal()">
                 <?= $this->__('Write a Review') ?>
             </button>
         </div>
-        <div class="reviews-list">
+        <div class="rv-list">
         <?php foreach ($_items as $_review): ?>
             <?php $_votes = $_review->getRatingVotes() ?>
-            <article class="review-card">
-                <header class="review-card__header">
-                    <div class="review-card__author">
-                        <span class="review-card__avatar"><?= $userIcon ?></span>
-                        <div class="review-card__meta">
-                            <span class="review-card__name"><?= $this->escapeHtml($_review->getNickname()) ?></span>
-                            <time class="review-card__date"><?= $this->formatDate($_review->getCreatedAt()) ?></time>
+            <article class="rv-card">
+                <header class="rc-header">
+                    <div class="rc-author">
+                        <span class="rc-avatar"><?= $userIcon ?></span>
+                        <div class="rc-meta">
+                            <span class="rc-name"><?= $this->escapeHtml($_review->getNickname()) ?></span>
+                            <time class="rc-date"><?= $this->formatDate($_review->getCreatedAt()) ?></time>
                         </div>
                     </div>
                     <?php if (count($_votes) == 1): ?>
                         <?php foreach ($_votes as $_vote): ?>
-                            <div class="review-card__rating">
+                            <div class="rc-rating">
                                 <div class="rating-box">
                                     <div class="rating" style="width:<?= $_vote->getPercent() ?>%"></div>
                                 </div>
@@ -44,16 +44,16 @@
                         <?php endforeach ?>
                     <?php endif ?>
                 </header>
-                <div class="review-card__content">
-                    <h4 class="review-card__title"><?= $this->escapeHtml(ucfirst($_review->getTitle())) ?></h4>
-                    <p class="review-card__text"><?= nl2br($this->escapeHtml(ucfirst($_review->getDetail()))) ?></p>
+                <div class="rc-content">
+                    <h4 class="rc-title"><?= $this->escapeHtml(ucfirst($_review->getTitle())) ?></h4>
+                    <p class="rc-text"><?= nl2br($this->escapeHtml(ucfirst($_review->getDetail()))) ?></p>
                 </div>
                 <?php if (count($_votes) > 1): ?>
-                <footer class="review-card__footer">
-                    <div class="review-card__ratings">
+                <footer class="rc-footer">
+                    <div class="rc-ratings">
                         <?php foreach ($_votes as $_vote): ?>
-                        <div class="review-card__rating-item">
-                            <span class="review-card__rating-label"><?= $this->escapeHtml($_vote->getRatingCode()) ?></span>
+                        <div class="rc-rating-item">
+                            <span class="rc-rating-label"><?= $this->escapeHtml($_vote->getRatingCode()) ?></span>
                             <div class="rating-box">
                                 <div class="rating" style="width:<?= $_vote->getPercent() ?>%"></div>
                             </div>
@@ -66,7 +66,7 @@
         <?php endforeach ?>
         </div>
     <?php elseif($this->getParentBlock()): ?>
-        <div class="reviews-header reviews-header--empty">
+        <div class="rv-header empty">
             <?= $this->getParentBlock()->getReviewsSummaryHtml($this->getProduct(), 'short', true) ?>
             <button type="button" class="button" onclick="document.getElementById('review-dialog').showModal()">
                 <?= $this->__('Be the First to Review') ?>
