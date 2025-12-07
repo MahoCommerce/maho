@@ -71,7 +71,6 @@ namespace PHPSTORM_META {
         permissions_variable,
         processed_quote_items_for_analytics,
         product,
-        productId,
         rating_data,
         ret,
         review_data,
