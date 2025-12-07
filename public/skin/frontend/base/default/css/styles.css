@@ -5996,6 +5996,8 @@ div.paypal-logo span > img {
  * Reviews
  * ============================================ */
 #customer-reviews {
+  container-type: inline-size;
+
   & h2:not(dialog h2) {
     color: var(--maho-color-primary);
     font-size: 0.75rem;
@@ -6171,13 +6173,14 @@ div.paypal-logo span > img {
     font-weight: 500;
   }
 
-  @media (max-width: 768px) {
+  @container (min-width: 900px) {
+    & .rv-list { columns: 3; }
+  }
+
+  @container (max-width: 600px) {
     & .rv-list { columns: 1; }
     & .rv-count { display: none; }
-    & .rc-header {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
+    & .rv-header { justify-content: center; }
   }
 }
 
