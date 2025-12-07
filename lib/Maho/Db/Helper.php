@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @package    Maho_Lib
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
