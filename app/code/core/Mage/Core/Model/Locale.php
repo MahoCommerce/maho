@@ -1364,7 +1364,8 @@ class Mage_Core_Model_Locale extends Varien_Object
         $toTimeStamp    = strtotime((string) $dateTo);
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59
-            $endDate = new DateTime((string) $dateTo . ' 23:59:59');
+            $endDate = new DateTime((string) $dateTo);
+            $endDate->setTime(23, 59, 59);
             $toTimeStamp = $endDate->getTimestamp();
         }
 
