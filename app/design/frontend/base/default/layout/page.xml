@@ -35,7 +35,6 @@
 
                 <!-- Add stylesheets with media queries for use by modern browsers -->
                 <action method="addItem"><type>skin_css</type><name>css/styles.css</name></action>
-                <action method="addItem"><type>skin_css</type><name>css/madisonisland.css</name></action>
 
                 <!-- Sets viewport meta tag using text block -->
                 <block type="core/text" name="head.viewport">
