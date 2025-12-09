@@ -8,155 +8,56 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/* ============================================ *
- * Homepage
- * ============================================ */
-
-/* Primary Banner */
-body.cms-home .main-container {
-  padding-top: 0;
-}
-
-/* Promotion Banner Section */
+/* Homepage */
+body.cms-home .main-container { padding-top: 0 }
 .promos {
-  margin: 0 0 10px 0;
+  display: grid;
+  gap: 20px;
   padding: 0;
-  width: 100%;
+  margin: 0 0 10px;
 }
-
-.promos:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-
-/* Specifying the body only in order to override the .std ul li styling */
+@media (min-width: 771px) { .promos { grid-template-columns: repeat(3, 1fr) } }
 body .promos > li {
-  margin: 0 0 10px 0;
   list-style: none;
-  text-align: center;
-  position: relative;
-  border: 1px solid var(--maho-color-border);
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
+  margin: 0;
   user-select: none;
 }
-
-.promos > li:last-child {
-  margin-bottom: 0;
-}
-
-.promos img {
-  max-width: 100%;
-  width: 100%;
-}
-
-.promos a:hover {
-  opacity: 0.8;
-  display: block;
-}
-
-@media only screen and (min-width: 771px) {
-  body .promos > li {
-    float: left;
-    width: 31.74603%;
-    margin-right: 2.38095%;
-  }
-
-  .promos > li:nth-child(3n) {
-    margin-right: 0;
-  }
-}
-
-/* New Products Section */
-/* Hiding the reviews content via CSS because we can't modify the template, */
-/* since it may be used in other places where those elements are needed */
-.cms-index-index .products-grid .ratings,
-.cms-index-index .products-grid .actions,
-.cms-index-noroute .products-grid .ratings,
-.cms-index-noroute .products-grid .actions {
-  display: none;
-}
-
+.promos img { width: 100% }
+.promos a:hover { opacity: 0.8 }
+.cms-index-index .products-grid :is(.ratings, .actions),
+.cms-index-noroute .products-grid :is(.ratings, .actions) { display: none }
 .cms-index-index h2.subtitle {
   padding: 6px 0;
   text-align: center;
   color: var(--maho-color-primary);
   font-weight: 600;
-  border-bottom: 1px solid var(--maho-color-border);
-  border-top: 1px solid var(--maho-color-border);
+  border-block: 1px solid var(--maho-color-border);
 }
+.cms-index-noroute h2.subtitle { display: none }
 
-.cms-index-noroute h2.subtitle {
-  display: none;
-}
-
-/* ============================================ *
- * Category Landing Pages
- * ============================================ */
-
-.category-image {
-  position: relative;
-}
-
+/* Category Landing Pages */
 .catblocks {
-  float: left;
-  padding: 0 0 20px 0;
-  width: 100%;
+  display: grid;
+  gap: 10px;
+  padding-bottom: 20px;
 }
-
-.catblocks li {
+@media (min-width: 480px) { .catblocks { grid-template-columns: repeat(2, 1fr) } }
+@media (min-width: 771px) { .catblocks { grid-template-columns: repeat(4, 1fr) } }
+body .catblocks li {
   position: relative;
-  float: left !important;
-  width: 23% !important;
-  margin-right: 2.66667% !important;
-  margin-bottom: 10px;
+  list-style: none;
+  margin: 0;
   border: 1px solid var(--maho-color-border);
 }
-
-.catblocks li:hover {
-  border-color: var(--maho-color-primary);
-}
-
-@media only screen and (max-width: 770px) {
-  .catblocks li {
-    width: 49% !important;
-    margin-right: 2% !important;
-  }
-
-  .catblocks li:nth-child(even) {
-    margin-right: 0 !important;
-  }
-}
-@media only screen and (max-width: 479px) {
-  .catblocks li {
-    width: 100% !important;
-    margin-right: 0 !important;
-    float: none;
-  }
-}
-.catblocks li:last-child {
-  margin-right: 0 !important;
-}
-
-.catblocks li img {
-  width: 100%;
-  max-width: 100%;
-}
-
+.catblocks li:hover { border-color: var(--maho-color-primary) }
+.catblocks li img { width: 100%; display: block }
 .catblocks li a span {
-  color: var(--maho-color-background);
   position: absolute;
-  background-color: var(--maho-color-background-dark);
-  font-size: 1.063rem;
+  inset: auto 0 0;
+  padding: 5px 10px;
+  background: var(--maho-color-background-dark);
+  color: var(--maho-color-background);
   font-weight: bold;
   text-transform: uppercase;
   text-align: center;
-  bottom: 0px;
-  left: 0px;
-  width: 100%;
-  padding: 5px 10px;
-  margin-right: 10px;
 }
