@@ -22,7 +22,7 @@ $connection = $installer->getConnection();
 
 // Index for date range queries on first_visit_at
 $connection->addIndex(
-    'log_visitor',
+    $installer->getTable('log/visitor'),
     'IDX_FIRST_VISIT_DATE',
     ['first_visit_at', 'store_id'],
     'index',
@@ -30,7 +30,7 @@ $connection->addIndex(
 
 // Index for date range queries on last_visit_at
 $connection->addIndex(
-    'log_visitor',
+    $installer->getTable('log/visitor'),
     'IDX_LAST_VISIT_DATE',
     ['last_visit_at'],
     'index',
@@ -38,7 +38,7 @@ $connection->addIndex(
 
 // Index for URL lookups
 $connection->addIndex(
-    'log_visitor',
+    $installer->getTable('log/visitor'),
     'IDX_LAST_URL',
     ['last_url_id'],
     'index',
@@ -46,7 +46,7 @@ $connection->addIndex(
 
 // Index for summary date queries
 $connection->addIndex(
-    'log_summary',
+    $installer->getTable('log/summary_table'),
     'IDX_SUMMARY_DATE_STORE',
     ['add_date', 'store_id'],
     'index',
@@ -54,7 +54,7 @@ $connection->addIndex(
 
 // Index for IP address lookups (new vs returning visitors)
 $connection->addIndex(
-    'log_visitor_info',
+    $installer->getTable('log/visitor_info'),
     'IDX_LOG_VISITOR_INFO_REMOTE_ADDR',
     ['remote_addr'],
     'index',
