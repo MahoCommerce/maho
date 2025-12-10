@@ -46,7 +46,7 @@ $connection->addIndex(
 
 // Index for summary date queries
 $connection->addIndex(
-    $installer->getTable('log/summary'),
+    $installer->getTable('log/summary_table'),
     'IDX_SUMMARY_DATE_STORE',
     ['add_date', 'store_id'],
     'index',
