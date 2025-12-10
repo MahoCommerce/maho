@@ -272,8 +272,9 @@ class tiptapWysiwygSetup {
                 TiptapModules.TableCell,
                 TiptapModules.TableHeader,
                 TiptapModules.TextAlign.configure({
-                    types: ['heading', 'paragraph'],
+                    types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 }),
+                TiptapModules.VerticalAlign,
                 TiptapModules.BubbleMenu.configure({
                     element: tableBubbleMenu,
                     shouldShow: ({ editor, view, state, oldState }) => {
@@ -393,20 +394,50 @@ class tiptapWysiwygSetup {
 
     createTableBubbleMenu() {
         const bubbleMenu = this.createToolbar([
-            { type: 'button', title: 'Add Column Before', command: 'addColumnBefore', icon: 'column-insert-left' },
-            { type: 'button', title: 'Add Column After', command: 'addColumnAfter', icon: 'column-insert-right' },
-            { type: 'button', title: 'Delete Column', command: 'deleteColumn', icon: 'column-remove' },
-            { type: 'separator'},
-            { type: 'button', title: 'Add Row Before', command: 'addRowBefore', icon: 'row-insert-top' },
-            { type: 'button', title: 'Add Row After', command: 'addRowAfter', icon: 'row-insert-bottom' },
-            { type: 'button', title: 'Delete Row', command: 'deleteRow', icon: 'row-remove' },
-            { type: 'separator'},
-            { type: 'button', title: 'Merge Cells', command: 'mergeCells', icon: 'arrows-join' },
-            { type: 'button', title: 'Split Cell', command: 'splitCell', icon: 'arrows-split' },
-            { type: 'separator'},
-            { type: 'button', title: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: 'table-column' },
-            { type: 'button', title: 'Toggle Header Row', command: 'toggleHeaderRow', icon: 'table-row' },
-            { type: 'separator'},
+            {
+                type: 'dropdown',
+                title: 'Columns',
+                icon: 'columns',
+                items: [
+                    { title: 'Add Column Before', command: 'addColumnBefore', icon: 'column-insert-left' },
+                    { title: 'Add Column After', command: 'addColumnAfter', icon: 'column-insert-right' },
+                    { title: 'Delete Column', command: 'deleteColumn', icon: 'column-remove' },
+                ],
+            },
+            {
+                type: 'dropdown',
+                title: 'Rows',
+                icon: 'rows',
+                items: [
+                    { title: 'Add Row Before', command: 'addRowBefore', icon: 'row-insert-top' },
+                    { title: 'Add Row After', command: 'addRowAfter', icon: 'row-insert-bottom' },
+                    { title: 'Delete Row', command: 'deleteRow', icon: 'row-remove' },
+                ],
+            },
+            {
+                type: 'dropdown',
+                title: 'Alignment',
+                icon: 'align-center',
+                items: [
+                    { title: 'Align Left', command: 'setTextAlign', args: ['left'], icon: 'align-left' },
+                    { title: 'Align Center', command: 'setTextAlign', args: ['center'], icon: 'align-center' },
+                    { title: 'Align Right', command: 'setTextAlign', args: ['right'], icon: 'align-right' },
+                    { title: 'Align Top', command: 'setVerticalAlign', args: ['top'], icon: 'valign-top' },
+                    { title: 'Align Middle', command: 'setVerticalAlign', args: ['middle'], icon: 'valign-middle' },
+                    { title: 'Align Bottom', command: 'setVerticalAlign', args: ['bottom'], icon: 'valign-bottom' },
+                ],
+            },
+            {
+                type: 'dropdown',
+                title: 'Cells',
+                icon: 'cells',
+                items: [
+                    { title: 'Merge Cells', command: 'mergeCells', icon: 'arrows-join' },
+                    { title: 'Split Cell', command: 'splitCell', icon: 'arrows-split' },
+                    { title: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: 'table-column' },
+                    { title: 'Toggle Header Row', command: 'toggleHeaderRow', icon: 'table-row' },
+                ],
+            },
             { type: 'button', title: 'Delete Table', command: 'deleteTable', icon: 'trash' },
         ]);
 
@@ -449,6 +480,60 @@ class tiptapWysiwygSetup {
                     select.addEventListener('change', item.onChange);
                 }
                 group.append(select);
+            }
+            else if (item.type === 'dropdown') {
+                const dropdown = document.createElement('div');
+                dropdown.className = 'toolbar-dropdown';
+
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'toolbar-dropdown-toggle';
+                toggle.innerHTML = this.getIcon(item.icon) + `<span>${this.translate(item.title ?? '')}</span>` + this.getIcon('chevron-down');
+                dropdown.append(toggle);
+
+                const menu = document.createElement('div');
+                menu.className = 'toolbar-dropdown-menu';
+
+                for (const menuItem of item.items) {
+                    const menuButton = document.createElement('button');
+                    menuButton.type = 'button';
+                    menuButton.innerHTML = this.getIcon(menuItem.icon) + `<span>${this.translate(menuItem.title)}</span>`;
+
+                    if (typeof menuItem.onClick === 'function') {
+                        menuButton.addEventListener('click', () => {
+                            menuItem.onClick();
+                            dropdown.classList.remove('is-open');
+                        });
+                    } else if (menuItem.command) {
+                        const args = Array.isArray(menuItem.args) ? menuItem.args : [];
+                        menuButton.addEventListener('click', () => {
+                            this.editor.chain().focus()[menuItem.command](...args).run();
+                            dropdown.classList.remove('is-open');
+                        });
+                    }
+                    menu.append(menuButton);
+                }
+
+                dropdown.append(menu);
+
+                // Toggle dropdown on click
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Close other open dropdowns
+                    for (const other of toolbar.querySelectorAll('.toolbar-dropdown.is-open')) {
+                        if (other !== dropdown) {
+                            other.classList.remove('is-open');
+                        }
+                    }
+                    dropdown.classList.toggle('is-open');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    dropdown.classList.remove('is-open');
+                });
+
+                group.append(dropdown);
             }
             else if (item.type === 'button') {
                 const button = document.createElement('button');
@@ -557,6 +642,11 @@ class tiptapWysiwygSetup {
         'align-center': '<path d="M4 6l16 0"/><path d="M8 12l8 0"/><path d="M6 18l12 0"/>',
         'align-right': '<path d="M4 6l16 0"/><path d="M10 12l10 0"/><path d="M6 18l14 0"/>',
 
+        // Vertical alignment icons
+        'valign-top': '<path d="M4 4h16"/><path d="M12 8v12"/><path d="M8 12l4 -4l4 4"/>',
+        'valign-middle': '<path d="M12 4v6"/><path d="M12 14v6"/><path d="M8 8l4 4l4 -4"/><path d="M8 16l4 -4l4 4"/>',
+        'valign-bottom': '<path d="M4 20h16"/><path d="M12 4v12"/><path d="M8 12l4 4l4 -4"/>',
+
         // Insert icons
         'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
         'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
@@ -584,6 +674,12 @@ class tiptapWysiwygSetup {
         'fullscreen-maximize': '<path d="M16 4l4 0l0 4"/><path d="M14 10l6 -6"/><path d="M8 20l-4 0l0 -4"/><path d="M4 20l6 -6"/><path d="M16 20l4 0l0 -4"/><path d="M14 14l6 6"/><path d="M8 4l-4 0l0 4"/><path d="M4 4l6 6"/>',
         'fullscreen-minimize': '<path d="M5 9l4 0l0 -4"/><path d="M3 3l6 6"/><path d="M5 15l4 0l0 4"/><path d="M3 21l6 -6"/><path d="M19 9l-4 0l0 -4"/><path d="M15 9l6 -6"/><path d="M19 15l-4 0l0 4"/><path d="M15 15l6 6"/>',
         'drag-handle': '<path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
+
+        // Dropdown icons
+        'chevron-down': '<path d="M6 9l6 6l6 -6"/>',
+        'columns': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4v16"/>',
+        'rows': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M4 12h16"/>',
+        'cells': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M4 10h16"/><path d="M10 4v16"/><path d="M4 16h16"/>',
     };
 }
 

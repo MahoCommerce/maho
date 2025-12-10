@@ -15,7 +15,7 @@ import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.13';
 import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.13';
 
 export {
-    Editor, Node, Mark, StarterKit, TextAlign,
+    Editor, Node, Mark, Extension, StarterKit, TextAlign,
     Table, TableRow, TableCell, TableHeader, BubbleMenu, DragHandle,
 };
 
@@ -144,6 +144,64 @@ export const GlobalAttributes = Extension.create({
                 },
             },
         ];
+    },
+});
+
+/**
+ * Vertical Align Extension for Table Cells
+ *
+ * Adds vertical-align support to table cells (top, middle, bottom)
+ */
+export const VerticalAlign = Extension.create({
+    name: 'verticalAlign',
+
+    addGlobalAttributes() {
+        return [{
+            types: ['tableCell', 'tableHeader'],
+            attributes: {
+                verticalAlign: {
+                    default: null,
+                    parseHTML: element => element.style.verticalAlign || null,
+                    renderHTML: attributes => {
+                        if (!attributes.verticalAlign) {
+                            return {};
+                        }
+                        return {
+                            style: `vertical-align: ${attributes.verticalAlign}`,
+                        };
+                    },
+                },
+            },
+        }];
+    },
+
+    addCommands() {
+        return {
+            setVerticalAlign: (alignment) => ({ chain, state }) => {
+                const { selection } = state;
+                const isCellSelection = selection.constructor.name === 'CellSelection';
+
+                if (isCellSelection) {
+                    // Update all selected cells
+                    return chain()
+                        .updateAttributes('tableCell', { verticalAlign: alignment })
+                        .updateAttributes('tableHeader', { verticalAlign: alignment })
+                        .run();
+                }
+
+                // Single cell - find the parent cell
+                const $pos = selection.$anchor;
+                for (let depth = $pos.depth; depth > 0; depth--) {
+                    const node = $pos.node(depth);
+                    if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
+                        return chain()
+                            .updateAttributes(node.type.name, { verticalAlign: alignment })
+                            .run();
+                    }
+                }
+                return false;
+            },
+        };
     },
 });
 
