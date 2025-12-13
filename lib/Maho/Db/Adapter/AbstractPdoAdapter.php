@@ -1264,7 +1264,20 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             }
 
             $keyName = $isPrimary ? 'PRIMARY' : strtoupper($indexNameStr);
-            $columns = $index->getIndexedColumns();
+            // Convert column objects to string column names
+            // PrimaryKeyConstraint uses getColumnNames() returning UnqualifiedName objects
+            // Index uses getIndexedColumns() returning IndexedColumn objects
+            if ($index instanceof \Doctrine\DBAL\Schema\PrimaryKeyConstraint) {
+                $columns = array_map(
+                    fn($col) => $col->getIdentifier()->getValue(),
+                    $index->getColumnNames(),
+                );
+            } else {
+                $columns = array_map(
+                    fn($col) => $col->getColumnName()->getIdentifier()->getValue(),
+                    $index->getIndexedColumns(),
+                );
+            }
 
             $result[$keyName] = [
                 'SCHEMA_NAME'   => $schemaName ?? '',
