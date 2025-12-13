@@ -1191,7 +1191,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
         foreach ($columns as $column) {
             // Get column name from the Column object itself (not from array key which is numeric)
-            $columnNameStr = $column->getObjectName()->toString();
+            // Use getIdentifier()->getValue() to get the raw name without quotes
+            $columnNameStr = $column->getObjectName()->getIdentifier()->getValue();
             $isPrimary = in_array(strtolower($columnNameStr), $primaryColumns);
             $typeName = $column->getType()::class;
             // Extract short type name from class
