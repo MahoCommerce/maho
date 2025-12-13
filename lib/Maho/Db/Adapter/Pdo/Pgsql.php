@@ -1127,22 +1127,12 @@ class Pgsql extends AbstractPdoAdapter
             $this->raw_query($sql);
         }
 
-        // Now modify the column type if definition is provided
-        if (is_array($definition)) {
-            $definition = $this->_getColumnDefinition($definition);
-        }
-
+        // Use modifyColumn to handle the type/nullability/default changes properly
         if ($definition) {
-            $sql = sprintf(
-                'ALTER TABLE %s ALTER COLUMN %s TYPE %s',
-                $quotedTable,
-                $this->quoteIdentifier($newColumnName),
-                $definition,
-            );
-            $this->raw_query($sql);
+            $this->modifyColumn($tableName, $newColumnName, $definition, $flushData, $schemaName);
+        } else {
+            $this->resetDdlCache($tableName, $schemaName);
         }
-
-        $this->resetDdlCache($tableName, $schemaName);
 
         return $this;
     }
