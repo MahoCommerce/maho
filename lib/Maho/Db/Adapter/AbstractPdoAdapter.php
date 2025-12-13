@@ -1146,11 +1146,11 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     // =========================================================================
-    // Schema Introspection Methods (DBAL-based)
+    // Schema Introspection Methods
     // =========================================================================
 
     /**
-     * Returns the column descriptions for a table using DBAL
+     * Returns the column descriptions for a table
      */
     #[\Override]
     public function describeTable(string $tableName, ?string $schemaName = null): array
@@ -1158,7 +1158,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $cacheKey = $this->_getTableName($tableName, $schemaName);
         $ddl = $this->loadDdlCache($cacheKey, self::DDL_DESCRIBE);
         if ($ddl === false) {
-            $ddl = $this->_describeTableDbal($tableName, $schemaName);
+            $ddl = $this->_loadTableDescription($tableName, $schemaName);
             $this->saveDdlCache($cacheKey, self::DDL_DESCRIBE, $ddl);
         }
 
@@ -1166,9 +1166,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Internal method to describe table using DBAL SchemaManager
+     * Internal method to load table description from database
      */
-    protected function _describeTableDbal(string $tableName, ?string $schemaName = null): array
+    protected function _loadTableDescription(string $tableName, ?string $schemaName = null): array
     {
         $this->_connect();
         $schemaManager = $this->_connection->createSchemaManager();
@@ -1189,8 +1189,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $position = 1;
         $primaryPosition = 1;
 
-        foreach ($columns as $columnName => $column) {
-            $columnNameStr = (string) $columnName;
+        foreach ($columns as $column) {
+            // Get column name from the Column object itself (not from array key which is numeric)
+            $columnNameStr = $column->getObjectName()->toString();
             $isPrimary = in_array(strtolower($columnNameStr), $primaryColumns);
             $typeName = $column->getType()::class;
             // Extract short type name from class
@@ -1219,7 +1220,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Returns the table index information using DBAL
+     * Returns the table index information
      */
     #[\Override]
     public function getIndexList(string $tableName, ?string $schemaName = null): array
@@ -1227,7 +1228,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $cacheKey = $this->_getTableName($tableName, $schemaName);
         $ddl = $this->loadDdlCache($cacheKey, self::DDL_INDEX);
         if ($ddl === false) {
-            $ddl = $this->_getIndexListDbal($tableName, $schemaName);
+            $ddl = $this->_loadIndexList($tableName, $schemaName);
             $this->saveDdlCache($cacheKey, self::DDL_INDEX, $ddl);
         }
 
@@ -1235,9 +1236,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Internal method to get index list using DBAL SchemaManager
+     * Internal method to load index list from database
      */
-    protected function _getIndexListDbal(string $tableName, ?string $schemaName = null): array
+    protected function _loadIndexList(string $tableName, ?string $schemaName = null): array
     {
         $this->_connect();
         $schemaManager = $this->_connection->createSchemaManager();
@@ -1279,7 +1280,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Retrieve the foreign keys descriptions for a table using DBAL
+     * Retrieve the foreign keys descriptions for a table
      */
     #[\Override]
     public function getForeignKeys(string $tableName, ?string $schemaName = null): array
@@ -1287,7 +1288,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $cacheKey = $this->_getTableName($tableName, $schemaName);
         $ddl = $this->loadDdlCache($cacheKey, self::DDL_FOREIGN_KEY);
         if ($ddl === false) {
-            $ddl = $this->_getForeignKeysDbal($tableName, $schemaName);
+            $ddl = $this->_loadForeignKeys($tableName, $schemaName);
             $this->saveDdlCache($cacheKey, self::DDL_FOREIGN_KEY, $ddl);
         }
 
@@ -1295,9 +1296,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Internal method to get foreign keys using DBAL SchemaManager
+     * Internal method to load foreign keys from database
      */
-    protected function _getForeignKeysDbal(string $tableName, ?string $schemaName = null): array
+    protected function _loadForeignKeys(string $tableName, ?string $schemaName = null): array
     {
         $this->_connect();
         $schemaManager = $this->_connection->createSchemaManager();
@@ -1326,7 +1327,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Checks if table exists using DBAL
+     * Checks if table exists
      */
     #[\Override]
     public function isTableExists(string $tableName, ?string $schemaName = null): bool
@@ -1337,7 +1338,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Returns list of tables in the database using DBAL
+     * Returns list of tables in the database
      *
      * @return string[] List of table names
      */
