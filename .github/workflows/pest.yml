@@ -9,57 +9,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  pest:
-    name: Test Suite (${{ matrix.db_engine }})
-    runs-on: [ubuntu-latest]
-
-    strategy:
-      fail-fast: false
-      matrix:
-        db_engine: [mysql, pgsql]
-        include:
-          - db_engine: mysql
-            db_image: mysql:latest
-            db_port: 3306
-            db_user: root
-            db_pass: root
-            php_extensions: ""
-          - db_engine: pgsql
-            db_image: postgres:16
-            db_port: 5432
-            db_user: postgres
-            db_pass: postgres
-            php_extensions: pdo_pgsql
+  pest-mysql:
+    name: Test Suite (MySQL)
+    runs-on: ubuntu-latest
 
     services:
       mysql:
-        image: ${{ matrix.db_engine == 'mysql' && 'mysql:latest' || '' }}
+        image: mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho
         ports:
           - 3306:3306
-        options: ${{ matrix.db_engine == 'mysql' && '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3' || '' }}
-
-      postgres:
-        image: ${{ matrix.db_engine == 'pgsql' && 'postgres:16' || '' }}
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: maho
-        ports:
-          - 5432:5432
-        options: ${{ matrix.db_engine == 'pgsql' && '--health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5' || '' }}
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
-          extensions: ${{ matrix.php_extensions }}
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Get composer cache directory
         id: composer-cache
@@ -84,9 +55,9 @@ jobs:
             --default_currency USD \
             --db_host 127.0.0.1 \
             --db_name maho \
-            --db_user ${{ matrix.db_user }} \
-            --db_pass ${{ matrix.db_pass }} \
-            --db_engine ${{ matrix.db_engine }} \
+            --db_user root \
+            --db_pass root \
+            --db_engine mysql \
             --url http://maho.test/ \
             --secure_base_url http://maho.test/ \
             --use_secure 0 \
@@ -96,7 +67,73 @@ jobs:
             --admin_email admin@admin.com \
             --admin_username admin \
             --admin_password asdasdasd123123123 \
-            ${{ matrix.db_engine == 'mysql' && '--sample_data=1' || '' }}
+            --sample_data 1
+          ./maho index:reindex:all
+          ./maho cache:flush
+
+      - name: Run Pest Tests
+        run: ./vendor/bin/pest
+
+  pest-pgsql:
+    name: Test Suite (PostgreSQL)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: maho
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: pdo_pgsql
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_host 127.0.0.1 \
+            --db_name maho \
+            --db_user postgres \
+            --db_pass postgres \
+            --db_engine pgsql \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123
           ./maho index:reindex:all
           ./maho cache:flush
 
