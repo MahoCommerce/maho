@@ -190,7 +190,6 @@ class FrontendLayoutDebug extends BaseMahoCommand
     {
         $request = $controller->getRequest();
 
-        $module = $request->getModuleName() ?: 'unknown';
         $controllerName = $request->getControllerName() ?: 'index';
         $action = $request->getActionName() ?: 'index';
 
