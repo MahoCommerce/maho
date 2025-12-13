@@ -805,6 +805,65 @@ class Pgsql extends AbstractPdoAdapter
         return $this->_connection->lastInsertId();
     }
 
+    /**
+     * Acquire a named lock using PostgreSQL advisory locks
+     *
+     * PostgreSQL advisory locks use bigint keys, so we convert the lock name
+     * to a hash. We use pg_try_advisory_lock with a loop for timeout support.
+     */
+    #[\Override]
+    public function getLock(string $lockName, int $timeout = 0): bool
+    {
+        $this->_connect();
+        $lockKey = crc32($lockName);
+
+        // If no timeout, try once and return immediately
+        if ($timeout <= 0) {
+            return (bool) $this->fetchOne('SELECT pg_try_advisory_lock(?)', [$lockKey]);
+        }
+
+        // With timeout, poll until we get the lock or timeout expires
+        $startTime = time();
+        while ((time() - $startTime) < $timeout) {
+            if ($this->fetchOne('SELECT pg_try_advisory_lock(?)', [$lockKey])) {
+                return true;
+            }
+            usleep(100000); // Wait 100ms before retrying
+        }
+
+        return false;
+    }
+
+    /**
+     * Release a named lock using PostgreSQL advisory locks
+     */
+    #[\Override]
+    public function releaseLock(string $lockName): bool
+    {
+        $this->_connect();
+        $lockKey = crc32($lockName);
+        return (bool) $this->fetchOne('SELECT pg_advisory_unlock(?)', [$lockKey]);
+    }
+
+    /**
+     * Check if a named lock is currently held using PostgreSQL advisory locks
+     *
+     * Note: PostgreSQL advisory locks don't have a direct equivalent to MySQL's IS_USED_LOCK.
+     * We check if the lock exists in pg_locks for the current database.
+     */
+    #[\Override]
+    public function isLocked(string $lockName): bool
+    {
+        $this->_connect();
+        $lockKey = crc32($lockName);
+        // Check if an advisory lock with this key exists in pg_locks
+        $result = $this->fetchOne(
+            'SELECT 1 FROM pg_locks WHERE locktype = ? AND objid = ? LIMIT 1',
+            ['advisory', $lockKey],
+        );
+        return (bool) $result;
+    }
+
     // =========================================================================
     // DDL Methods - PostgreSQL-specific implementations
     // =========================================================================
@@ -1744,6 +1803,31 @@ class Pgsql extends AbstractPdoAdapter
             ));
         }
 
+        // Create regular indexes (non-unique, non-primary) after table creation
+        // PostgreSQL doesn't support inline KEY() syntax like MySQL
+        $indexes = $table->getIndexes();
+        foreach ($indexes as $indexData) {
+            $indexType = strtoupper($indexData['TYPE'] ?? 'INDEX');
+            if ($indexType === 'UNIQUE' || $indexType === 'PRIMARY') {
+                continue; // Already handled inline
+            }
+
+            $indexColumns = [];
+            foreach ($indexData['COLUMNS'] as $columnData) {
+                $indexColumns[] = $this->quoteIdentifier($columnData['NAME']);
+            }
+
+            $this->raw_query(sprintf(
+                'CREATE INDEX %s ON %s (%s)',
+                $this->quoteIdentifier($indexData['INDEX_NAME']),
+                $this->quoteIdentifier($table->getName()),
+                implode(', ', $indexColumns),
+            ));
+        }
+
+        // Reset DDL cache for this table
+        $this->resetDdlCache($table->getName());
+
         return $result;
     }
 
@@ -1960,10 +2044,12 @@ class Pgsql extends AbstractPdoAdapter
         $fieldSql = [];
         foreach ($fields as $field) {
             if (!isset($columns[$field])) {
+                $availableColumns = implode(', ', array_keys($columns));
                 throw new \Maho\Db\Exception(sprintf(
-                    'There is no field "%s" that you are trying to create an index on "%s"',
+                    'There is no field "%s" that you are trying to create an index on "%s". Available columns: %s',
                     $field,
                     $tableName,
+                    $availableColumns ?: '(none)',
                 ));
             }
             $fieldSql[] = $this->quoteIdentifier($field);

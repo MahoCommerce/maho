@@ -36,8 +36,7 @@ class Mage_Index_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_He
     #[\Override]
     public function setLock($name)
     {
-        return (bool) $this->_getWriteAdapter()->query('SELECT GET_LOCK(?, ?);', [$name, self::LOCK_GET_TIMEOUT])
-            ->fetchColumn();
+        return $this->_getWriteAdapter()->getLock($name, self::LOCK_GET_TIMEOUT);
     }
 
     /**
@@ -49,7 +48,7 @@ class Mage_Index_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_He
     #[\Override]
     public function releaseLock($name)
     {
-        return (bool) $this->_getWriteAdapter()->query('SELECT RELEASE_LOCK(?);', [$name])->fetchColumn();
+        return $this->_getWriteAdapter()->releaseLock($name);
     }
 
     /**
@@ -61,7 +60,7 @@ class Mage_Index_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_He
     #[\Override]
     public function isLocked($name)
     {
-        return (bool) $this->_getWriteAdapter()->query('SELECT IS_USED_LOCK(?);', [$name])->fetchColumn();
+        return $this->_getWriteAdapter()->isLocked($name);
     }
 
     /**

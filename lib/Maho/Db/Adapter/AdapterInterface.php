@@ -850,4 +850,29 @@ interface AdapterInterface
      * Retrieve last inserted ID
      */
     public function lastInsertId(?string $tableName = null, ?string $primaryKey = null): string|int;
+
+    /**
+     * Acquire a named lock
+     *
+     * @param string $lockName The name of the lock
+     * @param int $timeout Timeout in seconds to wait for the lock
+     * @return bool True if lock was acquired, false otherwise
+     */
+    public function getLock(string $lockName, int $timeout = 0): bool;
+
+    /**
+     * Release a named lock
+     *
+     * @param string $lockName The name of the lock
+     * @return bool True if lock was released, false otherwise
+     */
+    public function releaseLock(string $lockName): bool;
+
+    /**
+     * Check if a named lock is currently held
+     *
+     * @param string $lockName The name of the lock
+     * @return bool True if lock is held, false otherwise
+     */
+    public function isLocked(string $lockName): bool;
 }

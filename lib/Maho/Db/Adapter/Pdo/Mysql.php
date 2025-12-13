@@ -2012,6 +2012,36 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Acquire a named lock using MySQL GET_LOCK()
+     */
+    #[\Override]
+    public function getLock(string $lockName, int $timeout = 0): bool
+    {
+        $this->_connect();
+        return (bool) $this->fetchOne('SELECT GET_LOCK(?, ?)', [$lockName, $timeout]);
+    }
+
+    /**
+     * Release a named lock using MySQL RELEASE_LOCK()
+     */
+    #[\Override]
+    public function releaseLock(string $lockName): bool
+    {
+        $this->_connect();
+        return (bool) $this->fetchOne('SELECT RELEASE_LOCK(?)', [$lockName]);
+    }
+
+    /**
+     * Check if a named lock is currently held using MySQL IS_USED_LOCK()
+     */
+    #[\Override]
+    public function isLocked(string $lockName): bool
+    {
+        $this->_connect();
+        return (bool) $this->fetchOne('SELECT IS_USED_LOCK(?)', [$lockName]);
+    }
+
+    /**
      * Batched insert of specified select
      *
      * @param string $table
@@ -2609,10 +2639,12 @@ class Mysql extends AbstractPdoAdapter
         $fieldSql = [];
         foreach ($fields as $field) {
             if (!isset($columns[$field])) {
+                $availableColumns = implode(', ', array_keys($columns));
                 throw new \Maho\Db\Exception(sprintf(
-                    'There is no field "%s" that you are trying to create an index on "%s"',
+                    'There is no field "%s" that you are trying to create an index on "%s". Available columns: %s',
                     $field,
                     $tableName,
+                    $availableColumns ?: '(none)',
                 ));
             }
             $fieldSql[] = $this->quoteIdentifier($field);
