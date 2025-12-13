@@ -303,7 +303,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      */
     public function prepareResult($object, $queryText, $query)
     {
-        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql4 $searchHelper */
+        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql $searchHelper */
         $searchHelper = Mage::getResourceHelper('catalogsearch');
 
         $adapter = $this->_getWriteAdapter();
@@ -467,7 +467,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      */
     protected function _unifyField($field, $backendType = 'varchar')
     {
-        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalogsearch');
 
         if ($backendType === 'datetime') {

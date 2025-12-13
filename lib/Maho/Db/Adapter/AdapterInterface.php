@@ -62,6 +62,11 @@ interface AdapterInterface
     public function rollBack(): self;
 
     /**
+     * Get the underlying Doctrine DBAL Connection
+     */
+    public function getConnection(): \Doctrine\DBAL\Connection;
+
+    /**
      * Retrieve DDL object for new table
      *
      * @param string|null $tableName the table name
@@ -74,14 +79,14 @@ interface AdapterInterface
      *
      * @throws \Maho\Db\Exception
      */
-    public function createTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql;
+    public function createTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Create temporary table from DDL object
      *
      * @throws \Maho\Db\Exception
      */
-    public function createTemporaryTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql;
+    public function createTemporaryTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Drop table from database
@@ -200,12 +205,12 @@ interface AdapterInterface
      *
      * @param string|array $fields  the table column name or array of ones
      */
-    public function addIndex(string $tableName, string $indexName, string|array $fields, string $indexType = self::INDEX_TYPE_INDEX, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql;
+    public function addIndex(string $tableName, string $indexName, string|array $fields, string $indexType = self::INDEX_TYPE_INDEX, ?string $schemaName = null): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Drop the index from table
      */
-    public function dropIndex(string $tableName, string $keyName, ?string $schemaName = null): bool|\Maho\Db\Statement\Pdo\Mysql;
+    public function dropIndex(string $tableName, string $keyName, ?string $schemaName = null): bool|\Maho\Db\Statement\StatementInterface;
 
     /**
      * Returns the table index information
@@ -353,7 +358,7 @@ interface AdapterInterface
      *                      May be a string or \Maho\Db\Select.
      * @param  array|int|string|float  $bind An array of data or data itself to bind to the placeholders.
      */
-    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\Pdo\Mysql;
+    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Executes a SQL statement(s)
@@ -822,7 +827,7 @@ interface AdapterInterface
     /**
      * Change table auto increment value
      */
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql;
+    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Create new table from provided select statement

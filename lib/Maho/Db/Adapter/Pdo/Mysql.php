@@ -14,78 +14,14 @@ declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
+use Maho\Db\Adapter\AbstractPdoAdapter;
 use Maho\Db\Helper;
 
-class Mysql implements \Maho\Db\Adapter\AdapterInterface
+class Mysql extends AbstractPdoAdapter
 {
-    /**
-     * Doctrine DBAL Connection
-     *
-     * @var \Doctrine\DBAL\Connection|null
-     */
-    protected $_connection = null;
-
-    /**
-     * Adapter configuration
-     *
-     * @var array
-     */
-    protected $_config = [];
-
-    /**
-     * Fetch mode
-     *
-     * @var int
-     */
-    protected $_fetchMode = \Maho\Db\Statement\Pdo\Mysql::FETCH_ASSOC;
-
-    /**
-     * Numeric data types
-     *
-     * @var array
-     */
-    protected $_numericDataTypes = [
-        'INT' => self::INT_TYPE,
-        'SMALLINT' => self::INT_TYPE,
-        'BIGINT' => self::BIGINT_TYPE,
-        'FLOAT' => self::FLOAT_TYPE,
-        'DECIMAL' => self::FLOAT_TYPE,
-        'NUMERIC' => self::FLOAT_TYPE,
-        'DOUBLE' => self::FLOAT_TYPE,
-        'REAL' => self::FLOAT_TYPE,
-    ];
-
-    // Numeric data type constants
-    public const INT_TYPE = 0;
-    public const BIGINT_TYPE = 5;
-    public const FLOAT_TYPE = 2;
-
-    public const DEBUG_CONNECT         = 0;
-    public const DEBUG_TRANSACTION     = 1;
-    public const DEBUG_QUERY           = 2;
-
-    public const TIMESTAMP_FORMAT      = 'Y-m-d H:i:s';
-    public const DATETIME_FORMAT       = 'Y-m-d H:i:s';
-    public const DATE_FORMAT           = 'Y-m-d';
-
-    public const DDL_DESCRIBE          = 1;
-    public const DDL_CREATE            = 2;
-    public const DDL_INDEX             = 3;
-    public const DDL_FOREIGN_KEY       = 4;
+    // MySQL-specific constants
     public const DDL_CACHE_PREFIX      = 'DB_PDO_MYSQL_DDL';
     public const DDL_CACHE_TAG         = 'DB_PDO_MYSQL_DDL';
-
-    public const LENGTH_TABLE_NAME     = 64;
-    public const LENGTH_INDEX_NAME     = 64;
-    public const LENGTH_FOREIGN_NAME   = 64;
-
-    /**
-     * Those constants are defining the possible address types
-     */
-    public const ADDRESS_TYPE_HOSTNAME     = 'hostname';
-    public const ADDRESS_TYPE_UNIX_SOCKET  = 'unix_socket';
-    public const ADDRESS_TYPE_IPV4_ADDRESS = 'ipv4';
-    public const ADDRESS_TYPE_IPV6_ADDRESS = 'ipv6';
 
     /**
      * MEMORY engine type for MySQL tables
@@ -94,98 +30,18 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Default class name for a DB statement.
-     *
-     * @var string
      */
-    protected $_defaultStmtClass = \Maho\Db\Statement\Pdo\Mysql::class;
+    protected string $_defaultStmtClass = \Maho\Db\Statement\Pdo\Mysql::class;
 
     /**
-     * Current Transaction Level
-     *
-     * @var int
+     * Log file name for SQL debug data (override parent's default)
      */
-    protected $_transactionLevel    = 0;
-
-    /**
-     * Set attribute to connection flag
-     *
-     * @var bool
-     */
-    protected $_connectionFlagsSet  = false;
-
-    /**
-     * Tables DDL cache
-     *
-     * @var array
-     */
-    protected $_ddlCache            = [];
-
-    /**
-     * SQL bind params. Used temporarily by regexp callback.
-     *
-     * @var array
-     */
-    protected $_bindParams          = [];
-
-    /**
-     * Autoincrement for bind value. Used by regexp callback.
-     *
-     * @var int
-     */
-    protected $_bindIncrement       = 0;
-
-    /**
-     * Write SQL debug data to file
-     *
-     * @var bool
-     */
-    protected $_debug               = false;
-
-    /**
-     * Minimum query duration time to be logged
-     *
-     * @var float
-     */
-    protected $_logQueryTime        = 0.05;
-
-    /**
-     * Log all queries (ignored minimum query duration time)
-     *
-     * @var bool
-     */
-    protected $_logAllQueries       = false;
-
-    /**
-     * Log file name for SQL debug data
-     */
-    protected string $_debugFile    = 'pdo_mysql.log';
-
-    /**
-     * Debug timer start value
-     *
-     * @var float
-     */
-    protected $_debugTimer          = 0;
-
-    /**
-     * Cache frontend adapter instance
-     *
-     * @var \Mage_Core_Model_Cache
-     */
-    protected $_cacheAdapter;
-
-    /**
-     * DDL cache allowing flag
-     * @var bool
-     */
-    protected $_isDdlCacheAllowed = true;
+    protected string $_debugFile = 'pdo_mysql.log';
 
     /**
      * MySQL column - Table DDL type pairs
-     *
-     * @var array
      */
-    protected $_ddlColumnTypes      = [
+    protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
@@ -202,346 +58,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         \Maho\Db\Ddl\Table::TYPE_VARBINARY     => 'blob',
     ];
 
-    /**
-     * All possible DDL statements
-     * First 3 symbols for each statement
-     *
-     * @var array
-     */
-    protected $_ddlRoutines = ['alt', 'cre', 'ren', 'dro', 'tru'];
-
-    /**
-     * DDL statements for temporary tables
-     *
-     * @var string
-     */
-    protected $_tempRoutines =  '#^\w+\s+temporary\s#im';
-
-    /**
-     * Allowed interval units array
-     *
-     * @var array
-     */
-    protected $_intervalUnits = [
-        self::INTERVAL_YEAR     => 'YEAR',
-        self::INTERVAL_MONTH    => 'MONTH',
-        self::INTERVAL_DAY      => 'DAY',
-        self::INTERVAL_HOUR     => 'HOUR',
-        self::INTERVAL_MINUTE   => 'MINUTE',
-        self::INTERVAL_SECOND   => 'SECOND',
-    ];
-
-    /**
-     * Hook callback to modify queries. Mysql specific property, designed only for backwards compatibility.
-     *
-     * @var array|null
-     */
-    protected $_queryHook = null;
-
-    /**
-     * Whether to automatically quote identifiers
-     *
-     * @var bool
-     */
-    protected $_autoQuoteIdentifiers = true;
-
-    public function __construct(array $config)
-    {
-        $this->_config = $config;
-
-        // Set debug mode if configured
-        if (isset($config['profiler']) && $config['profiler'] === true) {
-            $this->_debug = true;
-        }
-    }
-
-    /**
-     * Returns the configuration variables in this adapter.
-     */
-    #[\Override]
-    public function getConfig(): array
-    {
-        return $this->_config;
-    }
-
-    /**
-     * Returns the underlying Doctrine DBAL Connection instance.
-     */
-    public function getConnection(): \Doctrine\DBAL\Connection
-    {
-        $this->_connect();
-        return $this->_connection;
-    }
-
-    public function isTransaction(): bool
-    {
-        return (bool) $this->_transactionLevel;
-    }
-
-    #[\Override]
-    public function beginTransaction(): self
-    {
-        if ($this->_transactionLevel === 0) {
-            $this->_debugTimer();
-            $this->_connect();
-            $this->_connection->beginTransaction();
-            $this->_debugStat(self::DEBUG_TRANSACTION, 'BEGIN');
-        }
-        ++$this->_transactionLevel;
-        return $this;
-    }
-
-    /**
-     * Commit DB transaction
-     */
-    #[\Override]
-    public function commit(): self
-    {
-        if ($this->_transactionLevel === 1) {
-            $this->_debugTimer();
-            $this->_connection->commit();
-            $this->_debugStat(self::DEBUG_TRANSACTION, 'COMMIT');
-        }
-        if ($this->_transactionLevel > 0) {
-            --$this->_transactionLevel;
-        }
-        return $this;
-    }
-
-    /**
-     * Rollback DB transaction
-     */
-    #[\Override]
-    public function rollBack(): self
-    {
-        if ($this->_transactionLevel === 1) {
-            $this->_debugTimer();
-            $this->_connection->rollBack();
-            $this->_debugStat(self::DEBUG_TRANSACTION, 'ROLLBACK');
-        }
-        if ($this->_transactionLevel > 0) {
-            --$this->_transactionLevel;
-        }
-        return $this;
-    }
-
-    /**
-     * Get adapter transaction level state. Return 0 if all transactions are complete
-     */
-    #[\Override]
-    public function getTransactionLevel(): int
-    {
-        return $this->_transactionLevel;
-    }
-
-    /**
-     * Fetches all SQL result rows as an array.
-     */
-    #[\Override]
-    public function fetchAll(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array
-    {
-        $stmt = $this->query($sql, $bind);
-        if ($fetchMode === null) {
-            $fetchMode = $this->_fetchMode;
-        }
-        return $stmt->fetchAll($fetchMode);
-    }
-
-    /**
-     * Fetches the first row of the SQL result.
-     */
-    #[\Override]
-    public function fetchRow(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array|false
-    {
-        $stmt = $this->query($sql, $bind);
-        if ($fetchMode === null) {
-            $fetchMode = $this->_fetchMode;
-        }
-        return $stmt->fetch($fetchMode);
-    }
-
-    /**
-     * Fetches the first column of all SQL result rows as an array.
-     */
-    #[\Override]
-    public function fetchCol(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array
-    {
-        $stmt = $this->query($sql, $bind);
-        return $stmt->getResult()->fetchFirstColumn();
-    }
-
-    /**
-     * Fetches all SQL result rows as an array of key-value pairs.
-     *
-     * The first column is the key, the second column is the value.
-     */
-    #[\Override]
-    public function fetchPairs(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array
-    {
-        $stmt = $this->query($sql, $bind);
-        return $stmt->getResult()->fetchAllKeyValue();
-    }
-
-    /**
-     * Fetches the first column of the first row of the SQL result.
-     */
-    #[\Override]
-    public function fetchOne(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): mixed
-    {
-        $stmt = $this->query($sql, $bind);
-        return $stmt->fetchColumn(0);
-    }
-
-    /**
-     * Quote an identifier.
-     */
-    #[\Override]
-    public function quoteIdentifier(string|array|\Maho\Db\Expr $ident, bool $auto = false): string
-    {
-        return $this->_quoteIdentifierAs($ident, null, $auto);
-    }
-
-    /**
-     * Quote a column identifier and alias.
-     */
-    #[\Override]
-    public function quoteColumnAs(string|array|\Maho\Db\Expr $ident, ?string $alias, bool $auto = false): string
-    {
-        return $this->_quoteIdentifierAs($ident, $alias, $auto);
-    }
-
-    /**
-     * Quote a table identifier and alias.
-     */
-    #[\Override]
-    public function quoteTableAs(string|array|\Maho\Db\Expr|\Maho\Db\Select $ident, ?string $alias = null, bool $auto = false): string
-    {
-        return $this->_quoteIdentifierAs($ident, $alias, $auto);
-    }
-
-    /**
-     * Quote an identifier and an optional alias.
-     *
-     * @param string|array|\Maho\Db\Expr $ident The identifier or expression.
-     * @param string|null $alias An optional alias.
-     * @param bool $auto If true, auto-quote identifiers. Default: false.
-     * @param string $as The string to use for the AS keyword. Default: ' AS '.
-     * @return string The quoted identifier and alias.
-     */
-    protected function _quoteIdentifierAs(string|array|\Maho\Db\Expr|\Maho\Db\Select $ident, ?string $alias = null, bool $auto = false, string $as = ' AS '): string
-    {
-        if ($ident instanceof \Maho\Db\Expr) {
-            $quoted = $ident->__toString();
-        } elseif ($ident instanceof \Maho\Db\Select) {
-            $quoted = '(' . $ident->assemble() . ')';
-        } else {
-            if (is_string($ident)) {
-                $ident = explode('.', $ident);
-            }
-            // After explode or if already array, process segments
-            $segments = [];
-            foreach ($ident as $segment) {
-                // Skip empty segments to avoid creating invalid identifiers like 'table.'
-                if ($segment === '' || $segment === null) {
-                    continue;
-                }
-                if ($segment instanceof \Maho\Db\Expr) {
-                    $segments[] = $segment->__toString();
-                } else {
-                    $segments[] = $this->_quoteIdentifier($segment, $auto);
-                }
-            }
-            // If all segments were empty, return asterisk (SELECT *)
-            if (empty($segments)) {
-                $quoted = '*';
-            } else {
-                if ($alias !== null && end($ident) == $alias) {
-                    $alias = null;
-                }
-                $quoted = implode('.', $segments);
-            }
-        }
-        if ($alias !== null) {
-            $quoted .= $as . $this->_quoteIdentifier($alias, $auto);
-        }
-        return $quoted;
-    }
-
-    /**
-     * Quote an identifier.
-     *
-     * @param string $value The identifier.
-     * @param bool $auto If true, auto-quote only if needed. Default: false.
-     * @return string The quoted identifier.
-     */
-    protected function _quoteIdentifier(string $value, bool $auto = false): string
-    {
-        if ($auto === false || $this->_autoQuoteIdentifiers === true) {
-            $q = '`';
-            return ($q . str_replace("$q", "$q$q", $value) . $q);
-        }
-        return $value;
-    }
-
-    /**
-     * Fetches all SQL result rows as an associative array.
-     *
-     * The first column is the key, the entire row array is the value.
-     */
-    #[\Override]
-    public function fetchAssoc(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array
-    {
-        $stmt = $this->query($sql, $bind);
-        $data = [];
-        while ($row = $stmt->getResult()->fetchAssociative()) {
-            $data[current($row)] = $row;
-        }
-        return $data;
-    }
-
-    /**
-     * Convert an array, string, or \Maho\Db\Expr object into a string to put in a WHERE clause.
-     */
-    protected function _whereExpr(mixed $where): string
-    {
-        if (empty($where)) {
-            return '';
-        }
-        if (!is_array($where)) {
-            $where = [$where];
-        }
-        foreach ($where as $cond => &$term) {
-            // is $cond an int? (i.e. Not a condition)
-            if (is_int($cond)) {
-                // $term is the full condition
-                if ($term instanceof \Maho\Db\Expr) {
-                    $term = $term->__toString();
-                }
-            } else {
-                // $cond is the condition with placeholder,
-                // and $term is quoted into the condition
-                $term = $this->quoteInto($cond, $term);
-            }
-        }
-
-        return implode(' AND ', $where);
-    }
-
-    /**
-     * Convert date to DB format
-     */
-    public function convertDate(int|string|\DateTime $date): \Maho\Db\Expr
-    {
-        return $this->formatDate($date, false);
-    }
-
-    /**
-     * Convert date and time to DB format
-     */
-    public function convertDateTime(int|string|\DateTime $datetime): \Maho\Db\Expr
-    {
-        return $this->formatDate($datetime);
-    }
+    // =========================================================================
+    // MySQL-Specific Helper Methods
+    // =========================================================================
 
     /**
      * Parse a source hostname and generate a host info
@@ -583,11 +102,66 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         return $hostInfo;
     }
 
+    // =========================================================================
+    // Abstract Method Implementations from AbstractPdoAdapter
+    // =========================================================================
+
+    /**
+     * Get the driver name for this adapter
+     */
+    #[\Override]
+    protected function getDriverName(): string
+    {
+        return 'pdo_mysql';
+    }
+
+    /**
+     * Get the identifier quote character for MySQL (backtick)
+     */
+    #[\Override]
+    protected function getIdentifierQuoteChar(): string
+    {
+        return '`';
+    }
+
+    /**
+     * Run MySQL-specific initialization statements after connection
+     */
+    #[\Override]
+    protected function _initConnection(): void
+    {
+        /** @link http://bugs.mysql.com/bug.php?id=18551 */
+        $this->_connection->executeStatement("SET SQL_MODE=''");
+    }
+
+    /**
+     * Get DDL cache prefix for MySQL
+     */
+    #[\Override]
+    protected function getDdlCachePrefix(): string
+    {
+        return self::DDL_CACHE_PREFIX;
+    }
+
+    /**
+     * Get DDL cache tag for MySQL
+     */
+    #[\Override]
+    protected function getDdlCacheTag(): string
+    {
+        return self::DDL_CACHE_TAG;
+    }
+
+    // =========================================================================
+    // MySQL-Specific Connection Methods
+    // =========================================================================
+
     /**
      * Creates a PDO object and connects to the database.
      *
      * @throws \RuntimeException
      */
+    #[\Override]
     protected function _connect(): void
     {
         if ($this->_connection) {
@@ -710,25 +284,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
             return $row;
         } else {
             return $row[$field] ?? false;
-        }
-    }
-
-    /**
-     * Check transaction level in case of DDL query
-     *
-     * @param string|\Maho\Db\Select $sql
-     * @throws \RuntimeException
-     * @return void
-     */
-    protected function _checkDdlTransaction($sql)
-    {
-        if (is_string($sql) && $this->getTransactionLevel() > 0) {
-            $startSql = strtolower(substr(ltrim($sql), 0, 3));
-            if (in_array($startSql, $this->_ddlRoutines)
-                && (preg_match($this->_tempRoutines, $sql) !== 1)
-            ) {
-                throw new \Maho\Db\Exception(\Maho\Db\Adapter\AdapterInterface::ERROR_DDL_MESSAGE);
-            }
         }
     }
 
@@ -1087,21 +642,15 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Prepare table before add constraint foreign key
-     *
-     * @param string $tableName
-     * @param string $columnName
-     * @param string $refTableName
-     * @param string $refColumnName
-     * @param string $onDelete
-     * @return $this
      */
+    #[\Override]
     public function purgeOrphanRecords(
-        $tableName,
-        $columnName,
-        $refTableName,
-        $refColumnName,
-        $onDelete = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
-    ) {
+        string $tableName,
+        string $columnName,
+        string $refTableName,
+        string $refColumnName,
+        string $onDelete = \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE,
+    ): self {
         $onDelete = strtoupper($onDelete);
         if ($onDelete == \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE
             || $onDelete == \Maho\Db\Adapter\AdapterInterface::FK_ACTION_RESTRICT
@@ -1420,9 +969,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Retrieve the foreign keys tree for all tables
      *
-     * @return array
+     * @return array<string, array<string, array<string, mixed>>>
      */
-    public function getForeignKeysTree()
+    #[\Override]
+    public function getForeignKeysTree(): array
     {
         $tree = [];
         foreach ($this->listTables() as $table) {
@@ -1582,29 +1132,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     }
 
     /**
-     * Start debug timer
-     *
-     * @return $this
+     * Logging debug information (MySQL-specific format with PID and row count)
      */
-    protected function _debugTimer()
-    {
-        if ($this->_debug) {
-            $this->_debugTimer = microtime(true);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Logging debug information
-     *
-     * @param int $type
-     * @param string $sql
-     * @param array $bind
-     * @param \Maho\Db\Statement\Pdo\Mysql $result
-     * @return $this
-     */
-    protected function _debugStat($type, $sql, $bind = [], $result = null)
+    #[\Override]
+    protected function _debugStat(int $type, string $sql, array $bind = [], mixed $result = null): static
     {
         if (!$this->_debug) {
             return $this;
@@ -1640,29 +1171,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         $this->_debugWriteToFile($code);
 
         return $this;
-    }
-
-    /**
-     * Write exception and throw
-     *
-     * @throws \Exception
-     */
-    protected function _debugException(\Exception $e): never
-    {
-        if (!$this->_debug) {
-            throw $e;
-        }
-
-        $nl   = "\n";
-        $code = 'EXCEPTION ' . $nl . $e . $nl . $nl;
-        $this->_debugWriteToFile($code);
-
-        throw $e;
-    }
-
-    protected function _debugWriteToFile(string $str): void
-    {
-        \Mage::log($str, \Mage::LOG_DEBUG, $this->_debugFile);
     }
 
     /**
@@ -1757,17 +1265,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     }
 
     /**
-     * Retrieve ddl cache name
-     *
-     * @param string $tableName
-     * @param string $schemaName
-     */
-    protected function _getTableName($tableName, $schemaName = null): string
-    {
-        return ($schemaName ? $schemaName . '.' : '') . $tableName;
-    }
-
-    /**
      * Retrieve Id for cache
      *
      * @param string $tableKey
@@ -1805,7 +1302,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Save DDL data into cache
      */
     #[\Override]
-    public function saveDdlCache(string $tableCacheKey, int $ddlType, mixed $data): self
+    public function saveDdlCache(string $tableCacheKey, int $ddlType, mixed $data): static
     {
         if (!$this->_isDdlCacheAllowed) {
             return $this;
@@ -1825,7 +1322,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * if table name is null - reset all cached DDL data
      */
     #[\Override]
-    public function resetDdlCache(?string $tableName = null, ?string $schemaName = null): self
+    public function resetDdlCache(?string $tableName = null, ?string $schemaName = null): static
     {
         if (!$this->_isDdlCacheAllowed) {
             return $this;
@@ -1858,7 +1355,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Disallow DDL caching
      */
     #[\Override]
-    public function disallowDdlCache(): self
+    public function disallowDdlCache(): static
     {
         $this->_isDdlCacheAllowed = false;
         return $this;
@@ -1868,7 +1365,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Allow DDL caching
      */
     #[\Override]
-    public function allowDdlCache(): self
+    public function allowDdlCache(): static
     {
         $this->_isDdlCacheAllowed = true;
         return $this;
@@ -2056,10 +1553,10 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Format described column to definition, ready to be added to ddl table.
      * Return array with keys: name, type, length, options, comment
      *
-     * @param  array $columnData
-     * @return array
+     * @return array{name: string, type: ?string, length: ?int, options: array<string, mixed>, comment: string}
      */
-    public function getColumnCreateByDescribe($columnData)
+    #[\Override]
+    public function getColumnCreateByDescribe(array $columnData): array
     {
         $type = $this->_getColumnTypeByDdl($columnData);
         $options = [];
@@ -2199,11 +1696,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Retrieve column data type by data from describe table
-     *
-     * @param array $column
-     * @return string|void
      */
-    protected function _getColumnTypeByDdl($column)
+    #[\Override]
+    protected function _getColumnTypeByDdl(array $column): ?string
     {
         $dataType = strtolower($column['DATA_TYPE'] ?? '');
         switch ($dataType) {
@@ -2278,13 +1773,9 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Change table comment
-     *
-     * @param string $tableName
-     * @param string $comment
-     * @param string $schemaName
-     * @return mixed
      */
-    public function changeTableComment($tableName, $comment, $schemaName = null)
+    #[\Override]
+    public function changeTableComment(string $tableName, string $comment, ?string $schemaName = null): mixed
     {
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $sql   = sprintf("ALTER TABLE %s COMMENT='%s'", $table, $comment);
@@ -2578,13 +2069,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
         }
 
         return $bunches;
-    }
-
-    #[\Override]
-    public function setCacheAdapter(\Mage_Core_Model_Cache $adapter): self
-    {
-        $this->_cacheAdapter = $adapter;
-        return $this;
     }
 
     /**
@@ -3705,22 +3189,6 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     }
 
     /**
-     * Minus superfluous characters from hash.
-     *
-     * @param  $hash
-     * @param  $prefix
-     * @param  $maxCharacters
-     */
-    protected function _minusSuperfluous(string $hash, string $prefix, int $maxCharacters): string
-    {
-        $diff        = strlen($hash) + strlen($prefix) -  $maxCharacters;
-        $superfluous = $diff / 2;
-        $odd         = $diff % 2;
-        $hash        = substr($hash, $superfluous, - ($superfluous + $odd));
-        return $hash;
-    }
-
-    /**
      * Retrieve valid table name
      * Check table name length and allowed symbols
      */
@@ -4269,6 +3737,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Prepare insert data
      */
+    #[\Override]
     protected function _prepareInsertData(mixed $row, array &$bind): string
     {
         if (is_array($row)) {
@@ -4295,6 +3764,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Return insert sql query
      */
+    #[\Override]
     protected function _getInsertSqlQuery(string $tableName, array $columns, array $values): string
     {
         $tableName = $this->quoteIdentifier($tableName, true);
@@ -4309,9 +3779,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Return ddl type
-     *
-     * @return string
      */
+    #[\Override]
     protected function _getDdlType(array $options): ?string
     {
         $ddlType = null;
@@ -4327,6 +3796,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
     /**
      * Return DDL action
      */
+    #[\Override]
     protected function _getDdlAction(string $action): string
     {
         return match ($action) {
@@ -4339,9 +3809,8 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
 
     /**
      * Prepare sql date condition
-     *
-     * @return string
      */
+    #[\Override]
     protected function _prepareSqlDateCondition(array $condition, string $key): \Maho\Db\Expr|int|string
     {
         if (empty($condition['date'])) {
@@ -4379,6 +3848,7 @@ class Mysql implements \Maho\Db\Adapter\AdapterInterface
      * Parse text size
      * Returns max allowed size if value great it
      */
+    #[\Override]
     protected function _parseTextSize(string|int $size): int
     {
         $size = trim((string) $size);

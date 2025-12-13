@@ -349,7 +349,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
         /** @var Mage_Customer_Model_Customer $resource */
         $resource       = Mage::getModel('customer/customer');
         $table = $resource->getResource()->getEntityTable();
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextEntityId   = $helper->getNextAutoincrement($table);
         $passId         = $resource->getAttribute('password_hash')->getId();

@@ -53,7 +53,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
                 'locale'              => ['required' => true, 'comment' => ''],
                 'timezone'            => ['required' => true, 'comment' => ''],
                 'default_currency'    => ['required' => true, 'comment' => ''],
-                'db_model'            => ['comment' => ''],
+                'db_engine'           => ['comment' => ''],
                 'db_host'             => ['required' => true, 'comment' => ''],
                 'db_name'             => ['required' => true, 'comment' => ''],
                 'db_user'             => ['required' => true, 'comment' => ''],
@@ -252,7 +252,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
          * Database and web config
          */
         $this->_getDataModel()->setConfigData([
-            'db_model'            => $this->_args['db_model'],
+            'db_engine'           => $this->_args['db_engine'],
             'db_host'             => $this->_args['db_host'],
             'db_name'             => $this->_args['db_name'],
             'db_user'             => $this->_args['db_user'],

@@ -56,7 +56,7 @@ class Select
 
     public const TYPE_CONDITION = 'TYPE_CONDITION';
 
-    protected Adapter\Pdo\Mysql $_adapter;
+    protected Adapter\AdapterInterface $_adapter;
 
     /**
      * The component parts of a SELECT statement
@@ -82,12 +82,12 @@ class Select
      */
     protected array $_tableCols = [];
 
-    public function __construct(Adapter\Pdo\Mysql $adapter)
+    public function __construct(Adapter\AdapterInterface $adapter)
     {
         $this->_adapter = $adapter;
     }
 
-    public function getAdapter(): Adapter\Pdo\Mysql
+    public function getAdapter(): Adapter\AdapterInterface
     {
         return $this->_adapter;
     }
@@ -1114,7 +1114,7 @@ class Select
     /**
      * Executes the current select object and returns the result statement
      */
-    public function query(array $bind = []): Statement\Pdo\Mysql
+    public function query(array $bind = []): Statement\StatementInterface
     {
         return $this->_adapter->query($this, $bind);
     }

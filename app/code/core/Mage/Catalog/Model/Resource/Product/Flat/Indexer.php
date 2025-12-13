@@ -490,7 +490,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
      */
     protected function _compareColumnProperties($column, $describe)
     {
-        /** @var Mage_Catalog_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Catalog_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalog');
         return $helper->compareIndexColumnProperties($column, $describe);
     }
@@ -528,7 +528,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
         // Extract columns we need to have in flat table
         $columns = $this->getFlatColumns();
         if (Mage::helper('core')->useDbCompatibleMode()) {
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+            /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
             $helper = Mage::getResourceHelper('core');
             /* Convert old format of flat columns to new MMDB format that uses DDL types and definitions */
             foreach ($columns as $key => $column) {

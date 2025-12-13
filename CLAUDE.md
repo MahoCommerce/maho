@@ -80,7 +80,7 @@ app/design/
 ```
 
 ### Database Access Pattern (Doctrine DBAL)
-Maho uses **Doctrine DBAL 4.3** for all database operations. This is a complete replacement of Zend_Db - no Zend Framework database components remain in the codebase.
+Maho uses **Doctrine DBAL 4.4** for all database operations. This is a complete replacement of Zend_Db - no Zend Framework database components remain in the codebase.
 
 **Basic Pattern:**
 - Models extend `Mage_Core_Model_Abstract`

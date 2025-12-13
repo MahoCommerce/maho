@@ -354,7 +354,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
             }
 
             if (in_array($attrInstance->getFrontendClass(), $this->_castToIntMap)) {
-                /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
+                /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
                 $helper = Mage::getResourceHelper('eav');
                 $orderExpr = $helper->getCastToIntExpression($this->_prepareOrderExpression($orderExpr));
             }
@@ -1075,7 +1075,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
             );
         }
 
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('eav');
         $selectGroups = $helper->getLoadAttributesSelectGroups($selects);
         foreach ($selectGroups as $selects) {
@@ -1133,7 +1133,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      */
     protected function _addLoadAttributesSelectValues($select, $table, $type)
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('eav');
         $select->columns([
             'value' => $helper->prepareEavAttributeValue($table . '.value', $type),
@@ -1472,7 +1472,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     public function _prepareSelect(\Maho\Db\Select $select)
     {
         if ($this->_useAnalyticFunction) {
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+            /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
             $helper = Mage::getResourceHelper('core');
             return $helper->getQueryUsingAnalyticFunction($select);
         }
