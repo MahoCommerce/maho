@@ -414,7 +414,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * @param int|null $productId
      * @param int|null $websiteId
      *
-     * @return Maho\Db\Statement\Pdo\Mysql
+     * @return \Maho\Db\Statement\StatementInterface
      */
     protected function _getRuleProductsStmt($fromDate, $toDate, $productId = null, $websiteId = null)
     {

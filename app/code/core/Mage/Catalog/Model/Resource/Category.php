@@ -175,13 +175,15 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             }
             $object->setPath($object->getPath() . '/');
 
-            $toUpdateChild = explode('/', $object->getPath());
+            $toUpdateChild = array_filter(explode('/', $object->getPath()), fn($v) => $v !== '');
 
-            $this->_getWriteAdapter()->update(
-                $this->getEntityTable(),
-                ['children_count'  => new Maho\Db\Expr('children_count+1')],
-                ['entity_id IN(?)' => $toUpdateChild],
-            );
+            if (!empty($toUpdateChild)) {
+                $this->_getWriteAdapter()->update(
+                    $this->getEntityTable(),
+                    ['children_count'  => new Maho\Db\Expr('children_count+1')],
+                    ['entity_id IN(?)' => $toUpdateChild],
+                );
+            }
         }
         return $this;
     }

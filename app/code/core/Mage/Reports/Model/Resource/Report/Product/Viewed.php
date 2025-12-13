@@ -63,7 +63,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             ),
         );
 
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('core');
         $select = $adapter->select();
 
@@ -189,7 +189,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
         );
         $adapter->query($insertQuery);
 
-        /** @var Mage_Reports_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Reports_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('reports');
         $helper
             ->updateReportRatingPos('day', 'views_num', $mainTable, $this->getTable(self::AGGREGATION_DAILY));

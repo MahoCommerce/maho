@@ -10,7 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Install_Model_Installer_Db_Mysql4 extends Mage_Install_Model_Installer_Db_Abstract
+declare(strict_types=1);
+
+/**
+ * MySQL installer class
+ */
+class Mage_Install_Model_Installer_Db_Mysql extends Mage_Install_Model_Installer_Db_Abstract
 {
     /**
      * Retrieve DB server version
@@ -19,9 +24,9 @@ class Mage_Install_Model_Installer_Db_Mysql4 extends Mage_Install_Model_Installe
      */
     public function getVersion()
     {
-        $version  = $this->_getConnection()
+        $version = $this->_getConnection()
             ->fetchOne('SELECT VERSION()');
-        $version    = $version ?: 'undefined';
+        $version = $version ?: 'undefined';
         $match = [];
         if (preg_match("#^([0-9\.]+)#", $version, $match)) {
             $version = $match[0];
@@ -37,7 +42,7 @@ class Mage_Install_Model_Installer_Db_Mysql4 extends Mage_Install_Model_Installe
     #[\Override]
     public function supportEngine()
     {
-        $variables  = $this->_getConnection()
+        $variables = $this->_getConnection()
             ->fetchPairs('SHOW ENGINES');
         return isset($variables['InnoDB']) && ($variables['InnoDB'] == 'DEFAULT' || $variables['InnoDB'] == 'YES');
     }

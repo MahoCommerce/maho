@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Catalog_Model_Resource_Helper_Mysql4 extends Mage_Eav_Model_Resource_Helper_Mysql4
+class Mage_Catalog_Model_Resource_Helper_Mysql extends Mage_Eav_Model_Resource_Helper_Mysql
 {
     /**
      * Returns columns for select

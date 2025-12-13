@@ -33,7 +33,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Collection extends Mage_Eav_
         $columns = $this->getConnection()->describeTable($this->getResource()->getMainTable());
         unset($columns['attribute_id']);
         $retColumns = [];
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('core');
         foreach ($columns as $labelColumn => $columnData) {
             $retColumns[$labelColumn] = $labelColumn;

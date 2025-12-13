@@ -45,6 +45,7 @@ class Install extends BaseMahoCommand
         $this->addOption('db_user', null, InputOption::VALUE_REQUIRED, 'Database username');
         $this->addOption('db_pass', null, InputOption::VALUE_REQUIRED, 'Database password');
         $this->addOption('db_prefix', null, InputOption::VALUE_OPTIONAL, 'Database Tables Prefix. No table prefix will be used if not specified', '');
+        $this->addOption('db_engine', null, InputOption::VALUE_OPTIONAL, 'Database engine (mysql or pgsql)', 'mysql');
 
         // Session options
         $this->addOption('session_save', null, InputOption::VALUE_OPTIONAL, 'Where to store session data (files/db)', 'files');
@@ -178,38 +179,46 @@ class Install extends BaseMahoCommand
             $dbName = $input->getOption('db_name');
             $dbUser = $input->getOption('db_user');
             $dbPass = $input->getOption('db_pass');
-            $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
+            $dbEngine = $input->getOption('db_engine') ?? 'mysql';
             $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
-            try {
-                // Create PDO connection
-                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
-                $pdo = new \PDO($dsn, $dbUser, $dbPass);
-                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            // Sample data SQL files are MySQL-specific
+            if ($dbEngine === 'pgsql') {
+                $output->writeln('<comment>Sample data SQL import is not yet available for PostgreSQL.</comment>');
+                $output->writeln('<comment>Skipping database sample data import, but media files have been copied.</comment>');
+            } else {
+                $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
 
-                foreach ($sqlFiles as $sqlFile) {
-                    $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                    $output->writeln("<info>Importing {$sqlFile}...</info>");
+                try {
+                    // Create PDO connection
+                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                    // Read SQL file content
-                    $sqlContent = file_get_contents($sqlFilePath);
+                    foreach ($sqlFiles as $sqlFile) {
+                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                        $output->writeln("<info>Importing {$sqlFile}...</info>");
 
-                    // Execute the entire file as a single operation
-                    $pdo->exec($sqlContent);
-                    $output->writeln("<info>Successfully imported {$sqlFile}</info>");
+                        // Read SQL file content
+                        $sqlContent = file_get_contents($sqlFilePath);
+
+                        // Execute the entire file as a single operation
+                        $pdo->exec($sqlContent);
+                        $output->writeln("<info>Successfully imported {$sqlFile}</info>");
+                    }
+
+                } catch (\PDOException $e) {
+                    $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
+
+                    // If it's a connection error, provide more helpful message
+                    if (str_contains($e->getMessage(), 'Unknown database')) {
+                        $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
+                    } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                        $output->writeln('<error>Access denied. Please check your database credentials.</error>');
+                    }
+
+                    return Command::FAILURE;
                 }
-
-            } catch (\PDOException $e) {
-                $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
-
-                // If it's a connection error, provide more helpful message
-                if (str_contains($e->getMessage(), 'Unknown database')) {
-                    $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                } elseif (str_contains($e->getMessage(), 'Access denied')) {
-                    $output->writeln('<error>Access denied. Please check your database credentials.</error>');
-                }
-
-                return Command::FAILURE;
             }
 
             $this->clearEavAttributeCache($output);
@@ -270,43 +279,65 @@ class Install extends BaseMahoCommand
         $dbName = $input->getOption('db_name');
         $dbUser = $input->getOption('db_user');
         $dbPass = $input->getOption('db_pass');
+        $dbEngine = $input->getOption('db_engine') ?? 'mysql';
 
         if ($dbHost && $dbName && $dbUser !== null) {
             try {
-                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                $isPostgres = ($dbEngine === 'pgsql');
+                if ($isPostgres) {
+                    $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
+                } else {
+                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                }
                 $pdo = new \PDO($dsn, $dbUser, $dbPass);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                // Disable foreign key checks
-                $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+                if ($isPostgres) {
+                    // PostgreSQL: Get all tables and drop them with CASCADE
+                    $stmt = $pdo->query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+                    $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
 
-                // Get all tables
-                $stmt = $pdo->query('SHOW TABLES');
-                $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+                    if (count($tables) > 0) {
+                        $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
 
-                if (count($tables) > 0) {
-                    $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
+                        // Drop all tables with CASCADE to handle foreign keys
+                        foreach ($tables as $table) {
+                            $pdo->exec("DROP TABLE IF EXISTS \"{$table}\" CASCADE");
+                        }
 
-                    // Drop all tables
-                    foreach ($tables as $table) {
-                        $pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+                        $output->writeln('<info>Cleared all tables from the database</info>');
+                    } else {
+                        $output->writeln('<info>Database is already empty</info>');
+                    }
+                } else {
+                    // MySQL: Disable foreign key checks and drop tables
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+
+                    $stmt = $pdo->query('SHOW TABLES');
+                    $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+                    if (count($tables) > 0) {
+                        $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
+
+                        foreach ($tables as $table) {
+                            $pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+                        }
+
+                        $output->writeln('<info>Cleared all tables from the database</info>');
+                    } else {
+                        $output->writeln('<info>Database is already empty</info>');
                     }
 
-                    $output->writeln('<info>Cleared all tables from the database</info>');
-                } else {
-                    $output->writeln('<info>Database is already empty</info>');
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
                 }
-
-                // Re-enable foreign key checks
-                $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 
             } catch (\PDOException $e) {
                 $output->writeln("<error>Failed to clear database: {$e->getMessage()}</error>");
 
                 // If it's a connection error, provide more helpful message
-                if (str_contains($e->getMessage(), 'Unknown database')) {
+                if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
                     $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
                     $output->writeln('<error>Access denied. Please check your database credentials.</error>');
                 }
 

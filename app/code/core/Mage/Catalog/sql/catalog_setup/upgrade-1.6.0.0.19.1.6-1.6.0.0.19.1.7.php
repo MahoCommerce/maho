@@ -14,7 +14,10 @@
 $installer = $this;
 $installer->startSetup();
 
-$installer->run("ALTER TABLE {$this->getTable('catalog/product_website')} ROW_FORMAT=DYNAMIC;");
-$installer->run("ALTER TABLE {$this->getTable('catalog/product_relation')} ROW_FORMAT=DYNAMIC;");
+// ROW_FORMAT is MySQL-specific, skip for other databases
+if ($installer->getConnection() instanceof Maho\Db\Adapter\Pdo\Mysql) {
+    $installer->run("ALTER TABLE {$this->getTable('catalog/product_website')} ROW_FORMAT=DYNAMIC;");
+    $installer->run("ALTER TABLE {$this->getTable('catalog/product_relation')} ROW_FORMAT=DYNAMIC;");
+}
 
 $installer->endSetup();

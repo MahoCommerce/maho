@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Sales_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Mysql4 implements Mage_Sales_Model_Resource_Helper_Interface
+class Mage_Sales_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Helper_Mysql implements Mage_Sales_Model_Resource_Helper_Interface
 {
     /**
      * Update rating position
@@ -19,7 +19,7 @@ class Mage_Sales_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_H
      * @param array $aggregationAliases
      * @param string $mainTable
      * @param string $aggregationTable
-     * @return Mage_Sales_Model_Resource_Helper_Mysql4
+     * @return Mage_Sales_Model_Resource_Helper_Mysql
      */
     #[\Override]
     public function getBestsellersReportUpdateRatingPos(

@@ -6,14 +6,12 @@ declare(strict_types=1);
  * Maho
  *
  * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * Wrapper for Doctrine DBAL Result to provide Zend_Db_Statement-like interface
+ * Wrapper for Doctrine DBAL Result to provide Zend_Db_Statement-like interface for PostgreSQL
  *
  * This class wraps Doctrine DBAL's Result class to maintain compatibility
  * with code that expects a Zend_Db_Statement interface.
@@ -23,10 +21,9 @@ namespace Maho\Db\Statement\Pdo;
 
 use Maho\Db\Statement\StatementInterface;
 
-class Mysql implements StatementInterface
+class Pgsql implements StatementInterface
 {
     // Fetch mode constants for backward compatibility with Zend_Db_Statement
-    // These match PDO constants but don't require PDO extension
     public const FETCH_ASSOC = StatementInterface::FETCH_ASSOC;
     public const FETCH_NUM = StatementInterface::FETCH_NUM;
     public const FETCH_COLUMN = StatementInterface::FETCH_COLUMN;
@@ -40,12 +37,12 @@ class Mysql implements StatementInterface
     /**
      * The adapter that created this statement
      */
-    protected \Maho\Db\Adapter\Pdo\Mysql $_adapter;
+    protected \Maho\Db\Adapter\Pdo\Pgsql $_adapter;
 
     /**
      * Constructor
      */
-    public function __construct(\Maho\Db\Adapter\Pdo\Mysql $adapter, \Doctrine\DBAL\Result $result)
+    public function __construct(\Maho\Db\Adapter\Pdo\Pgsql $adapter, \Doctrine\DBAL\Result $result)
     {
         $this->_adapter = $adapter;
         $this->_result = $result;
@@ -154,7 +151,7 @@ class Mysql implements StatementInterface
     /**
      * Get the adapter
      */
-    public function getAdapter(): \Maho\Db\Adapter\Pdo\Mysql
+    public function getAdapter(): \Maho\Db\Adapter\Pdo\Pgsql
     {
         return $this->_adapter;
     }

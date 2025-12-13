@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Abstract
+class Mage_Core_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Helper_Abstract
 {
     /**
      * Returns expression for field unification

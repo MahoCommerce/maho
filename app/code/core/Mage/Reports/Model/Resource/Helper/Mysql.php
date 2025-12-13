@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Reports_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Mysql4 implements Mage_Reports_Model_Resource_Helper_Interface
+class Mage_Reports_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Helper_Mysql implements Mage_Reports_Model_Resource_Helper_Interface
 {
     /**
      * Merge Index data
@@ -33,7 +33,7 @@ class Mage_Reports_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource
      * @param string $column
      * @param string $mainTable
      * @param string $aggregationTable
-     * @return Mage_Core_Model_Resource_Helper_Mysql4
+     * @return Mage_Core_Model_Resource_Helper_Mysql
      */
     #[\Override]
     public function updateReportRatingPos($type, $column, $mainTable, $aggregationTable)

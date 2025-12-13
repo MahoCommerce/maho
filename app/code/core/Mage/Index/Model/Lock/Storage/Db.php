@@ -13,7 +13,7 @@
 class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_Interface
 {
     /**
-     * @var Mage_Index_Model_Resource_Helper_Mysql4
+     * @var Mage_Index_Model_Resource_Helper_Mysql
      */
     protected $_helper;
 
@@ -27,7 +27,7 @@ class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_
         /** @var Mage_Index_Model_Resource_Lock_Resource $resource */
         $resource = Mage::getSingleton('index/resource_lock_resource');
         $this->_connection = $resource->getConnection('index_write', 'default_lock');
-        /** @var Mage_Index_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Index_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('index');
         $this->_helper = $helper;
     }

@@ -34,13 +34,24 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
     protected $_configData;
 
     /**
-     * Return the name of DB model from config
+     * Return the database engine from config
      *
      * @return string
      */
+    public function getEngine()
+    {
+        return $this->_configData['db_engine'];
+    }
+
+    /**
+     * Return the name of DB model from config (legacy alias for getEngine)
+     *
+     * @return string
+     * @deprecated Use getEngine() instead
+     */
     public function getModel()
     {
-        return $this->_configData['db_model'];
+        return $this->getEngine();
     }
 
     /**
@@ -124,7 +135,7 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
     public function getRequiredExtensions()
     {
         $extensions = [];
-        $configExt = (array) Mage::getConfig()->getNode(sprintf('install/databases/%s/extensions', $this->getModel()));
+        $configExt = (array) Mage::getConfig()->getNode(sprintf('install/databases/%s/extensions', $this->getEngine()));
         foreach (array_keys($configExt) as $name) {
             $extensions[] = $name;
         }

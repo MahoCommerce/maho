@@ -11,6 +11,12 @@ declare(strict_types=1);
  * 3. Runs Pest tests
  * 4. Restores original local.xml
  *
+ * Environment variables:
+ * - MAHO_DB_TYPE: Database type ('mysql' or 'pgsql'), defaults to 'mysql'
+ * - MAHO_PGSQL_HOST: PostgreSQL host (defaults to 'localhost')
+ * - MAHO_PGSQL_USER: PostgreSQL username (defaults to 'postgres')
+ * - MAHO_PGSQL_PASS: PostgreSQL password (defaults to '')
+ *
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -22,16 +28,18 @@ class PestTestRunner
 
     private array $dbConfig = [];
     private string $testDbName;
+    private string $dbType;
 
     public function __construct()
     {
+        $this->dbType = getenv('MAHO_DB_TYPE') ?: 'mysql';
         $this->loadDatabaseConfig();
         $this->testDbName = $this->dbConfig['name'] . '_test';
     }
 
     public function run(array $pestArgs = []): int
     {
-        echo "Setting up fresh test database for local testing...\n";
+        echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
 
         try {
             $this->backupLocalXml();
@@ -54,6 +62,18 @@ class PestTestRunner
 
     private function loadDatabaseConfig(): void
     {
+        if ($this->dbType === 'pgsql') {
+            // For PostgreSQL, use environment variables or defaults
+            $this->dbConfig = [
+                'host' => getenv('MAHO_PGSQL_HOST') ?: 'localhost',
+                'user' => getenv('MAHO_PGSQL_USER') ?: 'postgres',
+                'pass' => getenv('MAHO_PGSQL_PASS') ?: '',
+                'name' => getenv('MAHO_PGSQL_DBNAME') ?: 'maho',
+            ];
+            return;
+        }
+
+        // For MySQL, read from existing local.xml
         if (!file_exists(self::LOCAL_XML_PATH)) {
             throw new Exception('local.xml not found. Please install Maho first.');
         }
@@ -74,10 +94,12 @@ class PestTestRunner
 
     private function backupLocalXml(): void
     {
-        if (!copy(self::LOCAL_XML_PATH, self::LOCAL_XML_BACKUP)) {
-            throw new Exception('Failed to backup local.xml');
+        if (file_exists(self::LOCAL_XML_PATH)) {
+            if (!copy(self::LOCAL_XML_PATH, self::LOCAL_XML_BACKUP)) {
+                throw new Exception('Failed to backup local.xml');
+            }
+            echo "✓ Backed up local.xml\n";
         }
-        echo "✓ Backed up local.xml\n";
     }
 
     private function restoreLocalXml(): void
@@ -96,6 +118,15 @@ class PestTestRunner
     {
         echo 'Creating fresh test database: ' . $this->testDbName . "\n";
 
+        if ($this->dbType === 'pgsql') {
+            $this->setupPostgresDatabase();
+        } else {
+            $this->setupMysqlDatabase();
+        }
+    }
+
+    private function setupMysqlDatabase(): void
+    {
         // Drop existing test database
         $this->executeCommand($this->getMysqlCommand('DROP DATABASE IF EXISTS `' . $this->testDbName . '`;'));
 
@@ -103,6 +134,21 @@ class PestTestRunner
         $this->executeCommand($this->getMysqlCommand('CREATE DATABASE `' . $this->testDbName . '`;'));
         echo "✓ Created test database\n";
 
+        $this->installMaho('mysql');
+    }
+
+    private function setupPostgresDatabase(): void
+    {
+        // Drop and recreate test database
+        $this->executeCommand($this->getPsqlCommand("DROP DATABASE IF EXISTS \"{$this->testDbName}\";", 'postgres'));
+        $this->executeCommand($this->getPsqlCommand("CREATE DATABASE \"{$this->testDbName}\";", 'postgres'));
+        echo "✓ Created test database\n";
+
+        $this->installMaho('pgsql');
+    }
+
+    private function installMaho(string $dbEngine): void
+    {
         // Temporarily move local.xml so Maho thinks it's not installed
         $tempLocalXml = self::LOCAL_XML_PATH . '.temp';
         if (file_exists(self::LOCAL_XML_PATH)) {
@@ -110,7 +156,9 @@ class PestTestRunner
         }
 
         try {
-            // Install Maho with sample data
+            // Install Maho (without sample data for PostgreSQL, or with for MySQL)
+            $sampleData = ($dbEngine === 'mysql') ? ' --sample_data 1' : '';
+
             $installCmd = './maho install --ansi' .
             ' --license_agreement_accepted yes' .
             ' --locale en_US' .
@@ -120,6 +168,7 @@ class PestTestRunner
             ' --db_name ' . escapeshellarg($this->testDbName) .
             ' --db_user ' . escapeshellarg($this->dbConfig['user']) .
             ' --db_pass ' . escapeshellarg($this->dbConfig['pass']) .
+            ' --db_engine ' . escapeshellarg($dbEngine) .
             ' --url http://maho.test/' .
             ' --secure_base_url http://maho.test/' .
             ' --use_secure 0' .
@@ -129,11 +178,11 @@ class PestTestRunner
             ' --admin_email admin@test.com' .
             ' --admin_username admin' .
             ' --admin_password testpassword123' .
-            ' --sample_data 1';
+            $sampleData;
 
-            echo "Installing Maho with sample data...\n";
+            echo 'Installing Maho' . ($sampleData ? ' with sample data' : '') . "...\n";
             $this->executeCommand($installCmd);
-            echo "✓ Installed Maho with sample data\n";
+            echo "✓ Installed Maho\n";
 
             // Reindex and flush cache
             echo "Reindexing and flushing cache...\n";
@@ -141,11 +190,8 @@ class PestTestRunner
             $this->executeCommand('./maho cache:flush --ansi');
             echo "✓ Completed setup\n";
 
-            // Keep the NEW local.xml (pointing to test DB) and don't restore the original yet
-            // The original will be restored in the finally block of run()
         } finally {
-            // Don't restore the temp local.xml here - we want to keep using the test database
-            // Only clean up the temp file if it exists
+            // Clean up temp file
             if (file_exists($tempLocalXml)) {
                 unlink($tempLocalXml);
             }
@@ -162,6 +208,17 @@ class PestTestRunner
         }
 
         return $cmd . ' -e ' . escapeshellarg($sql);
+    }
+
+    private function getPsqlCommand(string $sql, ?string $database = null): string
+    {
+        $db = $database ?? $this->testDbName;
+        $cmd = 'PGPASSWORD=' . escapeshellarg($this->dbConfig['pass']) .
+               ' psql -h ' . escapeshellarg($this->dbConfig['host']) .
+               ' -U ' . escapeshellarg($this->dbConfig['user']) .
+               ' -d ' . escapeshellarg($db);
+
+        return $cmd . ' -c ' . escapeshellarg($sql);
     }
 
     private function executeCommand(string $command): void
