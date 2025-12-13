@@ -714,7 +714,6 @@ class Pgsql extends AbstractPdoAdapter
      *
      * Finds a unique constraint that covers the "key" columns (inserted columns minus update columns)
      *
-     * @param string|array|\Maho\Db\Select $table
      * @param array $insertCols Columns being inserted
      * @param array $updateFields Fields that will be updated on conflict
      * @return array Columns to use for ON CONFLICT, empty if none found
@@ -1160,21 +1159,130 @@ class Pgsql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
 
+        $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
+        $quotedColumn = $this->quoteIdentifier($columnName);
+
+        // If definition is an array, we can handle type, nullable, and default separately
         if (is_array($definition)) {
-            $definition = $this->_getColumnDefinition($definition);
+            $definition = array_change_key_case($definition, CASE_UPPER);
+            $ddlType = $this->_getDdlType($definition);
+
+            // Get the type-only definition (without NULL/NOT NULL and DEFAULT)
+            $typeOnly = $this->_getColumnTypeOnly($definition, $ddlType);
+
+            // Change the column type
+            $this->raw_query(sprintf(
+                'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
+                $qualifiedTable,
+                $quotedColumn,
+                $typeOnly,
+                $quotedColumn,
+                $typeOnly,
+            ));
+
+            // Handle nullability
+            $nullable = !isset($definition['NULLABLE']) || (bool) $definition['NULLABLE'];
+            if ($nullable) {
+                $this->raw_query(sprintf(
+                    'ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL',
+                    $qualifiedTable,
+                    $quotedColumn,
+                ));
+            } else {
+                $this->raw_query(sprintf(
+                    'ALTER TABLE %s ALTER COLUMN %s SET NOT NULL',
+                    $qualifiedTable,
+                    $quotedColumn,
+                ));
+            }
+
+            // Handle default value
+            if (array_key_exists('DEFAULT', $definition)) {
+                $default = $definition['DEFAULT'];
+                if ($default === null || $default === '') {
+                    $this->raw_query(sprintf(
+                        'ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT',
+                        $qualifiedTable,
+                        $quotedColumn,
+                    ));
+                } else {
+                    $this->raw_query(sprintf(
+                        'ALTER TABLE %s ALTER COLUMN %s SET DEFAULT %s',
+                        $qualifiedTable,
+                        $quotedColumn,
+                        $this->quote($default),
+                    ));
+                }
+            }
+        } else {
+            // String definition - parse out the type only (strip NULL/NOT NULL/DEFAULT)
+            $typeOnly = preg_replace('/\s+(NOT\s+)?NULL(\s+DEFAULT\s+.*)?$/i', '', $definition);
+            $this->raw_query(sprintf(
+                'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
+                $qualifiedTable,
+                $quotedColumn,
+                $typeOnly,
+                $quotedColumn,
+                $typeOnly,
+            ));
         }
 
-        $sql = sprintf(
-            'ALTER TABLE %s ALTER COLUMN %s TYPE %s',
-            $this->quoteIdentifier($this->_getTableName($tableName, $schemaName)),
-            $this->quoteIdentifier($columnName),
-            $definition,
-        );
-
-        $this->raw_query($sql);
         $this->resetDdlCache($tableName, $schemaName);
 
         return $this;
+    }
+
+    /**
+     * Get column type definition only (without NULL/NOT NULL and DEFAULT)
+     */
+    protected function _getColumnTypeOnly(array $options, ?string $ddlType = null): string
+    {
+        if ($ddlType === null) {
+            $ddlType = $this->_getDdlType($options);
+        }
+
+        if (empty($ddlType) || !isset($this->_ddlColumnTypes[$ddlType])) {
+            throw new \Maho\Db\Exception('Invalid column definition data');
+        }
+
+        $cType = $this->_ddlColumnTypes[$ddlType];
+
+        switch ($ddlType) {
+            case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
+            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
+                $precision = 10;
+                $scale = 0;
+                $match = [];
+                if (!empty($options['LENGTH']) && preg_match('#^\(?(\d+),(\d+)\)?$#', $options['LENGTH'], $match)) {
+                    $precision = $match[1];
+                    $scale = $match[2];
+                } else {
+                    if (isset($options['SCALE']) && is_numeric($options['SCALE'])) {
+                        $scale = $options['SCALE'];
+                    }
+                    if (isset($options['PRECISION']) && is_numeric($options['PRECISION'])) {
+                        $precision = $options['PRECISION'];
+                    }
+                }
+                $cType .= sprintf('(%d,%d)', $precision, $scale);
+                break;
+
+            case \Maho\Db\Ddl\Table::TYPE_TEXT:
+            case \Maho\Db\Ddl\Table::TYPE_VARCHAR:
+                if (empty($options['LENGTH'])) {
+                    $length = \Maho\Db\Ddl\Table::DEFAULT_TEXT_SIZE;
+                } else {
+                    $length = $this->_parseTextSize($options['LENGTH']);
+                }
+                if ($length <= 65535) {
+                    $cType = sprintf('varchar(%d)', $length);
+                } else {
+                    $cType = 'text';
+                }
+                break;
+        }
+
+        return $cType;
     }
 
     /**
