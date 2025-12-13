@@ -1136,10 +1136,10 @@ class Pgsql extends AbstractPdoAdapter
         $schema = $schemaName ?? 'public';
         $query = sprintf(
             "SELECT
-                relname AS \"Name\",
+                c.relname AS \"Name\",
                 pg_total_relation_size(c.oid) AS \"Data_length\",
                 pg_indexes_size(c.oid) AS \"Index_length\",
-                n_live_tup AS \"Rows\"
+                s.n_live_tup AS \"Rows\"
             FROM pg_class c
             LEFT JOIN pg_stat_user_tables s ON c.relname = s.relname
             WHERE c.relkind = 'r' AND c.relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = %s)
