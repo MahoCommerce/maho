@@ -1246,8 +1246,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $indexes = $schemaManager->introspectTableIndexesByUnquotedName($tableName);
 
         $result = [];
-        foreach ($indexes as $indexName => $index) {
-            $indexNameStr = (string) $indexName;
+        foreach ($indexes as $index) {
+            // Get index name from the Index object itself (not from array key which is numeric)
+            $indexNameStr = $index->getObjectName()->getIdentifier()->getValue();
 
             // Determine index type based on index class or type
             $indexType = AdapterInterface::INDEX_TYPE_INDEX;
@@ -1306,12 +1307,14 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $foreignKeys = $schemaManager->introspectTableForeignKeyConstraintsByUnquotedName($tableName);
 
         $result = [];
-        foreach ($foreignKeys as $fkName => $fk) {
-            $fkNameStr = (string) $fkName;
+        foreach ($foreignKeys as $fk) {
+            // Get FK name from the ForeignKeyConstraint object itself (not from array key which is numeric)
+            $fkName = $fk->getObjectName();
+            $fkNameStr = $fkName ? $fkName->getIdentifier()->getValue() : '';
             $localColumns = $fk->getReferencingColumnNames();
             $foreignColumns = $fk->getReferencedColumnNames();
 
-            $result[strtoupper($fkNameStr)] = [
+            $result[strtoupper($fkNameStr) ?: 'FK_' . count($result)] = [
                 'FK_NAME'         => $fkNameStr,
                 'SCHEMA_NAME'     => $schemaName ?? '',
                 'TABLE_NAME'      => $tableName,

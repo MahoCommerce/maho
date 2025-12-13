@@ -642,11 +642,16 @@ class Pgsql extends AbstractPdoAdapter
             $fields = $cols;
         }
 
-        // Get primary key columns for ON CONFLICT clause
-        $primaryKeys = $this->_getPrimaryKeyColumns($table);
-        if (empty($primaryKeys)) {
+        // Get the columns to use for ON CONFLICT clause
+        // First, try to find a unique constraint that matches the non-update columns
+        $conflictColumns = $this->_getConflictColumns($table, $cols, $fields);
+        if (empty($conflictColumns)) {
+            // Fall back to primary key
+            $conflictColumns = $this->_getPrimaryKeyColumns($table);
+        }
+        if (empty($conflictColumns)) {
             // Fall back to first column if no primary key
-            $primaryKeys = [$cols[0]];
+            $conflictColumns = [$cols[0]];
         }
 
         // Prepare ON CONFLICT DO UPDATE conditions
@@ -674,7 +679,7 @@ class Pgsql extends AbstractPdoAdapter
         $insertSql = $this->_getInsertSqlQuery($table, $cols, $values);
 
         if ($updateFields) {
-            $conflictCols = array_map([$this, 'quoteIdentifier'], $primaryKeys);
+            $conflictCols = array_map([$this, 'quoteIdentifier'], $conflictColumns);
             $insertSql .= sprintf(
                 ' ON CONFLICT (%s) DO UPDATE SET %s',
                 implode(', ', $conflictCols),
@@ -702,6 +707,51 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         return $primaryKeys;
+    }
+
+    /**
+     * Get columns to use for ON CONFLICT clause
+     *
+     * Finds a unique constraint that covers the "key" columns (inserted columns minus update columns)
+     *
+     * @param string|array|\Maho\Db\Select $table
+     * @param array $insertCols Columns being inserted
+     * @param array $updateFields Fields that will be updated on conflict
+     * @return array Columns to use for ON CONFLICT, empty if none found
+     */
+    protected function _getConflictColumns(string|array|\Maho\Db\Select $table, array $insertCols, array $updateFields): array
+    {
+        $tableName = is_array($table) ? reset($table) : (string) $table;
+
+        // Determine which columns are "key" columns (not being updated)
+        $updateColNames = [];
+        foreach ($updateFields as $k => $v) {
+            if (!is_numeric($k)) {
+                $updateColNames[] = $k;
+            } elseif (is_string($v)) {
+                $updateColNames[] = $v;
+            }
+        }
+        $keyColumns = array_diff($insertCols, $updateColNames);
+
+        // Get all unique indexes for the table
+        $indexes = $this->getIndexList($tableName);
+
+        // Find a unique index that exactly matches the key columns
+        foreach ($indexes as $index) {
+            $indexType = $index['INDEX_TYPE'] ?? $index['type'] ?? '';
+            if ($indexType !== \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE) {
+                continue;
+            }
+
+            $indexColumns = $index['COLUMNS_LIST'] ?? $index['fields'] ?? [];
+            // Check if the index columns match the key columns (order doesn't matter)
+            if (count($indexColumns) === count($keyColumns) && empty(array_diff($indexColumns, $keyColumns))) {
+                return $indexColumns;
+            }
+        }
+
+        return [];
     }
 
     /**
