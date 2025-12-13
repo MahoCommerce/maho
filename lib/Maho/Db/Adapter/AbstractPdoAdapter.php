@@ -503,8 +503,15 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     public function update(string|array|Select $table, array $bind, string|array $where = ''): int
     {
         $set = [];
-        foreach (array_keys($bind) as $col) {
-            $set[] = $this->quoteIdentifier($col) . ' = ?';
+        $params = [];
+        foreach ($bind as $col => $value) {
+            if ($value instanceof Expr) {
+                // Expr values are included directly in SQL, not as bound parameters
+                $set[] = $this->quoteIdentifier($col) . ' = ' . $value->__toString();
+            } else {
+                $set[] = $this->quoteIdentifier($col) . ' = ?';
+                $params[] = $value;
+            }
         }
 
         $where = $this->_whereExpr($where);
@@ -516,7 +523,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             ($where) ? " WHERE $where" : '',
         );
 
-        $stmt = $this->query($sql, array_values($bind));
+        $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
     }
 
@@ -1173,16 +1180,21 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $this->_connect();
         $schemaManager = $this->_connection->createSchemaManager();
         $columns = $schemaManager->introspectTableColumnsByUnquotedName($tableName);
-        $indexes = $schemaManager->introspectTableIndexesByUnquotedName($tableName);
 
-        // Find primary key columns
+        // Get primary key columns - DBAL 4.x doesn't include primary key in indexes list
         $primaryColumns = [];
-        foreach ($indexes as $index) {
-            // Check if it's a PrimaryKeyConstraint
-            if ($index instanceof \Doctrine\DBAL\Schema\PrimaryKeyConstraint) {
-                $primaryColumns = array_map('strtolower', $index->getIndexedColumns());
-                break;
+        try {
+            $tableNameObj = \Doctrine\DBAL\Schema\Name\OptionallyQualifiedName::unquoted($tableName);
+            $primaryKeyConstraint = $schemaManager->introspectTablePrimaryKeyConstraint($tableNameObj);
+            if ($primaryKeyConstraint !== null) {
+                // getColumnNames() returns array of UnqualifiedName objects
+                $primaryColumns = array_map(
+                    fn($col) => strtolower($col->getIdentifier()->getValue()),
+                    $primaryKeyConstraint->getColumnNames()
+                );
             }
+        } catch (\Doctrine\DBAL\Exception $e) {
+            // Table might not have a primary key
         }
 
         $result = [];
@@ -1246,38 +1258,47 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $indexes = $schemaManager->introspectTableIndexesByUnquotedName($tableName);
 
         $result = [];
+
+        // First, check for primary key constraint (DBAL returns this separately)
+        $tableNameObj = \Doctrine\DBAL\Schema\Name\OptionallyQualifiedName::unquoted($tableName);
+        $primaryKey = $schemaManager->introspectTablePrimaryKeyConstraint($tableNameObj);
+        if ($primaryKey !== null) {
+            $pkName = $primaryKey->getObjectName();
+            $pkNameStr = $pkName ? $pkName->getIdentifier()->getValue() : $tableName . '_pkey';
+            $pkColumns = array_map(
+                fn($col) => $col->getIdentifier()->getValue(),
+                $primaryKey->getColumnNames(),
+            );
+            $result['PRIMARY'] = [
+                'SCHEMA_NAME'   => $schemaName ?? '',
+                'TABLE_NAME'    => $tableName,
+                'KEY_NAME'      => $pkNameStr,
+                'COLUMNS_LIST'  => $pkColumns,
+                'INDEX_TYPE'    => AdapterInterface::INDEX_TYPE_PRIMARY,
+                'INDEX_METHOD'  => '',
+                'type'          => AdapterInterface::INDEX_TYPE_PRIMARY,
+                'fields'        => $pkColumns,
+            ];
+        }
+
+        // Then process regular indexes
         foreach ($indexes as $index) {
             // Get index name from the Index object itself (not from array key which is numeric)
             $indexNameStr = $index->getObjectName()->getIdentifier()->getValue();
 
             // Determine index type based on index class or type
             $indexType = AdapterInterface::INDEX_TYPE_INDEX;
-            $isPrimary = false;
 
-            // Check for primary key constraint or unique index
-            /** @var \Doctrine\DBAL\Schema\PrimaryKeyConstraint|\Doctrine\DBAL\Schema\Index $index */
-            if ($index instanceof \Doctrine\DBAL\Schema\PrimaryKeyConstraint) {
-                $indexType = AdapterInterface::INDEX_TYPE_PRIMARY;
-                $isPrimary = true;
-            } elseif ($index instanceof \Doctrine\DBAL\Schema\Index && $index->getType() === \Doctrine\DBAL\Schema\Index\IndexType::UNIQUE) {
+            /** @var \Doctrine\DBAL\Schema\Index $index */
+            if ($index->getType() === \Doctrine\DBAL\Schema\Index\IndexType::UNIQUE) {
                 $indexType = AdapterInterface::INDEX_TYPE_UNIQUE;
             }
 
-            $keyName = $isPrimary ? 'PRIMARY' : strtoupper($indexNameStr);
-            // Convert column objects to string column names
-            // PrimaryKeyConstraint uses getColumnNames() returning UnqualifiedName objects
-            // Index uses getIndexedColumns() returning IndexedColumn objects
-            if ($index instanceof \Doctrine\DBAL\Schema\PrimaryKeyConstraint) {
-                $columns = array_map(
-                    fn($col) => $col->getIdentifier()->getValue(),
-                    $index->getColumnNames(),
-                );
-            } else {
-                $columns = array_map(
-                    fn($col) => $col->getColumnName()->getIdentifier()->getValue(),
-                    $index->getIndexedColumns(),
-                );
-            }
+            $keyName = strtoupper($indexNameStr);
+            $columns = array_map(
+                fn($col) => $col->getColumnName()->getIdentifier()->getValue(),
+                $index->getIndexedColumns(),
+            );
 
             $result[$keyName] = [
                 'SCHEMA_NAME'   => $schemaName ?? '',
@@ -1324,17 +1345,26 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             // Get FK name from the ForeignKeyConstraint object itself (not from array key which is numeric)
             $fkName = $fk->getObjectName();
             $fkNameStr = $fkName ? $fkName->getIdentifier()->getValue() : '';
+
+            // Get column names as strings (DBAL returns UnqualifiedName objects)
             $localColumns = $fk->getReferencingColumnNames();
+            $localColumnStr = !empty($localColumns) ? $localColumns[0]->getIdentifier()->getValue() : '';
+
             $foreignColumns = $fk->getReferencedColumnNames();
+            $foreignColumnStr = !empty($foreignColumns) ? $foreignColumns[0]->getIdentifier()->getValue() : '';
+
+            // Get referenced table name as string (DBAL returns OptionallyQualifiedName object)
+            $refTableName = $fk->getReferencedTableName();
+            $refTableNameStr = $refTableName->getUnqualifiedName()->getValue();
 
             $result[strtoupper($fkNameStr) ?: 'FK_' . count($result)] = [
                 'FK_NAME'         => $fkNameStr,
                 'SCHEMA_NAME'     => $schemaName ?? '',
                 'TABLE_NAME'      => $tableName,
-                'COLUMN_NAME'     => $localColumns[0] ?? '',
+                'COLUMN_NAME'     => $localColumnStr,
                 'REF_SCHEMA_NAME' => $schemaName ?? '',
-                'REF_TABLE_NAME'  => $fk->getReferencedTableName(),
-                'REF_COLUMN_NAME' => $foreignColumns[0] ?? '',
+                'REF_TABLE_NAME'  => $refTableNameStr,
+                'REF_COLUMN_NAME' => $foreignColumnStr,
                 'ON_DELETE'       => $fk->getOnDeleteAction()->value,
                 'ON_UPDATE'       => $fk->getOnUpdateAction()->value,
             ];
@@ -1365,7 +1395,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $this->_connect();
         $schemaManager = $this->_connection->createSchemaManager();
         $names = $schemaManager->introspectTableNames();
-        return array_map(fn($name) => $name->toString(), $names);
+        // Use getUnqualifiedName()->getValue() to get unquoted table name
+        return array_map(fn($name) => $name->getUnqualifiedName()->getValue(), $names);
     }
 
     /**
@@ -1505,8 +1536,12 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         if ($columnData['PRIMARY'] === true) {
             $options['primary'] = true;
         }
+        // Skip default for identity columns (they use sequences automatically)
+        // Also skip if the default contains nextval() which is a PostgreSQL sequence function
         if (!is_null($columnData['DEFAULT'])
             && $type != \Maho\Db\Ddl\Table::TYPE_TEXT
+            && $columnData['IDENTITY'] !== true
+            && !str_contains((string) $columnData['DEFAULT'], 'nextval(')
         ) {
             $options['default'] = $this->quote($columnData['DEFAULT']);
         }
@@ -1539,19 +1574,19 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             return null;
         }
 
-        // Generic mapping - platforms should override for specific mappings
+        // Generic mapping - uses both DBAL type names (from class) and raw database type names
         return match (strtolower($type)) {
             'int', 'integer', 'serial' => \Maho\Db\Ddl\Table::TYPE_INTEGER,
             'smallint', 'smallserial' => \Maho\Db\Ddl\Table::TYPE_SMALLINT,
             'bigint', 'bigserial' => \Maho\Db\Ddl\Table::TYPE_BIGINT,
             'numeric', 'decimal' => \Maho\Db\Ddl\Table::TYPE_DECIMAL,
-            'real', 'float', 'double', 'double precision' => \Maho\Db\Ddl\Table::TYPE_FLOAT,
-            'varchar', 'character varying' => \Maho\Db\Ddl\Table::TYPE_VARCHAR,
+            'real', 'float', 'double', 'double precision', 'smallfloat' => \Maho\Db\Ddl\Table::TYPE_FLOAT,
+            'string', 'varchar', 'character varying' => \Maho\Db\Ddl\Table::TYPE_VARCHAR,
             'text', 'mediumtext', 'longtext' => \Maho\Db\Ddl\Table::TYPE_TEXT,
-            'blob', 'mediumblob', 'longblob', 'bytea' => \Maho\Db\Ddl\Table::TYPE_BLOB,
+            'blob', 'mediumblob', 'longblob', 'bytea', 'binary' => \Maho\Db\Ddl\Table::TYPE_BLOB,
             'boolean', 'bool', 'tinyint' => \Maho\Db\Ddl\Table::TYPE_BOOLEAN,
             'date' => \Maho\Db\Ddl\Table::TYPE_DATE,
-            'timestamp', 'datetime', 'timestamp without time zone', 'timestamp with time zone' => \Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+            'datetime', 'timestamp', 'timestamp without time zone', 'timestamp with time zone', 'datetimetz' => \Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
             default => null,
         };
     }

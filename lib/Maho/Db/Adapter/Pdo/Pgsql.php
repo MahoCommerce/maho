@@ -1205,8 +1205,27 @@ class Pgsql extends AbstractPdoAdapter
                 }
             }
         } else {
-            // String definition - parse out the type only (strip NULL/NOT NULL/DEFAULT)
-            $typeOnly = preg_replace('/\s+(NOT\s+)?NULL(\s+DEFAULT\s+.*)?$/i', '', $definition);
+            // String definition - parse out the type only (strip NULL/NOT NULL/DEFAULT/COMMENT)
+            // Handle various MySQL patterns like:
+            // - "VARCHAR(255) default NULL COMMENT 'Remote Ip'"
+            // - "VARCHAR(255) NOT NULL DEFAULT ''"
+            // - "INT(11) UNSIGNED NOT NULL"
+            $typeOnly = $definition;
+
+            // Remove COMMENT clause (MySQL-specific)
+            $typeOnly = preg_replace('/\s+COMMENT\s+[\'"].*?[\'"]\s*$/i', '', $typeOnly);
+
+            // Remove DEFAULT clause
+            $typeOnly = preg_replace('/\s+DEFAULT\s+(NULL|[\'"].*?[\'"]|[\d.]+)\s*/i', ' ', $typeOnly);
+
+            // Remove NULL / NOT NULL
+            $typeOnly = preg_replace('/\s+(NOT\s+)?NULL\s*/i', ' ', $typeOnly);
+
+            // Remove UNSIGNED (PostgreSQL doesn't support it but we can ignore it)
+            $typeOnly = preg_replace('/\s+UNSIGNED\s*/i', ' ', $typeOnly);
+
+            $typeOnly = trim($typeOnly);
+
             $this->raw_query(sprintf(
                 'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
                 $qualifiedTable,
@@ -1504,12 +1523,29 @@ class Pgsql extends AbstractPdoAdapter
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
             if ($alias) {
-                $setClauses[] = sprintf(
-                    '%s = %s.%s',
-                    $this->quoteIdentifier($alias),
-                    $correlationName ? $this->quoteIdentifier($correlationName) : '',
-                    $this->quoteIdentifier($column),
-                );
+                // Handle Expr objects - they contain the full expression already
+                if ($column instanceof \Maho\Db\Expr) {
+                    $setClauses[] = sprintf(
+                        '%s = %s',
+                        $this->quoteIdentifier($alias),
+                        $column->__toString(),
+                    );
+                } elseif ($correlationName) {
+                    // Qualified column reference (table.column)
+                    $setClauses[] = sprintf(
+                        '%s = %s.%s',
+                        $this->quoteIdentifier($alias),
+                        $this->quoteIdentifier($correlationName),
+                        $this->quoteIdentifier($column),
+                    );
+                } else {
+                    // Unqualified column reference
+                    $setClauses[] = sprintf(
+                        '%s = %s',
+                        $this->quoteIdentifier($alias),
+                        $this->quoteIdentifier($column),
+                    );
+                }
             }
         }
 
@@ -1517,16 +1553,30 @@ class Pgsql extends AbstractPdoAdapter
             $query .= sprintf(' SET %s', implode(', ', $setClauses));
         }
 
-        // Add FROM clause from select's join
+        // Add FROM clause from select's join and collect join conditions for WHERE
         $from = $select->getPart(\Maho\Db\Select::FROM);
         $fromTables = [];
+        $joinConditions = [];
         foreach ($from as $alias => $tableInfo) {
             if ($alias !== $tableAlias) {
-                $fromTables[] = sprintf(
-                    '%s AS %s',
-                    $this->quoteIdentifier($tableInfo['tableName']),
-                    $this->quoteIdentifier($alias),
-                );
+                // Handle subqueries (Select objects) as table names
+                if ($tableInfo['tableName'] instanceof \Maho\Db\Select) {
+                    $fromTables[] = sprintf(
+                        '(%s) AS %s',
+                        $tableInfo['tableName']->assemble(),
+                        $this->quoteIdentifier($alias),
+                    );
+                } else {
+                    $fromTables[] = sprintf(
+                        '%s AS %s',
+                        $this->quoteIdentifier($tableInfo['tableName']),
+                        $this->quoteIdentifier($alias),
+                    );
+                }
+                // In PostgreSQL UPDATE ... FROM, join conditions go in WHERE clause
+                if (!empty($tableInfo['joinCondition'])) {
+                    $joinConditions[] = $tableInfo['joinCondition'];
+                }
             }
         }
 
@@ -1534,10 +1584,29 @@ class Pgsql extends AbstractPdoAdapter
             $query .= sprintf(' FROM %s', implode(', ', $fromTables));
         }
 
-        // Add WHERE clause
+        // Build WHERE clause from join conditions and select's WHERE parts
+        $whereClauses = $joinConditions; // Start with join conditions
+
         $where = $select->getPart(\Maho\Db\Select::WHERE);
         if ($where) {
-            $query .= ' WHERE ' . implode(' ', $where);
+            foreach ($where as $wherePart) {
+                if (is_array($wherePart)) {
+                    // WHERE part is ['AND' => '(condition)'] or ['OR' => '(condition)']
+                    foreach ($wherePart as $conjunction => $condition) {
+                        if (!empty($whereClauses) && strtoupper($conjunction) === 'OR') {
+                            $whereClauses[] = 'OR ' . $condition;
+                        } else {
+                            $whereClauses[] = $condition;
+                        }
+                    }
+                } else {
+                    $whereClauses[] = $wherePart;
+                }
+            }
+        }
+
+        if ($whereClauses) {
+            $query .= ' WHERE ' . implode(' AND ', $whereClauses);
         }
 
         return $query;
@@ -1549,11 +1618,27 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function deleteFromSelect(\Maho\Db\Select $select, string $table): string
     {
+        // Resolve table alias to actual table name if needed
+        $actualTableName = $table;
+        $tableAlias = $table;
+        $from = $select->getPart(\Maho\Db\Select::FROM);
+        if (isset($from[$table]) && isset($from[$table]['tableName'])) {
+            $actualTableName = $from[$table]['tableName'];
+        }
+
+        // Get primary key column
+        $pkColumn = $this->_getPrimaryKeyColumns($actualTableName)[0] ?? 'id';
+
+        // Clone select and reset columns to only select the primary key
+        $subSelect = clone $select;
+        $subSelect->reset(\Maho\Db\Select::COLUMNS);
+        $subSelect->columns([$tableAlias . '.' . $pkColumn]);
+
         $query = sprintf(
             'DELETE FROM %s WHERE %s IN (%s)',
-            $this->quoteIdentifier($table),
-            $this->quoteIdentifier($this->_getPrimaryKeyColumns($table)[0] ?? 'id'),
-            $select->assemble(),
+            $this->quoteIdentifier($actualTableName),
+            $this->quoteIdentifier($pkColumn),
+            $subSelect->assemble(),
         );
 
         return $query;
@@ -2180,8 +2265,13 @@ class Pgsql extends AbstractPdoAdapter
         $columns = $this->describeTable($tableName, $schemaName);
         $keyList = $this->getIndexList($tableName, $schemaName);
 
-        // Drop existing index if it exists
-        if (isset($keyList[strtoupper($indexName)])) {
+        // For PRIMARY KEY, check if a primary key already exists and drop it
+        if (strtolower($indexType) === \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_PRIMARY) {
+            if (isset($keyList['PRIMARY'])) {
+                $this->dropIndex($tableName, 'PRIMARY', $schemaName);
+            }
+        } elseif (isset($keyList[strtoupper($indexName)])) {
+            // Drop existing index if it exists
             $this->dropIndex($tableName, $indexName, $schemaName);
         }
 
@@ -2348,7 +2438,7 @@ class Pgsql extends AbstractPdoAdapter
             'lt'            => '{{fieldName}} < ?',
             'gteq'          => '{{fieldName}} >= ?',
             'lteq'          => '{{fieldName}} <= ?',
-            'finset'        => '? = ANY(STRING_TO_ARRAY({{fieldName}}, \',\'))',  // PostgreSQL equivalent of FIND_IN_SET
+            'finset'        => '?::text = ANY(STRING_TO_ARRAY({{fieldName}}, \',\'))',  // PostgreSQL equivalent of FIND_IN_SET
             'regexp'        => '{{fieldName}} ~ ?',  // PostgreSQL regex operator
             'from'          => '{{fieldName}} >= ?',
             'to'            => '{{fieldName}} <= ?',
@@ -2552,13 +2642,46 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Insert data with explicit ID (force insert even with 0 values)
+     *
+     * In PostgreSQL, when inserting with an explicit ID value, the sequence is not
+     * automatically updated. This can cause conflicts on subsequent inserts that
+     * use the sequence. We need to manually advance the sequence to be at least
+     * as high as the inserted ID.
      */
     #[\Override]
     public function insertForce(string $table, array $bind): int
     {
-        // PostgreSQL doesn't have SQL_MODE like MySQL, so we just call insert
-        // The sequence will be updated if needed after the insert
-        return $this->insert($table, $bind);
+        $result = $this->insert($table, $bind);
+
+        // After inserting with explicit IDs, update any sequences to avoid conflicts
+        // Find serial/identity columns and update their sequences
+        $tableInfo = $this->describeTable($table);
+        foreach ($bind as $column => $value) {
+            if (!isset($tableInfo[$column])) {
+                continue;
+            }
+
+            $columnInfo = $tableInfo[$column];
+
+            // Check if this column has an identity/serial (has a sequence default)
+            if (isset($columnInfo['DEFAULT']) && is_string($columnInfo['DEFAULT'])
+                && str_starts_with($columnInfo['DEFAULT'], 'nextval(')) {
+                // Extract sequence name from default like "nextval('tablename_column_seq'::regclass)"
+                if (preg_match("/nextval\('([^']+)'/", $columnInfo['DEFAULT'], $matches)) {
+                    $sequenceName = $matches[1];
+                    // Update sequence to be at least as high as the inserted value
+                    // Use setval with is_called=true so next call returns value+1
+                    $this->raw_query(sprintf(
+                        "SELECT setval('%s', GREATEST((SELECT last_value FROM %s), %d))",
+                        $sequenceName,
+                        $this->quoteIdentifier($sequenceName),
+                        (int) $value
+                    ));
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
