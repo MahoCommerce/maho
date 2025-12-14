@@ -439,6 +439,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         }
 
         if (is_array($value)) {
+            if (empty($value)) {
+                return 'NULL'; // Makes IN(NULL) which is always false
+            }
             foreach ($value as &$val) {
                 $val = $this->quote($val, $type);
             }

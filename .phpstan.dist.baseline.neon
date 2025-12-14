@@ -8413,12 +8413,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
 
 		-
-			rawMessage: Variable $condition might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Resource_Category_Collection::addSortedField().'
 			identifier: method.notFound
 			count: 1

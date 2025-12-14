@@ -710,7 +710,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     {
         $ids = $this->getData('path_ids');
         if (is_null($ids)) {
-            $ids = explode('/', (string) $this->getPath());
+            $ids = array_filter(explode('/', (string) $this->getPath()), fn($id) => $id !== '');
             $this->setData('path_ids', $ids);
         }
         return $ids;
