@@ -178,10 +178,11 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
         }
 
         // Add store view information
+        $connection = $this->getConnection();
         $this->getSelect()->joinLeft(
             ['store_table' => $this->getTable('blog/post_store')],
             'e.entity_id = store_table.post_id',
-            ['GROUP_CONCAT(store_table.store_id SEPARATOR ",") as stores'],
+            ['stores' => $connection->getGroupConcatExpr('store_table.store_id')],
         )->group('e.entity_id');
 
         return $this;

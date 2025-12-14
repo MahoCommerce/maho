@@ -159,6 +159,10 @@ class Pgsql extends AbstractPdoAdapter
             $params['sslmode'] = $this->_config['sslmode'];
         }
 
+        // Disable GSS encryption to prevent crashes on macOS with PHP-FPM
+        // (libpq checks for Kerberos credentials after fork which causes SIGSEGV)
+        $params['gssencmode'] = $this->_config['gssencmode'] ?? 'disable';
+
         $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
@@ -632,6 +636,26 @@ class Pgsql extends AbstractPdoAdapter
     public function fromUnixtime(int|\Maho\Db\Expr $timestamp): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf('TO_TIMESTAMP(%s)', $timestamp));
+    }
+
+    /**
+     * Get SQL expression for timestamp difference in seconds
+     *
+     * Returns the difference between two timestamps in seconds (end - start).
+     */
+    #[\Override]
+    public function getTimestampDiffExpr(string $startTimestamp, string $endTimestamp): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('EXTRACT(EPOCH FROM (%s - %s))::integer', $endTimestamp, $startTimestamp));
+    }
+
+    /**
+     * Get SQL expression for concatenating grouped values
+     */
+    #[\Override]
+    public function getGroupConcatExpr(string $expression, string $separator = ','): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf("STRING_AGG(%s::text, '%s')", $expression, $separator));
     }
 
     // =========================================================================

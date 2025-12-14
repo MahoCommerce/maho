@@ -21,9 +21,12 @@ class Mage_Adminhtml_Block_Sales_Order_View_Messages extends Mage_Adminhtml_Bloc
     public function _prepareLayout()
     {
         /**
-         * Check customer existing
+         * Check customer existing (only for non-guest orders)
          */
-        $customer = Mage::getModel('customer/customer')->load($this->_getOrder()->getCustomerId());
+        $customerId = $this->_getOrder()->getCustomerId();
+        if ($customerId) {
+            $customer = Mage::getModel('customer/customer')->load($customerId);
+        }
 
         /**
          * Check Item products existing

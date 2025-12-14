@@ -365,7 +365,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                 }
                 $this->_connection->delete(
                     $this->_entityTable,
-                    $this->_connection->quoteInto('`parent_id` IN (?)', array_keys($customersToClean)),
+                    $this->_connection->quoteInto('parent_id IN (?)', array_keys($customersToClean)),
                 );
             }
             $this->_connection->insertMultiple($this->_entityTable, $entityRows);

@@ -75,16 +75,98 @@ class SqlConverter
         // Replace backticks with double quotes for identifiers
         $sql = $this->convertBackticksToDoubleQuotes($sql);
 
-        // Handle escaped single quotes - MySQL uses \', PostgreSQL uses ''
-        $sql = str_replace("\\'", "''", $sql);
-
-        // Handle escaped backslashes
-        $sql = str_replace('\\\\', '\\', $sql);
+        // Convert MySQL escape sequences inside string literals
+        // MySQL interprets \n, \t, \r as actual newline/tab/carriage return
+        // PostgreSQL with standard_conforming_strings treats them as literal characters
+        $sql = $this->convertEscapeSequences($sql);
 
         // Convert boolean values in INSERT statements
         $sql = $this->convertBooleanValues($sql);
 
         return $sql;
+    }
+
+    /**
+     * Convert MySQL escape sequences inside string literals to actual characters
+     * MySQL interprets \n, \t, \r, \', \\ inside strings, PostgreSQL doesn't
+     */
+    private function convertEscapeSequences(string $sql): string
+    {
+        $result = '';
+        $length = strlen($sql);
+        $inString = false;
+        $i = 0;
+
+        while ($i < $length) {
+            $char = $sql[$i];
+
+            // Track when we enter/exit single-quoted strings
+            if ($char === "'" && !$inString) {
+                $inString = true;
+                $result .= $char;
+                $i++;
+                continue;
+            }
+
+            if ($inString && $char === "'") {
+                // Check for escaped quote ('' in the result so far means it was converted)
+                // Or end of string
+                if ($i + 1 < $length && $sql[$i + 1] === "'") {
+                    // Double quote - keep it and skip both
+                    $result .= "''";
+                    $i += 2;
+                    continue;
+                }
+                // End of string
+                $inString = false;
+                $result .= $char;
+                $i++;
+                continue;
+            }
+
+            // Convert escape sequences only inside strings
+            if ($inString && $char === '\\' && $i + 1 < $length) {
+                $nextChar = $sql[$i + 1];
+                switch ($nextChar) {
+                    case 'n':
+                        $result .= "\n";
+                        $i += 2;
+                        continue 2;
+                    case 't':
+                        $result .= "\t";
+                        $i += 2;
+                        continue 2;
+                    case 'r':
+                        $result .= "\r";
+                        $i += 2;
+                        continue 2;
+                    case '\\':
+                        $result .= '\\';
+                        $i += 2;
+                        continue 2;
+                    case "'":
+                        // Convert \' to '' for PostgreSQL
+                        $result .= "''";
+                        $i += 2;
+                        continue 2;
+                    case '"':
+                        // Convert \" to just "
+                        $result .= '"';
+                        $i += 2;
+                        continue 2;
+                    default:
+                        // Keep other escapes as-is
+                        $result .= $char;
+                        $i++;
+                        continue 2;
+                }
+            }
+
+            $result .= $char;
+            $i++;
+        }
+
+        return $result;
     }
 
     /**
@@ -354,6 +436,19 @@ class SqlConverter
     }
 
     /**
+     * Tables that should use ON CONFLICT DO UPDATE instead of DO NOTHING
+     * These are content tables where sample data should replace default content
+     * Uses primary key or unique constraint columns for conflict detection
+     */
+    private const UPSERT_TABLES = [
+        'cms_page' => ['conflict_column' => 'page_id', 'update_columns' => ['title', 'root_template', 'meta_keywords', 'meta_description', 'identifier', 'content_heading', 'content', 'is_active', 'sort_order', 'layout_update_xml', 'custom_theme', 'custom_root_template', 'custom_layout_update_xml', 'custom_theme_from', 'custom_theme_to']],
+        'cms_block' => ['conflict_column' => 'block_id', 'update_columns' => ['title', 'identifier', 'content', 'is_active']],
+        'core_config_data' => ['conflict_column' => 'config_id', 'update_columns' => ['scope', 'scope_id', 'path', 'value', 'updated_at']],
+        'permission_block' => ['conflict_column' => 'block_name', 'update_columns' => ['is_allowed']],
+        'permission_variable' => ['conflict_column' => 'variable_name', 'update_columns' => ['is_allowed']],
+    ];
+
+    /**
      * Execute SQL statements one by one
      */
     public function executeStatements(\PDO $pdo, string $sql, ?callable $progressCallback = null): void
@@ -368,9 +463,9 @@ class SqlConverter
                 continue;
             }
 
-            // Add ON CONFLICT DO NOTHING to INSERT statements
+            // Add ON CONFLICT handling to INSERT statements
             if (preg_match('/^\s*INSERT\s+INTO\s+/i', $statement)) {
-                $statement .= ' ON CONFLICT DO NOTHING';
+                $statement = $this->addConflictHandling($statement);
             }
 
             try {
@@ -393,6 +488,38 @@ class SqlConverter
         if ($progressCallback) {
             $progressCallback($total, $total);
         }
+    }
+
+    /**
+     * Add appropriate ON CONFLICT handling to an INSERT statement
+     */
+    private function addConflictHandling(string $statement): string
+    {
+        // Extract table name from INSERT INTO "table_name" or INSERT INTO table_name
+        if (!preg_match('/INSERT\s+INTO\s+"?(\w+)"?\s*/i', $statement, $matches)) {
+            return $statement . ' ON CONFLICT DO NOTHING';
+        }
+
+        $tableName = $matches[1];
+
+        // Check if this table needs upsert behavior
+        if (!isset(self::UPSERT_TABLES[$tableName])) {
+            return $statement . ' ON CONFLICT DO NOTHING';
+        }
+
+        $config = self::UPSERT_TABLES[$tableName];
+        $conflictColumn = $config['conflict_column'];
+        $updateColumns = $config['update_columns'];
+
+        // Build the DO UPDATE SET clause
+        $updateParts = [];
+        foreach ($updateColumns as $col) {
+            $updateParts[] = "\"{$col}\" = EXCLUDED.\"{$col}\"";
+        }
+
+        $updateClause = implode(', ', $updateParts);
+
+        return $statement . " ON CONFLICT (\"{$conflictColumn}\") DO UPDATE SET {$updateClause}";
     }
 
     /**

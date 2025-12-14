@@ -58,7 +58,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                     'product_id'      => 'product_id',
                     'product_name'    => 'MAX(product_name)',
                     'product_price'   => 'MAX(product_price)',
-                    'product_type_id' => 'product_type_id',
+                    'product_type_id' => 'MAX(product_type_id)',
                 ];
                 if ($this->_period == 'year') {
                     $this->_selectedColumns['period'] = $adapter->getDateFormatSql('period', '%Y');

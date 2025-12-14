@@ -224,7 +224,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
             if ($idToDelete) {
                 $this->_connection->query(
                     $this->_connection->quoteInto(
-                        "DELETE FROM `{$this->_entityTable}` WHERE `entity_id` IN (?)",
+                        "DELETE FROM {$this->_entityTable} WHERE entity_id IN (?)",
                         $idToDelete,
                     ),
                 );

@@ -3513,6 +3513,26 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Get SQL expression for timestamp difference in seconds
+     *
+     * Returns the difference between two timestamps in seconds (end - start).
+     */
+    #[\Override]
+    public function getTimestampDiffExpr(string $startTimestamp, string $endTimestamp): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('TIMESTAMPDIFF(SECOND, %s, %s)', $startTimestamp, $endTimestamp));
+    }
+
+    /**
+     * Get SQL expression for concatenating grouped values
+     */
+    #[\Override]
+    public function getGroupConcatExpr(string $expression, string $separator = ','): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf("GROUP_CONCAT(%s SEPARATOR '%s')", $expression, $separator));
+    }
+
+    /**
      * Updates table rows with specified data based on a WHERE clause.
      */
     #[\Override]

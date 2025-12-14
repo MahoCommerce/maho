@@ -887,4 +887,27 @@ interface AdapterInterface
      * @return bool True if lock is held, false otherwise
      */
     public function isLocked(string $lockName): bool;
+
+    /**
+     * Get SQL expression for timestamp difference in seconds
+     *
+     * Returns the difference between two timestamps in seconds (end - start).
+     * This is database-agnostic and handles the syntax differences between MySQL and PostgreSQL.
+     *
+     * @param string $startTimestamp The start timestamp column or expression
+     * @param string $endTimestamp The end timestamp column or expression
+     */
+    public function getTimestampDiffExpr(string $startTimestamp, string $endTimestamp): \Maho\Db\Expr;
+
+    /**
+     * Get SQL expression for concatenating grouped values
+     *
+     * Returns a SQL expression that concatenates values from grouped rows.
+     * This is database-agnostic and handles the syntax differences between MySQL (GROUP_CONCAT)
+     * and PostgreSQL (STRING_AGG).
+     *
+     * @param string $expression The column or expression to concatenate
+     * @param string $separator The separator to use between values (default: ',')
+     */
+    public function getGroupConcatExpr(string $expression, string $separator = ','): \Maho\Db\Expr;
 }
