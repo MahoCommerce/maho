@@ -23,7 +23,7 @@ $connection->addColumn(
         'LENGTH' => 255,
         'NULLABLE' => true,
         'COMMENT' => 'Passkey Credential ID Hash',
-    ]
+    ],
 );
 
 $connection->addColumn(
@@ -34,7 +34,7 @@ $connection->addColumn(
         'LENGTH' => 255,
         'NULLABLE' => true,
         'COMMENT' => 'Passkey Public Key',
-    ]
+    ],
 );
 
 $connection->addColumn(
@@ -45,7 +45,7 @@ $connection->addColumn(
         'NULLABLE' => false,
         'DEFAULT' => 1,
         'COMMENT' => 'Password Authentication Enabled',
-    ]
+    ],
 );
 
 $installer->endSetup();

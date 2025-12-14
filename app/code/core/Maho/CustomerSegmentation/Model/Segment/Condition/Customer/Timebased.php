@@ -136,7 +136,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     )
                     ->columns([
                         'customer_id' => 'c.entity_id',
-                        'days' => "DATEDIFF('{$now}', GREATEST(COALESCE(MAX(l.login_at), c.created_at), COALESCE(MAX(o.created_at), c.created_at)))",
+                        // Use MAX(c.created_at) to satisfy ONLY_FULL_GROUP_BY mode - there's only one created_at per customer anyway
+                        'days' => "DATEDIFF('{$now}', GREATEST(COALESCE(MAX(l.login_at), MAX(c.created_at)), COALESCE(MAX(o.created_at), MAX(c.created_at))))",
                     ])
                     ->group('c.entity_id')
                     ->having("days {$operator} {$value}");

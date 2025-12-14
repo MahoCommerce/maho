@@ -649,6 +649,10 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     if ($column['DEFAULT'] === '') {
                         $column['DEFAULT'] = null;
                     }
+                    // For PostgreSQL: skip sequence-based defaults for flat tables
+                    if (is_string($column['DEFAULT']) && str_starts_with($column['DEFAULT'], 'nextval(')) {
+                        $column['DEFAULT'] = null;
+                    }
 
                     $options = null;
                     if ($column['SCALE'] > 0) {

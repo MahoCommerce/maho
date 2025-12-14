@@ -1190,7 +1190,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
                 // getColumnNames() returns array of UnqualifiedName objects
                 $primaryColumns = array_map(
                     fn($col) => strtolower($col->getIdentifier()->getValue()),
-                    $primaryKeyConstraint->getColumnNames()
+                    $primaryKeyConstraint->getColumnNames(),
                 );
             }
         } catch (\Doctrine\DBAL\Exception $e) {

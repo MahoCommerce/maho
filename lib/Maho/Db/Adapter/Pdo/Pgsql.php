@@ -422,6 +422,33 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
+     * Generate fragment of SQL for rounding a numeric value to specified precision.
+     * PostgreSQL requires casting to numeric for ROUND with precision.
+     *
+     * @param string $expression Expression to round
+     * @param int $precision Number of decimal places
+     */
+    #[\Override]
+    public function getRoundSql(string $expression, int $precision = 0): \Maho\Db\Expr
+    {
+        // PostgreSQL's ROUND(double precision, integer) doesn't exist
+        // We must cast to numeric first
+        return new \Maho\Db\Expr(sprintf('ROUND((%s)::numeric, %d)', $expression, $precision));
+    }
+
+    /**
+     * Generate fragment of SQL to cast a value to text for comparison.
+     * PostgreSQL requires explicit type casting.
+     *
+     * @param string $expression Expression to cast
+     */
+    #[\Override]
+    public function getCastToTextSql(string $expression): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(%s)::text', $expression));
+    }
+
+    /**
      * Generate fragment of SQL, that check value against multiple condition cases
      */
     #[\Override]
@@ -722,7 +749,7 @@ class Pgsql extends AbstractPdoAdapter
     {
         $tableName = is_array($table) ? reset($table) : (string) $table;
 
-        // Determine which columns are "key" columns (not being updated)
+        // Determine which columns are being updated
         $updateColNames = [];
         foreach ($updateFields as $k => $v) {
             if (!is_numeric($k)) {
@@ -731,26 +758,51 @@ class Pgsql extends AbstractPdoAdapter
                 $updateColNames[] = $v;
             }
         }
-        $keyColumns = array_diff($insertCols, $updateColNames);
 
         // Get all unique indexes for the table
         $indexes = $this->getIndexList($tableName);
 
-        // Find a unique index that exactly matches the key columns
-        foreach ($indexes as $index) {
+        // Find unique indexes whose columns are ALL present in the INSERT columns
+        $candidateIndexes = [];
+        foreach ($indexes as $indexName => $index) {
             $indexType = $index['INDEX_TYPE'] ?? $index['type'] ?? '';
             if ($indexType !== \Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE) {
                 continue;
             }
 
             $indexColumns = $index['COLUMNS_LIST'] ?? $index['fields'] ?? [];
-            // Check if the index columns match the key columns (order doesn't matter)
-            if (count($indexColumns) === count($keyColumns) && empty(array_diff($indexColumns, $keyColumns))) {
-                return $indexColumns;
+            if (empty($indexColumns)) {
+                continue;
+            }
+
+            // Check if ALL index columns are present in the INSERT columns
+            $missingCols = array_diff($indexColumns, $insertCols);
+            if (empty($missingCols)) {
+                // Count how many index columns overlap with update columns
+                $updateOverlap = count(array_intersect($indexColumns, $updateColNames));
+                $candidateIndexes[$indexName] = [
+                    'columns' => $indexColumns,
+                    'overlap' => $updateOverlap,
+                    'size' => count($indexColumns),
+                ];
             }
         }
 
-        return [];
+        if (empty($candidateIndexes)) {
+            return [];
+        }
+
+        // Prefer indexes with NO overlap with update columns (these are natural "key" columns)
+        // Then prefer smaller indexes (fewer columns)
+        uasort($candidateIndexes, function ($a, $b) {
+            if ($a['overlap'] !== $b['overlap']) {
+                return $a['overlap'] - $b['overlap']; // Less overlap is better
+            }
+            return $a['size'] - $b['size']; // Smaller is better
+        });
+
+        $best = reset($candidateIndexes);
+        return $best['columns'];
     }
 
     /**
@@ -1517,18 +1569,31 @@ class Pgsql extends AbstractPdoAdapter
             $query .= sprintf(' AS %s', $this->quoteIdentifier($tableAlias));
         }
 
+        // Get target table column types for proper casting in PostgreSQL
+        // PostgreSQL requires explicit type casting for CASE expressions and other dynamic values
+        $tableColumns = $this->describeTable($tableName);
+        $columnTypes = [];
+        foreach ($tableColumns as $colName => $colInfo) {
+            $columnTypes[strtolower($colName)] = $colInfo['DATA_TYPE'] ?? null;
+        }
+
         // Build SET clause from select columns
         $columns = $select->getPart(\Maho\Db\Select::COLUMNS);
         $setClauses = [];
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
             if ($alias) {
+                $targetType = $columnTypes[strtolower($alias)] ?? null;
+
                 // Handle Expr objects - they contain the full expression already
                 if ($column instanceof \Maho\Db\Expr) {
+                    $valueExpr = $column->__toString();
+                    // PostgreSQL needs explicit casting for CASE expressions to numeric types
+                    $valueExpr = $this->_castExpressionToColumnType($valueExpr, $targetType);
                     $setClauses[] = sprintf(
                         '%s = %s',
                         $this->quoteIdentifier($alias),
-                        $column->__toString(),
+                        $valueExpr,
                     );
                 } elseif ($correlationName) {
                     // Qualified column reference (table.column)
@@ -1626,8 +1691,22 @@ class Pgsql extends AbstractPdoAdapter
             $actualTableName = $from[$table]['tableName'];
         }
 
-        // Get primary key column
-        $pkColumn = $this->_getPrimaryKeyColumns($actualTableName)[0] ?? 'id';
+        // Get primary key column - try explicit PK first, then common column names
+        $pkColumns = $this->_getPrimaryKeyColumns($actualTableName);
+        if (!empty($pkColumns)) {
+            $pkColumn = $pkColumns[0];
+        } else {
+            // No primary key found - check for common identifier columns
+            $tableColumns = array_keys($this->describeTable($actualTableName));
+            if (in_array('entity_id', $tableColumns)) {
+                $pkColumn = 'entity_id';
+            } elseif (in_array('id', $tableColumns)) {
+                $pkColumn = 'id';
+            } else {
+                // Last resort: use first column
+                $pkColumn = $tableColumns[0] ?? 'id';
+            }
+        }
 
         // Clone select and reset columns to only select the primary key
         $subSelect = clone $select;
@@ -2675,7 +2754,7 @@ class Pgsql extends AbstractPdoAdapter
                         "SELECT setval('%s', GREATEST((SELECT last_value FROM %s), %d))",
                         $sequenceName,
                         $this->quoteIdentifier($sequenceName),
-                        (int) $value
+                        (int) $value,
                     ));
                 }
             }
@@ -2823,5 +2902,43 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         return $this;
+    }
+
+    /**
+     * Cast an expression to the appropriate PostgreSQL type based on target column type
+     *
+     * PostgreSQL is strict about types and won't implicitly cast text to numeric types.
+     * CASE expressions often return text type which needs to be explicitly cast when
+     * updating numeric columns like smallint, integer, bigint, etc.
+     *
+     * @param string $expression The SQL expression
+     * @param string|null $targetType The target column's Doctrine DBAL type name
+     * @return string The expression with appropriate cast if needed
+     */
+    protected function _castExpressionToColumnType(string $expression, ?string $targetType): string
+    {
+        if ($targetType === null) {
+            return $expression;
+        }
+
+        // Map Doctrine DBAL type names to PostgreSQL cast types
+        $castType = match (strtolower($targetType)) {
+            'smallint' => 'smallint',
+            'integer' => 'integer',
+            'bigint' => 'bigint',
+            'decimal', 'numeric' => 'numeric',
+            'float', 'real' => 'real',
+            'boolean', 'bool' => 'boolean',
+            default => null,
+        };
+
+        // Only wrap expressions that likely need casting (CASE, COALESCE, etc.)
+        // Direct column references and simple values usually work fine
+        if ($castType !== null) {
+            // Wrap the entire expression with a cast
+            return sprintf('(%s)::%s', $expression, $castType);
+        }
+
+        return $expression;
     }
 }

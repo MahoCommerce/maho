@@ -13,6 +13,10 @@ declare(strict_types=1);
  *
  * Environment variables:
  * - MAHO_DB_TYPE: Database type ('mysql' or 'pgsql'), defaults to 'mysql'
+ * - MAHO_MYSQL_HOST: MySQL host (defaults to reading from local.xml)
+ * - MAHO_MYSQL_USER: MySQL username (defaults to reading from local.xml)
+ * - MAHO_MYSQL_PASS: MySQL password (defaults to reading from local.xml)
+ * - MAHO_MYSQL_DBNAME: MySQL database name (defaults to reading from local.xml)
  * - MAHO_PGSQL_HOST: PostgreSQL host (defaults to 'localhost')
  * - MAHO_PGSQL_USER: PostgreSQL username (defaults to 'postgres')
  * - MAHO_PGSQL_PASS: PostgreSQL password (defaults to '')
@@ -73,9 +77,20 @@ class PestTestRunner
             return;
         }
 
-        // For MySQL, read from existing local.xml
+        // For MySQL, check environment variables first
+        if (getenv('MAHO_MYSQL_HOST') || getenv('MAHO_MYSQL_USER')) {
+            $this->dbConfig = [
+                'host' => getenv('MAHO_MYSQL_HOST') ?: 'localhost',
+                'user' => getenv('MAHO_MYSQL_USER') ?: 'root',
+                'pass' => getenv('MAHO_MYSQL_PASS') ?: '',
+                'name' => getenv('MAHO_MYSQL_DBNAME') ?: 'maho',
+            ];
+            return;
+        }
+
+        // Fall back to reading from existing local.xml (only if it's MySQL config)
         if (!file_exists(self::LOCAL_XML_PATH)) {
-            throw new Exception('local.xml not found. Please install Maho first.');
+            throw new Exception('local.xml not found. Please set MAHO_MYSQL_* environment variables or install Maho first.');
         }
 
         $xml = simplexml_load_file(self::LOCAL_XML_PATH);
@@ -84,6 +99,13 @@ class PestTestRunner
         }
 
         $connection = $xml->global->resources->default_setup->connection;
+
+        // Check if local.xml is configured for MySQL
+        $model = (string) $connection->model;
+        if ($model === 'pgsql') {
+            throw new Exception('local.xml is configured for PostgreSQL. Please set MAHO_MYSQL_* environment variables for MySQL testing.');
+        }
+
         $this->dbConfig = [
             'host' => (string) $connection->host,
             'user' => (string) $connection->username,
@@ -156,8 +178,8 @@ class PestTestRunner
         }
 
         try {
-            // Install Maho (without sample data for PostgreSQL, or with for MySQL)
-            $sampleData = ($dbEngine === 'mysql') ? ' --sample_data 1' : '';
+            // Install Maho with sample data for both MySQL and PostgreSQL
+            $sampleData = ' --sample_data 1';
 
             $installCmd = './maho install --ansi' .
             ' --license_agreement_accepted yes' .
@@ -210,11 +232,38 @@ class PestTestRunner
         return $cmd . ' -e ' . escapeshellarg($sql);
     }
 
+    private function getPsqlBinary(): string
+    {
+        // Try common psql binary names
+        $binaries = ['psql', 'psql-18', 'psql-17', 'psql-16', 'psql-15'];
+        foreach ($binaries as $binary) {
+            $path = trim(shell_exec("which $binary 2>/dev/null") ?? '');
+            if (!empty($path) && is_executable($path)) {
+                return $binary;
+            }
+        }
+
+        // Check common Homebrew paths
+        $brewPaths = [
+            '/opt/homebrew/bin/psql',
+            '/opt/homebrew/bin/psql-18',
+            '/usr/local/bin/psql',
+        ];
+        foreach ($brewPaths as $path) {
+            if (is_executable($path)) {
+                return $path;
+            }
+        }
+
+        return 'psql'; // Default, will fail with clear error if not found
+    }
+
     private function getPsqlCommand(string $sql, ?string $database = null): string
     {
         $db = $database ?? $this->testDbName;
+        $psql = $this->getPsqlBinary();
         $cmd = 'PGPASSWORD=' . escapeshellarg($this->dbConfig['pass']) .
-               ' psql -h ' . escapeshellarg($this->dbConfig['host']) .
+               ' ' . $psql . ' -h ' . escapeshellarg($this->dbConfig['host']) .
                ' -U ' . escapeshellarg($this->dbConfig['user']) .
                ' -d ' . escapeshellarg($db);
 

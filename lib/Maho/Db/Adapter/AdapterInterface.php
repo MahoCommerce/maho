@@ -615,6 +615,18 @@ interface AdapterInterface
     public function getIfNullSql(string $expression, string|int $value = '0'): \Maho\Db\Expr;
 
     /**
+     * Generate fragment of SQL for rounding a numeric value to specified precision.
+     * Handles database-specific ROUND function requirements.
+     */
+    public function getRoundSql(string $expression, int $precision = 0): \Maho\Db\Expr;
+
+    /**
+     * Generate fragment of SQL to cast a value to text/varchar for comparison.
+     * This is useful for comparing integer columns with varchar columns.
+     */
+    public function getCastToTextSql(string $expression): \Maho\Db\Expr;
+
+    /**
      * Generate fragment of SQL, that combine together (concatenate) the results from data array
      * All arguments in data must be quoted
      *

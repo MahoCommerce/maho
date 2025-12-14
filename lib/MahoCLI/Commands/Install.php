@@ -182,15 +182,49 @@ class Install extends BaseMahoCommand
             $dbEngine = $input->getOption('db_engine') ?? 'mysql';
             $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
-            // Sample data SQL files are MySQL-specific
-            if ($dbEngine === 'pgsql') {
-                $output->writeln('<comment>Sample data SQL import is not yet available for PostgreSQL.</comment>');
-                $output->writeln('<comment>Skipping database sample data import, but media files have been copied.</comment>');
-            } else {
-                $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
+            $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
 
-                try {
-                    // Create PDO connection
+            try {
+                // Create PDO connection based on database engine
+                if ($dbEngine === 'pgsql') {
+                    $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
+                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+                    // Use SQL converter for PostgreSQL
+                    $converter = new \MahoCLI\Helper\SqlConverter();
+                    $converter->setPdo($pdo);
+
+                    // Disable foreign key checks for the import
+                    // PostgreSQL uses session_replication_role to disable triggers/constraints
+                    $pdo->exec('SET session_replication_role = replica');
+
+                    foreach ($sqlFiles as $sqlFile) {
+                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                        $output->writeln("<info>Importing {$sqlFile} (converting to PostgreSQL)...</info>");
+
+                        // Read and convert MySQL SQL to PostgreSQL
+                        $mysqlContent = file_get_contents($sqlFilePath);
+                        $pgsqlContent = $converter->mysqlToPostgresql($mysqlContent);
+
+                        // Execute statements one by one for better error handling
+                        $converter->executeStatements($pdo, $pgsqlContent, function ($current, $total) use ($output) {
+                            if ($current === $total || $current % 500 === 0) {
+                                $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                            }
+                        });
+                        $output->writeln("\n<info>Successfully imported {$sqlFile}</info>");
+                    }
+
+                    // Re-enable foreign key checks
+                    $pdo->exec('SET session_replication_role = DEFAULT');
+
+                    // Update sequences after importing data with explicit IDs
+                    $output->writeln('<info>Updating PostgreSQL sequences...</info>');
+                    $this->updatePostgresSequences($pdo);
+
+                } else {
+                    // MySQL - use direct execution
                     $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
                     $pdo = new \PDO($dsn, $dbUser, $dbPass);
                     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -206,19 +240,19 @@ class Install extends BaseMahoCommand
                         $pdo->exec($sqlContent);
                         $output->writeln("<info>Successfully imported {$sqlFile}</info>");
                     }
-
-                } catch (\PDOException $e) {
-                    $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
-
-                    // If it's a connection error, provide more helpful message
-                    if (str_contains($e->getMessage(), 'Unknown database')) {
-                        $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                    } elseif (str_contains($e->getMessage(), 'Access denied')) {
-                        $output->writeln('<error>Access denied. Please check your database credentials.</error>');
-                    }
-
-                    return Command::FAILURE;
                 }
+
+            } catch (\PDOException $e) {
+                $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
+
+                // If it's a connection error, provide more helpful message
+                if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
+                    $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
+                } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
+                    $output->writeln('<error>Access denied. Please check your database credentials.</error>');
+                }
+
+                return Command::FAILURE;
             }
 
             $this->clearEavAttributeCache($output);
@@ -355,6 +389,50 @@ class Install extends BaseMahoCommand
         Mage::getSingleton('eav/config')->clear();
         Mage::unregister('_singleton/eav/config');
         Mage::unregister('_helper/eav');
+    }
+
+    /**
+     * Update PostgreSQL sequences to be higher than the max ID in each table
+     * This is necessary after importing data with explicit IDs
+     */
+    private function updatePostgresSequences(\PDO $pdo): void
+    {
+        // Get all sequences in the database
+        $stmt = $pdo->query("
+            SELECT
+                seq.relname as sequence_name,
+                tab.relname as table_name,
+                col.attname as column_name
+            FROM pg_class seq
+            JOIN pg_depend dep ON seq.oid = dep.objid
+            JOIN pg_class tab ON dep.refobjid = tab.oid
+            JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
+            WHERE seq.relkind = 'S'
+            AND dep.deptype = 'a'
+            ORDER BY seq.relname
+        ");
+
+        $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($sequences as $seq) {
+            $sequenceName = $seq['sequence_name'];
+            $tableName = $seq['table_name'];
+            $columnName = $seq['column_name'];
+
+            try {
+                // Get the max ID from the table
+                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
+                $maxId = (int) $maxStmt->fetchColumn();
+
+                if ($maxId > 0) {
+                    // Set the sequence to max_id + 1
+                    $pdo->exec("SELECT setval('\"{$sequenceName}\"', {$maxId}, true)");
+                }
+            } catch (\PDOException $e) {
+                // Skip if table doesn't exist or other errors
+                continue;
+            }
+        }
     }
 
     private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void

@@ -23,7 +23,7 @@ $connection->addColumn(
         'NULLABLE' => false,
         'DEFAULT' => 0,
         'COMMENT' => 'Two Factor Authentication Enabled',
-    ]
+    ],
 );
 
 $connection->addColumn(
@@ -34,7 +34,7 @@ $connection->addColumn(
         'LENGTH' => 255,
         'NULLABLE' => true,
         'COMMENT' => 'Two Factor Authentication Secret',
-    ]
+    ],
 );
 
 $installer->endSetup();

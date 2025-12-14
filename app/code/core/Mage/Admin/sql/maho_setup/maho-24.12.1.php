@@ -23,7 +23,7 @@ $connection->addColumn(
         'LENGTH' => 20,
         'NULLABLE' => true,
         'COMMENT' => 'Status Color',
-    ]
+    ],
 );
 
 $installer->endSetup();

@@ -201,12 +201,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
         $proposedLength = (isset($matches[3]) && strlen($matches[3])) ? $matches[3] : null;
         switch (strtolower($matches[1])) {
             case 'bool':
+            case 'boolean': // Doctrine DBAL type
                 $length = null;
                 $type = Maho\Db\Ddl\Table::TYPE_BOOLEAN;
                 break;
             case 'char':
             case 'varchar':
             case 'tinytext':
+            case 'string': // Doctrine DBAL type
                 $length = $proposedLength;
                 if (!$length) {
                     $length = 255;
@@ -262,6 +264,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
                 break;
             case 'mediumint':
             case 'int':
+            case 'integer': // Doctrine DBAL type
                 $type = Maho\Db\Ddl\Table::TYPE_INTEGER;
                 break;
             case 'bigint':

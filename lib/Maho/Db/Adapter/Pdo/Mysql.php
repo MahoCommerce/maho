@@ -3033,6 +3033,31 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Generate fragment of SQL for rounding a numeric value to specified precision.
+     *
+     * @param string $expression Expression to round
+     * @param int $precision Number of decimal places
+     */
+    #[\Override]
+    public function getRoundSql(string $expression, int $precision = 0): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('ROUND(%s, %d)', $expression, $precision));
+    }
+
+    /**
+     * Generate fragment of SQL to cast a value to text/varchar for comparison.
+     * MySQL performs implicit casting, so we just return the expression as-is.
+     *
+     * @param string $expression Expression to cast
+     */
+    #[\Override]
+    public function getCastToTextSql(string $expression): \Maho\Db\Expr
+    {
+        // MySQL handles implicit type conversion well
+        return new \Maho\Db\Expr($expression);
+    }
+
+    /**
      * Generate fragment of SQL, that check value against multiple condition cases
      * and return different result depends on them
      *
