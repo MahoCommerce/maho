@@ -1011,11 +1011,7 @@ class Select
                 if ($term instanceof Expr) {
                     $queryBuilder->addOrderBy($term->__toString());
                 } elseif (is_array($term)) {
-                    if (str_contains($term[0], '(') && str_contains($term[0], ')')) {
-                        $queryBuilder->addOrderBy($term[0], $term[1]);
-                    } else {
-                        $queryBuilder->addOrderBy($this->_adapter->quoteIdentifier($term[0], true), $term[1]);
-                    }
+                    $queryBuilder->addOrderBy($term[0], $term[1]);
                 }
             }
         }
