@@ -17,6 +17,7 @@ class Mage_Core_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Hel
      * @param string $field
      * @return Maho\Db\Expr
      */
+    #[\Override]
     public function castField($field)
     {
         return new Maho\Db\Expr($field . '::text');

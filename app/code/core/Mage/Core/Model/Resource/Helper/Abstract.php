@@ -160,6 +160,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
     abstract public function addLikeEscape($value, $options = []);
 
     /**
+     * Cast a field or expression to text for comparison/concatenation
+     *
+     * @param Maho\Db\Expr|string $field
+     * @return Maho\Db\Expr
+     */
+    abstract public function castField($field);
+
+    /**
      * Returns case insensitive LIKE construction.
      * For options and escaping see escapeLikeValue().
      *

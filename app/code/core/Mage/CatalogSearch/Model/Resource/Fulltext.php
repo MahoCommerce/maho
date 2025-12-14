@@ -467,7 +467,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      */
     protected function _unifyField($field, $backendType = 'varchar')
     {
-        /** @var Mage_CatalogSearch_Model_Resource_Helper_Abstract|false $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Abstract|false $helper */
         $helper = Mage::getResourceHelper('catalogsearch');
 
         if ($backendType === 'datetime') {

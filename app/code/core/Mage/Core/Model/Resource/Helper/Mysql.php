@@ -16,11 +16,12 @@ class Mage_Core_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Hel
      * Returns expression for field unification
      *
      * @param string $field
-     * @return string
+     * @return Maho\Db\Expr
      */
+    #[\Override]
     public function castField($field)
     {
-        return $field;
+        return new Maho\Db\Expr($field);
     }
     /**
      * Returns analytic expression for database column

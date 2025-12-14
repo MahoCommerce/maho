@@ -133,7 +133,8 @@ jobs:
             --admin_firstname admin \
             --admin_email admin@admin.com \
             --admin_username admin \
-            --admin_password asdasdasd123123123
+            --admin_password asdasdasd123123123 \
+            --sample_data 1
           ./maho index:reindex:all
           ./maho cache:flush
 
