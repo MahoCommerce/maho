@@ -12706,13 +12706,13 @@ parameters:
 			rawMessage: Result of && is always false.
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: app/code/core/Mage/Customer/sql/customer_setup/mysql4-data-upgrade-1.4.0.0.7-1.4.0.0.8.php
+			path: app/code/core/Mage/Customer/sql/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
 
 		-
 			rawMessage: 'Strict comparison using === between false and false will always evaluate to true.'
 			identifier: identical.alwaysTrue
 			count: 1
-			path: app/code/core/Mage/Customer/sql/customer_setup/mysql4-data-upgrade-1.4.0.0.7-1.4.0.0.8.php
+			path: app/code/core/Mage/Customer/sql/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Batch::beforeFinish() has no return type specified.'
