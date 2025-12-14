@@ -132,6 +132,32 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
     }
 
     /**
+     * Wrap value in aggregate function for PostgreSQL GROUP BY compatibility
+     *
+     * PostgreSQL requires all non-aggregated columns in SELECT to be in GROUP BY.
+     * For EAV queries where we GROUP BY entity_id and attribute_id, columns from
+     * LEFT JOINed tables (like t_d.value, t_s.value) need to be wrapped in MAX()
+     * to satisfy PostgreSQL's strict GROUP BY requirements.
+     *
+     * @param string|Maho\Db\Expr $value
+     * @return Maho\Db\Expr
+     */
+    public function wrapForGroupBy($value)
+    {
+        return new Maho\Db\Expr("MAX($value)");
+    }
+
+    /**
+     * Check if database requires strict GROUP BY (all SELECT columns in GROUP BY)
+     *
+     * @return bool
+     */
+    public function requiresStrictGroupBy()
+    {
+        return true;
+    }
+
+    /**
      * Groups selects to separate unions depend on type
      *
      * @param array $selects
