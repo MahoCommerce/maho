@@ -506,10 +506,13 @@ class Mage_Core_Model_Resource_Setup
         $resModel   = (string) $this->_connectionConfig->model;
         $modName    = (string) $this->_moduleConfig[0]->getName();
 
+        // Backwards compatibility: also match mysql4- prefix when model is mysql
+        $modelPattern = $resModel === 'mysql' ? 'mysql4?' : preg_quote($resModel, '#');
+
         $dbFiles    = [];
         $typeFiles  = [];
         $regExpDb   = sprintf('#^%s-(.*)\.(php|sql)$#i', $actionType);
-        $regExpType = sprintf('#^%s-%s-(.*)\.(php|sql)$#i', $resModel, $actionType);
+        $regExpType = sprintf('#^%s-%s-(.*)\.(php|sql)$#i', $modelPattern, $actionType);
 
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
         foreach (Maho::globPackages("$filesDir/*") as $file) {
@@ -543,10 +546,14 @@ class Mage_Core_Model_Resource_Setup
     protected function _getAvailableDataFiles($actionType, $fromVersion, $toVersion)
     {
         $modName    = (string) $this->_moduleConfig[0]->getName();
+        $resModel   = (string) $this->_connectionConfig->model;
         $files      = [];
 
+        // Backwards compatibility: also match mysql4- prefix when model is mysql
+        $modelPattern = $resModel === 'mysql' ? 'mysql4?' : preg_quote($resModel, '#');
+
         $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
-        $regExpOld  = sprintf('#^%s-%s-(.*)\.php$#i', $this->_connectionConfig->model, $actionType);
+        $regExpOld  = sprintf('#^%s-%s-(.*)\.php$#i', $modelPattern, $actionType);
 
         $filesDir   = Mage::getModuleDir('data', $modName) . DS . $this->_resourceName;
         foreach (Maho::globPackages("$filesDir/*") as $file) {

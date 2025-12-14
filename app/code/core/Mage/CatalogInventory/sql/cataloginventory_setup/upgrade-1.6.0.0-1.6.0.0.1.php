@@ -12,11 +12,12 @@
 
 /** @var Mage_Eav_Model_Entity_Setup $this */
 $installer = $this;
-
-/** @var Maho\Db\Adapter\Pdo\Mysql $connection */
 $connection = $installer->getConnection();
 
-$connection->changeTableEngine(
-    $installer->getTable('cataloginventory/stock_status_indexer_tmp'),
-    Maho\Db\Adapter\Pdo\Mysql::ENGINE_MEMORY,
-);
+// MySQL-specific optimization: use MEMORY engine for temporary indexer table
+if ($connection instanceof Maho\Db\Adapter\Pdo\Mysql) {
+    $connection->changeTableEngine(
+        $installer->getTable('cataloginventory/stock_status_indexer_tmp'),
+        Maho\Db\Adapter\Pdo\Mysql::ENGINE_MEMORY,
+    );
+}
