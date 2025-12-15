@@ -7926,6 +7926,30 @@ input[type="datetime-local"]:focus {
 [data-type="maho-column"] {
     min-width: 0;
 }
+
+/* Column style: cards */
+[data-type="maho-columns"][data-style="cards"] [data-type="maho-column"] {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+/* Column style: separated - uses gap for spacing, border centered in gap */
+[data-type="maho-columns"][data-style="separated"] {
+    gap: 0 !important;
+}
+[data-type="maho-columns"][data-style="separated"] [data-type="maho-column"] {
+    padding: 0 1rem;
+    border-right: 1px solid #e5e7eb;
+}
+[data-type="maho-columns"][data-style="separated"] [data-type="maho-column"]:first-child {
+    padding-left: 0;
+}
+[data-type="maho-columns"][data-style="separated"] [data-type="maho-column"]:last-child {
+    border-right: none;
+    padding-right: 0;
+}
+
 @media (max-width: 768px) {
     [data-type="maho-columns"] {
         grid-template-columns: 1fr !important;

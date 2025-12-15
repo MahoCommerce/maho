@@ -478,6 +478,11 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setColumnsGap', args: ['medium'], dataGap: 'medium' },
             { type: 'button', title: 'Large', icon: 'gap-large', command: 'setColumnsGap', args: ['large'], dataGap: 'large' },
             { type: 'separator' },
+            { type: 'label', text: 'Style:' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setColumnsStyle', args: ['none'], dataColStyle: 'none' },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], dataColStyle: 'cards' },
+            { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], dataColStyle: 'separated' },
+            { type: 'separator' },
             { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
 
@@ -604,6 +609,9 @@ class tiptapWysiwygSetup {
                 }
                 if (item.dataGap) {
                     button.dataset.gap = item.dataGap;
+                }
+                if (item.dataColStyle) {
+                    button.dataset.colStyle = item.dataColStyle;
                 }
                 group.append(button);
             }
@@ -748,6 +756,11 @@ class tiptapWysiwygSetup {
         'gap-small': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
         'gap-medium': '<rect x="3" y="4" width="6" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="15" y="4" width="6" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
         'gap-large': '<rect x="3" y="4" width="5" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="16" y="4" width="5" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+
+        // Style icons
+        'style-none': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-dasharray="2 2"/>',
+        'style-cards': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor"/>',
+        'style-separated': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><path d="M12 4v16" stroke="currentColor" stroke-width="1"/>',
     };
 }
 
