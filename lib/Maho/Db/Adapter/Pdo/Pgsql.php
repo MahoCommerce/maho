@@ -567,6 +567,54 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
+     * Get SQL expression for days until next annual occurrence of a date
+     *
+     * Uses PostgreSQL's EXTRACT, MAKE_DATE, and date arithmetic.
+     * Handles leap year birthdays (Feb 29) by using Feb 28 in non-leap years.
+     *
+     * @param \Maho\Db\Expr|string $dateField The date field containing the anniversary
+     * @param string $referenceDate The reference date (usually today)
+     */
+    #[\Override]
+    public function getDaysUntilAnniversarySql(\Maho\Db\Expr|string $dateField, string $referenceDate): \Maho\Db\Expr
+    {
+        $refDate = $this->quote($referenceDate);
+
+        // Helper expression to safely create a date, adjusting Feb 29 to Feb 28 in non-leap years
+        // This prevents "date/time field value out of range" errors
+        $makeSafeDate = function (string $yearExpr) use ($dateField): string {
+            return "MAKE_DATE(
+                {$yearExpr}::int,
+                EXTRACT(MONTH FROM ({$dateField})::timestamp)::int,
+                CASE
+                    WHEN EXTRACT(MONTH FROM ({$dateField})::timestamp) = 2
+                        AND EXTRACT(DAY FROM ({$dateField})::timestamp) = 29
+                        AND NOT (({$yearExpr} % 4 = 0 AND {$yearExpr} % 100 != 0) OR {$yearExpr} % 400 = 0)
+                    THEN 28
+                    ELSE EXTRACT(DAY FROM ({$dateField})::timestamp)::int
+                END
+            )";
+        };
+
+        $currentYear = "EXTRACT(YEAR FROM {$refDate}::timestamp)";
+        $nextYear = "(EXTRACT(YEAR FROM {$refDate}::timestamp) + 1)";
+
+        $sql = "CASE
+            WHEN EXTRACT(YEAR FROM ({$dateField})::timestamp) > EXTRACT(YEAR FROM {$refDate}::timestamp) THEN
+                ({$makeSafeDate($currentYear)} - {$refDate}::date)
+            ELSE
+                CASE
+                    WHEN EXTRACT(DOY FROM {$refDate}::timestamp) > EXTRACT(DOY FROM ({$dateField})::timestamp) THEN
+                        ({$makeSafeDate($nextYear)} - {$refDate}::date)
+                    ELSE
+                        ({$makeSafeDate($currentYear)} - {$refDate}::date)
+                END
+            END";
+
+        return new \Maho\Db\Expr($sql);
+    }
+
+    /**
      * Extract the date part of a date or datetime expression
      */
     #[\Override]
@@ -1505,23 +1553,57 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Stop updating indexes (PostgreSQL doesn't have this feature, no-op)
+     * Stop updating indexes
+     *
+     * PostgreSQL does not have an equivalent to MySQL's `ALTER TABLE ... DISABLE KEYS`.
+     * This method is a no-op for PostgreSQL.
+     *
+     * **MySQL behavior:** `DISABLE KEYS` tells MySQL to stop updating non-unique indexes
+     * for MyISAM tables, which speeds up bulk inserts. Indexes are rebuilt when
+     * `ENABLE KEYS` is called.
+     *
+     * **PostgreSQL alternative strategies for bulk inserts:**
+     * - Drop indexes before bulk insert, recreate after (manual)
+     * - Use COPY instead of INSERT for large data loads
+     * - Increase `maintenance_work_mem` temporarily
+     * - Disable triggers with `ALTER TABLE ... DISABLE TRIGGER ALL`
+     * - Use unlogged tables for temporary bulk operations
+     *
+     * Since these alternatives require different approaches and have different
+     * trade-offs, this method intentionally does nothing rather than making
+     * assumptions about the desired optimization strategy.
+     *
+     * @see https://www.postgresql.org/docs/current/populate.html
      */
     #[\Override]
     public function disableTableKeys(string $tableName, ?string $schemaName = null): self
     {
-        // PostgreSQL doesn't have DISABLE KEYS like MySQL
-        // This is a no-op, but we could potentially drop and recreate indexes
+        // No-op for PostgreSQL - see docblock for alternative strategies
         return $this;
     }
 
     /**
-     * Re-create missing indexes (PostgreSQL doesn't have this feature, no-op)
+     * Re-create missing indexes
+     *
+     * PostgreSQL does not have an equivalent to MySQL's `ALTER TABLE ... ENABLE KEYS`.
+     * This method is a no-op for PostgreSQL.
+     *
+     * **MySQL behavior:** `ENABLE KEYS` rebuilds all non-unique indexes that were
+     * disabled with `DISABLE KEYS`. This is faster than updating indexes row-by-row
+     * during bulk inserts.
+     *
+     * **PostgreSQL notes:**
+     * - PostgreSQL indexes are always kept up-to-date (no disable/enable mechanism)
+     * - For bulk insert optimization, indexes should be dropped and recreated manually
+     * - Use `REINDEX TABLE tablename` to rebuild corrupted or bloated indexes
+     * - Consider `CREATE INDEX CONCURRENTLY` for production environments
+     *
+     * @see https://www.postgresql.org/docs/current/sql-reindex.html
      */
     #[\Override]
     public function enableTableKeys(string $tableName, ?string $schemaName = null): self
     {
-        // PostgreSQL doesn't have ENABLE KEYS like MySQL
+        // No-op for PostgreSQL - see docblock for alternative strategies
         return $this;
     }
 
@@ -1828,15 +1910,31 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Drop trigger
+     *
+     * PostgreSQL requires the table name to drop a trigger. This implementation
+     * queries the system catalog to find the table associated with the trigger.
      */
     #[\Override]
     public function dropTrigger(string $triggerName): self
     {
-        // PostgreSQL requires table name to drop trigger
-        // This is a simplified implementation
-        $sql = sprintf('DROP TRIGGER IF EXISTS %s ON %s', $this->quoteIdentifier($triggerName), 'UNKNOWN_TABLE');
-        // Note: This would need the table name to work properly in PostgreSQL
-        // For now, we skip this operation
+        // PostgreSQL requires table name to drop trigger - query system catalog to find it
+        $sql = "SELECT c.relname AS table_name
+                FROM pg_trigger t
+                JOIN pg_class c ON t.tgrelid = c.oid
+                WHERE t.tgname = " . $this->quote($triggerName) . "
+                AND NOT t.tgisinternal";
+
+        $result = $this->raw_fetchRow($sql);
+
+        if ($result && !empty($result['table_name'])) {
+            $dropSql = sprintf(
+                'DROP TRIGGER IF EXISTS %s ON %s',
+                $this->quoteIdentifier($triggerName),
+                $this->quoteIdentifier($result['table_name']),
+            );
+            $this->raw_query($dropSql);
+        }
+
         return $this;
     }
 

@@ -733,6 +733,21 @@ interface AdapterInterface
     public function getDateDiffSql(\Maho\Db\Expr|string $date1, \Maho\Db\Expr|string $date2): \Maho\Db\Expr;
 
     /**
+     * Get SQL expression for days until next annual occurrence of a date
+     *
+     * This calculates the number of days from a reference date until the next
+     * occurrence of an anniversary (e.g., birthday). Handles:
+     * - Dates where the year is in the future (returns days to that date in current year)
+     * - Dates where the anniversary has passed this year (returns days to next year)
+     * - Leap year birthdays (Feb 29) in non-leap years (uses Feb 28)
+     *
+     * @param \Maho\Db\Expr|string $dateField The date field containing the anniversary (e.g., birth date)
+     * @param string $referenceDate The reference date in 'Y-m-d' or 'Y-m-d H:i:s' format (usually today)
+     * @return \Maho\Db\Expr SQL expression that returns days until next anniversary
+     */
+    public function getDaysUntilAnniversarySql(\Maho\Db\Expr|string $dateField, string $referenceDate): \Maho\Db\Expr;
+
+    /**
      * Retrieve valid table name
      * Check table name length and allowed symbols
      */

@@ -3181,6 +3181,39 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Get SQL expression for days until next annual occurrence of a date
+     *
+     * Uses MySQL's DATEDIFF, DATE_FORMAT, YEAR, and DAYOFYEAR functions.
+     *
+     * @param \Maho\Db\Expr|string $dateField The date field containing the anniversary
+     * @param string $referenceDate The reference date (usually today)
+     */
+    #[\Override]
+    public function getDaysUntilAnniversarySql(\Maho\Db\Expr|string $dateField, string $referenceDate): \Maho\Db\Expr
+    {
+        $refDate = $this->quote($referenceDate);
+
+        // Calculate next anniversary by properly handling year differences
+        // This handles cases where birth year > current year (test data) or birth year < current year (real data)
+        $sql = "CASE
+            WHEN YEAR({$dateField}) > YEAR({$refDate}) THEN
+                DATEDIFF(DATE_FORMAT({$dateField}, CONCAT(YEAR({$refDate}), '-%m-%d')), {$refDate})
+            ELSE
+                DATEDIFF(
+                    CASE
+                        WHEN DAYOFYEAR({$refDate}) > DAYOFYEAR({$dateField}) THEN
+                            DATE_FORMAT({$dateField}, CONCAT(YEAR({$refDate}) + 1, '-%m-%d'))
+                        ELSE
+                            DATE_FORMAT({$dateField}, CONCAT(YEAR({$refDate}), '-%m-%d'))
+                    END,
+                    {$refDate}
+                )
+            END";
+
+        return new \Maho\Db\Expr($sql);
+    }
+
+    /**
      * Extract the date part of a date or datetime expression
      *
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement

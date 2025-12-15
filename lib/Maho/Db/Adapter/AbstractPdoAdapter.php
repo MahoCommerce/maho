@@ -714,6 +714,22 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         return new Expr($this->getPlatform()->getDateDiffExpression((string) $date1, (string) $date2));
     }
 
+    /**
+     * Get SQL expression for days until next annual occurrence of a date
+     *
+     * This calculates the number of days from a reference date until the next
+     * occurrence of an anniversary (e.g., birthday). Handles:
+     * - Dates where the year is in the future (returns days to that date in current year)
+     * - Dates where the anniversary has passed this year (returns days to next year)
+     * - Leap year birthdays (Feb 29) in non-leap years (uses Feb 28)
+     *
+     * @param Expr|string $dateField The date field containing the anniversary (e.g., birth date)
+     * @param string $referenceDate The reference date in 'Y-m-d' or 'Y-m-d H:i:s' format (usually today)
+     * @return Expr SQL expression that returns days until next anniversary
+     */
+    #[\Override]
+    abstract public function getDaysUntilAnniversarySql(Expr|string $dateField, string $referenceDate): Expr;
+
     // =========================================================================
     // Platform-Specific SQL Helper Methods (Abstract)
     // =========================================================================
