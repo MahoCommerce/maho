@@ -71,24 +71,6 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
-      - name: Verify Maho initialization
-        run: |
-          php -r "
-            require 'vendor/autoload.php';
-            Mage::setRoot(getcwd());
-            try {
-              Mage::app();
-              echo 'Maho initialized successfully!' . PHP_EOL;
-              echo 'Store: ' . Mage::app()->getStore()->getName() . PHP_EOL;
-            } catch (Exception \$e) {
-              echo 'ERROR: ' . \$e->getMessage() . PHP_EOL;
-              exit(1);
-            }
-          "
-
-      - name: List available tests
-        run: ./vendor/bin/pest --list-tests | head -20
-
       - name: Run Pest Tests
         run: ./vendor/bin/pest --display-errors --display-warnings
 
@@ -155,24 +137,6 @@ jobs:
             --sample_data 1
           ./maho index:reindex:all
           ./maho cache:flush
-
-      - name: Verify Maho initialization
-        run: |
-          php -r "
-            require 'vendor/autoload.php';
-            Mage::setRoot(getcwd());
-            try {
-              Mage::app();
-              echo 'Maho initialized successfully!' . PHP_EOL;
-              echo 'Store: ' . Mage::app()->getStore()->getName() . PHP_EOL;
-            } catch (Exception \$e) {
-              echo 'ERROR: ' . \$e->getMessage() . PHP_EOL;
-              exit(1);
-            }
-          "
-
-      - name: List available tests
-        run: ./vendor/bin/pest --list-tests | head -20
 
       - name: Run Pest Tests
         run: ./vendor/bin/pest --display-errors --display-warnings
