@@ -147,13 +147,19 @@ export const MahoColumns = Node.create({
 
     addNodeView() {
         return ({ node, editor, getPos }) => {
-            // Wrapper for positioning
-            const wrapper = document.createElement('div');
-            wrapper.setAttribute('data-type', 'maho-columns');
-            wrapper.setAttribute('data-preset', node.attrs.preset);
-            wrapper.setAttribute('data-gap', node.attrs.gap);
+            const gap = GAP_SIZES[node.attrs.gap] || GAP_SIZES.medium;
 
-            // Clickable badge with gear icon
+            const dom = document.createElement('div');
+            dom.setAttribute('data-type', 'maho-columns');
+            dom.setAttribute('data-preset', node.attrs.preset);
+            dom.setAttribute('data-gap', node.attrs.gap);
+            dom.style.cssText = `
+                display: grid;
+                grid-template-columns: ${node.attrs.layout};
+                gap: ${gap};
+                position: relative;
+            `;
+
             const badge = document.createElement('button');
             badge.type = 'button';
             badge.className = 'columns-badge';
@@ -189,32 +195,21 @@ export const MahoColumns = Node.create({
                 setTimeout(() => document.addEventListener('click', closeMenu), 0);
             });
 
-            wrapper.appendChild(badge);
-
-            // Grid container for columns
-            const grid = document.createElement('div');
-            grid.className = 'columns-grid';
-            const gap = GAP_SIZES[node.attrs.gap] || GAP_SIZES.medium;
-            grid.style.cssText = `
-                display: grid;
-                grid-template-columns: ${node.attrs.layout};
-                gap: ${gap};
-            `;
-            wrapper.appendChild(grid);
+            dom.appendChild(badge);
 
             return {
-                dom: wrapper,
-                contentDOM: grid,
+                dom,
+                contentDOM: dom,
                 update: (updatedNode) => {
                     if (updatedNode.type.name !== 'mahoColumns') {
                         return false;
                     }
 
                     const updatedGap = GAP_SIZES[updatedNode.attrs.gap] || GAP_SIZES.medium;
-                    wrapper.setAttribute('data-preset', updatedNode.attrs.preset);
-                    wrapper.setAttribute('data-gap', updatedNode.attrs.gap);
-                    grid.style.gridTemplateColumns = updatedNode.attrs.layout;
-                    grid.style.gap = updatedGap;
+                    dom.setAttribute('data-preset', updatedNode.attrs.preset);
+                    dom.setAttribute('data-gap', updatedNode.attrs.gap);
+                    dom.style.gridTemplateColumns = updatedNode.attrs.layout;
+                    dom.style.gap = updatedGap;
 
                     return true;
                 },

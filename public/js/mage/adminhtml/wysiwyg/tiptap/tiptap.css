@@ -1029,7 +1029,6 @@
 
 .ProseMirror [data-type="maho-columns"] {
     margin: 1rem 0;
-    position: relative;
 
     .columns-badge {
         position: absolute;
@@ -1063,10 +1062,6 @@
     &:hover .columns-badge,
     &.ProseMirror-selectednode .columns-badge {
         opacity: 1;
-    }
-
-    .columns-grid {
-        display: grid;
     }
 
     &:hover,
