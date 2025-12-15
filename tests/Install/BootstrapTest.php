@@ -57,11 +57,6 @@ describe('Sale Category Integration', function () {
             ->addIsActiveFilter()
             ->getFirstItem();
 
-        // Skip if Sale category doesn't exist
-        if (!$saleCategory->getId()) {
-            $this->markTestSkipped('Sale category not found - sample data may not be installed');
-        }
-
         // Get products in the Sale category
         $productCollection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect(['name', 'price', 'special_price', 'special_from_date', 'special_to_date'])

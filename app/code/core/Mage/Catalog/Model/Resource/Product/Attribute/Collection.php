@@ -33,11 +33,11 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Collection extends Mage_Eav_
         $columns = $this->getConnection()->describeTable($this->getResource()->getMainTable());
         unset($columns['attribute_id']);
         $retColumns = [];
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Abstract|false $helper */
         $helper = Mage::getResourceHelper('core');
         foreach ($columns as $labelColumn => $columnData) {
             $retColumns[$labelColumn] = $labelColumn;
-            if ($columnData['DATA_TYPE'] == Maho\Db\Ddl\Table::TYPE_TEXT) {
+            if ($columnData['DATA_TYPE'] == Maho\Db\Ddl\Table::TYPE_TEXT && $helper) {
                 $retColumns[$labelColumn] = $helper->castField('main_table.' . $labelColumn);
             }
         }

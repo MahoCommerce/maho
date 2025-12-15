@@ -110,7 +110,8 @@
         }
     },
     "scripts": {
-        "test": "php tests/pest-with-test-db.php"
+        "test": "php tests/pest-with-test-db.php",
+        "test:pgsql": "MAHO_DB_TYPE=pgsql php tests/pest-with-test-db.php"
     },
     "config": {
         "allow-plugins": {

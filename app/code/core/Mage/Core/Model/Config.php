@@ -481,7 +481,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection) {
             return;
         }
-        if (!$connection->fetchOne("SELECT GET_LOCK('core_config_cache_save_lock', ?)", [$waitTime])) {
+        if (!$connection->getLock('core_config_cache_save_lock', $waitTime)) {
             if ($ignoreFailure) {
                 return;
             } elseif (PHP_SAPI === 'cli') {
@@ -508,7 +508,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection) {
             return;
         }
-        $connection->fetchOne("SELECT RELEASE_LOCK('core_config_cache_save_lock')");
+        $connection->releaseLock('core_config_cache_save_lock');
     }
 
     /**

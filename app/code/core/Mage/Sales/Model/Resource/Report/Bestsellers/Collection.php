@@ -58,7 +58,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                     'product_id'      => 'product_id',
                     'product_name'    => 'MAX(product_name)',
                     'product_price'   => 'MAX(product_price)',
-                    'product_type_id' => 'product_type_id',
+                    'product_type_id' => 'MAX(product_type_id)',
                 ];
                 if ($this->_period == 'year') {
                     $this->_selectedColumns['period'] = $adapter->getDateFormatSql('period', '%Y');
@@ -295,7 +295,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
             if ($selectUnions) {
                 $unionParts = [];
                 $cloneSelect = clone $this->getSelect();
-                /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+                /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
                 $helper = Mage::getResourceHelper('core');
                 $unionParts[] = '(' . $cloneSelect . ')';
                 foreach ($selectUnions as $union) {

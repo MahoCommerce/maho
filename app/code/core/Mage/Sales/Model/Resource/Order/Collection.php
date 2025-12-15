@@ -131,7 +131,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
                 ],
             );
 
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('core');
         $helper->prepareColumnsList($this->getSelect());
         return $this;

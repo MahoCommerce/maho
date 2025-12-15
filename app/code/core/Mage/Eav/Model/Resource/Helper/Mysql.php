@@ -5,20 +5,12 @@
  *
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-/**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
 
-class Mage_Eav_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Mysql4
+class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Helper_Mysql
 {
     /**
      * Mysql column - Table DDL type pairs
@@ -87,6 +79,30 @@ class Mage_Eav_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Hel
     public function prepareEavAttributeValue($value, $eavType)
     {
         return $value;
+    }
+
+    /**
+     * Wrap value for GROUP BY compatibility
+     *
+     * MySQL allows non-aggregated columns in SELECT even if not in GROUP BY
+     * (unless ONLY_FULL_GROUP_BY is enabled), so no wrapping is needed.
+     *
+     * @param string|Maho\Db\Expr $value
+     * @return string|Maho\Db\Expr
+     */
+    public function wrapForGroupBy($value)
+    {
+        return $value;
+    }
+
+    /**
+     * Check if database requires strict GROUP BY (all SELECT columns in GROUP BY)
+     *
+     * @return bool
+     */
+    public function requiresStrictGroupBy()
+    {
+        return false;
     }
 
     /**

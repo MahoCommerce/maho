@@ -628,7 +628,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     protected function _getStaticColumns()
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalog');
         $columns = [];
         $columnsToSkip = ['entity_type_id', 'attribute_set_id'];
@@ -647,6 +647,10 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                 case Maho\Db\Ddl\Table::TYPE_BIGINT:
                     $isUnsigned = (bool) $column['UNSIGNED'];
                     if ($column['DEFAULT'] === '') {
+                        $column['DEFAULT'] = null;
+                    }
+                    // For PostgreSQL: skip sequence-based defaults for flat tables
+                    if (is_string($column['DEFAULT']) && str_starts_with($column['DEFAULT'], 'nextval(')) {
                         $column['DEFAULT'] = null;
                     }
 

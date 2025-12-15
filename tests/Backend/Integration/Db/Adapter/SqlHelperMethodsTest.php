@@ -326,7 +326,8 @@ describe('SQL Helper Methods - Expr Objects', function () {
     });
 
     it('uses Expr in complex queries', function () {
-        $expr = new Expr('UNIX_TIMESTAMP(NOW())');
+        // Use database-agnostic helper method for Unix timestamp
+        $expr = $this->adapter->getUnixTimestampExpr();
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as ts");
 

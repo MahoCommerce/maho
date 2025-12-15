@@ -56,7 +56,7 @@ class Select
 
     public const TYPE_CONDITION = 'TYPE_CONDITION';
 
-    protected Adapter\Pdo\Mysql $_adapter;
+    protected Adapter\AdapterInterface $_adapter;
 
     /**
      * The component parts of a SELECT statement
@@ -82,12 +82,12 @@ class Select
      */
     protected array $_tableCols = [];
 
-    public function __construct(Adapter\Pdo\Mysql $adapter)
+    public function __construct(Adapter\AdapterInterface $adapter)
     {
         $this->_adapter = $adapter;
     }
 
-    public function getAdapter(): Adapter\Pdo\Mysql
+    public function getAdapter(): Adapter\AdapterInterface
     {
         return $this->_adapter;
     }
@@ -422,6 +422,50 @@ class Select
         }
 
         return $this;
+    }
+
+    /**
+     * Expand column aliases in HAVING clause to their expressions.
+     *
+     * PostgreSQL doesn't allow column aliases in HAVING clauses (e.g., HAVING cnt > 1
+     * where cnt is an alias for COUNT(*)). This method replaces aliases with their
+     * actual expressions.
+     */
+    protected function _expandHavingAliases(string $having): string
+    {
+        // Build a map of aliases to their SQL expressions
+        $aliasMap = [];
+        foreach ($this->_parts[self::COLUMNS] as $columnEntry) {
+            [$correlationName, $column, $alias] = $columnEntry;
+            if ($alias !== null) {
+                // Get the SQL expression for this column
+                if ($column instanceof Expr) {
+                    $expr = $column->__toString();
+                } else {
+                    // For regular columns, include the table correlation if present
+                    if ($correlationName) {
+                        $expr = $this->_adapter->quoteIdentifier($correlationName) . '.' .
+                                $this->_adapter->quoteIdentifier($column);
+                    } else {
+                        $expr = $this->_adapter->quoteIdentifier($column);
+                    }
+                }
+                $aliasMap[$alias] = $expr;
+            }
+        }
+
+        // Replace aliases with expressions using word boundaries
+        foreach ($aliasMap as $alias => $expr) {
+            // Use word boundaries to avoid replacing partial matches
+            // e.g., "cnt" should not match "accounts"
+            $having = preg_replace(
+                '/\b' . preg_quote($alias, '/') . '\b/',
+                $expr,
+                $having,
+            );
+        }
+
+        return $having;
     }
 
     /**
@@ -955,6 +999,9 @@ class Select
         // Build HAVING clause
         if ($this->_parts[self::HAVING]) {
             $havingStr = implode(' ', $this->_parts[self::HAVING]);
+            // Expand column aliases to their expressions for PostgreSQL compatibility
+            // (PostgreSQL doesn't allow column aliases in HAVING clauses)
+            $havingStr = $this->_expandHavingAliases($havingStr);
             $queryBuilder->having($havingStr);
         }
 
@@ -964,11 +1011,7 @@ class Select
                 if ($term instanceof Expr) {
                     $queryBuilder->addOrderBy($term->__toString());
                 } elseif (is_array($term)) {
-                    if (str_contains($term[0], '(') && str_contains($term[0], ')')) {
-                        $queryBuilder->addOrderBy($term[0], $term[1]);
-                    } else {
-                        $queryBuilder->addOrderBy($this->_adapter->quoteIdentifier($term[0], true), $term[1]);
-                    }
+                    $queryBuilder->addOrderBy($term[0], $term[1]);
                 }
             }
         }
@@ -1114,7 +1157,7 @@ class Select
     /**
      * Executes the current select object and returns the result statement
      */
-    public function query(array $bind = []): Statement\Pdo\Mysql
+    public function query(array $bind = []): Statement\StatementInterface
     {
         return $this->_adapter->query($this, $bind);
     }

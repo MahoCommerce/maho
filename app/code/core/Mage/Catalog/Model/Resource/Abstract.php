@@ -138,7 +138,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     #[\Override]
     protected function _addLoadAttributesSelectFields($select, $table, $type)
     {
-        /** @var Mage_Catalog_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Catalog_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalog');
         $select->columns(
             $helper->attributeSelectFields('attr_table', $type),
@@ -586,6 +586,9 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
 
             $store = (int) $store;
 
+            /** @var Mage_Eav_Model_Resource_Helper_Mysql|Mage_Eav_Model_Resource_Helper_Pgsql $helper */
+            $helper = Mage::getResourceHelper('eav');
+
             foreach ($typedAttributes as $table => $attributes) {
                 // see also Mage_Catalog_Model_Resource_Collection_Abstract::_getLoadAttributesSelect()
                 if ($getPerStore && $store != $this->getDefaultStoreId()) {
@@ -613,17 +616,17 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                         ]),
                         [],
                     );
-                    // store_value join
-                    $valueExpr = $adapter->getCheckSql(
+                    // store_value join - for PostgreSQL, wrap non-grouped columns in aggregate functions
+                    $valueExpr = $helper->wrapForGroupBy($adapter->getCheckSql(
                         'store_value.attribute_id IS NULL',
                         'default_value.value',
                         'store_value.value',
-                    );
-                    $attributeIdExpr = $adapter->getCheckSql(
+                    ));
+                    $attributeIdExpr = $helper->wrapForGroupBy($adapter->getCheckSql(
                         'store_value.attribute_id IS NULL',
                         'default_value.attribute_id',
                         'store_value.attribute_id',
-                    );
+                    ));
                     $select->joinLeft(
                         ['store_value' => $table],
                         implode(' AND ', [

@@ -42,7 +42,8 @@ describe('Varien_Db_Expr Compatibility', function () {
     });
 
     it('handles Varien_Db_Expr in WHERE clauses', function () {
-        $expr = new Varien_Db_Expr('UNIX_TIMESTAMP(NOW())');
+        // Use database-agnostic helper method for Unix timestamp
+        $expr = $this->adapter->getUnixTimestampExpr();
 
         $select = $this->adapter->select()
             ->from($this->testTable, ['path'])
@@ -52,7 +53,12 @@ describe('Varien_Db_Expr Compatibility', function () {
 
         $sql = $select->assemble();
 
-        expect($sql)->toContain('UNIX_TIMESTAMP(NOW())');
+        // MySQL uses UNIX_TIMESTAMP(), PostgreSQL uses EXTRACT(EPOCH FROM ...)
+        if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql) {
+            expect($sql)->toContain('EXTRACT(EPOCH FROM NOW())');
+        } else {
+            expect($sql)->toContain('UNIX_TIMESTAMP()');
+        }
     });
 
     it('does not quote Varien_Db_Expr values', function () {
@@ -73,11 +79,12 @@ describe('SQL Generation Compatibility - Simple Queries', function () {
 
         $sql = $select->assemble();
 
-        // Verify SQL structure
+        // Verify SQL structure - MySQL uses backticks, PostgreSQL uses double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
         expect($sql)->toContain('SELECT');
-        expect($sql)->toContain('`scope`');
-        expect($sql)->toContain('`path`');
-        expect($sql)->toContain('`value`');
+        expect($sql)->toContain("{$q}scope{$q}");
+        expect($sql)->toContain("{$q}path{$q}");
+        expect($sql)->toContain("{$q}value{$q}");
         expect($sql)->toContain('FROM');
         expect($sql)->toContain('WHERE');
         expect($sql)->toContain('LIMIT 10');
@@ -91,8 +98,9 @@ describe('SQL Generation Compatibility - Simple Queries', function () {
 
         $sql = $select->assemble();
 
-        // Doctrine DBAL may omit 'AS' keyword and backticks around alias (both are valid SQL)
-        expect($sql)->toMatch('/`core_config_data`\s+(AS\s+)?`?c`?/i');
+        // Doctrine DBAL may omit 'AS' keyword and quotes around alias (both are valid SQL)
+        // MySQL uses backticks, PostgreSQL uses double quotes
+        expect($sql)->toMatch('/[`"]?core_config_data[`"]?\s+(AS\s+)?[`"]?c[`"]?/i');
         expect($sql)->toContain('scope');
     });
 
@@ -384,7 +392,8 @@ describe('SQL Generation Compatibility - Special Methods', function () {
         expect($sql)->toContain('1');
 
         $sql = $this->adapter->quoteInto('name = ?', 'O\'Reilly');
-        expect($sql)->toContain("O\\'Reilly");
+        // MySQL escapes with backslash: O\'Reilly, PostgreSQL doubles: O''Reilly
+        expect($sql)->toMatch("/O[\\\\']'Reilly/");
 
         $sql = $this->adapter->quoteInto('id IN (?)', [1, 2, 3]);
         expect($sql)->toContain('id IN');
@@ -394,11 +403,14 @@ describe('SQL Generation Compatibility - Special Methods', function () {
     });
 
     it('generates expected identifier quoting', function () {
+        // MySQL uses backticks, PostgreSQL uses double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+
         $quoted = $this->adapter->quoteIdentifier('table_name');
-        expect($quoted)->toBe('`table_name`');
+        expect($quoted)->toBe("{$q}table_name{$q}");
 
         $quoted = $this->adapter->quoteIdentifier('db.table');
-        expect($quoted)->toBe('`db`.`table`');
+        expect($quoted)->toBe("{$q}db{$q}.{$q}table{$q}");
 
         // Expressions should not be quoted
         $expr = new Expr('COUNT(*)');
@@ -407,17 +419,23 @@ describe('SQL Generation Compatibility - Special Methods', function () {
     });
 
     it('generates expected quoteColumnAs', function () {
+        // MySQL uses backticks, PostgreSQL uses double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+
         $quoted = $this->adapter->quoteColumnAs('user_id', 'id');
-        expect($quoted)->toContain('`user_id`');
+        expect($quoted)->toContain("{$q}user_id{$q}");
         expect($quoted)->toContain('AS');
-        expect($quoted)->toContain('`id`');
+        expect($quoted)->toContain("{$q}id{$q}");
     });
 
     it('generates expected quoteTableAs', function () {
+        // MySQL uses backticks, PostgreSQL uses double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+
         $quoted = $this->adapter->quoteTableAs('users', 'u');
-        expect($quoted)->toContain('`users`');
+        expect($quoted)->toContain("{$q}users{$q}");
         expect($quoted)->toContain('AS');
-        expect($quoted)->toContain('`u`');
+        expect($quoted)->toContain("{$q}u{$q}");
     });
 });
 

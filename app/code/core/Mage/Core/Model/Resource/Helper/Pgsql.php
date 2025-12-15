@@ -4,24 +4,25 @@
  * Maho
  *
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Abstract
+class Mage_Core_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Helper_Abstract
 {
     /**
-     * Returns expression for field unification
+     * Returns expression for field unification.
+     * For PostgreSQL, we cast TEXT fields to ensure consistent handling.
      *
      * @param string $field
-     * @return string
+     * @return Maho\Db\Expr
      */
+    #[\Override]
     public function castField($field)
     {
-        return $field;
+        return new Maho\Db\Expr($field . '::text');
     }
+
     /**
      * Returns analytic expression for database column
      *
@@ -59,7 +60,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
 
     /**
      * Correct limitation of queries with UNION
-     * No need to do additional actions on MySQL
      *
      * @param Maho\Db\Select $select
      * @return Maho\Db\Select
@@ -86,7 +86,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         foreach ($selectOrders as $term) {
             if (is_array($term)) {
                 if (!is_numeric($term[0])) {
-                    $orders[]   = sprintf('%s %s', $this->_getReadAdapter()->quoteIdentifier($term[0], true), $term[1]);
+                    $orders[] = sprintf('%s %s', $this->_getReadAdapter()->quoteIdentifier($term[0], true), $term[1]);
                 }
             } else {
                 if (!is_numeric($term)) {
@@ -105,10 +105,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Truncate alias name from field.
      *
-     * Result string depends from second optional argument $reverse
-     * which can be true if you need the first part of the field.
-     * Field can be with 'dot' delimiter.
-     *
      * @param string $field
      * @param bool   $reverse OPTIONAL
      * @return string
@@ -117,7 +113,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     {
         $string = $field;
         if (!is_numeric($field) && (str_contains($field, '.'))) {
-            $size  = strpos($field, '.');
+            $size = strpos($field, '.');
             if ($reverse) {
                 $string = substr($field, 0, $size);
             } else {
@@ -171,16 +167,10 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         $columns = $select->getPart(Maho\Db\Select::COLUMNS);
         foreach ($columns as $columnEntry) {
             $correlationName = (string) $columnEntry[1];
-            $column          = $columnEntry[2];
+            $column = $columnEntry[2];
             foreach ($selectHavings as $having) {
-                /**
-                 * Looking for column expression in the having clause
-                 */
                 if (str_contains($having, $correlationName)) {
                     if (is_string($column)) {
-                        /**
-                         * Replace column expression to column alias in having clause
-                         */
                         $havings[] = str_replace($correlationName, $column, $having);
                     } else {
                         throw new Mage_Core_Exception(sprintf("Can't prepare expression without column alias: '%s'", $correlationName));
@@ -210,12 +200,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
             $limitOffset = (int) $limitOffset;
 
             if ($limitOffset + $limitCount != $limitOffset + 1) {
-                $columns = [];
-                foreach ($columnList as $columnEntry) {
-                    $columns[] = $columnEntry[2] ?: $columnEntry[1];
-                }
-
-                $query = sprintf('%s LIMIT %s, %s', $query, $limitCount, $limitOffset);
+                $query = sprintf('%s LIMIT %d OFFSET %d', $query, $limitCount, $limitOffset);
             }
         }
 
@@ -235,9 +220,9 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
             return $select->getPart(Maho\Db\Select::COLUMNS);
         }
 
-        $columns          = $select->getPart(Maho\Db\Select::COLUMNS);
-        $tables           = $select->getPart(Maho\Db\Select::FROM);
-        $preparedColumns  = [];
+        $columns = $select->getPart(Maho\Db\Select::COLUMNS);
+        $tables = $select->getPart(Maho\Db\Select::FROM);
+        $preparedColumns = [];
 
         foreach ($columns as $columnEntry) {
             [$correlationName, $column, $alias] = $columnEntry;
@@ -270,7 +255,8 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     }
 
     /**
-     * Add prepared column group_concat expression
+     * Add prepared column group_concat expression.
+     * PostgreSQL uses STRING_AGG instead of GROUP_CONCAT.
      *
      * @param Maho\Db\Select $select
      * @param string $fieldAlias Field alias which will be added with column group_concat expression
@@ -290,18 +276,17 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
         if ($additionalWhere) {
             $fieldExpr = $this->_getReadAdapter()->getCheckSql($additionalWhere, $fieldExpr, "''");
         }
-        $separator = '';
-        if ($groupConcatDelimiter) {
-            $separator = sprintf(" SEPARATOR '%s'", $groupConcatDelimiter);
-        }
 
-        $select->columns([$fieldAlias => new Maho\Db\Expr(sprintf('GROUP_CONCAT(%s%s)', $fieldExpr, $separator))]);
+        $separator = $groupConcatDelimiter ?: ',';
+        // PostgreSQL uses STRING_AGG for concatenation
+        $select->columns([$fieldAlias => new Maho\Db\Expr(sprintf('STRING_AGG(%s::text, \'%s\')', $fieldExpr, $separator))]);
 
         return $select;
     }
 
     /**
-     * Returns expression of days passed from $startDate to $endDate
+     * Returns expression of days passed from $startDate to $endDate.
+     * PostgreSQL uses date subtraction which returns an integer number of days.
      *
      * @param  string|Maho\Db\Expr $startDate
      * @param  string|Maho\Db\Expr $endDate
@@ -309,14 +294,13 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      */
     public function getDateDiff($startDate, $endDate)
     {
-        $dateDiff = '(TO_DAYS(' . $endDate . ') - TO_DAYS(' . $startDate . '))';
+        $dateDiff = '((' . $endDate . ')::date - (' . $startDate . ')::date)';
         return new Maho\Db\Expr($dateDiff);
     }
 
     /**
      * Escapes and quotes LIKE value.
-     * Stating escape symbol in expression is not required, because we use standard MySQL escape symbol.
-     * For options and escaping see escapeLikeValue().
+     * PostgreSQL uses backslash as the default escape character.
      *
      * @param string $value
      * @param array $options

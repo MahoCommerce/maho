@@ -269,11 +269,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     protected function buildDaysSinceLastOrderCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
         $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", 'MAX(o.created_at)');
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', MAX(o.created_at))", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

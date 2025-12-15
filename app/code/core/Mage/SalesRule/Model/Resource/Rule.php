@@ -63,7 +63,11 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     public function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getDiscountQty()) {
-            $object->setDiscountQty(new Maho\Db\Expr('NULL'));
+            $object->setDiscountQty(null);
+        }
+
+        if ($object->getDiscountStep() === null) {
+            $object->setDiscountStep(0);
         }
 
         $dateFrom = $object->getFromDate();

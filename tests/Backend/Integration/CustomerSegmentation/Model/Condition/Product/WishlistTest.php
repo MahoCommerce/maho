@@ -223,8 +223,9 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('wishlist_item');
             expect($sql)->toContain('wishlist');
             expect($sql)->toContain('MAX(wi.added_at)');
-            expect($sql)->toContain('DATEDIFF');
-            expect($sql)->toContain('2025-'); // Verify date is properly formatted
+            // Check for either MySQL (DATEDIFF) or PostgreSQL (DATE() function or ::date cast) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
+            expect($sql)->toMatch('/202[5-9]-/'); // Verify date is properly formatted
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');
         });
@@ -383,7 +384,8 @@ describe('Product Wishlist Condition Integration Tests', function () {
 
             $sql = $this->condition->getConditionsSql($this->adapter);
 
-            expect($sql)->toContain('DATEDIFF');
+            // Check for either MySQL (DATEDIFF) or PostgreSQL (DATE() function or ::date cast) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
             expect($sql)->toContain('MAX(wi.added_at)');
             expect($sql)->toContain('< \'7\'');
         });
@@ -1125,6 +1127,7 @@ function setupWishlistTestData(): void
                 $wishlistItem->setWishlistId($wishlist->getId());
                 $wishlistItem->setProductId($itemData['product_id']);
                 $wishlistItem->setStoreId(1);
+                $wishlistItem->setQty(1);
 
                 $addedDate = date('Y-m-d H:i:s', strtotime("-{$itemData['days_ago']} days"));
                 $wishlistItem->setAddedAt($addedDate);

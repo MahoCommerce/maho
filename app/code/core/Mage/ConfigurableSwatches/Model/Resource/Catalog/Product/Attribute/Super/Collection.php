@@ -39,7 +39,7 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_C
 
         $this->join(
             ['eav_attributes' => 'eav/attribute'],
-            '`eav_attributes`.`attribute_id` = `main_table`.`attribute_id`',
+            'eav_attributes.attribute_id = main_table.attribute_id',
         );
 
         $this->_eavAttributesJoined = true;
@@ -104,6 +104,11 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_C
     protected function _getOptionLabels()
     {
         $attributeIds = $this->_getAttributeIds();
+
+        // Return empty array if no attribute IDs to avoid invalid IN () clause
+        if (empty($attributeIds)) {
+            return [];
+        }
 
         $select = $this->getConnection()->select();
         $select->from(['options' => $this->getTable('eav/attribute_option')])
