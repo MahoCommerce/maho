@@ -159,7 +159,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
             ->where('main_table.state NOT IN (?)', [
                 Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
                 Mage_Sales_Model_Order::STATE_NEW])
-            ->order('range ' . Maho\Db\Select::SQL_ASC)
+            ->order($adapter->quoteIdentifier('range') . ' ' . Maho\Db\Select::SQL_ASC)
             ->group(new Maho\Db\Expr($tzRangeOffsetExpression));
 
         $this->addFieldToFilter('created_at', $dateRange);
@@ -192,7 +192,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
             'quantity' => new Maho\Db\Expr('SUM(main_table.orders_count)'),
             'range' => $rangePeriod2,
         ])
-        ->order('range')
+        ->order($this->getConnection()->quoteIdentifier('range'))
         ->group(new Maho\Db\Expr($rangePeriod));
 
         $this->getSelect()->where(

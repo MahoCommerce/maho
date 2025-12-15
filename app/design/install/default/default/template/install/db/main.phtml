@@ -20,12 +20,13 @@
 <div class="form-list">
     <ul>
         <?php $dbTypeOptions = $this->getDatabaseBlocks(); ?>
+        <?php $selectedEngine = $this->getFormData()->getDbEngine() ?: ($dbTypeOptions[0]->getIdPrefix() ?? ''); ?>
         <?php if (count($dbTypeOptions) > 0): ?>
             <li>
-                <label for="db_model_select"><?= $this->__('Database Type') ?></label>
-                <select name="config[db_model]" id="db_model_select">
+                <label for="db_engine_select"><?= $this->__('Database Type') ?></label>
+                <select name="config[db_engine]" id="db_engine_select">
                     <?php foreach($dbTypeOptions as $block): ?>
-                        <option value="<?= $block->getIdPrefix()?>" <?php if($this->getFormData()->getDbModel() == $block->getIdPrefix()):?>selected="selected"<?php endif ?>><?= $block->getTitle() ?></option>
+                        <option value="<?= $block->getIdPrefix()?>" <?php if($selectedEngine == $block->getIdPrefix()):?>selected="selected"<?php endif ?>><?= $block->getTitle() ?></option>
                     <?php endforeach ?>
                 </select>
             </li>
@@ -33,7 +34,7 @@
 
         <?php foreach ($dbTypeOptions as $block): ?>
         <?php $block = $this->getDatabaseBlock($block->getIdPrefix()) ?>
-            <div id="<?= $block->getIdPrefix() ?>_conn_form" class="db-connection-form <?php if($this->getFormData()->getDbModel() != $block->getIdPrefix()):?>hidden<?php endif ?>" data-db-type="<?= $block->getIdPrefix() ?>">
+            <div id="<?= $block->getIdPrefix() ?>_conn_form" class="db-connection-form <?php if($selectedEngine != $block->getIdPrefix()):?>hidden<?php endif ?>" data-db-type="<?= $block->getIdPrefix() ?>">
                 <?= $block->toHtml() ?>
             </div>
         <?php endforeach ?>

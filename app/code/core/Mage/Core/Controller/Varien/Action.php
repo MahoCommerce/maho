@@ -161,7 +161,7 @@ abstract class Mage_Core_Controller_Varien_Action
     public function getFlag($action, $flag = '')
     {
         if ($action === '') {
-            $action = $this->getRequest()->getActionName();
+            $action = $this->getRequest()->getActionName() ?? '';
         }
         if ($flag === '') {
             return $this->_flags;
@@ -183,7 +183,7 @@ abstract class Mage_Core_Controller_Varien_Action
     public function setFlag($action, $flag, $value)
     {
         if ($action === '') {
-            $action = $this->getRequest()->getActionName();
+            $action = $this->getRequest()->getActionName() ?? '';
         }
         $this->_flags[$action][$flag] = $value;
         return $this;
