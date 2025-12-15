@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "altcha-org/altcha",
-            "version": "v1.3.0",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/altcha-org/altcha-lib-php.git",
-                "reference": "4738de2721a6812995a0c8d1ccd66de0bec7de9e"
+                "reference": "9e9e70c864a9db960d071c77c778be0c9ff1a4d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/altcha-org/altcha-lib-php/zipball/4738de2721a6812995a0c8d1ccd66de0bec7de9e",
-                "reference": "4738de2721a6812995a0c8d1ccd66de0bec7de9e",
+                "url": "https://api.github.com/repos/altcha-org/altcha-lib-php/zipball/9e9e70c864a9db960d071c77c778be0c9ff1a4d0",
+                "reference": "9e9e70c864a9db960d071c77c778be0c9ff1a4d0",
                 "shasum": ""
             },
             "require": {
@@ -49,9 +49,9 @@
             ],
             "support": {
                 "issues": "https://github.com/altcha-org/altcha-lib-php/issues",
-                "source": "https://github.com/altcha-org/altcha-lib-php/tree/v1.3.0"
+                "source": "https://github.com/altcha-org/altcha-lib-php/tree/v1.3.1"
             },
-            "time": "2025-12-11T09:42:31+00:00"
+            "time": "2025-12-13T10:03:53+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -8196,5 +8196,5 @@
     "platform-overrides": {
         "php": "8.3"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
