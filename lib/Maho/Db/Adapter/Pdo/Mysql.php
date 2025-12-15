@@ -3246,6 +3246,15 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Get difference between two dates in days (MySQL implementation)
+     */
+    #[\Override]
+    public function getDateDiffSql(\Maho\Db\Expr|string $date1, \Maho\Db\Expr|string $date2): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('DATEDIFF(%s, %s)', $date1, $date2));
+    }
+
+    /**
      * Retrieve valid table name
      * Check table name length and allowed symbols
      */
@@ -3530,6 +3539,27 @@ class Mysql extends AbstractPdoAdapter
     public function getGroupConcatExpr(string $expression, string $separator = ','): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf("GROUP_CONCAT(%s SEPARATOR '%s')", $expression, $separator));
+    }
+
+    /**
+     * Get SQL expression for FIND_IN_SET functionality
+     */
+    #[\Override]
+    public function getFindInSetExpr(string $needle, string $haystack): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('FIND_IN_SET(%s, %s)', $needle, $haystack));
+    }
+
+    /**
+     * Get SQL expression for Unix timestamp
+     */
+    #[\Override]
+    public function getUnixTimestampExpr(?string $timestamp = null): \Maho\Db\Expr
+    {
+        if ($timestamp === null) {
+            return new \Maho\Db\Expr('UNIX_TIMESTAMP()');
+        }
+        return new \Maho\Db\Expr(sprintf('UNIX_TIMESTAMP(%s)', $timestamp));
     }
 
     /**

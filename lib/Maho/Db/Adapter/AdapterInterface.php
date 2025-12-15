@@ -724,6 +724,15 @@ interface AdapterInterface
     public function getDateExtractSql(\Maho\Db\Expr|string $date, string $unit): \Maho\Db\Expr;
 
     /**
+     * Get difference between two dates in days
+     *
+     * @param \Maho\Db\Expr|string $date1 First date (quoted field name or SQL statement)
+     * @param \Maho\Db\Expr|string $date2 Second date (quoted field name or SQL statement)
+     * @return \Maho\Db\Expr SQL expression that returns (date1 - date2) in days
+     */
+    public function getDateDiffSql(\Maho\Db\Expr|string $date1, \Maho\Db\Expr|string $date2): \Maho\Db\Expr;
+
+    /**
      * Retrieve valid table name
      * Check table name length and allowed symbols
      */
@@ -910,4 +919,26 @@ interface AdapterInterface
      * @param string $separator The separator to use between values (default: ',')
      */
     public function getGroupConcatExpr(string $expression, string $separator = ','): \Maho\Db\Expr;
+
+    /**
+     * Get SQL expression for FIND_IN_SET functionality
+     *
+     * Returns a SQL expression that checks if a value exists in a comma-separated list.
+     * This is database-agnostic and handles the syntax differences between MySQL (FIND_IN_SET)
+     * and PostgreSQL (ANY with string_to_array).
+     *
+     * @param string $needle The value to search for (can be a ? placeholder)
+     * @param string $haystack The column containing comma-separated values
+     */
+    public function getFindInSetExpr(string $needle, string $haystack): \Maho\Db\Expr;
+
+    /**
+     * Generate a database-agnostic Unix timestamp expression
+     *
+     * MySQL: UNIX_TIMESTAMP($timestamp) or UNIX_TIMESTAMP() for current time
+     * PostgreSQL: EXTRACT(EPOCH FROM $timestamp)::bigint
+     *
+     * @param string|null $timestamp Optional timestamp expression (defaults to current time)
+     */
+    public function getUnixTimestampExpr(?string $timestamp = null): \Maho\Db\Expr;
 }

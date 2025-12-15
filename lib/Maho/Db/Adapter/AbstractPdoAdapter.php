@@ -949,9 +949,11 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             }
         } else {
             $cacheKey = $this->_getTableName($tableName, $schemaName);
-            unset($this->_ddlCache[$this->getDdlCachePrefix() . $cacheKey]);
+            // Clear in-memory cache (uses key without prefix)
+            unset($this->_ddlCache[$cacheKey]);
             if ($this->_cacheAdapter instanceof \Mage_Core_Model_Cache) {
-                $this->_cacheAdapter->remove($this->getDdlCachePrefix() . $cacheKey);
+                // Clear external cache (also uses key without prefix)
+                $this->_cacheAdapter->remove($cacheKey);
             }
         }
         return $this;

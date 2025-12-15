@@ -776,6 +776,7 @@ describe('Time-based Customer Conditions', function () {
                     'customer_id' => $customer->getId(),
                     'login_at' => $loginAt,
                     'logout_at' => null,
+                    'store_id' => 1,
                 ]);
             }
 

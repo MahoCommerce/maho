@@ -164,7 +164,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     protected function buildDaysSinceCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
-        return $this->buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', {$field})", $operator, $value);
+        $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", $field);
+        return $this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value);
     }
 
     protected function buildDaysUntilBirthdayCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string|false
@@ -193,6 +194,38 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
         // Calculate next birthday by properly handling year differences to avoid BIGINT overflow
         // This handles cases where birth year > current year (test data) or birth year < current year (real data)
+        if ($adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql) {
+            // PostgreSQL version - handles leap year birthdays by using Feb 28 in non-leap years
+            // Helper function to safely create a date, adjusting Feb 29 to Feb 28 in non-leap years
+            $makeSafeDate = fn(string $yearExpr) => "MAKE_DATE(
+                {$yearExpr}::int,
+                EXTRACT(MONTH FROM attr.value::timestamp)::int,
+                CASE
+                    WHEN EXTRACT(MONTH FROM attr.value::timestamp) = 2
+                        AND EXTRACT(DAY FROM attr.value::timestamp) = 29
+                        AND NOT (({$yearExpr} % 4 = 0 AND {$yearExpr} % 100 != 0) OR {$yearExpr} % 400 = 0)
+                    THEN 28
+                    ELSE EXTRACT(DAY FROM attr.value::timestamp)::int
+                END
+            )";
+
+            $currentYear = "EXTRACT(YEAR FROM '{$currentDate}'::timestamp)";
+            $nextYear = "(EXTRACT(YEAR FROM '{$currentDate}'::timestamp) + 1)";
+
+            return "CASE
+                WHEN EXTRACT(YEAR FROM attr.value::timestamp) > EXTRACT(YEAR FROM '{$currentDate}'::timestamp) THEN
+                    ({$makeSafeDate($currentYear)} - '{$currentDate}'::date)
+                ELSE
+                    CASE
+                        WHEN EXTRACT(DOY FROM '{$currentDate}'::timestamp) > EXTRACT(DOY FROM attr.value::timestamp) THEN
+                            ({$makeSafeDate($nextYear)} - '{$currentDate}'::date)
+                        ELSE
+                            ({$makeSafeDate($currentYear)} - '{$currentDate}'::date)
+                    END
+                END";
+        }
+
+        // MySQL version
         return "CASE
             WHEN YEAR(attr.value) > YEAR('{$currentDate}') THEN
                 DATEDIFF(DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}'), '-%m-%d')), '{$currentDate}')

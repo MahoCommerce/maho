@@ -537,7 +537,8 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function getDateAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
     {
-        $expr = sprintf('(%s + %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
+        // Cast to timestamp to avoid PostgreSQL ambiguity, then cast back to date for clean output
+        $expr = sprintf('((%s)::timestamp + %s)::date', $date, $this->_getIntervalUnitSql($interval, $unit));
         return new \Maho\Db\Expr($expr);
     }
 
@@ -547,7 +548,8 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function getDateSubSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
     {
-        $expr = sprintf('(%s - %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
+        // Cast to timestamp to avoid PostgreSQL ambiguity, then cast back to date for clean output
+        $expr = sprintf('((%s)::timestamp - %s)::date', $date, $this->_getIntervalUnitSql($interval, $unit));
         return new \Maho\Db\Expr($expr);
     }
 
@@ -572,7 +574,8 @@ class Pgsql extends AbstractPdoAdapter
             $format,
         );
 
-        $expr = sprintf("TO_CHAR(%s, '%s')", $date, $pgFormat);
+        // Cast to timestamp to avoid PostgreSQL ambiguity
+        $expr = sprintf("TO_CHAR((%s)::timestamp, '%s')", $date, $pgFormat);
         return new \Maho\Db\Expr($expr);
     }
 
@@ -582,7 +585,8 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function getDatePartSql(\Maho\Db\Expr|string $date): \Maho\Db\Expr
     {
-        return new \Maho\Db\Expr(sprintf('%s::date', $date));
+        // Cast to timestamp first to avoid ambiguity, then to date
+        return new \Maho\Db\Expr(sprintf('(%s)::timestamp::date', $date));
     }
 
     /**
@@ -616,8 +620,19 @@ class Pgsql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception(sprintf('Undefined interval unit "%s" specified', $unit));
         }
 
-        $expr = sprintf('EXTRACT(%s FROM %s)', $this->_intervalUnits[$unit], $date);
+        // Cast to timestamp to avoid PostgreSQL ambiguity
+        $expr = sprintf('EXTRACT(%s FROM (%s)::timestamp)', $this->_intervalUnits[$unit], $date);
         return new \Maho\Db\Expr($expr);
+    }
+
+    /**
+     * Get difference between two dates in days (PostgreSQL implementation)
+     */
+    #[\Override]
+    public function getDateDiffSql(\Maho\Db\Expr|string $date1, \Maho\Db\Expr|string $date2): \Maho\Db\Expr
+    {
+        // PostgreSQL: cast both dates to date type and subtract to get integer days
+        return new \Maho\Db\Expr(sprintf('((%s)::date - (%s)::date)', $date1, $date2));
     }
 
     /**
@@ -626,7 +641,8 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function getUnixTimestamp(string|\Maho\Db\Expr $date): \Maho\Db\Expr
     {
-        return new \Maho\Db\Expr(sprintf('EXTRACT(EPOCH FROM %s)::integer', $date));
+        // Cast to timestamp to avoid PostgreSQL ambiguity
+        return new \Maho\Db\Expr(sprintf('EXTRACT(EPOCH FROM (%s)::timestamp)::integer', $date));
     }
 
     /**
@@ -656,6 +672,29 @@ class Pgsql extends AbstractPdoAdapter
     public function getGroupConcatExpr(string $expression, string $separator = ','): \Maho\Db\Expr
     {
         return new \Maho\Db\Expr(sprintf("STRING_AGG(%s::text, '%s')", $expression, $separator));
+    }
+
+    /**
+     * Get SQL expression for FIND_IN_SET functionality
+     */
+    #[\Override]
+    public function getFindInSetExpr(string $needle, string $haystack): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('%s::text = ANY(string_to_array(%s, \',\'))', $needle, $haystack));
+    }
+
+    /**
+     * Get SQL expression for Unix timestamp
+     * PostgreSQL uses EXTRACT(EPOCH FROM ...) instead of UNIX_TIMESTAMP()
+     */
+    #[\Override]
+    public function getUnixTimestampExpr(?string $timestamp = null): \Maho\Db\Expr
+    {
+        if ($timestamp === null) {
+            return new \Maho\Db\Expr('EXTRACT(EPOCH FROM NOW())::bigint');
+        }
+        // Cast the timestamp to timestamp type to avoid ambiguity
+        return new \Maho\Db\Expr(sprintf('EXTRACT(EPOCH FROM (%s)::timestamp)::bigint', $timestamp));
     }
 
     // =========================================================================
@@ -1078,23 +1117,34 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function dropForeignKey(string $tableName, string $fkName, ?string $schemaName = null): self
     {
-        $foreignKeys = $this->getForeignKeys($tableName, $schemaName);
-        $fkName = strtoupper($fkName);
-        if (str_starts_with($fkName, 'FK_')) {
-            $fkName = substr($fkName, 3);
-        }
+        // PostgreSQL max identifier length is 63 characters - truncate for comparison
+        $pgMaxIdentLen = 63;
 
-        foreach ([$fkName, 'FK_' . $fkName] as $key) {
-            if (isset($foreignKeys[$key])) {
-                $sql = sprintf(
-                    'ALTER TABLE %s DROP CONSTRAINT %s',
-                    $this->quoteIdentifier($this->_getTableName($tableName, $schemaName)),
-                    $this->quoteIdentifier($foreignKeys[$key]['FK_NAME']),
-                );
-                $this->resetDdlCache($tableName, $schemaName);
-                $this->raw_query($sql);
+        $foreignKeys = $this->getForeignKeys($tableName, $schemaName);
+
+        // Find the FK by comparing names case-insensitively
+        // This handles PostgreSQL's lowercase identifier storage and truncation
+        $fkNameLower = strtolower(substr($fkName, 0, $pgMaxIdentLen));
+        $foundKey = null;
+        foreach ($foreignKeys as $key => $fkData) {
+            // Compare truncated names (PostgreSQL silently truncates identifiers)
+            $actualName = strtolower(substr($fkData['FK_NAME'], 0, $pgMaxIdentLen));
+            if ($actualName === $fkNameLower) {
+                $foundKey = $key;
+                break;
             }
         }
+
+        if ($foundKey !== null) {
+            $sql = sprintf(
+                'ALTER TABLE %s DROP CONSTRAINT %s',
+                $this->quoteIdentifier($this->_getTableName($tableName, $schemaName)),
+                $this->quoteIdentifier($foreignKeys[$foundKey]['FK_NAME']),
+            );
+            $this->resetDdlCache($tableName, $schemaName);
+            $this->raw_query($sql);
+        }
+
         return $this;
     }
 
@@ -1201,13 +1251,13 @@ class Pgsql extends AbstractPdoAdapter
                 $this->quoteIdentifier($newColumnName),
             );
             $this->raw_query($sql);
+            // Reset cache after rename so modifyColumn can find the new column name
+            $this->resetDdlCache($tableName, $schemaName);
         }
 
         // Use modifyColumn to handle the type/nullability/default changes properly
         if ($definition) {
             $this->modifyColumn($tableName, $newColumnName, $definition, $flushData, $schemaName);
-        } else {
-            $this->resetDdlCache($tableName, $schemaName);
         }
 
         return $this;

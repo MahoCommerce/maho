@@ -11,15 +11,14 @@ declare(strict_types=1);
  * 3. Runs Pest tests
  * 4. Restores original local.xml
  *
+ * Database credentials are resolved in this order:
+ * 1. Environment variables (if set)
+ * 2. local.xml (if configured for the same database type being tested)
+ *
  * Environment variables:
  * - MAHO_DB_TYPE: Database type ('mysql' or 'pgsql'), defaults to 'mysql'
- * - MAHO_MYSQL_HOST: MySQL host (defaults to reading from local.xml)
- * - MAHO_MYSQL_USER: MySQL username (defaults to reading from local.xml)
- * - MAHO_MYSQL_PASS: MySQL password (defaults to reading from local.xml)
- * - MAHO_MYSQL_DBNAME: MySQL database name (defaults to reading from local.xml)
- * - MAHO_PGSQL_HOST: PostgreSQL host (defaults to 'localhost')
- * - MAHO_PGSQL_USER: PostgreSQL username (defaults to 'postgres')
- * - MAHO_PGSQL_PASS: PostgreSQL password (defaults to '')
+ * - MAHO_MYSQL_HOST, MAHO_MYSQL_USER, MAHO_MYSQL_PASS, MAHO_MYSQL_DBNAME: MySQL credentials
+ * - MAHO_PGSQL_HOST, MAHO_PGSQL_USER, MAHO_PGSQL_PASS, MAHO_PGSQL_DBNAME: PostgreSQL credentials
  *
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -66,31 +65,33 @@ class PestTestRunner
 
     private function loadDatabaseConfig(): void
     {
+        // Check environment variables first (for both MySQL and PostgreSQL)
         if ($this->dbType === 'pgsql') {
-            // For PostgreSQL, use environment variables or defaults
-            $this->dbConfig = [
-                'host' => getenv('MAHO_PGSQL_HOST') ?: 'localhost',
-                'user' => getenv('MAHO_PGSQL_USER') ?: 'postgres',
-                'pass' => getenv('MAHO_PGSQL_PASS') ?: '',
-                'name' => getenv('MAHO_PGSQL_DBNAME') ?: 'maho',
-            ];
-            return;
+            if (getenv('MAHO_PGSQL_HOST') || getenv('MAHO_PGSQL_USER')) {
+                $this->dbConfig = [
+                    'host' => getenv('MAHO_PGSQL_HOST') ?: 'localhost',
+                    'user' => getenv('MAHO_PGSQL_USER') ?: 'postgres',
+                    'pass' => getenv('MAHO_PGSQL_PASS') ?: '',
+                    'name' => getenv('MAHO_PGSQL_DBNAME') ?: 'maho',
+                ];
+                return;
+            }
+        } else {
+            if (getenv('MAHO_MYSQL_HOST') || getenv('MAHO_MYSQL_USER')) {
+                $this->dbConfig = [
+                    'host' => getenv('MAHO_MYSQL_HOST') ?: 'localhost',
+                    'user' => getenv('MAHO_MYSQL_USER') ?: 'root',
+                    'pass' => getenv('MAHO_MYSQL_PASS') ?: '',
+                    'name' => getenv('MAHO_MYSQL_DBNAME') ?: 'maho',
+                ];
+                return;
+            }
         }
 
-        // For MySQL, check environment variables first
-        if (getenv('MAHO_MYSQL_HOST') || getenv('MAHO_MYSQL_USER')) {
-            $this->dbConfig = [
-                'host' => getenv('MAHO_MYSQL_HOST') ?: 'localhost',
-                'user' => getenv('MAHO_MYSQL_USER') ?: 'root',
-                'pass' => getenv('MAHO_MYSQL_PASS') ?: '',
-                'name' => getenv('MAHO_MYSQL_DBNAME') ?: 'maho',
-            ];
-            return;
-        }
-
-        // Fall back to reading from existing local.xml (only if it's MySQL config)
+        // Fall back to reading from existing local.xml
         if (!file_exists(self::LOCAL_XML_PATH)) {
-            throw new Exception('local.xml not found. Please set MAHO_MYSQL_* environment variables or install Maho first.');
+            $envPrefix = $this->dbType === 'pgsql' ? 'MAHO_PGSQL_*' : 'MAHO_MYSQL_*';
+            throw new Exception("local.xml not found. Please set {$envPrefix} environment variables or install Maho first.");
         }
 
         $xml = simplexml_load_file(self::LOCAL_XML_PATH);
@@ -99,10 +100,13 @@ class PestTestRunner
         }
 
         $connection = $xml->global->resources->default_setup->connection;
+        $configuredDbType = (string) $connection->model;
 
-        // Check if local.xml is configured for MySQL
-        $model = (string) $connection->model;
-        if ($model === 'pgsql') {
+        // Check if local.xml matches the requested database type
+        if ($this->dbType === 'pgsql' && $configuredDbType !== 'pgsql') {
+            throw new Exception('local.xml is configured for MySQL. Please set MAHO_PGSQL_* environment variables for PostgreSQL testing.');
+        }
+        if ($this->dbType === 'mysql' && $configuredDbType === 'pgsql') {
             throw new Exception('local.xml is configured for PostgreSQL. Please set MAHO_MYSQL_* environment variables for MySQL testing.');
         }
 

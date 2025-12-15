@@ -201,8 +201,9 @@ describe('Product Viewed Condition Integration Tests', function () {
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
             expect($sql)->toContain('MAX(rv.added_at)');
-            expect($sql)->toContain('DATEDIFF');
-            expect($sql)->toContain('2025-'); // Verify date is properly formatted
+            // Check for either MySQL (DATEDIFF) or PostgreSQL (date subtraction) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date/');
+            expect($sql)->toMatch('/202[5-9]-/'); // Verify date is properly formatted
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');
         });

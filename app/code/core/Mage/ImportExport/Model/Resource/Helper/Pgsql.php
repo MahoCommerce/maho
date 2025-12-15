@@ -37,25 +37,34 @@ class Mage_ImportExport_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Reso
     {
         $adapter = $this->_getReadAdapter();
 
+        // Get the actual primary key column from table metadata
+        $pkColumn = $this->_getPrimaryKeyColumn($tableName);
+
         // PostgreSQL: Get the next value from the sequence associated with the table's primary key
-        // Convention: sequence name is {tablename}_{column}_seq
-        $sql = "SELECT pg_get_serial_sequence(:table, 'entity_id') as seq_name";
-        $result = $adapter->fetchRow($sql, ['table' => $tableName]);
+        $result = ['seq_name' => null];
+        if ($pkColumn) {
+            $sql = 'SELECT pg_get_serial_sequence(:table, :column) as seq_name';
+            $result = $adapter->fetchRow($sql, ['table' => $tableName, 'column' => $pkColumn]);
+        }
 
         if (empty($result['seq_name'])) {
-            // Try common column names for primary key
-            foreach (['entity_id', 'id', 'value_id'] as $column) {
+            // Fallback: try common column names for primary key
+            foreach (['entity_id', 'id', 'value_id', 'link_id', 'rule_id', 'order_id'] as $column) {
                 $sql = 'SELECT pg_get_serial_sequence(:table, :column) as seq_name';
                 $result = $adapter->fetchRow($sql, ['table' => $tableName, 'column' => $column]);
                 if (!empty($result['seq_name'])) {
+                    $pkColumn = $column;
                     break;
                 }
             }
         }
 
         if (empty($result['seq_name'])) {
-            // Fallback: try to get max + 1 from the table
-            $sql = 'SELECT COALESCE(MAX(entity_id), 0) + 1 as next_val FROM ' . $adapter->quoteIdentifier($tableName);
+            // Fallback: try to get max + 1 from the table using the primary key column
+            $column = $pkColumn ?: 'entity_id';
+            $quotedTable = $adapter->quoteIdentifier($tableName);
+            $quotedColumn = $adapter->quoteIdentifier($column);
+            $sql = "SELECT COALESCE(MAX({$quotedColumn}), 0) + 1 as next_val FROM {$quotedTable}";
             $result = $adapter->fetchRow($sql);
             return (int) ($result['next_val'] ?? 1);
         }
@@ -65,5 +74,25 @@ class Mage_ImportExport_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Reso
         $seqResult = $adapter->fetchRow($sql);
 
         return (int) ($seqResult['next_val'] ?? 1);
+    }
+
+    /**
+     * Get the primary key column name for a table
+     *
+     * @param string $tableName
+     * @return string|null
+     */
+    protected function _getPrimaryKeyColumn($tableName)
+    {
+        $adapter = $this->_getReadAdapter();
+        $describe = $adapter->describeTable($tableName);
+
+        foreach ($describe as $column) {
+            if (!empty($column['PRIMARY'])) {
+                return $column['COLUMN_NAME'];
+            }
+        }
+
+        return null;
     }
 }

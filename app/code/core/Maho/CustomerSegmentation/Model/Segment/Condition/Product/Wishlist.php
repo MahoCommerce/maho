@@ -206,12 +206,14 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
 
     protected function buildDaysSinceAddedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
+        $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", 'MAX(wi.added_at)');
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])
             ->join(['w' => $this->getWishlistTable()], 'wi.wishlist_id = w.wishlist_id', ['customer_id'])
             ->where('w.customer_id IS NOT NULL')
             ->group('w.customer_id')
-            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', MAX(wi.added_at))", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
