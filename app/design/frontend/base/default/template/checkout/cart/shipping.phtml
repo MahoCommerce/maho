@@ -124,6 +124,11 @@
                     const requiredFields = this.form.querySelectorAll('.required-entry');
 
                     requiredFields.forEach(field => {
+                        // Skip hidden fields (e.g., region text input when select is shown)
+                        if (field.offsetParent === null || field.style.display === 'none') {
+                            return;
+                        }
+
                         if (!field.value.trim()) {
                             field.classList.add('validation-failed');
                             isValid = false;

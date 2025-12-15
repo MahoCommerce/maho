@@ -34,7 +34,7 @@ $linksPurchasedSeparately = $this->getLinksPurchasedSeparately();
                         <?= $this->escapeHtml($link->getTitle()) ?>
                     </label>
                     <?php if ($this->getLinkHasSample($link)): ?>
-                        <?php $onclick = $this->getIsOpenInNewWindow() ? ` onclick="this.target='_blank'"` : '' ?>
+                        <?php $onclick = $this->getIsOpenInNewWindow() ? ' onclick="this.target=\'_blank\'"' : '' ?>
                         (<a href="<?= $this->getLinkSamlpeUrl($link) ?>"<?= $onclick ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
                     <?php endif ?>
                     <?php if ($linksPurchasedSeparately): ?>
