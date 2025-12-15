@@ -1699,7 +1699,14 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $config = $this->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE);
         }
 
-        return (string) $config->model;
+        $model = (string) $config->model;
+
+        // Normalize legacy mysql4 model name to mysql for backwards compatibility
+        if ($model === 'mysql4') {
+            $model = 'mysql';
+        }
+
+        return $model;
     }
 
     /**
