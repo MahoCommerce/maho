@@ -30,6 +30,11 @@ class Pgsql extends AbstractPdoAdapter
     protected string $_defaultStmtClass = \Maho\Db\Statement\Pdo\Pgsql::class;
 
     /**
+     * Last inserted ID from INSERT ... RETURNING
+     */
+    protected string|int|null $_lastInsertedId = null;
+
+    /**
      * Log file name for SQL debug data (override parent's default)
      */
     protected string $_debugFile = 'pdo_pgsql.log';
@@ -715,6 +720,62 @@ class Pgsql extends AbstractPdoAdapter
     // =========================================================================
 
     /**
+     * Inserts a table row with specified data using RETURNING clause
+     *
+     * PostgreSQL's RETURNING clause allows us to get the inserted ID directly
+     * from the INSERT statement, avoiding a separate sequence query.
+     *
+     * @param string|array|\Maho\Db\Select $table The table to insert data into.
+     * @param array $bind Column-value pairs.
+     * @return int The number of affected rows.
+     */
+    #[\Override]
+    public function insert(string|array|\Maho\Db\Select $table, array $bind): int
+    {
+        // Reset last inserted ID
+        $this->_lastInsertedId = null;
+
+        // Extract and quote col names from the array keys
+        $cols = [];
+        $vals = [];
+        foreach (array_keys($bind) as $col) {
+            $cols[] = $this->quoteIdentifier($col);
+            $vals[] = '?';
+        }
+
+        // Get the primary key column for RETURNING clause
+        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $primaryKey = $this->_getPrimaryKeyColumns($tableName);
+        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+
+        // Build the statement
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES(%s)',
+            $this->quoteIdentifier($table),
+            implode(', ', $cols),
+            implode(', ', $vals),
+        );
+
+        // Add RETURNING clause if we have a primary key
+        if ($returningColumn !== null) {
+            $sql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
+        }
+
+        // Execute the statement
+        $stmt = $this->query($sql, array_values($bind));
+
+        // Capture the returned ID if available
+        if ($returningColumn !== null) {
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($row && isset($row[$returningColumn])) {
+                $this->_lastInsertedId = $row[$returningColumn];
+            }
+        }
+
+        return 1; // INSERT always affects 1 row on success
+    }
+
+    /**
      * Inserts a table row with ON CONFLICT DO UPDATE (PostgreSQL equivalent of ON DUPLICATE KEY UPDATE)
      *
      * @throws \Maho\Db\Exception
@@ -779,6 +840,14 @@ class Pgsql extends AbstractPdoAdapter
             }
         }
 
+        // Reset last inserted ID
+        $this->_lastInsertedId = null;
+
+        // Get the primary key column for RETURNING clause
+        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $primaryKey = $this->_getPrimaryKeyColumns($tableName);
+        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+
         $insertSql = $this->_getInsertSqlQuery($table, $cols, $values);
 
         if ($updateFields) {
@@ -790,8 +859,22 @@ class Pgsql extends AbstractPdoAdapter
             );
         }
 
+        // Add RETURNING clause if we have a primary key
+        if ($returningColumn !== null) {
+            $insertSql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
+        }
+
         $stmt = $this->query($insertSql, array_values($bind));
-        return $stmt->rowCount();
+
+        // Capture the returned ID if available
+        if ($returningColumn !== null) {
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($row && isset($row[$returningColumn])) {
+                $this->_lastInsertedId = $row[$returningColumn];
+            }
+        }
+
+        return $stmt->rowCount() ?: 1;
     }
 
     /**
@@ -937,10 +1020,16 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Inserts a table row with ON CONFLICT DO NOTHING (PostgreSQL equivalent of INSERT IGNORE)
+     *
+     * Uses RETURNING clause to capture the inserted ID if the row is actually inserted.
+     * If the row conflicts and is ignored, no ID is returned.
      */
     #[\Override]
     public function insertIgnore(string|array|\Maho\Db\Select $table, array $bind): int
     {
+        // Reset last inserted ID
+        $this->_lastInsertedId = null;
+
         $cols = [];
         $vals = [];
         foreach ($bind as $col => $val) {
@@ -953,27 +1042,56 @@ class Pgsql extends AbstractPdoAdapter
             }
         }
 
+        // Get the primary key column for RETURNING clause
+        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $primaryKey = $this->_getPrimaryKeyColumns($tableName);
+        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+
         $sql = 'INSERT INTO '
             . $this->quoteIdentifier($table, true)
             . ' (' . implode(', ', $cols) . ') '
             . 'VALUES (' . implode(', ', $vals) . ') '
             . 'ON CONFLICT DO NOTHING';
 
+        // Add RETURNING clause if we have a primary key
+        if ($returningColumn !== null) {
+            $sql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
+        }
+
         $bind = array_values($bind);
         $stmt = $this->query($sql, $bind);
+
+        // Capture the returned ID if available (only returns a row if insert succeeded)
+        if ($returningColumn !== null) {
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($row && isset($row[$returningColumn])) {
+                $this->_lastInsertedId = $row[$returningColumn];
+            }
+        }
+
         return $stmt->rowCount();
     }
 
     /**
      * Returns the ID of the last inserted row or sequence value
+     *
+     * Uses the cached value from INSERT ... RETURNING if available,
+     * otherwise falls back to sequence query for compatibility.
      */
     #[\Override]
     public function lastInsertId(?string $tableName = null, ?string $primaryKey = null): string|int
     {
+        // Return cached value from RETURNING clause if available
+        if ($this->_lastInsertedId !== null) {
+            $id = $this->_lastInsertedId;
+            $this->_lastInsertedId = null; // Clear after retrieval
+            return $id;
+        }
+
         $this->_connect();
 
         if ($tableName !== null && $primaryKey !== null) {
-            // PostgreSQL requires sequence name - query it directly since DBAL 4 doesn't support parameter
+            // Fallback: PostgreSQL requires sequence name - query it directly
             $sequenceName = sprintf('%s_%s_seq', $tableName, $primaryKey);
             $result = $this->fetchOne(sprintf('SELECT currval(%s)', $this->quote($sequenceName)));
             return $result ?: 0;
@@ -1918,11 +2036,11 @@ class Pgsql extends AbstractPdoAdapter
     public function dropTrigger(string $triggerName): self
     {
         // PostgreSQL requires table name to drop trigger - query system catalog to find it
-        $sql = "SELECT c.relname AS table_name
+        $sql = 'SELECT c.relname AS table_name
                 FROM pg_trigger t
                 JOIN pg_class c ON t.tgrelid = c.oid
-                WHERE t.tgname = " . $this->quote($triggerName) . "
-                AND NOT t.tgisinternal";
+                WHERE t.tgname = ' . $this->quote($triggerName) . '
+                AND NOT t.tgisinternal';
 
         $result = $this->raw_fetchRow($sql);
 
