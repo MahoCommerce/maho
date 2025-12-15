@@ -471,17 +471,13 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Generate fragment of SQL for concatenation
-     * Uses || operator instead of CONCAT()
+     * Generate fragment of SQL for concatenation with separator
+     * Uses || operator with quoted separator values
      */
     #[\Override]
-    public function getConcatSql(array $data, ?string $separator = null): \Maho\Db\Expr
+    protected function getConcatWithSeparatorSql(array $data, string $separator): \Maho\Db\Expr
     {
-        if (empty($separator)) {
-            return new \Maho\Db\Expr('(' . implode(' || ', $data) . ')');
-        }
-
-        // With separator, use CONCAT_WS equivalent
+        // With separator, build expression like: (a || 'sep' || b || 'sep' || c)
         $parts = [];
         foreach ($data as $i => $item) {
             if ($i > 0) {
@@ -490,15 +486,6 @@ class Pgsql extends AbstractPdoAdapter
             $parts[] = $item;
         }
         return new \Maho\Db\Expr('(' . implode(' || ', $parts) . ')');
-    }
-
-    /**
-     * Generate fragment of SQL that returns length of character string
-     */
-    #[\Override]
-    public function getLengthSql(string $string): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('LENGTH(%s)', $string));
     }
 
     /**
@@ -590,18 +577,6 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Prepare substring sql function
-     */
-    #[\Override]
-    public function getSubstringSql(\Maho\Db\Expr|string $stringExpression, int|string|\Maho\Db\Expr $pos, int|string|\Maho\Db\Expr|null $len = null): \Maho\Db\Expr
-    {
-        if (is_null($len)) {
-            return new \Maho\Db\Expr(sprintf('SUBSTRING(%s FROM %s)', $stringExpression, $pos));
-        }
-        return new \Maho\Db\Expr(sprintf('SUBSTRING(%s FROM %s FOR %s)', $stringExpression, $pos, $len));
-    }
-
-    /**
      * Prepare standard deviation sql function
      */
     #[\Override]
@@ -623,16 +598,6 @@ class Pgsql extends AbstractPdoAdapter
         // Cast to timestamp to avoid PostgreSQL ambiguity
         $expr = sprintf('EXTRACT(%s FROM (%s)::timestamp)', $this->_intervalUnits[$unit], $date);
         return new \Maho\Db\Expr($expr);
-    }
-
-    /**
-     * Get difference between two dates in days (PostgreSQL implementation)
-     */
-    #[\Override]
-    public function getDateDiffSql(\Maho\Db\Expr|string $date1, \Maho\Db\Expr|string $date2): \Maho\Db\Expr
-    {
-        // PostgreSQL: cast both dates to date type and subtract to get integer days
-        return new \Maho\Db\Expr(sprintf('((%s)::date - (%s)::date)', $date1, $date2));
     }
 
     /**

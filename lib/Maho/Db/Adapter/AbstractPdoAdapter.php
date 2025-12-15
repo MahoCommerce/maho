@@ -217,6 +217,16 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
+     * Returns the Doctrine DBAL Platform for this connection.
+     * Used for platform-agnostic SQL expression generation.
+     */
+    protected function getPlatform(): \Doctrine\DBAL\Platforms\AbstractPlatform
+    {
+        $this->_connect();
+        return $this->_connection->getDatabasePlatform();
+    }
+
+    /**
      * Check if currently in a transaction
      */
     public function isTransaction(): bool
@@ -614,23 +624,37 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Generate CONCAT SQL expression
-     * Note: CONCAT and CONCAT_WS work on both MySQL and PostgreSQL
+     * Generate CONCAT SQL expression using DBAL Platform
+     * Delegates to platform-specific getConcatExpression() for cross-database support
      */
     #[\Override]
     public function getConcatSql(array $data, ?string $separator = null): Expr
     {
-        $format = empty($separator) ? 'CONCAT(%s)' : "CONCAT_WS('{$separator}', %s)";
-        return new Expr(sprintf($format, implode(', ', $data)));
+        if (empty($separator)) {
+            // Use DBAL Platform for platform-agnostic concatenation
+            // MySQL uses CONCAT(), PostgreSQL uses ||
+            // Convert Expr objects to strings as DBAL expects string arguments
+            $strings = array_map(fn($item) => (string) $item, $data);
+            return new Expr($this->getPlatform()->getConcatExpression(...$strings));
+        }
+        // CONCAT_WS not in DBAL - use platform-specific implementation
+        return $this->getConcatWithSeparatorSql($data, $separator);
     }
 
     /**
-     * Generate LENGTH SQL expression (standard SQL)
+     * Generate CONCAT with separator SQL expression (platform-specific)
+     * MySQL uses CONCAT_WS(), PostgreSQL uses || with separator
+     */
+    abstract protected function getConcatWithSeparatorSql(array $data, string $separator): Expr;
+
+    /**
+     * Generate LENGTH SQL expression using DBAL Platform
+     * MySQL uses CHAR_LENGTH(), PostgreSQL uses LENGTH()
      */
     #[\Override]
     public function getLengthSql(string $string): Expr
     {
-        return new Expr(sprintf('LENGTH(%s)', $string));
+        return new Expr($this->getPlatform()->getLengthExpression($string));
     }
 
     /**
@@ -652,15 +676,17 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Generate SUBSTRING SQL expression (standard SQL)
+     * Generate SUBSTRING SQL expression using DBAL Platform
+     * Platform handles syntax differences (SUBSTRING FROM FOR vs positional args)
      */
     #[\Override]
     public function getSubstringSql(Expr|string $stringExpression, int|string|Expr $pos, int|string|Expr|null $len = null): Expr
     {
-        if (is_null($len)) {
-            return new Expr(sprintf('SUBSTRING(%s, %s)', $stringExpression, $pos));
-        }
-        return new Expr(sprintf('SUBSTRING(%s, %s, %s)', $stringExpression, $pos, $len));
+        $expr = (string) $stringExpression;
+        $start = (string) $pos;
+        $length = $len !== null ? (string) $len : null;
+
+        return new Expr($this->getPlatform()->getSubstringExpression($expr, $start, $length));
     }
 
     /**
@@ -675,6 +701,17 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
         $expr = sprintf('EXTRACT(%s FROM %s)', $this->_intervalUnits[$unit], $date);
         return new Expr($expr);
+    }
+
+    /**
+     * Generate date difference SQL expression using DBAL Platform
+     * Returns difference in days (date1 - date2)
+     * MySQL uses DATEDIFF(), PostgreSQL uses (DATE(date1)-DATE(date2))
+     */
+    #[\Override]
+    public function getDateDiffSql(Expr|string $date1, Expr|string $date2): Expr
+    {
+        return new Expr($this->getPlatform()->getDateDiffExpression((string) $date1, (string) $date2));
     }
 
     // =========================================================================

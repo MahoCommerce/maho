@@ -3087,20 +3087,10 @@ class Mysql extends AbstractPdoAdapter
      * @param string $separator concatenate with separator
      */
     #[\Override]
-    public function getConcatSql(array $data, ?string $separator = null): \Maho\Db\Expr
+    protected function getConcatWithSeparatorSql(array $data, string $separator): \Maho\Db\Expr
     {
-        $format = empty($separator) ? 'CONCAT(%s)' : "CONCAT_WS('{$separator}', %s)";
-        return new \Maho\Db\Expr(sprintf($format, implode(', ', $data)));
-    }
-
-    /**
-     * Generate fragment of SQL that returns length of character string
-     * The string argument must be quoted
-     */
-    #[\Override]
-    public function getLengthSql(string $string): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('LENGTH(%s)', $string));
+        // MySQL uses CONCAT_WS (concat with separator)
+        return new \Maho\Db\Expr(sprintf("CONCAT_WS('%s', %s)", $separator, implode(', ', $data)));
     }
 
     /**
@@ -3202,20 +3192,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Prepare substring sql function
-     *
-     * @param \Maho\Db\Expr|string $stringExpression quoted field name or SQL statement
-     */
-    #[\Override]
-    public function getSubstringSql(\Maho\Db\Expr|string $stringExpression, int|string|\Maho\Db\Expr $pos, int|string|\Maho\Db\Expr|null $len = null): \Maho\Db\Expr
-    {
-        if (is_null($len)) {
-            return new \Maho\Db\Expr(sprintf('SUBSTRING(%s, %s)', $stringExpression, $pos));
-        }
-        return new \Maho\Db\Expr(sprintf('SUBSTRING(%s, %s, %s)', $stringExpression, $pos, $len));
-    }
-
-    /**
      * Prepare standard deviation sql function
      *
      * @param \Maho\Db\Expr|string $expressionField   quoted field name or SQL statement
@@ -3243,15 +3219,6 @@ class Mysql extends AbstractPdoAdapter
 
         $expr = sprintf('EXTRACT(%s FROM %s)', $this->_intervalUnits[$unit], $date);
         return new \Maho\Db\Expr($expr);
-    }
-
-    /**
-     * Get difference between two dates in days (MySQL implementation)
-     */
-    #[\Override]
-    public function getDateDiffSql(\Maho\Db\Expr|string $date1, \Maho\Db\Expr|string $date2): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('DATEDIFF(%s, %s)', $date1, $date2));
     }
 
     /**
