@@ -223,8 +223,8 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('wishlist_item');
             expect($sql)->toContain('wishlist');
             expect($sql)->toContain('MAX(wi.added_at)');
-            // Check for either MySQL (DATEDIFF) or PostgreSQL (DATE() function or ::date cast) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
             expect($sql)->toMatch('/202[5-9]-/'); // Verify date is properly formatted
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');

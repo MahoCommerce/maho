@@ -53,9 +53,11 @@ describe('Varien_Db_Expr Compatibility', function () {
 
         $sql = $select->assemble();
 
-        // MySQL uses UNIX_TIMESTAMP(), PostgreSQL uses EXTRACT(EPOCH FROM ...)
+        // MySQL uses UNIX_TIMESTAMP(), PostgreSQL uses EXTRACT(EPOCH FROM ...), SQLite uses STRFTIME
         if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql) {
             expect($sql)->toContain('EXTRACT(EPOCH FROM NOW())');
+        } elseif ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite) {
+            expect($sql)->toContain("STRFTIME('%s'");
         } else {
             expect($sql)->toContain('UNIX_TIMESTAMP()');
         }
@@ -79,8 +81,8 @@ describe('SQL Generation Compatibility - Simple Queries', function () {
 
         $sql = $select->assemble();
 
-        // Verify SQL structure - MySQL uses backticks, PostgreSQL uses double quotes
-        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+        // Verify SQL structure - MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
         expect($sql)->toContain('SELECT');
         expect($sql)->toContain("{$q}scope{$q}");
         expect($sql)->toContain("{$q}path{$q}");
@@ -263,7 +265,12 @@ describe('SQL Generation Compatibility - Special Clauses', function () {
 
         $sql = $select->assemble();
 
-        expect($sql)->toContain('FOR UPDATE');
+        // SQLite uses transaction-level locking, so FOR UPDATE is silently ignored
+        if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite) {
+            expect($sql)->not->toContain('FOR UPDATE');
+        } else {
+            expect($sql)->toContain('FOR UPDATE');
+        }
     });
 
     it('generates expected LIMIT with OFFSET', function () {
