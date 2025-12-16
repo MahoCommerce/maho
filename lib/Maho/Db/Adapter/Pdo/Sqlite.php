@@ -487,7 +487,7 @@ class Sqlite extends AbstractPdoAdapter
     public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string
     {
         // Handle integers without quoting for SQLite's strict type comparisons
-        if (is_int($value) || (is_numeric($value) && strpos((string) $value, '.') === false && strpos((string) $value, 'e') === false)) {
+        if (is_int($value) || (is_numeric($value) && !str_contains((string) $value, '.') && !str_contains((string) $value, 'e'))) {
             return (string) (int) $value;
         }
 

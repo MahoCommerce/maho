@@ -82,7 +82,7 @@ class Mage_Reports_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource
 
         // Now add ranking using ROW_NUMBER() window function
         $rankCols = [];
-        foreach ($columns as $alias => $col) {
+        foreach (array_keys($columns) as $alias) {
             $rankCols[] = $alias;
         }
         $rankCols[] = "total_qty AS $column";

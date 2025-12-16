@@ -66,11 +66,7 @@ class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Hel
             'blob'     => Maho\Db\Ddl\Table::TYPE_BLOB,
         ];
 
-        if (isset($doctrineTypeMap[$columnType])) {
-            return $doctrineTypeMap[$columnType];
-        }
-
-        return array_search($columnType, $this->_ddlColumnTypes);
+        return $doctrineTypeMap[$columnType] ?? array_search($columnType, $this->_ddlColumnTypes);
     }
 
     /**
