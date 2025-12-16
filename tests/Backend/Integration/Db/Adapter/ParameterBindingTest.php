@@ -243,8 +243,8 @@ describe('Quote Methods', function () {
         $tableName = 'users';
         $quoted = $this->adapter->quoteIdentifier($tableName);
 
-        // MySQL uses backticks, PostgreSQL uses double quotes
-        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+        // MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
         expect($quoted)->toBe("{$q}users{$q}");
     });
 
@@ -254,8 +254,8 @@ describe('Quote Methods', function () {
 
         $quoted = $this->adapter->quoteColumnAs($column, $alias);
 
-        // MySQL uses backticks, PostgreSQL uses double quotes
-        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+        // MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
         expect($quoted)->toContain("{$q}user_id{$q}");
         expect($quoted)->toContain('AS');
         expect($quoted)->toContain("{$q}id{$q}");

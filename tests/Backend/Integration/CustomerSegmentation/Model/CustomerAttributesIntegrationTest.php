@@ -178,11 +178,11 @@ describe('Customer Attributes Integration Tests', function () {
             $sql = $condition->getConditionsSql($adapter);
 
             expect($sql)->toBeString();
-            // Check for either MySQL (DATEDIFF, DATE_FORMAT, YEAR, DAYOFYEAR) or PostgreSQL (EXTRACT, MAKE_DATE) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
-            expect($sql)->toMatch('/DATE_FORMAT|MAKE_DATE/');
-            expect($sql)->toMatch('/YEAR|EXTRACT/');
-            expect($sql)->toMatch('/DAYOFYEAR|DOY/');
+            // Check for MySQL (DATEDIFF, DATE_FORMAT, YEAR, DAYOFYEAR), PostgreSQL (EXTRACT, MAKE_DATE), or SQLite (JULIANDAY, STRFTIME) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
+            expect($sql)->toMatch('/DATE_FORMAT|MAKE_DATE|STRFTIME/');
+            expect($sql)->toMatch('/YEAR|EXTRACT|STRFTIME/');
+            expect($sql)->toMatch('/DAYOFYEAR|DOY|%m-%d/');
         });
     });
 

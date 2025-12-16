@@ -356,12 +356,13 @@ describe('Product Wishlist Condition Integration Tests', function () {
             $this->condition->setValue('1');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            expect($sql)->toContain('w.shared = \'1\'');
+            // SQLite may not quote integer values
+            expect($sql)->toMatch('/w\.shared = .?1.?/');
 
             // Test No (not shared)
             $this->condition->setValue('0');
             $sql = $this->condition->getConditionsSql($this->adapter);
-            expect($sql)->toContain('w.shared = \'0\'');
+            expect($sql)->toMatch('/w\.shared = .?0.?/');
         });
 
         test('handles wishlist items count aggregation', function () {
@@ -374,7 +375,8 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('COUNT(*)');
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');
-            expect($sql)->toContain('COUNT(*) >= \'10\'');
+            // SQLite may not quote integer values
+            expect($sql)->toMatch('/COUNT\(\*\) >= .?10.?/');
         });
 
         test('handles date-based wishlist conditions', function () {
