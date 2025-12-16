@@ -839,31 +839,31 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
         if ($this->isLoaded()) {
             return $this;
         }
-        Varien_Profiler::start('__EAV_COLLECTION_BEFORE_LOAD__');
+        \Maho\Profiler::start('__EAV_COLLECTION_BEFORE_LOAD__');
         Mage::dispatchEvent('eav_collection_abstract_load_before', ['collection' => $this]);
         $this->_beforeLoad();
-        Varien_Profiler::stop('__EAV_COLLECTION_BEFORE_LOAD__');
+        \Maho\Profiler::stop('__EAV_COLLECTION_BEFORE_LOAD__');
 
         $this->_renderFilters();
         $this->_renderOrders();
 
-        Varien_Profiler::start('__EAV_COLLECTION_LOAD_ENT__');
+        \Maho\Profiler::start('__EAV_COLLECTION_LOAD_ENT__');
         $this->_loadEntities($printQuery, $logQuery);
-        Varien_Profiler::stop('__EAV_COLLECTION_LOAD_ENT__');
-        Varien_Profiler::start('__EAV_COLLECTION_LOAD_ATTR__');
+        \Maho\Profiler::stop('__EAV_COLLECTION_LOAD_ENT__');
+        \Maho\Profiler::start('__EAV_COLLECTION_LOAD_ATTR__');
         $this->_loadAttributes($printQuery, $logQuery);
-        Varien_Profiler::stop('__EAV_COLLECTION_LOAD_ATTR__');
+        \Maho\Profiler::stop('__EAV_COLLECTION_LOAD_ATTR__');
 
-        Varien_Profiler::start('__EAV_COLLECTION_ORIG_DATA__');
+        \Maho\Profiler::start('__EAV_COLLECTION_ORIG_DATA__');
         foreach ($this->_items as $item) {
             $item->setOrigData();
         }
-        Varien_Profiler::stop('__EAV_COLLECTION_ORIG_DATA__');
+        \Maho\Profiler::stop('__EAV_COLLECTION_ORIG_DATA__');
 
         $this->_setIsLoaded();
-        Varien_Profiler::start('__EAV_COLLECTION_AFTER_LOAD__');
+        \Maho\Profiler::start('__EAV_COLLECTION_AFTER_LOAD__');
         $this->_afterLoad();
-        Varien_Profiler::stop('__EAV_COLLECTION_AFTER_LOAD__');
+        \Maho\Profiler::stop('__EAV_COLLECTION_AFTER_LOAD__');
         return $this;
     }
 

@@ -252,13 +252,13 @@ class Mage_Core_Model_App
             $options = ['etc_dir' => $options];
         }
 
-        Varien_Profiler::start('mage::app::init::config');
+        \Maho\Profiler::start('mage::app::init::config');
         $this->_config = Mage::getConfig();
         $this->_config->setOptions($options);
         $this->_initBaseConfig();
         $this->_initCache();
         $this->_config->init($options);
-        Varien_Profiler::stop('mage::app::init::config');
+        \Maho\Profiler::stop('mage::app::init::config');
 
         if ($this->_isInstalled === null) {
             $this->_isInstalled = Mage::isInstalled($options);
@@ -384,9 +384,9 @@ class Mage_Core_Model_App
      */
     protected function _initBaseConfig()
     {
-        Varien_Profiler::start('mage::app::init::system_config');
+        \Maho\Profiler::start('mage::app::init::system_config');
         $this->_config->loadBase();
-        Varien_Profiler::stop('mage::app::init::system_config');
+        \Maho\Profiler::stop('mage::app::init::system_config');
         return $this;
     }
 
@@ -423,9 +423,9 @@ class Mage_Core_Model_App
                 if (!$this->_config->loadModulesCache()) {
                     $this->_config->loadModules();
                     if ($this->_config->isLocalConfigLoaded() && !$this->_shouldSkipProcessModulesUpdates()) {
-                        Varien_Profiler::start('mage::app::init::apply_db_schema_updates');
+                        \Maho\Profiler::start('mage::app::init::apply_db_schema_updates');
                         Mage_Core_Model_Resource_Setup::applyAllUpdates();
-                        Varien_Profiler::stop('mage::app::init::apply_db_schema_updates');
+                        \Maho\Profiler::stop('mage::app::init::apply_db_schema_updates');
                     }
                     $this->_config->loadDb();
                     $this->_config->loadEnv();
@@ -477,9 +477,9 @@ class Mage_Core_Model_App
      */
     protected function _initCurrentStore($scopeCode, $scopeType)
     {
-        Varien_Profiler::start('mage::app::init::stores');
+        \Maho\Profiler::start('mage::app::init::stores');
         $this->_initStores();
-        Varien_Profiler::stop('mage::app::init::stores');
+        \Maho\Profiler::stop('mage::app::init::stores');
 
         if (empty($scopeCode) && !is_null($this->_website)) {
             $scopeCode = $this->_website->getCode();
@@ -767,9 +767,9 @@ class Mage_Core_Model_App
     {
         $this->_frontController = new Mage_Core_Controller_Varien_Front();
         Mage::register('controller', $this->_frontController);
-        Varien_Profiler::start('mage::app::init_front_controller');
+        \Maho\Profiler::start('mage::app::init_front_controller');
         $this->_frontController->init();
-        Varien_Profiler::stop('mage::app::init_front_controller');
+        \Maho\Profiler::stop('mage::app::init_front_controller');
         return $this;
     }
 
@@ -1411,7 +1411,7 @@ class Mage_Core_Model_App
                     ...$obs['args'], // Default config.xml <args>
                     ...$args,        // Mage::dispatchEvent() $args
                 ]);
-                Varien_Profiler::start('OBSERVER: ' . $obsName);
+                \Maho\Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
                     case 'disabled':
                         break;
@@ -1427,7 +1427,7 @@ class Mage_Core_Model_App
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                 }
-                Varien_Profiler::stop('OBSERVER: ' . $obsName);
+                \Maho\Profiler::stop('OBSERVER: ' . $obsName);
             }
         }
         return $this;

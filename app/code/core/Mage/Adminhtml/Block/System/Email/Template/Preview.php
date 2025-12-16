@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
             $this->maliciousCodeFilter($template->getTemplateText()),
         );
 
-        Varien_Profiler::start('email_template_proccessing');
+        \Maho\Profiler::start('email_template_proccessing');
         $vars = [];
 
         $templateProcessed = $template->getProcessedTemplate($vars, true);
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
             $templateProcessed = '<pre>' . htmlspecialchars($templateProcessed) . '</pre>';
         }
 
-        Varien_Profiler::stop('email_template_proccessing');
+        \Maho\Profiler::stop('email_template_proccessing');
 
         // Stop store emulation process
         $appEmulation->stopEnvironmentEmulation($initialEnvironmentInfo);
