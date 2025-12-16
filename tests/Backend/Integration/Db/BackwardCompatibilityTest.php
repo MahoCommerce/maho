@@ -403,8 +403,8 @@ describe('SQL Generation Compatibility - Special Methods', function () {
     });
 
     it('generates expected identifier quoting', function () {
-        // MySQL uses backticks, PostgreSQL uses double quotes
-        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+        // MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
 
         $quoted = $this->adapter->quoteIdentifier('table_name');
         expect($quoted)->toBe("{$q}table_name{$q}");
@@ -419,8 +419,8 @@ describe('SQL Generation Compatibility - Special Methods', function () {
     });
 
     it('generates expected quoteColumnAs', function () {
-        // MySQL uses backticks, PostgreSQL uses double quotes
-        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+        // MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
 
         $quoted = $this->adapter->quoteColumnAs('user_id', 'id');
         expect($quoted)->toContain("{$q}user_id{$q}");
@@ -429,8 +429,8 @@ describe('SQL Generation Compatibility - Special Methods', function () {
     });
 
     it('generates expected quoteTableAs', function () {
-        // MySQL uses backticks, PostgreSQL uses double quotes
-        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql ? '"' : '`';
+        // MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
 
         $quoted = $this->adapter->quoteTableAs('users', 'u');
         expect($quoted)->toContain("{$q}users{$q}");
