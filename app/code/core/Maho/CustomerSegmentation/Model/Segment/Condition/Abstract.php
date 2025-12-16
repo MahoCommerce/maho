@@ -82,6 +82,11 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
 
         $value = $this->prepareValueForSql($value, $operator);
 
+        // For numeric comparisons, don't quote numeric values (SQLite does strict string comparison)
+        if (is_numeric($value) && in_array($operator, ['=', '!=', '<>', '<', '>', '<=', '>='], true)) {
+            return "{$field} {$operator} " . (float) $value;
+        }
+
         return match ($operator) {
             'IN', 'NOT IN' => $adapter->quoteInto("{$field} {$operator} (?)", $value),
             'LIKE', 'NOT LIKE' => $adapter->quoteInto("{$field} {$operator} ?", $value),
