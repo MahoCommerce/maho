@@ -7886,3 +7886,25 @@ input[type="datetime-local"]:focus {
 #offcanvas #minicart-error-message {
     border-left: 5px solid var(--maho-color-error);
 }
+
+/* ============================================ *
+ * AJAX Loader Overlay
+ * ============================================ */
+
+.maho-loader-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.2s ease;
+}
+
+.maho-loader-spinner {
+    width: 32px;
+    height: 32px;
+    background: url('../images/loading.svg') no-repeat center;
+    background-size: contain;
+}

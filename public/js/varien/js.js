@@ -89,6 +89,30 @@ function mahoOnReady(callback) {
     }
 }
 
+let mahoLoaderTimeout, mahoLoaderElement;
+function showLoader(loaderArea) {
+    loaderArea = (typeof loaderArea === 'string' ? document.getElementById(loaderArea) : loaderArea) || document.body;
+    hideLoader();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'maho-loader-overlay';
+    overlay.innerHTML = '<div class="maho-loader-spinner"></div>';
+    overlay.style.opacity = '0';
+
+    if (getComputedStyle(loaderArea).position === 'static') {
+        loaderArea.style.position = 'relative';
+    }
+
+    loaderArea.appendChild(mahoLoaderElement = overlay);
+    mahoLoaderTimeout = setTimeout(() => overlay.style.opacity = '', 150);
+}
+
+function hideLoader() {
+    clearTimeout(mahoLoaderTimeout);
+    mahoLoaderElement?.remove();
+    mahoLoaderTimeout = mahoLoaderElement = null;
+}
+
 function popWin(url,win,para) {
     var win = window.open(url,win,para);
     win.focus();
