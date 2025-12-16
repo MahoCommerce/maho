@@ -4284,6 +4284,7 @@ p.product-name a:hover {
   max-height: 100vh;
   background: var(--maho-color-background);
   border: none;
+  border-radius: 0;
   padding: 0;
   margin: 0;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
