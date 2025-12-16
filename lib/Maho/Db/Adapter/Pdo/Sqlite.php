@@ -162,8 +162,8 @@ class Sqlite extends AbstractPdoAdapter
      */
     protected function _createSqliteFunction(\PDO $pdo, string $name, callable $callback, int $numArgs): void
     {
-        // PHP 8.5+ uses Pdo\Sqlite::createFunction(), older versions use PDO::sqliteCreateFunction()
-        if ($pdo instanceof \Pdo\Sqlite) {
+        // PHP 8.5+ has Pdo\Sqlite with createFunction(), older versions use PDO::sqliteCreateFunction()
+        if (PHP_VERSION_ID >= 80500 && method_exists($pdo, 'createFunction')) {
             $pdo->createFunction($name, $callback, $numArgs);
         } else {
             $pdo->sqliteCreateFunction($name, $callback, $numArgs);
