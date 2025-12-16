@@ -41,6 +41,48 @@ class SqlConverter
     }
 
     /**
+     * Convert MySQL SQL content to SQLite-compatible SQL
+     */
+    public function mysqlToSqlite(string $mysqlSql): string
+    {
+        // Remove MySQL-specific comments (/*!40101 SET ... */)
+        $sql = preg_replace('/\/\*!\d+.*?\*\/;?\s*/s', '', $mysqlSql);
+
+        // Remove LOCK/UNLOCK TABLE statements
+        $sql = preg_replace('/\bLOCK TABLES.*?;\s*/i', '', $sql);
+        $sql = preg_replace('/\bUNLOCK TABLES;\s*/i', '', $sql);
+
+        // Remove MySQL SET statements
+        $sql = preg_replace('/SET\s+@\w+\s*=.*?;\s*/i', '', $sql);
+        $sql = preg_replace('/SET\s+(NAMES|TIME_ZONE|SQL_MODE|FOREIGN_KEY_CHECKS|UNIQUE_CHECKS|SQL_NOTES|SESSION|GLOBAL|@@)\s*[^;]*;\s*/i', '', $sql);
+
+        // Convert REPLACE INTO to INSERT OR REPLACE INTO for SQLite
+        $sql = preg_replace('/\bREPLACE\s+INTO\b/i', 'INSERT OR REPLACE INTO', $sql);
+
+        // Convert MySQL hex literals (X'...' or 0x...) to SQLite integers
+        $sql = preg_replace_callback(
+            "/X'([0-9A-Fa-f]+)'/",
+            fn($m) => (string) (strlen($m[1]) <= 15 ? hexdec($m[1]) : 0),
+            $sql,
+        );
+        $sql = preg_replace_callback(
+            '/\b0x([0-9A-Fa-f]+)\b/',
+            fn($m) => (string) (strlen($m[1]) <= 15 ? hexdec($m[1]) : 0),
+            $sql,
+        );
+
+        // Replace backticks with double quotes for identifiers
+        $sql = $this->convertBackticksToDoubleQuotes($sql);
+
+        // Convert MySQL escape sequences inside string literals
+        $sql = $this->convertEscapeSequences($sql);
+
+        // SQLite uses integers (0/1) for booleans, so no conversion needed
+
+        return $sql;
+    }
+
+    /**
      * Convert MySQL SQL content to PostgreSQL-compatible SQL
      */
     public function mysqlToPostgresql(string $mysqlSql): string
@@ -439,13 +481,16 @@ class SqlConverter
      * Tables that should use ON CONFLICT DO UPDATE instead of DO NOTHING
      * These are content tables where sample data should replace default content
      * Uses primary key or unique constraint columns for conflict detection
+     *
+     * conflict_columns: Column(s) that form the unique constraint (can be string or array)
+     * update_columns: Columns to update on conflict
      */
     private const UPSERT_TABLES = [
-        'cms_page' => ['conflict_column' => 'page_id', 'update_columns' => ['title', 'root_template', 'meta_keywords', 'meta_description', 'identifier', 'content_heading', 'content', 'is_active', 'sort_order', 'layout_update_xml', 'custom_theme', 'custom_root_template', 'custom_layout_update_xml', 'custom_theme_from', 'custom_theme_to']],
-        'cms_block' => ['conflict_column' => 'block_id', 'update_columns' => ['title', 'identifier', 'content', 'is_active']],
-        'core_config_data' => ['conflict_column' => 'config_id', 'update_columns' => ['scope', 'scope_id', 'path', 'value', 'updated_at']],
-        'permission_block' => ['conflict_column' => 'block_name', 'update_columns' => ['is_allowed']],
-        'permission_variable' => ['conflict_column' => 'variable_name', 'update_columns' => ['is_allowed']],
+        'cms_page' => ['conflict_columns' => 'page_id', 'update_columns' => ['title', 'root_template', 'meta_keywords', 'meta_description', 'identifier', 'content_heading', 'content', 'is_active', 'sort_order', 'layout_update_xml', 'custom_theme', 'custom_root_template', 'custom_layout_update_xml', 'custom_theme_from', 'custom_theme_to']],
+        'cms_block' => ['conflict_columns' => 'block_id', 'update_columns' => ['title', 'identifier', 'content', 'is_active']],
+        'core_config_data' => ['conflict_columns' => ['scope', 'scope_id', 'path'], 'update_columns' => ['value', 'updated_at']],
+        'permission_block' => ['conflict_columns' => 'block_name', 'update_columns' => ['is_allowed']],
+        'permission_variable' => ['conflict_columns' => 'variable_name', 'update_columns' => ['is_allowed']],
     ];
 
     /**
@@ -508,8 +553,15 @@ class SqlConverter
         }
 
         $config = self::UPSERT_TABLES[$tableName];
-        $conflictColumn = $config['conflict_column'];
+        $conflictColumns = $config['conflict_columns'];
         $updateColumns = $config['update_columns'];
+
+        // Handle single column or array of columns
+        if (is_array($conflictColumns)) {
+            $conflictClause = implode('", "', $conflictColumns);
+        } else {
+            $conflictClause = $conflictColumns;
+        }
 
         // Build the DO UPDATE SET clause
         $updateParts = [];
@@ -519,7 +571,7 @@ class SqlConverter
 
         $updateClause = implode(', ', $updateParts);
 
-        return $statement . " ON CONFLICT (\"{$conflictColumn}\") DO UPDATE SET {$updateClause}";
+        return $statement . " ON CONFLICT (\"{$conflictClause}\") DO UPDATE SET {$updateClause}";
     }
 
     /**

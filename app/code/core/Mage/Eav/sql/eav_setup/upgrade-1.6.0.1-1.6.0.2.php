@@ -38,7 +38,7 @@ $table = $installer->getConnection()
         'default'   => null,
     ], 'Filename')
     ->addIndex(
-        $installer->getIdxName('eav/attribute_option_value', ['option_id']),
+        $installer->getIdxName('eav/attribute_option_swatch', ['option_id']),
         ['option_id'],
         ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )

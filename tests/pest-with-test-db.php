@@ -16,9 +16,10 @@ declare(strict_types=1);
  * 2. local.xml (if configured for the same database type being tested)
  *
  * Environment variables:
- * - MAHO_DB_TYPE: Database type ('mysql' or 'pgsql'), defaults to 'mysql'
+ * - MAHO_DB_TYPE: Database type ('mysql', 'pgsql', or 'sqlite'), defaults to 'mysql'
  * - MAHO_MYSQL_HOST, MAHO_MYSQL_USER, MAHO_MYSQL_PASS, MAHO_MYSQL_DBNAME: MySQL credentials
  * - MAHO_PGSQL_HOST, MAHO_PGSQL_USER, MAHO_PGSQL_PASS, MAHO_PGSQL_DBNAME: PostgreSQL credentials
+ * - MAHO_SQLITE_PATH: SQLite database file path (defaults to var/db/maho_test.sqlite)
  *
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -65,8 +66,15 @@ class PestTestRunner
 
     private function loadDatabaseConfig(): void
     {
-        // Check environment variables first (for both MySQL and PostgreSQL)
-        if ($this->dbType === 'pgsql') {
+        // Check environment variables first (for MySQL, PostgreSQL, and SQLite)
+        if ($this->dbType === 'sqlite') {
+            // SQLite uses file path instead of host/user/password
+            $this->dbConfig = [
+                'path' => getenv('MAHO_SQLITE_PATH') ?: 'var/db/maho.sqlite',
+                'name' => 'maho', // Used for testDbName generation
+            ];
+            return;
+        } elseif ($this->dbType === 'pgsql') {
             if (getenv('MAHO_PGSQL_HOST') || getenv('MAHO_PGSQL_USER')) {
                 $this->dbConfig = [
                     'host' => getenv('MAHO_PGSQL_HOST') ?: 'localhost',
@@ -90,7 +98,11 @@ class PestTestRunner
 
         // Fall back to reading from existing local.xml
         if (!file_exists(self::LOCAL_XML_PATH)) {
-            $envPrefix = $this->dbType === 'pgsql' ? 'MAHO_PGSQL_*' : 'MAHO_MYSQL_*';
+            $envPrefix = match ($this->dbType) {
+                'pgsql' => 'MAHO_PGSQL_*',
+                'sqlite' => 'MAHO_SQLITE_PATH',
+                default => 'MAHO_MYSQL_*',
+            };
             throw new Exception("local.xml not found. Please set {$envPrefix} environment variables or install Maho first.");
         }
 
@@ -108,6 +120,9 @@ class PestTestRunner
         }
         if ($this->dbType === 'mysql' && $configuredDbType === 'pgsql') {
             throw new Exception('local.xml is configured for PostgreSQL. Please set MAHO_MYSQL_* environment variables for MySQL testing.');
+        }
+        if ($this->dbType === 'sqlite' && $configuredDbType !== 'sqlite') {
+            throw new Exception("local.xml is configured for {$configuredDbType}. Please set MAHO_SQLITE_PATH environment variable for SQLite testing.");
         }
 
         $this->dbConfig = [
@@ -144,7 +159,9 @@ class PestTestRunner
     {
         echo 'Creating fresh test database: ' . $this->testDbName . "\n";
 
-        if ($this->dbType === 'pgsql') {
+        if ($this->dbType === 'sqlite') {
+            $this->setupSqliteDatabase();
+        } elseif ($this->dbType === 'pgsql') {
             $this->setupPostgresDatabase();
         } else {
             $this->setupMysqlDatabase();
@@ -173,6 +190,48 @@ class PestTestRunner
         $this->installMaho('pgsql');
     }
 
+    private function setupSqliteDatabase(): void
+    {
+        // For SQLite, the test database is a file. Delete it if it exists.
+        $testDbPath = $this->getSqliteTestDbPath();
+
+        // Ensure directory exists
+        $dir = dirname($testDbPath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        // Delete existing database file
+        if (file_exists($testDbPath)) {
+            unlink($testDbPath);
+            echo "✓ Removed existing test database file\n";
+        }
+
+        echo "✓ Prepared test database path: {$testDbPath}\n";
+
+        $this->installMaho('sqlite');
+    }
+
+    private function getSqliteTestDbPath(): string
+    {
+        // Use the configured path but append _test to the filename
+        $basePath = $this->dbConfig['path'];
+        $pathInfo = pathinfo($basePath);
+        $testDbName = ($pathInfo['filename'] ?? 'maho') . '_test';
+        if (isset($pathInfo['extension'])) {
+            $testDbName .= '.' . $pathInfo['extension'];
+        } else {
+            $testDbName .= '.sqlite';
+        }
+
+        // If path is relative, make it relative to current directory
+        if (isset($pathInfo['dirname']) && $pathInfo['dirname'] !== '.') {
+            return $pathInfo['dirname'] . DIRECTORY_SEPARATOR . $testDbName;
+        }
+
+        return 'var/db/' . $testDbName;
+    }
+
     private function installMaho(string $dbEngine): void
     {
         // Temporarily move local.xml so Maho thinks it's not installed
@@ -182,18 +241,15 @@ class PestTestRunner
         }
 
         try {
-            // Install Maho with sample data for both MySQL and PostgreSQL
+            // Install Maho with sample data for all database engines
             $sampleData = ' --sample_data 1';
 
+            // Build base install command
             $installCmd = './maho install --ansi' .
             ' --license_agreement_accepted yes' .
             ' --locale en_US' .
             ' --timezone Europe/London' .
             ' --default_currency USD' .
-            ' --db_host ' . escapeshellarg($this->dbConfig['host']) .
-            ' --db_name ' . escapeshellarg($this->testDbName) .
-            ' --db_user ' . escapeshellarg($this->dbConfig['user']) .
-            ' --db_pass ' . escapeshellarg($this->dbConfig['pass']) .
             ' --db_engine ' . escapeshellarg($dbEngine) .
             ' --url http://maho.test/' .
             ' --secure_base_url http://maho.test/' .
@@ -205,6 +261,18 @@ class PestTestRunner
             ' --admin_username admin' .
             ' --admin_password testpassword123' .
             $sampleData;
+
+            // Add database-specific parameters
+            if ($dbEngine === 'sqlite') {
+                // SQLite uses db_name for the file path
+                $installCmd .= ' --db_name ' . escapeshellarg($this->getSqliteTestDbPath());
+            } else {
+                // MySQL and PostgreSQL use host/user/pass/name
+                $installCmd .= ' --db_host ' . escapeshellarg($this->dbConfig['host']) .
+                    ' --db_name ' . escapeshellarg($this->testDbName) .
+                    ' --db_user ' . escapeshellarg($this->dbConfig['user']) .
+                    ' --db_pass ' . escapeshellarg($this->dbConfig['pass']);
+            }
 
             echo 'Installing Maho' . ($sampleData ? ' with sample data' : '') . "...\n";
             $this->executeCommand($installCmd);

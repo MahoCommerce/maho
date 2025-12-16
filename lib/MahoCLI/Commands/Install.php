@@ -45,7 +45,7 @@ class Install extends BaseMahoCommand
         $this->addOption('db_user', null, InputOption::VALUE_REQUIRED, 'Database username');
         $this->addOption('db_pass', null, InputOption::VALUE_REQUIRED, 'Database password');
         $this->addOption('db_prefix', null, InputOption::VALUE_OPTIONAL, 'Database Tables Prefix. No table prefix will be used if not specified', '');
-        $this->addOption('db_engine', null, InputOption::VALUE_OPTIONAL, 'Database engine (mysql or pgsql)', 'mysql');
+        $this->addOption('db_engine', null, InputOption::VALUE_OPTIONAL, 'Database engine (mysql, pgsql, or sqlite)', 'mysql');
 
         // Session options
         $this->addOption('session_save', null, InputOption::VALUE_OPTIONAL, 'Where to store session data (files/db)', 'files');
@@ -223,6 +223,44 @@ class Install extends BaseMahoCommand
                     $output->writeln('<info>Updating PostgreSQL sequences...</info>');
                     $this->updatePostgresSequences($pdo);
 
+                } elseif ($dbEngine === 'sqlite') {
+                    // SQLite - convert MySQL SQL to SQLite
+                    $dbPath = $dbName;
+                    // Resolve relative paths
+                    if ($dbPath[0] !== '/' && !str_contains($dbPath, ':')) {
+                        $baseDir = defined('BP') ? BP : getcwd();
+                        $dbDir = $baseDir . '/var/db';
+                        if (!is_dir($dbDir)) {
+                            mkdir($dbDir, 0755, true);
+                        }
+                        $dbPath = $dbDir . '/' . $dbPath;
+                    }
+
+                    $dsn = "sqlite:{$dbPath}";
+                    $pdo = new \PDO($dsn);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+                    // Use SQL converter for SQLite
+                    $converter = new \MahoCLI\Helper\SqlConverter();
+                    $converter->setPdo($pdo);
+
+                    foreach ($sqlFiles as $sqlFile) {
+                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                        $output->writeln("<info>Importing {$sqlFile} (converting to SQLite)...</info>");
+
+                        // Read and convert MySQL SQL to SQLite
+                        $mysqlContent = file_get_contents($sqlFilePath);
+                        $sqliteContent = $converter->mysqlToSqlite($mysqlContent);
+
+                        // Execute statements one by one for better error handling
+                        $converter->executeStatements($pdo, $sqliteContent, function ($current, $total) use ($output) {
+                            if ($current === $total || $current % 500 === 0) {
+                                $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                            }
+                        });
+                        $output->writeln("\n<info>Successfully imported {$sqlFile}</info>");
+                    }
+
                 } else {
                     // MySQL - use direct execution
                     $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
@@ -315,7 +353,21 @@ class Install extends BaseMahoCommand
         $dbPass = $input->getOption('db_pass');
         $dbEngine = $input->getOption('db_engine') ?? 'mysql';
 
-        if ($dbHost && $dbName && $dbUser !== null) {
+        // Handle SQLite separately - just delete the database file
+        if ($dbEngine === 'sqlite') {
+            $dbPath = getcwd() . '/var/db/' . $dbName;
+            if (file_exists($dbPath)) {
+                if (is_writable($dbPath)) {
+                    unlink($dbPath);
+                    $output->writeln('<info>Removed existing SQLite database</info>');
+                } else {
+                    $output->writeln('<error>Cannot remove SQLite database - file is not writable</error>');
+                    throw new \RuntimeException('Cannot remove SQLite database - insufficient permissions');
+                }
+            } else {
+                $output->writeln('<info>SQLite database does not exist yet</info>');
+            }
+        } elseif ($dbHost && $dbName && $dbUser !== null) {
             try {
                 $isPostgres = ($dbEngine === 'pgsql');
                 if ($isPostgres) {
