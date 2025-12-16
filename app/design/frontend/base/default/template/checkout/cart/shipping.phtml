@@ -10,7 +10,7 @@
  */
 ?>
 <?php /** @var Mage_Checkout_Block_Cart_Shipping $this */ ?>
-<div class="shipping">
+<div class="shipping" id="shipping-container">
     <h2><?= $this->__('Estimate Shipping and Tax') ?></h2>
     <div class="shipping-form">
        <form action="<?= $this->getFormActionUrl() ?>" method="post" id="shipping-zip-form">
@@ -59,6 +59,7 @@
             const countriesWithOptionalZip = <?= $this->helper('directory')->getCountriesWithOptionalZip(true) ?>;
             const form = document.getElementById('shipping-zip-form');
             const container = document.getElementById('co-shipping-method-form-container');
+            const shippingContainer = document.getElementById('shipping-container');
 
             function validate() {
                 const country = document.getElementById('country').value;
@@ -92,7 +93,7 @@
                     const result = await mahoFetch(form.action, {
                         method: 'POST',
                         body: new URLSearchParams(new FormData(form)),
-                        loaderArea: container
+                        loaderArea: shippingContainer
                     });
                     if (result.rates_html) container.innerHTML = result.rates_html;
                 } catch (error) {
@@ -108,7 +109,7 @@
                     const result = await mahoFetch(e.target.action, {
                         method: 'POST',
                         body: new URLSearchParams(new FormData(e.target)),
-                        loaderArea: container
+                        loaderArea: shippingContainer
                     });
                     updateTotals(result.totals_html);
                 } catch (error) {
