@@ -1275,16 +1275,166 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Drop the Foreign Key from table
      *
-     * SQLite doesn't support dropping individual foreign keys.
-     * This is a no-op as foreign keys are part of the table definition.
+     * SQLite doesn't support ALTER TABLE DROP FOREIGN KEY directly.
+     * This method recreates the table without the specified foreign key.
      */
     #[\Override]
     public function dropForeignKey(string $tableName, string $fkName, ?string $schemaName = null): self
     {
-        // SQLite doesn't support ALTER TABLE DROP FOREIGN KEY
-        // Foreign keys are defined as part of CREATE TABLE
-        // To remove a FK, would need to recreate the table
-        // For now, this is a no-op as Doctrine DBAL handles table recreation when needed
+        $actualTableName = $this->_getTableName($tableName, $schemaName);
+
+        // Get current foreign keys
+        $foreignKeys = $this->getForeignKeys($actualTableName, $schemaName);
+
+        // Check if the FK exists
+        // SQLite doesn't preserve FK constraint names, so we need to match by:
+        // 1. The stored FK_NAME (if it exists)
+        // 2. The array key
+        // 3. Generating what the FK name WOULD be based on structure
+        $fkNameUpper = strtoupper($fkName);
+        $foundFk = false;
+        $newForeignKeys = [];
+
+        foreach ($foreignKeys as $key => $fk) {
+            $isMatch = false;
+
+            // Check by stored name
+            $existingFkName = strtoupper($fk['FK_NAME'] ?? '');
+            if ($existingFkName !== '' && $existingFkName === $fkNameUpper) {
+                $isMatch = true;
+            }
+
+            // Check by array key
+            if (!$isMatch && strtoupper($key) === $fkNameUpper) {
+                $isMatch = true;
+            }
+
+            // Check by generating expected FK name from structure
+            if (!$isMatch && !empty($fk['COLUMN_NAME']) && !empty($fk['REF_TABLE_NAME']) && !empty($fk['REF_COLUMN_NAME'])) {
+                $generatedName = $this->getForeignKeyName(
+                    $actualTableName,
+                    $fk['COLUMN_NAME'],
+                    $fk['REF_TABLE_NAME'],
+                    $fk['REF_COLUMN_NAME'],
+                );
+                if (strtoupper($generatedName) === $fkNameUpper) {
+                    $isMatch = true;
+                }
+            }
+
+            if (!$isMatch) {
+                $newForeignKeys[$key] = $fk;
+            } else {
+                $foundFk = true;
+            }
+        }
+
+        // If FK wasn't found, nothing to do
+        if (!$foundFk) {
+            return $this;
+        }
+
+        // Get current table columns
+        $describe = $this->describeTable($actualTableName, $schemaName);
+
+        // Build column definitions for CREATE TABLE
+        $columnDefs = [];
+        $columnNames = [];
+
+        foreach ($describe as $colName => $colInfo) {
+            $columnNames[] = $this->quoteIdentifier($colName);
+            $existingDef = [
+                'TYPE' => $colInfo['DATA_TYPE'],
+                'LENGTH' => $colInfo['LENGTH'],
+                'NULLABLE' => $colInfo['NULLABLE'],
+                'DEFAULT' => $colInfo['DEFAULT'],
+                'PRIMARY' => $colInfo['PRIMARY'],
+                'IDENTITY' => $colInfo['IDENTITY'],
+            ];
+            $columnDefs[] = $this->quoteIdentifier($colName) . ' ' . $this->_getColumnDefinition($existingDef);
+        }
+
+        // Get indexes (excluding PRIMARY)
+        $indexes = $this->getIndexList($actualTableName, $schemaName);
+        $indexDefs = [];
+        foreach ($indexes as $indexData) {
+            if ($indexData['KEY_NAME'] === 'PRIMARY' || $indexData['INDEX_TYPE'] === AdapterInterface::INDEX_TYPE_PRIMARY) {
+                continue;
+            }
+            $indexDefs[] = $indexData;
+        }
+
+        // Build foreign key definitions (without the one we're dropping)
+        $fkDefs = [];
+        foreach ($newForeignKeys as $fk) {
+            $fkDefs[] = sprintf(
+                'FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE %s ON UPDATE %s',
+                $this->quoteIdentifier($fk['COLUMN_NAME']),
+                $this->quoteIdentifier($fk['REF_TABLE_NAME']),
+                $this->quoteIdentifier($fk['REF_COLUMN_NAME']),
+                $fk['ON_DELETE'],
+                $fk['ON_UPDATE'],
+            );
+        }
+
+        // Create temporary table name
+        $tempTableName = $actualTableName . '_temp_' . uniqid();
+
+        $allDefs = array_merge($columnDefs, $fkDefs);
+        $createSql = sprintf(
+            'CREATE TABLE %s (%s)',
+            $this->quoteIdentifier($tempTableName),
+            implode(', ', $allDefs),
+        );
+
+        // Execute table recreation using native SQLite transaction
+        $this->_connect();
+        $conn = $this->_connection;
+
+        try {
+            $conn->executeStatement('PRAGMA foreign_keys = OFF');
+            $conn->executeStatement('BEGIN TRANSACTION');
+
+            $conn->executeStatement($createSql);
+
+            $copySql = sprintf(
+                'INSERT INTO %s (%s) SELECT %s FROM %s',
+                $this->quoteIdentifier($tempTableName),
+                implode(', ', $columnNames),
+                implode(', ', $columnNames),
+                $this->quoteIdentifier($actualTableName),
+            );
+            $conn->executeStatement($copySql);
+
+            $conn->executeStatement(sprintf('DROP TABLE %s', $this->quoteIdentifier($actualTableName)));
+
+            $conn->executeStatement(sprintf(
+                'ALTER TABLE %s RENAME TO %s',
+                $this->quoteIdentifier($tempTableName),
+                $this->quoteIdentifier($actualTableName),
+            ));
+
+            foreach ($indexDefs as $indexData) {
+                $indexType = $indexData['INDEX_TYPE'] === AdapterInterface::INDEX_TYPE_UNIQUE ? 'UNIQUE ' : '';
+                $indexSql = sprintf(
+                    'CREATE %sINDEX %s ON %s (%s)',
+                    $indexType,
+                    $this->quoteIdentifier($indexData['KEY_NAME']),
+                    $this->quoteIdentifier($actualTableName),
+                    implode(', ', array_map([$this, 'quoteIdentifier'], $indexData['COLUMNS_LIST'])),
+                );
+                $conn->executeStatement($indexSql);
+            }
+
+            $conn->executeStatement('COMMIT');
+            $conn->executeStatement('PRAGMA foreign_keys = ON');
+        } catch (\Exception $e) {
+            $conn->executeStatement('ROLLBACK');
+            $conn->executeStatement('PRAGMA foreign_keys = ON');
+            throw new \Maho\Db\Exception(sprintf('Failed to drop foreign key: %s', $e->getMessage()), 0, $e);
+        }
+
+        $this->resetDdlCache($actualTableName, $schemaName);
 
         return $this;
     }
@@ -1410,24 +1560,114 @@ class Sqlite extends AbstractPdoAdapter
      * Modify the column definition
      *
      * SQLite doesn't support ALTER TABLE MODIFY COLUMN directly.
-     * This is primarily a no-op as SQLite has dynamic typing.
+     * This method uses Doctrine DBAL's SchemaManager which handles table recreation automatically.
      *
      * @throws \Maho\Db\Exception
      */
     #[\Override]
     public function modifyColumn(string $tableName, string $columnName, array|string $definition, bool $flushData = false, ?string $schemaName = null): self
     {
-        if (!$this->tableColumnExists($tableName, $columnName, $schemaName)) {
-            throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
+        $actualTableName = $this->_getTableName($tableName, $schemaName);
+
+        if (!$this->tableColumnExists($actualTableName, $columnName, $schemaName)) {
+            throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $actualTableName));
         }
 
-        // SQLite doesn't support ALTER TABLE MODIFY COLUMN
-        // Due to SQLite's dynamic typing, column type is more of a hint
-        // Column modifications would require table recreation via Doctrine DBAL
+        // Convert string definition to array if needed
+        if (is_string($definition)) {
+            $definition = ['COLUMN_TYPE' => $definition];
+        }
+        $definition = array_change_key_case($definition, CASE_UPPER);
 
-        $this->resetDdlCache($tableName, $schemaName);
+        $this->_connect();
+        $schemaManager = $this->_connection->createSchemaManager();
+        $comparator = $schemaManager->createComparator();
+
+        // Introspect the current table
+        $table = $schemaManager->introspectTable($actualTableName);
+
+        // Build modified table using DBAL's fluent API
+        $newTable = $table->edit()
+            ->modifyColumn(
+                \Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName),
+                function ($editor) use ($definition) {
+                    if (array_key_exists('NULLABLE', $definition)) {
+                        $editor->setNotNull(!$definition['NULLABLE']);
+                    }
+                    if (array_key_exists('DEFAULT', $definition)) {
+                        $editor->setDefaultValue($definition['DEFAULT']);
+                    }
+                    if (isset($definition['LENGTH'])) {
+                        $editor->setLength((int) $definition['LENGTH']);
+                    }
+                    if (isset($definition['PRECISION'])) {
+                        $editor->setPrecision((int) $definition['PRECISION']);
+                    }
+                    if (isset($definition['SCALE'])) {
+                        $editor->setScale((int) $definition['SCALE']);
+                    }
+                    if (isset($definition['UNSIGNED'])) {
+                        $editor->setUnsigned((bool) $definition['UNSIGNED']);
+                    }
+                    if (isset($definition['COMMENT'])) {
+                        $editor->setComment($definition['COMMENT']);
+                    }
+                    return $editor;
+                },
+            )
+            ->create();
+
+        // Compare and apply changes - DBAL handles table recreation for SQLite
+        $diff = $comparator->compareTables($table, $newTable);
+        if (!$diff->isEmpty()) {
+            $schemaManager->alterTable($diff);
+        }
+
+        $this->resetDdlCache($actualTableName, $schemaName);
 
         return $this;
+    }
+
+    /**
+     * Internal method to load table description from database
+     *
+     * SQLite-specific override to correctly handle INTEGER PRIMARY KEY columns.
+     * In SQLite, INTEGER PRIMARY KEY columns are aliases to rowid and are effectively
+     * NOT NULL, but PRAGMA table_info reports notnull=0 for them.
+     */
+    #[\Override]
+    protected function _loadTableDescription(string $tableName, ?string $schemaName = null): array
+    {
+        // Get base description from parent
+        $result = parent::_loadTableDescription($tableName, $schemaName);
+
+        // Use PRAGMA table_info to get accurate NOT NULL info
+        // SQLite's PRAGMA gives us the actual schema constraints
+        $pragma = $this->fetchAll("PRAGMA table_info({$this->quoteIdentifier($tableName)})");
+        $pragmaByName = [];
+        foreach ($pragma as $col) {
+            $pragmaByName[$col['name']] = $col;
+        }
+
+        // Fix up NULLABLE for columns where Doctrine DBAL doesn't match SQLite's intent
+        foreach ($result as $columnName => &$columnInfo) {
+            if (isset($pragmaByName[$columnName])) {
+                $pragmaCol = $pragmaByName[$columnName];
+
+                // If PRAGMA says notnull=1, it's definitely NOT NULL
+                if ($pragmaCol['notnull'] == 1) {
+                    $columnInfo['NULLABLE'] = false;
+                }
+
+                // For INTEGER PRIMARY KEY, SQLite allows NULL in the constraint check
+                // but the column is effectively NOT NULL since it becomes rowid alias
+                if ($pragmaCol['pk'] == 1 && strtoupper($pragmaCol['type']) === 'INTEGER') {
+                    $columnInfo['NULLABLE'] = false;
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -2502,8 +2742,8 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Add new Foreign Key to table
      *
-     * Note: SQLite requires table recreation to add foreign keys after creation.
-     * This method is a no-op for existing tables.
+     * SQLite doesn't support ALTER TABLE ADD FOREIGN KEY directly.
+     * This method uses Doctrine DBAL's SchemaManager which handles table recreation automatically.
      */
     #[\Override]
     public function addForeignKey(
@@ -2518,13 +2758,57 @@ class Sqlite extends AbstractPdoAdapter
         ?string $schemaName = null,
         ?string $refSchemaName = null,
     ): self {
-        // SQLite cannot add foreign keys after table creation
-        // Foreign keys must be defined in CREATE TABLE
-        // This is a no-op for existing tables
+        $actualTableName = $this->_getTableName($tableName, $schemaName);
 
         if ($purge) {
             $this->purgeOrphanRecords($tableName, $columnName, $refTableName, $refColumnName, $onDelete);
         }
+
+        // Check if the column exists
+        if (!$this->tableColumnExists($actualTableName, $columnName, $schemaName)) {
+            throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $actualTableName));
+        }
+
+        $this->_connect();
+        $schemaManager = $this->_connection->createSchemaManager();
+        $comparator = $schemaManager->createComparator();
+
+        // Introspect the current table
+        $table = $schemaManager->introspectTable($actualTableName);
+
+        // Map action strings to ReferentialAction enum
+        $actionMap = [
+            AdapterInterface::FK_ACTION_CASCADE => \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::CASCADE,
+            AdapterInterface::FK_ACTION_SET_NULL => \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::SET_NULL,
+            AdapterInterface::FK_ACTION_NO_ACTION => \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::NO_ACTION,
+            AdapterInterface::FK_ACTION_RESTRICT => \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::RESTRICT,
+            AdapterInterface::FK_ACTION_SET_DEFAULT => \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::SET_DEFAULT,
+        ];
+
+        $onDeleteAction = $actionMap[strtoupper($onDelete)] ?? \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::CASCADE;
+        $onUpdateAction = $actionMap[strtoupper($onUpdate)] ?? \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::CASCADE;
+
+        // Build the FK constraint using DBAL's fluent API
+        $fk = \Doctrine\DBAL\Schema\ForeignKeyConstraint::editor(\Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($fkName))
+            ->setReferencingColumnNames(\Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName))
+            ->setReferencedTableName(\Doctrine\DBAL\Schema\Name\OptionallyQualifiedName::unquoted($refTableName))
+            ->setReferencedColumnNames(\Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($refColumnName))
+            ->setOnDeleteAction($onDeleteAction)
+            ->setOnUpdateAction($onUpdateAction)
+            ->create();
+
+        // Add foreign key using DBAL's fluent API
+        $newTable = $table->edit()
+            ->addForeignKeyConstraint($fk)
+            ->create();
+
+        // Compare and apply changes - DBAL handles table recreation for SQLite
+        $diff = $comparator->compareTables($table, $newTable);
+        if (!$diff->isEmpty()) {
+            $schemaManager->alterTable($diff);
+        }
+
+        $this->resetDdlCache($actualTableName, $schemaName);
 
         return $this;
     }
