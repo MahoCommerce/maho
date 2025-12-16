@@ -1584,13 +1584,13 @@ class Sqlite extends AbstractPdoAdapter
         $comparator = $schemaManager->createComparator();
 
         // Introspect the current table
-        $table = $schemaManager->introspectTable($actualTableName);
+        $table = $schemaManager->introspectTableByUnquotedName($actualTableName);
 
         // Build modified table using DBAL's fluent API
         $newTable = $table->edit()
             ->modifyColumn(
                 \Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName),
-                function ($editor) use ($definition) {
+                function (\Doctrine\DBAL\Schema\ColumnEditor $editor) use ($definition): void {
                     if (array_key_exists('NULLABLE', $definition)) {
                         $editor->setNotNull(!$definition['NULLABLE']);
                     }
@@ -1612,7 +1612,6 @@ class Sqlite extends AbstractPdoAdapter
                     if (isset($definition['COMMENT'])) {
                         $editor->setComment($definition['COMMENT']);
                     }
-                    return $editor;
                 },
             )
             ->create();
@@ -2774,7 +2773,7 @@ class Sqlite extends AbstractPdoAdapter
         $comparator = $schemaManager->createComparator();
 
         // Introspect the current table
-        $table = $schemaManager->introspectTable($actualTableName);
+        $table = $schemaManager->introspectTableByUnquotedName($actualTableName);
 
         // Map action strings to ReferentialAction enum
         $actionMap = [
@@ -2789,10 +2788,11 @@ class Sqlite extends AbstractPdoAdapter
         $onUpdateAction = $actionMap[strtoupper($onUpdate)] ?? \Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction::CASCADE;
 
         // Build the FK constraint using DBAL's fluent API
-        $fk = \Doctrine\DBAL\Schema\ForeignKeyConstraint::editor(\Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($fkName))
-            ->setReferencingColumnNames(\Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName))
-            ->setReferencedTableName(\Doctrine\DBAL\Schema\Name\OptionallyQualifiedName::unquoted($refTableName))
-            ->setReferencedColumnNames(\Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($refColumnName))
+        $fk = \Doctrine\DBAL\Schema\ForeignKeyConstraint::editor()
+            ->setUnquotedName($fkName)
+            ->setUnquotedReferencingColumnNames($columnName)
+            ->setUnquotedReferencedTableName($refTableName)
+            ->setUnquotedReferencedColumnNames($refColumnName)
             ->setOnDeleteAction($onDeleteAction)
             ->setOnUpdateAction($onUpdateAction)
             ->create();
