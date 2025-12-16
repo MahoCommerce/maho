@@ -43,7 +43,7 @@ class Mage_ImportExport_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Res
         // If the table doesn't exist there, it means no rows have been inserted yet
         try {
             $result = $adapter->fetchOne(
-                "SELECT seq FROM sqlite_sequence WHERE name = ?",
+                'SELECT seq FROM sqlite_sequence WHERE name = ?',
                 [$tableName],
             );
 

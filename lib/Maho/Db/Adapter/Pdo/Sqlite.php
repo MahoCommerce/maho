@@ -138,7 +138,7 @@ class Sqlite extends AbstractPdoAdapter
         // GREATEST function - returns the largest value from a list of arguments
         // SQLite doesn't have GREATEST(), so we implement it using MAX() scalar behavior
         $this->_createSqliteFunction($pdo, 'GREATEST', function (...$args) {
-            $args = array_filter($args, fn ($v) => $v !== null);
+            $args = array_filter($args, fn($v) => $v !== null);
             if (empty($args)) {
                 return null;
             }
@@ -148,7 +148,7 @@ class Sqlite extends AbstractPdoAdapter
         // LEAST function - returns the smallest value from a list of arguments
         // SQLite's built-in MIN() is aggregate, so we need scalar version
         $this->_createSqliteFunction($pdo, 'LEAST', function (...$args) {
-            $args = array_filter($args, fn ($v) => $v !== null);
+            $args = array_filter($args, fn($v) => $v !== null);
             if (empty($args)) {
                 return null;
             }
