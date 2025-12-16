@@ -386,10 +386,11 @@ describe('Product Wishlist Condition Integration Tests', function () {
 
             $sql = $this->condition->getConditionsSql($this->adapter);
 
-            // Check for either MySQL (DATEDIFF) or PostgreSQL (DATE() function or ::date cast) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
             expect($sql)->toContain('MAX(wi.added_at)');
-            expect($sql)->toContain('< \'7\'');
+            // SQLite may not quote integer values
+            expect($sql)->toMatch('/< .?7.?/');
         });
     });
 

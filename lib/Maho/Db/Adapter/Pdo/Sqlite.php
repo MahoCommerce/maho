@@ -679,11 +679,15 @@ class Sqlite extends AbstractPdoAdapter
         $currentYearAnniversary = "DATE(STRFTIME('%Y', {$refDate}) || '-' || STRFTIME('%m-%d', {$dateField}))";
         $nextYearAnniversary = "DATE(STRFTIME('%Y', {$refDate}, '+1 year') || '-' || STRFTIME('%m-%d', {$dateField}))";
 
+        // Normalize reference date to start of day to compare dates only, not times
+        // This ensures that comparing 12-16 22:24 to 12-17 gives 1 day, not 0
+        $refDateOnly = "DATE({$refDate})";
+
         $sql = "CASE
-            WHEN JULIANDAY({$currentYearAnniversary}) >= JULIANDAY({$refDate}) THEN
-                CAST(JULIANDAY({$currentYearAnniversary}) - JULIANDAY({$refDate}) AS INTEGER)
+            WHEN JULIANDAY({$currentYearAnniversary}) >= JULIANDAY({$refDateOnly}) THEN
+                CAST(JULIANDAY({$currentYearAnniversary}) - JULIANDAY({$refDateOnly}) AS INTEGER)
             ELSE
-                CAST(JULIANDAY({$nextYearAnniversary}) - JULIANDAY({$refDate}) AS INTEGER)
+                CAST(JULIANDAY({$nextYearAnniversary}) - JULIANDAY({$refDateOnly}) AS INTEGER)
         END";
 
         return new \Maho\Db\Expr($sql);

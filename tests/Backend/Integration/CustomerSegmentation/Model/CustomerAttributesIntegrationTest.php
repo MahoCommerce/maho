@@ -40,8 +40,8 @@ describe('Customer Attributes Integration Tests', function () {
             // Test SQL is properly formed
             expect($sql)->toBeString();
             expect($sql)->toContain('CASE');
-            // Check for either MySQL (DATEDIFF) or PostgreSQL (DATE() function or ::date cast) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
 
             // For each matched customer, verify they have birthday today (month-day matches)
             $todayMonthDay = date('m-d');
