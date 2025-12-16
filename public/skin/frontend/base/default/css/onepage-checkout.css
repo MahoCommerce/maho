@@ -1,0 +1,491 @@
+/**
+ * Maho One-Page Checkout Styles
+ *
+ * @package     skin_frontend_base_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/* ============================================ *
+ * One-Page Checkout Layout
+ * ============================================ */
+
+/* Flatten accordion - show all sections except those controlled by JS */
+body.checkout-onepage-index .opc .section {
+    display: block;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    background: #fff;
+    padding: 0;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    list-style: none;
+}
+
+/* Specifically show these sections always (unless they have inline style) */
+body.checkout-onepage-index .opc #opc-billing,
+body.checkout-onepage-index .opc #opc-shipping_method:not([style*="display: none"]),
+body.checkout-onepage-index .opc #opc-payment:not([style*="display: none"]),
+body.checkout-onepage-index .opc #opc-review:not([style*="display: none"]) {
+    display: block !important;
+}
+
+body.checkout-onepage-index .opc .section .step-title {
+    padding: 15px 20px;
+    margin: 0;
+    background: #fff;
+    cursor: default;
+    border-radius: 4px 4px 0 0;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    border-bottom: none;
+}
+
+body.checkout-onepage-index .opc .section .step-title h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a73e8;
+    margin: 0;
+    line-height: 1.3;
+    text-transform: none;
+    letter-spacing: -0.3px;
+}
+
+body.checkout-onepage-index .opc .section .step {
+    padding: 25px;
+}
+
+/* Remove "Edit" link from step titles */
+body.checkout-onepage-index .opc .section .step-title a {
+    display: none !important;
+}
+
+/* Show all step content - override inline styles */
+body.checkout-onepage-index .opc .section:not(#opc-login) .step,
+body.checkout-onepage-index .opc .section:not(#opc-login) .a-item,
+body.checkout-onepage-index .opc .section:not(#opc-login) > div[id^="checkout-step-"] {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Specific step IDs */
+body.checkout-onepage-index #checkout-step-billing,
+body.checkout-onepage-index #checkout-step-shipping,
+body.checkout-onepage-index #checkout-step-shipping_method,
+body.checkout-onepage-index #checkout-step-payment,
+body.checkout-onepage-index #checkout-step-review {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Hide collapsed section styles */
+body.checkout-onepage-index .opc .section .step {
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+    max-height: none !important;
+}
+
+/* ============================================ *
+ * Section Visibility
+ * ============================================ */
+
+/* Login section hidden by default (shown on demand via JS) */
+body.checkout-onepage-index #opc-login,
+body.checkout-onepage-index #opc-login.section,
+body.checkout-onepage-index li#opc-login {
+    display: none !important;
+}
+
+/* But when shown, display its content */
+body.checkout-onepage-index #opc-login[style*="display: block"] .step,
+body.checkout-onepage-index #opc-login[style*="display: block"] .a-item,
+body.checkout-onepage-index #opc-login[style*="display: block"] #checkout-step-login {
+    display: block !important;
+}
+
+/* Hide shipping section when using billing address (controlled by JS) */
+body.checkout-onepage-index #opc-shipping.hidden,
+body.checkout-onepage-index #opc-shipping[style*="display: none"] {
+    display: none !important;
+}
+
+/* Ensure JS can hide shipping section */
+body.checkout-onepage-index #opc-shipping {
+    /* Allow JS to control visibility */
+}
+
+/* Always show shipping and payment sections (with placeholder text when empty) */
+body.checkout-onepage-index #opc-shipping_method,
+body.checkout-onepage-index #opc-payment {
+    display: block !important;
+}
+
+/* Minimum height for loading sections */
+body.checkout-onepage-index #checkout-shipping-method-load:empty,
+body.checkout-onepage-index #checkout-payment-method-load:empty {
+    min-height: 60px;
+    display: block;
+}
+
+/* Hide the review section from main content area - it's in sidebar now */
+body.checkout-onepage-index #opc-review {
+    display: none !important;
+}
+
+/* Ensure content load areas are visible when populated */
+body.checkout-onepage-index #checkout-shipping-method-load:not(:empty),
+body.checkout-onepage-index #checkout-payment-method-load:not(:empty),
+body.checkout-onepage-index #checkout-review-load:not(:empty) {
+    display: block !important;
+}
+
+/* ============================================ *
+ * Buttons
+ * ============================================ */
+
+/* Hide intermediate "Continue" buttons */
+#billing-buttons-container,
+#shipping-buttons-container,
+#shipping-method-buttons-container,
+#payment-buttons-container {
+    display: none;
+}
+
+/* Show and style final "Place Order" button */
+#review-buttons-container {
+    display: block !important;
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 2px solid #333;
+    border-radius: 4px;
+    text-align: center;
+}
+
+#review-buttons-container .btn-checkout,
+#review-buttons-container button.button {
+    font-size: 18px;
+    padding: 15px 40px;
+    min-width: 250px;
+    background: #5cb85c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#review-buttons-container .btn-checkout:hover,
+#review-buttons-container button.button:hover {
+    background: #4cae4c;
+}
+
+/* ============================================ *
+ * 2-Column Layout: Form | Order Summary
+ * ============================================ */
+
+/* Force sidebar to be visible always */
+.checkout-onepage-index .col-right,
+.checkout-onepage-index .col-right.sidebar,
+.checkout-onepage-index .sidebar,
+.checkout-onepage-index .main .col-right {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure main container uses proper layout */
+.checkout-onepage-index .main {
+    display: block !important;
+}
+
+.checkout-onepage-index .main::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Desktop: Form (left) + Summary (right) */
+@media only screen and (min-width: 980px) {
+    .checkout-onepage-index .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .checkout-onepage-index .col-main,
+    .checkout-onepage-index .main .col-main {
+        float: left !important;
+        width: 65% !important;
+        padding-right: 3% !important;
+        clear: none !important;
+    }
+
+    .checkout-onepage-index .col-right,
+    .checkout-onepage-index .col-right.sidebar,
+    .checkout-onepage-index .sidebar,
+    .checkout-onepage-index .main .col-right {
+        float: right !important;
+        width: 32% !important;
+        clear: none !important;
+        margin-left: 0 !important;
+    }
+
+    /* Make sidebar content sticky */
+    .checkout-onepage-index .col-right {
+        position: relative;
+    }
+
+    .checkout-onepage-index #checkout-progress-wrapper,
+    .checkout-onepage-index .checkout.onepage.review.sidebar {
+        position: sticky;
+        top: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Style the sidebar blocks */
+    .checkout-onepage-index .col-right .block,
+    .checkout-onepage-index .col-right .order-review,
+    .checkout-onepage-index .col-right #checkout-review-table {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Progress block styling */
+    .checkout-onepage-index .col-right .block-progress {
+        margin-bottom: 20px;
+    }
+
+    .checkout-onepage-index .col-right .block-title {
+        background: #f8f8f8;
+        margin: -20px -20px 15px -20px;
+        padding: 15px 20px;
+        border-bottom: 2px solid #333;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .checkout-onepage-index .col-right .block-title strong {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+    }
+
+    /* Order review table styling */
+    .checkout-onepage-index .col-right #checkout-review-table {
+        margin-bottom: 15px;
+    }
+
+    .checkout-onepage-index .col-right #checkout-review-table th {
+        background: #f8f8f8;
+        padding: 10px;
+        font-weight: 600;
+        text-align: left;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .checkout-onepage-index .col-right #checkout-review-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Totals styling */
+    .checkout-onepage-index .col-right .totals {
+        margin-top: 15px;
+    }
+
+    .checkout-onepage-index .col-right .totals .amount {
+        font-weight: 700;
+    }
+
+    .checkout-onepage-index .col-right .grand_total {
+        font-size: 18px;
+        padding-top: 15px;
+        margin-top: 15px;
+        border-top: 2px solid #333;
+    }
+
+    /* Sidebar place order button */
+    .checkout-onepage-index .col-right .btn-checkout,
+    .checkout-onepage-index .col-right button.button {
+        width: 100%;
+        font-size: 16px;
+        padding: 15px 20px;
+        background: #5cb85c;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-radius: 4px;
+        margin-top: 20px;
+        letter-spacing: 1px;
+        transition: background 0.2s ease;
+    }
+
+    .checkout-onepage-index .col-right .btn-checkout:hover,
+    .checkout-onepage-index .col-right button.button:hover {
+        background: #4cae4c;
+    }
+
+    /* Place order button container */
+    .checkout-onepage-index .col-right #checkout-review-submit {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #ddd;
+    }
+}
+
+/* Tablet: Smaller margins */
+@media only screen and (min-width: 768px) and (max-width: 979px) {
+    .checkout-onepage-index .col-main {
+        float: left;
+        width: 60%;
+        padding-right: 2%;
+    }
+
+    .checkout-onepage-index .col-right,
+    .checkout-onepage-index .col-right.sidebar,
+    .checkout-onepage-index .sidebar {
+        display: block !important;
+        float: right;
+        width: 38%;
+        visibility: visible !important;
+    }
+}
+
+/* Mobile: Stack sections */
+@media only screen and (max-width: 767px) {
+    .checkout-onepage-index .col-main,
+    .checkout-onepage-index .col-right,
+    .checkout-onepage-index .col-right.sidebar,
+    .checkout-onepage-index .sidebar {
+        float: none;
+        width: 100%;
+        padding: 0;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .opc .section {
+        padding: 15px;
+    }
+
+    #review-buttons-container .btn-checkout,
+    #review-buttons-container button.button {
+        font-size: 16px;
+        padding: 12px 30px;
+        min-width: 200px;
+    }
+}
+
+/* Clearfix for main container */
+.checkout-onepage-index .main-container::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* ============================================ *
+ * Visual Polish
+ * ============================================ */
+
+/* Remove step numbers/dots */
+body.checkout-onepage-index .opc .section .step-title h2::before {
+    content: none !important;
+}
+
+/* Active section highlight */
+.opc .section.active {
+    border-color: #5cb85c;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Form field spacing */
+.opc .form-list li {
+    margin-bottom: 15px;
+}
+
+/* Clear floats */
+.opc .form-list::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Hide password fields in one-page checkout (guest mode by default) */
+body.checkout-onepage-index #register-customer-password {
+    display: none;
+}
+
+/* Hide "Remember Me" in guest checkout by default */
+body.checkout-onepage-index .remember-me-box {
+    display: none;
+}
+
+/* Show password fields when create account is checked */
+body.checkout-onepage-index #billing\:create_account:checked ~ ul #register-customer-password,
+body.checkout-onepage-index.show-password-fields #register-customer-password {
+    display: block !important;
+}
+
+/* Show Remember Me when create account is checked */
+body.checkout-onepage-index #billing\:create_account:checked ~ ul .remember-me-box,
+body.checkout-onepage-index.show-password-fields .remember-me-box {
+    display: block !important;
+}
+
+/* Page title with login link */
+.checkout-onepage-index .page-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.checkout-onepage-index .page-title h1 {
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.checkout-onepage-index .page-title-login {
+    font-size: 14px;
+    color: #555;
+    white-space: nowrap;
+}
+
+.checkout-onepage-index .page-title-login a {
+    color: #2563eb;
+    text-decoration: underline;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.checkout-onepage-index .page-title-login a:hover {
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+/* ============================================ *
+ * Loading States
+ * ============================================ */
+
+.opc .section.processing {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.opc .section.processing .step-title h2::after {
+    content: " ...";
+    animation: dotdotdot 1.5s infinite;
+}
+
+@keyframes dotdotdot {
+    0%, 20% { content: " ."; }
+    40% { content: " .."; }
+    60%, 100% { content: " ..."; }
+}
