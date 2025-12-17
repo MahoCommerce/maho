@@ -279,55 +279,6 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
     }
 
     /**
-     * Retrieve catalog product flat columns array in old format (used before MMDB support)
-     *
-     * @return array
-     */
-    protected function _getFlatColumnsOldDefinition()
-    {
-        $columns = [];
-        $columns['entity_id'] = [
-            'type'      => 'int(10)',
-            'unsigned'  => true,
-            'is_null'   => false,
-            'default'   => null,
-            'extra'     => null,
-        ];
-        if ($this->getFlatHelper()->isAddChildData()) {
-            $columns['child_id'] = [
-                'type'      => 'int(10)',
-                'unsigned'  => true,
-                'is_null'   => true,
-                'default'   => null,
-                'extra'     => null,
-            ];
-            $columns['is_child'] = [
-                'type'      => 'tinyint(1)',
-                'unsigned'  => true,
-                'is_null'   => false,
-                'default'   => 0,
-                'extra'     => null,
-            ];
-        }
-        $columns['attribute_set_id'] = [
-            'type'      => 'smallint(5)',
-            'unsigned'  => true,
-            'is_null'   => false,
-            'default'   => 0,
-            'extra'     => null,
-        ];
-        $columns['type_id'] = [
-            'type'      => 'varchar(32)',
-            'unsigned'  => false,
-            'is_null'   => false,
-            'default'   => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
-            'extra'     => null,
-        ];
-
-        return $columns;
-    }
-
-    /**
      * Retrieve catalog product flat columns array in DDL format
      *
      * @return array
@@ -391,11 +342,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
     public function getFlatColumns()
     {
         if ($this->_columns === null) {
-            if (Mage::helper('core')->useDbCompatibleMode()) {
-                $this->_columns = $this->_getFlatColumnsOldDefinition();
-            } else {
-                $this->_columns = $this->_getFlatColumnsDdlDefinition();
-            }
+            $this->_columns = $this->_getFlatColumnsDdlDefinition();
 
             foreach ($this->getAttributes() as $attribute) {
                 /** @var Mage_Eav_Model_Entity_Attribute_Abstract $attribute */
@@ -527,14 +474,6 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
 
         // Extract columns we need to have in flat table
         $columns = $this->getFlatColumns();
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
-            $helper = Mage::getResourceHelper('core');
-            /* Convert old format of flat columns to new MMDB format that uses DDL types and definitions */
-            foreach ($columns as $key => $column) {
-                $columns[$key] = $helper->convertOldColumnDefinition($column);
-            }
-        }
 
         // Extract indexes we need to have in flat table
         $indexesNeed  = $this->getFlatIndexes();

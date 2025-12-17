@@ -310,14 +310,6 @@ class Mage_Core_Model_Resource_Setup
         $dbVer = $this->_getResource()->getDbVersion($this->_resourceName);
         $configVer = (string) $this->_moduleConfig->version;
 
-        /**
-         * Hook queries in adapter, so that in MySQL compatibility mode extensions and custom modules will avoid
-         * errors due to changes in database structure
-         */
-        if (((string) $this->_moduleConfig->codePool != 'core') && Mage::helper('core')->useDbCompatibleMode()) {
-            $this->_hookQueries();
-        }
-
         // Module is installed
         if ($dbVer !== false) {
             $status = version_compare($configVer, $dbVer);

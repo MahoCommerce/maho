@@ -63,19 +63,13 @@ class Mage_Bundle_Model_Product_Attribute_Source_Price_View extends Mage_Eav_Mod
     {
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $column = [
+            'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
             'unsigned'  => false,
+            'nullable'  => true,
             'default'   => null,
             'extra'     => null,
+            'comment'   => 'Bundle Price View ' . $attributeCode . ' column',
         ];
-
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $column['type']     = 'int';
-            $column['is_null']  = true;
-        } else {
-            $column['type']     = Maho\Db\Ddl\Table::TYPE_INTEGER;
-            $column['nullable'] = true;
-            $column['comment']  = 'Bundle Price View ' . $attributeCode . ' column';
-        }
 
         return [$attributeCode => $column];
     }
