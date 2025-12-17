@@ -15301,18 +15301,6 @@ parameters:
 			path: app/code/core/Mage/Install/Model/Installer/Db.php
 
 		-
-			rawMessage: 'Method Mage_Install_Model_Installer_Db_Abstract::getPdoType() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Install_Model_Installer_Db_Abstract::setConfig() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Install/Model/Installer/Db/Abstract.php
-
-		-
 			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Maho\Db\Adapter\AdapterInterface) in isset() is not nullable.'
 			identifier: isset.property
 			count: 1
