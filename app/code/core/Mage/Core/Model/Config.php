@@ -1683,12 +1683,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
-     * Retrieve resource connection model name
+     * Retrieve resource connection model name (database engine)
      *
-     * @param string $moduleName
-     * @return string
+     * Supports new 'engine' config with backward compatibility for legacy 'model' config.
      */
-    protected function _getResourceConnectionModel($moduleName = null)
+    protected function _getResourceConnectionModel(?string $moduleName = null): string
     {
         $config = null;
         if (!is_null($moduleName)) {
@@ -1699,6 +1698,12 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $config = $this->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE);
         }
 
+        // New config: use 'engine'
+        if (!empty($config->engine)) {
+            return (string) $config->engine;
+        }
+
+        // Backward compatibility: use 'model'
         $model = (string) $config->model;
 
         // Normalize legacy mysql4 model name to mysql for backwards compatibility
@@ -1706,7 +1711,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $model = 'mysql';
         }
 
-        return $model;
+        return $model ?: 'mysql';
     }
 
     /**

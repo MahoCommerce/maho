@@ -16,11 +16,9 @@ class Mage_Install_Model_Installer_Db_Sqlite extends Mage_Install_Model_Installe
      * Retrieve connection data from config
      *
      * SQLite uses file path instead of host/user/password
-     *
-     * @return array
      */
     #[\Override]
-    public function getConnectionData()
+    public function getConnectionData(): array
     {
         if (!$this->_connectionData) {
             // SQLite uses path instead of host/user/password
@@ -42,7 +40,6 @@ class Mage_Install_Model_Installer_Db_Sqlite extends Mage_Install_Model_Installe
             $connectionData = [
                 'path'      => $dbPath,
                 'dbname'    => $dbPath,
-                'pdoType'   => $this->getPdoType(),
             ];
             $this->_connectionData = $connectionData;
         }
@@ -50,25 +47,11 @@ class Mage_Install_Model_Installer_Db_Sqlite extends Mage_Install_Model_Installe
     }
 
     /**
-     * Retrieve DB server version
-     *
-     * @return string (string version number | 'undefined')
-     */
-    public function getVersion()
-    {
-        $version = $this->_getConnection()
-            ->fetchOne('SELECT sqlite_version()');
-        return $version ?: 'undefined';
-    }
-
-    /**
      * Check storage engine support
      * SQLite uses a single integrated storage engine that is always available.
-     *
-     * @return bool
      */
     #[\Override]
-    public function supportEngine()
+    public function supportEngine(): bool
     {
         // SQLite always supports its integrated storage engine
         return true;

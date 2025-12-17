@@ -149,45 +149,26 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $isMulti = $this->getAttribute()->getFrontend()->getInputType() == 'multiselect';
 
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $columns[$attributeCode] = [
-                'type'      => $isMulti ? 'text' : 'int',
+        $type = ($isMulti) ? Maho\Db\Ddl\Table::TYPE_TEXT : Maho\Db\Ddl\Table::TYPE_INTEGER;
+        $columns[$attributeCode] = [
+            'type'      => $type,
+            'length'    => $isMulti ? '65535' : null,
+            'unsigned'  => false,
+            'nullable'   => true,
+            'default'   => null,
+            'extra'     => null,
+            'comment'   => $attributeCode . ' column',
+        ];
+        if (!$isMulti) {
+            $columns[$attributeCode . '_value'] = [
+                'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
+                'length'    => 255,
                 'unsigned'  => false,
-                'is_null'   => true,
-                'default'   => null,
-                'extra'     => null,
-            ];
-            if (!$isMulti) {
-                $columns[$attributeCode . '_value'] = [
-                    'type'      => 'varchar(255)',
-                    'unsigned'  => false,
-                    'is_null'   => true,
-                    'default'   => null,
-                    'extra'     => null,
-                ];
-            }
-        } else {
-            $type = ($isMulti) ? Maho\Db\Ddl\Table::TYPE_TEXT : Maho\Db\Ddl\Table::TYPE_INTEGER;
-            $columns[$attributeCode] = [
-                'type'      => $type,
-                'length'    => $isMulti ? '65535' : null,
-                'unsigned'  => false,
-                'nullable'   => true,
+                'nullable'  => true,
                 'default'   => null,
                 'extra'     => null,
                 'comment'   => $attributeCode . ' column',
             ];
-            if (!$isMulti) {
-                $columns[$attributeCode . '_value'] = [
-                    'type'      => Maho\Db\Ddl\Table::TYPE_TEXT,
-                    'length'    => 255,
-                    'unsigned'  => false,
-                    'nullable'  => true,
-                    'default'   => null,
-                    'extra'     => null,
-                    'comment'   => $attributeCode . ' column',
-                ];
-            }
         }
 
         return $columns;

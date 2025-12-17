@@ -51,17 +51,6 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
                 );
             }
 
-            $version    = $resource->getVersion();
-            $requiredVersion = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/min_version', $dbEngine));
-
-            // check DB server version
-            if (version_compare($version, $requiredVersion) == -1) {
-                Mage::throwException(
-                    Mage::helper('install')->__('The database server version doesn\'t match system requirements (required: %s, actual: %s).', $requiredVersion, $version),
-                );
-            }
-
             // check InnoDB support (MySQL-specific, PostgreSQL always returns true)
             if (!$resource->supportEngine()) {
                 Mage::throwException(
@@ -109,15 +98,6 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
         if (empty($data['db_engine'])) {
             $data['db_engine'] = 'mysql';
         }
-
-        // Set db type according to the db engine
-        if (!isset($data['db_type'])) {
-            $data['db_type'] = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/type', $data['db_engine']));
-        }
-
-        $dbResource = $this->_getDbResource($data['db_engine']);
-        $data['db_pdo_type'] = $dbResource->getPdoType();
 
         if (!isset($data['db_init_statemants'])) {
             $data['db_init_statemants'] = (string) Mage::getConfig()

@@ -29,9 +29,7 @@
                     <password>{{db_pass}}</password>
                     <dbname>{{db_name}}</dbname>
                     <initStatements>{{db_init_statemants}}</initStatements>
-                    <model>{{db_engine}}</model>
-                    <type>{{db_type}}</type>
-                    <pdoType>{{db_pdo_type}}</pdoType>
+                    <engine>{{db_engine}}</engine>
                     <active>1</active>
                 </connection>
             </default_setup>
