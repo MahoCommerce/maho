@@ -142,10 +142,11 @@ class Mage_Eav_Model_Config
             return;
         }
 
-        Varien_Profiler::start('EAV: ' . __METHOD__);
+        \Maho\Profiler::start('EAV: ' . __METHOD__);
 
         if ($this->_isCacheEnabled() && $this->_loadFromCache($storeId)) {
             $this->_storeInitialized[$storeId] = true;
+            \Maho\Profiler::stop('EAV: ' . __METHOD__);
             return;
         }
 
@@ -168,7 +169,7 @@ class Mage_Eav_Model_Config
 
         $this->_storeInitialized[$storeId] = true;
 
-        Varien_Profiler::stop('EAV: ' . __METHOD__);
+        \Maho\Profiler::stop('EAV: ' . __METHOD__);
     }
 
     /**
@@ -265,11 +266,11 @@ class Mage_Eav_Model_Config
      */
     protected function _loadFromCache($storeId)
     {
-        Varien_Profiler::start('EAV: ' . __METHOD__);
+        \Maho\Profiler::start('EAV: ' . __METHOD__);
 
         $cacheData = Mage::app()->loadCache(self::ENTITIES_CACHE_ID . '_' . $storeId);
         if ($cacheData === false) {
-            Varien_Profiler::stop('EAV: ' . __METHOD__);
+            \Maho\Profiler::stop('EAV: ' . __METHOD__);
             return false;
         }
         $cacheData = unserialize($cacheData);
@@ -299,7 +300,7 @@ class Mage_Eav_Model_Config
 
         $this->_attributeSetInfo = $cacheData['_attributeSetInfo'];
 
-        Varien_Profiler::stop('EAV: ' . __METHOD__);
+        \Maho\Profiler::stop('EAV: ' . __METHOD__);
         return true;
     }
 
@@ -477,6 +478,10 @@ class Mage_Eav_Model_Config
             return $code;
         }
 
+        if ($code === null) {
+            return false;
+        }
+
         $storeId ??= $this->_storeId();
         $this->_initializeStore($storeId);
         $entityType = $this->getEntityType($entityType);
@@ -515,7 +520,7 @@ class Mage_Eav_Model_Config
      */
     public function getAttributes($entityType)
     {
-        Varien_Profiler::start('EAV: ' . __METHOD__);
+        \Maho\Profiler::start('EAV: ' . __METHOD__);
 
         $entityType = $this->getEntityType($entityType);
         $attributes = [];
@@ -525,7 +530,7 @@ class Mage_Eav_Model_Config
             $attributes[] = $this->getAttribute($entityType, $attributeId, $storeId);
         }
 
-        Varien_Profiler::stop('EAV: ' . __METHOD__);
+        \Maho\Profiler::stop('EAV: ' . __METHOD__);
 
         return $attributes;
     }

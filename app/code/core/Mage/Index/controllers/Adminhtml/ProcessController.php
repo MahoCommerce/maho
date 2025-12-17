@@ -118,10 +118,10 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
         $process = $this->_initProcess();
         if ($process) {
             try {
-                Varien_Profiler::start('__INDEX_PROCESS_REINDEX_ALL__');
+                \Maho\Profiler::start('__INDEX_PROCESS_REINDEX_ALL__');
 
                 $process->reindexEverything();
-                Varien_Profiler::stop('__INDEX_PROCESS_REINDEX_ALL__');
+                \Maho\Profiler::stop('__INDEX_PROCESS_REINDEX_ALL__');
                 $this->_getSession()->addSuccess(
                     Mage::helper('index')->__('%s index was rebuilt.', $process->getIndexer()->getName()),
                 );

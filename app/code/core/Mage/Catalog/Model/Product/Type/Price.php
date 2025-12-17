@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -365,7 +366,7 @@ class Mage_Catalog_Model_Product_Type_Price
         $gId = null,
         $productId = null,
     ) {
-        Varien_Profiler::start('__PRODUCT_CALCULATE_PRICE__');
+        \Maho\Profiler::start('__PRODUCT_CALCULATE_PRICE__');
         if ($wId instanceof Mage_Core_Model_Store) {
             $sId = $wId->getId();
             $wId = $wId->getWebsiteId();
@@ -391,7 +392,7 @@ class Mage_Catalog_Model_Product_Type_Price
         }
 
         $finalPrice = max($finalPrice, 0);
-        Varien_Profiler::stop('__PRODUCT_CALCULATE_PRICE__');
+        \Maho\Profiler::stop('__PRODUCT_CALCULATE_PRICE__');
         return $finalPrice;
     }
 

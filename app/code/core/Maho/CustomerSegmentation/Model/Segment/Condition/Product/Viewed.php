@@ -189,11 +189,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
 
     protected function buildDaysSinceViewCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
+        $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", 'MAX(rv.added_at)');
         $subselect = $adapter->select()
             ->from(['rv' => $this->getReportViewedTable()], ['customer_id'])
             ->where('rv.customer_id IS NOT NULL')
             ->group('rv.customer_id')
-            ->having($this->buildSqlCondition($adapter, "DATEDIFF('" . Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT) . "', MAX(rv.added_at))", $operator, $value));
+            ->having($this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

@@ -233,7 +233,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
             )
             ->where('main.attribute_id = ?', $attributeId)
             ->where('main.entity_id in (?)', $productIds)
-            ->order($positionCheckSql . ' ' . Maho\Db\Select::SQL_ASC);
+            ->order(new Maho\Db\Expr($positionCheckSql . ' ' . Maho\Db\Select::SQL_ASC));
     }
 
     /**

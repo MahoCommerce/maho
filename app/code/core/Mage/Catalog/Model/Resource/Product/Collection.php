@@ -842,12 +842,16 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     {
         $select = clone $this->getSelect();
         $priceExpression = $this->getPriceExpression($select) . ' ' . $this->getAdditionalPriceExpression($select);
-        $sqlEndPart = ') * ' . $this->getCurrencyRate() . ', 2)';
+        $currencyRate = $this->getCurrencyRate();
+        $adapter = $this->getConnection();
+        $roundedMaxExpr = $adapter->getRoundSql("MAX({$priceExpression}) * {$currencyRate}", 2);
+        $roundedMinExpr = $adapter->getRoundSql("MIN({$priceExpression}) * {$currencyRate}", 2);
+        $roundedStdExpr = $adapter->getRoundSql("({$priceExpression}) * {$currencyRate}", 2);
         $select = $this->_getSelectCountSql($select, false);
         $select->columns([
-            'max' => 'ROUND(MAX(' . $priceExpression . $sqlEndPart,
-            'min' => 'ROUND(MIN(' . $priceExpression . $sqlEndPart,
-            'std' => $this->getConnection()->getStandardDeviationSql('ROUND((' . $priceExpression . $sqlEndPart),
+            'max' => $roundedMaxExpr,
+            'min' => $roundedMinExpr,
+            'std' => $adapter->getStandardDeviationSql($roundedStdExpr),
         ]);
         $select->where($this->getPriceExpression($select) . ' IS NOT NULL');
         $result = $this->getConnection()->query($select, $this->_bindParams);
@@ -1543,7 +1547,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             );
         }
         // Avoid column duplication problems
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('core');
         $helper->prepareColumnsList($this->getSelect());
 
@@ -1592,7 +1596,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             return $this;
         }
 
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper     = Mage::getResourceHelper('core');
         $connection = $this->getConnection();
         $select     = $this->getSelect();

@@ -123,7 +123,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source extends Mage_Catalo
             )
             ->where('pid.attribute_id IN(?)', $attrIds);
 
-        /** @var Mage_Catalog_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Catalog_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalog');
         $select->where($helper->getIsNullNotNullCondition('pis.value', 'pid.value'));
 

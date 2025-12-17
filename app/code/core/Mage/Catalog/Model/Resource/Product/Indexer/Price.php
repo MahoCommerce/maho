@@ -399,7 +399,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         $table = $this->_getTierPriceIndexTable();
         $write->delete($table);
 
-        $websiteExpression = $write->getCheckSql('tp.website_id = 0', 'ROUND(tp.value * cwd.rate, 4)', 'tp.value');
+        $websiteExpression = $write->getCheckSql('tp.website_id = 0', $write->getRoundSql('tp.value * cwd.rate', 4), 'tp.value');
         $select = $write->select()
             ->from(
                 ['tp' => $this->getValueTable('catalog/product', 'tier_price')],
@@ -446,7 +446,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         $table = $this->_getGroupPriceIndexTable();
         $write->delete($table);
 
-        $websiteExpression = $write->getCheckSql('gp.website_id = 0', 'ROUND(gp.value * cwd.rate, 4)', 'gp.value');
+        $websiteExpression = $write->getCheckSql('gp.website_id = 0', $write->getRoundSql('gp.value * cwd.rate', 4), 'gp.value');
         $select = $write->select()
             ->from(
                 ['gp' => $this->getValueTable('catalog/product', 'group_price')],

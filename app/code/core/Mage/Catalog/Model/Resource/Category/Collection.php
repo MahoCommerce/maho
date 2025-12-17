@@ -108,19 +108,28 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     {
         if (is_array($categoryIds)) {
             if (empty($categoryIds)) {
-                $condition = '';
-            } else {
-                $condition = ['in' => $categoryIds];
+                // No IDs - use impossible condition to return no results
+                $this->getSelect()->where('1 = 0');
+                return $this;
             }
+            $condition = ['in' => $categoryIds];
         } elseif (is_numeric($categoryIds)) {
             $condition = $categoryIds;
         } elseif (is_string($categoryIds)) {
-            $ids = explode(',', $categoryIds);
-            if (empty($ids)) {
-                $condition = $categoryIds;
-            } else {
-                $condition = ['in' => $ids];
+            if ($categoryIds === '') {
+                // No IDs - use impossible condition to return no results
+                $this->getSelect()->where('1 = 0');
+                return $this;
             }
+            $ids = array_filter(explode(',', $categoryIds), fn($id) => $id !== '');
+            if (empty($ids)) {
+                // No IDs - use impossible condition to return no results
+                $this->getSelect()->where('1 = 0');
+                return $this;
+            }
+            $condition = ['in' => $ids];
+        } else {
+            return $this;
         }
         $this->addFieldToFilter('entity_id', $condition);
         return $this;

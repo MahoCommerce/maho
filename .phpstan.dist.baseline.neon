@@ -8413,12 +8413,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
 
 		-
-			rawMessage: Variable $condition might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Resource_Category_Collection::addSortedField().'
 			identifier: method.notFound
 			count: 1
@@ -12706,13 +12700,13 @@ parameters:
 			rawMessage: Result of && is always false.
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: app/code/core/Mage/Customer/sql/customer_setup/mysql4-data-upgrade-1.4.0.0.7-1.4.0.0.8.php
+			path: app/code/core/Mage/Customer/sql/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
 
 		-
 			rawMessage: 'Strict comparison using === between false and false will always evaluate to true.'
 			identifier: identical.alwaysTrue
 			count: 1
-			path: app/code/core/Mage/Customer/sql/customer_setup/mysql4-data-upgrade-1.4.0.0.7-1.4.0.0.8.php
+			path: app/code/core/Mage/Customer/sql/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Batch::beforeFinish() has no return type specified.'
@@ -15590,12 +15584,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Oauth_Model_Observer::afterAdminLoginFailed() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Oauth/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Oauth_Model_Observer::afterCustomerLogin() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Oauth/Model/Observer.php
@@ -18759,12 +18747,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Review_Model_Session::getRedirectUrl() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Review/controllers/ProductController.php
-
-		-
-			rawMessage: 'Method Mage_Review_ProductController::_initProductLayout() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Review/controllers/ProductController.php
 

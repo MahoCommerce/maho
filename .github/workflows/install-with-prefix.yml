@@ -1,0 +1,77 @@
+# This workflow tests a fresh Maho installation with a table prefix.
+# Using a table prefix ensures that setup/migration scripts use
+# $installer->getTable() instead of hardcoded table names.
+# See: https://github.com/MahoCommerce/maho/issues/410
+
+name: Maho Install
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  install:
+    name: PHP ${{ matrix.php }}
+    runs-on: [ubuntu-latest]
+
+    strategy:
+      matrix:
+        php: ['8.3', '8.4', '8.5']
+
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: maho
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_host 127.0.0.1 \
+            --db_name maho \
+            --db_user root \
+            --db_pass root \
+            --db_prefix maho_ \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123

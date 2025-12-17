@@ -14,13 +14,24 @@
 $installer = $this;
 $installer->startSetup();
 
-// Add index to sales_flat_order on customer_email for fast lookup, only first 15 bytes
+// Add index to sales_flat_order on customer_email for fast lookup
+// MySQL uses prefix index (15 bytes), PostgreSQL uses regular index
 $keyList = $installer->getConnection()->getIndexList($installer->getTable('sales/order'));
 if (!isset($keyList['IDX_SALES_FLAT_ORDER_CUSTOMER_EMAIL'])) {
-    $installer->run("
-        ALTER TABLE {$installer->getTable('sales/order')}
-        ADD INDEX `IDX_SALES_FLAT_ORDER_CUSTOMER_EMAIL` (`customer_email` (15));
-    ");
+    if ($installer->getConnection() instanceof Maho\Db\Adapter\Pdo\Mysql) {
+        // MySQL supports prefix indexes
+        $installer->run("
+            ALTER TABLE {$installer->getTable('sales/order')}
+            ADD INDEX `IDX_SALES_FLAT_ORDER_CUSTOMER_EMAIL` (`customer_email` (15));
+        ");
+    } else {
+        // PostgreSQL: use regular index on the full column
+        $installer->getConnection()->addIndex(
+            $installer->getTable('sales/order'),
+            'IDX_SALES_FLAT_ORDER_CUSTOMER_EMAIL',
+            ['customer_email'],
+        );
+    }
 }
 
 // Add index to sales_flat_order_item.product_id for fast join/lookup

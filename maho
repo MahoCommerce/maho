@@ -80,6 +80,9 @@ $application->addCommand(new \MahoCLI\Commands\TranslationsUnused());
 
 $application->addCommand(new \MahoCLI\Commands\CreateCommand());
 
+$application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
+$application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
+
 $discoverer = new CommandDiscoverer();
 $commands = $discoverer->discover(__DIR__ . '/vendor/*/*') + $discoverer->discover(__DIR__);
 foreach ($commands as $command) {

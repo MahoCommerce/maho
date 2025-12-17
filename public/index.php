@@ -15,7 +15,7 @@ define('MAHO_PUBLIC_DIR', __DIR__);
 
 require MAHO_ROOT_DIR . '/vendor/autoload.php';
 
-#Varien_Profiler::enable();
+#\Maho\Profiler::enable();
 
 umask(0);
 

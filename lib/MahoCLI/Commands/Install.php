@@ -45,6 +45,7 @@ class Install extends BaseMahoCommand
         $this->addOption('db_user', null, InputOption::VALUE_REQUIRED, 'Database username');
         $this->addOption('db_pass', null, InputOption::VALUE_REQUIRED, 'Database password');
         $this->addOption('db_prefix', null, InputOption::VALUE_OPTIONAL, 'Database Tables Prefix. No table prefix will be used if not specified', '');
+        $this->addOption('db_engine', null, InputOption::VALUE_OPTIONAL, 'Database engine (mysql, pgsql, or sqlite)', 'mysql');
 
         // Session options
         $this->addOption('session_save', null, InputOption::VALUE_OPTIONAL, 'Where to store session data (files/db)', 'files');
@@ -178,34 +179,114 @@ class Install extends BaseMahoCommand
             $dbName = $input->getOption('db_name');
             $dbUser = $input->getOption('db_user');
             $dbPass = $input->getOption('db_pass');
-            $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
+            $dbEngine = $input->getOption('db_engine') ?? 'mysql';
             $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
+            $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
+
             try {
-                // Create PDO connection
-                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
-                $pdo = new \PDO($dsn, $dbUser, $dbPass);
-                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                // Create PDO connection based on database engine
+                if ($dbEngine === 'pgsql') {
+                    $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
+                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                foreach ($sqlFiles as $sqlFile) {
-                    $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                    $output->writeln("<info>Importing {$sqlFile}...</info>");
+                    // Use SQL converter for PostgreSQL
+                    $converter = new \MahoCLI\Helper\SqlConverter();
+                    $converter->setPdo($pdo);
 
-                    // Read SQL file content
-                    $sqlContent = file_get_contents($sqlFilePath);
+                    // Disable foreign key checks for the import
+                    // PostgreSQL uses session_replication_role to disable triggers/constraints
+                    $pdo->exec('SET session_replication_role = replica');
 
-                    // Execute the entire file as a single operation
-                    $pdo->exec($sqlContent);
-                    $output->writeln("<info>Successfully imported {$sqlFile}</info>");
+                    foreach ($sqlFiles as $sqlFile) {
+                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                        $output->writeln("<info>Importing {$sqlFile} (converting to PostgreSQL)...</info>");
+
+                        // Read and convert MySQL SQL to PostgreSQL
+                        $mysqlContent = file_get_contents($sqlFilePath);
+                        $pgsqlContent = $converter->mysqlToPostgresql($mysqlContent);
+
+                        // Execute statements one by one for better error handling
+                        $converter->executeStatements($pdo, $pgsqlContent, function ($current, $total) use ($output) {
+                            if ($current === $total || $current % 500 === 0) {
+                                $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                            }
+                        });
+                        $output->writeln("\n<info>Successfully imported {$sqlFile}</info>");
+                    }
+
+                    // Re-enable foreign key checks
+                    $pdo->exec('SET session_replication_role = DEFAULT');
+
+                    // Update sequences after importing data with explicit IDs
+                    $output->writeln('<info>Updating PostgreSQL sequences...</info>');
+                    $this->updatePostgresSequences($pdo);
+
+                } elseif ($dbEngine === 'sqlite') {
+                    // SQLite - convert MySQL SQL to SQLite
+                    $dbPath = $dbName;
+                    // Resolve relative paths
+                    if ($dbPath[0] !== '/' && !str_contains($dbPath, ':')) {
+                        $baseDir = defined('BP') ? BP : getcwd();
+                        $dbDir = $baseDir . '/var/db';
+                        if (!is_dir($dbDir)) {
+                            mkdir($dbDir, 0755, true);
+                        }
+                        $dbPath = $dbDir . '/' . $dbPath;
+                    }
+
+                    $dsn = "sqlite:{$dbPath}";
+                    $pdo = new \PDO($dsn);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+                    // Use SQL converter for SQLite
+                    $converter = new \MahoCLI\Helper\SqlConverter();
+                    $converter->setPdo($pdo);
+
+                    foreach ($sqlFiles as $sqlFile) {
+                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                        $output->writeln("<info>Importing {$sqlFile} (converting to SQLite)...</info>");
+
+                        // Read and convert MySQL SQL to SQLite
+                        $mysqlContent = file_get_contents($sqlFilePath);
+                        $sqliteContent = $converter->mysqlToSqlite($mysqlContent);
+
+                        // Execute statements one by one for better error handling
+                        $converter->executeStatements($pdo, $sqliteContent, function ($current, $total) use ($output) {
+                            if ($current === $total || $current % 500 === 0) {
+                                $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                            }
+                        });
+                        $output->writeln("\n<info>Successfully imported {$sqlFile}</info>");
+                    }
+
+                } else {
+                    // MySQL - use direct execution
+                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+                    foreach ($sqlFiles as $sqlFile) {
+                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                        $output->writeln("<info>Importing {$sqlFile}...</info>");
+
+                        // Read SQL file content
+                        $sqlContent = file_get_contents($sqlFilePath);
+
+                        // Execute the entire file as a single operation
+                        $pdo->exec($sqlContent);
+                        $output->writeln("<info>Successfully imported {$sqlFile}</info>");
+                    }
                 }
 
             } catch (\PDOException $e) {
                 $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
 
                 // If it's a connection error, provide more helpful message
-                if (str_contains($e->getMessage(), 'Unknown database')) {
+                if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
                     $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
                     $output->writeln('<error>Access denied. Please check your database credentials.</error>');
                 }
 
@@ -270,43 +351,79 @@ class Install extends BaseMahoCommand
         $dbName = $input->getOption('db_name');
         $dbUser = $input->getOption('db_user');
         $dbPass = $input->getOption('db_pass');
+        $dbEngine = $input->getOption('db_engine') ?? 'mysql';
 
-        if ($dbHost && $dbName && $dbUser !== null) {
+        // Handle SQLite separately - just delete the database file
+        if ($dbEngine === 'sqlite') {
+            $dbPath = getcwd() . '/var/db/' . $dbName;
+            if (file_exists($dbPath)) {
+                if (is_writable($dbPath)) {
+                    unlink($dbPath);
+                    $output->writeln('<info>Removed existing SQLite database</info>');
+                } else {
+                    $output->writeln('<error>Cannot remove SQLite database - file is not writable</error>');
+                    throw new \RuntimeException('Cannot remove SQLite database - insufficient permissions');
+                }
+            } else {
+                $output->writeln('<info>SQLite database does not exist yet</info>');
+            }
+        } elseif ($dbHost && $dbName && $dbUser !== null) {
             try {
-                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                $isPostgres = ($dbEngine === 'pgsql');
+                if ($isPostgres) {
+                    $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
+                } else {
+                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                }
                 $pdo = new \PDO($dsn, $dbUser, $dbPass);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                // Disable foreign key checks
-                $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+                if ($isPostgres) {
+                    // PostgreSQL: Get all tables and drop them with CASCADE
+                    $stmt = $pdo->query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+                    $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
 
-                // Get all tables
-                $stmt = $pdo->query('SHOW TABLES');
-                $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+                    if (count($tables) > 0) {
+                        $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
 
-                if (count($tables) > 0) {
-                    $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
+                        // Drop all tables with CASCADE to handle foreign keys
+                        foreach ($tables as $table) {
+                            $pdo->exec("DROP TABLE IF EXISTS \"{$table}\" CASCADE");
+                        }
 
-                    // Drop all tables
-                    foreach ($tables as $table) {
-                        $pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+                        $output->writeln('<info>Cleared all tables from the database</info>');
+                    } else {
+                        $output->writeln('<info>Database is already empty</info>');
+                    }
+                } else {
+                    // MySQL: Disable foreign key checks and drop tables
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+
+                    $stmt = $pdo->query('SHOW TABLES');
+                    $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+                    if (count($tables) > 0) {
+                        $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
+
+                        foreach ($tables as $table) {
+                            $pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+                        }
+
+                        $output->writeln('<info>Cleared all tables from the database</info>');
+                    } else {
+                        $output->writeln('<info>Database is already empty</info>');
                     }
 
-                    $output->writeln('<info>Cleared all tables from the database</info>');
-                } else {
-                    $output->writeln('<info>Database is already empty</info>');
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
                 }
-
-                // Re-enable foreign key checks
-                $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 
             } catch (\PDOException $e) {
                 $output->writeln("<error>Failed to clear database: {$e->getMessage()}</error>");
 
                 // If it's a connection error, provide more helpful message
-                if (str_contains($e->getMessage(), 'Unknown database')) {
+                if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
                     $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
                     $output->writeln('<error>Access denied. Please check your database credentials.</error>');
                 }
 
@@ -324,6 +441,50 @@ class Install extends BaseMahoCommand
         Mage::getSingleton('eav/config')->clear();
         Mage::unregister('_singleton/eav/config');
         Mage::unregister('_helper/eav');
+    }
+
+    /**
+     * Update PostgreSQL sequences to be higher than the max ID in each table
+     * This is necessary after importing data with explicit IDs
+     */
+    private function updatePostgresSequences(\PDO $pdo): void
+    {
+        // Get all sequences in the database
+        $stmt = $pdo->query("
+            SELECT
+                seq.relname as sequence_name,
+                tab.relname as table_name,
+                col.attname as column_name
+            FROM pg_class seq
+            JOIN pg_depend dep ON seq.oid = dep.objid
+            JOIN pg_class tab ON dep.refobjid = tab.oid
+            JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
+            WHERE seq.relkind = 'S'
+            AND dep.deptype = 'a'
+            ORDER BY seq.relname
+        ");
+
+        $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($sequences as $seq) {
+            $sequenceName = $seq['sequence_name'];
+            $tableName = $seq['table_name'];
+            $columnName = $seq['column_name'];
+
+            try {
+                // Get the max ID from the table
+                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
+                $maxId = (int) $maxStmt->fetchColumn();
+
+                if ($maxId > 0) {
+                    // Set the sequence to max_id + 1
+                    $pdo->exec("SELECT setval('\"{$sequenceName}\"', {$maxId}, true)");
+                }
+            } catch (\PDOException $e) {
+                // Skip if table doesn't exist or other errors
+                continue;
+            }
+        }
     }
 
     private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void

@@ -310,7 +310,13 @@ describe('Select Query Builder - FOR UPDATE', function () {
 
         $sql = $select->assemble();
 
-        expect($sql)->toContain('FOR UPDATE');
+        // SQLite uses transaction-level locking, so FOR UPDATE is silently ignored
+        // MySQL and PostgreSQL support row-level locking with FOR UPDATE
+        if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite) {
+            expect($sql)->not->toContain('FOR UPDATE');
+        } else {
+            expect($sql)->toContain('FOR UPDATE');
+        }
     });
 
     it('removes FOR UPDATE when set to false', function () {

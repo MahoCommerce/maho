@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @package    Maho_Data
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
@@ -76,10 +76,8 @@ class Db extends Collection
 
     /**
      * Database's statement for fetch item one by one
-     *
-     * @var Mysql
      */
-    protected $_fetchStmt = null;
+    protected ?\Maho\Db\Statement\StatementInterface $_fetchStmt = null;
 
     /**
      * Whether orders are rendered

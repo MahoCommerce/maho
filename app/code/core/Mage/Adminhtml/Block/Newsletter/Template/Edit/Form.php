@@ -108,6 +108,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
         $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig([
             'widget_filters' => $widgetFilters,
             'add_variables' => true,
+            'add_slideshows' => false,
             'variable_window_url' => Mage::getSingleton('adminhtml/url')->getUrl('*/newsletter_template/wysiwygVariable'),
         ]);
         if ($model->isPlain()) {

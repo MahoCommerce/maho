@@ -303,7 +303,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      */
     public function prepareResult($object, $queryText, $query)
     {
-        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql4 $searchHelper */
+        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql $searchHelper */
         $searchHelper = Mage::getResourceHelper('catalogsearch');
 
         $adapter = $this->_getWriteAdapter();
@@ -467,15 +467,14 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      */
     protected function _unifyField($field, $backendType = 'varchar')
     {
-        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Core_Model_Resource_Helper_Abstract|false $helper */
         $helper = Mage::getResourceHelper('catalogsearch');
 
         if ($backendType === 'datetime') {
-            $expr = $helper->castField(
-                $this->_getReadAdapter()->getDateFormatSql($field, '%Y-%m-%d %H:%i:%s'),
-            );
+            $fieldExpr = $this->_getReadAdapter()->getDateFormatSql($field, '%Y-%m-%d %H:%i:%s');
+            $expr = $helper ? $helper->castField($fieldExpr) : $fieldExpr;
         } else {
-            $expr = $helper->castField($field);
+            $expr = $helper ? $helper->castField($field) : $field;
         }
         return $expr;
     }

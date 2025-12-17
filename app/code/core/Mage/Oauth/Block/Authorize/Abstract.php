@@ -14,7 +14,7 @@
  * @method string getToken()
  * @method Mage_Oauth_Block_AuthorizeBaseAbstract setToken(string $token)
  * @method bool getIsSimple()
- * @method Mage_Oauth_Block_Authorize_Button setIsSimple(bool $flag)
+ * @method Mage_Oauth_Block_Authorize_ButtonBaseAbstract setIsSimple(bool $flag)
  * @method bool getHasException()
  * @method Mage_Oauth_Block_AuthorizeBaseAbstract setHasException(bool $flag)
  * @method null|string getVerifier()

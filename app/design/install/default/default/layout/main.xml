@@ -23,7 +23,9 @@
     <install_wizard_config>
         <reference name="database">
             <action method="setTemplate"><template>install/db/main.phtml</template></action>
-            <action method="addDatabaseBlock"><type>mysql4</type><block>install/db_type_mysql4</block><template>install/db/mysql4.phtml</template></action>
+            <action method="addDatabaseBlock"><type>mysql</type><block>install/db_type_mysql</block><template>install/db/mysql.phtml</template></action>
+            <action method="addDatabaseBlock"><type>pgsql</type><block>install/db_type_pgsql</block><template>install/db/pgsql.phtml</template></action>
+            <action method="addDatabaseBlock"><type>sqlite</type><block>install/db_type_sqlite</block><template>install/db/sqlite.phtml</template></action>
         </reference>
     </install_wizard_config>
 </layout>

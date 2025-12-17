@@ -173,8 +173,9 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
      */
     protected function _getFullPriceExpression($filter, $select)
     {
-        return new Maho\Db\Expr('ROUND((' . $this->_getPriceExpression($filter, $select) . ') * '
-            . $filter->getLayer()->getProductCollection()->getCurrencyRate() . ', 2)');
+        $priceExpr = '(' . $this->_getPriceExpression($filter, $select) . ') * '
+            . $filter->getLayer()->getProductCollection()->getCurrencyRate();
+        return $this->_getReadAdapter()->getRoundSql($priceExpr, 2);
     }
 
     /**

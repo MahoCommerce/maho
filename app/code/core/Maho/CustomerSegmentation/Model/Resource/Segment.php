@@ -148,12 +148,15 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
 
     public function getActiveSegmentIds(int $websiteId): array
     {
-        $select = $this->_getReadAdapter()->select()
+        $adapter = $this->_getReadAdapter();
+        $findInSet = $adapter->getFindInSetExpr($adapter->quote($websiteId), 'website_ids');
+
+        $select = $adapter->select()
             ->from($this->getMainTable(), ['segment_id'])
             ->where('is_active = ?', 1)
-            ->where('FIND_IN_SET(?, website_ids)', $websiteId);
+            ->where((string) $findInSet);
 
-        return $this->_getReadAdapter()->fetchCol($select);
+        return $adapter->fetchCol($select);
     }
 
     #[\Override]

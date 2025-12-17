@@ -37,7 +37,7 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
                         <span class="label">
                             <label for="links_<?= $link->getId() ?>"><?= $this->escapeHtml($link->getTitle()) ?></label>
                         <?php if ($link->getSampleFile() || $link->getSampleUrl()): ?>
-                            <?php $onclick = $this->getIsOpenInNewWindow() ? ` onclick="this.target='_blank'"` : '' ?>
+                            <?php $onclick = $this->getIsOpenInNewWindow() ? ' onclick="this.target=\'_blank\'"' : '' ?>
                             (<a href="<?= $this->getLinkSamlpeUrl($link) ?>"<?= $onclick ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
                         <?php endif ?>
                         <?php if ($linksPurchasedSeparately): ?>

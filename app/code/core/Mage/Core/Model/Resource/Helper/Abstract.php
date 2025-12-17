@@ -160,6 +160,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
     abstract public function addLikeEscape($value, $options = []);
 
     /**
+     * Cast a field or expression to text for comparison/concatenation
+     *
+     * @param Maho\Db\Expr|string $field
+     * @return Maho\Db\Expr
+     */
+    abstract public function castField($field);
+
+    /**
      * Returns case insensitive LIKE construction.
      * For options and escaping see escapeLikeValue().
      *
@@ -201,12 +209,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
         $proposedLength = (isset($matches[3]) && strlen($matches[3])) ? $matches[3] : null;
         switch (strtolower($matches[1])) {
             case 'bool':
+            case 'boolean': // Doctrine DBAL type
                 $length = null;
                 $type = Maho\Db\Ddl\Table::TYPE_BOOLEAN;
                 break;
             case 'char':
             case 'varchar':
             case 'tinytext':
+            case 'string': // Doctrine DBAL type
                 $length = $proposedLength;
                 if (!$length) {
                     $length = 255;
@@ -262,6 +272,7 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
                 break;
             case 'mediumint':
             case 'int':
+            case 'integer': // Doctrine DBAL type
                 $type = Maho\Db\Ddl\Table::TYPE_INTEGER;
                 break;
             case 'bigint':

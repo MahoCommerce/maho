@@ -755,7 +755,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      */
     public function currency(string $currency): NumberFormatter
     {
-        Varien_Profiler::start('locale/currency');
+        \Maho\Profiler::start('locale/currency');
         if (!isset(self::$_currencyCache[$this->getLocaleCode()][$currency])) {
             $formatter = new NumberFormatter($this->getLocaleCode(), NumberFormatter::CURRENCY);
 
@@ -795,7 +795,7 @@ class Mage_Core_Model_Locale extends Varien_Object
 
             self::$_currencyCache[$this->getLocaleCode()][$currency] = $formatter;
         }
-        Varien_Profiler::stop('locale/currency');
+        \Maho\Profiler::stop('locale/currency');
         return self::$_currencyCache[$this->getLocaleCode()][$currency];
     }
 
@@ -1364,7 +1364,8 @@ class Mage_Core_Model_Locale extends Varien_Object
         $toTimeStamp    = strtotime((string) $dateTo);
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59
-            $endDate = new DateTime((string) $dateTo . ' 23:59:59');
+            $endDate = new DateTime((string) $dateTo);
+            $endDate->setTime(23, 59, 59);
             $toTimeStamp = $endDate->getTimestamp();
         }
 

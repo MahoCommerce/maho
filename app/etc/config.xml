@@ -22,7 +22,7 @@
                     <username/>
                     <password/>
                     <dbname>maho</dbname>
-                    <model>mysql4</model>
+                    <model>mysql</model>
                     <initStatements>SET NAMES utf8</initStatements>
                     <type>pdo_mysql</type>
                     <active>0</active>
@@ -66,6 +66,16 @@
                         <class>Mage_Core_Model_Resource_Type_Db_Pdo_Mysql</class>
                         <compatibleMode>1</compatibleMode>
                     </pdo_mysql>
+                    <pdo_pgsql>
+                        <adapter>Maho\Db\Adapter\Pdo\Pgsql</adapter>
+                        <class>Mage_Core_Model_Resource_Type_Db_Pdo_Pgsql</class>
+                        <compatibleMode>1</compatibleMode>
+                    </pdo_pgsql>
+                    <pdo_sqlite>
+                        <adapter>Maho\Db\Adapter\Pdo\Sqlite</adapter>
+                        <class>Mage_Core_Model_Resource_Type_Db_Pdo_Sqlite</class>
+                        <compatibleMode>1</compatibleMode>
+                    </pdo_sqlite>
                 </types>
             </connection>
         </resource>

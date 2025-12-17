@@ -119,7 +119,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
      */
     public function loadByCode($entityType, $code)
     {
-        Varien_Profiler::start('_LOAD_ATTRIBUTE_BY_CODE__');
+        \Maho\Profiler::start('_LOAD_ATTRIBUTE_BY_CODE__');
         $model = Mage::getSingleton('eav/config')->getAttribute($entityType, $code);
         if ($model) {
             $this->setData($model->getData());
@@ -140,7 +140,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         $this->_afterLoad();
         $this->setOrigData();
         $this->_hasDataChanges = false;
-        Varien_Profiler::stop('_LOAD_ATTRIBUTE_BY_CODE__');
+        \Maho\Profiler::stop('_LOAD_ATTRIBUTE_BY_CODE__');
         return $this;
     }
 
@@ -647,7 +647,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
      */
     public function _getFlatColumnsDdlDefinition()
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper  = Mage::getResourceHelper('eav');
         $columns = [];
         switch ($this->getBackendType()) {
