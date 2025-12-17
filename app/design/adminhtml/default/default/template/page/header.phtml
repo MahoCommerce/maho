@@ -66,7 +66,7 @@
         </fieldset>
         <?php endif ?>
         <div class="user-menu-icons">
-            <a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>" class="user-icon" title="<?= $this->__("Logged in as %s", $this->escapeHtml($this->getUser()->getUsername())) ?>">
+            <a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>" class="user-icon" title="<?= $this->__("My Account") ?>">
                 <?= $this->getIconSvg('user') ?>
             </a>
             <a href="<?= $this->getLogoutLink() ?>" class="logout-icon" title="<?= $this->__('Log Out') ?>">
