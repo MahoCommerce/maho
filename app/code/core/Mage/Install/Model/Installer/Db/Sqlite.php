@@ -47,18 +47,6 @@ class Mage_Install_Model_Installer_Db_Sqlite extends Mage_Install_Model_Installe
     }
 
     /**
-     * Retrieve DB server version
-     *
-     * @return string (string version number | 'undefined')
-     */
-    public function getVersion()
-    {
-        $version = $this->_getConnection()
-            ->fetchOne('SELECT sqlite_version()');
-        return $version ?: 'undefined';
-    }
-
-    /**
      * Check storage engine support
      * SQLite uses a single integrated storage engine that is always available.
      */
