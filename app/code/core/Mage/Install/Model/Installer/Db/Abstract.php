@@ -38,7 +38,7 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
      */
     public function getEngine(): string
     {
-        return $this->_configData['db_engine'];
+        return $this->_configData['db_engine'] ?? 'mysql';
     }
 
     /**
