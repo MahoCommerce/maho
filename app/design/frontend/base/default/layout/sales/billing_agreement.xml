@@ -32,8 +32,8 @@
     </sales_billing_agreement_view>
 
     <customer_account>
-        <reference name="customer_account_navigation" >
-            <action method="addLink" translate="label"><name>billing_agreements</name><path>sales/billing_agreement/</path><label>Billing Agreements</label></action>
+        <reference name="customer_account_navigation">
+            <action method="addBillingAgreementsLink"/>
         </reference>
     </customer_account>
 </layout>

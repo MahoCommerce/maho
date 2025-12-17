@@ -6,6 +6,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -47,5 +48,20 @@ class Mage_Downloadable_Helper_Data extends Mage_Core_Helper_Abstract
             return true;
         }
         return false;
+    }
+
+    /**
+     * Check if current customer has any purchased downloadable products
+     */
+    public function customerHasDownloadableProducts(): bool
+    {
+        $customerId = Mage::getSingleton('customer/session')->getCustomerId();
+        if (!$customerId) {
+            return false;
+        }
+
+        return Mage::getResourceModel('downloadable/link_purchased_collection')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->getSize() > 0;
     }
 }
