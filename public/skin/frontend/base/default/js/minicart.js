@@ -250,14 +250,14 @@ class Minicart {
     }
 
     showError(message) {
-        const el = this.getMessageContainer().querySelector(this.selectors.error);
+        const el = document.querySelector(this.selectors.error);
         if (!el) return;
         el.textContent = message;
         el.style.display = 'block';
     }
 
     showSuccess(message) {
-        const el = this.getMessageContainer().querySelector(this.selectors.success);
+        const el = document.querySelector(this.selectors.success);
         if (!el) return;
         el.textContent = message;
         el.style.display = 'block';
@@ -266,6 +266,13 @@ class Minicart {
     refreshIfOnCartPage() {
         if (document.body.classList.contains("checkout-cart-index")) {
             window.location.reload(true);
+        }
+    }
+
+    openOffcanvas() {
+        const trigger = document.querySelector('.skip-cart.offcanvas-trigger');
+        if (trigger) {
+            trigger.click();
         }
     }
 };

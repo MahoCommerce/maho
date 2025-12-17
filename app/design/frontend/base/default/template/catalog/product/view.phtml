@@ -98,26 +98,39 @@
         </form>
         <script type="text/javascript">
             var productAddToCartForm = new VarienForm('product_addtocart_form');
-            productAddToCartForm.submit = function(button, url) {
-                if (this.validator.validate()) {
-                    var form = this.form;
-                    var oldUrl = form.action;
+            productAddToCartForm.submit = async function(button, url) {
+                if (!this.validator.validate()) {
+                    return;
+                }
 
-                    if (url) {
-                        form.action = url;
-                    }
-                    var e = null;
-                    try {
-                        this.form.submit();
-                    } catch (e) {
-                    }
-                    this.form.action = oldUrl;
-                    if (e) {
-                        throw e;
-                    }
+                const form = this.form;
+                const targetUrl = url || form.action;
 
+                if (button && button !== 'undefined') {
+                    button.disabled = true;
+                }
+
+                try {
+                    const result = await mahoFetch(targetUrl, {
+                        method: 'POST',
+                        body: new URLSearchParams(new FormData(form)),
+                        loaderArea: form.closest('.product-view')
+                    });
+
+                    if (result.success && typeof minicart !== 'undefined') {
+                        minicart.updateCartQty(result.qty);
+                        minicart.updateContent(result);
+                        minicart.init();
+                        minicart.openOffcanvas();
+                        setTimeout(() => minicart.showMessage(result), 100);
+                    } else if (result.error) {
+                        alert(result.error);
+                    }
+                } catch (error) {
+                    alert(error.message || '<?= $this->jsQuoteEscape($this->__('Cannot add the item to shopping cart.')) ?>');
+                } finally {
                     if (button && button !== 'undefined') {
-                        button.disabled = true;
+                        button.disabled = false;
                     }
                 }
             }.bind(productAddToCartForm);
