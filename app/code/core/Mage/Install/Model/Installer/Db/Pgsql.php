@@ -34,11 +34,9 @@ class Mage_Install_Model_Installer_Db_Pgsql extends Mage_Install_Model_Installer
      * Check storage engine support
      * PostgreSQL doesn't have pluggable storage engines like MySQL,
      * it uses its own storage system which is always available.
-     *
-     * @return bool
      */
     #[\Override]
-    public function supportEngine()
+    public function supportEngine(): bool
     {
         // PostgreSQL always supports transactional storage
         return true;

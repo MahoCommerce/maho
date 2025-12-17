@@ -110,15 +110,6 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
             $data['db_engine'] = 'mysql';
         }
 
-        // Set db type according to the db engine
-        if (!isset($data['db_type'])) {
-            $data['db_type'] = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/type', $data['db_engine']));
-        }
-
-        $dbResource = $this->_getDbResource($data['db_engine']);
-        $data['db_pdo_type'] = $dbResource->getPdoType();
-
         if (!isset($data['db_init_statemants'])) {
             $data['db_init_statemants'] = (string) Mage::getConfig()
                 ->getNode(sprintf('install/databases/%s/initStatements', $data['db_engine']));

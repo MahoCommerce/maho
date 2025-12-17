@@ -35,51 +35,32 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
 
     /**
      * Return the database engine from config
-     *
-     * @return string
      */
-    public function getEngine()
+    public function getEngine(): string
     {
         return $this->_configData['db_engine'];
     }
 
     /**
-     * Return the name of DB model from config (legacy alias for getEngine)
-     *
-     * @return string
-     * @deprecated Use getEngine() instead
+     * Return the DB type (pdo_{engine}) derived from engine
      */
-    public function getModel()
+    public function getType(): string
     {
-        return $this->getEngine();
-    }
-
-    /**
-     * Return the DB type from config
-     *
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->_configData['db_type'];
+        return 'pdo_' . $this->getEngine();
     }
 
     /**
      * Set configuration data
-     *
-     * @param array $config the connection configuration
      */
-    public function setConfig($config)
+    public function setConfig(array $config): void
     {
         $this->_configData = $config;
     }
 
     /**
      * Retrieve connection data from config
-     *
-     * @return array
      */
-    public function getConnectionData()
+    public function getConnectionData(): array
     {
         if (!$this->_connectionData) {
             $connectionData = [
@@ -87,7 +68,6 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
                 'username'  => $this->_configData['db_user'],
                 'password'  => $this->_configData['db_pass'],
                 'dbname'    => $this->_configData['db_name'],
-                'pdoType'   => $this->getPdoType(),
             ];
             $this->_connectionData = $connectionData;
         }
@@ -96,20 +76,16 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
 
     /**
      * Check InnoDB support
-     *
-     * @return bool
      */
-    public function supportEngine()
+    public function supportEngine(): bool
     {
         return true;
     }
 
     /**
      * Create new connection with custom config
-     *
-     * @return Maho\Db\Adapter\AdapterInterface
      */
-    protected function _getConnection()
+    protected function _getConnection(): \Maho\Db\Adapter\AdapterInterface
     {
         if (!isset($this->_connection)) {
             $resource   = Mage::getSingleton('core/resource');
@@ -120,19 +96,9 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
     }
 
     /**
-     * Return pdo type
-     */
-    public function getPdoType()
-    {
-        return null;
-    }
-
-    /**
      * Retrieve required PHP extension list for database
-     *
-     * @return array
      */
-    public function getRequiredExtensions()
+    public function getRequiredExtensions(): array
     {
         $extensions = [];
         $configExt = (array) Mage::getConfig()->getNode(sprintf('install/databases/%s/extensions', $this->getEngine()));

@@ -36,11 +36,9 @@ class Mage_Install_Model_Installer_Db_Mysql extends Mage_Install_Model_Installer
 
     /**
      * Check InnoDB support
-     *
-     * @return bool
      */
     #[\Override]
-    public function supportEngine()
+    public function supportEngine(): bool
     {
         $variables = $this->_getConnection()
             ->fetchPairs('SHOW ENGINES');
