@@ -65,7 +65,6 @@
 "Secure Base URL","Secure Base URL"
 "Session Storage Options","Session Storage Options"
 "Tables Prefix","Tables Prefix"
-"The database server version doesn't match system requirements (required: %s, actual: %s).","The database server version doesn't match system requirements (required: %s, actual: %s)."
 "The table prefix should contain only letters (a-z), numbers (0-9) or underscores (_), the first character should be a letter.","The table prefix should contain only letters (a-z), numbers (0-9) or underscores (_), the first character should be a letter."
 "The URL ""%s"" is invalid.","The URL ""%s"" is invalid."
 "The URL ""%s"" is not accessible.","The URL ""%s"" is not accessible."
