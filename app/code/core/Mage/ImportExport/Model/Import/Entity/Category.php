@@ -403,6 +403,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         $entityTable = Mage::getSingleton('core/resource')->getTableName('catalog_category_entity');
         $newCategoryAttributes = [];
         $isPostgres = $this->_connection instanceof \Maho\Db\Adapter\Pdo\Pgsql;
+        $isSqlite = $this->_connection instanceof \Maho\Db\Adapter\Pdo\Sqlite;
 
         foreach ($entityRows as &$row) {
             // Extract temporary data before database insert
@@ -410,8 +411,9 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             $tempRowScope = $row['_temp_row_scope'] ?? null;
             unset($row['_temp_row_data'], $row['_temp_row_scope']);
 
-            // For PostgreSQL compatibility, we need to include the path in the initial INSERT
-            // because path is NOT NULL. For auto-generated IDs, we need to get the next sequence value first.
+            // For PostgreSQL and SQLite compatibility, we need to include the path in the initial INSERT
+            // because path is NOT NULL. For auto-generated IDs, we need to get the next sequence value first
+            // (PostgreSQL) or use a placeholder that we update after getting lastInsertId (SQLite).
             $needsPathUpdate = false;
             if (!isset($row['entity_id'])) {
                 if ($isPostgres) {
@@ -420,6 +422,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                         "SELECT nextval(pg_get_serial_sequence('{$entityTable}', 'entity_id'))",
                     );
                     $row['entity_id'] = $entityId;
+                } elseif ($isSqlite) {
+                    // SQLite: use placeholder path since we can't get next ID before insert
+                    // but SQLite strictly enforces NOT NULL. Will update after insert.
+                    $row['path'] = '0';
+                    $needsPathUpdate = true;
                 } else {
                     // MySQL: let auto_increment handle it, will update path after
                     $needsPathUpdate = true;
@@ -438,7 +445,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
             $this->_connection->insert($entityTable, $row);
 
-            // For MySQL without pre-set entity_id, get the auto-generated ID and update path
+            // For MySQL/SQLite without pre-set entity_id, get the auto-generated ID and update path
             if ($needsPathUpdate) {
                 $entityId = (int) $this->_connection->lastInsertId();
                 $parentPath = '';

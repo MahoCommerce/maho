@@ -411,9 +411,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             if (empty($segments)) {
                 $quoted = '*';
             } else {
-                if ($alias !== null && end($ident) == $alias) {
-                    $alias = null;
-                }
+                // Note: We intentionally do NOT strip the alias when it matches the column name.
+                // While `column AS column` is redundant, it's necessary for SQLite UNION queries
+                // where ORDER BY needs explicit aliases to match result set columns.
                 $quoted = implode('.', $segments);
             }
         }

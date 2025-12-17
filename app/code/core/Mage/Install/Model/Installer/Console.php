@@ -91,11 +91,16 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
 
         /**
          * Parse arguments
+         * Supports both --key value and --key=value formats
          */
         $currentArg = false;
         $match = false;
         foreach ($args as $arg) {
-            if (preg_match('/^--(.*)$/', $arg, $match)) {
+            if (preg_match('/^--([^=]+)=(.*)$/', $arg, $match)) {
+                // argument with value in --key=value format
+                $args[$match[1]] = $match[2];
+                $currentArg = false;
+            } elseif (preg_match('/^--(.*)$/', $arg, $match)) {
                 // argument name
                 $currentArg = $match[1];
                 // in case if argument doesn't need a value
@@ -116,8 +121,16 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
 
         /**
          * Check required arguments
+         * Some parameters are not required for SQLite
          */
+        $isSqlite = isset($args['db_engine']) && $args['db_engine'] === 'sqlite';
+        $sqliteOptionalParams = ['db_host', 'db_user', 'use_secure', 'secure_base_url', 'use_secure_admin'];
+
         foreach ($this->_getOptions() as $name => $option) {
+            // Skip validation for SQLite-optional parameters
+            if ($isSqlite && in_array($name, $sqliteOptionalParams)) {
+                continue;
+            }
             if (isset($option['required']) && $option['required'] && !isset($args[$name])) {
                 $error = 'ERROR: ' . 'You should provide the value for --' . $name . ' parameter';
                 if (!empty($option['comment'])) {

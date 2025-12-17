@@ -153,10 +153,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             return false;
         }
 
+        // For datetime tables with equality operator, use DATE() for SQLite compatibility
+        // (datetime stored as '1990-06-15 00:00:00' won't match '1990-06-15' as exact string)
+        $field = 'attr.value';
+        if (str_ends_with($attributeData['table'], '_datetime') && in_array($operator, ['=', '=='], true)) {
+            $field = (string) $adapter->getDatePartSql($field);
+        }
+
         $subselect = $adapter->select()
             ->from(['attr' => $attributeData['table']], ['entity_id'])
             ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
-            ->where($this->buildSqlCondition($adapter, 'attr.value', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, $field, $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

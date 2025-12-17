@@ -92,6 +92,14 @@
                     <pdo_pgsql>1</pdo_pgsql>
                 </extensions>
             </pgsql>
+            <sqlite>
+                <type>pdo_sqlite</type>
+                <initStatements></initStatements>
+                <min_version>3.31.0</min_version>
+                <extensions>
+                    <pdo_sqlite>1</pdo_sqlite>
+                </extensions>
+            </sqlite>
         </databases>
         <layout>
             <updates>

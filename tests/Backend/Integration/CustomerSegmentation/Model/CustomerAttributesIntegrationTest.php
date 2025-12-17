@@ -40,8 +40,8 @@ describe('Customer Attributes Integration Tests', function () {
             // Test SQL is properly formed
             expect($sql)->toBeString();
             expect($sql)->toContain('CASE');
-            // Check for either MySQL (DATEDIFF) or PostgreSQL (DATE() function or ::date cast) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
 
             // For each matched customer, verify they have birthday today (month-day matches)
             $todayMonthDay = date('m-d');
@@ -178,11 +178,11 @@ describe('Customer Attributes Integration Tests', function () {
             $sql = $condition->getConditionsSql($adapter);
 
             expect($sql)->toBeString();
-            // Check for either MySQL (DATEDIFF, DATE_FORMAT, YEAR, DAYOFYEAR) or PostgreSQL (EXTRACT, MAKE_DATE) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
-            expect($sql)->toMatch('/DATE_FORMAT|MAKE_DATE/');
-            expect($sql)->toMatch('/YEAR|EXTRACT/');
-            expect($sql)->toMatch('/DAYOFYEAR|DOY/');
+            // Check for MySQL (DATEDIFF, DATE_FORMAT, YEAR, DAYOFYEAR), PostgreSQL (EXTRACT, MAKE_DATE), or SQLite (JULIANDAY, STRFTIME) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
+            expect($sql)->toMatch('/DATE_FORMAT|MAKE_DATE|STRFTIME/');
+            expect($sql)->toMatch('/YEAR|EXTRACT|STRFTIME/');
+            expect($sql)->toMatch('/DAYOFYEAR|DOY|%m-%d/');
         });
     });
 

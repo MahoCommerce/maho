@@ -40,3 +40,21 @@
         <?php endforeach ?>
     </ul>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dbSelector = document.getElementById('db_engine_select');
+    if (dbSelector) {
+        dbSelector.addEventListener('change', function() {
+            const selectedType = this.value;
+            document.querySelectorAll('.db-connection-form').forEach(function(form) {
+                if (form.dataset.dbType === selectedType) {
+                    form.classList.remove('hidden');
+                } else {
+                    form.classList.add('hidden');
+                }
+            });
+        });
+    }
+});
+</script>

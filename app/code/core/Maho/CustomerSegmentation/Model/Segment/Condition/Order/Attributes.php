@@ -287,7 +287,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $this->prepareNumericValue($value)));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -299,7 +299,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $value));
+            ->having($this->buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $this->prepareNumericValue($value)));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

@@ -18,7 +18,12 @@
     </modules>
     <global>
         <models>
+            <core>
+                <class>Mage_Core_Model</class>
+                <resourceModel>core_resource</resourceModel>
+            </core>
             <core_resource>
+                <class>Mage_Core_Model_Resource</class>
                 <entities>
                     <website>
                         <table>core_website</table>

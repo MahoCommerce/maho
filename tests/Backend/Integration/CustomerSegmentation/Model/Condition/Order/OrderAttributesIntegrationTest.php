@@ -546,8 +546,8 @@ describe('Order Attributes Condition Integration Tests', function () {
 
             expect($sql)->toBeString();
             expect($sql)->toContain('MAX(o.created_at)');
-            // Check for either MySQL (DATEDIFF) or PostgreSQL (DATE() function or ::date cast) syntax
-            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(/');
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
             expect($sql)->toContain('HAVING');
         });
     });
@@ -872,7 +872,7 @@ describe('Order Attributes Condition Integration Tests', function () {
 
         test('SQL contains proper subqueries for calculated fields', function () {
             $calculatedFields = [
-                'days_since_last_order' => ['pattern' => '/DATEDIFF|::date|DATE\\(/', 'contains' => ['MAX(o.created_at)']],
+                'days_since_last_order' => ['pattern' => '/DATEDIFF|::date|DATE\\(|JULIANDAY/', 'contains' => ['MAX(o.created_at)']],
                 'average_order_amount' => ['contains' => ['AVG(o.grand_total)', 'HAVING']],
                 'total_ordered_amount' => ['contains' => ['SUM(o.grand_total)', 'HAVING']],
             ];

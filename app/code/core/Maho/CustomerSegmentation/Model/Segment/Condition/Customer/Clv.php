@@ -158,7 +158,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
         // Standard condition building
         $clvSelect = $adapter->select()
             ->from(['clv' => new Maho\Db\Expr("({$select})")], ['customer_id'])
-            ->where($this->buildSqlCondition($adapter, 'clv.total', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'clv.total', $operator, $this->prepareNumericValue($value)));
 
         if ($requireValid) {
             return $adapter->quoteInto("{$fieldName} IN (?)", new Maho\Db\Expr((string) $clvSelect));

@@ -1,0 +1,30 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * Install SQLite database configuration template
+ *
+ * @see Mage_Install_Block_Config
+ * @var Mage_Install_Block_Config $this
+ */
+?>
+<li>
+    <label for="sqlite_db_path"><?= $this->__('Database File Path') ?> <span class="required">*</span></label>
+    <input type="text" name="connection[<?= $this->getIdPrefix()?>][db_name]" id="sqlite_db_path" value="<?= $this->getFormData()->getDbName() ?: 'maho.sqlite' ?>" title="<?= $this->quoteEscape($this->__('Database File Path')) ?>" class="required-entry input-text" />
+    <p class="field-note">
+        <small><?= $this->__('Relative path from var/db/ directory, or absolute path, or :memory: for in-memory database') ?></small>
+    </p>
+</li>
+<li>
+    <label for="sqlite_prefix"><?= $this->__('Tables Prefix') ?></label>
+    <input type="text" name="connection[<?= $this->getIdPrefix()?>][db_prefix]" id="sqlite_prefix" value="<?= $this->getFormData()->getDbPrefix() ?>" title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>" class="validate-data input-text" />
+    <p class="field-note">
+        <small><?= $this->__('(Optional. Leave blank for no prefix)') ?></small>
+    </p>
+</li>
