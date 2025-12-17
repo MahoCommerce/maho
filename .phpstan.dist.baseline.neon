@@ -15295,12 +15295,6 @@ parameters:
 			path: app/code/core/Mage/Install/Model/Installer/Console.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Install_Model_Installer_Db_Abstract::getVersion().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Install/Model/Installer/Db.php
-
-		-
 			rawMessage: 'Property Mage_Install_Model_Installer_Db_Abstract::$_connection (Maho\Db\Adapter\AdapterInterface) in isset() is not nullable.'
 			identifier: isset.property
 			count: 1
