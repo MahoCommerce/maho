@@ -28,7 +28,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
      */
     protected function _getLayoutHandle()
     {
-        return 'maho_giftcard_pdf';
+        return 'giftcard_pdf';
     }
 
     /**
@@ -38,7 +38,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
      */
     protected function _getBlockName()
     {
-        return 'maho_giftcard.pdf';
+        return 'giftcard.pdf';
     }
 
     /**
@@ -53,7 +53,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
 
         try {
             // Create PDF block and set gift cards
-            $block = Mage::app()->getLayout()->createBlock('maho_giftcard/pdf_giftcard');
+            $block = Mage::app()->getLayout()->createBlock('giftcard/pdf_giftcard');
             $block->setGiftcards($giftcards);
 
             // Generate HTML
@@ -69,7 +69,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
         } catch (Exception $e) {
             Mage::logException($e);
             throw new Mage_Core_Exception(
-                Mage::helper('maho_giftcard')->__('Error generating gift card PDF: %s', $e->getMessage()),
+                Mage::helper('giftcard')->__('Error generating gift card PDF: %s', $e->getMessage()),
             );
         }
     }

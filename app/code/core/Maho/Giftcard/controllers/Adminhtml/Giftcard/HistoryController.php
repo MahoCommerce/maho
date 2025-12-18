@@ -42,7 +42,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
     public function indexAction()
     {
         $this->_initAction();
-        $this->_title(Mage::helper('maho_giftcard')->__('Gift Card History'));
+        $this->_title(Mage::helper('giftcard')->__('Gift Card History'));
         $this->renderLayout();
     }
 
@@ -58,6 +58,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/maho_giftcard/history');
+        return Mage::getSingleton('admin/session')->isAllowed('customer/giftcard/history');
     }
 }

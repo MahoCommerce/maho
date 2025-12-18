@@ -18,9 +18,9 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function generateCode(): string
     {
-        $length = (int) Mage::getStoreConfig('maho_giftcard/general/code_length') ?: 16;
-        $prefix = Mage::getStoreConfig('maho_giftcard/general/code_prefix') ?: 'GC';
-        $format = Mage::getStoreConfig('maho_giftcard/general/code_format');
+        $length = (int) Mage::getStoreConfig('giftcard/general/code_length') ?: 16;
+        $prefix = Mage::getStoreConfig('giftcard/general/code_prefix') ?: 'GC';
+        $format = Mage::getStoreConfig('giftcard/general/code_format');
 
         // Generate random alphanumeric code
         $characters = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // Excluding I, O to avoid confusion
@@ -53,7 +53,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         // Check if code already exists, regenerate if it does
-        $giftcard = Mage::getModel('maho_giftcard/giftcard')
+        $giftcard = Mage::getModel('giftcard/giftcard')
             ->loadByCode($code);
 
         if ($giftcard->getId()) {
@@ -77,7 +77,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isEnabled(): bool
     {
-        return Mage::getStoreConfigFlag('maho_giftcard/general/enabled');
+        return Mage::getStoreConfigFlag('giftcard/general/enabled');
     }
 
     /**
@@ -87,7 +87,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getLifetime(): int
     {
-        return (int) Mage::getStoreConfig('maho_giftcard/general/lifetime');
+        return (int) Mage::getStoreConfig('giftcard/general/lifetime');
     }
 
     /**
@@ -125,7 +125,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isQrCodeEnabled(): bool
     {
-        return Mage::getStoreConfigFlag('maho_giftcard/general/enable_qrcode');
+        return Mage::getStoreConfigFlag('giftcard/general/enable_qrcode');
     }
 
     /**
@@ -133,7 +133,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isBarcodeEnabled(): bool
     {
-        return Mage::getStoreConfigFlag('maho_giftcard/general/enable_barcode');
+        return Mage::getStoreConfigFlag('giftcard/general/enable_barcode');
     }
 
     /**
@@ -248,8 +248,8 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
         try {
             // Get template ID and sender identity from configuration
-            $templateId = Mage::getStoreConfig('maho_giftcard/email/template', $storeId);
-            $identity = Mage::getStoreConfig('maho_giftcard/email/identity', $storeId) ?: 'general';
+            $templateId = Mage::getStoreConfig('giftcard/email/template', $storeId);
+            $identity = Mage::getStoreConfig('giftcard/email/identity', $storeId) ?: 'general';
 
             if (!$templateId) {
                 throw new Mage_Core_Exception('No email template configured. Please configure template in System > Configuration > Sales > Gift Cards > Email Settings.');
@@ -294,7 +294,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         // Create scheduled email record
-        $scheduledEmail = Mage::getModel('maho_giftcard/scheduled_email');
+        $scheduledEmail = Mage::getModel('giftcard/scheduled_email');
         $scheduledEmail->setData([
             'giftcard_id' => $giftcard->getId(),
             'recipient_email' => $giftcard->getRecipientEmail(),

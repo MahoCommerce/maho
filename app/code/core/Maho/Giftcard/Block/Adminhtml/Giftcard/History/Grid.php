@@ -26,11 +26,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('maho_giftcard/history')->getCollection();
+        $collection = Mage::getModel('giftcard/history')->getCollection();
 
         // Join gift card table to get code
         $collection->getSelect()->join(
-            ['gc' => $collection->getTable('maho_giftcard/giftcard')],
+            ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
             ['code', 'recipient_email'],
         );
@@ -51,21 +51,21 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     protected function _prepareColumns()
     {
         $this->addColumn('history_id', [
-            'header' => Mage::helper('maho_giftcard')->__('ID'),
+            'header' => Mage::helper('giftcard')->__('ID'),
             'align'  => 'right',
             'width'  => '50px',
             'index'  => 'history_id',
         ]);
 
         $this->addColumn('code', [
-            'header' => Mage::helper('maho_giftcard')->__('Gift Card Code'),
+            'header' => Mage::helper('giftcard')->__('Gift Card Code'),
             'align'  => 'left',
             'index'  => 'code',
             'filter_index' => 'gc.code',
         ]);
 
         $this->addColumn('action', [
-            'header'  => Mage::helper('maho_giftcard')->__('Action'),
+            'header'  => Mage::helper('giftcard')->__('Action'),
             'align'   => 'left',
             'width'   => '100px',
             'index'   => 'action',
@@ -80,7 +80,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         ]);
 
         $this->addColumn('amount', [
-            'header'   => Mage::helper('maho_giftcard')->__('Amount'),
+            'header'   => Mage::helper('giftcard')->__('Amount'),
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'amount',
@@ -89,7 +89,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         ]);
 
         $this->addColumn('balance_before', [
-            'header'   => Mage::helper('maho_giftcard')->__('Balance Before'),
+            'header'   => Mage::helper('giftcard')->__('Balance Before'),
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'balance_before',
@@ -98,7 +98,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         ]);
 
         $this->addColumn('balance_after', [
-            'header'   => Mage::helper('maho_giftcard')->__('Balance After'),
+            'header'   => Mage::helper('giftcard')->__('Balance After'),
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'balance_after',
@@ -107,7 +107,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         ]);
 
         $this->addColumn('order_increment_id', [
-            'header' => Mage::helper('maho_giftcard')->__('Order'),
+            'header' => Mage::helper('giftcard')->__('Order'),
             'align'  => 'left',
             'width'  => '120px',
             'index'  => 'order_increment_id',
@@ -116,20 +116,20 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         ]);
 
         $this->addColumn('recipient_email', [
-            'header' => Mage::helper('maho_giftcard')->__('Recipient Email'),
+            'header' => Mage::helper('giftcard')->__('Recipient Email'),
             'align'  => 'left',
             'index'  => 'recipient_email',
             'filter_index' => 'gc.recipient_email',
         ]);
 
         $this->addColumn('comment', [
-            'header' => Mage::helper('maho_giftcard')->__('Comment'),
+            'header' => Mage::helper('giftcard')->__('Comment'),
             'align'  => 'left',
             'index'  => 'comment',
         ]);
 
         $this->addColumn('created_at', [
-            'header' => Mage::helper('maho_giftcard')->__('Date'),
+            'header' => Mage::helper('giftcard')->__('Date'),
             'align'  => 'left',
             'width'  => '160px',
             'index'  => 'created_at',

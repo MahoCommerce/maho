@@ -74,9 +74,9 @@ class Maho_Giftcard_Model_Observer
         string $senderEmail = '',
         string $message = '',
     ): void {
-        $helper = Mage::helper('maho_giftcard');
+        $helper = Mage::helper('giftcard');
 
-        $giftcard = Mage::getModel('maho_giftcard/giftcard');
+        $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
             'code' => $helper->generateCode(),
             'status' => Maho_Giftcard_Model_Giftcard::STATUS_PENDING,
@@ -98,7 +98,7 @@ class Maho_Giftcard_Model_Observer
         $giftcard->save();
 
         // Add history entry
-        $history = Mage::getModel('maho_giftcard/history');
+        $history = Mage::getModel('giftcard/history');
         $history->setData([
             'giftcard_id' => $giftcard->getId(),
             'action' => Maho_Giftcard_Model_Giftcard::ACTION_CREATED,
@@ -131,7 +131,7 @@ class Maho_Giftcard_Model_Observer
         }
 
         // Find all pending gift cards for this order
-        $giftcards = Mage::getModel('maho_giftcard/giftcard')->getCollection()
+        $giftcards = Mage::getModel('giftcard/giftcard')->getCollection()
             ->addFieldToFilter('purchase_order_id', $order->getId())
             ->addFieldToFilter('status', Maho_Giftcard_Model_Giftcard::STATUS_PENDING);
 
@@ -141,7 +141,7 @@ class Maho_Giftcard_Model_Observer
             $giftcard->save();
 
             // Add history entry
-            $history = Mage::getModel('maho_giftcard/history');
+            $history = Mage::getModel('giftcard/history');
             $history->setData([
                 'giftcard_id' => $giftcard->getId(),
                 'action' => 'activated',
@@ -171,7 +171,7 @@ class Maho_Giftcard_Model_Observer
     protected function _sendGiftcardEmail($giftcard, $order)
     {
         try {
-            $helper = Mage::helper('maho_giftcard');
+            $helper = Mage::helper('giftcard');
 
             // Prepare email variables
             $emailVars = [
@@ -190,7 +190,7 @@ class Maho_Giftcard_Model_Observer
             $emailTemplate = Mage::getModel('core/email_template');
             $emailTemplate->setDesignConfig(['area' => 'frontend', 'store' => $order->getStoreId()])
                 ->sendTransactional(
-                    'maho_giftcard_email_template',
+                    'giftcard_email_template',
                     Mage::getStoreConfig('sales/email/identity', $order->getStoreId()),
                     $giftcard->getRecipientEmail(),
                     $giftcard->getRecipientName(),
@@ -376,7 +376,7 @@ class Maho_Giftcard_Model_Observer
 
         // Deduct balance from each gift card
         foreach ($codes as $code => $usedAmount) {
-            $giftcard = Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
             if (!$giftcard->getId()) {
                 continue;
             }
@@ -389,7 +389,7 @@ class Maho_Giftcard_Model_Observer
             $giftcard->save();
 
             // Log the usage in history
-            $history = Mage::getModel('maho_giftcard/history');
+            $history = Mage::getModel('giftcard/history');
             $history->setData([
                 'giftcard_id' => $giftcard->getId(),
                 'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
@@ -445,7 +445,7 @@ class Maho_Giftcard_Model_Observer
                 }
             }
 
-            $label = Mage::helper('maho_giftcard')->__('Gift Cards');
+            $label = Mage::helper('giftcard')->__('Gift Cards');
             if (!empty($codes)) {
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
@@ -514,12 +514,12 @@ class Maho_Giftcard_Model_Observer
 
             // Only override if no payment method was selected
             if (empty($payment['method'])) {
-                $payment['method'] = 'maho_giftcard';
+                $payment['method'] = 'giftcard';
                 $request->setPost('payment', $payment);
 
                 // Also set it directly on the quote
                 try {
-                    $quote->getPayment()->setMethod('maho_giftcard');
+                    $quote->getPayment()->setMethod('giftcard');
                 } catch (Exception $e) {
                     Mage::logException($e);
                 }

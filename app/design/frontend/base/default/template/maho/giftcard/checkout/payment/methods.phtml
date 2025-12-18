@@ -45,7 +45,7 @@ $isFullyCovered = ($giftcardAmount > 0 && $grandTotal <= 0.01);
                     }
                 }
                 freeMethodFound = true;
-            } else if (methodId === 'dt_method_maho_giftcard') {
+            } else if (methodId === 'dt_method_giftcard') {
                 // Show gift card method as alternative
                 method.style.display = 'block';
                 if (!freeMethodFound) {
@@ -53,7 +53,7 @@ $isFullyCovered = ($giftcardAmount > 0 && $grandTotal <= 0.01);
                     if (radio) {
                         radio.checked = true;
                         if (typeof payment !== 'undefined' && payment.switchMethod) {
-                            payment.switchMethod('maho_giftcard');
+                            payment.switchMethod('giftcard');
                         }
                     }
                 }
@@ -101,7 +101,7 @@ $isFullyCovered = ($giftcardAmount > 0 && $grandTotal <= 0.01);
         }
 
         // Don't allow selecting gift card payment if partial payment
-        var giftcardMethod = document.getElementById('dt_method_maho_giftcard');
+        var giftcardMethod = document.getElementById('dt_method_giftcard');
         if (giftcardMethod) {
             giftcardMethod.style.display = 'none';
             var dd = giftcardMethod.nextElementSibling;

@@ -178,11 +178,11 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                 $maxAmount = $productInstance->getGiftcardMaxAmount();
 
                 if ($minAmount && $amount < (float) $minAmount) {
-                    return Mage::helper('maho_giftcard')->__('Gift card amount cannot be less than %s', Mage::app()->getStore()->formatPrice($minAmount));
+                    return Mage::helper('giftcard')->__('Gift card amount cannot be less than %s', Mage::app()->getStore()->formatPrice($minAmount));
                 }
 
                 if ($maxAmount && $amount > (float) $maxAmount) {
-                    return Mage::helper('maho_giftcard')->__('Gift card amount cannot be more than %s', Mage::app()->getStore()->formatPrice($maxAmount));
+                    return Mage::helper('giftcard')->__('Gift card amount cannot be more than %s', Mage::app()->getStore()->formatPrice($maxAmount));
                 }
             }
 
@@ -203,7 +203,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                     }
 
                     if (!$isValid) {
-                        return Mage::helper('maho_giftcard')->__('Please select a valid gift card amount');
+                        return Mage::helper('giftcard')->__('Please select a valid gift card amount');
                     }
                 }
             }

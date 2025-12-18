@@ -60,7 +60,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _construct()
     {
-        $this->_init('maho_giftcard/giftcard');
+        $this->_init('giftcard/giftcard');
     }
 
     /**
@@ -233,7 +233,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         ?int $orderId = null,
         ?string $comment = null,
     ): void {
-        $history = Mage::getModel('maho_giftcard/history');
+        $history = Mage::getModel('giftcard/history');
         $history->setData([
             'giftcard_id' => $this->getId(),
             'action' => $action,
@@ -255,7 +255,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function getHistoryCollection()
     {
-        return Mage::getResourceModel('maho_giftcard/history_collection')
+        return Mage::getResourceModel('giftcard/history_collection')
             ->addFieldToFilter('giftcard_id', $this->getId())
             ->setOrder('created_at', 'DESC');
     }

@@ -16,9 +16,9 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
 {
-    protected $_code = 'maho_giftcard';
-    protected $_formBlockType = 'maho_giftcard/payment_form';
-    protected $_infoBlockType = 'maho_giftcard/payment_info';
+    protected $_code = 'giftcard';
+    protected $_formBlockType = 'giftcard/payment_form';
+    protected $_infoBlockType = 'giftcard/payment_info';
     protected $_canUseInternal = true;
     protected $_canUseCheckout = true;
     protected $_canUseForMultishipping = false;
@@ -102,7 +102,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
         }
 
         foreach ($codes as $code => $appliedAmount) {
-            $giftcard = Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
             if ($giftcard->getId() && $giftcard->isValid()) {
                 $giftcard->use(
@@ -136,7 +136,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $totalApplied = array_sum($codes);
 
         foreach ($codes as $code => $appliedAmount) {
-            $giftcard = Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
             if ($giftcard->getId()) {
                 $refundAmount = ($appliedAmount / $totalApplied) * $amount;

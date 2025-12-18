@@ -207,9 +207,9 @@ $giftcards = $this->getGiftcards();
                 <div class="code"><?php echo $this->escapeHtml($giftcard->getCode()) ?></div>
 
                 <?php
-                $helper = Mage::helper('maho_giftcard');
-                $showQrInPdf = Mage::getStoreConfigFlag('maho_giftcard/general/pdf_show_qrcode');
-                $showBarcodeInPdf = Mage::getStoreConfigFlag('maho_giftcard/general/pdf_show_barcode');
+                $helper = Mage::helper('giftcard');
+                $showQrInPdf = Mage::getStoreConfigFlag('giftcard/general/pdf_show_qrcode');
+                $showBarcodeInPdf = Mage::getStoreConfigFlag('giftcard/general/pdf_show_barcode');
 
                 $qrCode = $showQrInPdf ? $helper->getQrCodeDataUrl($giftcard->getCode(), 150) : '';
                 $barcode = $showBarcodeInPdf ? $helper->getBarcodeDataUrl($giftcard->getCode()) : '';

@@ -28,7 +28,7 @@ class Maho_Giftcard_Model_Cron
             // Process scheduled emails
 
             // Get scheduled emails that are due (using store timezone)
-            $collection = Mage::getResourceModel('maho_giftcard/scheduled_email_collection')
+            $collection = Mage::getResourceModel('giftcard/scheduled_email_collection')
                 ->addFieldToFilter('status', Maho_Giftcard_Model_Scheduled_Email::STATUS_PENDING)
                 ->addFieldToFilter('scheduled_at', ['lteq' => $currentTimeUtc->format('Y-m-d H:i:s')])
                 ->setPageSize(50); // Process max 50 per run
@@ -73,7 +73,7 @@ class Maho_Giftcard_Model_Cron
             // Check for expired gift cards
 
             // Get active gift cards that have expired
-            $collection = Mage::getResourceModel('maho_giftcard/giftcard_collection')
+            $collection = Mage::getResourceModel('giftcard/giftcard_collection')
                 ->addFieldToFilter('status', Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
                 ->addFieldToFilter('expires_at', ['notnull' => true])
                 ->addFieldToFilter('expires_at', ['lt' => $currentTime->format('Y-m-d H:i:s')]);
@@ -86,7 +86,7 @@ class Maho_Giftcard_Model_Cron
                     $giftcard->save();
 
                     // Add history entry
-                    $history = Mage::getModel('maho_giftcard/history');
+                    $history = Mage::getModel('giftcard/history');
                     $history->setData([
                         'giftcard_id' => $giftcard->getId(),
                         'action' => Maho_Giftcard_Model_Giftcard::ACTION_EXPIRED,

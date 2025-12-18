@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'maho_giftcard/manage';
+    public const ADMIN_RESOURCE = 'giftcard/manage';
 
     /**
      * Print gift card as PDF
@@ -21,7 +21,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     public function pdfAction()
     {
         $id = $this->getRequest()->getParam('id');
-        $giftcard = Mage::getModel('maho_giftcard/giftcard')->load($id);
+        $giftcard = Mage::getModel('giftcard/giftcard')->load($id);
 
         if (!$giftcard->getId()) {
             $this->_getSession()->addError('Gift card not found.');
@@ -30,7 +30,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
         }
 
         try {
-            $pdf = Mage::getModel('maho_giftcard/pdf_giftcard')->getPdf([$giftcard]);
+            $pdf = Mage::getModel('giftcard/pdf_giftcard')->getPdf([$giftcard]);
 
             $this->_prepareDownloadResponse(
                 'giftcard_' . $giftcard->getCode() . '.pdf',
@@ -60,7 +60,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
         try {
             $giftcards = [];
             foreach ($giftcardIds as $id) {
-                $giftcard = Mage::getModel('maho_giftcard/giftcard')->load($id);
+                $giftcard = Mage::getModel('giftcard/giftcard')->load($id);
                 if ($giftcard->getId()) {
                     $giftcards[] = $giftcard;
                 }
@@ -70,7 +70,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
                 throw new Exception('No valid gift cards found.');
             }
 
-            $pdf = Mage::getModel('maho_giftcard/pdf_giftcard')->getPdf($giftcards);
+            $pdf = Mage::getModel('giftcard/pdf_giftcard')->getPdf($giftcards);
 
             $this->_prepareDownloadResponse(
                 'giftcards_' . date('Y-m-d') . '.pdf',
@@ -92,7 +92,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
         $id = $this->getRequest()->getParam('id');
         $scheduleAt = $this->getRequest()->getParam('schedule_at');
 
-        $giftcard = Mage::getModel('maho_giftcard/giftcard')->load($id);
+        $giftcard = Mage::getModel('giftcard/giftcard')->load($id);
 
         if (!$giftcard->getId()) {
             $this->_getSession()->addError('Gift card not found.');
@@ -110,13 +110,13 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
             if ($scheduleAt) {
                 // Schedule email for later
                 $scheduleDate = new DateTime($scheduleAt);
-                Mage::helper('maho_giftcard')->scheduleGiftcardEmail($giftcard, $scheduleDate);
+                Mage::helper('giftcard')->scheduleGiftcardEmail($giftcard, $scheduleDate);
                 $this->_getSession()->addSuccess(
                     sprintf('Gift card email scheduled for %s', $scheduleDate->format('Y-m-d H:i')),
                 );
             } else {
                 // Send immediately
-                Mage::helper('maho_giftcard')->sendGiftcardEmail($giftcard);
+                Mage::helper('giftcard')->sendGiftcardEmail($giftcard);
                 $this->_getSession()->addSuccess('Gift card email sent successfully.');
             }
 
@@ -131,6 +131,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('maho_giftcard/manage');
+        return Mage::getSingleton('admin/session')->isAllowed('giftcard/manage');
     }
 }

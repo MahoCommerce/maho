@@ -82,7 +82,7 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
         $validCodes = [];
 
         foreach ($codes as $code => $requestedAmount) {
-            $giftcard = Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
             file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD LOAD: Code=' . $code . ' ID=' . $giftcard->getId() . ' Valid=' . ($giftcard->isValid() ? 'Y' : 'N') . ' Balance=' . $giftcard->getBalance() . "\n", FILE_APPEND);
 
@@ -185,7 +185,7 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
 
             $address->addTotal([
                 'code' => $this->getCode(),
-                'title' => Mage::helper('maho_giftcard')->__('Gift Certificates'),
+                'title' => Mage::helper('giftcard')->__('Gift Certificates'),
                 'value' => $amount, // Pass positive value - template will handle display
                 'giftcard_codes' => implode(', ', $codes),
             ]);

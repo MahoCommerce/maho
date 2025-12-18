@@ -37,7 +37,7 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _construct()
     {
-        $this->_init('maho_giftcard/history');
+        $this->_init('giftcard/history');
     }
 
     /**
@@ -47,7 +47,7 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
      */
     public function getGiftcard()
     {
-        return Mage::getModel('maho_giftcard/giftcard')->load($this->getGiftcardId());
+        return Mage::getModel('giftcard/giftcard')->load($this->getGiftcardId());
     }
 
     /**

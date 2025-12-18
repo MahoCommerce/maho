@@ -16,7 +16,7 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     #[\Override]
     protected function _construct()
     {
-        $this->_init('maho_giftcard/giftcard', 'giftcard_id');
+        $this->_init('giftcard/giftcard', 'giftcard_id');
     }
 
     /**

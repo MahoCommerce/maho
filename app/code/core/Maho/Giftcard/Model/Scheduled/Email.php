@@ -43,7 +43,7 @@ class Maho_Giftcard_Model_Scheduled_Email extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _construct()
     {
-        $this->_init('maho_giftcard/scheduled_email');
+        $this->_init('giftcard/scheduled_email');
     }
 
     /**
@@ -56,14 +56,14 @@ class Maho_Giftcard_Model_Scheduled_Email extends Mage_Core_Model_Abstract
         }
 
         try {
-            $giftcard = Mage::getModel('maho_giftcard/giftcard')->load($this->getGiftcardId());
+            $giftcard = Mage::getModel('giftcard/giftcard')->load($this->getGiftcardId());
 
             if (!$giftcard->getId()) {
                 throw new Mage_Core_Exception('Gift card not found.');
             }
 
             // Send the email
-            Mage::helper('maho_giftcard')->sendGiftcardEmail($giftcard);
+            Mage::helper('giftcard')->sendGiftcardEmail($giftcard);
 
             // Mark as sent
             $this->setStatus(self::STATUS_SENT);

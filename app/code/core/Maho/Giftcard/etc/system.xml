@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config>
     <sections>
-        <maho_giftcard translate="label" module="maho_giftcard">
+        <giftcard translate="label" module="giftcard">
             <label>Gift Cards</label>
             <tab>sales</tab>
             <sort_order>400</sort_order>
@@ -138,6 +138,6 @@
                     </fields>
                 </email>
             </groups>
-        </maho_giftcard>
+        </giftcard>
     </sections>
 </config>

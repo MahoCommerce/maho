@@ -16,8 +16,8 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History extends Mage_Adminhtml_Bloc
     public function __construct()
     {
         $this->_controller = 'adminhtml_giftcard_history';
-        $this->_blockGroup = 'maho_giftcard';
-        $this->_headerText = Mage::helper('maho_giftcard')->__('Gift Card Transaction History');
+        $this->_blockGroup = 'giftcard';
+        $this->_headerText = Mage::helper('giftcard')->__('Gift Card Transaction History');
 
         parent::__construct();
         $this->_removeButton('add');

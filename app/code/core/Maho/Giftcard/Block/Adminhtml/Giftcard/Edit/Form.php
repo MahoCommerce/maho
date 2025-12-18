@@ -27,7 +27,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
 
         $form->setUseContainer(true);
 
-        $fieldset = $form->addFieldset('base_fieldset', ['legend' => Mage::helper('maho_giftcard')->__('Gift Card Information')]);
+        $fieldset = $form->addFieldset('base_fieldset', ['legend' => Mage::helper('giftcard')->__('Gift Card Information')]);
 
         if ($model->getId()) {
             $fieldset->addField('giftcard_id', 'hidden', [
@@ -37,16 +37,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
 
         $fieldset->addField('code', 'text', [
             'name'     => 'code',
-            'label'    => Mage::helper('maho_giftcard')->__('Code'),
-            'title'    => Mage::helper('maho_giftcard')->__('Code'),
+            'label'    => Mage::helper('giftcard')->__('Code'),
+            'title'    => Mage::helper('giftcard')->__('Code'),
             'required' => false,
             'note'     => 'Leave empty to auto-generate',
             'disabled' => $model->getId() ? true : false,
         ]);
 
         $fieldset->addField('status', 'select', [
-            'label'    => Mage::helper('maho_giftcard')->__('Status'),
-            'title'    => Mage::helper('maho_giftcard')->__('Status'),
+            'label'    => Mage::helper('giftcard')->__('Status'),
+            'title'    => Mage::helper('giftcard')->__('Status'),
             'name'     => 'status',
             'required' => true,
             'options'  => [
@@ -59,16 +59,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
 
         $fieldset->addField('balance', 'text', [
             'name'     => 'balance',
-            'label'    => Mage::helper('maho_giftcard')->__('Balance'),
-            'title'    => Mage::helper('maho_giftcard')->__('Balance'),
+            'label'    => Mage::helper('giftcard')->__('Balance'),
+            'title'    => Mage::helper('giftcard')->__('Balance'),
             'required' => true,
             'class'    => 'validate-number',
         ]);
 
         $fieldset->addField('initial_balance', 'text', [
             'name'     => 'initial_balance',
-            'label'    => Mage::helper('maho_giftcard')->__('Initial Balance'),
-            'title'    => Mage::helper('maho_giftcard')->__('Initial Balance'),
+            'label'    => Mage::helper('giftcard')->__('Initial Balance'),
+            'title'    => Mage::helper('giftcard')->__('Initial Balance'),
             'required' => !$model->getId(),
             'class'    => 'validate-number',
             'disabled' => $model->getId() ? true : false,
@@ -76,16 +76,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
 
         $fieldset->addField('currency_code', 'text', [
             'name'     => 'currency_code',
-            'label'    => Mage::helper('maho_giftcard')->__('Currency Code'),
-            'title'    => Mage::helper('maho_giftcard')->__('Currency Code'),
+            'label'    => Mage::helper('giftcard')->__('Currency Code'),
+            'title'    => Mage::helper('giftcard')->__('Currency Code'),
             'required' => !$model->getId(),
             'value'    => $model->getCurrencyCode() ?: Mage::app()->getStore()->getCurrentCurrencyCode(),
         ]);
 
         $fieldset->addField('expires_at', 'date', [
             'name'   => 'expires_at',
-            'label'  => Mage::helper('maho_giftcard')->__('Expires At'),
-            'title'  => Mage::helper('maho_giftcard')->__('Expires At'),
+            'label'  => Mage::helper('giftcard')->__('Expires At'),
+            'title'  => Mage::helper('giftcard')->__('Expires At'),
             'image'  => $this->getSkinUrl('images/grid-cal.gif'),
             'format' => 'yyyy-MM-dd',
             'note'   => 'Leave empty for no expiration',
@@ -93,49 +93,49 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
 
         $fieldset->addField('recipient_name', 'text', [
             'name'  => 'recipient_name',
-            'label' => Mage::helper('maho_giftcard')->__('Recipient Name'),
-            'title' => Mage::helper('maho_giftcard')->__('Recipient Name'),
+            'label' => Mage::helper('giftcard')->__('Recipient Name'),
+            'title' => Mage::helper('giftcard')->__('Recipient Name'),
         ]);
 
         $fieldset->addField('recipient_email', 'text', [
             'name'  => 'recipient_email',
-            'label' => Mage::helper('maho_giftcard')->__('Recipient Email'),
-            'title' => Mage::helper('maho_giftcard')->__('Recipient Email'),
+            'label' => Mage::helper('giftcard')->__('Recipient Email'),
+            'title' => Mage::helper('giftcard')->__('Recipient Email'),
             'class' => 'validate-email',
         ]);
 
         $fieldset->addField('sender_name', 'text', [
             'name'  => 'sender_name',
-            'label' => Mage::helper('maho_giftcard')->__('Sender Name'),
-            'title' => Mage::helper('maho_giftcard')->__('Sender Name'),
+            'label' => Mage::helper('giftcard')->__('Sender Name'),
+            'title' => Mage::helper('giftcard')->__('Sender Name'),
         ]);
 
         $fieldset->addField('sender_email', 'text', [
             'name'  => 'sender_email',
-            'label' => Mage::helper('maho_giftcard')->__('Sender Email'),
-            'title' => Mage::helper('maho_giftcard')->__('Sender Email'),
+            'label' => Mage::helper('giftcard')->__('Sender Email'),
+            'title' => Mage::helper('giftcard')->__('Sender Email'),
             'class' => 'validate-email',
         ]);
 
         $fieldset->addField('message', 'textarea', [
             'name'  => 'message',
-            'label' => Mage::helper('maho_giftcard')->__('Message'),
-            'title' => Mage::helper('maho_giftcard')->__('Message'),
+            'label' => Mage::helper('giftcard')->__('Message'),
+            'title' => Mage::helper('giftcard')->__('Message'),
         ]);
 
         $fieldset->addField('comment', 'textarea', [
             'name'  => 'comment',
-            'label' => Mage::helper('maho_giftcard')->__('Admin Comment'),
-            'title' => Mage::helper('maho_giftcard')->__('Admin Comment'),
+            'label' => Mage::helper('giftcard')->__('Admin Comment'),
+            'title' => Mage::helper('giftcard')->__('Admin Comment'),
             'note'  => 'For admin records (balance adjustments)',
         ]);
 
         // Show QR code and barcode for existing gift cards
         if ($model->getId()) {
-            $helper = Mage::helper('maho_giftcard');
+            $helper = Mage::helper('giftcard');
 
             $fieldset->addField('qr_barcode_display', 'note', [
-                'label' => Mage::helper('maho_giftcard')->__('QR Code & Barcode'),
+                'label' => Mage::helper('giftcard')->__('QR Code & Barcode'),
                 'text'  => $this->_getQrBarcodeHtml($model, $helper),
             ]);
         }

@@ -26,7 +26,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('maho_giftcard/giftcard')->getCollection();
+        $collection = Mage::getModel('giftcard/giftcard')->getCollection();
         $this->setCollection($collection);
 
         return parent::_prepareCollection();
@@ -36,20 +36,20 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
     protected function _prepareColumns()
     {
         $this->addColumn('giftcard_id', [
-            'header' => Mage::helper('maho_giftcard')->__('ID'),
+            'header' => Mage::helper('giftcard')->__('ID'),
             'align'  => 'right',
             'width'  => '50px',
             'index'  => 'giftcard_id',
         ]);
 
         $this->addColumn('code', [
-            'header' => Mage::helper('maho_giftcard')->__('Code'),
+            'header' => Mage::helper('giftcard')->__('Code'),
             'align'  => 'left',
             'index'  => 'code',
         ]);
 
         $this->addColumn('status', [
-            'header'  => Mage::helper('maho_giftcard')->__('Status'),
+            'header'  => Mage::helper('giftcard')->__('Status'),
             'align'   => 'left',
             'width'   => '80px',
             'index'   => 'status',
@@ -63,7 +63,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('balance', [
-            'header'   => Mage::helper('maho_giftcard')->__('Balance'),
+            'header'   => Mage::helper('giftcard')->__('Balance'),
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'balance',
@@ -72,7 +72,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('initial_balance', [
-            'header'   => Mage::helper('maho_giftcard')->__('Initial Balance'),
+            'header'   => Mage::helper('giftcard')->__('Initial Balance'),
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'initial_balance',
@@ -81,13 +81,13 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('recipient_email', [
-            'header' => Mage::helper('maho_giftcard')->__('Recipient Email'),
+            'header' => Mage::helper('giftcard')->__('Recipient Email'),
             'align'  => 'left',
             'index'  => 'recipient_email',
         ]);
 
         $this->addColumn('purchase_order_id', [
-            'header' => Mage::helper('maho_giftcard')->__('Order #'),
+            'header' => Mage::helper('giftcard')->__('Order #'),
             'align'  => 'right',
             'width'  => '100px',
             'index'  => 'purchase_order_id',
@@ -95,7 +95,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('expires_at', [
-            'header' => Mage::helper('maho_giftcard')->__('Expires'),
+            'header' => Mage::helper('giftcard')->__('Expires'),
             'align'  => 'left',
             'width'  => '120px',
             'index'  => 'expires_at',
@@ -103,7 +103,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('created_at', [
-            'header' => Mage::helper('maho_giftcard')->__('Created'),
+            'header' => Mage::helper('giftcard')->__('Created'),
             'align'  => 'left',
             'width'  => '120px',
             'index'  => 'created_at',
@@ -111,13 +111,13 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('action', [
-            'header'    => Mage::helper('maho_giftcard')->__('Action'),
+            'header'    => Mage::helper('giftcard')->__('Action'),
             'width'     => '100',
             'type'      => 'action',
             'getter'    => 'getId',
             'actions'   => [
                 [
-                    'caption' => Mage::helper('maho_giftcard')->__('Edit'),
+                    'caption' => Mage::helper('giftcard')->__('Edit'),
                     'url'     => ['base' => '*/*/edit'],
                     'field'   => 'id',
                 ],
@@ -138,9 +138,9 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         $this->getMassactionBlock()->setFormFieldName('giftcard');
 
         $this->getMassactionBlock()->addItem('delete', [
-            'label'   => Mage::helper('maho_giftcard')->__('Delete'),
+            'label'   => Mage::helper('giftcard')->__('Delete'),
             'url'     => $this->getUrl('*/*/massDelete'),
-            'confirm' => Mage::helper('maho_giftcard')->__('Are you sure?'),
+            'confirm' => Mage::helper('giftcard')->__('Are you sure?'),
         ]);
 
         $statuses = [
@@ -149,21 +149,21 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ];
 
         $this->getMassactionBlock()->addItem('status', [
-            'label'      => Mage::helper('maho_giftcard')->__('Change status'),
+            'label'      => Mage::helper('giftcard')->__('Change status'),
             'url'        => $this->getUrl('*/*/massStatus', ['_current' => true]),
             'additional' => [
                 'visibility' => [
                     'name'   => 'status',
                     'type'   => 'select',
                     'class'  => 'required-entry',
-                    'label'  => Mage::helper('maho_giftcard')->__('Status'),
+                    'label'  => Mage::helper('giftcard')->__('Status'),
                     'values' => $statuses,
                 ],
             ],
         ]);
 
         $this->getMassactionBlock()->addItem('print_pdf', [
-            'label' => Mage::helper('maho_giftcard')->__('Print PDF'),
+            'label' => Mage::helper('giftcard')->__('Print PDF'),
             'url'   => $this->getUrl('*/giftcard_print/massPdf'),
         ]);
 

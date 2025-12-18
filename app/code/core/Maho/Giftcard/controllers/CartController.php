@@ -46,7 +46,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             }
 
             // Load gift card by code
-            $giftcard = Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
             if (!$giftcard->getId()) {
                 Mage::throwException($this->__('Gift card "%s" is not valid.', $code));

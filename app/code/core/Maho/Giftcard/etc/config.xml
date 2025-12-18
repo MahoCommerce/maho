@@ -11,14 +11,14 @@
             <quote>
                 <totals>
                     <giftcard>
-                        <renderer>maho_giftcard/cart_total</renderer>
+                        <renderer>giftcard/cart_total</renderer>
                     </giftcard>
                 </totals>
             </quote>
             <order>
                 <totals>
                     <giftcard>
-                        <class>maho_giftcard/total_order</class>
+                        <class>giftcard/total_order</class>
                         <after>subtotal,shipping,discount,tax</after>
                         <before>grand_total</before>
                     </giftcard>
@@ -27,30 +27,30 @@
         </sales>
 
         <models>
-            <maho_giftcard>
+            <giftcard>
                 <class>Maho_Giftcard_Model</class>
-                <resourceModel>maho_giftcard_resource</resourceModel>
-            </maho_giftcard>
-            <maho_giftcard_resource>
+                <resourceModel>giftcard_resource</resourceModel>
+            </giftcard>
+            <giftcard_resource>
                 <class>Maho_Giftcard_Model_Resource</class>
                 <entities>
                     <giftcard>
-                        <table>maho_giftcard</table>
+                        <table>giftcard</table>
                     </giftcard>
                     <history>
-                        <table>maho_giftcard_history</table>
+                        <table>giftcard_history</table>
                     </history>
                     <scheduled_email>
-                        <table>maho_giftcard_scheduled_email</table>
+                        <table>giftcard_scheduled_email</table>
                     </scheduled_email>
                 </entities>
-            </maho_giftcard_resource>
+            </giftcard_resource>
         </models>
 
         <helpers>
-            <maho_giftcard>
+            <giftcard>
                 <class>Maho_Giftcard_Helper</class>
-            </maho_giftcard>
+            </giftcard>
             <payment>
                 <rewrite>
                     <data>Maho_Giftcard_Helper_Payment</data>
@@ -59,9 +59,9 @@
         </helpers>
 
         <blocks>
-            <maho_giftcard>
+            <giftcard>
                 <class>Maho_Giftcard_Block</class>
-            </maho_giftcard>
+            </giftcard>
             <adminhtml>
                 <rewrite>
                     <sales_order_totals>Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals</sales_order_totals>
@@ -77,9 +77,9 @@
         <catalog>
             <product>
                 <type>
-                    <giftcard translate="label" module="maho_giftcard">
+                    <giftcard translate="label" module="giftcard">
                         <label>Gift Card</label>
-                        <model>maho_giftcard/product_type_giftcard</model>
+                        <model>giftcard/product_type_giftcard</model>
                         <is_virtual>1</is_virtual>
                         <composite>0</composite>
                         <index_priority>50</index_priority>
@@ -90,29 +90,29 @@
 
         <template>
             <email>
-                <maho_giftcard_email_template translate="label" module="maho_giftcard">
+                <giftcard_email_template translate="label" module="giftcard">
                     <label>Gift Card Notification Email</label>
                     <file>giftcard_notification.html</file>
                     <type>html</type>
-                </maho_giftcard_email_template>
+                </giftcard_email_template>
             </email>
         </template>
 
         <resources>
-            <maho_giftcard_setup>
+            <giftcard_setup>
                 <setup>
                     <module>Maho_Giftcard</module>
                     <class>Mage_Core_Model_Resource_Setup</class>
                 </setup>
-            </maho_giftcard_setup>
+            </giftcard_setup>
         </resources>
 
         <sales>
             <quote>
                 <totals>
                     <giftcard>
-                        <class>maho_giftcard/total_quote</class>
-                        <renderer>maho_giftcard/cart_total</renderer>
+                        <class>giftcard/total_quote</class>
+                        <renderer>giftcard/cart_total</renderer>
                         <after>subtotal,shipping,discount,tax</after>
                         <before>grand_total</before>
                     </giftcard>
@@ -121,14 +121,14 @@
             <order_invoice>
                 <totals>
                     <giftcard>
-                        <class>maho_giftcard/total_invoice</class>
+                        <class>giftcard/total_invoice</class>
                     </giftcard>
                 </totals>
             </order_invoice>
             <order_creditmemo>
                 <totals>
                     <giftcard>
-                        <class>maho_giftcard/total_creditmemo</class>
+                        <class>giftcard/total_creditmemo</class>
                     </giftcard>
                 </totals>
             </order_creditmemo>
@@ -137,62 +137,54 @@
         <events>
             <sales_order_place_after>
                 <observers>
-                    <maho_giftcard_generate>
-                        <class>maho_giftcard/observer</class>
+                    <giftcard_generate>
+                        <class>giftcard/observer</class>
                         <method>generateGiftcards</method>
-                    </maho_giftcard_generate>
-                    <maho_giftcard_deduct_balance>
-                        <class>maho_giftcard/observer</class>
+                    </giftcard_generate>
+                    <giftcard_deduct_balance>
+                        <class>giftcard/observer</class>
                         <method>deductGiftcardBalance</method>
-                    </maho_giftcard_deduct_balance>
+                    </giftcard_deduct_balance>
                 </observers>
             </sales_order_place_after>
             <catalog_product_save_before>
                 <observers>
-                    <maho_giftcard_product_save>
-                        <class>maho_giftcard/observer</class>
+                    <giftcard_product_save>
+                        <class>giftcard/observer</class>
                         <method>catalogProductSaveBefore</method>
-                    </maho_giftcard_product_save>
+                    </giftcard_product_save>
                 </observers>
             </catalog_product_save_before>
             <sales_quote_add_item>
                 <observers>
-                    <maho_giftcard_set_price>
-                        <class>maho_giftcard/observer</class>
+                    <giftcard_set_price>
+                        <class>giftcard/observer</class>
                         <method>setGiftcardPrice</method>
-                    </maho_giftcard_set_price>
+                    </giftcard_set_price>
                 </observers>
             </sales_quote_add_item>
-            <sales_order_place_after>
-                <observers>
-                    <maho_giftcard_deduct_balance>
-                        <class>maho_giftcard/observer</class>
-                        <method>deductGiftcardBalance</method>
-                    </maho_giftcard_deduct_balance>
-                </observers>
-            </sales_order_place_after>
             <sales_order_invoice_pay>
                 <observers>
-                    <maho_giftcard_activate_on_payment>
-                        <class>maho_giftcard/observer</class>
+                    <giftcard_activate_on_payment>
+                        <class>giftcard/observer</class>
                         <method>activateGiftcardsOnInvoicePaid</method>
-                    </maho_giftcard_activate_on_payment>
+                    </giftcard_activate_on_payment>
                 </observers>
             </sales_order_invoice_pay>
             <controller_action_predispatch_checkout_onepage_savePayment>
                 <observers>
-                    <maho_giftcard_auto_select_payment>
-                        <class>maho_giftcard/observer</class>
+                    <giftcard_auto_select_payment>
+                        <class>giftcard/observer</class>
                         <method>autoSelectPaymentMethod</method>
-                    </maho_giftcard_auto_select_payment>
+                    </giftcard_auto_select_payment>
                 </observers>
             </controller_action_predispatch_checkout_onepage_savePayment>
             <core_block_abstract_to_html_after>
                 <observers>
-                    <maho_giftcard_add_total_to_admin>
-                        <class>maho_giftcard/observer</class>
+                    <giftcard_add_total_to_admin>
+                        <class>giftcard/observer</class>
                         <method>addGiftcardTotalToAdminOrder</method>
-                    </maho_giftcard_add_total_to_admin>
+                    </giftcard_add_total_to_admin>
                 </observers>
             </core_block_abstract_to_html_after>
         </events>
@@ -230,22 +222,22 @@
 
     <crontab>
         <jobs>
-            <maho_giftcard_process_scheduled_emails>
+            <giftcard_process_scheduled_emails>
                 <schedule><cron_expr>*/5 * * * *</cron_expr></schedule>
-                <run><model>maho_giftcard/cron::processScheduledEmails</model></run>
-            </maho_giftcard_process_scheduled_emails>
-            <maho_giftcard_mark_expired>
+                <run><model>giftcard/cron::processScheduledEmails</model></run>
+            </giftcard_process_scheduled_emails>
+            <giftcard_mark_expired>
                 <schedule><cron_expr>0 1 * * *</cron_expr></schedule>
-                <run><model>maho_giftcard/cron::markExpiredGiftcards</model></run>
-            </maho_giftcard_mark_expired>
+                <run><model>giftcard/cron::markExpiredGiftcards</model></run>
+            </giftcard_mark_expired>
         </jobs>
     </crontab>
 
     <default>
         <payment>
-            <maho_giftcard>
+            <giftcard>
                 <active>0</active>
-                <model>maho_giftcard/payment</model>
+                <model>giftcard/payment</model>
                 <title>Gift Card</title>
                 <order_status>pending</order_status>
                 <allowspecific>0</allowspecific>
@@ -256,9 +248,9 @@
                 <can_capture>1</can_capture>
                 <can_refund>1</can_refund>
                 <payment_action>authorize_capture</payment_action>
-            </maho_giftcard>
+            </giftcard>
         </payment>
-        <maho_giftcard>
+        <giftcard>
             <general>
                 <enabled>1</enabled>
                 <code_length>16</code_length>
@@ -272,11 +264,11 @@
                 <pdf_show_barcode>1</pdf_show_barcode>
             </general>
             <email>
-                <template>32</template>
+                <template>giftcard_email_template</template>
                 <identity>general</identity>
                 <send_on_creation>0</send_on_creation>
             </email>
-        </maho_giftcard>
+        </giftcard>
     </default>
 
     <admin>
@@ -284,7 +276,7 @@
             <adminhtml>
                 <args>
                     <modules>
-                        <maho_giftcard before="Mage_Adminhtml">Maho_Giftcard_Adminhtml</maho_giftcard>
+                        <giftcard before="Mage_Adminhtml">Maho_Giftcard_Adminhtml</giftcard>
                     </modules>
                 </args>
             </adminhtml>
@@ -293,30 +285,29 @@
 
     <frontend>
         <routers>
-            <maho_giftcard>
+            <giftcard>
                 <use>standard</use>
                 <args>
                     <module>Maho_Giftcard</module>
                     <frontName>giftcard</frontName>
                 </args>
-            </maho_giftcard>
+            </giftcard>
         </routers>
         <layout>
             <updates>
-                <maho_giftcard>
-                    <file>maho_giftcard.xml</file>
-                </maho_giftcard>
+                <giftcard>
+                    <file>giftcard.xml</file>
+                </giftcard>
             </updates>
         </layout>
     </frontend>
 
     <adminhtml>
-        <!-- Menu disabled - causes admin menu to disappear -->
         <layout>
             <updates>
-                <maho_giftcard>
-                    <file>maho_giftcard.xml</file>
-                </maho_giftcard>
+                <giftcard>
+                    <file>giftcard.xml</file>
+                </giftcard>
             </updates>
         </layout>
     </adminhtml>

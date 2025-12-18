@@ -42,7 +42,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals extends Mage_Adminhtml_Bl
                 }
             }
 
-            $label = $this->helper('maho_giftcard')->__('Gift Cards');
+            $label = $this->helper('giftcard')->__('Gift Cards');
             if (!empty($codes)) {
                 $label .= ' (' . implode(', ', $codes) . ')';
             }

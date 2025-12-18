@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'maho_giftcard/manage';
+    public const ADMIN_RESOURCE = 'giftcard/manage';
 
     /**
      * Create gift card product(s) action
@@ -21,8 +21,8 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     public function createAction()
     {
         $this->loadLayout();
-        $this->_setActiveMenu('sales/maho_giftcard');
-        $this->_title(Mage::helper('maho_giftcard')->__('Create Gift Card Products'));
+        $this->_setActiveMenu('customer/giftcard');
+        $this->_title(Mage::helper('giftcard')->__('Create Gift Card Products'));
         $this->renderLayout();
     }
 
@@ -177,6 +177,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('maho_giftcard/manage');
+        return Mage::getSingleton('admin/session')->isAllowed('giftcard/manage');
     }
 }

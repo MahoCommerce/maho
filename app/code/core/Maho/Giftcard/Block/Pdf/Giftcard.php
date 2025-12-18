@@ -46,7 +46,7 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
      */
     public function getGiftcardHelper()
     {
-        return Mage::helper('maho_giftcard');
+        return Mage::helper('giftcard');
     }
 
     /**

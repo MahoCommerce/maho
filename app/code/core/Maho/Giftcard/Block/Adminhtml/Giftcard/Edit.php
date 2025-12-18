@@ -18,11 +18,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit extends Mage_Adminhtml_Block_W
         parent::__construct();
 
         $this->_objectId = 'id';
-        $this->_blockGroup = 'maho_giftcard';
+        $this->_blockGroup = 'giftcard';
         $this->_controller = 'adminhtml_giftcard';
 
-        $this->_updateButton('save', 'label', Mage::helper('maho_giftcard')->__('Save Gift Card'));
-        $this->_updateButton('delete', 'label', Mage::helper('maho_giftcard')->__('Delete Gift Card'));
+        $this->_updateButton('save', 'label', Mage::helper('giftcard')->__('Save Gift Card'));
+        $this->_updateButton('delete', 'label', Mage::helper('giftcard')->__('Delete Gift Card'));
 
         $this->_addButton('saveandcontinue', [
             'label'   => Mage::helper('adminhtml')->__('Save And Continue Edit'),
@@ -34,7 +34,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit extends Mage_Adminhtml_Block_W
         if ($model && $model->getId()) {
             // Add Print PDF button
             $this->_addButton('print_pdf', [
-                'label'   => Mage::helper('maho_giftcard')->__('Print PDF'),
+                'label'   => Mage::helper('giftcard')->__('Print PDF'),
                 'onclick' => 'window.open(\'' . $this->getUrl('*/giftcard_print/pdf', ['id' => $model->getId()]) . '\')',
                 'class'   => 'go',
             ], -1);
@@ -42,8 +42,8 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit extends Mage_Adminhtml_Block_W
             // Add Send Email button (only if recipient email is set)
             if ($model->getRecipientEmail()) {
                 $this->_addButton('send_email', [
-                    'label'   => Mage::helper('maho_giftcard')->__('Send Email'),
-                    'onclick' => 'if(confirm(\'' . Mage::helper('maho_giftcard')->__('Send gift card email to %s?', $model->getRecipientEmail()) . '\')) { setLocation(\'' . $this->getUrl('*/giftcard_print/email', ['id' => $model->getId()]) . '\'); }',
+                    'label'   => Mage::helper('giftcard')->__('Send Email'),
+                    'onclick' => 'if(confirm(\'' . Mage::helper('giftcard')->__('Send gift card email to %s?', $model->getRecipientEmail()) . '\')) { setLocation(\'' . $this->getUrl('*/giftcard_print/email', ['id' => $model->getId()]) . '\'); }',
                     'class'   => 'go',
                 ], -1);
             }
@@ -63,12 +63,12 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit extends Mage_Adminhtml_Block_W
     public function getHeaderText()
     {
         if (Mage::registry('current_giftcard') && Mage::registry('current_giftcard')->getId()) {
-            return Mage::helper('maho_giftcard')->__(
+            return Mage::helper('giftcard')->__(
                 "Edit Gift Card '%s'",
                 $this->escapeHtml(Mage::registry('current_giftcard')->getCode()),
             );
         } else {
-            return Mage::helper('maho_giftcard')->__('New Gift Card');
+            return Mage::helper('giftcard')->__('New Gift Card');
         }
     }
 }

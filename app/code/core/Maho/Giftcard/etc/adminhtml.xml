@@ -46,9 +46,9 @@
                         <children>
                             <config>
                                 <children>
-                                    <maho_giftcard translate="title" module="maho_giftcard">
+                                    <giftcard translate="title" module="giftcard">
                                         <title>Gift Cards Configuration</title>
-                                    </maho_giftcard>
+                                    </giftcard>
                                 </children>
                             </config>
                         </children>

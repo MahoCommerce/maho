@@ -19,7 +19,7 @@ $connection = $this->getConnection();
 // ============================================================================
 // Create gift card table
 // ============================================================================
-$table = $connection->newTable($this->getTable('maho_giftcard/giftcard'))
+$table = $connection->newTable($this->getTable('giftcard/giftcard'))
     ->addColumn('giftcard_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'identity' => true,
         'unsigned' => true,
@@ -78,20 +78,20 @@ $table = $connection->newTable($this->getTable('maho_giftcard/giftcard'))
         'nullable' => false,
     ], 'Updated At')
     ->addIndex(
-        $this->getIdxName('maho_giftcard/giftcard', ['code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $this->getIdxName('giftcard/giftcard', ['code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
         ['code'],
         ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
-        $this->getIdxName('maho_giftcard/giftcard', ['status']),
+        $this->getIdxName('giftcard/giftcard', ['status']),
         ['status'],
     )
     ->addIndex(
-        $this->getIdxName('maho_giftcard/giftcard', ['purchase_order_id']),
+        $this->getIdxName('giftcard/giftcard', ['purchase_order_id']),
         ['purchase_order_id'],
     )
     ->addForeignKey(
-        $this->getFkName('maho_giftcard/giftcard', 'purchase_order_id', 'sales/order', 'entity_id'),
+        $this->getFkName('giftcard/giftcard', 'purchase_order_id', 'sales/order', 'entity_id'),
         'purchase_order_id',
         $this->getTable('sales/order'),
         'entity_id',
@@ -105,7 +105,7 @@ $connection->createTable($table);
 // ============================================================================
 // Create gift card history table
 // ============================================================================
-$table = $connection->newTable($this->getTable('maho_giftcard/history'))
+$table = $connection->newTable($this->getTable('giftcard/history'))
     ->addColumn('history_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'identity' => true,
         'unsigned' => true,
@@ -146,23 +146,23 @@ $table = $connection->newTable($this->getTable('maho_giftcard/history'))
         'nullable' => false,
     ], 'Created At')
     ->addIndex(
-        $this->getIdxName('maho_giftcard/history', ['giftcard_id']),
+        $this->getIdxName('giftcard/history', ['giftcard_id']),
         ['giftcard_id'],
     )
     ->addIndex(
-        $this->getIdxName('maho_giftcard/history', ['order_id']),
+        $this->getIdxName('giftcard/history', ['order_id']),
         ['order_id'],
     )
     ->addForeignKey(
-        $this->getFkName('maho_giftcard/history', 'giftcard_id', 'maho_giftcard/giftcard', 'giftcard_id'),
+        $this->getFkName('giftcard/history', 'giftcard_id', 'giftcard/giftcard', 'giftcard_id'),
         'giftcard_id',
-        $this->getTable('maho_giftcard/giftcard'),
+        $this->getTable('giftcard/giftcard'),
         'giftcard_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
         Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
-        $this->getFkName('maho_giftcard/history', 'order_id', 'sales/order', 'entity_id'),
+        $this->getFkName('giftcard/history', 'order_id', 'sales/order', 'entity_id'),
         'order_id',
         $this->getTable('sales/order'),
         'entity_id',
@@ -176,7 +176,7 @@ $connection->createTable($table);
 // ============================================================================
 // Create scheduled email table
 // ============================================================================
-$table = $connection->newTable($this->getTable('maho_giftcard/scheduled_email'))
+$table = $connection->newTable($this->getTable('giftcard/scheduled_email'))
     ->addColumn('scheduled_email_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, [
         'identity' => true,
         'unsigned' => true,
@@ -213,21 +213,21 @@ $table = $connection->newTable($this->getTable('maho_giftcard/scheduled_email'))
         'nullable' => false,
     ], 'Updated At')
     ->addIndex(
-        $this->getIdxName('maho_giftcard/scheduled_email', ['giftcard_id']),
+        $this->getIdxName('giftcard/scheduled_email', ['giftcard_id']),
         ['giftcard_id'],
     )
     ->addIndex(
-        $this->getIdxName('maho_giftcard/scheduled_email', ['status']),
+        $this->getIdxName('giftcard/scheduled_email', ['status']),
         ['status'],
     )
     ->addIndex(
-        $this->getIdxName('maho_giftcard/scheduled_email', ['scheduled_at']),
+        $this->getIdxName('giftcard/scheduled_email', ['scheduled_at']),
         ['scheduled_at'],
     )
     ->addForeignKey(
-        $this->getFkName('maho_giftcard/scheduled_email', 'giftcard_id', 'maho_giftcard/giftcard', 'giftcard_id'),
+        $this->getFkName('giftcard/scheduled_email', 'giftcard_id', 'giftcard/giftcard', 'giftcard_id'),
         'giftcard_id',
-        $this->getTable('maho_giftcard/giftcard'),
+        $this->getTable('giftcard/giftcard'),
         'giftcard_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
         Varien_Db_Ddl_Table::ACTION_CASCADE,

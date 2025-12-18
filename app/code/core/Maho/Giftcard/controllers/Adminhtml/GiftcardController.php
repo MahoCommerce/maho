@@ -69,21 +69,21 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     public function editAction()
     {
         $id = $this->getRequest()->getParam('id');
-        $model = Mage::getModel('maho_giftcard/giftcard');
+        $model = Mage::getModel('giftcard/giftcard');
 
         if ($id) {
             $model->load($id);
 
             if (!$model->getId()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('maho_giftcard')->__('This gift card no longer exists.'),
+                    Mage::helper('giftcard')->__('This gift card no longer exists.'),
                 );
                 $this->_redirect('*/*/');
                 return;
             }
         }
 
-        $this->_title($model->getId() ? $model->getCode() : Mage::helper('maho_giftcard')->__('New Gift Card'));
+        $this->_title($model->getId() ? $model->getCode() : Mage::helper('giftcard')->__('New Gift Card'));
 
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (!empty($data)) {
@@ -93,7 +93,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         Mage::register('current_giftcard', $model);
 
         $this->_initAction();
-        $this->_addContent($this->getLayout()->createBlock('maho_giftcard/adminhtml_giftcard_edit'));
+        $this->_addContent($this->getLayout()->createBlock('giftcard/adminhtml_giftcard_edit'));
         $this->renderLayout();
     }
 
@@ -104,7 +104,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     {
         if ($data = $this->getRequest()->getPost()) {
             $id = $this->getRequest()->getParam('id');
-            $model = Mage::getModel('maho_giftcard/giftcard');
+            $model = Mage::getModel('giftcard/giftcard');
 
             if ($id) {
                 $model->load($id);
@@ -113,12 +113,12 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             try {
                 // Generate code if creating new
                 if (!$model->getId() && empty($data['code'])) {
-                    $data['code'] = Mage::helper('maho_giftcard')->generateCode();
+                    $data['code'] = Mage::helper('giftcard')->generateCode();
                 }
 
                 // Set expiration if not set
                 if (!$model->getId() && empty($data['expires_at'])) {
-                    $data['expires_at'] = Mage::helper('maho_giftcard')->calculateExpirationDate();
+                    $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
                 }
 
                 // If balance changed, record as adjustment
@@ -134,7 +134,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('maho_giftcard')->__('The gift card has been saved.'),
+                    Mage::helper('giftcard')->__('The gift card has been saved.'),
                 );
 
                 Mage::getSingleton('adminhtml/session')->setFormData(false);
@@ -164,11 +164,11 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     {
         if ($id = $this->getRequest()->getParam('id')) {
             try {
-                $model = Mage::getModel('maho_giftcard/giftcard')->load($id);
+                $model = Mage::getModel('giftcard/giftcard')->load($id);
                 $model->delete();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('maho_giftcard')->__('The gift card has been deleted.'),
+                    Mage::helper('giftcard')->__('The gift card has been deleted.'),
                 );
 
                 $this->_redirect('*/*/');
@@ -181,7 +181,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         }
 
         Mage::getSingleton('adminhtml/session')->addError(
-            Mage::helper('maho_giftcard')->__('Unable to find a gift card to delete.'),
+            Mage::helper('giftcard')->__('Unable to find a gift card to delete.'),
         );
 
         $this->_redirect('*/*/');
@@ -196,17 +196,17 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         if (!is_array($giftcardIds)) {
             Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('maho_giftcard')->__('Please select gift card(s).'),
+                Mage::helper('giftcard')->__('Please select gift card(s).'),
             );
         } else {
             try {
                 foreach ($giftcardIds as $giftcardId) {
-                    $giftcard = Mage::getModel('maho_giftcard/giftcard')->load($giftcardId);
+                    $giftcard = Mage::getModel('giftcard/giftcard')->load($giftcardId);
                     $giftcard->delete();
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('maho_giftcard')->__(
+                    Mage::helper('giftcard')->__(
                         'Total of %d record(s) were deleted.',
                         count($giftcardIds),
                     ),
@@ -229,19 +229,19 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         if (!is_array($giftcardIds)) {
             Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('maho_giftcard')->__('Please select gift card(s).'),
+                Mage::helper('giftcard')->__('Please select gift card(s).'),
             );
         } else {
             try {
                 foreach ($giftcardIds as $giftcardId) {
-                    $giftcard = Mage::getModel('maho_giftcard/giftcard')
+                    $giftcard = Mage::getModel('giftcard/giftcard')
                         ->load($giftcardId)
                         ->setStatus($status)
                         ->save();
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('maho_giftcard')->__(
+                    Mage::helper('giftcard')->__(
                         'Total of %d record(s) were updated.',
                         count($giftcardIds),
                     ),
@@ -271,7 +271,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             return;
         }
 
-        $giftcard = Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+        $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
         if (!$giftcard->getId()) {
             $this->getResponse()->setBody(json_encode([
@@ -296,6 +296,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/maho_giftcard/manage');
+        return Mage::getSingleton('admin/session')->isAllowed('customer/giftcard/manage');
     }
 }

@@ -16,6 +16,6 @@ class Maho_Giftcard_Model_Resource_History_Collection extends Mage_Core_Model_Re
     #[\Override]
     protected function _construct()
     {
-        $this->_init('maho_giftcard/history');
+        $this->_init('giftcard/history');
     }
 }

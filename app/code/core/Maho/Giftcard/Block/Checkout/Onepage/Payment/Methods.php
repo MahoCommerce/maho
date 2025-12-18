@@ -38,7 +38,7 @@ class Maho_Giftcard_Block_Checkout_Onepage_Payment_Methods extends Mage_Checkout
             // Auto-select gift card payment method if it's the only one
             $giftcardMethod = null;
             foreach ($methods as $method) {
-                if ($method->getCode() === 'maho_giftcard') {
+                if ($method->getCode() === 'giftcard') {
                     $giftcardMethod = $method;
                     break;
                 }
@@ -47,7 +47,7 @@ class Maho_Giftcard_Block_Checkout_Onepage_Payment_Methods extends Mage_Checkout
             // If gift card payment is available and order is fully covered,
             // automatically select it
             if ($giftcardMethod && count($methods) === 1) {
-                $this->setSelectedMethodCode('maho_giftcard');
+                $this->setSelectedMethodCode('giftcard');
             }
         }
 
@@ -77,7 +77,7 @@ class Maho_Giftcard_Block_Checkout_Onepage_Payment_Methods extends Mage_Checkout
 
         // If order is fully covered by gift cards, auto-select gift card payment
         if ($this->isFullyCoveredByGiftcard($quote)) {
-            return 'maho_giftcard';
+            return 'giftcard';
         }
 
         $method = $this->getQuote()->getPayment()->getMethod();
