@@ -56,6 +56,10 @@ $application->addCommand(new \MahoCLI\Commands\CronRun());
 $application->addCommand(new \MahoCLI\Commands\LogClean());
 $application->addCommand(new \MahoCLI\Commands\LogStatus());
 
+$application->addCommand(new \MahoCLI\Commands\MaintenanceEnable());
+$application->addCommand(new \MahoCLI\Commands\MaintenanceDisable());
+$application->addCommand(new \MahoCLI\Commands\MaintenanceStatus());
+
 $application->addCommand(new \MahoCLI\Commands\HealthCheck());
 $application->addCommand(new \MahoCLI\Commands\Install());
 $application->addCommand(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
