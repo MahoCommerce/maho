@@ -52,7 +52,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
     <?php if ($links = $this->getLinks()): ?>
         <div class="product-cart-sku">
             <span class="label"><?= $this->escapeHtml($this->getLinksTitle()) ?>:</span>
-            <?= implode(', ', array_map(fn($link) => $this->escapeHtml($link->getTitle()), $links)) ?>
+            <?= implode(', ', array_map(fn($link) => (string) $this->escapeHtml($link->getTitle()), $links)) ?>
         </div>
     <?php endif ?>
     <!-- EOF downloadable -->

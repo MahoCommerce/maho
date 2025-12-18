@@ -816,40 +816,6 @@ class Sqlite extends AbstractPdoAdapter
     // =========================================================================
 
     /**
-     * Inserts a table row with specified data
-     *
-     * SQLite automatically handles ROWID/INTEGER PRIMARY KEY auto-increment
-     *
-     * @param string|array|\Maho\Db\Select $table The table to insert data into.
-     * @param array $bind Column-value pairs.
-     * @return int The number of affected rows.
-     */
-    #[\Override]
-    public function insert(string|array|\Maho\Db\Select $table, array $bind): int
-    {
-        // Extract and quote col names from the array keys
-        $cols = [];
-        $vals = [];
-        foreach (array_keys($bind) as $col) {
-            $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
-        }
-
-        // Build the statement
-        $sql = sprintf(
-            'INSERT INTO %s (%s) VALUES(%s)',
-            $this->quoteIdentifier($table),
-            implode(', ', $cols),
-            implode(', ', $vals),
-        );
-
-        // Execute the statement
-        $this->query($sql, array_values($bind));
-
-        return 1; // INSERT always affects 1 row on success
-    }
-
-    /**
      * Inserts a table row with ON CONFLICT DO UPDATE (SQLite's upsert syntax)
      *
      * @throws \Maho\Db\Exception
