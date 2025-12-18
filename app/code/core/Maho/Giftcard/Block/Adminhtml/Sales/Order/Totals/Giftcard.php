@@ -16,6 +16,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard extends Mage_Cor
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $parent = $this->getParentBlock();

@@ -16,7 +16,7 @@ class Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard extends Mage_Catalo
     /**
      * Load gift card attributes if not already loaded
      */
-    protected function _loadGiftcardAttributes()
+    protected function _loadGiftcardAttributes(): void
     {
         $product = $this->getProduct();
         if (!$product->hasData('giftcard_type') && $product->getId()) {

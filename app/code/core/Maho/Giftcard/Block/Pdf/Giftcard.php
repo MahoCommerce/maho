@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

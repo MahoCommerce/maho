@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Mage_Adminhtml_Block_Widget implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -22,7 +23,7 @@ class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Ma
     /**
      * Get product
      */
-    public function getProduct()
+    public function getProduct(): ?Mage_Catalog_Model_Product
     {
         $product = Mage::registry('current_product');
 
@@ -56,6 +57,7 @@ class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Ma
     /**
      * Get tab label
      */
+    #[\Override]
     public function getTabLabel()
     {
         return $this->__('Gift Card');
@@ -64,6 +66,7 @@ class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Ma
     /**
      * Get tab title
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->__('Gift Card Options');
@@ -72,6 +75,7 @@ class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Ma
     /**
      * Can show tab
      */
+    #[\Override]
     public function canShowTab()
     {
         return $this->getProduct()->getTypeId() === 'giftcard';
@@ -80,6 +84,7 @@ class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Ma
     /**
      * Is tab hidden
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

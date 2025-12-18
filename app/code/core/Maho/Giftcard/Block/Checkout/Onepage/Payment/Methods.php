@@ -73,6 +73,7 @@ class Maho_Giftcard_Block_Checkout_Onepage_Payment_Methods extends Mage_Checkout
      *
      * @return string|null
      */
+    #[\Override]
     public function getSelectedMethodCode()
     {
         $quote = $this->getQuote();

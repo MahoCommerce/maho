@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -27,6 +28,7 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
      *
      * @return $this
      */
+    #[\Override]
     #[\Override]
     protected function _prepareSpecificInformation($transport = null)
     {

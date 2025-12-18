@@ -16,6 +16,7 @@ class Maho_Giftcard_Block_Sales_Order_Creditmemo_Totals extends Mage_Sales_Block
      *
      * @return $this
      */
+    #[\Override]
     protected function _initTotals()
     {
         parent::_initTotals();

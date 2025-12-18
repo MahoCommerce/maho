@@ -16,6 +16,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Invoice_Totals extends Mage_Admi
      *
      * @return $this
      */
+    #[\Override]
     protected function _initTotals()
     {
         parent::_initTotals();

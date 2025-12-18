@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Block_Payment_Form extends Mage_Payment_Block_Form
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

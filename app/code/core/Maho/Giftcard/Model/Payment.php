@@ -67,6 +67,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getConfigPaymentAction()
     {
         return self::ACTION_AUTHORIZE_CAPTURE;

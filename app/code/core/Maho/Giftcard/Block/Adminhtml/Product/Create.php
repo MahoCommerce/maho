@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Block_Adminhtml_Product_Create extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

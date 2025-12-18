@@ -258,7 +258,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             'balance_after' => (float) $balanceAfter,
             'order_id' => $orderId,
             'comment' => $comment,
-            'admin_user_id' => Mage::getSingleton('admin/session')->getUser()?->getId(),
+            'admin_user_id' => Mage::getSingleton('admin/session')->getUser()->getId(),
             'created_at' => date('Y-m-d H:i:s'),
         ]);
         $history->save();
