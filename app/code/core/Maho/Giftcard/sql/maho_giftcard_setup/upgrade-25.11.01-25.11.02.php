@@ -54,15 +54,15 @@ $table = $installer->getConnection()
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('maho_giftcard/scheduled_email', ['giftcard_id']),
-        ['giftcard_id']
+        ['giftcard_id'],
     )
     ->addIndex(
         $installer->getIdxName('maho_giftcard/scheduled_email', ['status']),
-        ['status']
+        ['status'],
     )
     ->addIndex(
         $installer->getIdxName('maho_giftcard/scheduled_email', ['scheduled_at']),
-        ['scheduled_at']
+        ['scheduled_at'],
     )
     ->addForeignKey(
         $installer->getFkName('maho_giftcard/scheduled_email', 'giftcard_id', 'maho_giftcard/giftcard', 'giftcard_id'),
@@ -70,7 +70,7 @@ $table = $installer->getConnection()
         $installer->getTable('maho_giftcard/giftcard'),
         'giftcard_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Gift Card Scheduled Emails');
 

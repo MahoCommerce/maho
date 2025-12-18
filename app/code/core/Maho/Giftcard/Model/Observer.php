@@ -56,7 +56,7 @@ class Maho_Giftcard_Model_Observer
                     $recipientEmail,
                     $senderName,
                     $senderEmail,
-                    $message
+                    $message,
                 );
             }
         }
@@ -83,7 +83,7 @@ class Maho_Giftcard_Model_Observer
         string $recipientEmail = '',
         string $senderName = '',
         string $senderEmail = '',
-        string $message = ''
+        string $message = '',
     ): void {
         $helper = Mage::helper('maho_giftcard');
 
@@ -207,7 +207,7 @@ class Maho_Giftcard_Model_Observer
                     $giftcard->getRecipientEmail(),
                     $giftcard->getRecipientName(),
                     $emailVars,
-                    $order->getStoreId()
+                    $order->getStoreId(),
                 );
 
             // Email sent successfully
@@ -352,7 +352,7 @@ class Maho_Giftcard_Model_Observer
         // If not found on addresses, try to calculate from codes
         if (!$baseGiftcardAmount && !empty($codes)) {
             foreach ($codes as $code => $amount) {
-                $baseGiftcardAmount += (float)$amount;
+                $baseGiftcardAmount += (float) $amount;
             }
             $giftcardAmount = $order->getStore()->convertPrice($baseGiftcardAmount, false);
         }
@@ -397,7 +397,7 @@ class Maho_Giftcard_Model_Observer
             }
 
             $balanceBefore = $giftcard->getBalance();
-            $newBalance = max(0, $balanceBefore - (float)$usedAmount);
+            $newBalance = max(0, $balanceBefore - (float) $usedAmount);
 
             // Update gift card balance
             $giftcard->setBalance($newBalance);
@@ -408,7 +408,7 @@ class Maho_Giftcard_Model_Observer
             $history->setData([
                 'giftcard_id' => $giftcard->getId(),
                 'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
-                'amount' => -(float)$usedAmount,
+                'amount' => -(float) $usedAmount,
                 'balance_before' => $balanceBefore,
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
@@ -468,10 +468,10 @@ class Maho_Giftcard_Model_Observer
 
             $total = new Varien_Object([
                 'code'       => 'giftcard',
-                'value'      => -abs((float)$giftcardAmount),
-                'base_value' => -abs((float)$order->getBaseGiftcardAmount()),
+                'value'      => -abs((float) $giftcardAmount),
+                'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
                 'label'      => $label,
-                'strong'     => false
+                'strong'     => false,
             ]);
 
             $block->addTotalBefore($total, 'grand_total');
@@ -523,8 +523,8 @@ class Maho_Giftcard_Model_Observer
         $quote = Mage::getSingleton('checkout/session')->getQuote();
 
         // Check if gift cards fully cover the order
-        $giftcardAmount = abs((float)$quote->getGiftcardAmount());
-        $grandTotal = (float)$quote->getGrandTotal();
+        $giftcardAmount = abs((float) $quote->getGiftcardAmount());
+        $grandTotal = (float) $quote->getGrandTotal();
 
         if ($giftcardAmount > 0 && $grandTotal <= 0.01) {
             // Auto-select gift card payment method

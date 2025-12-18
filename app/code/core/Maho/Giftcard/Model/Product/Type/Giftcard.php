@@ -161,7 +161,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                     $value = $productInstance->getResource()->getAttributeRawValue(
                         $productInstance->getId(),
                         $code,
-                        $productInstance->getStoreId()
+                        $productInstance->getStoreId(),
                     );
                     $productInstance->setData($code, $value);
                 }

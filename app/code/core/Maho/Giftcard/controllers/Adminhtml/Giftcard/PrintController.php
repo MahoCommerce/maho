@@ -35,7 +35,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
             $this->_prepareDownloadResponse(
                 'giftcard_' . $giftcard->getCode() . '.pdf',
                 $pdf,
-                'application/pdf'
+                'application/pdf',
             );
         } catch (Exception $e) {
             Mage::logException($e);
@@ -75,7 +75,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
             $this->_prepareDownloadResponse(
                 'giftcards_' . date('Y-m-d') . '.pdf',
                 $pdf,
-                'application/pdf'
+                'application/pdf',
             );
         } catch (Exception $e) {
             Mage::logException($e);
@@ -112,7 +112,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
                 $scheduleDate = new DateTime($scheduleAt);
                 Mage::helper('maho_giftcard')->scheduleGiftcardEmail($giftcard, $scheduleDate);
                 $this->_getSession()->addSuccess(
-                    sprintf('Gift card email scheduled for %s', $scheduleDate->format('Y-m-d H:i'))
+                    sprintf('Gift card email scheduled for %s', $scheduleDate->format('Y-m-d H:i')),
                 );
             } else {
                 // Send immediately

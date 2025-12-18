@@ -62,8 +62,8 @@ class Maho_Giftcard_Block_Checkout_Onepage_Payment_Methods extends Mage_Checkout
      */
     protected function isFullyCoveredByGiftcard(Mage_Sales_Model_Quote $quote): bool
     {
-        $giftcardAmount = abs((float)$quote->getGiftcardAmount());
-        $grandTotal = (float)$quote->getGrandTotal();
+        $giftcardAmount = abs((float) $quote->getGiftcardAmount());
+        $grandTotal = (float) $quote->getGrandTotal();
 
         return $giftcardAmount > 0 && $grandTotal <= 0.01;
     }

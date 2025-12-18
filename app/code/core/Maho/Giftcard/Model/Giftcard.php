@@ -127,7 +127,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount exceeds gift card balance.');
         }
 
-        $balanceBefore = (float)$this->getBalance();
+        $balanceBefore = (float) $this->getBalance();
         $balanceAfter = $balanceBefore - $amount;
 
         // Update balance
@@ -147,7 +147,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $balanceBefore,
             $balanceAfter,
             $orderId,
-            $comment
+            $comment,
         );
 
         return $this;
@@ -168,7 +168,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
-        $balanceBefore = (float)$this->getBalance();
+        $balanceBefore = (float) $this->getBalance();
         $balanceAfter = $balanceBefore + $amount;
 
         // Update balance
@@ -188,7 +188,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $balanceBefore,
             $balanceAfter,
             $orderId,
-            $comment
+            $comment,
         );
 
         return $this;
@@ -203,7 +203,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function adjustBalance(float $newBalance, ?string $comment = null): self
     {
-        $balanceBefore = (float)$this->getBalance();
+        $balanceBefore = (float) $this->getBalance();
         $amount = $newBalance - $balanceBefore;
 
         $this->setBalance($newBalance);
@@ -224,7 +224,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $balanceBefore,
             $newBalance,
             null,
-            $comment
+            $comment,
         );
 
         return $this;
@@ -247,15 +247,15 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         float $balanceBefore,
         float $balanceAfter,
         ?int $orderId = null,
-        ?string $comment = null
+        ?string $comment = null,
     ): void {
         $history = Mage::getModel('maho_giftcard/history');
         $history->setData([
             'giftcard_id' => $this->getId(),
             'action' => $action,
-            'amount' => (float)$amount,
-            'balance_before' => (float)$balanceBefore,
-            'balance_after' => (float)$balanceAfter,
+            'amount' => (float) $amount,
+            'balance_before' => (float) $balanceBefore,
+            'balance_after' => (float) $balanceAfter,
             'order_id' => $orderId,
             'comment' => $comment,
             'admin_user_id' => Mage::getSingleton('admin/session')->getUser()?->getId(),

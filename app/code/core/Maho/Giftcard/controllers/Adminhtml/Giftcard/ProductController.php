@@ -40,8 +40,8 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
 
             $amounts = $data['amounts'] ?? '';
             $amountType = $data['amount_type'] ?? 'fixed'; // fixed or range
-            $minAmount = isset($data['min_amount']) ? (float)$data['min_amount'] : null;
-            $maxAmount = isset($data['max_amount']) ? (float)$data['max_amount'] : null;
+            $minAmount = isset($data['min_amount']) ? (float) $data['min_amount'] : null;
+            $maxAmount = isset($data['max_amount']) ? (float) $data['max_amount'] : null;
 
             $createdProducts = [];
 
@@ -54,7 +54,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
                         continue;
                     }
 
-                    $product = $this->_createGiftCardProduct((float)$amount);
+                    $product = $this->_createGiftCardProduct((float) $amount);
                     $createdProducts[] = $product->getName() . ' (SKU: ' . $product->getSku() . ')';
                 }
             } else {
@@ -64,7 +64,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
             }
 
             $this->_getSession()->addSuccess(
-                $this->__('Created %d gift card product(s): %s', count($createdProducts), implode(', ', $createdProducts))
+                $this->__('Created %d gift card product(s): %s', count($createdProducts), implode(', ', $createdProducts)),
             );
 
             $this->_redirect('*/giftcard/index');
@@ -85,7 +85,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     {
         $product = Mage::getModel('catalog/product');
 
-        $sku = 'GIFTCARD-' . str_replace('.', '', (string)$amount);
+        $sku = 'GIFTCARD-' . str_replace('.', '', (string) $amount);
         $name = 'Gift Card - ' . Mage::helper('core')->formatPrice($amount, false);
 
         $product->setStoreId(0)
@@ -127,9 +127,10 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
         $name = 'Gift Card - Custom Amount';
 
         if ($minAmount && $maxAmount) {
-            $name .= sprintf(' (%s - %s)',
+            $name .= sprintf(
+                ' (%s - %s)',
                 Mage::helper('core')->formatPrice($minAmount, false),
-                Mage::helper('core')->formatPrice($maxAmount, false)
+                Mage::helper('core')->formatPrice($maxAmount, false),
             );
         }
 

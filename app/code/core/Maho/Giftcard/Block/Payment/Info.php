@@ -55,7 +55,7 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
                 $transport->setData($this->__('Gift Cards Applied'), implode(', ', $giftcardInfo));
                 $transport->setData(
                     $this->__('Total Gift Card Amount'),
-                    Mage::helper('core')->currency(abs($order->getGiftcardAmount()), true, false)
+                    Mage::helper('core')->currency(abs($order->getGiftcardAmount()), true, false),
                 );
             }
         }

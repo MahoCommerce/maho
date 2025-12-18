@@ -11,8 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Mage_Adminhtml_Block_Widget
-    implements Mage_Adminhtml_Block_Widget_Tab_Interface
+class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Mage_Adminhtml_Block_Widget implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     protected function _construct()
     {
@@ -44,7 +43,7 @@ class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Ma
                     $value = $product->getResource()->getAttributeRawValue(
                         $product->getId(),
                         $code,
-                        $product->getStoreId()
+                        $product->getStoreId(),
                     );
                     $product->setData($code, $value);
                 }

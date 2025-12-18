@@ -76,15 +76,15 @@ $table = $this->getConnection()->newTable($this->getTable('maho_giftcard/giftcar
     ->addIndex(
         $this->getIdxName('maho_giftcard/giftcard', ['code'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
         ['code'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $this->getIdxName('maho_giftcard/giftcard', ['status']),
-        ['status']
+        ['status'],
     )
     ->addIndex(
         $this->getIdxName('maho_giftcard/giftcard', ['purchase_order_id']),
-        ['purchase_order_id']
+        ['purchase_order_id'],
     )
     ->addForeignKey(
         $this->getFkName('maho_giftcard/giftcard', 'purchase_order_id', 'sales/order', 'entity_id'),
@@ -92,7 +92,7 @@ $table = $this->getConnection()->newTable($this->getTable('maho_giftcard/giftcar
         $this->getTable('sales/order'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Gift Card Table');
 
@@ -141,11 +141,11 @@ $table = $this->getConnection()->newTable($this->getTable('maho_giftcard/history
     ], 'Created At')
     ->addIndex(
         $this->getIdxName('maho_giftcard/history', ['giftcard_id']),
-        ['giftcard_id']
+        ['giftcard_id'],
     )
     ->addIndex(
         $this->getIdxName('maho_giftcard/history', ['order_id']),
-        ['order_id']
+        ['order_id'],
     )
     ->addForeignKey(
         $this->getFkName('maho_giftcard/history', 'giftcard_id', 'maho_giftcard/giftcard', 'giftcard_id'),
@@ -153,7 +153,7 @@ $table = $this->getConnection()->newTable($this->getTable('maho_giftcard/history
         $this->getTable('maho_giftcard/giftcard'),
         'giftcard_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $this->getFkName('maho_giftcard/history', 'order_id', 'sales/order', 'entity_id'),
@@ -161,7 +161,7 @@ $table = $this->getConnection()->newTable($this->getTable('maho_giftcard/history
         $this->getTable('sales/order'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Gift Card History Table');
 
@@ -175,7 +175,7 @@ $this->getConnection()->addColumn(
         'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
         'nullable' => true,
         'comment'  => 'Applied Gift Card Codes (JSON)',
-    ]
+    ],
 );
 
 $this->getConnection()->addColumn(
@@ -187,7 +187,7 @@ $this->getConnection()->addColumn(
         'nullable' => true,
         'default'  => '0.0000',
         'comment'  => 'Gift Card Discount Amount',
-    ]
+    ],
 );
 
 $this->getConnection()->addColumn(
@@ -199,7 +199,7 @@ $this->getConnection()->addColumn(
         'nullable' => true,
         'default'  => '0.0000',
         'comment'  => 'Base Gift Card Discount Amount',
-    ]
+    ],
 );
 
 // Add same fields to order table
@@ -210,7 +210,7 @@ $this->getConnection()->addColumn(
         'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
         'nullable' => true,
         'comment'  => 'Applied Gift Card Codes (JSON)',
-    ]
+    ],
 );
 
 $this->getConnection()->addColumn(
@@ -222,7 +222,7 @@ $this->getConnection()->addColumn(
         'nullable' => true,
         'default'  => '0.0000',
         'comment'  => 'Gift Card Discount Amount',
-    ]
+    ],
 );
 
 $this->getConnection()->addColumn(
@@ -234,7 +234,7 @@ $this->getConnection()->addColumn(
         'nullable' => true,
         'default'  => '0.0000',
         'comment'  => 'Base Gift Card Discount Amount',
-    ]
+    ],
 );
 
 $this->endSetup();

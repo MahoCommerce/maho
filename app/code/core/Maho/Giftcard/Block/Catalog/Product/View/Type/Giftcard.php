@@ -33,7 +33,7 @@ class Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard extends Mage_Catalo
                 $value = $product->getResource()->getAttributeRawValue(
                     $product->getId(),
                     $code,
-                    $product->getStoreId()
+                    $product->getStoreId(),
                 );
                 $product->setData($code, $value);
             }

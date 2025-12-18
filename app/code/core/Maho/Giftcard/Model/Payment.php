@@ -45,8 +45,8 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
         }
 
         // Check if gift cards are applied and fully cover the order
-        $giftcardAmount = abs((float)$quote->getGiftcardAmount());
-        $grandTotal = (float)$quote->getGrandTotal();
+        $giftcardAmount = abs((float) $quote->getGiftcardAmount());
+        $grandTotal = (float) $quote->getGrandTotal();
 
         // Only available when gift cards fully cover the order
         return $giftcardAmount > 0 && $grandTotal <= 0.01;
@@ -107,9 +107,9 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
 
             if ($giftcard->getId() && $giftcard->isValid()) {
                 $giftcard->use(
-                    (float)$appliedAmount,
-                    (int)$order->getId(),
-                    "Payment for order #{$order->getIncrementId()}"
+                    (float) $appliedAmount,
+                    (int) $order->getId(),
+                    "Payment for order #{$order->getIncrementId()}",
                 );
             }
         }
@@ -144,8 +144,8 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
                 $refundAmount = ($appliedAmount / $totalApplied) * $amount;
                 $giftcard->refund(
                     $refundAmount,
-                    (int)$order->getId(),
-                    "Refund for order #{$order->getIncrementId()}"
+                    (int) $order->getId(),
+                    "Refund for order #{$order->getIncrementId()}",
                 );
             }
         }

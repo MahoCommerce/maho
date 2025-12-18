@@ -20,7 +20,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function generateCode(): string
     {
-        $length = (int)Mage::getStoreConfig('maho_giftcard/general/code_length') ?: 16;
+        $length = (int) Mage::getStoreConfig('maho_giftcard/general/code_length') ?: 16;
         $prefix = Mage::getStoreConfig('maho_giftcard/general/code_prefix') ?: 'GC';
         $format = Mage::getStoreConfig('maho_giftcard/general/code_format');
 
@@ -94,7 +94,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getLifetime(): int
     {
-        return (int)Mage::getStoreConfig('maho_giftcard/general/lifetime');
+        return (int) Mage::getStoreConfig('maho_giftcard/general/lifetime');
     }
 
     /**
@@ -170,7 +170,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             // Use BaconQrCode for local QR generation
             $renderer = new \BaconQrCode\Renderer\ImageRenderer(
                 new \BaconQrCode\Renderer\RendererStyle\RendererStyle($size),
-                new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd(),
             );
 
             $writer = new \BaconQrCode\Writer($renderer);
@@ -260,7 +260,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         $vars = [
             'giftcard' => $giftcard,
             'code' => $giftcard->getCode(),
-            'balance' => $this->formatAmount((float)$giftcard->getBalance(), $giftcard->getCurrencyCode()),
+            'balance' => $this->formatAmount((float) $giftcard->getBalance(), $giftcard->getCurrencyCode()),
             'recipient_name' => $giftcard->getRecipientName() ?: 'Valued Customer',
             'sender_name' => $giftcard->getSenderName() ?: '',
             'message' => $giftcard->getMessage() ?: '',
@@ -301,7 +301,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             $sent = $emailTemplate->send(
                 $giftcard->getRecipientEmail(),
                 $giftcard->getRecipientName() ?: 'Valued Customer',
-                $vars
+                $vars,
             );
 
             if (!$sent) {

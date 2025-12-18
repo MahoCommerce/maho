@@ -32,14 +32,14 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('maho_giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
-            ['code', 'recipient_email']
+            ['code', 'recipient_email'],
         );
 
         // Join order table to get increment_id
         $collection->getSelect()->joinLeft(
             ['so' => $collection->getTable('sales/order')],
             'main_table.order_id = so.entity_id',
-            ['order_increment_id' => 'increment_id']
+            ['order_increment_id' => 'increment_id'],
         );
 
         $this->setCollection($collection);

@@ -51,8 +51,8 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard extends Mage_Cor
 
                     $parent->addTotal(new Varien_Object([
                         'code'       => 'giftcard',
-                        'value'      => -abs((float)$giftcardAmount),
-                        'base_value' => -abs((float)$order->getBaseGiftcardAmount()),
+                        'value'      => -abs((float) $giftcardAmount),
+                        'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
                         'label'      => $label,
                     ]), 'discount');
                 }

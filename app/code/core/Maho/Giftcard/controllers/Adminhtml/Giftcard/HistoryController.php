@@ -26,11 +26,11 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
             ->_setActiveMenu('customer/giftcard/history')
             ->_addBreadcrumb(
                 'Customers',
-                'Customers'
+                'Customers',
             )
             ->_addBreadcrumb(
                 'Gift Card History',
-                'Gift Card History'
+                'Gift Card History',
             );
 
         return $this;

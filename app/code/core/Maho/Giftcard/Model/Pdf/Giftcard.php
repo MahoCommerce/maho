@@ -72,7 +72,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
         } catch (Exception $e) {
             Mage::logException($e);
             throw new Mage_Core_Exception(
-                Mage::helper('maho_giftcard')->__('Error generating gift card PDF: %s', $e->getMessage())
+                Mage::helper('maho_giftcard')->__('Error generating gift card PDF: %s', $e->getMessage()),
             );
         }
     }

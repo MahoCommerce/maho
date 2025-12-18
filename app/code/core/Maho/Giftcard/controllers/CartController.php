@@ -25,7 +25,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         if (!$code) {
             Mage::getSingleton('checkout/session')->addError(
-                $this->__('Please enter a gift card code.')
+                $this->__('Please enter a gift card code.'),
             );
             $this->_redirect('checkout/cart');
             return;
@@ -38,7 +38,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             foreach ($quote->getAllItems() as $item) {
                 if ($item->getProductType() === 'giftcard') {
                     Mage::getSingleton('checkout/session')->addError(
-                        $this->__('Gift cards cannot be used to purchase gift card products.')
+                        $this->__('Gift cards cannot be used to purchase gift card products.'),
                     );
                     $this->_redirect('checkout/cart');
                     return;
@@ -86,7 +86,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             $quote->collectTotals()->save();
 
             Mage::getSingleton('checkout/session')->addSuccess(
-                $this->__('Gift card "%s" was applied.', $code)
+                $this->__('Gift card "%s" was applied.', $code),
             );
 
         } catch (Exception $e) {
@@ -134,13 +134,13 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $quote->collectTotals()->save();
 
                 Mage::getSingleton('checkout/session')->addSuccess(
-                    $this->__('Gift card was removed.')
+                    $this->__('Gift card was removed.'),
                 );
             }
 
         } catch (Exception $e) {
             Mage::getSingleton('checkout/session')->addError(
-                $this->__('Cannot remove gift card.')
+                $this->__('Cannot remove gift card.'),
             );
         }
 

@@ -52,7 +52,7 @@ class Maho_Giftcard_Block_Payment_Form extends Mage_Payment_Block_Form
         foreach ($codes as $code => $amount) {
             $result[] = [
                 'code' => $this->maskGiftcardCode($code),
-                'amount' => Mage::helper('core')->currency($amount, true, false)
+                'amount' => Mage::helper('core')->currency($amount, true, false),
             ];
         }
 
