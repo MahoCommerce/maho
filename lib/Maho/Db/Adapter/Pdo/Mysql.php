@@ -1795,35 +1795,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Inserts a table row with specified data.
-     *
-     * @throws \Maho\Db\Exception
-     */
-    #[\Override]
-    public function insert(string|array|\Maho\Db\Select $table, array $bind): int
-    {
-        // Extract and quote col names from the array keys
-        $cols = [];
-        $vals = [];
-        foreach (array_keys($bind) as $col) {
-            $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
-        }
-
-        // Build the statement
-        $sql = sprintf(
-            'INSERT INTO %s (%s) VALUES(%s)',
-            $this->quoteIdentifier($table),
-            implode(', ', $cols),
-            implode(', ', $vals),
-        );
-
-        // Execute the statement and return the number of affected rows
-        $stmt = $this->query($sql, array_values($bind));
-        return $stmt->rowCount();
-    }
-
-    /**
      * Inserts a table row with specified data
      * Special for Zero values to identity column
      */
@@ -3560,32 +3531,6 @@ class Mysql extends AbstractPdoAdapter
             return new \Maho\Db\Expr('UNIX_TIMESTAMP()');
         }
         return new \Maho\Db\Expr(sprintf('UNIX_TIMESTAMP(%s)', $timestamp));
-    }
-
-    /**
-     * Updates table rows with specified data based on a WHERE clause.
-     */
-    #[\Override]
-    public function update(string|array|\Maho\Db\Select $table, array $bind, string|array $where = ''): int
-    {
-        $set = [];
-        foreach (array_keys($bind) as $col) {
-            $set[] = $this->quoteIdentifier($col) . ' = ?';
-        }
-
-        $where = $this->_whereExpr($where);
-
-        // Build the UPDATE statement
-        $sql = sprintf(
-            'UPDATE %s SET %s%s',
-            $this->quoteIdentifier($table),
-            implode(', ', $set),
-            ($where) ? " WHERE $where" : '',
-        );
-
-        // Execute the statement and return the number of affected rows
-        $stmt = $this->query($sql, array_values($bind));
-        return $stmt->rowCount();
     }
 
     /**

@@ -496,9 +496,15 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     {
         $cols = [];
         $vals = [];
-        foreach (array_keys($bind) as $col) {
+        $params = [];
+        foreach ($bind as $col => $value) {
             $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
+            if ($value instanceof Expr) {
+                $vals[] = $value->__toString();
+            } else {
+                $vals[] = '?';
+                $params[] = $value;
+            }
         }
 
         $sql = sprintf(
@@ -508,7 +514,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             implode(', ', $vals),
         );
 
-        $stmt = $this->query($sql, array_values($bind));
+        $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
     }
 

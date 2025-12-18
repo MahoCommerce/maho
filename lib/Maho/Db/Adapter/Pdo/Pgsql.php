@@ -738,9 +738,15 @@ class Pgsql extends AbstractPdoAdapter
         // Extract and quote col names from the array keys
         $cols = [];
         $vals = [];
-        foreach (array_keys($bind) as $col) {
+        $params = [];
+        foreach ($bind as $col => $value) {
             $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
+            if ($value instanceof \Maho\Db\Expr) {
+                $vals[] = $value->__toString();
+            } else {
+                $vals[] = '?';
+                $params[] = $value;
+            }
         }
 
         // Get the primary key column for RETURNING clause
@@ -762,7 +768,7 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         // Execute the statement
-        $stmt = $this->query($sql, array_values($bind));
+        $stmt = $this->query($sql, $params);
 
         // Capture the returned ID if available
         if ($returningColumn !== null) {
