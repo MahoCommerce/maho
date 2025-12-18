@@ -43,22 +43,19 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
         </div>
 
         <?php if ($_options = $this->getOptionList()):?>
-        <dl class="item-options">
             <?php foreach ($_options as $_option) : ?>
             <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
-                <dt><?= $this->escapeHtml($_option['label']) ?></dt>
-                <dd<?php if (isset($_formatedOptionValue['full_view'])): ?> class="truncated"<?php endif ?>><?= $_formatedOptionValue['value'] ?>
+            <div class="product-cart-sku<?php if (isset($_formatedOptionValue['full_view'])): ?> truncated<?php endif ?>">
+                <span class="label"><?= $this->escapeHtml($_option['label']) ?>:</span>
+                <?= $_formatedOptionValue['value'] ?>
                 <?php if (isset($_formatedOptionValue['full_view'])): ?>
                 <div class="truncated_full_value">
-                    <dl class="item-options">
-                        <dt><?= $this->escapeHtml($_option['label']) ?></dt>
-                        <dd><?= $_formatedOptionValue['full_view'] ?></dd>
-                    </dl>
+                    <span class="label"><?= $this->escapeHtml($_option['label']) ?>:</span>
+                    <?= $_formatedOptionValue['full_view'] ?>
                 </div>
                 <?php endif ?>
-            </dd>
+            </div>
             <?php endforeach ?>
-        </dl>
         <?php endif ?>
 
         <?php if ($messages = $this->getMessages()): ?>
