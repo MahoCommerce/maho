@@ -224,7 +224,7 @@ td.product-cart-remove a {
 .cart-table .product-cart-sku {
     font-style: italic;
     font-size: 0.75rem;
-    margin: 5px 0 12px;
+    margin-block: 5px;
 }
 .cart-table .product-cart-sku .label {
     font-weight: 600;
