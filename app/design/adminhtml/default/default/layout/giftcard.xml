@@ -24,18 +24,12 @@
         </reference>
     </adminhtml_giftcard_history_index>
 
-    <!-- Product Edit Page - Gift Card Tab removed as attributes are in attribute group -->
-    <!-- Commented out to avoid duplicate tab since Gift Card attributes are in an attribute group
+    <!-- Gift Card Product Edit Page - Add field toggle script -->
     <adminhtml_catalog_product_giftcard>
-        <reference name="product_tabs">
-            <action method="addTabAfter">
-                <tabId>giftcard</tabId>
-                <tab>giftcard/adminhtml_catalog_product_edit_tab_giftcard</tab>
-                <afterTabId>group_1</afterTabId>
-            </action>
+        <reference name="content">
+            <block type="core/template" name="giftcard.type.toggle" template="maho/giftcard/catalog/product/type-toggle.phtml" />
         </reference>
     </adminhtml_catalog_product_giftcard>
-    -->
 
     <!-- Add gift card totals to admin order views -->
     <!-- Gift card totals are added via block rewrite in config.xml -->

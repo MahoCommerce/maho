@@ -80,6 +80,7 @@
                     <giftcard translate="label" module="giftcard">
                         <label>Gift Card</label>
                         <model>giftcard/product_type_giftcard</model>
+                        <price_model>giftcard/product_price</price_model>
                         <is_virtual>1</is_virtual>
                         <composite>0</composite>
                         <index_priority>50</index_priority>

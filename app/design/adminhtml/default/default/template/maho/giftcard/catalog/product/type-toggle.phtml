@@ -1,0 +1,30 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    adminhtml_default
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<script type="module">
+const typeSelect = document.getElementById('giftcard_type');
+if (typeSelect) {
+    const minAmountRow = document.getElementById('giftcard_min_amount')?.closest('tr');
+    const maxAmountRow = document.getElementById('giftcard_max_amount')?.closest('tr');
+    const amountsRow = document.getElementById('giftcard_amounts')?.closest('tr');
+
+    function toggleFields() {
+        const selectedText = typeSelect.options[typeSelect.selectedIndex]?.text || '';
+        const isCustom = selectedText.toLowerCase().includes('custom');
+
+        if (minAmountRow) minAmountRow.style.display = isCustom ? '' : 'none';
+        if (maxAmountRow) maxAmountRow.style.display = isCustom ? '' : 'none';
+        if (amountsRow) amountsRow.style.display = isCustom ? 'none' : '';
+    }
+
+    typeSelect.addEventListener('change', toggleFields);
+    toggleFields();
+}
+</script>

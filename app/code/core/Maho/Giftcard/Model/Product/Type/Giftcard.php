@@ -230,7 +230,47 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
             return $product->getCustomPrice();
         }
 
-        return parent::getPrice($product);
+        // Return minimum possible price for display
+        return $this->getMinimumPrice($product);
+    }
+
+    /**
+     * Get minimum possible price for the gift card
+     */
+    public function getMinimumPrice($product = null): float
+    {
+        $product = $this->getProduct($product);
+
+        // Load gift card attributes if needed
+        if (!$product->hasData('giftcard_type') && $product->getId()) {
+            $attributes = ['giftcard_type', 'giftcard_amounts', 'giftcard_min_amount'];
+            foreach ($attributes as $code) {
+                $value = $product->getResource()->getAttributeRawValue(
+                    $product->getId(),
+                    $code,
+                    $product->getStoreId(),
+                );
+                $product->setData($code, $value);
+            }
+        }
+
+        // For fixed amounts, return the lowest amount
+        $amounts = $product->getData('giftcard_amounts');
+        if ($amounts) {
+            $amountsArray = array_map('trim', explode(',', $amounts));
+            $amountsArray = array_filter($amountsArray, fn($a) => is_numeric($a) && $a > 0);
+            if (!empty($amountsArray)) {
+                return (float) min($amountsArray);
+            }
+        }
+
+        // For custom amounts, return the minimum amount
+        $minAmount = $product->getData('giftcard_min_amount');
+        if ($minAmount && $minAmount > 0) {
+            return (float) $minAmount;
+        }
+
+        return 0.0;
     }
 
     /**
