@@ -29,7 +29,6 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
      * @return $this
      */
     #[\Override]
-    #[\Override]
     protected function _prepareSpecificInformation($transport = null)
     {
         if ($this->_paymentSpecificInformation !== null) {
