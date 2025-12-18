@@ -19,7 +19,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     public function generateCode(): string
     {
         $length = (int) Mage::getStoreConfig('giftcard/general/code_length') ?: 16;
-        $prefix = Mage::getStoreConfig('giftcard/general/code_prefix') ?: 'GC';
+        $prefix = (string) Mage::getStoreConfig('giftcard/general/code_prefix');
         $format = Mage::getStoreConfig('giftcard/general/code_format');
 
         // Generate random alphanumeric code

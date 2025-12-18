@@ -14,7 +14,7 @@ declare(strict_types=1);
 class Maho_Giftcard_Model_Resource_History extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('giftcard/history', 'history_id');
     }

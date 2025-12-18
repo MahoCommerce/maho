@@ -49,7 +49,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Delete data specific to this product type
      */
-    public function deleteTypeSpecificData(Mage_Catalog_Model_Product $product)
+    public function deleteTypeSpecificData(Mage_Catalog_Model_Product $product): void
     {
         // No type-specific data to delete
     }
@@ -223,7 +223,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Get final price of product
      */
-    public function getPrice($product)
+    public function getPrice(Mage_Catalog_Model_Product $product): float
     {
         // If custom price is set (from cart item), use that
         if ($product->getCustomPrice()) {
@@ -237,7 +237,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Get minimum possible price for the gift card
      */
-    public function getMinimumPrice($product = null): float
+    public function getMinimumPrice(?Mage_Catalog_Model_Product $product = null): float
     {
         $product = $this->getProduct($product);
 

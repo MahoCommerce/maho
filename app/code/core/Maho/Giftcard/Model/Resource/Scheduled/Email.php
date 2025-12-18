@@ -14,7 +14,7 @@ declare(strict_types=1);
 class Maho_Giftcard_Model_Resource_Scheduled_Email extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('giftcard/scheduled_email', 'scheduled_email_id');
     }

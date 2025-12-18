@@ -335,7 +335,7 @@ class Maho_Giftcard_Model_Observer
         }
 
         // If not found on addresses, try to calculate from codes
-        if (!$baseGiftcardAmount && !empty($codes)) {
+        if (!$baseGiftcardAmount) {
             foreach ($codes as $code => $amount) {
                 $baseGiftcardAmount += (float) $amount;
             }

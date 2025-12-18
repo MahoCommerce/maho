@@ -8,9 +8,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Display applied gift cards in checkout
- */
+/** @var Mage_Core_Block_Template $this */
 $quote = $this->getQuote();
 if (!$quote) {
     $quote = Mage::getSingleton('checkout/session')->getQuote();

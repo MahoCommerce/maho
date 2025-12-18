@@ -16,8 +16,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
     public const ADMIN_RESOURCE = 'customer/giftcard/history';
 
     /**
-     * Init actions
-     *
      * @return $this
      */
     protected function _initAction()
@@ -36,20 +34,14 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
         return $this;
     }
 
-    /**
-     * Index action - history grid
-     */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initAction();
         $this->_title(Mage::helper('giftcard')->__('Gift Card History'));
         $this->renderLayout();
     }
 
-    /**
-     * Grid action for AJAX
-     */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();

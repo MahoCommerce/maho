@@ -19,7 +19,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Apply gift card to cart
      */
-    public function applyAction()
+    public function applyAction(): void
     {
         $code = trim((string) $this->getRequest()->getParam('giftcard_code'));
 
@@ -99,7 +99,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Remove gift card from cart
      */
-    public function removeAction()
+    public function removeAction(): void
     {
         $code = $this->getRequest()->getParam('code');
 

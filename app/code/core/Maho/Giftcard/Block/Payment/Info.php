@@ -32,7 +32,7 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
     protected function _prepareSpecificInformation($transport = null)
     {
         if ($this->_paymentSpecificInformation !== null) {
-            return $this->_paymentSpecificInformation;
+            return $this;
         }
 
         $transport = parent::_prepareSpecificInformation($transport);
@@ -61,7 +61,9 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
             }
         }
 
-        return $transport;
+        $this->_paymentSpecificInformation = $transport;
+
+        return $this;
     }
 
     /**

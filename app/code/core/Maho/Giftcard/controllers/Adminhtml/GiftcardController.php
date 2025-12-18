@@ -39,7 +39,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Index action - gift card grid
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_initAction();
         $this->_title('Gift Cards');
@@ -49,7 +49,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Grid action for AJAX
      */
-    public function gridAction()
+    public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
@@ -58,7 +58,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * New gift card
      */
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
@@ -66,7 +66,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Edit gift card
      */
-    public function editAction()
+    public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $model = Mage::getModel('giftcard/giftcard');
@@ -100,7 +100,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Save gift card
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
             $id = $this->getRequest()->getParam('id');
@@ -160,7 +160,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Delete gift card
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             try {
@@ -190,7 +190,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Mass delete action
      */
-    public function massDeleteAction()
+    public function massDeleteAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
 
@@ -222,7 +222,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Mass status change action
      */
-    public function massStatusAction()
+    public function massStatusAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
         $status = $this->getRequest()->getParam('status');
@@ -257,7 +257,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Check balance action (AJAX)
      */
-    public function checkBalanceAction()
+    public function checkBalanceAction(): void
     {
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);
 

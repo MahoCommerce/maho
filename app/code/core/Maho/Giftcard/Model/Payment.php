@@ -16,15 +16,25 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
 {
+    /** @var string */
     protected $_code = 'giftcard';
+    /** @var string */
     protected $_formBlockType = 'giftcard/payment_form';
+    /** @var string */
     protected $_infoBlockType = 'giftcard/payment_info';
+    /** @var bool */
     protected $_canUseInternal = true;
+    /** @var bool */
     protected $_canUseCheckout = true;
+    /** @var bool */
     protected $_canUseForMultishipping = false;
+    /** @var bool */
     protected $_isGateway = false;
+    /** @var bool */
     protected $_canAuthorize = false;
+    /** @var bool */
     protected $_canCapture = true;
+    /** @var bool */
     protected $_canRefund = true;
 
     /**

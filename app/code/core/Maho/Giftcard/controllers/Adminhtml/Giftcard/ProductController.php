@@ -18,7 +18,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Create gift card product(s) action
      */
-    public function createAction()
+    public function createAction(): void
     {
         $this->loadLayout();
         $this->_setActiveMenu('customer/giftcard');
@@ -29,7 +29,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Save gift card product(s)
      */
-    public function saveAction()
+    public function saveAction(): void
     {
         try {
             $data = $this->getRequest()->getPost();
@@ -89,7 +89,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
 
         $product->setStoreId(0)
             ->setAttributeSetId(4) // Default attribute set
-            ->setTypeId('virtual')
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
             ->setSku($sku)
             ->setName($name)
             ->setDescription('Digital gift card that can be used as payment')
@@ -133,7 +133,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
 
         $product->setStoreId(0)
             ->setAttributeSetId(4)
-            ->setTypeId('virtual')
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
             ->setSku($sku)
             ->setName($name)
             ->setDescription('Digital gift card with custom amount')

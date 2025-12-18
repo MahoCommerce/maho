@@ -24,16 +24,14 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Item extends Mage_Adminht
         if ($order && $order->getGiftcardCodes()) {
             $codes = [];
             $giftcardCodes = $order->getGiftcardCodes();
-            if ($giftcardCodes) {
-                $codesArray = json_decode($giftcardCodes, true);
-                if (is_array($codesArray)) {
-                    // Show partial codes for security
-                    foreach (array_keys($codesArray) as $code) {
-                        if (strlen($code) > 10) {
-                            $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                        } else {
-                            $codes[] = $code;
-                        }
+            $codesArray = json_decode($giftcardCodes, true);
+            if (is_array($codesArray)) {
+                // Show partial codes for security
+                foreach (array_keys($codesArray) as $code) {
+                    if (strlen($code) > 10) {
+                        $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
+                    } else {
+                        $codes[] = $code;
                     }
                 }
             }

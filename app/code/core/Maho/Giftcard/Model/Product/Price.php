@@ -41,7 +41,7 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
     /**
      * Get minimum possible price for the gift card
      */
-    public function getMinimumPrice($product): float
+    public function getMinimumPrice(Mage_Catalog_Model_Product $product): float
     {
         // Load gift card attributes if needed
         if (!$product->hasData('giftcard_amounts') && $product->getId()) {

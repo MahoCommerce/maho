@@ -26,6 +26,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
      *
      * @return string
      */
+    #[\Override]
     protected function _getLayoutHandle()
     {
         return 'giftcard_pdf';
@@ -36,6 +37,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
      *
      * @return string
      */
+    #[\Override]
     protected function _getBlockName()
     {
         return 'giftcard.pdf';
@@ -44,6 +46,7 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
     /**
      * Generate PDF for gift cards
      */
+    #[\Override]
     public function getPdf(array|Varien_Data_Collection $documents = []): string
     {
         // Convert to array if collection

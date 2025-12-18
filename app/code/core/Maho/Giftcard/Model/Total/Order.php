@@ -20,8 +20,6 @@ class Maho_Giftcard_Model_Total_Order extends Mage_Sales_Model_Order_Total_Abstr
      */
     public function collect(Mage_Sales_Model_Order $order)
     {
-        parent::collect($order);
-
         $giftcardAmount = $order->getGiftcardAmount();
         $baseGiftcardAmount = $order->getBaseGiftcardAmount();
 
@@ -63,13 +61,8 @@ class Maho_Giftcard_Model_Total_Order extends Mage_Sales_Model_Order_Total_Abstr
                 $title .= ' (' . implode(', ', $codes) . ')';
             }
 
-            $order->addTotal([
-                'code' => $this->getCode(),
-                'title' => $title,
-                'value' => -abs($amount),  // Always show as negative
-                'base_value' => -abs($order->getBaseGiftcardAmount()),
-                'area' => 'footer',
-            ], 'discount');
+            // Total is added via layout XML and block rendering
+            // The gift card amount is stored on the order and displayed in order totals
         }
         return $this;
     }

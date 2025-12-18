@@ -763,12 +763,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Simple.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Simple.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Type_Configurable::canUseAttribute() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -5299,12 +5293,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_SearchController::_initAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7939,12 +7927,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Api.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Product/Api.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Product_Api::$_defaultProductAttributeList has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -7959,12 +7941,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Api_V2::_prepareDataForSave() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
 
