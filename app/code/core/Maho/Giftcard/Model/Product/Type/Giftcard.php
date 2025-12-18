@@ -239,9 +239,17 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     #[\Override]
     public function hasRequiredOptions($product = null)
     {
-        if ($this->getProduct($product)->getGiftcardType() === 'custom') {
-            return true;
-        }
-        return parent::hasRequiredOptions($product);
+        // Gift cards always have required options (amount, recipient info)
+        return true;
+    }
+
+    /**
+     * Check if product has options
+     * Gift cards always have options (amount selection, recipient info)
+     */
+    #[\Override]
+    public function hasOptions($product = null)
+    {
+        return true;
     }
 }
