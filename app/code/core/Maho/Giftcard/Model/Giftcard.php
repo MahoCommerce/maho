@@ -66,7 +66,6 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * Load gift card by code
      *
-     * @param string $code
      * @return $this
      */
     public function loadByCode(string $code): self
@@ -77,8 +76,6 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     /**
      * Check if gift card is valid for use
-     *
-     * @return bool
      */
     public function isValid(): bool
     {
@@ -156,9 +153,6 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * Refund amount back to gift card
      *
-     * @param float $amount
-     * @param int|null $orderId
-     * @param string|null $comment
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -197,8 +191,6 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * Adjust balance (admin action)
      *
-     * @param float $newBalance
-     * @param string|null $comment
      * @return $this
      */
     public function adjustBalance(float $newBalance, ?string $comment = null): self
@@ -232,14 +224,6 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     /**
      * Add history entry
-     *
-     * @param string $action
-     * @param float $amount
-     * @param float $balanceBefore
-     * @param float $balanceAfter
-     * @param int|null $orderId
-     * @param string|null $comment
-     * @return void
      */
     protected function _addHistory(
         string $action,

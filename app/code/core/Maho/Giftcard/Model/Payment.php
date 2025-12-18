@@ -76,7 +76,6 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     /**
      * Authorize payment - not used for gift cards
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @return $this
      */
@@ -89,7 +88,6 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     /**
      * Capture payment - deduct from gift card balances
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @return $this
      */
@@ -121,7 +119,6 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     /**
      * Refund payment - add back to gift card balances
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @return $this
      */
@@ -157,7 +154,6 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     /**
      * Get applied gift card codes from order
      *
-     * @param Mage_Sales_Model_Order $order
      * @return array [code => amount]
      */
     protected function _getAppliedCodes(Mage_Sales_Model_Order $order): array

@@ -48,8 +48,6 @@ class Maho_Giftcard_Model_Scheduled_Email extends Mage_Core_Model_Abstract
 
     /**
      * Process scheduled email
-     *
-     * @return bool
      */
     public function process(): bool
     {

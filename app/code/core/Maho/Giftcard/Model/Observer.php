@@ -16,7 +16,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Generate gift cards after order is placed
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function generateGiftcards(Varien_Event_Observer $observer)
@@ -64,16 +63,6 @@ class Maho_Giftcard_Model_Observer
 
     /**
      * Create a gift card
-     *
-     * @param float $amount
-     * @param Mage_Sales_Model_Order $order
-     * @param Mage_Sales_Model_Order_Item $item
-     * @param string $recipientName
-     * @param string $recipientEmail
-     * @param string $senderName
-     * @param string $senderEmail
-     * @param string $message
-     * @return void
      */
     protected function _createGiftcard(
         float $amount,
@@ -128,7 +117,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Activate gift cards when invoice is paid
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function activateGiftcardsOnInvoicePaid(Varien_Event_Observer $observer)
@@ -219,7 +207,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Save gift card product attributes
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function catalogProductSaveBefore(Varien_Event_Observer $observer)
@@ -256,7 +243,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Set custom price on quote item for gift cards
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function setGiftcardPrice(Varien_Event_Observer $observer)
@@ -312,7 +298,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Deduct gift card balance when order is placed
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function deductGiftcardBalance(Varien_Event_Observer $observer)
@@ -372,7 +357,7 @@ class Maho_Giftcard_Model_Observer
 
             // Format codes for display
             $displayCodes = [];
-            foreach ($codes as $code => $amount) {
+            foreach (array_keys($codes) as $code) {
                 // Show partial code for security
                 if (strlen($code) > 10) {
                     $displayCodes[] = substr($code, 0, 5) . '...' . substr($code, -4);
@@ -424,7 +409,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Add gift card total to admin order view
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function addGiftcardTotalToAdminOrder(Varien_Event_Observer $observer)
@@ -481,7 +465,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Update payment method label when fully paid by gift card
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function updatePaymentMethodForGiftcard(Varien_Event_Observer $observer)
@@ -513,7 +496,6 @@ class Maho_Giftcard_Model_Observer
     /**
      * Auto-select gift card payment method when order is fully covered
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function autoSelectPaymentMethod(Varien_Event_Observer $observer)

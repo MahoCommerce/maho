@@ -24,7 +24,6 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
     /**
      * Collect gift card totals
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     #[\Override]
@@ -161,7 +160,6 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
     /**
      * Add total information to address
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     #[\Override]

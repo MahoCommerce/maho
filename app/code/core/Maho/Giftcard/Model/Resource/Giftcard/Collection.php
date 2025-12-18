@@ -33,7 +33,6 @@ class Maho_Giftcard_Model_Resource_Giftcard_Collection extends Mage_Core_Model_R
     /**
      * Filter by order ID
      *
-     * @param int $orderId
      * @return $this
      */
     public function addOrderFilter(int $orderId): self

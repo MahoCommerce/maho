@@ -66,9 +66,6 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
 
     /**
      * Mask gift card code for display
-     *
-     * @param string $code
-     * @return string
      */
     protected function maskGiftcardCode(string $code): string
     {
@@ -82,8 +79,6 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
 
     /**
      * Get payment method title
-     *
-     * @return string
      */
     public function getMethodTitle(): string
     {

@@ -21,6 +21,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Check if product is virtual
      */
+    #[\Override]
     public function isVirtual($product = null)
     {
         return true;
@@ -29,6 +30,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Check if product can be configured
      */
+    #[\Override]
     public function canConfigure($product = null)
     {
         return true;
@@ -38,6 +40,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      * Check is product available for sale
      * Gift cards are always available (no stock management)
      */
+    #[\Override]
     public function isSalable($product = null)
     {
         return true;
@@ -54,6 +57,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Prepare additional options/information for order item
      */
+    #[\Override]
     protected function _prepareOptions(Varien_Object $buyRequest, $product, $processMode)
     {
         // First, check if gift card fields need to be transferred from request
@@ -139,6 +143,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      * Prepare product for cart
      * Set custom price based on gift card amount
      */
+    #[\Override]
     public function prepareForCartAdvanced(Varien_Object $buyRequest, $product = null, $processMode = null)
     {
         $result = parent::prepareForCartAdvanced($buyRequest, $product, $processMode);
@@ -231,6 +236,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     /**
      * Check if product has required options
      */
+    #[\Override]
     public function hasRequiredOptions($product = null)
     {
         if ($this->getProduct($product)->getGiftcardType() === 'custom') {

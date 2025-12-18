@@ -16,8 +16,6 @@ class Maho_Giftcard_Model_Cron
     /**
      * Process scheduled gift card emails
      * Runs every 5 minutes
-     *
-     * @return void
      */
     public function processScheduledEmails(): void
     {
@@ -64,8 +62,6 @@ class Maho_Giftcard_Model_Cron
     /**
      * Mark expired gift cards
      * Runs daily at 1 AM
-     *
-     * @return void
      */
     public function markExpiredGiftcards(): void
     {

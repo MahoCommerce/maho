@@ -18,8 +18,6 @@ class Maho_Giftcard_Block_Checkout_Cart_Giftcard extends Mage_Core_Block_Templat
 {
     /**
      * Get applied gift card codes from quote
-     *
-     * @return array
      */
     public function getAppliedGiftcardCodes(): array
     {
@@ -50,8 +48,6 @@ class Maho_Giftcard_Block_Checkout_Cart_Giftcard extends Mage_Core_Block_Templat
 
     /**
      * Check if customer can apply gift cards
-     *
-     * @return bool
      */
     public function canApplyGiftcard(): bool
     {

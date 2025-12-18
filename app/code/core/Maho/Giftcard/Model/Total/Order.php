@@ -16,7 +16,6 @@ class Maho_Giftcard_Model_Total_Order extends Mage_Sales_Model_Order_Total_Abstr
     /**
      * Collect gift card totals
      *
-     * @param Mage_Sales_Model_Order $order
      * @return $this
      */
     public function collect(Mage_Sales_Model_Order $order)
@@ -37,7 +36,6 @@ class Maho_Giftcard_Model_Total_Order extends Mage_Sales_Model_Order_Total_Abstr
     /**
      * Add gift card information to order totals
      *
-     * @param Mage_Sales_Model_Order $order
      * @return $this
      */
     public function fetch(Mage_Sales_Model_Order $order)

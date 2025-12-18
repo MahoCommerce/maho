@@ -43,9 +43,6 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
 
     /**
      * Generate PDF for gift cards
-     *
-     * @param array|Varien_Data_Collection $documents
-     * @return string
      */
     public function getPdf(array|Varien_Data_Collection $documents = []): string
     {

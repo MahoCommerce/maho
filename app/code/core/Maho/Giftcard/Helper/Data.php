@@ -15,8 +15,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
      * Generate a unique gift card code
-     *
-     * @return string
      */
     public function generateCode(): string
     {
@@ -33,7 +31,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         // Apply format if specified (e.g., XXXX-XXXX-XXXX-XXXX)
-        if ($format && strpos($format, 'X') !== false) {
+        if ($format && str_contains($format, 'X')) {
             $formattedCode = '';
             $codeIndex = 0;
 
@@ -67,9 +65,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Format gift card code for display
-     *
-     * @param string $code
-     * @return string
      */
     public function formatCode(string $code): string
     {
@@ -79,8 +74,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Check if gift card module is enabled
-     *
-     * @return bool
      */
     public function isEnabled(): bool
     {
@@ -99,8 +92,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Calculate expiration date from now
-     *
-     * @return string|null
      */
     public function calculateExpirationDate(): ?string
     {
@@ -118,10 +109,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Format currency amount
-     *
-     * @param float $amount
-     * @param string|null $currencyCode
-     * @return string
      */
     public function formatAmount(float $amount, ?string $currencyCode = null): string
     {
@@ -135,8 +122,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Check if QR code generation is enabled
-     *
-     * @return bool
      */
     public function isQrCodeEnabled(): bool
     {
@@ -145,8 +130,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Check if barcode generation is enabled
-     *
-     * @return bool
      */
     public function isBarcodeEnabled(): bool
     {
@@ -155,10 +138,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Generate QR code data URL for gift card code
-     *
-     * @param string $code
-     * @param int $size
-     * @return string
      */
     public function getQrCodeDataUrl(string $code, int $size = 200): string
     {
@@ -188,9 +167,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Generate barcode data URL for gift card code (Code128)
-     *
-     * @param string $code
-     * @return string
      */
     public function getBarcodeDataUrl(string $code): string
     {
@@ -215,9 +191,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get QR code SVG for gift card code
-     *
-     * @param string $code
-     * @return string
      */
     public function getQrCodeSvg(string $code): string
     {
@@ -231,10 +204,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get QR code URL (alias for getQrCodeDataUrl for backward compatibility)
-     *
-     * @param string $code
-     * @param int $size
-     * @return string
      */
     public function getQrCodeUrl(string $code, int $size = 200): string
     {
@@ -244,8 +213,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Send gift card email to recipient
      *
-     * @param Maho_Giftcard_Model_Giftcard $giftcard
-     * @return bool
      * @throws Mage_Core_Exception
      */
     public function sendGiftcardEmail(Maho_Giftcard_Model_Giftcard $giftcard): bool
@@ -318,9 +285,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Schedule gift card email for later delivery
      *
-     * @param Maho_Giftcard_Model_Giftcard $giftcard
-     * @param DateTime $scheduleAt
-     * @return bool
      * @throws Mage_Core_Exception
      */
     public function scheduleGiftcardEmail(Maho_Giftcard_Model_Giftcard $giftcard, DateTime $scheduleAt): bool

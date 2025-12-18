@@ -22,8 +22,6 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     /**
      * Load gift card by code
      *
-     * @param Maho_Giftcard_Model_Giftcard $object
-     * @param string $code
      * @return $this
      */
     public function loadByCode(Maho_Giftcard_Model_Giftcard $object, string $code): self

@@ -25,8 +25,6 @@ class Maho_Giftcard_Block_Payment_Form extends Mage_Payment_Block_Form
 
     /**
      * Get payment method title with additional message
-     *
-     * @return string
      */
     public function getMethodTitle(): string
     {
@@ -35,8 +33,6 @@ class Maho_Giftcard_Block_Payment_Form extends Mage_Payment_Block_Form
 
     /**
      * Get applied gift card codes with amounts
-     *
-     * @return array
      */
     public function getAppliedGiftcards(): array
     {
@@ -62,9 +58,6 @@ class Maho_Giftcard_Block_Payment_Form extends Mage_Payment_Block_Form
 
     /**
      * Mask gift card code for display
-     *
-     * @param string $code
-     * @return string
      */
     protected function maskGiftcardCode(string $code): string
     {

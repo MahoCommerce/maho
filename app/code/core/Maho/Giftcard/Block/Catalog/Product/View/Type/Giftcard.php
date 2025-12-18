@@ -65,9 +65,9 @@ class Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard extends Mage_Catalo
         // Map the option text to our expected values
         if ($typeText) {
             $typeTextLower = strtolower($typeText);
-            if (strpos($typeTextLower, 'custom') !== false) {
+            if (str_contains($typeTextLower, 'custom')) {
                 return 'custom';
-            } elseif (strpos($typeTextLower, 'fixed') !== false) {
+            } elseif (str_contains($typeTextLower, 'fixed')) {
                 return 'fixed';
             }
         }

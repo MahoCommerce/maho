@@ -151,7 +151,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
      *
      * @param Maho_Giftcard_Model_Giftcard $model
      * @param Maho_Giftcard_Helper_Data $helper
-     * @return string
      */
     protected function _getQrBarcodeHtml($model, $helper): string
     {

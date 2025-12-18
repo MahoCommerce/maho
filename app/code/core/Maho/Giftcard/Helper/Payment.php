@@ -61,9 +61,6 @@ class Maho_Giftcard_Helper_Payment extends Mage_Payment_Helper_Data
 
     /**
      * Check if order is fully covered by gift cards
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @return bool
      */
     protected function isFullyCoveredByGiftcard(Mage_Sales_Model_Quote $quote): bool
     {
@@ -75,9 +72,6 @@ class Maho_Giftcard_Helper_Payment extends Mage_Payment_Helper_Data
 
     /**
      * Check if order has partial gift card coverage
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @return bool
      */
     protected function hasPartialGiftcardCoverage(Mage_Sales_Model_Quote $quote): bool
     {

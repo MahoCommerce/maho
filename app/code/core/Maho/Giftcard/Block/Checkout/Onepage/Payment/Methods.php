@@ -56,9 +56,6 @@ class Maho_Giftcard_Block_Checkout_Onepage_Payment_Methods extends Mage_Checkout
 
     /**
      * Check if order is fully covered by gift cards
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @return bool
      */
     protected function isFullyCoveredByGiftcard(Mage_Sales_Model_Quote $quote): bool
     {

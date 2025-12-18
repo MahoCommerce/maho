@@ -78,7 +78,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Create a gift card product for a fixed amount
      *
-     * @param float $amount
      * @return Mage_Catalog_Model_Product
      */
     protected function _createGiftCardProduct(float $amount)
@@ -115,8 +114,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Create a gift card product with custom amount range
      *
-     * @param float|null $minAmount
-     * @param float|null $maxAmount
      * @return Mage_Catalog_Model_Product
      */
     protected function _createGiftCardProductWithRange(?float $minAmount, ?float $maxAmount)

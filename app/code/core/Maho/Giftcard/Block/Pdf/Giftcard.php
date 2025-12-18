@@ -23,7 +23,6 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
     /**
      * Set gift cards for PDF generation
      *
-     * @param array $giftcards
      * @return $this
      */
     public function setGiftcards(array $giftcards)
@@ -34,8 +33,6 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
 
     /**
      * Get gift cards
-     *
-     * @return array
      */
     public function getGiftcards(): array
     {
@@ -54,8 +51,6 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
 
     /**
      * Get store name
-     *
-     * @return string
      */
     public function getStoreName(): string
     {
@@ -64,8 +59,6 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
 
     /**
      * Get logo URL
-     *
-     * @return string
      */
     public function getLogoUrl(): string
     {
