@@ -1,0 +1,100 @@
+<?php
+/**
+ * Gift Card form in shopping cart
+ * @var $this Maho_Giftcard_Block_Checkout_Cart_Giftcard
+ */
+
+$appliedCodes = $this->getAppliedGiftcardCodes();
+?>
+
+<form id="giftcard-cart-form" action="<?php echo $this->getUrl('giftcard/cart/apply') ?>" method="post">
+    <div class="giftcard">
+        <h2><?php echo $this->__('Gift Cards') ?></h2>
+        <div class="giftcard-form">
+            <input type="hidden" name="remove" id="remove-giftcard" value="0">
+
+            <?php if (!empty($appliedCodes)): ?>
+                <div class="applied-giftcards" style="margin-bottom: 10px;">
+                    <?php foreach ($appliedCodes as $code => $amount): ?>
+                        <?php
+                            // Display partial code for security
+                            $displayCode = $code;
+                            if (strlen($code) > 10) {
+                                $displayCode = substr($code, 0, 4) . '...' . substr($code, -4);
+                            }
+                        ?>
+                        <div class="applied-code" style="margin-bottom: 5px;">
+                            <span><?php echo $this->escapeHtml($displayCode) ?>:
+                                -<?php echo Mage::helper('core')->currency($amount, true, false) ?></span>
+                            <a href="<?php echo $this->getUrl('giftcard/cart/remove', ['code' => $code]) ?>"
+                               title="<?php echo $this->__('Remove') ?>"
+                               style="margin-left: 10px; color: #cc0000;">[<?php echo $this->__('Remove') ?>]</a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="coupon-input-group">
+                <label for="giftcard_code" class="visually-hidden"><?php echo $this->__('Enter gift card code') ?></label>
+                <input class="input-text coupon-input" type="text" id="giftcard_code" name="giftcard_code" value="" placeholder="<?php echo $this->__('Enter gift card code') ?>">
+                <button type="button" title="<?php echo $this->__('Apply') ?>" class="button2 btn-apply" onclick="giftcardForm.submit(false)"><?php echo $this->__('Apply') ?></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+//<![CDATA[
+var giftcardForm = {
+    submit: function(isRemove) {
+        var form = document.getElementById('giftcard-cart-form');
+        var codeInput = document.getElementById('giftcard_code');
+        var removeInput = document.getElementById('remove-giftcard');
+
+        if (isRemove) {
+            codeInput.classList.remove('required-entry');
+            codeInput.removeAttribute('required');
+            removeInput.value = "1";
+        } else {
+            // Check if code is entered
+            if (!codeInput.value.trim()) {
+                codeInput.classList.add('validation-failed');
+                codeInput.focus();
+
+                // Show error message if not already shown
+                var existingError = codeInput.parentElement.querySelector('.validation-advice');
+                if (!existingError) {
+                    var errorMsg = document.createElement('div');
+                    errorMsg.className = 'validation-advice';
+                    errorMsg.style.color = '#df280a';
+                    errorMsg.style.fontSize = '0.85em';
+                    errorMsg.style.marginTop = '4px';
+                    errorMsg.textContent = 'This is a required field.';
+                    codeInput.parentElement.appendChild(errorMsg);
+                }
+                return false;
+            }
+
+            // Remove any existing error messages
+            var existingError = codeInput.parentElement.querySelector('.validation-advice');
+            if (existingError) {
+                existingError.remove();
+            }
+            codeInput.classList.remove('validation-failed');
+        }
+
+        form.submit();
+        return true;
+    }
+};
+
+// Add event listener to clear error on input
+document.getElementById('giftcard_code').addEventListener('input', function() {
+    this.classList.remove('validation-failed');
+    var error = this.parentElement.querySelector('.validation-advice');
+    if (error) {
+        error.remove();
+    }
+});
+//]]>
+</script>

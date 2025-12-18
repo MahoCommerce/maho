@@ -1,0 +1,251 @@
+<?php
+/**
+ * @var $this Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard
+ */
+$product = $this->getProduct();
+$type = $this->getGiftcardType();
+$amounts = $this->getGiftcardAmounts();
+$isMessageAllowed = $this->isMessageAllowed();
+?>
+
+<div class="product-options" id="product-options-wrapper">
+    <dl>
+        <?php if ($type === 'fixed' && !empty($amounts)): ?>
+            <!-- Fixed Amount Selection -->
+            <dt><label for="giftcard_amount" class="required"><em>*</em><?php echo $this->__('Select Amount'); ?></label></dt>
+            <dd>
+                <div class="input-box">
+                    <select name="giftcard_amount" id="giftcard_amount" class="required-entry super-attribute-select" title="<?php echo $this->__('Gift Card Amount'); ?>">
+                        <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
+                        <?php foreach ($amounts as $amount): ?>
+                            <option value="<?php echo $this->escapeHtml($amount); ?>">
+                                <?php echo $this->formatPrice((float)$amount); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </dd>
+        <?php else: ?>
+            <!-- Custom Amount Input -->
+            <dt>
+                <label for="giftcard_amount" class="required">
+                    <em>*</em><?php echo $this->__('Enter Amount'); ?>
+                    <?php if ($this->getMinAmount() || $this->getMaxAmount()): ?>
+                        <span class="price-notice">
+                            (<?php if ($this->getMinAmount()): ?>Min: <?php echo $this->formatPrice($this->getMinAmount()); ?><?php endif; ?>
+                            <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?> - <?php endif; ?>
+                            <?php if ($this->getMaxAmount()): ?>Max: <?php echo $this->formatPrice($this->getMaxAmount()); ?><?php endif; ?>)
+                        </span>
+                    <?php endif; ?>
+                </label>
+            </dt>
+            <dd>
+                <div class="input-box">
+                    <input
+                        type="text"
+                        name="giftcard_amount"
+                        id="giftcard_amount"
+                        class="input-text required-entry validate-number validate-greater-than-zero"
+                        title="<?php echo $this->__('Amount'); ?>"
+                        value=""
+                        <?php if ($this->getMinAmount()): ?>data-validate-min="<?php echo $this->getMinAmount(); ?>"<?php endif; ?>
+                        <?php if ($this->getMaxAmount()): ?>data-validate-max="<?php echo $this->getMaxAmount(); ?>"<?php endif; ?>
+                    />
+                </div>
+            </dd>
+        <?php endif; ?>
+
+        <!-- Recipient Information -->
+        <dt class="gift-options-title"><?php echo $this->__('Recipient Information'); ?></dt>
+
+        <dt><label for="giftcard_recipient_name" class="required"><em>*</em><?php echo $this->__('Recipient Name'); ?></label></dt>
+        <dd>
+            <div class="input-box">
+                <input
+                    type="text"
+                    name="giftcard_recipient_name"
+                    id="giftcard_recipient_name"
+                    class="input-text required-entry"
+                    title="<?php echo $this->__('Recipient Name'); ?>"
+                    maxlength="255"
+                />
+            </div>
+        </dd>
+
+        <dt><label for="giftcard_recipient_email" class="required"><em>*</em><?php echo $this->__('Recipient Email'); ?></label></dt>
+        <dd>
+            <div class="input-box">
+                <input
+                    type="email"
+                    name="giftcard_recipient_email"
+                    id="giftcard_recipient_email"
+                    class="input-text required-entry validate-email"
+                    title="<?php echo $this->__('Recipient Email'); ?>"
+                    maxlength="255"
+                />
+            </div>
+        </dd>
+
+        <!-- Sender Information -->
+        <dt class="gift-options-title"><?php echo $this->__('Sender Information'); ?></dt>
+
+        <dt><label for="giftcard_sender_name" class="required"><em>*</em><?php echo $this->__('Your Name'); ?></label></dt>
+        <dd>
+            <div class="input-box">
+                <input
+                    type="text"
+                    name="giftcard_sender_name"
+                    id="giftcard_sender_name"
+                    class="input-text required-entry"
+                    title="<?php echo $this->__('Your Name'); ?>"
+                    maxlength="255"
+                />
+            </div>
+        </dd>
+
+        <dt><label for="giftcard_sender_email" class="required"><em>*</em><?php echo $this->__('Your Email'); ?></label></dt>
+        <dd>
+            <div class="input-box">
+                <input
+                    type="email"
+                    name="giftcard_sender_email"
+                    id="giftcard_sender_email"
+                    class="input-text required-entry validate-email"
+                    title="<?php echo $this->__('Your Email'); ?>"
+                    maxlength="255"
+                />
+            </div>
+        </dd>
+
+        <?php if ($isMessageAllowed): ?>
+            <!-- Personal Message -->
+            <dt><label for="giftcard_message"><?php echo $this->__('Personal Message'); ?> <small>(<?php echo $this->__('Optional'); ?>)</small></label></dt>
+            <dd>
+                <div class="input-box">
+                    <textarea
+                        name="giftcard_message"
+                        id="giftcard_message"
+                        class="input-text"
+                        title="<?php echo $this->__('Personal Message'); ?>"
+                        rows="3"
+                        cols="50"
+                        maxlength="500"
+                    ></textarea>
+                    <p class="note"><?php echo $this->__('Maximum 500 characters'); ?></p>
+                </div>
+            </dd>
+        <?php endif; ?>
+
+        <!-- Delivery Date (Optional) -->
+        <dt><label for="giftcard_delivery_date"><?php echo $this->__('Delivery Date'); ?> <small>(<?php echo $this->__('Optional - Leave blank for immediate delivery'); ?>)</small></label></dt>
+        <dd>
+            <div class="input-box">
+                <input
+                    type="date"
+                    name="giftcard_delivery_date"
+                    id="giftcard_delivery_date"
+                    class="input-text"
+                    title="<?php echo $this->__('Delivery Date'); ?>"
+                    min="<?php echo date('Y-m-d'); ?>"
+                />
+            </div>
+        </dd>
+    </dl>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+    // Gift Card price update functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        var amountField = document.getElementById('giftcard_amount');
+        var currencyFormat = '<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>';
+
+        // Function to update the displayed price
+        function updateGiftCardPrice(amount) {
+            var price = parseFloat(amount);
+            if (!isNaN(price) && price > 0) {
+                // Update the main price display
+                var priceElements = document.querySelectorAll('.price-box .price');
+                priceElements.forEach(function(element) {
+                    element.innerHTML = currencyFormat + price.toFixed(2);
+                });
+
+                // Update product options price if it exists
+                if (typeof optionsPrice !== 'undefined' && optionsPrice) {
+                    optionsPrice.productPrice = price;
+                    optionsPrice.reload();
+                }
+            }
+        }
+
+        if (amountField) {
+            if (amountField.type === 'select-one') {
+                // Fixed amount dropdown
+                amountField.addEventListener('change', function() {
+                    updateGiftCardPrice(this.value);
+                });
+
+                // Set initial price if an option is selected
+                if (amountField.value) {
+                    updateGiftCardPrice(amountField.value);
+                }
+            } else if (amountField.type === 'text') {
+                // Custom amount input
+                <?php if ($this->getMinAmount()): ?>
+                var minAmount = <?php echo $this->getMinAmount(); ?>;
+                <?php endif; ?>
+                <?php if ($this->getMaxAmount()): ?>
+                var maxAmount = <?php echo $this->getMaxAmount(); ?>;
+                <?php endif; ?>
+
+                // Update price on input
+                amountField.addEventListener('input', function() {
+                    updateGiftCardPrice(this.value);
+                });
+
+                // Validate on blur
+                amountField.addEventListener('blur', function() {
+                    var value = parseFloat(this.value);
+                    if (isNaN(value) || value <= 0) {
+                        this.value = '';
+                        updateGiftCardPrice(0);
+                        return;
+                    }
+
+                    <?php if ($this->getMinAmount()): ?>
+                    if (value < minAmount) {
+                        alert('<?php echo $this->__('Amount must be at least ') . $this->formatPrice($this->getMinAmount()); ?>');
+                        this.value = minAmount;
+                        updateGiftCardPrice(minAmount);
+                        this.focus();
+                        return;
+                    }
+                    <?php endif; ?>
+
+                    <?php if ($this->getMaxAmount()): ?>
+                    if (value > maxAmount) {
+                        alert('<?php echo $this->__('Amount cannot exceed ') . $this->formatPrice($this->getMaxAmount()); ?>');
+                        this.value = maxAmount;
+                        updateGiftCardPrice(maxAmount);
+                        this.focus();
+                        return;
+                    }
+                    <?php endif; ?>
+
+                    // Format the value to 2 decimal places
+                    this.value = value.toFixed(2);
+                    updateGiftCardPrice(value);
+                });
+
+                // Set default value if min amount is specified
+                <?php if ($this->getMinAmount()): ?>
+                if (!amountField.value) {
+                    amountField.value = minAmount.toFixed(2);
+                    updateGiftCardPrice(minAmount);
+                }
+                <?php endif; ?>
+            }
+        }
+    });
+//]]>
+</script>

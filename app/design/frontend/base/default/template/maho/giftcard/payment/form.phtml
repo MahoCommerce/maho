@@ -1,0 +1,59 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    base_default
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php
+/**
+ * @var Maho_Giftcard_Block_Payment_Form $this
+ */
+$_code = $this->getMethodCode();
+?>
+<ul class="form-list" id="payment_form_<?php echo $_code ?>" style="display:none;">
+    <li class="wide">
+        <div class="gift-card-payment-info">
+            <p><?php echo $this->__('This order will be fully paid using the following gift card(s):') ?></p>
+            <?php $appliedGiftcards = $this->getAppliedGiftcards(); ?>
+            <?php if ($appliedGiftcards): ?>
+                <ul class="gift-cards-list">
+                    <?php foreach ($appliedGiftcards as $giftcard): ?>
+                        <li>
+                            <strong><?php echo $this->escapeHtml($giftcard['code']) ?>:</strong>
+                            <?php echo $this->escapeHtml($giftcard['amount']) ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            <p class="note"><?php echo $this->__('No additional payment is required.') ?></p>
+        </div>
+    </li>
+</ul>
+<style>
+    .gift-card-payment-info {
+        padding: 10px;
+        background: #f7f7f7;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+    .gift-card-payment-info p {
+        margin: 5px 0;
+    }
+    .gift-cards-list {
+        list-style: none;
+        padding: 10px 0;
+        margin: 0;
+    }
+    .gift-cards-list li {
+        padding: 5px 0;
+        margin: 0;
+    }
+    .gift-card-payment-info .note {
+        font-style: italic;
+        color: #666;
+    }
+</style>

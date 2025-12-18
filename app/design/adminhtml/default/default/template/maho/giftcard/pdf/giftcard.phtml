@@ -1,0 +1,286 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    default_default
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Giftcard_Block_Pdf_Giftcard $this */
+$giftcards = $this->getGiftcards();
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .giftcard {
+            background-color: #f5f7fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e5eb;
+        }
+
+        .header h1 {
+            font-size: 28pt;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 300;
+        }
+
+        .header .store-name {
+            font-size: 14pt;
+            color: #7f8c8d;
+            font-weight: normal;
+        }
+
+        .code-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .code-label {
+            font-size: 10pt;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .code {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2c3e50;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .balance-section {
+            background-color: #667eea;
+            color: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 12pt;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .balance {
+            font-size: 36pt;
+            font-weight: bold;
+        }
+
+        .info-grid {
+            display: table;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .info-row {
+            display: table-row;
+        }
+
+        .info-label {
+            display: table-cell;
+            padding: 8px 0;
+            font-size: 10pt;
+            color: #7f8c8d;
+            width: 30%;
+        }
+
+        .info-value {
+            display: table-cell;
+            padding: 8px 0;
+            font-size: 11pt;
+            color: #2c3e50;
+        }
+
+
+        .message-section {
+            background-color: #fff9e6;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #f39c12;
+        }
+
+        .message-label {
+            font-size: 10pt;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .message {
+            font-size: 11pt;
+            color: #2c3e50;
+            font-style: italic;
+        }
+
+        .terms {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5eb;
+        }
+
+        .terms h3 {
+            font-size: 11pt;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .terms ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .terms li {
+            font-size: 9pt;
+            color: #7f8c8d;
+            margin-bottom: 6px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .terms li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5eb;
+            font-size: 9pt;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <?php foreach ($giftcards as $giftcard): ?>
+        <div class="giftcard">
+            <div class="header">
+                <h1>GIFT CARD</h1>
+                <div class="store-name"><?php echo $this->escapeHtml(Mage::getStoreConfig('general/store_information/name')) ?></div>
+            </div>
+
+            <div class="code-section">
+                <div class="code-label">Gift Card Code</div>
+                <div class="code"><?php echo $this->escapeHtml($giftcard->getCode()) ?></div>
+
+                <?php
+                $helper = Mage::helper('maho_giftcard');
+                $showQrInPdf = Mage::getStoreConfigFlag('maho_giftcard/general/pdf_show_qrcode');
+                $showBarcodeInPdf = Mage::getStoreConfigFlag('maho_giftcard/general/pdf_show_barcode');
+
+                $qrCode = $showQrInPdf ? $helper->getQrCodeDataUrl($giftcard->getCode(), 150) : '';
+                $barcode = $showBarcodeInPdf ? $helper->getBarcodeDataUrl($giftcard->getCode()) : '';
+                ?>
+
+                <?php if ($qrCode): ?>
+                <div style="margin-top: 20px;">
+                    <img src="<?php echo $qrCode ?>" alt="QR Code" style="width: 150px; height: 150px;" />
+                    <div style="font-size: 8pt; color: #7f8c8d; margin-top: 5px;">Scan with mobile device</div>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($barcode): ?>
+                <div style="margin-top: 15px;">
+                    <img src="<?php echo $barcode ?>" alt="Barcode" style="height: 50px; width: auto; max-width: 250px;" />
+                    <div style="font-size: 8pt; color: #7f8c8d; margin-top: 5px;">For POS scanning</div>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="balance-section">
+                <div class="balance-label">Current Balance</div>
+                <div class="balance"><?php echo Mage::helper('core')->currency($giftcard->getBalance(), true, false) ?></div>
+            </div>
+
+            <div class="info-grid">
+                <?php if ($giftcard->getRecipientName()): ?>
+                <div class="info-row">
+                    <div class="info-label">To:</div>
+                    <div class="info-value"><?php echo $this->escapeHtml($giftcard->getRecipientName()) ?></div>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($giftcard->getSenderName()): ?>
+                <div class="info-row">
+                    <div class="info-label">From:</div>
+                    <div class="info-value"><?php echo $this->escapeHtml($giftcard->getSenderName()) ?></div>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($giftcard->getExpiresAt()): ?>
+                <div class="info-row">
+                    <div class="info-label">Expires:</div>
+                    <div class="info-value"><?php echo $this->formatDate($giftcard->getExpiresAt(), 'medium') ?></div>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($giftcard->getMessage()): ?>
+            <div class="message-section">
+                <div class="message-label">Personal Message</div>
+                <div class="message"><?php echo nl2br($this->escapeHtml($giftcard->getMessage())) ?></div>
+            </div>
+            <?php endif; ?>
+
+            <div class="terms">
+                <h3>Terms & Conditions</h3>
+                <ul>
+                    <li>This gift card is redeemable for merchandise only</li>
+                    <li>Cannot be redeemed for cash unless required by law</li>
+                    <li>Lost or stolen cards will not be replaced</li>
+                    <li>No additional fees apply to this gift card</li>
+                </ul>
+            </div>
+
+            <div class="footer">
+                <p>Thank you for choosing <?php echo $this->escapeHtml(Mage::getStoreConfig('general/store_information/name')) ?></p>
+                <p><?php echo $this->escapeHtml(Mage::getStoreConfig('web/unsecure/base_url')) ?></p>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</body>
+</html>

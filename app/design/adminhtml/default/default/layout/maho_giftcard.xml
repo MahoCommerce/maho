@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Giftcard
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <!-- Gift Card Grid Page -->
+    <adminhtml_giftcard_index>
+        <reference name="content">
+            <block type="maho_giftcard/adminhtml_giftcard" name="giftcard" />
+        </reference>
+    </adminhtml_giftcard_index>
+
+    <!-- Gift Card History Grid Page -->
+    <adminhtml_giftcard_history_index>
+        <reference name="content">
+            <block type="maho_giftcard/adminhtml_giftcard_history" name="giftcard_history" />
+        </reference>
+    </adminhtml_giftcard_history_index>
+
+    <!-- Product Edit Page - Gift Card Tab removed as attributes are in attribute group -->
+    <!-- Commented out to avoid duplicate tab since Gift Card attributes are in an attribute group
+    <adminhtml_catalog_product_giftcard>
+        <reference name="product_tabs">
+            <action method="addTabAfter">
+                <tabId>giftcard</tabId>
+                <tab>maho_giftcard/adminhtml_catalog_product_edit_tab_giftcard</tab>
+                <afterTabId>group_1</afterTabId>
+            </action>
+        </reference>
+    </adminhtml_catalog_product_giftcard>
+    -->
+
+    <!-- Add gift card totals to admin order views -->
+    <!-- Gift card totals are added via block rewrite in config.xml -->
+
+    <adminhtml_sales_order_invoice_view>
+        <reference name="sales.order.view.totals.main">
+            <block type="maho_giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
+                <action method="setSourceField"><value>giftcard_amount</value></action>
+                <action method="setDisplayZero"><value>false</value></action>
+            </block>
+        </reference>
+    </adminhtml_sales_order_invoice_view>
+
+    <adminhtml_sales_order_creditmemo_view>
+        <reference name="sales.order.view.totals.main">
+            <block type="maho_giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
+                <action method="setSourceField"><value>giftcard_amount</value></action>
+                <action method="setDisplayZero"><value>false</value></action>
+            </block>
+        </reference>
+    </adminhtml_sales_order_creditmemo_view>
+
+    <adminhtml_sales_order_invoice_new>
+        <reference name="sales.order.view.totals.main">
+            <block type="maho_giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
+                <action method="setSourceField"><value>giftcard_amount</value></action>
+                <action method="setDisplayZero"><value>false</value></action>
+            </block>
+        </reference>
+    </adminhtml_sales_order_invoice_new>
+
+    <adminhtml_sales_order_creditmemo_new>
+        <reference name="sales.order.view.totals.main">
+            <block type="maho_giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
+                <action method="setSourceField"><value>giftcard_amount</value></action>
+                <action method="setDisplayZero"><value>false</value></action>
+            </block>
+        </reference>
+    </adminhtml_sales_order_creditmemo_new>
+</layout>

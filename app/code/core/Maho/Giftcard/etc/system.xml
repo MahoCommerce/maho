@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Giftcard
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <sections>
+        <maho_giftcard translate="label" module="maho_giftcard">
+            <label>Gift Cards</label>
+            <tab>sales</tab>
+            <sort_order>400</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label">
+                    <label>General Settings</label>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enable Gift Cards</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <code_length translate="label comment">
+                            <label>Gift Card Code Length</label>
+                            <comment>Number of characters in generated codes</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number validate-greater-than-zero</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </code_length>
+                        <code_prefix translate="label comment">
+                            <label>Gift Card Code Prefix</label>
+                            <comment>Prefix for generated codes (e.g., GC)</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </code_prefix>
+                        <lifetime translate="label comment">
+                            <label>Default Expiry (days)</label>
+                            <comment>Default number of days until gift card expires (0 = never expires, can be overridden per card)</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </lifetime>
+                        <enable_qrcode translate="label comment">
+                            <label>Enable QR Code</label>
+                            <comment>Generate QR codes for gift cards (scannable in POS)</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable_qrcode>
+                        <enable_barcode translate="label comment">
+                            <label>Enable Barcode</label>
+                            <comment>Generate barcodes (Code128) for gift cards</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable_barcode>
+                        <pdf_show_qrcode translate="label comment">
+                            <label>Show QR Code in PDF</label>
+                            <comment>Include QR code in PDF exports</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enable_qrcode>1</enable_qrcode></depends>
+                        </pdf_show_qrcode>
+                        <pdf_show_barcode translate="label comment">
+                            <label>Show Barcode in PDF</label>
+                            <comment>Include barcode in PDF exports</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enable_barcode>1</enable_barcode></depends>
+                        </pdf_show_barcode>
+                    </fields>
+                </general>
+                <email translate="label">
+                    <label>Email Settings</label>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <template translate="label comment">
+                            <label>Gift Card Email Template</label>
+                            <comment>Email template to use when sending gift cards to recipients</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </template>
+                        <identity translate="label comment">
+                            <label>Email Sender</label>
+                            <comment>Email identity to use as sender</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </identity>
+                        <send_on_creation translate="label comment">
+                            <label>Send Email on Creation</label>
+                            <comment>Automatically send email when gift card is created with recipient email</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </send_on_creation>
+                    </fields>
+                </email>
+            </groups>
+        </maho_giftcard>
+    </sections>
+</config>

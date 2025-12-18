@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Giftcard
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <!-- Checkout Payment - Handle gift card payment method selection -->
+    <checkout_onepage_index>
+        <reference name="checkout.onepage.payment.methods">
+            <block type="core/template" name="giftcard.payment.methods" template="maho/giftcard/checkout/payment/methods.phtml" />
+        </reference>
+    </checkout_onepage_index>
+
+    <!-- Checkout Cart - Add Gift Card Form -->
+    <checkout_cart_index>
+        <!-- Add to the extra section where discount codes appear -->
+        <reference name="checkout.cart.extra">
+            <block type="maho_giftcard/checkout_cart_giftcard" name="checkout.cart.giftcard" as="giftcard" template="maho/giftcard/checkout/cart/giftcard.phtml" />
+        </reference>
+    </checkout_cart_index>
+
+    <!-- Gift Card Product View -->
+    <PRODUCT_TYPE_giftcard>
+        <reference name="product.info">
+            <block type="maho_giftcard/catalog_product_view_type_giftcard" name="product.info.giftcard" as="product_type_data" template="maho/giftcard/catalog/product/view/type/giftcard.phtml">
+                <action method="setTemplate"><template>maho/giftcard/catalog/product/view/type/giftcard.phtml</template></action>
+            </block>
+        </reference>
+
+        <!-- Add gift card options to container2 for add to cart section -->
+        <reference name="product.info.container2">
+            <action method="append"><block>product.info.giftcard</block></action>
+        </reference>
+    </PRODUCT_TYPE_giftcard>
+</layout>

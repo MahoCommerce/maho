@@ -1,0 +1,106 @@
+<?php
+/**
+ * Gift Card payment methods handler
+ * This template handles payment method display when gift cards are applied
+ */
+
+$quote = Mage::getSingleton('checkout/session')->getQuote();
+$grandTotal = $quote->getGrandTotal();
+$giftcardAmount = $quote->getGiftcardAmount();
+
+// Check if gift cards cover the full order
+$isFullyCovered = ($giftcardAmount > 0 && $grandTotal <= 0.01);
+?>
+
+<?php if ($isFullyCovered): ?>
+<script type="text/javascript">
+//<![CDATA[
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide all payment methods except free/giftcard
+        var paymentMethods = document.querySelectorAll('#checkout-payment-method-load dt');
+        var freeMethodFound = false;
+        var giftcardMethodFound = false;
+
+        paymentMethods.forEach(function(method) {
+            var methodId = method.id;
+
+            // Keep only free or gift card payment methods visible
+            if (methodId === 'dt_method_free') {
+                method.style.display = 'block';
+                // Auto-select free payment method
+                var radio = method.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    if (typeof payment !== 'undefined' && payment.switchMethod) {
+                        payment.switchMethod('free');
+                    }
+                }
+                freeMethodFound = true;
+            } else if (methodId === 'dt_method_maho_giftcard') {
+                // Show gift card method as alternative
+                method.style.display = 'block';
+                if (!freeMethodFound) {
+                    var radio = method.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                        if (typeof payment !== 'undefined' && payment.switchMethod) {
+                            payment.switchMethod('maho_giftcard');
+                        }
+                    }
+                }
+                giftcardMethodFound = true;
+            } else {
+                // Hide other payment methods
+                method.style.display = 'none';
+                var dd = method.nextElementSibling;
+                if (dd && dd.tagName === 'DD') {
+                    dd.style.display = 'none';
+                }
+            }
+        });
+
+        // Add a message explaining the order is covered
+        var paymentMethodsContainer = document.getElementById('checkout-payment-method-load');
+        if (paymentMethodsContainer && !document.getElementById('giftcard-covered-message')) {
+            var message = document.createElement('div');
+            message.id = 'giftcard-covered-message';
+            message.className = 'messages';
+            message.innerHTML = '<ul class="messages"><li class="success-msg"><ul><li><span><?php echo $this->__('Your order is fully covered by gift cards. No additional payment is required.') ?></span></li></ul></li></ul>';
+            paymentMethodsContainer.parentNode.insertBefore(message, paymentMethodsContainer);
+        }
+    });
+//]]>
+</script>
+<?php else: ?>
+<script type="text/javascript">
+//<![CDATA[
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show all payment methods when gift card doesn't cover full amount
+        var paymentMethods = document.querySelectorAll('#checkout-payment-method-load dt');
+        paymentMethods.forEach(function(method) {
+            method.style.display = '';
+            var dd = method.nextElementSibling;
+            if (dd && dd.tagName === 'DD') {
+                dd.style.display = '';
+            }
+        });
+
+        // Remove the covered message if it exists
+        var message = document.getElementById('giftcard-covered-message');
+        if (message) {
+            message.remove();
+        }
+
+        // Don't allow selecting gift card payment if partial payment
+        var giftcardMethod = document.getElementById('dt_method_maho_giftcard');
+        if (giftcardMethod) {
+            giftcardMethod.style.display = 'none';
+            var dd = giftcardMethod.nextElementSibling;
+            if (dd && dd.tagName === 'DD') {
+                dd.style.display = 'none';
+            }
+        }
+    });
+//]]>
+</script>
+<?php endif; ?>

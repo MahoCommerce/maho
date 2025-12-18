@@ -1,0 +1,347 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Giftcard
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
+{
+    /**
+     * Generate a unique gift card code
+     *
+     * @return string
+     */
+    public function generateCode(): string
+    {
+        $length = (int)Mage::getStoreConfig('maho_giftcard/general/code_length') ?: 16;
+        $prefix = Mage::getStoreConfig('maho_giftcard/general/code_prefix') ?: 'GC';
+        $format = Mage::getStoreConfig('maho_giftcard/general/code_format');
+
+        // Generate random alphanumeric code
+        $characters = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // Excluding I, O to avoid confusion
+        $code = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $code .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+
+        // Apply format if specified (e.g., XXXX-XXXX-XXXX-XXXX)
+        if ($format && strpos($format, 'X') !== false) {
+            $formattedCode = '';
+            $codeIndex = 0;
+
+            for ($i = 0; $i < strlen($format); $i++) {
+                if ($format[$i] === 'X') {
+                    $formattedCode .= $code[$codeIndex] ?? '';
+                    $codeIndex++;
+                } else {
+                    $formattedCode .= $format[$i];
+                }
+            }
+
+            $code = $formattedCode;
+        }
+
+        // Add prefix
+        if ($prefix) {
+            $code = $prefix . '-' . $code;
+        }
+
+        // Check if code already exists, regenerate if it does
+        $giftcard = Mage::getModel('maho_giftcard/giftcard')
+            ->loadByCode($code);
+
+        if ($giftcard->getId()) {
+            return $this->generateCode(); // Recursively generate new code
+        }
+
+        return $code;
+    }
+
+    /**
+     * Format gift card code for display
+     *
+     * @param string $code
+     * @return string
+     */
+    public function formatCode(string $code): string
+    {
+        // Already formatted during generation
+        return strtoupper($code);
+    }
+
+    /**
+     * Check if gift card module is enabled
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('maho_giftcard/general/enabled');
+    }
+
+    /**
+     * Get gift card lifetime in days
+     *
+     * @return int 0 = no expiration
+     */
+    public function getLifetime(): int
+    {
+        return (int)Mage::getStoreConfig('maho_giftcard/general/lifetime');
+    }
+
+    /**
+     * Calculate expiration date from now
+     *
+     * @return string|null
+     */
+    public function calculateExpirationDate(): ?string
+    {
+        $lifetime = $this->getLifetime();
+
+        if ($lifetime === 0) {
+            return null; // No expiration
+        }
+
+        $expirationDate = new DateTime();
+        $expirationDate->modify("+{$lifetime} days");
+
+        return $expirationDate->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Format currency amount
+     *
+     * @param float $amount
+     * @param string|null $currencyCode
+     * @return string
+     */
+    public function formatAmount(float $amount, ?string $currencyCode = null): string
+    {
+        if (!$currencyCode) {
+            $currencyCode = Mage::app()->getStore()->getCurrentCurrencyCode();
+        }
+
+        // Use Maho's currency model for formatting
+        return Mage::getModel('directory/currency')->load($currencyCode)->format($amount, [], false);
+    }
+
+    /**
+     * Check if QR code generation is enabled
+     *
+     * @return bool
+     */
+    public function isQrCodeEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('maho_giftcard/general/enable_qrcode');
+    }
+
+    /**
+     * Check if barcode generation is enabled
+     *
+     * @return bool
+     */
+    public function isBarcodeEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('maho_giftcard/general/enable_barcode');
+    }
+
+    /**
+     * Generate QR code data URL for gift card code
+     *
+     * @param string $code
+     * @param int $size
+     * @return string
+     */
+    public function getQrCodeDataUrl(string $code, int $size = 200): string
+    {
+        if (!$this->isQrCodeEnabled()) {
+            return '';
+        }
+
+        try {
+            // Use BaconQrCode for local QR generation
+            $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+                new \BaconQrCode\Renderer\RendererStyle\RendererStyle($size),
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+            );
+
+            $writer = new \BaconQrCode\Writer($renderer);
+
+            // Generate SVG QR code
+            $svg = $writer->writeString($code);
+
+            // Convert to data URL
+            return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        } catch (\Exception $e) {
+            Mage::logException($e);
+            return '';
+        }
+    }
+
+    /**
+     * Generate barcode data URL for gift card code (Code128)
+     *
+     * @param string $code
+     * @return string
+     */
+    public function getBarcodeDataUrl(string $code): string
+    {
+        if (!$this->isBarcodeEnabled()) {
+            return '';
+        }
+
+        try {
+            // Use Picqer for local barcode generation
+            $generator = new \Picqer\Barcode\BarcodeGeneratorSVG();
+
+            // Generate Code128 barcode as SVG
+            $svg = $generator->getBarcode($code, $generator::TYPE_CODE_128, 2, 60);
+
+            // Convert to data URL
+            return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        } catch (\Exception $e) {
+            Mage::logException($e);
+            return '';
+        }
+    }
+
+    /**
+     * Get QR code SVG for gift card code
+     *
+     * @param string $code
+     * @return string
+     */
+    public function getQrCodeSvg(string $code): string
+    {
+        if (!$this->isQrCodeEnabled()) {
+            return '';
+        }
+
+        // Return the data URL directly as SVG
+        return $this->getQrCodeDataUrl($code, 200);
+    }
+
+    /**
+     * Get QR code URL (alias for getQrCodeDataUrl for backward compatibility)
+     *
+     * @param string $code
+     * @param int $size
+     * @return string
+     */
+    public function getQrCodeUrl(string $code, int $size = 200): string
+    {
+        return $this->getQrCodeDataUrl($code, $size);
+    }
+
+    /**
+     * Send gift card email to recipient
+     *
+     * @param Maho_Giftcard_Model_Giftcard $giftcard
+     * @return bool
+     * @throws Mage_Core_Exception
+     */
+    public function sendGiftcardEmail(Maho_Giftcard_Model_Giftcard $giftcard): bool
+    {
+        if (!$giftcard->getRecipientEmail()) {
+            throw new Mage_Core_Exception('No recipient email address.');
+        }
+
+        $storeId = Mage::app()->getStore()->getId();
+
+        // Prepare template variables
+        $vars = [
+            'giftcard' => $giftcard,
+            'code' => $giftcard->getCode(),
+            'balance' => $this->formatAmount((float)$giftcard->getBalance(), $giftcard->getCurrencyCode()),
+            'recipient_name' => $giftcard->getRecipientName() ?: 'Valued Customer',
+            'sender_name' => $giftcard->getSenderName() ?: '',
+            'message' => $giftcard->getMessage() ?: '',
+            'qr_url' => $this->getQrCodeDataUrl($giftcard->getCode(), 300),
+            'barcode_url' => $this->getBarcodeDataUrl($giftcard->getCode()),
+            'store_name' => Mage::getStoreConfig('general/store_information/name', $storeId),
+            'store_url' => Mage::getBaseUrl(),
+        ];
+
+        if ($giftcard->getExpiresAt()) {
+            $expiryDate = new DateTime($giftcard->getExpiresAt());
+            $vars['expires_at'] = $expiryDate->format('F j, Y');
+        }
+
+        // Use factory method (works with SMTP Pro)
+        $emailTemplate = Mage::getModel('core/email_template');
+        $emailTemplate->setDesignConfig(['area' => 'frontend', 'store' => $storeId]);
+
+        try {
+            // Get template ID and sender identity from configuration
+            $templateId = Mage::getStoreConfig('maho_giftcard/email/template', $storeId);
+            $identity = Mage::getStoreConfig('maho_giftcard/email/identity', $storeId) ?: 'general';
+
+            if (!$templateId) {
+                throw new Mage_Core_Exception('No email template configured. Please configure template in System > Configuration > Sales > Gift Cards > Email Settings.');
+            }
+
+            // Load template
+            $emailTemplate->load($templateId);
+
+            // Set sender
+            $senderName = Mage::getStoreConfig('trans_email/ident_' . $identity . '/name', $storeId);
+            $senderEmail = Mage::getStoreConfig('trans_email/ident_' . $identity . '/email', $storeId);
+            $emailTemplate->setSenderName($senderName);
+            $emailTemplate->setSenderEmail($senderEmail);
+
+            // Send using Maho's native send() method
+            $sent = $emailTemplate->send(
+                $giftcard->getRecipientEmail(),
+                $giftcard->getRecipientName() ?: 'Valued Customer',
+                $vars
+            );
+
+            if (!$sent) {
+                throw new Mage_Core_Exception('Failed to send email - check giftcard.log for details.');
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Mage::logException($e);
+            throw new Mage_Core_Exception('Email sending failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Schedule gift card email for later delivery
+     *
+     * @param Maho_Giftcard_Model_Giftcard $giftcard
+     * @param DateTime $scheduleAt
+     * @return bool
+     * @throws Mage_Core_Exception
+     */
+    public function scheduleGiftcardEmail(Maho_Giftcard_Model_Giftcard $giftcard, DateTime $scheduleAt): bool
+    {
+        if (!$giftcard->getRecipientEmail()) {
+            throw new Mage_Core_Exception('No recipient email address.');
+        }
+
+        // Create scheduled email record
+        $scheduledEmail = Mage::getModel('maho_giftcard/scheduled_email');
+        $scheduledEmail->setData([
+            'giftcard_id' => $giftcard->getId(),
+            'recipient_email' => $giftcard->getRecipientEmail(),
+            'recipient_name' => $giftcard->getRecipientName(),
+            'scheduled_at' => $scheduleAt->format('Y-m-d H:i:s'),
+            'status' => 'pending',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $scheduledEmail->save();
+
+        return true;
+    }
+}
