@@ -968,8 +968,6 @@ a.button:hover {
   border-left: none;
 }
 
-.block-layered-nav .currently .btn-remove,
-.block-layered-nav .currently .btn-previous,
 .mini-products-list .btn-remove,
 .mini-products-list .btn-previous,
 #compare-items .btn-remove,
@@ -3929,14 +3927,6 @@ p.product-name a:hover {
   flex-shrink: 0;
 }
 
-/* Legacy support - remove old styles */
-.block-layered-nav .actions {
-  display: none;
-}
-.block-layered-nav .currently {
-  display: contents;
-}
-
 /* Price Filter Input Mode */
 .price-filter-input {
   display: flex;
@@ -5333,16 +5323,6 @@ label.offcanvas-trigger {
 #narrow-by-list dd a.swatch-link:not(:has(img)):hover {
   outline: 1px solid var(--maho-color-border);
   border-radius: 3px;
-}
-
-/* Legacy .currently li styles - kept for swatch compatibility */
-.currently .swatch-link {
-  display: inline-block;
-  margin: 0 0 0 3px;
-}
-.currently .swatch-link:hover {
-  border-color: var(--maho-color-border);
-  cursor: default;
 }
 
 /* Other Swatch States */
