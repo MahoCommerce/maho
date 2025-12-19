@@ -3768,8 +3768,7 @@ p.product-name a:hover {
   }
   #offcanvas .block-layered-nav .active-filters-header,
   #offcanvas .block-layered-nav .filter-tags {
-    border-left: none;
-    border-right: none;
+    border: none;
   }
   .sidebar.col-left:not(:has(.offcanvas-trigger)) {
     display: none;
