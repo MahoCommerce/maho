@@ -3693,38 +3693,35 @@ p.product-name a:hover {
 }
 .block-layered-nav .block-content > dl > dt {
   margin: 0;
-  margin-bottom: 10px;
+  padding: 7px 10px 7px 24px;
   color: var(--maho-color-text-primary);
   font-size: 0.875rem;
-  font-weight: bold;
+  font-weight: normal;
   font-style: normal;
   line-height: 1.4;
-  text-rendering: optimizeSpeed;
   text-transform: uppercase;
   user-select: none;
-  font-weight: normal;
-  margin-bottom: 0px;
-  padding: 7px 10px 7px 24px;
-  border-width: 1px;
-  border-style: solid;
-  border-color: var(--maho-color-border);
+  border: 1px solid var(--maho-color-border);
   position: relative;
   background-color: var(--maho-color-background-alt);
   display: block;
 }
-.block-layered-nav .block-content > dl > dt:after {
+/* Shared dropdown arrow triangle */
+.block-layered-nav .block-content > dl > dt:after,
+.block-layered-nav .block-content.accordion-open > dl > dt.current:after,
+.block-layered-nav .block-subtitle--filter.active:after {
   content: '';
   position: absolute;
   width: 0;
   height: 0;
-  display: block;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
-  border-top: 4px solid var(--maho-color-primary);
+  border: 4px solid transparent;
+  border-top-color: var(--maho-color-primary);
   border-bottom: none;
-  left: 10px;
   top: 50%;
   margin-top: -3px;
+}
+.block-layered-nav .block-content > dl > dt:after {
+  left: 10px;
 }
 .block-layered-nav .block-content > dl > dt:hover {
   background-color: var(--maho-color-background-hover);
@@ -3778,18 +3775,7 @@ p.product-name a:hover {
     border: none;
   }
   .block-layered-nav .block-content.accordion-open > dl > dt.current:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
-    border-top: 4px solid var(--maho-color-primary);
-    border-bottom: none;
     left: 6px;
-    top: 50%;
-    margin-top: -3px;
   }
   .block-layered-nav .block-content.accordion-open > dl > dd.current {
     display: block;
@@ -3799,18 +3785,8 @@ p.product-name a:hover {
     color: var(--maho-color-background);
   }
   .block-layered-nav .block-subtitle--filter.active:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    display: block;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
-    border-top: 4px solid var(--maho-color-background);
-    border-bottom: none;
     right: 10px;
-    top: 50%;
-    margin-top: -3px;
+    border-top-color: var(--maho-color-background);
   }
 
   .block-layered-nav dl ol > li > a,
@@ -3888,8 +3864,8 @@ p.product-name a:hover {
   position: relative;
 }
 .block-layered-nav .filter-tag-link:hover {
-  background: #fef2f2;
-  border-color: #fca5a5;
+  background: color-mix(in srgb, var(--maho-color-error) 10%, transparent);
+  border-color: color-mix(in srgb, var(--maho-color-error) 50%, transparent);
 }
 .block-layered-nav .filter-tag-label {
   color: var(--maho-color-text-secondary);
@@ -3928,10 +3904,6 @@ p.product-name a:hover {
 }
 
 /* Price Filter Input Mode */
-.price-filter-input {
-  display: flex;
-  flex-direction: column;
-}
 .price-filter-fields {
   display: flex;
   align-items: flex-end;
