@@ -27,6 +27,10 @@ class Mage_Adminhtml_Model_System_Config_Source_Price_Step
                 'value' => Mage_Catalog_Model_Layer_Filter_Price::RANGE_CALCULATION_MANUAL,
                 'label' => Mage::helper('adminhtml')->__('Manual'),
             ],
+            [
+                'value' => Mage_Catalog_Model_Layer_Filter_Price::RANGE_CALCULATION_INPUT,
+                'label' => Mage::helper('adminhtml')->__('Input fields (from - to)'),
+            ],
         ];
     }
 }

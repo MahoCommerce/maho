@@ -14,15 +14,20 @@
 <?php if($this->canShowBlock()): ?>
 <div class="block block-layered-nav">
     <div class="block-content toggle-content">
-        <?= $this->getStateHtml() ?>
         <?php if ($this->getLayer()->getState()->getFilters()): ?>
-            <div class="actions"><a href="<?= $this->getClearUrl() ?>"><?= $this->__('Clear All') ?></a></div>
+        <div class="active-filters-wrapper">
+            <div class="active-filters-header">
+                <span class="active-filters-title"><?= $this->__('Active Filters') ?></span>
+                <a href="<?= $this->getClearUrl() ?>" class="clear-all-filters"><?= $this->__('Clear All') ?></a>
+            </div>
+            <?= $this->getStateHtml() ?>
+        </div>
         <?php endif ?>
         <?php if($this->canShowOptions()): ?>
             <dl id="narrow-by-list">
                 <?php $_filters = $this->getFilters() ?>
                 <?php foreach ($_filters as $_filter): ?>
-                <?php if($_filter->getItemsCount()): ?>
+                <?php if ($_filter->getItemsCount() || method_exists($_filter, 'isInputMode') && $_filter->isInputMode()): ?>
                     <dt><?= $this->__($_filter->getName()) ?></dt>
                     <dd><?= $_filter->getHtml() ?></dd>
                 <?php endif ?>
