@@ -329,7 +329,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
                 }
             }
 
-            Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($block, $method, $args);
+            Mage::helper('core/security')->validateAgainstBlockMethodBlocklist($block, $method, $args);
 
             $this->_translateLayoutNode($node, $args);
             call_user_func_array([$block, $method], array_values($args));

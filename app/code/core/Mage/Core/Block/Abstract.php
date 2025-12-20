@@ -520,7 +520,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
                 $params = $args;
             }
 
-            Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($child, $callback, $params);
+            Mage::helper('core/security')->validateAgainstBlockMethodBlocklist($child, $callback, $params);
             if ($result == call_user_func_array([&$child, $callback], $params)) {
                 $this->unsetChild($alias);
             }
@@ -837,7 +837,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $alias = $block->getBlockAlias();
             if (in_array($alias, $this->_childGroups[$groupName])) {
                 if ($callback) {
-                    Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($this, $callback, [$alias]);
+                    Mage::helper('core/security')->validateAgainstBlockMethodBlocklist($this, $callback, [$alias]);
                     $row = $this->$callback($alias);
                     if (!$skipEmptyResults || $row) {
                         $result[$alias] = $row;

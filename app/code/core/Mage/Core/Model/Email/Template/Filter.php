@@ -150,7 +150,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
                 $type = $blockParameters['type'];
                 $block = $layout->createBlock($type, null, $blockParameters);
             } else {
-                Mage::log('Security problem: ' . $blockParameters['type'] . ' has not been whitelisted.');
+                Mage::log('Security problem: ' . $blockParameters['type'] . ' has not been allowlisted.');
             }
         } elseif (isset($blockParameters['id'])) {
             $block = $layout->createBlock('cms/block');
