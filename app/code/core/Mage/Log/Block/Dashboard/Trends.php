@@ -26,7 +26,7 @@ class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Gra
         // Get trend data
         $trendData = Mage::helper('log/dashboard')->getVisitorTrends(30);
 
-        $maxValue = !empty($trendData['data']) ? max($trendData['data']) : 0;
+        $maxValue = empty($trendData['data']) ? 0 : max($trendData['data']);
         $this->_axisLabels = [
             'x' => $trendData['labels'],
             'y' => range(0, $maxValue),

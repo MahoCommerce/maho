@@ -752,7 +752,7 @@ class Pgsql extends AbstractPdoAdapter
         // Get the primary key column for RETURNING clause
         $tableName = is_array($table) ? reset($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
-        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+        $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
         // Build the statement
         $sql = sprintf(
@@ -852,7 +852,7 @@ class Pgsql extends AbstractPdoAdapter
         // Get the primary key column for RETURNING clause
         $tableName = is_array($table) ? reset($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
-        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+        $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
         $insertSql = $this->_getInsertSqlQuery($table, $cols, $values);
 
@@ -1051,7 +1051,7 @@ class Pgsql extends AbstractPdoAdapter
         // Get the primary key column for RETURNING clause
         $tableName = is_array($table) ? reset($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
-        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+        $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
         $sql = 'INSERT INTO '
             . $this->quoteIdentifier($table, true)

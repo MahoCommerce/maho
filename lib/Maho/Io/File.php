@@ -293,7 +293,7 @@ class File extends AbstractIo
         }
 
         $this->_iwd = getcwd();
-        $this->cd(!empty($args['path']) ? $args['path'] : $this->_iwd);
+        $this->cd(empty($args['path']) ? $this->_iwd : $args['path']);
         return true;
     }
 
