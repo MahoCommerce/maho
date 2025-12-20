@@ -417,6 +417,28 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     /**
+     * Get parent products grid (configurable, grouped, bundle products that use this product)
+     * @throws Mage_Core_Exception
+     */
+    public function parentProductsAction(): void
+    {
+        $this->_initProduct();
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Get parent products grid for AJAX reload
+     * @throws Mage_Core_Exception
+     */
+    public function parentProductsGridAction(): void
+    {
+        $this->_initProduct();
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
      * Get associated grouped products grid and serializer block
      * @throws Mage_Core_Exception
      */
