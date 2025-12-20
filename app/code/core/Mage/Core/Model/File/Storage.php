@@ -20,9 +20,14 @@ class Mage_Core_Model_File_Storage extends Mage_Core_Model_Abstract
     /**
      * Config paths for storing storage configuration
      */
-    public const XML_PATH_MEDIA_RESOURCE_WHITELIST = 'default/system/media_storage_configuration/allowed_resources';
+    public const XML_PATH_MEDIA_RESOURCE_ALLOWLIST = 'default/system/media_storage_configuration/allowed_resources';
     public const XML_PATH_MEDIA_RESOURCE_IGNORED   = 'default/system/media_storage_configuration/ignored_resources';
     public const XML_PATH_MEDIA_LOADED_MODULES     = 'default/system/media_storage_configuration/loaded_modules';
+
+    /**
+     * @deprecated since 26.1, use XML_PATH_MEDIA_RESOURCE_ALLOWLIST instead
+     */
+    public const XML_PATH_MEDIA_RESOURCE_WHITELIST = self::XML_PATH_MEDIA_RESOURCE_ALLOWLIST;
 
     /**
      * Prefix of model events names
