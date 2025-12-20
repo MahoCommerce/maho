@@ -422,7 +422,7 @@ class Mage_Oauth_Model_Server
         if (!is_string($this->_protocolParams['oauth_callback'])) {
             $this->_throwException('oauth_callback', self::ERR_PARAMETER_REJECTED);
         }
-        // Is the callback URL allowlisted?
+        // Is the callback URL on the allowlist?
         $callbackUrl = $this->_consumer->getCallbackUrl();
         if ($callbackUrl && str_starts_with($this->_protocolParams['oauth_callback'], $callbackUrl)) {
             return;

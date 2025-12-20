@@ -25,6 +25,11 @@ class Mage_Core_Model_File_Storage extends Mage_Core_Model_Abstract
     public const XML_PATH_MEDIA_LOADED_MODULES     = 'default/system/media_storage_configuration/loaded_modules';
 
     /**
+     * @deprecated since 26.1, use XML_PATH_MEDIA_RESOURCE_ALLOWLIST instead
+     */
+    public const XML_PATH_MEDIA_RESOURCE_WHITELIST = self::XML_PATH_MEDIA_RESOURCE_ALLOWLIST;
+
+    /**
      * Prefix of model events names
      *
      * @var string
