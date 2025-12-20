@@ -67,7 +67,7 @@ class DBConnect extends BaseMahoCommand
         $dbname = (string) $connConfig->dbname;
         $user = (string) $connConfig->username;
         $password = (string) $connConfig->password;
-        $port = !empty($connConfig->port) ? (string) $connConfig->port : '5432';
+        $port = empty($connConfig->port) ? '5432' : (string) $connConfig->port;
 
         $configFile = $this->createTempPgpassFile($host, $port, $dbname, $user, $password);
 

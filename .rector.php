@@ -27,6 +27,7 @@ return RectorConfig::configure()
         CodeQuality\NotEqual\CommonNotEqualRector::class,
         CodeQuality\LogicalAnd\LogicalToBooleanRector::class,
         CodeQuality\Ternary\SimplifyTautologyTernaryRector::class,
+        CodeQuality\Ternary\SwitchNegatedTernaryRector::class,
         DeadCode\ClassMethod\RemoveUselessParamTagRector::class,
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
         DeadCode\MethodCall\RemoveNullArgOnNullDefaultParamRector::class,

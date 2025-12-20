@@ -51,7 +51,7 @@ class Mage_Core_Model_Url_Validator
 
     public function getMessage(): string
     {
-        return !empty($this->messages) ? $this->messages[0] : '';
+        return empty($this->messages) ? '' : $this->messages[0];
     }
 
     public function isValid(mixed $value): bool

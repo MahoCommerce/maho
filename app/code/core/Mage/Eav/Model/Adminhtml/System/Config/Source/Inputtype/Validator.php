@@ -59,7 +59,7 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
 
     public function getMessage(): string
     {
-        return !empty($this->messages) ? $this->messages[0] : '';
+        return empty($this->messages) ? '' : $this->messages[0];
     }
 
     public function isValid(mixed $value): bool

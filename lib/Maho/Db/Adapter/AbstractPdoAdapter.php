@@ -1412,10 +1412,10 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
             // Get column names as strings (DBAL returns UnqualifiedName objects)
             $localColumns = $fk->getReferencingColumnNames();
-            $localColumnStr = !empty($localColumns) ? $localColumns[0]->getIdentifier()->getValue() : '';
+            $localColumnStr = empty($localColumns) ? '' : $localColumns[0]->getIdentifier()->getValue();
 
             $foreignColumns = $fk->getReferencedColumnNames();
-            $foreignColumnStr = !empty($foreignColumns) ? $foreignColumns[0]->getIdentifier()->getValue() : '';
+            $foreignColumnStr = empty($foreignColumns) ? '' : $foreignColumns[0]->getIdentifier()->getValue();
 
             // Get referenced table name as string (DBAL returns OptionallyQualifiedName object)
             $refTableName = $fk->getReferencedTableName();
