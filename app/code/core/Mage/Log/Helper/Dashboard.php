@@ -294,7 +294,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
             foreach ($visitors as $visitor) {
                 $referer = $visitor['http_referer'] ?? '';
-                $host = !empty($referer) ? parse_url($referer, PHP_URL_HOST) : null;
+                $host = empty($referer) ? null : parse_url($referer, PHP_URL_HOST);
 
                 // Skip internal referrers (same domain)
                 if ($host === $storeHost) {

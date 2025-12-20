@@ -52,13 +52,13 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         }
 
         if (isset($data['unsecure_base_url'])) {
-            $data['unsecure_base_url'] .= !str_ends_with($data['unsecure_base_url'], '/') ? '/' : '';
+            $data['unsecure_base_url'] .= str_ends_with($data['unsecure_base_url'], '/') ? '' : '/';
             if (!str_starts_with($data['unsecure_base_url'], 'http')) {
                 $data['unsecure_base_url'] = 'http://' . $data['unsecure_base_url'];
             }
         }
         if (isset($data['secure_base_url'])) {
-            $data['secure_base_url'] .= !str_ends_with($data['secure_base_url'], '/') ? '/' : '';
+            $data['secure_base_url'] .= str_ends_with($data['secure_base_url'], '/') ? '' : '/';
             if (!str_starts_with($data['secure_base_url'], 'http')) {
                 $data['secure_base_url'] = 'https://' . $data['secure_base_url'];
             }

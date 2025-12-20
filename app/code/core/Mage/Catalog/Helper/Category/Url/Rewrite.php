@@ -32,8 +32,8 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
     public function __construct(array $args = [])
     {
         $this->_resource = Mage::getSingleton('core/resource');
-        $this->_connection = !empty($args['connection']) ? $args['connection'] : $this->_resource
-            ->getConnection(Mage_Core_Model_Resource::DEFAULT_READ_RESOURCE);
+        $this->_connection = empty($args['connection']) ? $this->_resource
+            ->getConnection(Mage_Core_Model_Resource::DEFAULT_READ_RESOURCE) : $args['connection'];
     }
 
     /**

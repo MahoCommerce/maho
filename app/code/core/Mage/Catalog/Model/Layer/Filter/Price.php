@@ -32,11 +32,12 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     public const XML_PATH_INTERVAL_DIVISION_LIMIT = 'catalog/layered_navigation/interval_division_limit';
 
     /**
-     * Price layered navigation modes: Automatic (equalize price ranges), Automatic (equalize product counts), Manual
+     * Price layered navigation modes: Automatic (equalize price ranges), Automatic (equalize product counts), Manual, Input
      */
     public const RANGE_CALCULATION_AUTO     = 'auto'; // equalize price ranges
     public const RANGE_CALCULATION_IMPROVED = 'improved'; // equalize product counts
     public const RANGE_CALCULATION_MANUAL   = 'manual';
+    public const RANGE_CALCULATION_INPUT    = 'input'; // from-to input fields
 
     /**
      * Minimal size of the range

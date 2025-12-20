@@ -47,8 +47,8 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'container_id' => 'used_currently_for',
                 'after_element_html' =>
                     '<script type="text/javascript">' .
-                    (!$this->getEmailTemplate()->getSystemConfigPathsWhereUsedCurrently()
-                        ? 'document.getElementById(\'' . 'used_currently_for' . '\').style.display = \'none\'; ' : '') .
+                    ($this->getEmailTemplate()->getSystemConfigPathsWhereUsedCurrently()
+                        ? '' : 'document.getElementById(\'' . 'used_currently_for' . '\').style.display = \'none\'; ') .
                     '</script>',
             ]);
         }
@@ -59,8 +59,8 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'container_id' => 'used_default_for',
                 'after_element_html' =>
                     '<script type="text/javascript">' .
-                    (!(bool) $this->getEmailTemplate()->getOrigTemplateCode()
-                        ? 'document.getElementById(\'' . 'used_default_for' . '\').style.display = \'none\'; ' : '') .
+                    ((bool) $this->getEmailTemplate()->getOrigTemplateCode()
+                        ? '' : 'document.getElementById(\'' . 'used_default_for' . '\').style.display = \'none\'; ') .
                     '</script>',
             ]);
         }

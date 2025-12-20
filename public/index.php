@@ -39,8 +39,7 @@ if (file_exists($maintenanceFile)) {
         }
     }
     if (!$maintenanceBypass) {
-        Maho::errorReport();
-        exit;
+        Maho::maintenancePage();
     }
 
     // remove config cache to make the system check for DB updates
