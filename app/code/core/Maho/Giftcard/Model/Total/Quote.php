@@ -37,18 +37,12 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
 
         $quote = $address->getQuote();
 
-        // Log to see if this is being called
-        file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD COLLECT: Quote=' . $quote->getId() . ' Codes=' . $quote->getGiftcardCodes() . ' Address=' . $address->getAddressType() . "\n", FILE_APPEND);
-
-
         // Only apply to billing address for virtual quotes, shipping for others
         $addressType = $address->getAddressType();
         if ($addressType == 'billing' && !$quote->isVirtual()) {
-            file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD SKIPPED: billing address for non-virtual quote' . "\n", FILE_APPEND);
             return $this;
         }
         if ($addressType == 'shipping' && $quote->isVirtual()) {
-            file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD SKIPPED: shipping address for virtual quote' . "\n", FILE_APPEND);
             return $this;
         }
 
@@ -73,8 +67,6 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
         }
         $grandTotal = $address->getGrandTotal();
 
-        file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD TOTAL: BaseGrand=' . $baseGrandTotal . ' Grand=' . $grandTotal . "\n", FILE_APPEND);
-
         $baseTotalDiscount = 0;
         $totalDiscount = 0;
 
@@ -83,8 +75,6 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
 
         foreach ($codes as $code => $requestedAmount) {
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-            file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD LOAD: Code=' . $code . ' ID=' . $giftcard->getId() . ' Valid=' . ($giftcard->isValid() ? 'Y' : 'N') . ' Balance=' . $giftcard->getBalance() . "\n", FILE_APPEND);
 
             if (!$giftcard->getId() || !$giftcard->isValid()) {
                 continue; // Skip invalid cards
@@ -107,13 +97,11 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
 
             if ($baseAmountToApply > 0) {
                 $baseTotalDiscount += $baseAmountToApply;
-                $totalDiscount += $baseAmountToApply; // Simplified - should use currency conversion
+                $totalDiscount += $quote->getStore()->convertPrice($baseAmountToApply);
 
                 $validCodes[$code] = $baseAmountToApply;
             }
         }
-
-        file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD DISCOUNT: Base=' . $baseTotalDiscount . ' Total=' . $totalDiscount . "\n", FILE_APPEND);
 
         if ($baseTotalDiscount > 0) {
             // Store amounts on both quote and address as POSITIVE values
@@ -121,9 +109,6 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             $quote->setGiftcardAmount($totalDiscount);
             $address->setBaseGiftcardAmount($baseTotalDiscount);
             $address->setGiftcardAmount($totalDiscount);
-
-            // Debug to ensure we're setting positive values
-            file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD SET: Address BaseAmount=' . $address->getBaseGiftcardAmount() . ' Amount=' . $address->getGiftcardAmount() . "\n", FILE_APPEND);
 
             // Store gift card codes on address for display
             $address->setGiftcardCodes(json_encode($validCodes));
@@ -143,9 +128,6 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             // This will handle updating the grand total properly
             $this->_addAmount(-$totalDiscount);
             $this->_addBaseAmount(-$baseTotalDiscount);
-
-            // Debug: Check value right after _addAmount
-            file_put_contents('/tmp/giftcard_debug.log', date('Y-m-d H:i:s') . ' GIFTCARD AFTER_ADD: GiftcardAmount=' . $address->getGiftcardAmount() . ' TotalAmount=' . $address->getTotalAmount($this->getCode()) . "\n", FILE_APPEND);
         } else {
             // No gift card discount - reset amounts
             $address->setBaseGiftcardAmount(0);

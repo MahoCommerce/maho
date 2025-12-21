@@ -87,6 +87,10 @@ $table = $connection->newTable($this->getTable('giftcard/giftcard'))
         ['status'],
     )
     ->addIndex(
+        $this->getIdxName('giftcard/giftcard', ['status', 'expires_at']),
+        ['status', 'expires_at'],
+    )
+    ->addIndex(
         $this->getIdxName('giftcard/giftcard', ['purchase_order_id']),
         ['purchase_order_id'],
     )
@@ -148,6 +152,10 @@ $table = $connection->newTable($this->getTable('giftcard/history'))
     ->addIndex(
         $this->getIdxName('giftcard/history', ['giftcard_id']),
         ['giftcard_id'],
+    )
+    ->addIndex(
+        $this->getIdxName('giftcard/history', ['giftcard_id', 'created_at']),
+        ['giftcard_id', 'created_at'],
     )
     ->addIndex(
         $this->getIdxName('giftcard/history', ['order_id']),
@@ -219,6 +227,10 @@ $table = $connection->newTable($this->getTable('giftcard/scheduled_email'))
     ->addIndex(
         $this->getIdxName('giftcard/scheduled_email', ['status']),
         ['status'],
+    )
+    ->addIndex(
+        $this->getIdxName('giftcard/scheduled_email', ['status', 'scheduled_at']),
+        ['status', 'scheduled_at'],
     )
     ->addIndex(
         $this->getIdxName('giftcard/scheduled_email', ['scheduled_at']),

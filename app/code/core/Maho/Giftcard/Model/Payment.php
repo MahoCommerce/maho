@@ -145,6 +145,11 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
         // Refund proportionally to each gift card used
         $totalApplied = array_sum($codes);
 
+        // Guard against division by zero
+        if ($totalApplied <= 0) {
+            return $this;
+        }
+
         foreach ($codes as $code => $appliedAmount) {
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 

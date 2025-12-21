@@ -233,6 +233,12 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         ?int $orderId = null,
         ?string $comment = null,
     ): void {
+        $adminUserId = null;
+        $adminSession = Mage::getSingleton('admin/session');
+        if ($adminSession->isLoggedIn()) {
+            $adminUserId = $adminSession->getUser()->getId();
+        }
+
         $history = Mage::getModel('giftcard/history');
         $history->setData([
             'giftcard_id' => $this->getId(),
@@ -242,8 +248,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             'balance_after' => (float) $balanceAfter,
             'order_id' => $orderId,
             'comment' => $comment,
-            'admin_user_id' => Mage::getSingleton('admin/session')->getUser()->getId(),
-            'created_at' => date('Y-m-d H:i:s'),
+            'admin_user_id' => $adminUserId,
+            'created_at' => Mage_Core_Model_Locale::now(),
         ]);
         $history->save();
     }

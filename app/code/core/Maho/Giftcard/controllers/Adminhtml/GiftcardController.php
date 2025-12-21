@@ -16,6 +16,16 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     public const ADMIN_RESOURCE = 'customer/giftcard/manage';
 
     /**
+     * Set forced form key actions for CSRF protection
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['delete', 'massDelete', 'massStatus']);
+        return parent::preDispatch();
+    }
+
+    /**
      * Init actions
      *
      * @return $this

@@ -374,35 +374,63 @@ class Maho_Giftcard_Model_Observer
 
         $order->save();
 
-        // Deduct balance from each gift card
-        foreach ($codes as $code => $usedAmount) {
-            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-            if (!$giftcard->getId()) {
-                continue;
+        // Deduct balance from each gift card with transaction and row locking
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $adapter->beginTransaction();
+
+        try {
+            foreach ($codes as $code => $usedAmount) {
+                // Load gift card with row lock to prevent race conditions
+                $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
+                $select = $adapter->select()
+                    ->from($giftcardTable)
+                    ->where('code = ?', $code)
+                    ->forUpdate();
+
+                $giftcardData = $adapter->fetchRow($select);
+
+                if (!$giftcardData || empty($giftcardData['giftcard_id'])) {
+                    continue;
+                }
+
+                $balanceBefore = (float) $giftcardData['balance'];
+                $newBalance = max(0, $balanceBefore - (float) $usedAmount);
+
+                // Validate sufficient balance
+                if ($balanceBefore < (float) $usedAmount) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('giftcard')->__('Insufficient balance on gift card %s', $code),
+                    );
+                }
+
+                // Update gift card balance directly with locked row
+                $adapter->update(
+                    $giftcardTable,
+                    [
+                        'balance' => $newBalance,
+                        'updated_at' => Mage_Core_Model_Locale::now(),
+                    ],
+                    ['giftcard_id = ?' => $giftcardData['giftcard_id']],
+                );
+
+                // Log the usage in history
+                $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
+                $adapter->insert($historyTable, [
+                    'giftcard_id' => $giftcardData['giftcard_id'],
+                    'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
+                    'amount' => -(float) $usedAmount,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $newBalance,
+                    'order_id' => $order->getId(),
+                    'comment' => "Used in order #{$order->getIncrementId()}",
+                    'created_at' => Mage_Core_Model_Locale::now(),
+                ]);
             }
 
-            $balanceBefore = $giftcard->getBalance();
-            $newBalance = max(0, $balanceBefore - (float) $usedAmount);
-
-            // Update gift card balance
-            $giftcard->setBalance($newBalance);
-            $giftcard->save();
-
-            // Log the usage in history
-            $history = Mage::getModel('giftcard/history');
-            $history->setData([
-                'giftcard_id' => $giftcard->getId(),
-                'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
-                'amount' => -(float) $usedAmount,
-                'balance_before' => $balanceBefore,
-                'balance_after' => $newBalance,
-                'order_id' => $order->getId(),
-                'comment' => "Used in order #{$order->getIncrementId()}",
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-            $history->save();
-
-            // Gift card balance updated
+            $adapter->commit();
+        } catch (Exception $e) {
+            $adapter->rollBack();
+            throw $e;
         }
     }
 

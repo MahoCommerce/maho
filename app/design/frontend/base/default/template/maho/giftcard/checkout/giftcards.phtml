@@ -36,8 +36,8 @@ if ($giftcardCodes):
                     <span class="text-sm text-success ml-2">-<?php echo Mage::helper('core')->currency($amount, true, false) ?></span>
                 </div>
                 <button type="button"
-                        class="btn btn-ghost btn-xs text-error"
-                        onclick="removeGiftCard('<?php echo Mage::helper('core')->jsQuoteEscape($code) ?>')"
+                        class="btn btn-ghost btn-xs text-error js-remove-giftcard"
+                        data-code="<?php echo $this->escapeHtml($code) ?>"
                         title="<?php echo $this->__('Remove Gift Card') ?>">
                     <i class="fas fa-times"></i> <?php echo $this->__('Remove') ?>
                 </button>
@@ -46,19 +46,22 @@ if ($giftcardCodes):
     </div>
 </div>
 
-<script type="text/javascript">
-//<![CDATA[
-function removeGiftCard(code) {
-    if (confirm('<?php echo $this->__('Are you sure you want to remove this gift card?') ?>')) {
-        if (window.ModernFirecheckout) {
-            window.ModernFirecheckout.updateCheckoutSection(['checkout-giftcard-load', 'review'], {
-                'giftcard_code': code,
-                'remove_giftcard': '1'
-            });
+<script type="module">
+const confirmMessage = <?php echo Mage::helper('core')->jsonEncode($this->__('Are you sure you want to remove this gift card?')) ?>;
+
+document.querySelectorAll('.js-remove-giftcard').forEach(button => {
+    button.addEventListener('click', function() {
+        const code = this.dataset.code;
+        if (confirm(confirmMessage)) {
+            if (window.ModernFirecheckout) {
+                window.ModernFirecheckout.updateCheckoutSection(['checkout-giftcard-load', 'review'], {
+                    'giftcard_code': code,
+                    'remove_giftcard': '1'
+                });
+            }
         }
-    }
-}
-//]]>
+    });
+});
 </script>
 <?php
     endif;
