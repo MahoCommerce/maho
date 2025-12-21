@@ -73,10 +73,7 @@
 
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <?php
-                $_itemsGridLabel = $this->getForcedShipmentCreate()?'Items to Invoice and Ship':'Items to Invoice';
-            ?>
-            <h4><?= Mage::helper('sales')->__('%s', $_itemsGridLabel) ?></h4>
+            <h4><?= Mage::helper('sales')->__($this->getForcedShipmentCreate() ? 'Items to Invoice and Ship' : 'Items to Invoice') ?></h4>
         </div>
     </div>
     <div id="invoice_item_container">

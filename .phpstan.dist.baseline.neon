@@ -10987,18 +10987,6 @@ parameters:
 			path: app/code/core/Mage/Core/Helper/EnvironmentConfigLoader.php
 
 		-
-			rawMessage: 'Method Mage_Core_Helper_Security::validateAgainstBlockMethodBlacklist() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Helper/Security.php
-
-		-
-			rawMessage: Property Mage_Core_Helper_Security::$invalidBlockActions has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Helper/Security.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Abstract::_init() has no return type specified.'
 			identifier: missingType.return
 			count: 1
