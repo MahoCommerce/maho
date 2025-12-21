@@ -53,7 +53,7 @@
                    autocomplete="new-password"
                    required>
             <p class="field-note">
-                <small><?= $this->helper('adminhtml')->__('Password must be at least of %d characters.', $minAdminPasswordLength) ?></small>
+                <?= $this->helper('adminhtml')->__('Password must be at least of %d characters.', $minAdminPasswordLength) ?>
             </p>
         </li>
         <li>

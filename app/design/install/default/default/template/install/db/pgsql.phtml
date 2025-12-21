@@ -18,7 +18,7 @@
     <label for="host"><?= $this->__('Host') ?> <span class="required">*</span></label>
     <input type="text" name="connection[<?= $this->getIdPrefix()?>][db_host]" id="host" value="<?= $this->getFormData()->getDbHost() ?: 'localhost' ?>" title="<?= $this->quoteEscape($this->__('Database host')) ?>" class="input-text" required>
     <p class="field-note">
-        <small><?= $this->__('You can specify server port, ex.: localhost:5432') ?></small>
+        <?= $this->__('You can specify server port, ex.: localhost:5432') ?>
     </p>
 </li>
 <li>
@@ -37,6 +37,6 @@
     <label for="prefix"><?= $this->__('Tables Prefix') ?></label>
     <input type="text" name="connection[<?= $this->getIdPrefix()?>][db_prefix]" id="prefix" value="<?= $this->getFormData()->getDbPrefix() ?>" title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>" class="input-text">
     <p class="field-note">
-        <small><?= $this->__('(Optional. Leave blank for no prefix)') ?></small>
+        <?= $this->__('(Optional. Leave blank for no prefix)') ?>
     </p>
 </li>
