@@ -21,7 +21,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     public function createAction(): void
     {
         $this->loadLayout();
-        $this->_setActiveMenu('customer/giftcard');
+        $this->_setActiveMenu('sales/giftcard');
         $this->_title(Mage::helper('giftcard')->__('Create Gift Card Products'));
         $this->renderLayout();
     }

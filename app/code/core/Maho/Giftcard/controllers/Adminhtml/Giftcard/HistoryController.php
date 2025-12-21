@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'customer/giftcard/history';
+    public const ADMIN_RESOURCE = 'sales/giftcard/history';
 
     /**
      * @return $this
@@ -21,10 +21,10 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
     protected function _initAction()
     {
         $this->loadLayout()
-            ->_setActiveMenu('customer/giftcard/history')
+            ->_setActiveMenu('sales/giftcard/history')
             ->_addBreadcrumb(
-                'Customers',
-                'Customers',
+                'Sales',
+                'Sales',
             )
             ->_addBreadcrumb(
                 'Gift Card History',
@@ -50,6 +50,6 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('customer/giftcard/history');
+        return Mage::getSingleton('admin/session')->isAllowed('sales/giftcard/history');
     }
 }

@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <config>
     <menu>
-        <customer>
+        <sales>
             <children>
-                <giftcard>
+                <giftcard translate="title" module="giftcard">
                     <title>Gift Cards</title>
-                    <sort_order>300</sort_order>
+                    <sort_order>55</sort_order>
                     <children>
-                        <manage>
+                        <manage translate="title" module="giftcard">
                             <title>Manage Gift Cards</title>
                             <action>adminhtml/giftcard/index</action>
                             <sort_order>10</sort_order>
                         </manage>
-                        <history>
+                        <history translate="title" module="giftcard">
                             <title>Gift Card History</title>
                             <action>adminhtml/giftcard_history/index</action>
                             <sort_order>20</sort_order>
@@ -20,28 +20,28 @@
                     </children>
                 </giftcard>
             </children>
-        </customer>
+        </sales>
     </menu>
     <acl>
         <resources>
             <admin>
                 <children>
-                    <customer>
+                    <sales>
                         <children>
-                            <giftcard>
+                            <giftcard translate="title" module="giftcard">
                                 <title>Gift Cards</title>
-                                <sort_order>300</sort_order>
+                                <sort_order>55</sort_order>
                                 <children>
-                                    <manage>
+                                    <manage translate="title" module="giftcard">
                                         <title>Manage Gift Cards</title>
                                     </manage>
-                                    <history>
+                                    <history translate="title" module="giftcard">
                                         <title>Gift Card History</title>
                                     </history>
                                 </children>
                             </giftcard>
                         </children>
-                    </customer>
+                    </sales>
                     <system>
                         <children>
                             <config>
