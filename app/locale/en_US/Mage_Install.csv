@@ -76,5 +76,5 @@
 "Web Access Options","Web Access Options"
 "Welcome to Maho's Installation Wizard","Welcome to Maho's Installation Wizard"
 "You're All Set","You're All Set"
-"You can specify server port, ex.: localhost:3307<br />If you are not using default UNIX socket, you can specify it here instead of host, ex.: /var/run/mysqld/mysqld.sock","You can specify server port, ex.: localhost:3307<br />If you are not using default UNIX socket, you can specify it here instead of host, ex.: /var/run/mysqld/mysqld.sock"
+"You can specify server port, ex.: localhost:3307<br>If you are not using default UNIX socket, you can specify it here instead of host, ex.: /var/run/mysqld/mysqld.sock","You can specify server port, ex.: localhost:3307<br>If you are not using default UNIX socket, you can specify it here instead of host, ex.: /var/run/mysqld/mysqld.sock"
 "You can specify server port, ex.: localhost:5432","You can specify server port, ex.: localhost:5432"
