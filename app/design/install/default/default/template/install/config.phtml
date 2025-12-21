@@ -18,7 +18,7 @@
 <div class="messages">
     <?= $this->getMessagesBlock()->toHtml() ?>
 </div>
-<?php if($this->getInstaller()->getServerCheckStatus()): ?>
+<?php if ($this->getInstaller()->getServerCheckStatus()): ?>
 <form action="<?= $this->getPostUrl() ?>" method="post" id="form-validate">
 <?= $this->getLayout()->getBlock('database')->toHtml() ?>
 
@@ -26,34 +26,65 @@
 <div class="form-list">
     <ul>
         <li>
-            <label for="base_url"><?= $this->__('Base URL') ?> <span class="required">*</span></label>
-            <input type="text" name="config[unsecure_base_url]" id="base_url" value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Base URL')) ?>" class="required-entry validate-url input-text" />
+            <label for="base_url"><?= $this->__('Base URL') ?></label>
+            <input type="text"
+                   name="config[unsecure_base_url]"
+                   id="base_url"
+                   value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>"
+                   title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
+                   class="input-text"
+                   pattern="https?://.+/"
+                   required>
+            <p class="field-note">
+                <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>http://mydomain.com/maho/</strong>') ?>
+            </p>
         </li>
         <li>
-            <label for="admin_frontname"><?= $this->__('Admin Path') ?> <span class="required">*</span></label>
-            <input type="text" name="config[admin_frontname]" id="admin_frontname" value="<?= $this->getFormData()->getAdminFrontname() ?>" title="<?= $this->quoteEscape($this->__('Admin Path')) ?>" class="required-entry validate-data input-text" />
+            <label for="admin_frontname"><?= $this->__('Admin Path') ?></label>
+            <input type="text"
+                   name="config[admin_frontname]"
+                   id="admin_frontname"
+                   value="<?= $this->getFormData()->getAdminFrontname() ?>"
+                   title="<?= $this->quoteEscape($this->__('Admin Path')) ?>"
+                   class="input-text"
+                   required>
             <p class="field-note">
-                <small><?= $this->__('Additional path added after Base URL to access your Administrative Panel (e.g. admin, backend, control etc.).') ?></small>
+                <?= $this->__('Additional path added after Base URL to access your Administrative Panel (e.g. admin, backend, control etc.).') ?>
             </p>
         </li>
         <li>
             <label for="use_secure" class="checkbox-label">
-                <input type="checkbox" name="config[use_secure]" id="use_secure" value="1" <?php if($this->getFormData()->getUseSecure()): ?>checked="checked"<?php endif ?> />
+                <input type="checkbox"
+                       name="config[use_secure]"
+                       id="use_secure"
+                       value="1"
+                       <?php if ($this->getFormData()->getUseSecure()): ?>checked<?php endif ?>>
                 <span><?= $this->__('Use Secure URLs (SSL)') ?></span>
             </label>
         </li>
     </ul>
-    <ul id="use_secure_options" class="<?php if(!$this->getFormData()->getUseSecure()): ?>hidden<?php endif ?>">
+    <ul id="use_secure_options" class="<?php if (!$this->getFormData()->getUseSecure()): ?>hidden<?php endif ?>">
         <li>
-            <label for="secure_base_url"><?= $this->__('Secure Base URL') ?> <span class="required">*</span></label>
-            <input type="text" name="config[secure_base_url]" id="secure_base_url" value="<?= $this->getFormData()->getSecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Secure Base URL')) ?>" class="required-entry validate-url input-text" />
+            <label for="secure_base_url"><?= $this->__('Secure Base URL') ?></label>
+            <input type="text"
+                   name="config[secure_base_url]"
+                   id="secure_base_url"
+                   value="<?= $this->getFormData()->getSecureBaseUrl() ?>"
+                   title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
+                   class="input-text"
+                   pattern="https?://.+/"
+                   <?php if ($this->getFormData()->getUseSecure()): ?>required<?php endif ?>>
             <p class="field-note">
-                <small><?= $this->__('Provide a complete base URL for SSL connection. For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?></small>
+                <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?>
             </p>
         </li>
         <li>
             <label for="use_secure_admin" class="checkbox-label">
-                <input type="checkbox" name="config[use_secure_admin]" id="use_secure_admin" value="1" <?php if($this->getFormData()->getUseSecureAdmin()): ?>checked="checked"<?php endif ?> />
+                <input type="checkbox"
+                       name="config[use_secure_admin]"
+                       id="use_secure_admin"
+                       value="1"
+                       <?php if ($this->getFormData()->getUseSecureAdmin()): ?>checked<?php endif ?>>
                 <span><?= $this->__('Run admin interface with SSL') ?></span>
             </label>
         </li>
@@ -84,12 +115,28 @@
     </div>
 </div>
 
-<script type="text/javascript">
-    var dataForm = new VarienForm('form-validate');
+<script type="module">
+    // Toggle secure URL options visibility and required state
+    const useSecureCheckbox = document.getElementById('use_secure');
+    const secureOptions = document.getElementById('use_secure_options');
+    const secureBaseUrl = document.getElementById('secure_base_url');
+
+    function updateSecureOptions() {
+        const isEnabled = useSecureCheckbox.checked;
+        secureOptions.classList.toggle('hidden', !isEnabled);
+        secureBaseUrl.disabled = !isEnabled;
+        secureBaseUrl.required = isEnabled;
+    }
+
+    useSecureCheckbox?.addEventListener('change', updateSecureOptions);
+
+    // Set initial state
+    if (useSecureCheckbox) {
+        updateSecureOptions();
+    }
 
     // Show installation overlay on form submit
-    document.getElementById('form-validate').addEventListener('submit', function(e) {
-        // Only show overlay if form is valid
+    document.getElementById('form-validate')?.addEventListener('submit', function() {
         if (this.checkValidity()) {
             document.getElementById('installation-overlay').style.display = 'flex';
             document.body.classList.add('installation-active');
@@ -99,6 +146,10 @@
 <?php else: ?>
     <div><?= $this->__('Please set all required settings before clicking Continue') ?></div>
     <div class="button-set">
-        <button class="form-button" type="button" onclick="setLocation('<?= $this->getUrl('*/*/*', ['_current'=>true]) ?>')"><span><?= $this->__('Continue') ?></span></button>
+        <button class="form-button"
+                type="button"
+                onclick="setLocation('<?= $this->getUrl('*/*/*', ['_current'=>true]) ?>')">
+            <span><?= $this->__('Continue') ?></span>
+        </button>
     </div>
 <?php endif ?>
