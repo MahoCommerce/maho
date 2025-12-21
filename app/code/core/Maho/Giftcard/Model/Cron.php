@@ -20,42 +20,25 @@ class Maho_Giftcard_Model_Cron
     public function processScheduledEmails(): void
     {
         try {
-            // Get current time in store timezone
-            $storeTimezone = Mage::getStoreConfig('general/locale/timezone');
-            $currentTime = new DateTime('now', new DateTimeZone($storeTimezone));
             $currentTimeUtc = new DateTime('now', new DateTimeZone('UTC'));
 
-            // Process scheduled emails
-
-            // Get scheduled emails that are due (using store timezone)
-            $collection = Mage::getResourceModel('giftcard/scheduled_email_collection')
-                ->addFieldToFilter('status', Maho_Giftcard_Model_Scheduled_Email::STATUS_PENDING)
-                ->addFieldToFilter('scheduled_at', ['lteq' => $currentTimeUtc->format('Y-m-d H:i:s')])
+            // Get gift cards with scheduled emails that are due
+            $collection = Mage::getResourceModel('giftcard/giftcard_collection')
+                ->addFieldToFilter('email_scheduled_at', ['notnull' => true])
+                ->addFieldToFilter('email_scheduled_at', ['lteq' => $currentTimeUtc->format('Y-m-d H:i:s')])
+                ->addFieldToFilter('email_sent_at', ['null' => true])
+                ->addFieldToFilter('recipient_email', ['notnull' => true])
                 ->setPageSize(50); // Process max 50 per run
 
-            $processed = 0;
-            $failed = 0;
-
-            foreach ($collection as $scheduledEmail) {
+            foreach ($collection as $giftcard) {
                 try {
-                    if ($scheduledEmail->process()) {
-                        $processed++;
-                        // Email sent successfully
-                    } else {
-                        $failed++;
-                    }
+                    Mage::helper('giftcard')->sendGiftcardEmail($giftcard);
                 } catch (Exception $e) {
-                    $failed++;
                     Mage::logException($e);
                 }
             }
-
-            if ($processed > 0 || $failed > 0) {
-                // Processing complete
-            }
         } catch (Exception $e) {
             Mage::logException($e);
-            // Error logged via logException above
         }
     }
 

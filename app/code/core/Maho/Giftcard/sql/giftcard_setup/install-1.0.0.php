@@ -77,6 +77,12 @@ $table = $connection->newTable($this->getTable('giftcard/giftcard'))
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
         'nullable' => false,
     ], 'Updated At')
+    ->addColumn('email_scheduled_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
+        'nullable' => true,
+    ], 'Email Scheduled Send Time')
+    ->addColumn('email_sent_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
+        'nullable' => true,
+    ], 'Email Sent At')
     ->addIndex(
         $this->getIdxName('giftcard/giftcard', ['code'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['code'],
@@ -93,6 +99,10 @@ $table = $connection->newTable($this->getTable('giftcard/giftcard'))
     ->addIndex(
         $this->getIdxName('giftcard/giftcard', ['purchase_order_id']),
         ['purchase_order_id'],
+    )
+    ->addIndex(
+        $this->getIdxName('giftcard/giftcard', ['email_scheduled_at', 'email_sent_at']),
+        ['email_scheduled_at', 'email_sent_at'],
     )
     ->addForeignKey(
         $this->getFkName('giftcard/giftcard', 'purchase_order_id', 'sales/order', 'entity_id'),
@@ -178,73 +188,6 @@ $table = $connection->newTable($this->getTable('giftcard/history'))
         Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->setComment('Gift Card History Table');
-
-$connection->createTable($table);
-
-// ============================================================================
-// Create scheduled email table
-// ============================================================================
-$table = $connection->newTable($this->getTable('giftcard/scheduled_email'))
-    ->addColumn('scheduled_email_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
-        'identity' => true,
-        'unsigned' => true,
-        'nullable' => false,
-        'primary'  => true,
-    ], 'Scheduled Email ID')
-    ->addColumn('giftcard_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
-        'unsigned' => true,
-        'nullable' => false,
-    ], 'Gift Card ID')
-    ->addColumn('recipient_email', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
-        'nullable' => false,
-    ], 'Recipient Email')
-    ->addColumn('recipient_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
-        'nullable' => true,
-    ], 'Recipient Name')
-    ->addColumn('scheduled_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
-        'nullable' => false,
-    ], 'Scheduled Send Time (UTC)')
-    ->addColumn('status', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
-        'nullable' => false,
-        'default'  => 'pending',
-    ], 'Status')
-    ->addColumn('sent_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
-        'nullable' => true,
-    ], 'Sent At')
-    ->addColumn('error_message', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
-        'nullable' => true,
-    ], 'Error Message')
-    ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
-        'nullable' => false,
-    ], 'Created At')
-    ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
-        'nullable' => false,
-    ], 'Updated At')
-    ->addIndex(
-        $this->getIdxName('giftcard/scheduled_email', ['giftcard_id']),
-        ['giftcard_id'],
-    )
-    ->addIndex(
-        $this->getIdxName('giftcard/scheduled_email', ['status']),
-        ['status'],
-    )
-    ->addIndex(
-        $this->getIdxName('giftcard/scheduled_email', ['status', 'scheduled_at']),
-        ['status', 'scheduled_at'],
-    )
-    ->addIndex(
-        $this->getIdxName('giftcard/scheduled_email', ['scheduled_at']),
-        ['scheduled_at'],
-    )
-    ->addForeignKey(
-        $this->getFkName('giftcard/scheduled_email', 'giftcard_id', 'giftcard/giftcard', 'giftcard_id'),
-        'giftcard_id',
-        $this->getTable('giftcard/giftcard'),
-        'giftcard_id',
-        Maho\Db\Ddl\Table::ACTION_CASCADE,
-        Maho\Db\Ddl\Table::ACTION_CASCADE,
-    )
-    ->setComment('Gift Card Scheduled Emails');
 
 $connection->createTable($table);
 

@@ -309,8 +309,6 @@ namespace PHPSTORM_META {
         'giftcard_resource/giftcard_collection' => \Maho_Giftcard_Model_Resource_Giftcard_Collection::class,
         'giftcard_resource/history' => \Maho_Giftcard_Model_Resource_History::class,
         'giftcard_resource/history_collection' => \Maho_Giftcard_Model_Resource_History_Collection::class,
-        'giftcard_resource/scheduled_email' => \Maho_Giftcard_Model_Resource_Scheduled_Email::class,
-        'giftcard_resource/scheduled_email_collection' => \Maho_Giftcard_Model_Resource_Scheduled_Email_Collection::class,
         'giftmessage_resource/message' => \Mage_GiftMessage_Model_Resource_Message::class,
         'giftmessage_resource/message_collection' => \Mage_GiftMessage_Model_Resource_Message_Collection::class,
         'giftmessage_resource/setup' => \Mage_GiftMessage_Model_Resource_Setup::class,

@@ -211,7 +211,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Send gift card email to recipient
+     * Send gift card email to recipient via core email queue
      *
      * @throws Mage_Core_Exception
      */
@@ -242,10 +242,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             $vars['expires_at'] = $expiryDate->format('F j, Y');
         }
 
-        // Use factory method (works with SMTP Pro)
-        $emailTemplate = Mage::getModel('core/email_template');
-        $emailTemplate->setDesignConfig(['area' => 'frontend', 'store' => $storeId]);
-
         try {
             // Get template ID and sender identity from configuration
             $templateId = Mage::getStoreConfig('giftcard/email/template', $storeId);
@@ -255,25 +251,28 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
                 throw new Mage_Core_Exception('No email template configured. Please configure template in System > Configuration > Sales > Gift Cards > Email Settings.');
             }
 
-            // Load template
-            $emailTemplate->load($templateId);
+            // Create email queue entry using core queue
+            $emailQueue = Mage::getModel('core/email_queue');
+            $emailQueue->setEntityId($giftcard->getId())
+                ->setEntityType('giftcard')
+                ->setEventType('giftcard_notification');
 
-            // Set sender
-            $senderName = Mage::getStoreConfig('trans_email/ident_' . $identity . '/name', $storeId);
-            $senderEmail = Mage::getStoreConfig('trans_email/ident_' . $identity . '/email', $storeId);
-            $emailTemplate->setSenderName($senderName);
-            $emailTemplate->setSenderEmail($senderEmail);
+            // Use mailer to send via queue
+            $mailer = Mage::getModel('core/email_template_mailer');
+            $emailInfo = Mage::getModel('core/email_info');
+            $emailInfo->addTo($giftcard->getRecipientEmail(), $giftcard->getRecipientName() ?: 'Valued Customer');
+            $mailer->addEmailInfo($emailInfo);
 
-            // Send using Maho's native send() method
-            $sent = $emailTemplate->send(
-                $giftcard->getRecipientEmail(),
-                $giftcard->getRecipientName() ?: 'Valued Customer',
-                $vars,
-            );
+            $mailer->setSender($identity)
+                ->setStoreId($storeId)
+                ->setTemplateId($templateId)
+                ->setTemplateParams($vars)
+                ->setQueue($emailQueue)
+                ->send();
 
-            if (!$sent) {
-                throw new Mage_Core_Exception('Failed to send email - check giftcard.log for details.');
-            }
+            // Mark email as sent on giftcard
+            $giftcard->setEmailSentAt(Mage_Core_Model_Locale::now());
+            $giftcard->save();
 
             return true;
         } catch (Exception $e) {
@@ -293,18 +292,9 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             throw new Mage_Core_Exception('No recipient email address.');
         }
 
-        // Create scheduled email record
-        $scheduledEmail = Mage::getModel('giftcard/scheduled_email');
-        $scheduledEmail->setData([
-            'giftcard_id' => $giftcard->getId(),
-            'recipient_email' => $giftcard->getRecipientEmail(),
-            'recipient_name' => $giftcard->getRecipientName(),
-            'scheduled_at' => $scheduleAt->format('Y-m-d H:i:s'),
-            'status' => 'pending',
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        $scheduledEmail->save();
+        // Set scheduled time on the gift card itself
+        $giftcard->setEmailScheduledAt($scheduleAt->format('Y-m-d H:i:s'));
+        $giftcard->save();
 
         return true;
     }

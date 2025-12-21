@@ -40,9 +40,6 @@
                     <history>
                         <table>giftcard_history</table>
                     </history>
-                    <scheduled_email>
-                        <table>giftcard_scheduled_email</table>
-                    </scheduled_email>
                 </entities>
             </giftcard_resource>
         </models>
