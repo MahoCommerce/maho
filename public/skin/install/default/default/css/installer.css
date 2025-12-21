@@ -424,13 +424,6 @@ label {
     transform: translateY(-1px);
 }
 
-/* Native validation styling - only show errors, not success states */
-.input-text:invalid:not(:focus):not(:placeholder-shown),
-select:invalid:not(:focus),
-textarea:invalid:not(:focus):not(:placeholder-shown) {
-    border-color: var(--color-error);
-}
-
 .input-text:invalid:focus,
 select:invalid:focus,
 textarea:invalid:focus {

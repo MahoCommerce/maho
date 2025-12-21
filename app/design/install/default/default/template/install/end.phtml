@@ -13,7 +13,7 @@
 ?>
 <script>
     // Hide header and footer on this page
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.header')?.classList.add('hidden');
         document.querySelector('.footer-container')?.classList.add('hidden');
         document.body.classList.add('installation-complete-page');
@@ -46,10 +46,6 @@
     <div class="page-head">
         <h3><?= $this->__("You're All Set") ?>!</h3>
     </div>
-
-    <?php if ($this->getIframeSourceUrl()): ?>
-        <iframe id="iframe_box" src="<?= $this->getIframeSourceUrl() ?>" frameborder="0" width="650" height="600" style="border-radius: var(--radius-md); margin: var(--space-xl) 0;"></iframe>
-    <?php endif ?>
 
     <p><?= $this->__('Get ready to experience Open-Source eCommerce Evolved.') ?></p>
 

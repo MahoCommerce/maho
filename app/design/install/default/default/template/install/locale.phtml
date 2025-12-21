@@ -41,20 +41,12 @@
     <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>
 </div>
 </form>
-<script type="text/javascript">
-    const changeLocale = (event) => {
-        const elem = event.target;
-        if (elem) {
-            const timezoneValue = document.getElementById('timezone').value;
-            const currencyValue = document.getElementById('currency').value;
-            const url = `<?= $this->getChangeUrl() ?>locale/${elem.value}/?timezone=${timezoneValue}&currency=${currencyValue}`;
-            window.location.href = url;
-        }
-    };
-
-    const dataForm = new VarienForm('form-validate');
-    const localeElement = document.getElementById('locale');
-    if (localeElement) {
-        localeElement.addEventListener('change', changeLocale);
-    }
+<script>
+    document.querySelector('#locale')?.addEventListener('change', () => {
+        const params = new URLSearchParams({
+            timezone: document.querySelector('#timezone').value,
+            currency: document.querySelector('#currency').value
+        });
+        window.location.href = `<?= $this->getChangeUrl() ?>locale/${document.querySelector('#locale').value}/?${params}`;
+    });
 </script>

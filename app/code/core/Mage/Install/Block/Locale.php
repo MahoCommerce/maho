@@ -65,7 +65,7 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
             ->setName('config[locale]')
             ->setId('locale')
             ->setTitle(Mage::helper('install')->__('Locale'))
-            ->setClass('required-entry')
+            ->setExtraParams('required')
             ->setValue($this->getLocale())
             ->setOptions(Mage::app()->getLocale()->getTranslatedOptionLocales())
             ->getHtml();
@@ -82,7 +82,7 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
             ->setName('config[timezone]')
             ->setId('timezone')
             ->setTitle(Mage::helper('install')->__('Time Zone'))
-            ->setClass('required-entry')
+            ->setExtraParams('required')
             ->setValue($this->getTimezone())
             ->setOptions(Mage::app()->getLocale()->getOptionTimezones())
             ->getHtml();
@@ -113,7 +113,7 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
             ->setName('config[currency]')
             ->setId('currency')
             ->setTitle(Mage::helper('install')->__('Default Currency'))
-            ->setClass('required-entry')
+            ->setExtraParams('required')
             ->setValue($this->getCurrency())
             ->setOptions(Mage::app()->getLocale()->getOptionCurrencies())
             ->getHtml();

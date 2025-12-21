@@ -21,15 +21,15 @@
     <ul>
         <li>
             <label for="firstname"><?= $this->__('First Name') ?> <span class="required">*</span></label>
-            <input type="text" name="admin[firstname]" id="firstname" value="<?= $this->getFormData()->getFirstname() ?>" title="<?= $this->quoteEscape($this->__('First Name')) ?>" class="required-entry input-text"/>
+            <input type="text" name="admin[firstname]" id="firstname" value="<?= $this->getFormData()->getFirstname() ?>" title="<?= $this->quoteEscape($this->__('First Name')) ?>" class="input-text" required>
         </li>
         <li>
             <label for="lastname"><?= $this->__('Last Name') ?> <span class="required">*</span></label>
-            <input type="text" name="admin[lastname]" id="lastname" value="<?= $this->getFormData()->getLastname() ?>" title="<?= $this->quoteEscape($this->__('Last Name')) ?>" class="required-entry input-text"/>
+            <input type="text" name="admin[lastname]" id="lastname" value="<?= $this->getFormData()->getLastname() ?>" title="<?= $this->quoteEscape($this->__('Last Name')) ?>" class="input-text" required>
         </li>
         <li>
             <label for="email_address"><?= $this->__('Email') ?> <span class="required">*</span></label>
-            <input type="text" name="admin[email]" id="email_address" value="<?= $this->getFormData()->getEmail() ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="validate-email required-entry input-text"/>
+            <input type="email" name="admin[email]" id="email_address" value="<?= $this->getFormData()->getEmail() ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text" required>
         </li>
     </ul>
 </div>
@@ -39,28 +39,26 @@
     <ul>
         <li>
             <label for="username"><?= $this->__('Username') ?> <span class="required">*</span></label>
-            <input type="text" name="admin[username]" id="username" value="<?= $this->getFormData()->getUsername() ?>" title="<?= $this->quoteEscape($this->__('Username')) ?>" class="required-entry input-text"/>
+            <input type="text" name="admin[username]" id="username" value="<?= $this->getFormData()->getUsername() ?>" title="<?= $this->quoteEscape($this->__('Username')) ?>" class="input-text" required>
         </li>
         <li>
             <label for="password"><?= $this->__('Password') ?> <span class="required">*</span></label>
-            <!-- This is a dummy hidden field to trick firefox from auto filling the password -->
-            <input type="password" class="input-text" name="dummy" id="dummy" style="display: none;"/>
             <?php $minAdminPasswordLength = $this->getMinAdminPasswordLength(); ?>
             <input type="password"
                    name="admin[new_password]"
                    id="password"
                    title="<?= $this->quoteEscape($this->__('Password')) ?>"
-                   class="required-entry validate-admin-password input-text min-admin-pass-length-<?= $minAdminPasswordLength ?>"
-                   autocomplete="new-password"/>
+                   class="input-text"
+                   minlength="<?= $minAdminPasswordLength ?>"
+                   autocomplete="new-password"
+                   required>
             <p class="field-note">
-                <small><?= Mage::helper('adminhtml')->__('Password must be at least of %d characters.', $minAdminPasswordLength) ?></small>
+                <small><?= $this->helper('adminhtml')->__('Password must be at least of %d characters.', $minAdminPasswordLength) ?></small>
             </p>
         </li>
         <li>
             <label for="confirmation"><?= $this->__('Confirm Password') ?> <span class="required">*</span></label>
-            <!-- This is a dummy hidden field to trick firefox from auto filling the password -->
-            <input type="password" class="input-text" name="dummy" id="dummy" style="display: none;"/>
-            <input type="password" name="admin[password_confirmation]" title="<?= $this->quoteEscape($this->__('Password Confirmation')) ?>" id="confirmation" class="required-entry validate-cpassword input-text" autocomplete="new-password"/>
+            <input type="password" name="admin[password_confirmation]" title="<?= $this->quoteEscape($this->__('Password Confirmation')) ?>" id="confirmation" class="input-text" autocomplete="new-password" required>
         </li>
     </ul>
 </div>
@@ -78,14 +76,10 @@
     </div>
 </div>
 
-<script type="text/javascript">
-    var dataForm = new VarienForm('form-validate');
-
-    // Show installation overlay on form submit
-    document.getElementById('form-validate').addEventListener('submit', function(e) {
-        // Only show overlay if form is valid
+<script>
+    document.querySelector('#form-validate')?.addEventListener('submit', () => {
         if (this.checkValidity()) {
-            document.getElementById('installation-overlay').style.display = 'flex';
+            document.querySelector('#installation-overlay').style.display = 'flex';
             document.body.classList.add('installation-active');
         }
     });
