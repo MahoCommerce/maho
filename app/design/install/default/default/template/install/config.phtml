@@ -73,7 +73,7 @@
                    title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
                    class="input-text"
                    pattern=".*\/$"
-                   required>
+                   <?php if ($this->getFormData()->getUseSecure()): ?>required<?php endif ?>>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?>
             </p>
@@ -123,6 +123,16 @@
                 baseUrlInput.value += '/';
             }
         });
+    });
+
+    // Toggle secure URL options visibility and required state
+    const useSecureCheckbox = document.getElementById('use_secure');
+    const secureOptions = document.getElementById('use_secure_options');
+    const secureBaseUrl = document.getElementById('secure_base_url');
+
+    useSecureCheckbox?.addEventListener('change', () => {
+        secureOptions.classList.toggle('hidden', !useSecureCheckbox.checked);
+        secureBaseUrl.required = useSecureCheckbox.checked;
     });
 
     // Show installation overlay on form submit

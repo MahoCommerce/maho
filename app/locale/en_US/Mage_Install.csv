@@ -48,6 +48,7 @@
 "One of PHP Extensions ""%s"" must be loaded.","One of PHP Extensions ""%s"" must be loaded."
 "Password","Password"
 "Password Confirmation","Password Confirmation"
+"Passwords do not match.","Passwords do not match."
 "Path ""%s"" must be writable.","Path ""%s"" must be writable."
 "Personal Information","Personal Information"
 "PHP extension ""%s"" must be loaded.","PHP extension ""%s"" must be loaded."

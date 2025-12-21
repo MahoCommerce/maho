@@ -107,6 +107,22 @@
 </div>
 
 <script type="module">
+    const password = document.getElementById('password');
+    const confirmation = document.getElementById('confirmation');
+
+    // Validate password confirmation matches
+    function validatePasswordMatch() {
+        if (confirmation.value !== password.value) {
+            confirmation.setCustomValidity('<?= $this->quoteEscape($this->__('Passwords do not match.')) ?>');
+        } else {
+            confirmation.setCustomValidity('');
+        }
+    }
+
+    password?.addEventListener('input', validatePasswordMatch);
+    confirmation?.addEventListener('input', validatePasswordMatch);
+
+    // Show installation overlay on form submit
     document.getElementById('form-validate')?.addEventListener('submit', function() {
         if (this.checkValidity()) {
             document.getElementById('installation-overlay').style.display = 'flex';
