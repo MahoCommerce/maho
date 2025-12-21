@@ -19,7 +19,7 @@
     <?= $this->getMessagesBlock()->toHtml() ?>
 </div>
 
-<?php if (count($this->getMessagesBlock()->getMessages()) == 0): ?>
+<?php if (count($this->getMessagesBlock()->getMessages()) === 0): ?>
     <form action="<?= $this->getPostUrl() ?>" method="post" id="licenseForm">
         <div class="license-container">
             <div class="license-box" id="licenseBox">
@@ -28,12 +28,17 @@
         </div>
 
         <label for="agree" class="checkbox-label">
-            <input type="checkbox" name="agree" value="1" id="agree" aria-describedby="licenseBox"/>
+            <input type="checkbox"
+                   name="agree"
+                   value="1"
+                   id="agree"
+                   aria-describedby="licenseBox"
+                   required>
             <span><?= $this->__('I agree to the above terms and conditions.') ?></span>
         </label>
 
         <div class="button-set">
-            <button class="form-button" type="submit" id="submitButton" disabled="disabled">
+            <button class="form-button" type="submit" id="submitButton" disabled>
                 <span><?= $this->__('Continue') ?></span>
             </button>
         </div>

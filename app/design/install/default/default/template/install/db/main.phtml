@@ -24,9 +24,12 @@
         <?php if (count($dbTypeOptions) > 0): ?>
             <li>
                 <label for="db_engine_select"><?= $this->__('Database Type') ?></label>
-                <select name="config[db_engine]" id="db_engine_select">
-                    <?php foreach($dbTypeOptions as $block): ?>
-                        <option value="<?= $block->getIdPrefix()?>" <?php if($selectedEngine == $block->getIdPrefix()):?>selected="selected"<?php endif ?>><?= $block->getTitle() ?></option>
+                <select name="config[db_engine]" id="db_engine_select" required>
+                    <?php foreach ($dbTypeOptions as $block): ?>
+                        <option value="<?= $block->getIdPrefix()?>"
+                                <?php if ($selectedEngine == $block->getIdPrefix()): ?>selected<?php endif ?>>
+                            <?= $block->getTitle() ?>
+                        </option>
                     <?php endforeach ?>
                 </select>
             </li>
@@ -34,27 +37,34 @@
 
         <?php foreach ($dbTypeOptions as $block): ?>
         <?php $block = $this->getDatabaseBlock($block->getIdPrefix()) ?>
-            <div id="<?= $block->getIdPrefix() ?>_conn_form" class="db-connection-form <?php if($selectedEngine != $block->getIdPrefix()):?>hidden<?php endif ?>" data-db-type="<?= $block->getIdPrefix() ?>">
+            <div id="<?= $block->getIdPrefix() ?>_conn_form"
+                 class="db-connection-form <?php if ($selectedEngine != $block->getIdPrefix()): ?>hidden<?php endif ?>"
+                 data-db-type="<?= $block->getIdPrefix() ?>">
                 <?= $block->toHtml() ?>
             </div>
         <?php endforeach ?>
     </ul>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const dbSelector = document.getElementById('db_engine_select');
-    if (dbSelector) {
-        dbSelector.addEventListener('change', function() {
-            const selectedType = this.value;
-            document.querySelectorAll('.db-connection-form').forEach(function(form) {
-                if (form.dataset.dbType === selectedType) {
-                    form.classList.remove('hidden');
-                } else {
-                    form.classList.add('hidden');
-                }
+<script type="module">
+    const dbEngineSelect = document.querySelector('#db_engine_select');
+
+    dbEngineSelect?.addEventListener('change', () => {
+        updateDbForms(dbEngineSelect.value);
+    });
+
+    if (dbEngineSelect) {
+        updateDbForms(dbEngineSelect.value);
+    }
+
+    function updateDbForms(selectedType) {
+        document.querySelectorAll('.db-connection-form').forEach(form => {
+            const isHidden = form.dataset.dbType !== selectedType;
+            form.classList.toggle('hidden', isHidden);
+            // Disable inputs in hidden forms to exclude them from validation
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = isHidden;
             });
         });
     }
-});
 </script>

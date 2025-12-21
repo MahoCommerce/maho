@@ -19,7 +19,7 @@
             <default_setup>
                 <connection>
                     <host>localhost</host>
-                    <username/>
+                    <username>maho</username>
                     <password/>
                     <dbname>maho</dbname>
                     <engine>mysql</engine>
