@@ -18,8 +18,7 @@
                     <fields>
                         <enabled translate="label">
                             <label>Enable Gift Cards</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -44,7 +43,7 @@
                         </code_prefix>
                         <lifetime translate="label comment">
                             <label>Default Expiry (days)</label>
-                            <comment>0 = never expires</comment>
+                            <comment>0 = never expires. Can be overridden per product.</comment>
                             <frontend_type>text</frontend_type>
                             <validate>validate-number</validate>
                             <sort_order>40</sort_order>
@@ -52,10 +51,27 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </lifetime>
+                        <allow_message translate="label comment">
+                            <label>Allow Gift Message</label>
+                            <comment>Can be overridden per product.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>45</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </allow_message>
+                        <is_redeemable translate="label comment">
+                            <label>Is Redeemable</label>
+                            <comment>Can be overridden per product.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>46</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </is_redeemable>
                         <show_qrcode translate="label">
                             <label>Show QR Code</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

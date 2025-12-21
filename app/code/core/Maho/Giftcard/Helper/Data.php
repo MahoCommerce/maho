@@ -81,7 +81,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get gift card lifetime in days
+     * Get gift card lifetime in days from config
      *
      * @return int 0 = no expiration
      */
@@ -91,11 +91,60 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Calculate expiration date from now
+     * Get gift card lifetime for a specific product
+     * Uses product attribute if set, otherwise falls back to config default
+     *
+     * @return int 0 = no expiration
+     */
+    public function getProductLifetime(Mage_Catalog_Model_Product $product): int
+    {
+        $value = $product->getData('giftcard_lifetime');
+        if ($value !== null && $value !== '') {
+            return (int) $value;
+        }
+        return $this->getLifetime();
+    }
+
+    /**
+     * Check if gift message is allowed for a specific product
+     * Uses product attribute if set, otherwise falls back to config default
+     */
+    public function getProductAllowMessage(Mage_Catalog_Model_Product $product): bool
+    {
+        $value = $product->getData('giftcard_allow_message');
+        if ($value !== null && $value !== '') {
+            return (bool) $value;
+        }
+        return Mage::getStoreConfigFlag('giftcard/general/allow_message');
+    }
+
+    /**
+     * Check if gift card is redeemable for a specific product
+     * Uses product attribute if set, otherwise falls back to config default
+     */
+    public function getProductIsRedeemable(Mage_Catalog_Model_Product $product): bool
+    {
+        $value = $product->getData('giftcard_is_redeemable');
+        if ($value !== null && $value !== '') {
+            return (bool) $value;
+        }
+        return Mage::getStoreConfigFlag('giftcard/general/is_redeemable');
+    }
+
+    /**
+     * Calculate expiration date from now using config default
      */
     public function calculateExpirationDate(): ?string
     {
-        $lifetime = $this->getLifetime();
+        return $this->calculateProductExpirationDate(null);
+    }
+
+    /**
+     * Calculate expiration date from now for a specific product
+     */
+    public function calculateProductExpirationDate(?Mage_Catalog_Model_Product $product): ?string
+    {
+        $lifetime = $product ? $this->getProductLifetime($product) : $this->getLifetime();
 
         if ($lifetime === 0) {
             return null; // No expiration

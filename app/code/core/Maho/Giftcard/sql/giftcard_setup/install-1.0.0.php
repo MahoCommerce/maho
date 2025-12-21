@@ -241,29 +241,6 @@ $connection->addColumn($this->getTable('sales/order'), 'base_giftcard_amount', [
     'comment'  => 'Base Gift Card Discount Amount',
 ]);
 
-// Order address table
-$connection->addColumn($this->getTable('sales/order_address'), 'giftcard_codes', [
-    'type'     => Maho\Db\Ddl\Table::TYPE_TEXT,
-    'nullable' => true,
-    'comment'  => 'Gift Card Codes (JSON)',
-]);
-
-$connection->addColumn($this->getTable('sales/order_address'), 'giftcard_amount', [
-    'type'     => Maho\Db\Ddl\Table::TYPE_DECIMAL,
-    'length'   => '12,4',
-    'nullable' => true,
-    'default'  => '0.0000',
-    'comment'  => 'Gift Card Amount',
-]);
-
-$connection->addColumn($this->getTable('sales/order_address'), 'base_giftcard_amount', [
-    'type'     => Maho\Db\Ddl\Table::TYPE_DECIMAL,
-    'length'   => '12,4',
-    'nullable' => true,
-    'default'  => '0.0000',
-    'comment'  => 'Base Gift Card Amount',
-]);
-
 // Invoice table
 $connection->addColumn($this->getTable('sales/invoice'), 'giftcard_amount', [
     'type'     => Maho\Db\Ddl\Table::TYPE_DECIMAL,
@@ -380,7 +357,7 @@ $attributes = [
         'required' => false,
         'sort_order' => 50,
         'global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,
-        'visible' => true,
+        'visible' => false, // Rendered via custom tab with "Use Default" option
         'searchable' => false,
         'filterable' => false,
         'comparable' => false,
@@ -388,7 +365,7 @@ $attributes = [
         'used_in_product_listing' => false,
         'unique' => false,
         'apply_to' => 'giftcard',
-        'default' => '1',
+        // No default - NULL means use system config
     ],
     'giftcard_lifetime' => [
         'type' => 'int',
@@ -397,7 +374,7 @@ $attributes = [
         'required' => false,
         'sort_order' => 60,
         'global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,
-        'visible' => true,
+        'visible' => false, // Rendered via custom tab with placeholder
         'searchable' => false,
         'filterable' => false,
         'comparable' => false,
@@ -405,8 +382,7 @@ $attributes = [
         'used_in_product_listing' => false,
         'unique' => false,
         'apply_to' => 'giftcard',
-        'default' => '365',
-        'note' => 'Number of days gift card is valid. Use 0 for no expiration.',
+        // No default - NULL means use system config
     ],
     'giftcard_is_redeemable' => [
         'type' => 'int',
@@ -415,7 +391,7 @@ $attributes = [
         'required' => false,
         'sort_order' => 70,
         'global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,
-        'visible' => true,
+        'visible' => false, // Rendered via custom tab with "Use Default" option
         'searchable' => false,
         'filterable' => false,
         'comparable' => false,
@@ -423,7 +399,7 @@ $attributes = [
         'used_in_product_listing' => false,
         'unique' => false,
         'apply_to' => 'giftcard',
-        'default' => '1',
+        // No default - NULL means use system config
     ],
 ];
 

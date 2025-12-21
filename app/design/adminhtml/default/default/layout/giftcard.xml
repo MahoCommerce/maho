@@ -24,8 +24,11 @@
         </reference>
     </adminhtml_giftcard_history_index>
 
-    <!-- Gift Card Product Edit Page - Add field toggle script -->
+    <!-- Gift Card Product Edit Page - Add tab and field toggle script -->
     <adminhtml_catalog_product_giftcard>
+        <reference name="product_tabs">
+            <action method="addTabAfter"><name>giftcard</name><block>giftcard/adminhtml_catalog_product_edit_tab_giftcard</block><after>group_9</after></action>
+        </reference>
         <reference name="content">
             <block type="core/template" name="giftcard.type.toggle" template="maho/giftcard/catalog/product/type-toggle.phtml" />
         </reference>
