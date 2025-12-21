@@ -90,7 +90,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
      * @return $this
      */
     #[\Override]
-    public function authorize(Varien_Object $payment, $amount)
+    public function authorize(Maho\DataObject $payment, $amount)
     {
         return $this;
     }
@@ -102,7 +102,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
      * @return $this
      */
     #[\Override]
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(Maho\DataObject $payment, $amount)
     {
         $order = $payment->getOrder();
         $codes = $this->_getAppliedCodes($order);
@@ -133,7 +133,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
      * @return $this
      */
     #[\Override]
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(Maho\DataObject $payment, $amount)
     {
         $order = $payment->getOrder();
         $codes = $this->_getAppliedCodes($order);

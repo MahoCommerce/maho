@@ -18,7 +18,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
     {
         $model = Mage::registry('current_giftcard');
 
-        $form = new Varien_Data_Form([
+        $form = new Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['id' => $this->getRequest()->getParam('id')]),
             'method' => 'post',

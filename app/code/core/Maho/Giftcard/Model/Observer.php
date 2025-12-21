@@ -18,7 +18,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function generateGiftcards(Varien_Event_Observer $observer)
+    public function generateGiftcards(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
@@ -119,7 +119,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function activateGiftcardsOnInvoicePaid(Varien_Event_Observer $observer)
+    public function activateGiftcardsOnInvoicePaid(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Invoice $invoice */
         $invoice = $observer->getEvent()->getInvoice();
@@ -209,7 +209,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function catalogProductSaveBefore(Varien_Event_Observer $observer)
+    public function catalogProductSaveBefore(Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
@@ -245,7 +245,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function setGiftcardPrice(Varien_Event_Observer $observer)
+    public function setGiftcardPrice(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote_Item $quoteItem */
         $quoteItem = $observer->getEvent()->getQuoteItem();
@@ -300,7 +300,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function deductGiftcardBalance(Varien_Event_Observer $observer)
+    public function deductGiftcardBalance(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
@@ -411,7 +411,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function addGiftcardTotalToAdminOrder(Varien_Event_Observer $observer)
+    public function addGiftcardTotalToAdminOrder(Maho\Event\Observer $observer)
     {
         $block = $observer->getEvent()->getBlock();
 
@@ -450,7 +450,7 @@ class Maho_Giftcard_Model_Observer
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
 
-            $total = new Varien_Object([
+            $total = new Maho\DataObject([
                 'code'       => 'giftcard',
                 'value'      => -abs((float) $giftcardAmount),
                 'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
@@ -467,7 +467,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function updatePaymentMethodForGiftcard(Varien_Event_Observer $observer)
+    public function updatePaymentMethodForGiftcard(Maho\Event\Observer $observer)
     {
         $order = $observer->getEvent()->getOrder();
         if (!$order) {
@@ -498,7 +498,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    public function autoSelectPaymentMethod(Varien_Event_Observer $observer)
+    public function autoSelectPaymentMethod(Maho\Event\Observer $observer)
     {
         $controller = $observer->getEvent()->getControllerAction();
         $request = $controller->getRequest();

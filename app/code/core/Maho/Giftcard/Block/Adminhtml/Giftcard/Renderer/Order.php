@@ -14,7 +14,7 @@ declare(strict_types=1);
 class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Order extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(Maho\DataObject $row)
     {
         $orderId = $row->getPurchaseOrderId();
 

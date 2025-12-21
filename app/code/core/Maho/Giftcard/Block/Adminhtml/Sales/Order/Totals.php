@@ -47,7 +47,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals extends Mage_Adminhtml_Bl
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
 
-            $this->addTotalBefore(new Varien_Object([
+            $this->addTotalBefore(new Maho\DataObject([
                 'code'      => 'giftcard',
                 'value'     => -abs((float) $giftcardAmount),
                 'base_value' => -abs((float) $order->getBaseGiftcardAmount()),

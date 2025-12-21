@@ -47,7 +47,7 @@ class Maho_Giftcard_Block_Sales_Order_Creditmemo_Totals extends Mage_Sales_Block
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
 
-            $this->addTotalBefore(new Varien_Object([
+            $this->addTotalBefore(new Maho\DataObject([
                 'code'      => 'giftcard',
                 'value'     => -abs($giftcardAmount),
                 'base_value' => -abs($order->getBaseGiftcardAmount()),

@@ -58,7 +58,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      * Prepare additional options/information for order item
      */
     #[\Override]
-    protected function _prepareOptions(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareOptions(Maho\DataObject $buyRequest, $product, $processMode)
     {
         // First, check if gift card fields need to be transferred from request
         $request = Mage::app()->getRequest();
@@ -144,7 +144,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      * Set custom price based on gift card amount
      */
     #[\Override]
-    public function prepareForCartAdvanced(Varien_Object $buyRequest, $product = null, $processMode = null)
+    public function prepareForCartAdvanced(Maho\DataObject $buyRequest, $product = null, $processMode = null)
     {
         $result = parent::prepareForCartAdvanced($buyRequest, $product, $processMode);
 

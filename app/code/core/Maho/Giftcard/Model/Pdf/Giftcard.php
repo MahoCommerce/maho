@@ -47,10 +47,10 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
      * Generate PDF for gift cards
      */
     #[\Override]
-    public function getPdf(array|Varien_Data_Collection $documents = []): string
+    public function getPdf(array|Maho\Data\Collection $documents = []): string
     {
         // Convert to array if collection
-        $giftcards = $documents instanceof Varien_Data_Collection ? $documents->getItems() : $documents;
+        $giftcards = $documents instanceof Maho\Data\Collection ? $documents->getItems() : $documents;
 
         $this->_beforeGetPdf();
 
