@@ -33,6 +33,7 @@
                    value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>"
                    title="<?= $this->quoteEscape($this->__('Base URL')) ?>"
                    class="input-text"
+                   pattern=".*\/$"
                    required>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>http://mydomain.com/maho/</strong>') ?>
@@ -70,7 +71,8 @@
                    id="secure_base_url"
                    value="<?= $this->getFormData()->getSecureBaseUrl() ?>"
                    title="<?= $this->quoteEscape($this->__('Secure Base URL')) ?>"
-                   class="validate-url input-text"
+                   class="input-text"
+                   pattern=".*\/$"
                    required>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?>
@@ -114,6 +116,15 @@
 </div>
 
 <script>
+    // Ensure trailing slash at the end of (secure) base url
+    document.querySelectorAll('input[type="url"]').forEach(baseUrlInput => {
+        baseUrlInput.addEventListener('blur', () => {
+            if (baseUrlInput.value && !baseUrlInput.value.endsWith('/')) {
+                baseUrlInput.value += '/';
+            }
+        });
+    });
+
     // Show installation overlay on form submit
     document.getElementById('form-validate').addEventListener('submit', function(e) {
         // Only show overlay if form is valid
