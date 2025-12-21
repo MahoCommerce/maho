@@ -42,14 +42,14 @@
 </div>
 
 <script>
-    const dbSelector = document.querySelector('#db_engine_select');
+    const dbEngineSelect = document.querySelector('#db_engine_select');
 
-    dbSelector?.addEventListener('change', () => {
-        updateDbForms(dbSelector.value);
+    dbEngineSelect?.addEventListener('change', () => {
+        updateDbForms(dbEngineSelect.value);
     });
 
-    if (dbSelector) {
-        updateDbForms(dbSelector.value);
+    if (dbEngineSelect) {
+        updateDbForms(dbEngineSelect.value);
     }
 
     function updateDbForms(selectedType) {
