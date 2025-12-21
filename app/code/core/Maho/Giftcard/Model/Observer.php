@@ -170,6 +170,11 @@ class Maho_Giftcard_Model_Observer
      */
     protected function _sendGiftcardEmail($giftcard, $order)
     {
+        // Only send if recipient email is provided
+        if (!$giftcard->getRecipientEmail()) {
+            return;
+        }
+
         try {
             $helper = Mage::helper('giftcard');
 

@@ -256,15 +256,12 @@
                 <code_prefix>GC</code_prefix>
                 <lifetime>365</lifetime>
                 <allow_message>1</allow_message>
-                <enable_qrcode>1</enable_qrcode>
-                <enable_barcode>1</enable_barcode>
-                <pdf_show_qrcode>1</pdf_show_qrcode>
-                <pdf_show_barcode>1</pdf_show_barcode>
+                <show_qrcode>1</show_qrcode>
+                <show_barcode>1</show_barcode>
             </general>
             <email>
                 <template>giftcard_email_template</template>
                 <identity>general</identity>
-                <send_on_creation>0</send_on_creation>
             </email>
         </giftcard>
     </default>

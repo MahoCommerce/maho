@@ -208,11 +208,8 @@ $giftcards = $this->getGiftcards();
 
                 <?php
                 $helper = Mage::helper('giftcard');
-                $showQrInPdf = Mage::getStoreConfigFlag('giftcard/general/pdf_show_qrcode');
-                $showBarcodeInPdf = Mage::getStoreConfigFlag('giftcard/general/pdf_show_barcode');
-
-                $qrCode = $showQrInPdf ? $helper->getQrCodeDataUrl($giftcard->getCode(), 150) : '';
-                $barcode = $showBarcodeInPdf ? $helper->getBarcodeDataUrl($giftcard->getCode()) : '';
+                $qrCode = $helper->getQrCodeDataUrl($giftcard->getCode(), 150);
+                $barcode = $helper->getBarcodeDataUrl($giftcard->getCode());
                 ?>
 
                 <?php if ($qrCode): ?>

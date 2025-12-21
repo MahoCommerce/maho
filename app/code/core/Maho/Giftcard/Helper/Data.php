@@ -125,15 +125,24 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isQrCodeEnabled(): bool
     {
-        return Mage::getStoreConfigFlag('giftcard/general/enable_qrcode');
+        return Mage::getStoreConfigFlag('giftcard/general/show_qrcode');
     }
 
     /**
-     * Check if barcode generation is enabled
+     * Check if barcode generation is enabled and available
      */
     public function isBarcodeEnabled(): bool
     {
-        return Mage::getStoreConfigFlag('giftcard/general/enable_barcode');
+        return Mage::getStoreConfigFlag('giftcard/general/show_barcode')
+            && $this->isBarcodePackageInstalled();
+    }
+
+    /**
+     * Check if the barcode generator package is installed
+     */
+    public function isBarcodePackageInstalled(): bool
+    {
+        return class_exists(\Picqer\Barcode\BarcodeGeneratorSVG::class);
     }
 
     /**
@@ -175,11 +184,8 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         try {
-            // Use Picqer for local barcode generation
-            $generator = new \Picqer\Barcode\BarcodeGeneratorSVG();
-
-            // Generate Code128 barcode as SVG
-            $svg = $generator->getBarcode($code, $generator::TYPE_CODE_128, 2, 60);
+            $generator = new \Picqer\Barcode\BarcodeGeneratorSVG(); // @phpstan-ignore class.notFound
+            $svg = $generator->getBarcode($code, $generator::TYPE_CODE_128, 2, 60); // @phpstan-ignore class.notFound, class.notFound
 
             // Convert to data URL
             return 'data:image/svg+xml;base64,' . base64_encode($svg);

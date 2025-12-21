@@ -61,8 +61,7 @@
         "symfony/polyfill-php84": "^1.31",
         "symfony/polyfill-php85": "^1.32",
         "symfony/validator": "^7.4",
-        "symfony/var-dumper": "^7.4",
-        "picqer/php-barcode-generator": "^3.0"
+        "symfony/var-dumper": "^7.4"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
@@ -94,7 +93,8 @@
         "laminas/laminas-json-server": "Install this package if you need JSON-RPC web services functionality",
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
         "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
-        "mahocommerce/module-braintree": "Braintree payment gateway integration"
+        "mahocommerce/module-braintree": "Braintree payment gateway integration",
+        "picqer/php-barcode-generator": "Required for gift card barcode generation"
     },
     "conflict": {
         "colinmollenhour/cache-backend-redis": "*",
