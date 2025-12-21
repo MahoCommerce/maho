@@ -193,6 +193,7 @@ footer {
     padding: var(--space-xl);
     text-align: center;
     font-size: var(--font-size-sm);
+    width: 100%;
 }
 
 footer a {
