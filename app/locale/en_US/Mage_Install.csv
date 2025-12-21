@@ -69,6 +69,7 @@
 "The URL ""%s"" is invalid.","The URL ""%s"" is invalid."
 "The URL ""%s"" is not accessible.","The URL ""%s"" is not accessible."
 "Time Zone","Time Zone"
+"URL must end with a trailing slash (/)","URL must end with a trailing slash (/)"
 "User Name","User Name"
 "Username","Username"
 "User Password","User Password"

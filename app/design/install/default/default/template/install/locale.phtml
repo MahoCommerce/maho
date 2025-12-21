@@ -41,7 +41,7 @@
     <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>
 </div>
 </form>
-<script>
+<script type="module">
     const localeSelect = document.querySelector('#locale');
     localeSelect?.addEventListener('change', () => {
         const params = new URLSearchParams({

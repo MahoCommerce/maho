@@ -11,13 +11,10 @@
 
 /** @var Mage_Install_Block_End $this */
 ?>
-<script>
-    // Hide header and footer on this page
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.header')?.classList.add('hidden');
-        document.querySelector('.footer-container')?.classList.add('hidden');
-        document.body.classList.add('installation-complete-page');
-    });
+<script type="module">
+    document.querySelector('.header')?.classList.add('hidden');
+    document.querySelector('footer')?.classList.add('hidden');
+    document.body.classList.add('installation-complete-page');
 </script>
 
 <div class="installation-complete">
