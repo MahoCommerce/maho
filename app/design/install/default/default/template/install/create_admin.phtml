@@ -20,15 +20,15 @@
 <div class="form-list">
     <ul>
         <li>
-            <label for="firstname"><?= $this->__('First Name') ?> <span class="required">*</span></label>
+            <label for="firstname"><?= $this->__('First Name') ?></label>
             <input type="text" name="admin[firstname]" id="firstname" value="<?= $this->getFormData()->getFirstname() ?>" title="<?= $this->quoteEscape($this->__('First Name')) ?>" class="input-text" required>
         </li>
         <li>
-            <label for="lastname"><?= $this->__('Last Name') ?> <span class="required">*</span></label>
+            <label for="lastname"><?= $this->__('Last Name') ?></label>
             <input type="text" name="admin[lastname]" id="lastname" value="<?= $this->getFormData()->getLastname() ?>" title="<?= $this->quoteEscape($this->__('Last Name')) ?>" class="input-text" required>
         </li>
         <li>
-            <label for="email_address"><?= $this->__('Email') ?> <span class="required">*</span></label>
+            <label for="email_address"><?= $this->__('Email') ?></label>
             <input type="email" name="admin[email]" id="email_address" value="<?= $this->getFormData()->getEmail() ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text" required>
         </li>
     </ul>
@@ -38,11 +38,11 @@
 <div class="form-list">
     <ul>
         <li>
-            <label for="username"><?= $this->__('Username') ?> <span class="required">*</span></label>
+            <label for="username"><?= $this->__('Username') ?></label>
             <input type="text" name="admin[username]" id="username" value="<?= $this->getFormData()->getUsername() ?>" title="<?= $this->quoteEscape($this->__('Username')) ?>" class="input-text" required>
         </li>
         <li>
-            <label for="password"><?= $this->__('Password') ?> <span class="required">*</span></label>
+            <label for="password"><?= $this->__('Password') ?></label>
             <?php $minAdminPasswordLength = $this->getMinAdminPasswordLength(); ?>
             <input type="password"
                    name="admin[new_password]"
@@ -57,7 +57,7 @@
             </p>
         </li>
         <li>
-            <label for="confirmation"><?= $this->__('Confirm Password') ?> <span class="required">*</span></label>
+            <label for="confirmation"><?= $this->__('Confirm Password') ?></label>
             <input type="password" name="admin[password_confirmation]" title="<?= $this->quoteEscape($this->__('Password Confirmation')) ?>" id="confirmation" class="input-text" autocomplete="new-password" required>
         </li>
     </ul>

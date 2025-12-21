@@ -23,7 +23,7 @@
         <?php $selectedEngine = $this->getFormData()->getDbEngine() ?: ($dbTypeOptions[0]->getIdPrefix() ?? ''); ?>
         <?php if (count($dbTypeOptions) > 0): ?>
             <li>
-                <label for="db_engine_select"><?= $this->__('Database Type') ?> <span class="required">*</span></label>
+                <label for="db_engine_select"><?= $this->__('Database Type') ?></label>
                 <select name="config[db_engine]" id="db_engine_select" required>
                     <?php foreach ($dbTypeOptions as $block): ?>
                         <option value="<?= $block->getIdPrefix()?>" <?php if ($selectedEngine == $block->getIdPrefix()): ?>selected<?php endif ?>><?= $block->getTitle() ?></option>

@@ -26,15 +26,15 @@
 <div class="form-list">
     <ul>
         <li>
-            <label for="base_url"><?= $this->__('Base URL') ?> <span class="required">*</span></label>
+            <label for="base_url"><?= $this->__('Base URL') ?></label>
             <input type="url" name="config[unsecure_base_url]" id="base_url" value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Base URL')) ?>" class="validate-url input-text" required>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>http://mydomain.com/maho/</strong>') ?>
             </p>
         </li>
         <li>
-            <label for="admin_frontname"><?= $this->__('Admin Path') ?> <span class="required">*</span></label>
-            <input type="text" name="config[admin_frontname]" id="admin_frontname" value="<?= $this->getFormData()->getAdminFrontname() ?>" title="<?= $this->quoteEscape($this->__('Admin Path')) ?>" class="validate-data input-text" required>
+            <label for="admin_frontname"><?= $this->__('Admin Path') ?></label>
+            <input type="text" name="config[admin_frontname]" id="admin_frontname" value="<?= $this->getFormData()->getAdminFrontname() ?>" title="<?= $this->quoteEscape($this->__('Admin Path')) ?>" class="input-text" required>
             <p class="field-note">
                 <?= $this->__('Additional path added after Base URL to access your Administrative Panel (e.g. admin, backend, control etc.).') ?>
             </p>
@@ -48,7 +48,7 @@
     </ul>
     <ul id="use_secure_options" class="<?php if (!$this->getFormData()->getUseSecure()): ?>hidden<?php endif ?>">
         <li>
-            <label for="secure_base_url"><?= $this->__('Secure Base URL') ?> <span class="required">*</span></label>
+            <label for="secure_base_url"><?= $this->__('Secure Base URL') ?></label>
             <input type="url" name="config[secure_base_url]" id="secure_base_url" value="<?= $this->getFormData()->getSecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Secure Base URL')) ?>" class="validate-url input-text" required>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?>

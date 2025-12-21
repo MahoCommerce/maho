@@ -15,7 +15,7 @@
  */
 ?>
 <li>
-    <label for="sqlite_db_path"><?= $this->__('Database File Path') ?> <span class="required">*</span></label>
+    <label for="sqlite_db_path"><?= $this->__('Database File Path') ?></label>
     <input type="text" name="connection[<?= $this->getIdPrefix()?>][db_name]" id="sqlite_db_path" value="<?= $this->getFormData()->getDbName() ?: 'maho.sqlite' ?>" title="<?= $this->quoteEscape($this->__('Database File Path')) ?>" class="input-text" required>
     <p class="field-note">
         <?= $this->__('Relative path from var/db/ directory, or absolute path, or :memory: for in-memory database') ?>

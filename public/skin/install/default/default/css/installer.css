@@ -641,7 +641,9 @@ input[type="checkbox"]:checked::after {
     animation: error-shake 0.4s ease-out;
 }
 
-.required {
+label:has(+ input[required])::after,
+label:has(+ select[required])::after {
+    content: " *";
     color: var(--color-error);
 }
 
