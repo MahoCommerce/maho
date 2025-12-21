@@ -107,9 +107,9 @@
 </div>
 
 <script>
-    document.querySelector('#form-validate')?.addEventListener('submit', () => {
+    document.getElementById('form-validate')?.addEventListener('submit', function() {
         if (this.checkValidity()) {
-            document.querySelector('#installation-overlay').style.display = 'flex';
+            document.getElementById('installation-overlay').style.display = 'flex';
             document.body.classList.add('installation-active');
         }
     });

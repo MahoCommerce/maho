@@ -126,8 +126,7 @@
     });
 
     // Show installation overlay on form submit
-    document.getElementById('form-validate').addEventListener('submit', function(e) {
-        // Only show overlay if form is valid
+    document.getElementById('form-validate')?.addEventListener('submit', function() {
         if (this.checkValidity()) {
             document.getElementById('installation-overlay').style.display = 'flex';
             document.body.classList.add('installation-active');
