@@ -27,21 +27,37 @@
     <ul>
         <li>
             <label for="base_url"><?= $this->__('Base URL') ?></label>
-            <input type="url" name="config[unsecure_base_url]" id="base_url" value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Base URL')) ?>" class="validate-url input-text" required>
+            <input type="url"
+                   name="config[unsecure_base_url]"
+                   id="base_url"
+                   value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>"
+                   title="<?= $this->quoteEscape($this->__('Base URL')) ?>"
+                   class="input-text"
+                   required>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>http://mydomain.com/maho/</strong>') ?>
             </p>
         </li>
         <li>
             <label for="admin_frontname"><?= $this->__('Admin Path') ?></label>
-            <input type="text" name="config[admin_frontname]" id="admin_frontname" value="<?= $this->getFormData()->getAdminFrontname() ?>" title="<?= $this->quoteEscape($this->__('Admin Path')) ?>" class="input-text" required>
+            <input type="text"
+                   name="config[admin_frontname]"
+                   id="admin_frontname"
+                   value="<?= $this->getFormData()->getAdminFrontname() ?>"
+                   title="<?= $this->quoteEscape($this->__('Admin Path')) ?>"
+                   class="input-text"
+                   required>
             <p class="field-note">
                 <?= $this->__('Additional path added after Base URL to access your Administrative Panel (e.g. admin, backend, control etc.).') ?>
             </p>
         </li>
         <li>
             <label for="use_secure" class="checkbox-label">
-                <input type="checkbox" name="config[use_secure]" id="use_secure" value="1" <?php if ($this->getFormData()->getUseSecure()): ?>checked<?php endif ?>>
+                <input type="checkbox"
+                       name="config[use_secure]"
+                       id="use_secure"
+                       value="1"
+                       <?php if ($this->getFormData()->getUseSecure()): ?>checked<?php endif ?>>
                 <span><?= $this->__('Use Secure URLs (SSL)') ?></span>
             </label>
         </li>
@@ -49,14 +65,24 @@
     <ul id="use_secure_options" class="<?php if (!$this->getFormData()->getUseSecure()): ?>hidden<?php endif ?>">
         <li>
             <label for="secure_base_url"><?= $this->__('Secure Base URL') ?></label>
-            <input type="url" name="config[secure_base_url]" id="secure_base_url" value="<?= $this->getFormData()->getSecureBaseUrl() ?>" title="<?= $this->quoteEscape($this->__('Secure Base URL')) ?>" class="validate-url input-text" required>
+            <input type="url"
+                   name="config[secure_base_url]"
+                   id="secure_base_url"
+                   value="<?= $this->getFormData()->getSecureBaseUrl() ?>"
+                   title="<?= $this->quoteEscape($this->__('Secure Base URL')) ?>"
+                   class="validate-url input-text"
+                   required>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?>
             </p>
         </li>
         <li>
             <label for="use_secure_admin" class="checkbox-label">
-                <input type="checkbox" name="config[use_secure_admin]" id="use_secure_admin" value="1" <?php if ($this->getFormData()->getUseSecureAdmin()): ?>checked<?php endif ?>>
+                <input type="checkbox"
+                       name="config[use_secure_admin]"
+                       id="use_secure_admin"
+                       value="1"
+                       <?php if ($this->getFormData()->getUseSecureAdmin()): ?>checked<?php endif ?>>
                 <span><?= $this->__('Run admin interface with SSL') ?></span>
             </label>
         </li>
@@ -100,6 +126,10 @@
 <?php else: ?>
     <div><?= $this->__('Please set all required settings before clicking Continue') ?></div>
     <div class="button-set">
-        <button class="form-button" type="button" onclick="setLocation('<?= $this->getUrl('*/*/*', ['_current'=>true]) ?>')"><span><?= $this->__('Continue') ?></span></button>
+        <button class="form-button"
+                type="button"
+                onclick="setLocation('<?= $this->getUrl('*/*/*', ['_current'=>true]) ?>')">
+            <span><?= $this->__('Continue') ?></span>
+        </button>
     </div>
 <?php endif ?>

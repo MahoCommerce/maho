@@ -26,7 +26,10 @@
                 <label for="db_engine_select"><?= $this->__('Database Type') ?></label>
                 <select name="config[db_engine]" id="db_engine_select" required>
                     <?php foreach ($dbTypeOptions as $block): ?>
-                        <option value="<?= $block->getIdPrefix()?>" <?php if ($selectedEngine == $block->getIdPrefix()): ?>selected<?php endif ?>><?= $block->getTitle() ?></option>
+                        <option value="<?= $block->getIdPrefix()?>"
+                                <?php if ($selectedEngine == $block->getIdPrefix()): ?>selected<?php endif ?>>
+                            <?= $block->getTitle() ?>
+                        </option>
                     <?php endforeach ?>
                 </select>
             </li>
@@ -34,7 +37,9 @@
 
         <?php foreach ($dbTypeOptions as $block): ?>
         <?php $block = $this->getDatabaseBlock($block->getIdPrefix()) ?>
-            <div id="<?= $block->getIdPrefix() ?>_conn_form" class="db-connection-form <?php if ($selectedEngine != $block->getIdPrefix()): ?>hidden<?php endif ?>" data-db-type="<?= $block->getIdPrefix() ?>">
+            <div id="<?= $block->getIdPrefix() ?>_conn_form"
+                 class="db-connection-form <?php if ($selectedEngine != $block->getIdPrefix()): ?>hidden<?php endif ?>"
+                 data-db-type="<?= $block->getIdPrefix() ?>">
                 <?= $block->toHtml() ?>
             </div>
         <?php endforeach ?>
