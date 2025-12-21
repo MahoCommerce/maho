@@ -42,11 +42,12 @@
 </div>
 </form>
 <script>
-    document.querySelector('#locale')?.addEventListener('change', () => {
+    const localeSelect = document.querySelector('#locale');
+    localeSelect?.addEventListener('change', () => {
         const params = new URLSearchParams({
             timezone: document.querySelector('#timezone').value,
             currency: document.querySelector('#currency').value
         });
-        window.location.href = `<?= $this->getChangeUrl() ?>locale/${document.querySelector('#locale').value}/?${params}`;
+        window.location.href = `<?= $this->getChangeUrl() ?>locale/${localeSelect.value}/?${params}`;
     });
 </script>

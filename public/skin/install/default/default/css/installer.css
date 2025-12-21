@@ -109,7 +109,7 @@ img {
     display: block;
 }
 
-button, input, select, textarea {
+button, input, select {
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
@@ -177,14 +177,6 @@ ul, ol {
     width: 100%;
 }
 
-.col-2-left-layout {
-    display: block;
-}
-
-.col-left {
-    display: none; /* Hide sidebar, stepper is now in header */
-}
-
 .col-main {
     width: 100%;
     max-width: var(--content-width);
@@ -196,22 +188,14 @@ ul, ol {
     animation: fade-in-up var(--transition-slow) ease-out;
 }
 
-.footer-container {
+footer {
     background: var(--color-white);
-    border-top: 1px solid var(--color-border-light);
-    margin-top: auto;
-}
-
-.footer {
-    max-width: var(--max-width);
-    margin: 0 auto;
     padding: var(--space-xl);
     text-align: center;
-    color: var(--color-text-light);
     font-size: var(--font-size-sm);
 }
 
-.footer a {
+footer a {
     color: var(--color-text-light);
     font-weight: 500;
 }
@@ -402,10 +386,6 @@ label {
     transition: color var(--transition-fast);
 }
 
-.input-box {
-    position: relative;
-}
-
 .input-text, select, textarea {
     width: 100%;
     padding: var(--space-md);
@@ -433,11 +413,6 @@ textarea:invalid:focus {
 
 .input-text::placeholder {
     color: var(--color-text-lighter);
-}
-
-textarea {
-    resize: vertical;
-    min-height: 120px;
 }
 
 select {
@@ -497,24 +472,6 @@ input[type="checkbox"]:checked::after {
     background: var(--color-bg);
 }
 
-/* Form Groups */
-.group-select {
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-xl);
-    margin: var(--space-xl) 0;
-}
-
-.group-select .legend {
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: var(--space-lg);
-    padding-bottom: var(--space-md);
-    border-bottom: 2px solid var(--color-border-light);
-}
-
 /* Database connection form transitions */
 .db-connection-form {
     transition: opacity var(--transition-base), transform var(--transition-base);
@@ -554,7 +511,7 @@ input[type="checkbox"]:checked::after {
     color: var(--color-text-light);
 }
 
-.form-button, .form-button-alt {
+.form-button {
     padding: var(--space-md) var(--space-xl);
     border: none;
     border-radius: var(--radius-sm);
@@ -572,7 +529,7 @@ input[type="checkbox"]:checked::after {
     text-decoration: none;
 }
 
-.form-button span, .form-button-alt span {
+.form-button span {
     position: relative;
     z-index: 1;
 }
@@ -620,17 +577,6 @@ input[type="checkbox"]:checked::after {
 .form-button:hover:not(:disabled)::before {
     width: 300px;
     height: 300px;
-}
-
-.form-button-alt {
-    background: var(--color-white);
-    color: var(--color-text);
-    border: 2px solid var(--color-border);
-}
-
-.form-button-alt:hover {
-    border-color: var(--color-text);
-    background: var(--color-bg);
 }
 
 /* ========================================
@@ -742,28 +688,6 @@ input[type="checkbox"]:checked::after {
    Loading States
    ======================================== */
 
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(215, 223, 34, 0.2);
-    border-top-color: var(--color-primary);
-    border-radius: var(--radius-full);
-    animation: spin 0.8s linear infinite;
-    margin: var(--space-xl) auto;
-}
-
-/* Loading spinner inside button */
-.form-button .loading-spinner,
-.form-button-alt .loading-spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-    border-top-color: var(--color-text);
-    margin: 0;
-    flex-shrink: 0;
-}
-
-/* Installation overlay */
 .installation-overlay {
     position: fixed;
     top: 0;
@@ -810,18 +734,6 @@ body.installation-active {
     border-radius: var(--radius-full);
     animation: spin 0.8s linear infinite;
     margin: 0 auto;
-}
-
-.skeleton {
-    background: linear-gradient(
-        90deg,
-        var(--color-bg) 25%,
-        var(--color-border-light) 50%,
-        var(--color-bg) 75%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-loading 1.5s infinite;
-    border-radius: var(--radius-sm);
 }
 
 /* ========================================
@@ -1082,7 +994,7 @@ body.installation-active {
         flex-direction: column;
     }
 
-    .form-button, .form-button-alt {
+    .form-button {
         width: 100%;
     }
 }
@@ -1112,10 +1024,6 @@ body.installation-active {
     color: var(--color-text-light);
     font-size: var(--font-size-sm);
     line-height: var(--line-height-relaxed);
-}
-
-.field-note small {
-    font-size: inherit;
 }
 
 /* ========================================
@@ -1361,16 +1269,4 @@ body.installation-complete-page .middle-container {
 
 .hidden {
     display: none !important;
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
 }

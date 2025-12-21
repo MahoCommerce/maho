@@ -232,7 +232,7 @@
         }, observerOptions);
 
         // Observe elements that should animate in
-        document.querySelectorAll('.form-list li, .group-select, .button-set').forEach(el => {
+        document.querySelectorAll('.form-list li, .button-set').forEach(el => {
             el.style.opacity = '0';
             el.style.transform = 'translateY(20px)';
             el.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
