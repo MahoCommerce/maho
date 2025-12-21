@@ -127,7 +127,6 @@
 
             // Add validation state handling
             input.addEventListener('invalid', function(e) {
-                e.preventDefault();
                 this.classList.add('validation-failed');
 
                 // Scroll to first error smoothly
