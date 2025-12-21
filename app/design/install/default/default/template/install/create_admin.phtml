@@ -120,7 +120,9 @@
     }
 
     password?.addEventListener('input', validatePasswordMatch);
+    password?.addEventListener('blur', validatePasswordMatch);
     confirmation?.addEventListener('input', validatePasswordMatch);
+    confirmation?.addEventListener('blur', validatePasswordMatch);
 
     // Show installation overlay on form submit
     document.getElementById('form-validate')?.addEventListener('submit', function() {

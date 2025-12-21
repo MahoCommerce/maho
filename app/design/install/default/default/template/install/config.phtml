@@ -27,13 +27,13 @@
     <ul>
         <li>
             <label for="base_url"><?= $this->__('Base URL') ?></label>
-            <input type="url"
+            <input type="text"
                    name="config[unsecure_base_url]"
                    id="base_url"
                    value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>"
                    title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
                    class="input-text"
-                   pattern=".*\/$"
+                   pattern="https?://.+/"
                    required>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>http://mydomain.com/maho/</strong>') ?>
@@ -66,13 +66,13 @@
     <ul id="use_secure_options" class="<?php if (!$this->getFormData()->getUseSecure()): ?>hidden<?php endif ?>">
         <li>
             <label for="secure_base_url"><?= $this->__('Secure Base URL') ?></label>
-            <input type="url"
+            <input type="text"
                    name="config[secure_base_url]"
                    id="secure_base_url"
                    value="<?= $this->getFormData()->getSecureBaseUrl() ?>"
                    title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
                    class="input-text"
-                   pattern=".*\/$"
+                   pattern="https?://.+/"
                    <?php if ($this->getFormData()->getUseSecure()): ?>required<?php endif ?>>
             <p class="field-note">
                 <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?>
@@ -116,24 +116,24 @@
 </div>
 
 <script type="module">
-    // Ensure trailing slash at the end of (secure) base url
-    document.querySelectorAll('input[type="url"]').forEach(baseUrlInput => {
-        baseUrlInput.addEventListener('blur', () => {
-            if (baseUrlInput.value && !baseUrlInput.value.endsWith('/')) {
-                baseUrlInput.value += '/';
-            }
-        });
-    });
-
     // Toggle secure URL options visibility and required state
     const useSecureCheckbox = document.getElementById('use_secure');
     const secureOptions = document.getElementById('use_secure_options');
     const secureBaseUrl = document.getElementById('secure_base_url');
 
-    useSecureCheckbox?.addEventListener('change', () => {
-        secureOptions.classList.toggle('hidden', !useSecureCheckbox.checked);
-        secureBaseUrl.required = useSecureCheckbox.checked;
-    });
+    function updateSecureOptions() {
+        const isEnabled = useSecureCheckbox.checked;
+        secureOptions.classList.toggle('hidden', !isEnabled);
+        secureBaseUrl.disabled = !isEnabled;
+        secureBaseUrl.required = isEnabled;
+    }
+
+    useSecureCheckbox?.addEventListener('change', updateSecureOptions);
+
+    // Set initial state
+    if (useSecureCheckbox) {
+        updateSecureOptions();
+    }
 
     // Show installation overlay on form submit
     document.getElementById('form-validate')?.addEventListener('submit', function() {

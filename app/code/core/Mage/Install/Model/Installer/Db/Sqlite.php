@@ -49,11 +49,13 @@ class Mage_Install_Model_Installer_Db_Sqlite extends Mage_Install_Model_Installe
     /**
      * Check storage engine support
      * SQLite uses a single integrated storage engine that is always available.
+     * This method also validates the database connection.
      */
     #[\Override]
     public function supportEngine(): bool
     {
-        // SQLite always supports its integrated storage engine
+        // Test connection by running a simple query
+        $this->_getConnection()->fetchOne('SELECT 1');
         return true;
     }
 }

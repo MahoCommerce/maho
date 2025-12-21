@@ -59,7 +59,12 @@
 
     function updateDbForms(selectedType) {
         document.querySelectorAll('.db-connection-form').forEach(form => {
-            form.classList.toggle('hidden', form.dataset.dbType !== selectedType);
+            const isHidden = form.dataset.dbType !== selectedType;
+            form.classList.toggle('hidden', isHidden);
+            // Disable inputs in hidden forms to exclude them from validation
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = isHidden;
+            });
         });
     }
 </script>
