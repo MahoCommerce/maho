@@ -304,7 +304,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     }
 
     /**
-     * Redirect to canonical URL if trailing slash doesn't match configured behavior
+     * Normalize request path and redirect to canonical URL if needed
+     *
+     * Handles:
+     * - Consecutive slashes (e.g., //men -> /men)
+     * - Trailing slash based on store configuration
      */
     protected function checkTrailingSlash(Mage_Core_Controller_Request_Http $request): void
     {
@@ -317,7 +321,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
 
         $requestUri = $request->getRequestUri();
 
-        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($requestUri);
+        // Normalize consecutive slashes to single slash
+        $canonicalUri = preg_replace('#/{2,}#', '/', $requestUri);
+
+        // Apply trailing slash configuration
+        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
 
         if ($canonicalUri !== $requestUri) {
             Mage::app()->getFrontController()->getResponse()
