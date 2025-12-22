@@ -10,38 +10,20 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Install_Block_Begin extends Mage_Install_Block_Abstract
+class Mage_Install_Block_License extends Mage_Install_Block_Abstract
 {
-    /**
-     * Set template
-     */
     public function __construct()
     {
         parent::__construct();
         $this->setTemplate('page/license.phtml');
     }
 
-    /**
-     * @deprecated
-     */
-    public function getLanguages() {}
-
-    /**
-     * Get wizard URL
-     *
-     * @return string
-     */
-    public function getPostUrl()
+    public function getPostUrl(): string
     {
-        return Mage::getUrl('install/wizard/beginPost');
+        return Mage::getUrl('install/wizard/licensePost');
     }
 
-    /**
-     * Get License HTML contents
-     *
-     * @return string
-     */
-    public function getLicenseHtml()
+    public function getLicenseHtml(): string
     {
         return nl2br(file_get_contents(Maho::findFile((string) Mage::getConfig()->getNode('install/eula_file'))));
     }

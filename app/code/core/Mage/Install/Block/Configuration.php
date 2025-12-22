@@ -18,14 +18,9 @@ class Mage_Install_Block_Configuration extends Mage_Install_Block_Abstract
         $this->setTemplate('page/configuration.phtml');
     }
 
-    /**
-     * Retrieve form data post url
-     *
-     * @return string
-     */
-    public function getPostUrl()
+    public function getPostUrl(): string
     {
-        return $this->getUrl('*/*/configPost');
+        return $this->getUrl('*/*/configurationPost');
     }
 
     /**

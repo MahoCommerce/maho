@@ -28,7 +28,7 @@
         <li>
             <label for="base_url"><?= $this->__('Base URL') ?></label>
             <input type="text"
-                   name="config[unsecure_base_url]"
+                   name="configuration[unsecure_base_url]"
                    id="base_url"
                    value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>"
                    title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
@@ -42,7 +42,7 @@
         <li>
             <label for="admin_frontname"><?= $this->__('Admin Path') ?></label>
             <input type="text"
-                   name="config[admin_frontname]"
+                   name="configuration[admin_frontname]"
                    id="admin_frontname"
                    value="<?= $this->getFormData()->getAdminFrontname() ?>"
                    title="<?= $this->quoteEscape($this->__('Admin Path')) ?>"
@@ -55,7 +55,7 @@
         <li>
             <label for="use_secure" class="checkbox-label">
                 <input type="checkbox"
-                       name="config[use_secure]"
+                       name="configuration[use_secure]"
                        id="use_secure"
                        value="1"
                        <?php if ($this->getFormData()->getUseSecure()): ?>checked<?php endif ?>>
@@ -67,7 +67,7 @@
         <li>
             <label for="secure_base_url"><?= $this->__('Secure Base URL') ?></label>
             <input type="text"
-                   name="config[secure_base_url]"
+                   name="configuration[secure_base_url]"
                    id="secure_base_url"
                    value="<?= $this->getFormData()->getSecureBaseUrl() ?>"
                    title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
@@ -81,7 +81,7 @@
         <li>
             <label for="use_secure_admin" class="checkbox-label">
                 <input type="checkbox"
-                       name="config[use_secure_admin]"
+                       name="configuration[use_secure_admin]"
                        id="use_secure_admin"
                        value="1"
                        <?php if ($this->getFormData()->getUseSecureAdmin()): ?>checked<?php endif ?>>

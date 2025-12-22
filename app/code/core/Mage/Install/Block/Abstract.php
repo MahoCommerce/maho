@@ -12,8 +12,6 @@
 abstract class Mage_Install_Block_Abstract extends Mage_Core_Block_Template
 {
     /**
-     * Retrieve installer model
-     *
      * @return Mage_Install_Model_Installer
      */
     public function getInstaller()
@@ -22,8 +20,6 @@ abstract class Mage_Install_Block_Abstract extends Mage_Core_Block_Template
     }
 
     /**
-     * Retrieve wizard model
-     *
      * @return Mage_Install_Model_Wizard
      */
     public function getWizard()
@@ -32,8 +28,6 @@ abstract class Mage_Install_Block_Abstract extends Mage_Core_Block_Template
     }
 
     /**
-     * Retrieve current installation step
-     *
      * @return Varien_Object
      */
     public function getCurrentStep()

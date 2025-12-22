@@ -20,12 +20,12 @@
         </block>
         <block type="install/db_main" name="database" as="database"/>
     </install_wizard>
-    <install_wizard_config>
+    <install_wizard_configuration>
         <reference name="database">
             <action method="setTemplate"><template>page/configuration/database.phtml</template></action>
             <action method="addDatabaseBlock"><type>mysql</type><block>install/db_type_mysql</block><template>page/configuration/database/mysql.phtml</template></action>
-            <action method="addDatabaseBlock"><type>pgsql</type><block>install/db_type_pgsql</block><template>page/configuration/database/postgresql.phtml</template></action>
+            <action method="addDatabaseBlock"><type>pgsql</type><block>install/db_type_pgsql</block><template>page/configuration/database/pgsql.phtml</template></action>
             <action method="addDatabaseBlock"><type>sqlite</type><block>install/db_type_sqlite</block><template>page/configuration/database/sqlite.phtml</template></action>
         </reference>
-    </install_wizard_config>
+    </install_wizard_configuration>
 </layout>

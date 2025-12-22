@@ -15163,22 +15163,16 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Resource/Process.php
 
 		-
-			rawMessage: 'Method Mage_Install_Block_Admin::getFormData() has no return type specified.'
+			rawMessage: 'Method Mage_Install_Block_Administrator::getFormData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Install/Block/Admin.php
 
 		-
-			rawMessage: 'Method Mage_Install_Block_Admin::getPostUrl() has no return type specified.'
+			rawMessage: 'Method Mage_Install_Block_Administrator::getPostUrl() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Install/Block/Admin.php
-
-		-
-			rawMessage: 'Method Mage_Install_Block_Begin::getLanguages() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Install/Block/Begin.php
 
 		-
 			rawMessage: 'Method Mage_Install_Block_Configuration::getSessionSaveOptions() has no return type specified.'
