@@ -16,6 +16,7 @@ use Exception;
 use Mage;
 use Mage_Catalog_Model_Category;
 use Mage_Catalog_Model_Product;
+use Mage_Cms_Model_Block;
 use Mage_Core_Model_Locale;
 use Mage_Install_Model_Installer_Console;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -604,12 +605,7 @@ class Install extends BaseMahoCommand
         // 1. Import static data first (tax classes, customer groups, ratings)
         $this->importStaticDataFromJson($sampleDataDir, $output);
 
-        // 2. Import config data
-        if (file_exists($sampleDataDir . '/config.json')) {
-            $this->importConfigFromJson($sampleDataDir, $output);
-        }
-
-        // 2b. Import permission_block
+        // 2. Import permission_block
         if (file_exists($sampleDataDir . '/permission_block.json')) {
             $this->importPermissionBlockFromJson($sampleDataDir, $output);
         }
@@ -626,42 +622,48 @@ class Install extends BaseMahoCommand
             $this->createAttributeSetsFromJson($sampleDataDir, $output);
         }
 
-        // 5. Import categories
-        if (file_exists($sampleDataDir . '/categories.json')) {
-            $this->importCategoriesFromJson($sampleDataDir, $output);
+        // 5. Import config data (AFTER attributes so swatch attribute codes can be resolved to IDs)
+        if (file_exists($sampleDataDir . '/config.json')) {
+            $this->importConfigFromJson($sampleDataDir, $output);
         }
 
-        // 6. Import products
-        if (file_exists($sampleDataDir . '/products.json')) {
-            $this->importProductsFromJson($sampleDataDir, $output);
-        }
-
-        // 7. Import CMS content
+        // 6. Import CMS content (BEFORE categories so landing pages can be resolved)
         if (file_exists($sampleDataDir . '/cms.json')) {
             $this->importCmsFromJson($sampleDataDir, $output);
         }
 
-        // 8. Import blog posts
+        // 7. Import categories (with media)
+        if (file_exists($sampleDataDir . '/categories.json')) {
+            $this->copyCategoryMediaFiles($sampleDataDir, $output);
+            $this->importCategoriesFromJson($sampleDataDir, $output);
+        }
+
+        // 8. Import products
+        if (file_exists($sampleDataDir . '/products.json')) {
+            $this->importProductsFromJson($sampleDataDir, $output);
+        }
+
+        // 9. Import blog posts
         if (file_exists($sampleDataDir . '/blog.json')) {
             $this->importBlogFromJson($sampleDataDir, $output);
         }
 
-        // 9. Import reviews
+        // 10. Import reviews
         if (file_exists($sampleDataDir . '/reviews.json')) {
             $this->importReviewsFromJson($sampleDataDir, $output);
         }
 
-        // 10. Import tax rules
+        // 11. Import tax rules
         if (file_exists($sampleDataDir . '/tax_rules.json')) {
             $this->importTaxRulesFromJson($sampleDataDir, $output);
         }
 
-        // 11. Import product links (related, upsell, cross-sell)
+        // 12. Import product links (related, upsell, cross-sell)
         if (file_exists($sampleDataDir . '/product_links.json')) {
             $this->importProductLinksFromJson($sampleDataDir, $output);
         }
 
-        // 12. Import tier prices
+        // 13. Import tier prices
         if (file_exists($sampleDataDir . '/tier_prices.json')) {
             $this->importTierPricesFromJson($sampleDataDir, $output);
         }
@@ -674,6 +676,14 @@ class Install extends BaseMahoCommand
         // 14. Import dynamic category rules
         if (file_exists($sampleDataDir . '/dynamic_category_rules.json')) {
             $this->importDynamicCategoryRulesFromJson($sampleDataDir, $output);
+        }
+
+        // 15. Reindex all
+        $output->writeln('<info>Reindexing...</info>');
+        $indexer = Mage::getSingleton('index/indexer');
+        $processes = $indexer->getProcessesCollection();
+        foreach ($processes as $process) {
+            $process->reindexEverything();
         }
     }
 
@@ -1017,6 +1027,24 @@ class Install extends BaseMahoCommand
             return;
         }
 
+        // Scan products to find attributes used as super attributes for configurable products
+        $superAttributes = [];
+        $productsFile = $sampleDataDir . '/products.json';
+        if (file_exists($productsFile)) {
+            $productsJson = file_get_contents($productsFile);
+            $productsData = Mage::helper('core')->jsonDecode($productsJson);
+            foreach ($productsData['products'] ?? [] as $productData) {
+                if (($productData['type'] ?? '') === 'configurable' && !empty($productData['configurable_attributes'])) {
+                    foreach ($productData['configurable_attributes'] as $attr) {
+                        $code = is_array($attr) ? ($attr['attribute_code'] ?? '') : $attr;
+                        if ($code) {
+                            $superAttributes[$code] = true;
+                        }
+                    }
+                }
+            }
+        }
+
         /** @var \Mage_Catalog_Model_Resource_Setup $installer */
         $installer = new \Mage_Catalog_Model_Resource_Setup('core_setup');
         $entityTypeId = $installer->getEntityTypeId('catalog_product');
@@ -1049,6 +1077,31 @@ class Install extends BaseMahoCommand
                     $attribute->save();
                 }
 
+                // Update is_configurable for attributes used as super attributes
+                if (isset($superAttributes[$attributeCode])) {
+                    $connection->update(
+                        $connection->getTableName('catalog_eav_attribute'),
+                        ['is_configurable' => 1],
+                        ['attribute_id = ?' => $attribute->getId()],
+                    );
+                }
+
+                // Add options for existing select/multiselect attributes if they don't have options
+                if (in_array($inputType, ['select', 'multiselect']) && !empty($config['option']['values'])) {
+                    // Check if attribute has options
+                    $existingOptions = $connection->fetchOne(
+                        $connection->select()
+                            ->from($connection->getTableName('eav_attribute_option'), 'COUNT(*)')
+                            ->where('attribute_id = ?', $attribute->getId()),
+                    );
+                    if (!$existingOptions) {
+                        $installer->addAttributeOption([
+                            'attribute_id' => $attribute->getId(),
+                            'values' => $config['option']['values'],
+                        ]);
+                    }
+                }
+
                 // Still process store labels for existing attributes
                 if (!empty($config['store_labels'])) {
                     $storeLabelsToAdd[$attributeCode] = $config['store_labels'];
@@ -1070,7 +1123,8 @@ class Install extends BaseMahoCommand
                 'comparable' => $config['comparable'] ?? false,
                 'visible_on_front' => $config['visible_on_front'] ?? false,
                 'used_in_product_listing' => $config['used_in_product_listing'] ?? false,
-                'is_configurable' => $config['is_configurable'] ?? false,
+                // Force is_configurable for attributes used as super attributes
+                'is_configurable' => isset($superAttributes[$attributeCode]) || ($config['is_configurable'] ?? false),
             ];
 
             // Add source and backend models for select/multiselect attributes
@@ -1081,13 +1135,9 @@ class Install extends BaseMahoCommand
                 }
             }
 
-            // Add options if present
+            // Add options if present - using simpler 'values' format
             if (!empty($config['option']['values'])) {
-                $optionValues = [];
-                foreach ($config['option']['values'] as $value) {
-                    $optionValues[] = $value;
-                }
-                $attributeData['option'] = ['values' => $optionValues];
+                $attributeData['option'] = ['values' => $config['option']['values']];
             }
 
             $installer->addAttribute('catalog_product', $attributeCode, $attributeData);
@@ -1147,6 +1197,82 @@ class Install extends BaseMahoCommand
             }
         }
 
+        // Clear EAV cache so newly created attributes can be found
+        Mage::getSingleton('eav/config')->clear();
+        Mage::unregister('_singleton/eav/config');
+
+        // Populate swatch data for select attributes (text swatches)
+        // This creates entries in eav_attribute_option_swatch so ConfigurableSwatches recognizes them
+        $swatchTable = $connection->getTableName('eav_attribute_option_swatch');
+        $optionTable = $connection->getTableName('eav_attribute_option');
+        $optionValueTable = $connection->getTableName('eav_attribute_option_value');
+
+        // Reload the JSON data fresh to ensure we have all attributes
+        $jsonData = Mage::helper('core')->jsonDecode(file_get_contents($sampleDataDir . '/attributes.json'));
+        $swatchCount = 0;
+
+        // Get all select/multiselect attributes
+        foreach ($jsonData['catalog_product'] ?? [] as $attributeCode => $config) {
+            $inputType = $config['input'] ?? 'text';
+            if (!in_array($inputType, ['select', 'multiselect'])) {
+                continue;
+            }
+
+            $attribute = Mage::getModel('eav/entity_attribute')
+                ->loadByCode($entityTypeId, $attributeCode);
+
+            if (!$attribute->getId()) {
+                continue;
+            }
+
+            // Get all options for this attribute with their labels
+            $options = $connection->fetchAll(
+                $connection->select()
+                    ->from(['o' => $optionTable], ['option_id'])
+                    ->join(
+                        ['ov' => $optionValueTable],
+                        'ov.option_id = o.option_id AND ov.store_id = 0',
+                        ['value'],
+                    )
+                    ->where('o.attribute_id = ?', $attribute->getId()),
+            );
+
+            $attrSwatchCount = 0;
+            foreach ($options as $option) {
+                // Check if swatch already exists
+                $existingSwatch = $connection->fetchOne(
+                    $connection->select()
+                        ->from($swatchTable, ['value_id'])
+                        ->where('option_id = ?', $option['option_id']),
+                );
+
+                if (!$existingSwatch) {
+                    // Insert text swatch with the option label as value
+                    try {
+                        $connection->insert($swatchTable, [
+                            'option_id' => $option['option_id'],
+                            'value' => $option['value'], // Use label for text swatches
+                        ]);
+                        $swatchCount++;
+                        $attrSwatchCount++;
+                    } catch (\Exception $e) {
+                        // Silently skip duplicates
+                    }
+                }
+            }
+        }
+
+        $output->writeln("  Created {$swatchCount} swatches");
+
+        // Clear all caches and reset EAV config to ensure updated is_configurable values are used
+        Mage::app()->getCacheInstance()->flush();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+        // Force reload of EAV config
+        Mage::unregister('_singleton/eav/config');
+        // Also clear category collection cache
+        Mage::unregister('_resource_singleton/catalog/category_collection');
+
         $output->writeln("  Created {$attributeCount} attributes");
     }
 
@@ -1187,9 +1313,33 @@ class Install extends BaseMahoCommand
                 ->addAttributeToFilter('url_key', $catData['url_key'])
                 ->addAttributeToFilter('parent_id', $parentId);
 
+            // Resolve landing page CMS block identifier to ID
+            $landingPageId = null;
+            if (!empty($catData['landing_page'])) {
+                /** @var Mage_Cms_Model_Block $block */
+                $block = Mage::getModel('cms/block')->load($catData['landing_page'], 'identifier');
+                if ($block->getId()) {
+                    $landingPageId = $block->getId();
+                }
+            }
+
             if ($existing->getSize() > 0) {
-                $category = $existing->getFirstItem();
+                // Update existing category
+                $category = Mage::getModel('catalog/category')->load($existing->getFirstItem()->getId());
+                $category->setStoreId($storeId);
+                $category->addData([
+                    'is_active' => $catData['is_active'] ?? 1,
+                    'is_anchor' => $catData['is_anchor'] ?? 1,
+                    'include_in_menu' => $catData['include_in_menu'] ?? 1,
+                    'description' => $catData['description'] ?? '',
+                    'image' => $catData['image'] ?? null,
+                    'display_mode' => $catData['display_mode'] ?? 'PRODUCTS',
+                    'page_layout' => $catData['page_layout'] ?? null,
+                    'landing_page' => $landingPageId,
+                ]);
+                $category->save();
             } else {
+                // Create new category
                 /** @var Mage_Catalog_Model_Category $category */
                 $category = Mage::getModel('catalog/category');
                 $category->setStoreId($storeId);
@@ -1198,9 +1348,13 @@ class Install extends BaseMahoCommand
                     'name' => $catData['name'],
                     'url_key' => $catData['url_key'],
                     'is_active' => $catData['is_active'] ?? 1,
+                    'is_anchor' => $catData['is_anchor'] ?? 1,
                     'include_in_menu' => $catData['include_in_menu'] ?? 1,
                     'description' => $catData['description'] ?? '',
                     'image' => $catData['image'] ?? null,
+                    'display_mode' => $catData['display_mode'] ?? 'PRODUCTS',
+                    'page_layout' => $catData['page_layout'] ?? null,
+                    'landing_page' => $landingPageId,
                     'path' => Mage::getModel('catalog/category')->load($parentId)->getPath(),
                 ]);
 
@@ -1218,7 +1372,7 @@ class Install extends BaseMahoCommand
     }
 
     /**
-     * Import products from JSON
+     * Import products from JSON using ImportExport array adapter
      */
     private function importProductsFromJson(string $sampleDataDir, OutputInterface $output): void
     {
@@ -1232,30 +1386,397 @@ class Install extends BaseMahoCommand
             return;
         }
 
-        // Build category path to ID mapping
-        $categoryMap = $this->buildCategoryPathMap();
+        // Copy media files first
+        $this->copyMediaFiles($sampleDataDir, $output);
 
-        // First pass: create simple products (needed for configurable/bundle/grouped)
-        $simpleCount = 0;
-        $complexCount = 0;
+        // Convert JSON to import format
+        $importData = $this->convertProductsToImportFormat($data['products'], $sampleDataDir);
 
-        foreach ($data['products'] as $productData) {
-            if (in_array($productData['type'], ['simple', 'virtual', 'downloadable'])) {
-                $this->createProduct($productData, $categoryMap, $sampleDataDir);
-                $simpleCount++;
+        if (empty($importData)) {
+            $output->writeln('  No valid products to import');
+            return;
+        }
+
+        // Use ImportExport with array adapter
+        /** @var Mage_ImportExport_Model_Import $import */
+        $import = Mage::getModel('importexport/import');
+        $import->setData([
+            'entity' => 'catalog_product',
+            'behavior' => \Mage_ImportExport_Model_Import::BEHAVIOR_APPEND,
+        ]);
+
+        // Create array adapter with the data
+        $source = \Mage_ImportExport_Model_Import_Adapter::createArrayAdapter($importData);
+
+        // Set the source on entity adapter and validate
+        $entityAdapter = $import->getEntityAdapter();
+        $entityAdapter->setSource($source);
+
+        $validationResult = $entityAdapter->validateData();
+
+        if ($entityAdapter->getErrorsCount() > 0) {
+            $output->writeln('<comment>  Validation warnings:</comment>');
+            foreach ($entityAdapter->getErrorMessages() as $error => $rows) {
+                $output->writeln("    - {$error} (rows: " . implode(', ', array_slice($rows, 0, 5)) . ')');
             }
         }
 
-        // Second pass: create complex products
-        foreach ($data['products'] as $productData) {
-            if (in_array($productData['type'], ['configurable', 'bundle', 'grouped'])) {
-                $this->createProduct($productData, $categoryMap, $sampleDataDir);
-                $complexCount++;
+        if ($validationResult) {
+            // Import the data
+            $entityAdapter->importData();
+            $output->writeln("  Imported {$entityAdapter->getProcessedEntitiesCount()} products");
+
+            // Assign all products to default website
+            $this->assignProductsToWebsite($output);
+
+            // Assign additional categories
+            $this->assignAdditionalCategories($data['products'], $output);
+        } else {
+            $output->writeln('<error>  Product import validation failed</error>');
+        }
+    }
+
+    /**
+     * Assign all products to the default website
+     */
+    private function assignProductsToWebsite(OutputInterface $output): void
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $productWebsiteTable = $connection->getTableName('catalog_product_website');
+        $productTable = $connection->getTableName('catalog_product_entity');
+
+        // Get website ID from database (first non-admin website)
+        $websiteId = (int) $connection->fetchOne(
+            $connection->select()
+                ->from($connection->getTableName('core_website'), 'website_id')
+                ->where('website_id > 0')
+                ->order('sort_order ASC')
+                ->limit(1),
+        );
+        if (!$websiteId) {
+            $websiteId = 1;
+        }
+
+        // Insert products that are not yet assigned to the website
+        $sql = "INSERT IGNORE INTO {$productWebsiteTable} (product_id, website_id)
+                SELECT entity_id, {$websiteId} FROM {$productTable}";
+        $connection->query($sql);
+
+        $count = $connection->fetchOne("SELECT COUNT(*) FROM {$productWebsiteTable}");
+        $output->writeln("  Assigned {$count} products to website");
+    }
+
+    /**
+     * Assign additional categories to products after import
+     * @param array<int, array<string, mixed>> $products
+     */
+    private function assignAdditionalCategories(array $products, OutputInterface $output): void
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $categoryProductTable = $connection->getTableName('catalog_category_product');
+
+        // Build category path to ID map
+        $categoryPathMap = $this->buildCategoryPathMap();
+
+        // Build SKU to product ID map
+        $skuMap = [];
+        $result = $connection->fetchAll(
+            $connection->select()
+                ->from($connection->getTableName('catalog_product_entity'), ['entity_id', 'sku']),
+        );
+        foreach ($result as $row) {
+            $skuMap[$row['sku']] = (int) $row['entity_id'];
+        }
+
+        $assignmentCount = 0;
+        foreach ($products as $productData) {
+            $sku = $productData['sku'] ?? null;
+            $categories = $productData['categories'] ?? [];
+
+            if (!$sku || empty($categories) || count($categories) <= 1) {
+                continue;
+            }
+
+            $productId = $skuMap[$sku] ?? null;
+            if (!$productId) {
+                continue;
+            }
+
+            // Skip the first category (already assigned during import)
+            for ($i = 1; $i < count($categories); $i++) {
+                $categoryPath = $categories[$i];
+                $categoryId = $categoryPathMap[$categoryPath] ?? null;
+                if (!$categoryId) {
+                    continue;
+                }
+
+                // Check if assignment already exists
+                $exists = $connection->fetchOne(
+                    $connection->select()
+                        ->from($categoryProductTable, 'COUNT(*)')
+                        ->where('category_id = ?', $categoryId)
+                        ->where('product_id = ?', $productId),
+                );
+
+                if (!$exists) {
+                    $connection->insert($categoryProductTable, [
+                        'category_id' => $categoryId,
+                        'product_id' => $productId,
+                        'position' => 0,
+                    ]);
+                    $assignmentCount++;
+                }
             }
         }
 
-        $total = $simpleCount + $complexCount;
-        $output->writeln("  Imported {$total} products ({$simpleCount} simple, {$complexCount} complex)");
+        if ($assignmentCount > 0) {
+            $output->writeln("  Assigned {$assignmentCount} additional category associations");
+        }
+    }
+
+    /**
+     * Copy category media files from sample data to media directory
+     */
+    private function copyCategoryMediaFiles(string $sampleDataDir, OutputInterface $output): void
+    {
+        $sourceDir = $sampleDataDir . '/media/catalog/category';
+        $destDir = Mage::getBaseDir('media') . '/catalog/category';
+
+        if (!is_dir($sourceDir)) {
+            return;
+        }
+
+        $output->writeln('  Copying category media files...');
+
+        // Ensure destination directory exists
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0777, true);
+        }
+
+        $count = 0;
+        $files = scandir($sourceDir);
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+            $srcFile = $sourceDir . '/' . $file;
+            $destFile = $destDir . '/' . $file;
+            if (is_file($srcFile) && !file_exists($destFile)) {
+                copy($srcFile, $destFile);
+                $count++;
+            }
+        }
+
+        if ($count > 0) {
+            $output->writeln("  Copied {$count} category media files");
+        }
+    }
+
+    /**
+     * Copy media files from sample data to media directory
+     */
+    private function copyMediaFiles(string $sampleDataDir, OutputInterface $output): void
+    {
+        $sourceDir = $sampleDataDir . '/media/catalog/product';
+        // Copy to media/import for ImportExport module to process
+        $destDir = Mage::getBaseDir('media') . '/import';
+
+        if (!is_dir($sourceDir)) {
+            return;
+        }
+
+        $output->writeln('  Copying media files...');
+
+        // Ensure destination directory exists
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0777, true);
+        }
+
+        // Use recursive copy
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($sourceDir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST,
+        );
+
+        $count = 0;
+        foreach ($iterator as $item) {
+            $target = $destDir . '/' . $iterator->getSubPathname();
+            if ($item->isDir()) {
+                if (!is_dir($target)) {
+                    mkdir($target, 0777, true);
+                }
+            } else {
+                if (!file_exists($target)) {
+                    copy($item->getPathname(), $target);
+                    $count++;
+                }
+            }
+        }
+
+        $output->writeln("  Copied {$count} media files");
+    }
+
+    /**
+     * Convert JSON products to ImportExport format
+     * @param array<int, array<string, mixed>> $products
+     * @return array<int, array<string, mixed>>
+     */
+    private function convertProductsToImportFormat(array $products, string $sampleDataDir): array
+    {
+        // First pass: collect all possible columns
+        $allColumns = [
+            'sku', '_type', '_attribute_set', 'name', 'price', 'status', 'visibility',
+            'tax_class_id', 'description', 'short_description', 'weight', 'url_key',
+            '_product_websites', '_root_category', '_category', 'special_price', 'image', 'small_image',
+            'thumbnail', '_media_image', 'qty', 'is_in_stock', '_super_attribute_code',
+            '_super_products_sku', '_associated_sku',
+        ];
+
+        // Collect all attribute codes from products
+        foreach ($products as $productData) {
+            if (!empty($productData['attributes'])) {
+                foreach (array_keys($productData['attributes']) as $attrCode) {
+                    if (!in_array($attrCode, $allColumns)) {
+                        $allColumns[] = $attrCode;
+                    }
+                }
+            }
+        }
+
+        // Sort products: simple/virtual first, then configurable/grouped (which reference other products)
+        // This ensures child products exist before parent products try to link to them
+        $typeOrder = ['simple' => 1, 'virtual' => 2, 'configurable' => 3, 'grouped' => 4];
+        usort($products, function ($a, $b) use ($typeOrder) {
+            $aOrder = $typeOrder[$a['type'] ?? 'simple'] ?? 5;
+            $bOrder = $typeOrder[$b['type'] ?? 'simple'] ?? 5;
+            return $aOrder <=> $bOrder;
+        });
+
+        // Second pass: build rows with all columns
+        $importData = [];
+
+        foreach ($products as $productData) {
+            // Start with empty row having all columns
+            $row = array_fill_keys($allColumns, '');
+
+            // Fill in the data
+            $row['sku'] = $productData['sku'];
+            $row['_type'] = $productData['type'];
+            $row['_attribute_set'] = $productData['attribute_set'] ?? 'Default';
+            $row['name'] = $productData['name'];
+            $row['price'] = $productData['price'] ?? 0;
+            $row['status'] = $productData['status'] ?? 1;
+            $row['visibility'] = $productData['visibility'] ?? 4;
+            $row['tax_class_id'] = $productData['tax_class_id'] ?? 0;
+            $row['description'] = $productData['description'] ?? '';
+            $row['short_description'] = $productData['short_description'] ?? '';
+            $row['weight'] = $productData['weight'] ?? '';
+            $row['url_key'] = $productData['url_key'] ?? '';
+            // Skip _product_websites - let it be assigned during post-import
+            $row['_product_websites'] = '';
+
+            // Categories - need to add a row for each category
+            $categories = $productData['categories'] ?? [];
+            $row['_root_category'] = 'Default Category';
+            $row['_category'] = !empty($categories) ? $categories[0] : '';
+
+            // Custom attributes
+            if (!empty($productData['attributes'])) {
+                foreach ($productData['attributes'] as $attrCode => $value) {
+                    $row[$attrCode] = $value;
+                }
+            }
+
+            // Special price
+            if (isset($productData['special_price'])) {
+                $row['special_price'] = $productData['special_price'];
+            }
+
+            // Images - strip leading slash for ImportExport module
+            if (!empty($productData['images'])) {
+                if (!empty($productData['images']['image'])) {
+                    $row['image'] = ltrim($productData['images']['image'], '/');
+                    $row['small_image'] = ltrim($productData['images']['small_image'] ?? $productData['images']['image'], '/');
+                    $row['thumbnail'] = ltrim($productData['images']['thumbnail'] ?? $productData['images']['image'], '/');
+                }
+                if (!empty($productData['images']['gallery'])) {
+                    $gallery = array_map(fn ($img) => ltrim($img, '/'), $productData['images']['gallery']);
+                    $row['_media_image'] = implode(',', $gallery);
+                }
+            }
+
+            // Stock
+            if (!empty($productData['stock'])) {
+                $row['qty'] = $productData['stock']['qty'] ?? 0;
+                $row['is_in_stock'] = $productData['stock']['is_in_stock'] ?? 1;
+            }
+
+            // For configurable products, add super attributes and child products as continuation rows
+            if ($productData['type'] === 'configurable') {
+                $superAttrCodes = [];
+                $childSkus = [];
+
+                // Collect super attributes
+                if (!empty($productData['configurable_attributes'])) {
+                    $superAttrCodes = array_map(function ($attr) {
+                        return is_array($attr) ? ($attr['attribute_code'] ?? '') : $attr;
+                    }, $productData['configurable_attributes']);
+                    $superAttrCodes = array_values(array_filter($superAttrCodes));
+                }
+
+                // Collect child SKUs
+                if (!empty($productData['associated_skus'])) {
+                    $childSkus = $productData['associated_skus'];
+                }
+
+                // First row has main data + first super attribute + first child SKU
+                if (!empty($superAttrCodes)) {
+                    $row['_super_attribute_code'] = array_shift($superAttrCodes);
+                }
+                if (!empty($childSkus)) {
+                    $row['_super_products_sku'] = array_shift($childSkus);
+                }
+
+                $importData[] = $row;
+
+                // Add continuation rows for remaining super attributes and child SKUs
+                // Continuation rows have EMPTY sku to indicate they belong to previous product
+                // Must use full column template to ensure array_combine works in adapter
+                $maxRows = max(count($superAttrCodes), count($childSkus));
+                for ($i = 0; $i < $maxRows; $i++) {
+                    $contRow = array_fill_keys($allColumns, '');  // Full template with empty values
+                    $contRow['sku'] = '';  // Empty SKU = continuation row
+                    if (isset($superAttrCodes[$i])) {
+                        $contRow['_super_attribute_code'] = $superAttrCodes[$i];
+                    }
+                    if (isset($childSkus[$i])) {
+                        $contRow['_super_products_sku'] = $childSkus[$i];
+                    }
+                    $importData[] = $contRow;
+                }
+            } elseif ($productData['type'] === 'grouped') {
+                // For grouped products, first row has main data + first associated SKU
+                $assocSkus = $productData['associated_skus'] ?? [];
+                if (!empty($assocSkus)) {
+                    $row['_associated_sku'] = array_shift($assocSkus);
+                }
+
+                $importData[] = $row;
+
+                // Add continuation rows for remaining associated SKUs
+                foreach ($assocSkus as $assocSku) {
+                    $contRow = array_fill_keys($allColumns, '');  // Full template with empty values
+                    $contRow['sku'] = '';  // Empty SKU = continuation row
+                    $contRow['_associated_sku'] = $assocSku;
+                    $importData[] = $contRow;
+                }
+            } else {
+                // Simple, virtual, etc. - just add the main row
+                $importData[] = $row;
+            }
+        }
+
+        return $importData;
     }
 
     /**
@@ -1456,42 +1977,102 @@ class Install extends BaseMahoCommand
      */
     private function addProductImages(Mage_Catalog_Model_Product $product, array $images, string $sampleDataDir): void
     {
-        $mediaDir = $sampleDataDir . '/media/catalog/product';
+        $productId = $product->getId();
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $resource = Mage::getSingleton('core/resource');
 
-        // Add main images
+        $mediaDir = $sampleDataDir . '/media/catalog/product';
+        $destMediaDir = Mage::getBaseDir('media') . '/catalog/product';
+
+        // Get media gallery attribute ID
+        $eavAttribute = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'media_gallery');
+        $galleryAttributeId = $eavAttribute->getAttributeId();
+
+        $galleryTable = $resource->getTableName('catalog/product_attribute_media_gallery');
+        $galleryValueTable = $resource->getTableName('catalog/product_attribute_media_gallery_value');
+        $varcharTable = $resource->getTableName('catalog_product_entity_varchar');
+
+        $addedFiles = [];
+        $position = 0;
+
+        // Build map of file -> array of image types
+        $allImages = [];
         foreach (['image', 'small_image', 'thumbnail'] as $imageType) {
             if (!empty($images[$imageType])) {
-                $imagePath = $mediaDir . $images[$imageType];
-                if (file_exists($imagePath)) {
-                    try {
-                        $product->addImageToMediaGallery(
-                            $imagePath,
-                            [$imageType],
-                            false,
-                            false,
-                        );
-                    } catch (Exception $e) {
-                        // Image might already exist
-                    }
+                $file = $images[$imageType];
+                if (!isset($allImages[$file])) {
+                    $allImages[$file] = [];
                 }
+                $allImages[$file][] = $imageType;
             }
         }
-
-        // Add gallery images
         if (!empty($images['gallery'])) {
             foreach ($images['gallery'] as $galleryImage) {
-                $imagePath = $mediaDir . $galleryImage;
-                if (file_exists($imagePath)) {
-                    try {
-                        $product->addImageToMediaGallery($imagePath, null, false, false);
-                    } catch (Exception $e) {
-                        // Image might already exist
-                    }
+                if (!isset($allImages[$galleryImage])) {
+                    $allImages[$galleryImage] = []; // Gallery only, no attributes
                 }
             }
         }
 
-        $product->save();
+        foreach ($allImages as $imageFile => $imageTypes) {
+            $sourcePath = $mediaDir . $imageFile;
+            if (!file_exists($sourcePath)) {
+                continue;
+            }
+
+            // Copy file to destination if not already there
+            $destPath = $destMediaDir . $imageFile;
+            if (!file_exists($destPath)) {
+                $destDir = dirname($destPath);
+                if (!is_dir($destDir)) {
+                    mkdir($destDir, 0777, true);
+                }
+                copy($sourcePath, $destPath);
+            }
+
+            // Insert into media gallery table if not already added
+            if (!isset($addedFiles[$imageFile])) {
+                $position++;
+                $connection->insert($galleryTable, [
+                    'attribute_id' => $galleryAttributeId,
+                    'entity_id' => $productId,
+                    'value' => $imageFile,
+                ]);
+                $valueId = $connection->lastInsertId();
+
+                // Insert gallery value (store-level data)
+                $connection->insert($galleryValueTable, [
+                    'value_id' => $valueId,
+                    'store_id' => 0,
+                    'label' => null,
+                    'position' => $position,
+                    'disabled' => 0,
+                ]);
+
+                $addedFiles[$imageFile] = true;
+            }
+
+            // Set image/small_image/thumbnail attribute values for all types
+            foreach ($imageTypes as $imageType) {
+                $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_product', $imageType);
+                if ($attribute && $attribute->getId()) {
+                    // Delete existing value
+                    $connection->delete($varcharTable, [
+                        'entity_id = ?' => $productId,
+                        'attribute_id = ?' => $attribute->getId(),
+                        'store_id = ?' => 0,
+                    ]);
+
+                    // Insert new value
+                    $connection->insert($varcharTable, [
+                        'entity_id' => $productId,
+                        'attribute_id' => $attribute->getId(),
+                        'store_id' => 0,
+                        'value' => $imageFile,
+                    ]);
+                }
+            }
+        }
     }
 
     /**

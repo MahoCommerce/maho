@@ -75,6 +75,7 @@ class SampleDataExport extends BaseMahoCommand
             $this->exportTierPrices($outputDir, $output);
             $this->exportCustomOptions($outputDir, $output);
             $this->exportDynamicCategoryRules($outputDir, $output);
+            $this->exportMedia($outputDir, $output);
         } catch (Exception $e) {
             $output->writeln("<error>Export failed: {$e->getMessage()}</error>");
             return Command::FAILURE;
@@ -337,6 +338,7 @@ class SampleDataExport extends BaseMahoCommand
                 'name' => $category->getName(),
                 'url_key' => $category->getUrlKey(),
                 'is_active' => (int) $category->getIsActive(),
+                'is_anchor' => (int) $category->getIsAnchor(),
                 'include_in_menu' => (int) $category->getIncludeInMenu(),
             ];
 
@@ -345,6 +347,22 @@ class SampleDataExport extends BaseMahoCommand
             }
             if ($category->getImage()) {
                 $catData['image'] = $category->getImage();
+            }
+            // Export display mode if not default (PRODUCTS)
+            if ($category->getDisplayMode() && $category->getDisplayMode() !== 'PRODUCTS') {
+                $catData['display_mode'] = $category->getDisplayMode();
+            }
+            // Export landing page CMS block identifier
+            if ($category->getLandingPage()) {
+                /** @var Mage_Cms_Model_Block $block */
+                $block = Mage::getModel('cms/block')->load($category->getLandingPage());
+                if ($block->getId()) {
+                    $catData['landing_page'] = $block->getIdentifier();
+                }
+            }
+            // Export page layout if set
+            if ($category->getPageLayout()) {
+                $catData['page_layout'] = $category->getPageLayout();
             }
 
             $subChildren = $this->buildCategoryTree($category);
@@ -1360,6 +1378,49 @@ class SampleDataExport extends BaseMahoCommand
 
         $this->saveJson($outputDir . '/dynamic_category_rules.json', $data);
         $output->writeln('  Saved: dynamic_category_rules.json (' . count($data['dynamic_category_rules']) . ' rules)');
+    }
+
+    private function exportMedia(string $outputDir, OutputInterface $output): void
+    {
+        $output->writeln('<info>Exporting media files...</info>');
+
+        $sourceDir = Mage::getBaseDir('media') . '/catalog/product';
+        $destDir = $outputDir . '/media/catalog/product';
+
+        if (!is_dir($sourceDir)) {
+            $output->writeln('  No media files to export');
+            return;
+        }
+
+        $count = $this->copyDirectory($sourceDir, $destDir);
+        $output->writeln("  Copied: {$count} media files");
+    }
+
+    private function copyDirectory(string $source, string $dest): int
+    {
+        if (!is_dir($dest)) {
+            mkdir($dest, 0755, true);
+        }
+
+        $count = 0;
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST,
+        );
+
+        foreach ($iterator as $item) {
+            $destPath = $dest . '/' . $iterator->getSubPathname();
+            if ($item->isDir()) {
+                if (!is_dir($destPath)) {
+                    mkdir($destPath, 0755, true);
+                }
+            } else {
+                copy($item->getPathname(), $destPath);
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**
