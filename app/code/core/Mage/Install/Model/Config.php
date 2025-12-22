@@ -32,7 +32,7 @@ class Mage_Install_Model_Config extends Varien_Simplexml_Config
     /**
      * Get array of wizard steps
      *
-     * [$inndex => Varien_Object ]
+     * [$index => Varien_Object ]
      *
      * @return array
      */

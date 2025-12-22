@@ -15181,13 +15181,13 @@ parameters:
 			path: app/code/core/Mage/Install/Block/Begin.php
 
 		-
-			rawMessage: 'Method Mage_Install_Block_Config::getSessionSaveOptions() has no return type specified.'
+			rawMessage: 'Method Mage_Install_Block_Configuration::getSessionSaveOptions() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Install/Block/Config.php
 
 		-
-			rawMessage: 'Method Mage_Install_Block_Config::getSessionSaveSelect() has no return type specified.'
+			rawMessage: 'Method Mage_Install_Block_Configuration::getSessionSaveSelect() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Install/Block/Config.php
