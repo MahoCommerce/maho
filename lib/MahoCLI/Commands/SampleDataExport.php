@@ -398,6 +398,7 @@ class SampleDataExport extends BaseMahoCommand
                 'type' => $product->getTypeId(),
                 'attribute_set' => $this->getAttributeSetName((int) $product->getAttributeSetId()),
                 'name' => $product->getName(),
+                'url_key' => $product->getUrlKey(),
                 'price' => (float) $product->getPrice(),
                 'status' => (int) $product->getStatus(),
                 'visibility' => (int) $product->getVisibility(),

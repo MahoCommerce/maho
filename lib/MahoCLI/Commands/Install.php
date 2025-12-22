@@ -71,6 +71,7 @@ class Install extends BaseMahoCommand
 
         // Sample data
         $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data');
+        $this->addOption('sample_data_path', null, InputOption::VALUE_OPTIONAL, 'Path to local sample data directory (skips download)');
 
         // Force option
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Force reinstallation - drops database and removes local.xml');
@@ -128,52 +129,88 @@ class Install extends BaseMahoCommand
         $output->writeln('');
 
         // Download and decompress sample data
-        if ($input->getOption('sample_data')) {
-            $output->writeln('<info>Downloading sample data...</info>');
-
-            // Get Maho version and determine the corresponding branch
-            $mahoVersion = Mage::getVersion(); // e.g., "25.9.0"
-            $versionParts = explode('.', $mahoVersion);
-            $branchVersion = "{$versionParts[0]}.{$versionParts[1]}"; // e.g., "25.9"
-
-            $sampleDataUrl = "https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/{$branchVersion}.tar.gz";
-            $tempFile = tempnam(sys_get_temp_dir(), 'maho_sample_data');
+        $sampleDataPath = $input->getOption('sample_data_path');
+        if ($input->getOption('sample_data') || $sampleDataPath) {
             $targetDir = Mage::getBaseDir();
+            $cleanupDir = null; // Directory to clean up after import (only for downloaded data)
+            $tempFile = null; // Temp file to clean up (only for downloaded data)
 
-            // Download the file
-            if (file_put_contents($tempFile, file_get_contents($sampleDataUrl)) === false) {
-                $output->writeln('<error>Failed to download sample data</error>');
-                return Command::FAILURE;
-            }
-
-            $output->writeln('<info>Extracting and copying sample data files...</info>');
-
-            // Extract the archive using tar
-            $extractCommand = "tar -xzf $tempFile -C $targetDir";
-            exec($extractCommand, $extractOutput, $extractReturnVar);
-
-            if ($extractReturnVar !== 0) {
-                $output->writeln("<error>Failed to extract sample data. tar command returned: $extractReturnVar</error>");
-                foreach ($extractOutput as $line) {
-                    $output->writeln($line);
+            if ($sampleDataPath) {
+                // Use provided local path
+                $sampleDataPath = rtrim($sampleDataPath, '/');
+                if (!is_dir($sampleDataPath)) {
+                    $output->writeln("<error>Sample data path does not exist: {$sampleDataPath}</error>");
+                    return Command::FAILURE;
                 }
-                return Command::FAILURE;
-            }
+                $output->writeln("<info>Using local sample data from: {$sampleDataPath}</info>");
+                $sampleDataDir = $sampleDataPath;
 
-            // Copy media files
-            $sampleDataDirName = "maho-sample-data-{$branchVersion}";
-            $sourceMediaDir = $targetDir . "/{$sampleDataDirName}/media";
-            $targetMediaDir = $targetDir . '/public/media';
+                // Copy media files from local path
+                $sourceMediaDir = $sampleDataDir . '/media';
+                if (is_dir($sourceMediaDir)) {
+                    $output->writeln('<info>Copying media files...</info>');
+                    $targetMediaDir = $targetDir . '/public/media';
+                    $copyCommand = "cp -R $sourceMediaDir/* $targetMediaDir/";
+                    exec($copyCommand, $copyOutput, $copyReturnVar);
 
-            $copyCommand = "cp -R $sourceMediaDir/* $targetMediaDir/";
-            exec($copyCommand, $copyOutput, $copyReturnVar);
-
-            if ($copyReturnVar !== 0) {
-                $output->writeln("<error>Failed to copy media files. cp command returned: $copyReturnVar</error>");
-                foreach ($copyOutput as $line) {
-                    $output->writeln($line);
+                    if ($copyReturnVar !== 0) {
+                        $output->writeln("<error>Failed to copy media files. cp command returned: $copyReturnVar</error>");
+                        foreach ($copyOutput as $line) {
+                            $output->writeln($line);
+                        }
+                        return Command::FAILURE;
+                    }
                 }
-                return Command::FAILURE;
+            } else {
+                // Download from GitHub
+                $output->writeln('<info>Downloading sample data...</info>');
+
+                // Get Maho version and determine the corresponding branch
+                $mahoVersion = Mage::getVersion(); // e.g., "25.9.0"
+                $versionParts = explode('.', $mahoVersion);
+                $branchVersion = "{$versionParts[0]}.{$versionParts[1]}"; // e.g., "25.9"
+
+                $sampleDataUrl = "https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/{$branchVersion}.tar.gz";
+                $tempFile = tempnam(sys_get_temp_dir(), 'maho_sample_data');
+
+                // Download the file
+                if (file_put_contents($tempFile, file_get_contents($sampleDataUrl)) === false) {
+                    $output->writeln('<error>Failed to download sample data</error>');
+                    return Command::FAILURE;
+                }
+
+                $output->writeln('<info>Extracting and copying sample data files...</info>');
+
+                // Extract the archive using tar
+                $extractCommand = "tar -xzf $tempFile -C $targetDir";
+                exec($extractCommand, $extractOutput, $extractReturnVar);
+
+                if ($extractReturnVar !== 0) {
+                    $output->writeln("<error>Failed to extract sample data. tar command returned: $extractReturnVar</error>");
+                    foreach ($extractOutput as $line) {
+                        $output->writeln($line);
+                    }
+                    return Command::FAILURE;
+                }
+
+                // Copy media files
+                $sampleDataDirName = "maho-sample-data-{$branchVersion}";
+                $sourceMediaDir = $targetDir . "/{$sampleDataDirName}/media";
+                $targetMediaDir = $targetDir . '/public/media';
+
+                $copyCommand = "cp -R $sourceMediaDir/* $targetMediaDir/";
+                exec($copyCommand, $copyOutput, $copyReturnVar);
+
+                if ($copyReturnVar !== 0) {
+                    $output->writeln("<error>Failed to copy media files. cp command returned: $copyReturnVar</error>");
+                    foreach ($copyOutput as $line) {
+                        $output->writeln($line);
+                    }
+                    return Command::FAILURE;
+                }
+
+                $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
+                $cleanupDir = $sampleDataDir;
             }
 
             $output->writeln('<info>Installing sample database</info>');
@@ -183,7 +220,6 @@ class Install extends BaseMahoCommand
             $dbUser = $input->getOption('db_user');
             $dbPass = $input->getOption('db_pass');
             $dbEngine = $input->getOption('db_engine') ?? 'mysql';
-            $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
             // Detect format: JSON (new) or SQL (legacy)
             $useJsonFormat = file_exists($sampleDataDir . '/attributes.json');
@@ -317,17 +353,21 @@ class Install extends BaseMahoCommand
             $output->writeln('<info>Sample data, media files, and database content installed successfully</info>');
             $output->writeln('<info>Please run ./maho index:reindex:all && ./maho cache:flush</info>');
 
-            // Clean up
-            unlink($tempFile);
-            $rmCommand = 'rm -rf ' . escapeshellarg($targetDir . "/{$sampleDataDirName}");
-            exec($rmCommand, $rmOutput, $rmReturnVar);
-
-            if ($rmReturnVar !== 0) {
-                $output->writeln("<error>Failed to remove temporary files. rm command returned: $rmReturnVar</error>");
-                foreach ($rmOutput as $line) {
-                    $output->writeln($line);
+            // Clean up downloaded files (not when using local path)
+            if ($cleanupDir !== null) {
+                if ($tempFile !== null && file_exists($tempFile)) {
+                    unlink($tempFile);
                 }
-                // We don't return FAILURE here as the installation itself was successful
+                $rmCommand = 'rm -rf ' . escapeshellarg($cleanupDir);
+                exec($rmCommand, $rmOutput, $rmReturnVar);
+
+                if ($rmReturnVar !== 0) {
+                    $output->writeln("<error>Failed to remove temporary files. rm command returned: $rmReturnVar</error>");
+                    foreach ($rmOutput as $line) {
+                        $output->writeln($line);
+                    }
+                    // We don't return FAILURE here as the installation itself was successful
+                }
             }
         }
 
@@ -574,14 +614,16 @@ class Install extends BaseMahoCommand
             $this->importPermissionBlockFromJson($sampleDataDir, $output);
         }
 
-        // 3. Create attribute sets
-        if (file_exists($sampleDataDir . '/attribute_sets.json')) {
-            $this->createAttributeSetsFromJson($sampleDataDir, $output);
-        }
-
-        // 4. Create custom attributes
+        // 3. Create custom attributes first (before attribute sets)
         if (file_exists($sampleDataDir . '/attributes.json')) {
             $this->createAttributesFromJson($sampleDataDir, $output);
+            // Clear EAV cache so products can see the new attributes
+            $this->clearEavAttributeCache($output);
+        }
+
+        // 4. Create attribute sets (assigns attributes including the newly created ones)
+        if (file_exists($sampleDataDir . '/attribute_sets.json')) {
+            $this->createAttributeSetsFromJson($sampleDataDir, $output);
         }
 
         // 5. Import categories
@@ -860,7 +902,20 @@ class Install extends BaseMahoCommand
 
         $entityTypeId = Mage::getModel('eav/entity')->setType('catalog_product')->getTypeId();
         $defaultSetId = Mage::getModel('catalog/product')->getDefaultAttributeSetId();
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $entityAttrTable = $connection->getTableName('eav_entity_attribute');
         $setCount = 0;
+
+        // Build attribute code to ID map
+        $attributeIdMap = [];
+        $attrRows = $connection->fetchAll(
+            $connection->select()
+                ->from($connection->getTableName('eav_attribute'), ['attribute_id', 'attribute_code'])
+                ->where('entity_type_id = ?', $entityTypeId),
+        );
+        foreach ($attrRows as $row) {
+            $attributeIdMap[$row['attribute_code']] = (int) $row['attribute_id'];
+        }
 
         foreach ($data['attribute_sets'] as $setData) {
             // Check if attribute set already exists
@@ -883,12 +938,14 @@ class Install extends BaseMahoCommand
                 $setCount++;
             }
 
+            $attributeSetId = (int) $attributeSet->getId();
+
             // Process groups and attribute assignments
             foreach ($setData['groups'] ?? [] as $groupData) {
                 // Find or create the group
                 /** @var \Mage_Eav_Model_Resource_Entity_Attribute_Group_Collection $existingGroups */
                 $existingGroups = Mage::getModel('eav/entity_attribute_group')->getCollection()
-                    ->setAttributeSetFilter($attributeSet->getId())
+                    ->setAttributeSetFilter($attributeSetId)
                     ->addFieldToFilter('attribute_group_name', $groupData['name']);
 
                 if ($existingGroups->getSize() > 0) {
@@ -896,23 +953,47 @@ class Install extends BaseMahoCommand
                 } else {
                     /** @var \Mage_Eav_Model_Entity_Attribute_Group $group */
                     $group = Mage::getModel('eav/entity_attribute_group');
-                    $group->setAttributeSetId($attributeSet->getId());
+                    $group->setAttributeSetId($attributeSetId);
                     $group->setAttributeGroupName($groupData['name']);
                     $group->setSortOrder($groupData['sort_order'] ?? 0);
                     $group->save();
                 }
 
-                // Assign attributes to this group
-                foreach ($groupData['attributes'] ?? [] as $attrData) {
-                    $attribute = Mage::getModel('eav/entity_attribute')
-                        ->loadByCode($entityTypeId, $attrData['code']);
+                $groupId = (int) $group->getId();
 
-                    if ($attribute->getId()) {
-                        /** @var \Mage_Eav_Model_Entity_Attribute $attribute */
-                        $attribute->setAttributeSetId($attributeSet->getId());
-                        $attribute->setAttributeGroupId($group->getId());
-                        $attribute->setSortOrder($attrData['sort_order'] ?? 0);
-                        $attribute->save();
+                // Assign attributes to this group using direct DB operations
+                foreach ($groupData['attributes'] ?? [] as $attrData) {
+                    $attributeId = $attributeIdMap[$attrData['code']] ?? null;
+                    if (!$attributeId) {
+                        continue;
+                    }
+
+                    // Check if assignment already exists
+                    $exists = $connection->fetchOne(
+                        $connection->select()
+                            ->from($entityAttrTable, ['entity_attribute_id'])
+                            ->where('entity_type_id = ?', $entityTypeId)
+                            ->where('attribute_set_id = ?', $attributeSetId)
+                            ->where('attribute_id = ?', $attributeId),
+                    );
+
+                    if ($exists) {
+                        // Update existing assignment
+                        $connection->update($entityAttrTable, [
+                            'attribute_group_id' => $groupId,
+                            'sort_order' => $attrData['sort_order'] ?? 0,
+                        ], [
+                            'entity_attribute_id = ?' => $exists,
+                        ]);
+                    } else {
+                        // Create new assignment
+                        $connection->insert($entityAttrTable, [
+                            'entity_type_id' => $entityTypeId,
+                            'attribute_set_id' => $attributeSetId,
+                            'attribute_group_id' => $groupId,
+                            'attribute_id' => $attributeId,
+                            'sort_order' => $attrData['sort_order'] ?? 0,
+                        ]);
                     }
                 }
             }
@@ -937,7 +1018,7 @@ class Install extends BaseMahoCommand
         }
 
         /** @var \Mage_Catalog_Model_Resource_Setup $installer */
-        $installer = Mage::getResourceModel('catalog/setup', ['resourceName' => 'core_setup']);
+        $installer = new \Mage_Catalog_Model_Resource_Setup('core_setup');
         $entityTypeId = $installer->getEntityTypeId('catalog_product');
         $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
@@ -961,6 +1042,13 @@ class Install extends BaseMahoCommand
             $isNewAttribute = !$attribute->getId();
 
             if (!$isNewAttribute) {
+                // Update source model for existing select/multiselect attributes if missing
+                $inputType = $config['input'] ?? 'text';
+                if (in_array($inputType, ['select', 'multiselect']) && !$attribute->getSourceModel()) {
+                    $attribute->setSourceModel('eav/entity_attribute_source_table');
+                    $attribute->save();
+                }
+
                 // Still process store labels for existing attributes
                 if (!empty($config['store_labels'])) {
                     $storeLabelsToAdd[$attributeCode] = $config['store_labels'];
@@ -968,9 +1056,10 @@ class Install extends BaseMahoCommand
                 continue;
             }
 
+            $inputType = $config['input'] ?? 'text';
             $attributeData = [
                 'type' => $config['type'] ?? 'varchar',
-                'input' => $config['input'] ?? 'text',
+                'input' => $inputType,
                 'label' => $config['label'] ?? $attributeCode,
                 'global' => $config['global'] ?? \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
                 'visible' => $config['visible'] ?? true,
@@ -984,6 +1073,14 @@ class Install extends BaseMahoCommand
                 'is_configurable' => $config['is_configurable'] ?? false,
             ];
 
+            // Add source and backend models for select/multiselect attributes
+            if (in_array($inputType, ['select', 'multiselect'])) {
+                $attributeData['source'] = 'eav/entity_attribute_source_table';
+                if ($inputType === 'multiselect') {
+                    $attributeData['backend'] = 'eav/entity_attribute_backend_array';
+                }
+            }
+
             // Add options if present
             if (!empty($config['option']['values'])) {
                 $optionValues = [];
@@ -995,6 +1092,19 @@ class Install extends BaseMahoCommand
 
             $installer->addAttribute('catalog_product', $attributeCode, $attributeData);
             $attributeCount++;
+
+            // For select/multiselect, ensure source model is set in DB
+            if (in_array($inputType, ['select', 'multiselect'])) {
+                $newAttribute = Mage::getModel('eav/entity_attribute')
+                    ->loadByCode($entityTypeId, $attributeCode);
+                if ($newAttribute->getId() && !$newAttribute->getSourceModel()) {
+                    $connection->update(
+                        $connection->getTableName('eav_attribute'),
+                        ['source_model' => 'eav/entity_attribute_source_table'],
+                        ['attribute_id = ?' => $newAttribute->getId()],
+                    );
+                }
+            }
 
             // Store labels to add after attribute creation
             if (!empty($config['store_labels'])) {
@@ -1207,8 +1317,9 @@ class Install extends BaseMahoCommand
                 $website = Mage::app()->getWebsite($websiteCode);
                 $websiteIds[] = $website->getId();
             } catch (Exception $e) {
-                // Use default website
-                $websiteIds[] = Mage::app()->getDefaultStoreView()->getWebsiteId();
+                // Use default website (ID 1 is typically the main website)
+                $defaultStore = Mage::app()->getDefaultStoreView();
+                $websiteIds[] = $defaultStore ? $defaultStore->getWebsiteId() : 1;
             }
         }
 
@@ -1220,11 +1331,18 @@ class Install extends BaseMahoCommand
             }
         }
 
+        // Generate url_key from name if not provided
+        $urlKey = $productData['url_key'] ?? '';
+        if (empty($urlKey)) {
+            $urlKey = Mage::getModel('catalog/product_url')->formatUrlKey($productData['name']);
+        }
+
         $product->setData([
             'sku' => $productData['sku'],
             'type_id' => $productData['type'],
             'attribute_set_id' => $attributeSetId,
             'name' => $productData['name'],
+            'url_key' => $urlKey,
             'description' => $productData['description'] ?? '',
             'short_description' => $productData['short_description'] ?? '',
             'price' => $productData['price'] ?? 0,
@@ -1257,6 +1375,23 @@ class Install extends BaseMahoCommand
             ]);
         }
 
+        // Set downloadable data BEFORE first save to avoid double-save issues
+        if ($productData['type'] === 'downloadable' && !empty($productData['links'])) {
+            $linksData = [];
+            foreach ($productData['links'] as $linkData) {
+                $linksData[] = [
+                    'title' => $linkData['title'],
+                    'price' => $linkData['price'] ?? 0,
+                    'number_of_downloads' => $linkData['downloads'] ?? 0,
+                    'is_shareable' => 2, // Use config
+                    'link_type' => 'file',
+                    'link_file' => $linkData['file'],
+                ];
+            }
+            $product->setDownloadableData(['link' => $linksData]);
+            $product->setLinksExist(true);
+        }
+
         $product->save();
 
         // Handle images after save
@@ -1264,7 +1399,7 @@ class Install extends BaseMahoCommand
             $this->addProductImages($product, $productData['images'], $sampleDataDir);
         }
 
-        // Handle product type specific data
+        // Handle product type specific data (excluding downloadable which is handled above)
         switch ($productData['type']) {
             case 'configurable':
                 $this->setupConfigurableProduct($product, $productData);
@@ -1274,9 +1409,6 @@ class Install extends BaseMahoCommand
                 break;
             case 'grouped':
                 $this->setupGroupedProduct($product, $productData);
-                break;
-            case 'downloadable':
-                $this->setupDownloadableProduct($product, $productData);
                 break;
         }
     }
@@ -1371,12 +1503,14 @@ class Install extends BaseMahoCommand
             return;
         }
 
+        $productId = $product->getId();
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
         // Get configurable attribute IDs and pricing data
-        $attributeIds = [];
+        $attributes = [];
         $pricingByAttrCode = [];
 
         foreach ($productData['configurable_attributes'] as $attrData) {
-            // Support both old format (string) and new format (array with attribute_code)
             $attrCode = is_array($attrData) ? ($attrData['attribute_code'] ?? '') : $attrData;
             if (empty($attrCode)) {
                 continue;
@@ -1385,16 +1519,15 @@ class Install extends BaseMahoCommand
             $attribute = Mage::getModel('eav/entity_attribute')
                 ->loadByCode('catalog_product', $attrCode);
             if ($attribute->getId()) {
-                $attributeIds[] = $attribute->getId();
+                $attributes[] = $attribute;
 
-                // Store pricing data if available
                 if (is_array($attrData) && !empty($attrData['pricing'])) {
                     $pricingByAttrCode[$attrCode] = $attrData['pricing'];
                 }
             }
         }
 
-        if (empty($attributeIds)) {
+        if (empty($attributes)) {
             return;
         }
 
@@ -1411,45 +1544,69 @@ class Install extends BaseMahoCommand
             return;
         }
 
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $configurableType */
-        $configurableType = $product->getTypeInstance(true);
-        $configurableType->setUsedProductAttributeIds($attributeIds, $product);
+        $superAttrTable = $connection->getTableName('catalog_product_super_attribute');
+        $superAttrLabelTable = $connection->getTableName('catalog_product_super_attribute_label');
+        $superAttrPricingTable = $connection->getTableName('catalog_product_super_attribute_pricing');
+        $superLinkTable = $connection->getTableName('catalog_product_super_link');
 
-        $configurableAttributesData = $configurableType->getConfigurableAttributesAsArray($product);
+        // Insert super attributes
+        $position = 0;
+        foreach ($attributes as $attribute) {
+            $attrCode = $attribute->getAttributeCode();
 
-        // Apply pricing data if available
-        if (!empty($pricingByAttrCode)) {
-            foreach ($configurableAttributesData as &$attrData) {
-                $attrCode = $attrData['attribute_code'] ?? '';
-                if (isset($pricingByAttrCode[$attrCode]) && !empty($attrData['values'])) {
-                    $pricingData = $pricingByAttrCode[$attrCode];
-                    // Map pricing by label
-                    $pricingByLabel = [];
-                    foreach ($pricingData as $p) {
-                        $pricingByLabel[$p['value_label']] = $p;
-                    }
+            // Insert super attribute
+            $connection->insert($superAttrTable, [
+                'product_id' => $productId,
+                'attribute_id' => $attribute->getId(),
+                'position' => $position++,
+            ]);
 
-                    foreach ($attrData['values'] as &$valueData) {
-                        $label = $valueData['label'] ?? '';
-                        if (isset($pricingByLabel[$label])) {
-                            $valueData['pricing_value'] = $pricingByLabel[$label]['pricing_value'];
-                            $valueData['is_percent'] = $pricingByLabel[$label]['is_percent'];
-                        }
+            $superAttrId = $connection->lastInsertId($superAttrTable);
+
+            // Insert label
+            $connection->insert($superAttrLabelTable, [
+                'product_super_attribute_id' => $superAttrId,
+                'store_id' => 0,
+                'use_default' => 0,
+                'value' => $attribute->getFrontendLabel(),
+            ]);
+
+            // Insert pricing if available
+            if (isset($pricingByAttrCode[$attrCode])) {
+                foreach ($pricingByAttrCode[$attrCode] as $pricing) {
+                    // Get option ID from label
+                    $optionId = $this->getAttributeOptionIdByLabel($attribute, $pricing['value_label']);
+                    if ($optionId) {
+                        $connection->insert($superAttrPricingTable, [
+                            'product_super_attribute_id' => $superAttrId,
+                            'value_index' => $optionId,
+                            'is_percent' => $pricing['is_percent'] ? 1 : 0,
+                            'pricing_value' => $pricing['pricing_value'],
+                            'website_id' => 0,
+                        ]);
                     }
                 }
             }
         }
 
-        $product->setConfigurableAttributesData($configurableAttributesData);
-
-        // Build configurable products data
-        $configurableProductsData = [];
-        foreach ($associatedProductIds as $productId) {
-            $configurableProductsData[$productId] = [];
+        // Link child products
+        foreach ($associatedProductIds as $childId) {
+            $connection->insert($superLinkTable, [
+                'parent_id' => $productId,
+                'product_id' => $childId,
+            ]);
         }
-        $product->setConfigurableProductsData($configurableProductsData);
+    }
 
-        $product->save();
+    private function getAttributeOptionIdByLabel(\Mage_Eav_Model_Entity_Attribute $attribute, string $label): ?int
+    {
+        $options = $attribute->getSource()->getAllOptions(false);
+        foreach ($options as $option) {
+            if ($option['label'] === $label) {
+                return (int) $option['value'];
+            }
+        }
+        return null;
     }
 
     /**
@@ -1461,43 +1618,67 @@ class Install extends BaseMahoCommand
             return;
         }
 
-        $product->setPriceType($productData['price_type'] === 'fixed' ? 1 : 0);
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $productId = $product->getId();
 
-        $bundleOptions = [];
-        $bundleSelections = [];
+        // Update price type via EAV
+        $priceType = ($productData['price_type'] === 'fixed') ? 1 : 0;
+        $priceTypeAttr = Mage::getModel('eav/entity_attribute')
+            ->loadByCode('catalog_product', 'price_type');
+        if ($priceTypeAttr->getId()) {
+            $tableName = $connection->getTableName('catalog_product_entity_int');
+            $connection->insertOnDuplicate(
+                $tableName,
+                [
+                    'entity_id' => $productId,
+                    'attribute_id' => $priceTypeAttr->getId(),
+                    'store_id' => 0,
+                    'value' => $priceType,
+                ],
+                ['value'],
+            );
+        }
+
+        $bundleOptionTable = $connection->getTableName('catalog_product_bundle_option');
+        $bundleOptionValueTable = $connection->getTableName('catalog_product_bundle_option_value');
+        $bundleSelectionTable = $connection->getTableName('catalog_product_bundle_selection');
 
         foreach ($productData['bundle_options'] as $optionIndex => $optionData) {
-            $bundleOptions[$optionIndex] = [
-                'title' => $optionData['title'],
-                'type' => $optionData['type'],
-                'required' => $optionData['required'],
+            // Insert bundle option
+            $connection->insert($bundleOptionTable, [
+                'parent_id' => $productId,
+                'required' => $optionData['required'] ? 1 : 0,
                 'position' => $optionIndex,
-                'delete' => '',
-            ];
+                'type' => $optionData['type'],
+            ]);
 
-            $selections = [];
+            $optionId = $connection->lastInsertId($bundleOptionTable);
+
+            // Insert option title
+            $connection->insert($bundleOptionValueTable, [
+                'option_id' => $optionId,
+                'store_id' => 0,
+                'title' => $optionData['title'],
+            ]);
+
+            // Insert selections
             foreach ($optionData['products'] as $selectionIndex => $selectionData) {
                 $simpleProduct = Mage::getModel('catalog/product')->loadByAttribute('sku', $selectionData['sku']);
                 if ($simpleProduct && $simpleProduct->getId()) {
-                    $selections[$selectionIndex] = [
+                    $connection->insert($bundleSelectionTable, [
+                        'option_id' => $optionId,
+                        'parent_product_id' => $productId,
                         'product_id' => $simpleProduct->getId(),
+                        'position' => $selectionIndex,
+                        'is_default' => $selectionData['is_default'] ?? 0,
+                        'selection_price_type' => 0,
+                        'selection_price_value' => 0,
                         'selection_qty' => $selectionData['qty'],
                         'selection_can_change_qty' => 1,
-                        'is_default' => $selectionData['is_default'] ?? 0,
-                        'position' => $selectionIndex,
-                        'delete' => '',
-                    ];
+                    ]);
                 }
             }
-            $bundleSelections[$optionIndex] = $selections;
         }
-
-        $product->setBundleOptionsData($bundleOptions);
-        $product->setBundleSelectionsData($bundleSelections);
-        $product->setCanSaveCustomOptions(true);
-        $product->setCanSaveBundleSelections(true);
-
-        $product->save();
     }
 
     /**
@@ -1509,49 +1690,61 @@ class Install extends BaseMahoCommand
             return;
         }
 
-        $links = [];
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $linkTable = $connection->getTableName('catalog_product_link');
+        $linkAttributeTable = $connection->getTableName('catalog_product_link_attribute');
+        $linkAttributeIntTable = $connection->getTableName('catalog_product_link_attribute_int');
+        $linkAttributeDecimalTable = $connection->getTableName('catalog_product_link_attribute_decimal');
+
+        $linkTypeId = \Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED;
+
+        // Get attribute IDs for position and qty
+        $positionAttrId = $connection->fetchOne(
+            $connection->select()
+                ->from($linkAttributeTable, 'product_link_attribute_id')
+                ->where('link_type_id = ?', $linkTypeId)
+                ->where('product_link_attribute_code = ?', 'position'),
+        );
+
+        $qtyAttrId = $connection->fetchOne(
+            $connection->select()
+                ->from($linkAttributeTable, 'product_link_attribute_id')
+                ->where('link_type_id = ?', $linkTypeId)
+                ->where('product_link_attribute_code = ?', 'qty'),
+        );
+
+        $position = 0;
         foreach ($productData['associated_products'] as $assocData) {
             $simpleProduct = Mage::getModel('catalog/product')->loadByAttribute('sku', $assocData['sku']);
             if ($simpleProduct && $simpleProduct->getId()) {
-                /** @var \Mage_Catalog_Model_Product_Link $link */
-                $link = Mage::getModel('catalog/product_link');
-                $link->setProductId($product->getId());
-                $link->setLinkedProductId($simpleProduct->getId());
-                $link->setLinkTypeId(\Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED);
-                $links[] = $link;
+                // Insert link
+                $connection->insert($linkTable, [
+                    'product_id' => $product->getId(),
+                    'linked_product_id' => $simpleProduct->getId(),
+                    'link_type_id' => $linkTypeId,
+                ]);
+
+                $linkId = $connection->lastInsertId($linkTable);
+
+                // Insert position attribute
+                if ($positionAttrId) {
+                    $connection->insert($linkAttributeIntTable, [
+                        'product_link_attribute_id' => $positionAttrId,
+                        'link_id' => $linkId,
+                        'value' => $assocData['position'] ?? $position++,
+                    ]);
+                }
+
+                // Insert qty attribute if available
+                if ($qtyAttrId && isset($assocData['qty'])) {
+                    $connection->insert($linkAttributeDecimalTable, [
+                        'product_link_attribute_id' => $qtyAttrId,
+                        'link_id' => $linkId,
+                        'value' => $assocData['qty'],
+                    ]);
+                }
             }
         }
-
-        if (!empty($links)) {
-            $product->setGroupedLinkData($links);
-            $product->save();
-        }
-    }
-
-    /**
-     * @param array<string, mixed> $productData
-     */
-    private function setupDownloadableProduct(Mage_Catalog_Model_Product $product, array $productData): void
-    {
-        if (empty($productData['links'])) {
-            return;
-        }
-
-        $linksData = [];
-        foreach ($productData['links'] as $linkData) {
-            $linksData[] = [
-                'title' => $linkData['title'],
-                'price' => $linkData['price'] ?? 0,
-                'number_of_downloads' => $linkData['downloads'] ?? 0,
-                'is_shareable' => 2, // Use config
-                'link_type' => 'file',
-                'link_file' => $linkData['file'],
-            ];
-        }
-
-        $product->setDownloadableData(['link' => $linksData]);
-        $product->setLinksExist(true);
-        $product->save();
     }
 
     /**
@@ -2195,6 +2388,13 @@ class Install extends BaseMahoCommand
                     'updated_at' => Mage_Core_Model_Locale::now(),
                 ]);
                 $count++;
+            }
+
+            // Set is_dynamic attribute on the category
+            $category = Mage::getModel('catalog/category')->load($categoryId);
+            if ($category->getId()) {
+                $category->setIsDynamic(1);
+                $category->save();
             }
         }
 
