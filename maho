@@ -63,6 +63,7 @@ $application->addCommand(new \MahoCLI\Commands\MaintenanceStatus());
 $application->addCommand(new \MahoCLI\Commands\HealthCheck());
 $application->addCommand(new \MahoCLI\Commands\Install());
 $application->addCommand(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
+$application->addCommand(new \MahoCLI\Commands\SampleDataExport());
 
 $application->addCommand(new \MahoCLI\Commands\PhpstormMetadataGenerate());
 
