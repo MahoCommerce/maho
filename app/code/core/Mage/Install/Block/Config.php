@@ -15,7 +15,7 @@ class Mage_Install_Block_Config extends Mage_Install_Block_Abstract
     public function __construct()
     {
         parent::__construct();
-        $this->setTemplate('install/config.phtml');
+        $this->setTemplate('page/configuration.phtml');
     }
 
     /**

@@ -15,7 +15,7 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
     public function __construct()
     {
         parent::__construct();
-        $this->setTemplate('install/locale.phtml');
+        $this->setTemplate('page/locale.phtml');
     }
 
     /**
