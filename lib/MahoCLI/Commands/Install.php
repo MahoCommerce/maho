@@ -16,6 +16,7 @@ use Exception;
 use Mage;
 use Mage_Catalog_Model_Category;
 use Mage_Catalog_Model_Product;
+use Mage_Core_Model_Locale;
 use Mage_Install_Model_Installer_Console;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -606,6 +607,31 @@ class Install extends BaseMahoCommand
         // 9. Import reviews
         if (file_exists($sampleDataDir . '/reviews.json')) {
             $this->importReviewsFromJson($sampleDataDir, $output);
+        }
+
+        // 10. Import tax rules
+        if (file_exists($sampleDataDir . '/tax_rules.json')) {
+            $this->importTaxRulesFromJson($sampleDataDir, $output);
+        }
+
+        // 11. Import product links (related, upsell, cross-sell)
+        if (file_exists($sampleDataDir . '/product_links.json')) {
+            $this->importProductLinksFromJson($sampleDataDir, $output);
+        }
+
+        // 12. Import tier prices
+        if (file_exists($sampleDataDir . '/tier_prices.json')) {
+            $this->importTierPricesFromJson($sampleDataDir, $output);
+        }
+
+        // 13. Import custom options
+        if (file_exists($sampleDataDir . '/custom_options.json')) {
+            $this->importCustomOptionsFromJson($sampleDataDir, $output);
+        }
+
+        // 14. Import dynamic category rules
+        if (file_exists($sampleDataDir . '/dynamic_category_rules.json')) {
+            $this->importDynamicCategoryRulesFromJson($sampleDataDir, $output);
         }
     }
 
@@ -1680,5 +1706,381 @@ class Install extends BaseMahoCommand
         }
 
         return implode(',', $ids);
+    }
+
+    /**
+     * Import tax rules and calculations from JSON
+     */
+    private function importTaxRulesFromJson(string $sampleDataDir, OutputInterface $output): void
+    {
+        $output->writeln('<info>Importing tax rules...</info>');
+
+        $json = file_get_contents($sampleDataDir . '/tax_rules.json');
+        $data = Mage::helper('core')->jsonDecode($json);
+
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        // Build lookup maps
+        $taxClassIdMap = [];
+        $taxClassRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('tax_class'), ['class_id', 'class_name']),
+        );
+        foreach ($taxClassRows as $row) {
+            $taxClassIdMap[$row['class_name']] = (int) $row['class_id'];
+        }
+
+        $taxRateIdMap = [];
+        $taxRateRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('tax_calculation_rate'), ['tax_calculation_rate_id', 'code']),
+        );
+        foreach ($taxRateRows as $row) {
+            $taxRateIdMap[$row['code']] = (int) $row['tax_calculation_rate_id'];
+        }
+
+        // Import tax rules
+        $ruleTable = $connection->getTableName('tax_calculation_rule');
+        $ruleCount = 0;
+        $taxRuleIdMap = [];
+
+        foreach ($data['tax_rules'] ?? [] as $row) {
+            $exists = $connection->fetchOne(
+                $connection->select()->from($ruleTable, ['tax_calculation_rule_id'])
+                    ->where('code = ?', $row['code']),
+            );
+            if (!$exists) {
+                $connection->insert($ruleTable, [
+                    'code' => $row['code'],
+                    'priority' => $row['priority'],
+                    'position' => $row['position'],
+                    'calculate_subtotal' => $row['calculate_subtotal'],
+                ]);
+                $taxRuleIdMap[$row['code']] = (int) $connection->lastInsertId();
+                $ruleCount++;
+            } else {
+                $taxRuleIdMap[$row['code']] = (int) $exists;
+            }
+        }
+
+        // Import tax calculations
+        $calcTable = $connection->getTableName('tax_calculation');
+        $calcCount = 0;
+
+        foreach ($data['tax_calculations'] ?? [] as $row) {
+            $rateId = $taxRateIdMap[$row['tax_rate_code']] ?? null;
+            $ruleId = $taxRuleIdMap[$row['tax_rule_code']] ?? null;
+            $customerClassId = $taxClassIdMap[$row['customer_tax_class_name']] ?? null;
+            $productClassId = $taxClassIdMap[$row['product_tax_class_name']] ?? null;
+
+            if (!$rateId || !$ruleId || !$customerClassId || !$productClassId) {
+                continue;
+            }
+
+            // Check if calculation exists
+            $exists = $connection->fetchOne(
+                $connection->select()->from($calcTable, ['tax_calculation_id'])
+                    ->where('tax_calculation_rate_id = ?', $rateId)
+                    ->where('tax_calculation_rule_id = ?', $ruleId)
+                    ->where('customer_tax_class_id = ?', $customerClassId)
+                    ->where('product_tax_class_id = ?', $productClassId),
+            );
+
+            if (!$exists) {
+                $connection->insert($calcTable, [
+                    'tax_calculation_rate_id' => $rateId,
+                    'tax_calculation_rule_id' => $ruleId,
+                    'customer_tax_class_id' => $customerClassId,
+                    'product_tax_class_id' => $productClassId,
+                ]);
+                $calcCount++;
+            }
+        }
+
+        $output->writeln("  Imported {$ruleCount} tax rules, {$calcCount} tax calculations");
+    }
+
+    /**
+     * Import product links (related, upsell, cross-sell) from JSON
+     */
+    private function importProductLinksFromJson(string $sampleDataDir, OutputInterface $output): void
+    {
+        $output->writeln('<info>Importing product links...</info>');
+
+        $json = file_get_contents($sampleDataDir . '/product_links.json');
+        $data = Mage::helper('core')->jsonDecode($json);
+
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        // Build SKU to product ID map
+        $productIdMap = [];
+        $productRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_entity'), ['entity_id', 'sku']),
+        );
+        foreach ($productRows as $row) {
+            $productIdMap[$row['sku']] = (int) $row['entity_id'];
+        }
+
+        $linkTable = $connection->getTableName('catalog_product_link');
+
+        $linkTypes = [
+            'related' => \Mage_Catalog_Model_Product_Link::LINK_TYPE_RELATED,
+            'upsell' => \Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL,
+            'crosssell' => \Mage_Catalog_Model_Product_Link::LINK_TYPE_CROSSSELL,
+        ];
+
+        $counts = ['related' => 0, 'upsell' => 0, 'crosssell' => 0];
+
+        foreach ($linkTypes as $linkKey => $linkTypeId) {
+            foreach ($data[$linkKey] ?? [] as $link) {
+                $productId = $productIdMap[$link['product_sku']] ?? null;
+                $linkedProductId = $productIdMap[$link['linked_sku']] ?? null;
+
+                if (!$productId || !$linkedProductId) {
+                    continue;
+                }
+
+                // Check if link exists
+                $exists = $connection->fetchOne(
+                    $connection->select()->from($linkTable, ['link_id'])
+                        ->where('product_id = ?', $productId)
+                        ->where('linked_product_id = ?', $linkedProductId)
+                        ->where('link_type_id = ?', $linkTypeId),
+                );
+
+                if (!$exists) {
+                    $connection->insert($linkTable, [
+                        'product_id' => $productId,
+                        'linked_product_id' => $linkedProductId,
+                        'link_type_id' => $linkTypeId,
+                    ]);
+                    $counts[$linkKey]++;
+                }
+            }
+        }
+
+        $total = $counts['related'] + $counts['upsell'] + $counts['crosssell'];
+        $output->writeln("  Imported {$total} product links (" .
+            "{$counts['related']} related, {$counts['upsell']} upsell, {$counts['crosssell']} crosssell)");
+    }
+
+    /**
+     * Import tier prices from JSON
+     */
+    private function importTierPricesFromJson(string $sampleDataDir, OutputInterface $output): void
+    {
+        $output->writeln('<info>Importing tier prices...</info>');
+
+        $json = file_get_contents($sampleDataDir . '/tier_prices.json');
+        $data = Mage::helper('core')->jsonDecode($json);
+
+        if (empty($data['tier_prices'])) {
+            $output->writeln('  No tier prices to import');
+            return;
+        }
+
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        // Build SKU to product ID map
+        $productIdMap = [];
+        $productRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_entity'), ['entity_id', 'sku']),
+        );
+        foreach ($productRows as $row) {
+            $productIdMap[$row['sku']] = (int) $row['entity_id'];
+        }
+
+        // Build customer group code to ID map
+        $customerGroupIdMap = [];
+        $customerGroupRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('customer_group'), ['customer_group_id', 'customer_group_code']),
+        );
+        foreach ($customerGroupRows as $row) {
+            $customerGroupIdMap[$row['customer_group_code']] = (int) $row['customer_group_id'];
+        }
+
+        $tierPriceTable = $connection->getTableName('catalog_product_entity_tier_price');
+        $count = 0;
+
+        foreach ($data['tier_prices'] as $tierPrice) {
+            $productId = $productIdMap[$tierPrice['product_sku']] ?? null;
+            if (!$productId) {
+                continue;
+            }
+
+            $allGroups = empty($tierPrice['all_groups']) ? 0 : 1;
+            $customerGroupId = 0;
+            if (!$allGroups && isset($tierPrice['customer_group_code'])) {
+                $customerGroupId = $customerGroupIdMap[$tierPrice['customer_group_code']] ?? 0;
+            }
+
+            // Check if tier price exists
+            $exists = $connection->fetchOne(
+                $connection->select()->from($tierPriceTable, ['value_id'])
+                    ->where('entity_id = ?', $productId)
+                    ->where('all_groups = ?', $allGroups)
+                    ->where('customer_group_id = ?', $customerGroupId)
+                    ->where('qty = ?', $tierPrice['qty'])
+                    ->where('website_id = ?', $tierPrice['website_id']),
+            );
+
+            if (!$exists) {
+                $connection->insert($tierPriceTable, [
+                    'entity_id' => $productId,
+                    'all_groups' => $allGroups,
+                    'customer_group_id' => $customerGroupId,
+                    'qty' => $tierPrice['qty'],
+                    'value' => $tierPrice['value'],
+                    'website_id' => $tierPrice['website_id'],
+                ]);
+                $count++;
+            }
+        }
+
+        $output->writeln("  Imported {$count} tier prices");
+    }
+
+    /**
+     * Import custom options from JSON
+     */
+    private function importCustomOptionsFromJson(string $sampleDataDir, OutputInterface $output): void
+    {
+        $output->writeln('<info>Importing custom options...</info>');
+
+        $json = file_get_contents($sampleDataDir . '/custom_options.json');
+        $data = Mage::helper('core')->jsonDecode($json);
+
+        if (empty($data['custom_options'])) {
+            $output->writeln('  No custom options to import');
+            return;
+        }
+
+        $count = 0;
+
+        foreach ($data['custom_options'] as $optionData) {
+            // Find product by SKU
+            $product = Mage::getModel('catalog/product')->loadByAttribute('sku', $optionData['product_sku']);
+            if (!$product || !$product->getId()) {
+                continue;
+            }
+
+            // Check if option already exists (by title and type)
+            $existingOptions = $product->getProductOptionsCollection();
+            $optionExists = false;
+            foreach ($existingOptions as $existingOption) {
+                if ($existingOption->getTitle() === $optionData['title'] && $existingOption->getType() === $optionData['type']) {
+                    $optionExists = true;
+                    break;
+                }
+            }
+
+            if ($optionExists) {
+                continue;
+            }
+
+            /** @var \Mage_Catalog_Model_Product_Option $option */
+            $option = Mage::getModel('catalog/product_option');
+            $option->setProduct($product);
+            $option->setType($optionData['type']);
+            $option->setIsRequire($optionData['is_require']);
+            $option->setSortOrder($optionData['sort_order']);
+            $option->setTitle($optionData['title']);
+
+            if (!empty($optionData['sku'])) {
+                $option->setSku($optionData['sku']);
+            }
+            if (!empty($optionData['max_characters'])) {
+                $option->setMaxCharacters($optionData['max_characters']);
+            }
+            if (!empty($optionData['file_extension'])) {
+                $option->setFileExtension($optionData['file_extension']);
+            }
+            if (!empty($optionData['image_size_x'])) {
+                $option->setImageSizeX($optionData['image_size_x']);
+            }
+            if (!empty($optionData['image_size_y'])) {
+                $option->setImageSizeY($optionData['image_size_y']);
+            }
+            if (isset($optionData['price'])) {
+                $option->setPrice($optionData['price']);
+                $option->setPriceType($optionData['price_type'] ?? 'fixed');
+            }
+
+            // For select types, add values
+            if (!empty($optionData['values'])) {
+                $values = [];
+                foreach ($optionData['values'] as $valueData) {
+                    $values[] = [
+                        'title' => $valueData['title'],
+                        'price' => $valueData['price'] ?? 0,
+                        'price_type' => $valueData['price_type'] ?? 'fixed',
+                        'sku' => $valueData['sku'] ?? '',
+                        'sort_order' => $valueData['sort_order'] ?? 0,
+                    ];
+                }
+                $option->setValues($values);
+            }
+
+            $option->save();
+            $count++;
+        }
+
+        $output->writeln("  Imported {$count} custom options");
+    }
+
+    /**
+     * Import dynamic category rules from JSON
+     */
+    private function importDynamicCategoryRulesFromJson(string $sampleDataDir, OutputInterface $output): void
+    {
+        $output->writeln('<info>Importing dynamic category rules...</info>');
+
+        $json = file_get_contents($sampleDataDir . '/dynamic_category_rules.json');
+        $data = Mage::helper('core')->jsonDecode($json);
+
+        if (empty($data['dynamic_category_rules'])) {
+            $output->writeln('  No dynamic category rules to import');
+            return;
+        }
+
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        // Build category path to ID map
+        $categoryPathMap = $this->buildCategoryPathMap();
+
+        $tableName = $connection->getTableName('catalog_category_dynamic_rule');
+        $count = 0;
+
+        foreach ($data['dynamic_category_rules'] as $rule) {
+            $categoryId = $categoryPathMap[$rule['category_path']] ?? null;
+            if (!$categoryId) {
+                continue;
+            }
+
+            // Check if rule exists for this category
+            $exists = $connection->fetchOne(
+                $connection->select()->from($tableName, ['rule_id'])
+                    ->where('category_id = ?', $categoryId),
+            );
+
+            if ($exists) {
+                // Update existing rule
+                $connection->update($tableName, [
+                    'conditions_serialized' => $rule['conditions_serialized'],
+                    'is_active' => $rule['is_active'],
+                    'updated_at' => Mage_Core_Model_Locale::now(),
+                ], ['rule_id = ?' => $exists]);
+            } else {
+                // Insert new rule
+                $connection->insert($tableName, [
+                    'category_id' => $categoryId,
+                    'conditions_serialized' => $rule['conditions_serialized'],
+                    'is_active' => $rule['is_active'],
+                    'created_at' => Mage_Core_Model_Locale::now(),
+                    'updated_at' => Mage_Core_Model_Locale::now(),
+                ]);
+                $count++;
+            }
+        }
+
+        $output->writeln("  Imported {$count} dynamic category rules");
     }
 }

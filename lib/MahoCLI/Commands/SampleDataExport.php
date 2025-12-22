@@ -71,6 +71,10 @@ class SampleDataExport extends BaseMahoCommand
             $this->exportBlog($outputDir, $output);
             $this->exportReviews($outputDir, $output);
             $this->exportStaticData($outputDir, $output);
+            $this->exportProductLinks($outputDir, $output);
+            $this->exportTierPrices($outputDir, $output);
+            $this->exportCustomOptions($outputDir, $output);
+            $this->exportDynamicCategoryRules($outputDir, $output);
         } catch (Exception $e) {
             $output->writeln("<error>Export failed: {$e->getMessage()}</error>");
             return Command::FAILURE;
@@ -887,6 +891,71 @@ class SampleDataExport extends BaseMahoCommand
 
         $this->saveJson($outputDir . '/ratings.json', $ratingsData);
         $output->writeln('  Saved: ratings.json (' . count($ratingsData['ratings']) . ' ratings, ' . count($ratingsData['rating_options']) . ' options)');
+
+        // Tax rules and calculations
+        $taxRulesData = [
+            'tax_rules' => [],
+            'tax_calculations' => [],
+        ];
+
+        // Tax calculation rules
+        $rows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('tax_calculation_rule')),
+        );
+        foreach ($rows as $row) {
+            $taxRulesData['tax_rules'][] = [
+                'tax_calculation_rule_id' => (int) $row['tax_calculation_rule_id'],
+                'code' => $row['code'],
+                'priority' => (int) $row['priority'],
+                'position' => (int) $row['position'],
+                'calculate_subtotal' => (int) $row['calculate_subtotal'],
+            ];
+        }
+
+        // Tax calculations (links rates to rules, customer classes, product classes)
+        // We need to convert IDs to codes for portability
+        $rows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('tax_calculation')),
+        );
+
+        // Build lookup maps for tax classes
+        $taxClassMap = [];
+        $taxClassRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('tax_class'), ['class_id', 'class_name']),
+        );
+        foreach ($taxClassRows as $tcRow) {
+            $taxClassMap[(int) $tcRow['class_id']] = $tcRow['class_name'];
+        }
+
+        // Build lookup map for tax rates
+        $taxRateMap = [];
+        $taxRateRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('tax_calculation_rate'), ['tax_calculation_rate_id', 'code']),
+        );
+        foreach ($taxRateRows as $trRow) {
+            $taxRateMap[(int) $trRow['tax_calculation_rate_id']] = $trRow['code'];
+        }
+
+        // Build lookup map for tax rules
+        $taxRuleMap = [];
+        $taxRuleRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('tax_calculation_rule'), ['tax_calculation_rule_id', 'code']),
+        );
+        foreach ($taxRuleRows as $trRow) {
+            $taxRuleMap[(int) $trRow['tax_calculation_rule_id']] = $trRow['code'];
+        }
+
+        foreach ($rows as $row) {
+            $taxRulesData['tax_calculations'][] = [
+                'tax_rate_code' => $taxRateMap[(int) $row['tax_calculation_rate_id']] ?? null,
+                'tax_rule_code' => $taxRuleMap[(int) $row['tax_calculation_rule_id']] ?? null,
+                'customer_tax_class_name' => $taxClassMap[(int) $row['customer_tax_class_id']] ?? null,
+                'product_tax_class_name' => $taxClassMap[(int) $row['product_tax_class_id']] ?? null,
+            ];
+        }
+
+        $this->saveJson($outputDir . '/tax_rules.json', $taxRulesData);
+        $output->writeln('  Saved: tax_rules.json (' . count($taxRulesData['tax_rules']) . ' rules, ' . count($taxRulesData['tax_calculations']) . ' calculations)');
     }
 
     /**
@@ -926,6 +995,289 @@ class SampleDataExport extends BaseMahoCommand
         }
 
         return implode(',', $codes);
+    }
+
+    private function exportProductLinks(string $outputDir, OutputInterface $output): void
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+        $data = [
+            'related' => [],
+            'upsell' => [],
+            'crosssell' => [],
+        ];
+
+        // Link type IDs
+        $linkTypes = [
+            \Mage_Catalog_Model_Product_Link::LINK_TYPE_RELATED => 'related',
+            \Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL => 'upsell',
+            \Mage_Catalog_Model_Product_Link::LINK_TYPE_CROSSSELL => 'crosssell',
+        ];
+
+        // Build product ID to SKU map
+        $productSkuMap = [];
+        $productRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_entity'), ['entity_id', 'sku']),
+        );
+        foreach ($productRows as $row) {
+            $productSkuMap[(int) $row['entity_id']] = $row['sku'];
+        }
+
+        // Fetch all product links
+        $rows = $connection->fetchAll(
+            $connection->select()
+                ->from($connection->getTableName('catalog_product_link'))
+                ->where('link_type_id IN (?)', array_keys($linkTypes)),
+        );
+
+        foreach ($rows as $row) {
+            $linkType = $linkTypes[(int) $row['link_type_id']] ?? null;
+            if (!$linkType) {
+                continue;
+            }
+
+            $productSku = $productSkuMap[(int) $row['product_id']] ?? null;
+            $linkedSku = $productSkuMap[(int) $row['linked_product_id']] ?? null;
+
+            if ($productSku && $linkedSku) {
+                $data[$linkType][] = [
+                    'product_sku' => $productSku,
+                    'linked_sku' => $linkedSku,
+                ];
+            }
+        }
+
+        $total = count($data['related']) + count($data['upsell']) + count($data['crosssell']);
+        $this->saveJson($outputDir . '/product_links.json', $data);
+        $output->writeln("  Saved: product_links.json ({$total} links: " .
+            count($data['related']) . ' related, ' .
+            count($data['upsell']) . ' upsell, ' .
+            count($data['crosssell']) . ' crosssell)');
+    }
+
+    private function exportTierPrices(string $outputDir, OutputInterface $output): void
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+        $data = ['tier_prices' => []];
+
+        // Build product ID to SKU map
+        $productSkuMap = [];
+        $productRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_entity'), ['entity_id', 'sku']),
+        );
+        foreach ($productRows as $row) {
+            $productSkuMap[(int) $row['entity_id']] = $row['sku'];
+        }
+
+        // Build customer group ID to code map
+        $customerGroupMap = [];
+        $customerGroupRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('customer_group'), ['customer_group_id', 'customer_group_code']),
+        );
+        foreach ($customerGroupRows as $row) {
+            $customerGroupMap[(int) $row['customer_group_id']] = $row['customer_group_code'];
+        }
+
+        // Fetch tier prices
+        $rows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_entity_tier_price')),
+        );
+
+        foreach ($rows as $row) {
+            $productSku = $productSkuMap[(int) $row['entity_id']] ?? null;
+            if (!$productSku) {
+                continue;
+            }
+
+            $tierPrice = [
+                'product_sku' => $productSku,
+                'qty' => (float) $row['qty'],
+                'value' => (float) $row['value'],
+                'website_id' => (int) $row['website_id'],
+            ];
+
+            if ((int) $row['all_groups'] === 1) {
+                $tierPrice['all_groups'] = true;
+            } else {
+                $tierPrice['customer_group_code'] = $customerGroupMap[(int) $row['customer_group_id']] ?? 'NOT LOGGED IN';
+            }
+
+            $data['tier_prices'][] = $tierPrice;
+        }
+
+        $this->saveJson($outputDir . '/tier_prices.json', $data);
+        $output->writeln('  Saved: tier_prices.json (' . count($data['tier_prices']) . ' entries)');
+    }
+
+    private function exportCustomOptions(string $outputDir, OutputInterface $output): void
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+        $data = ['custom_options' => []];
+
+        // Build product ID to SKU map
+        $productSkuMap = [];
+        $productRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_entity'), ['entity_id', 'sku']),
+        );
+        foreach ($productRows as $row) {
+            $productSkuMap[(int) $row['entity_id']] = $row['sku'];
+        }
+
+        // Fetch options
+        $options = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_option')),
+        );
+
+        foreach ($options as $option) {
+            $productSku = $productSkuMap[(int) $option['product_id']] ?? null;
+            if (!$productSku) {
+                continue;
+            }
+
+            $optionId = (int) $option['option_id'];
+
+            // Get option title
+            $titleRow = $connection->fetchRow(
+                $connection->select()
+                    ->from($connection->getTableName('catalog_product_option_title'))
+                    ->where('option_id = ?', $optionId)
+                    ->where('store_id = ?', 0),
+            );
+
+            // Get option price (for non-select types)
+            $priceRow = $connection->fetchRow(
+                $connection->select()
+                    ->from($connection->getTableName('catalog_product_option_price'))
+                    ->where('option_id = ?', $optionId)
+                    ->where('store_id = ?', 0),
+            );
+
+            $optionData = [
+                'product_sku' => $productSku,
+                'type' => $option['type'],
+                'is_require' => (int) $option['is_require'],
+                'sort_order' => (int) $option['sort_order'],
+                'title' => $titleRow['title'] ?? '',
+            ];
+
+            if (!empty($option['sku'])) {
+                $optionData['sku'] = $option['sku'];
+            }
+            if (!empty($option['max_characters'])) {
+                $optionData['max_characters'] = (int) $option['max_characters'];
+            }
+            if (!empty($option['file_extension'])) {
+                $optionData['file_extension'] = $option['file_extension'];
+            }
+            if (!empty($option['image_size_x'])) {
+                $optionData['image_size_x'] = (int) $option['image_size_x'];
+            }
+            if (!empty($option['image_size_y'])) {
+                $optionData['image_size_y'] = (int) $option['image_size_y'];
+            }
+            if ($priceRow) {
+                $optionData['price'] = (float) $priceRow['price'];
+                $optionData['price_type'] = $priceRow['price_type'];
+            }
+
+            // For select types, get the option values
+            if (in_array($option['type'], ['drop_down', 'radio', 'checkbox', 'multiple'])) {
+                $values = $connection->fetchAll(
+                    $connection->select()
+                        ->from($connection->getTableName('catalog_product_option_type_value'))
+                        ->where('option_id = ?', $optionId)
+                        ->order('sort_order ASC'),
+                );
+
+                $optionValues = [];
+                foreach ($values as $value) {
+                    $valueId = (int) $value['option_type_id'];
+
+                    // Get value title
+                    $valueTitleRow = $connection->fetchRow(
+                        $connection->select()
+                            ->from($connection->getTableName('catalog_product_option_type_title'))
+                            ->where('option_type_id = ?', $valueId)
+                            ->where('store_id = ?', 0),
+                    );
+
+                    // Get value price
+                    $valuePriceRow = $connection->fetchRow(
+                        $connection->select()
+                            ->from($connection->getTableName('catalog_product_option_type_price'))
+                            ->where('option_type_id = ?', $valueId)
+                            ->where('store_id = ?', 0),
+                    );
+
+                    $valueData = [
+                        'title' => $valueTitleRow['title'] ?? '',
+                        'sort_order' => (int) $value['sort_order'],
+                    ];
+
+                    if (!empty($value['sku'])) {
+                        $valueData['sku'] = $value['sku'];
+                    }
+                    if ($valuePriceRow) {
+                        $valueData['price'] = (float) $valuePriceRow['price'];
+                        $valueData['price_type'] = $valuePriceRow['price_type'];
+                    }
+
+                    $optionValues[] = $valueData;
+                }
+
+                if (!empty($optionValues)) {
+                    $optionData['values'] = $optionValues;
+                }
+            }
+
+            $data['custom_options'][] = $optionData;
+        }
+
+        $this->saveJson($outputDir . '/custom_options.json', $data);
+        $output->writeln('  Saved: custom_options.json (' . count($data['custom_options']) . ' options)');
+    }
+
+    private function exportDynamicCategoryRules(string $outputDir, OutputInterface $output): void
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+        $data = ['dynamic_category_rules' => []];
+
+        // Check if table exists
+        $tableName = $connection->getTableName('catalog_category_dynamic_rule');
+        try {
+            $rows = $connection->fetchAll(
+                $connection->select()->from($tableName),
+            );
+        } catch (Exception $e) {
+            $output->writeln('  Skipped: dynamic_category_rules.json (table not found)');
+            return;
+        }
+
+        // Build category path map for portability
+        foreach ($rows as $row) {
+            $categoryId = (int) $row['category_id'];
+
+            // Get category path by name
+            /** @var Mage_Catalog_Model_Category $category */
+            $category = Mage::getModel('catalog/category')->load($categoryId);
+            $categoryPath = $this->getCategoryPath($category);
+
+            if (!$categoryPath) {
+                continue;
+            }
+
+            $data['dynamic_category_rules'][] = [
+                'category_path' => $categoryPath,
+                'conditions_serialized' => $row['conditions_serialized'],
+                'is_active' => (int) $row['is_active'],
+            ];
+        }
+
+        $this->saveJson($outputDir . '/dynamic_category_rules.json', $data);
+        $output->writeln('  Saved: dynamic_category_rules.json (' . count($data['dynamic_category_rules']) . ' rules)');
     }
 
     /**
