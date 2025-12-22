@@ -23119,7 +23119,7 @@ parameters:
 			rawMessage: Variable $steps might not be defined.
 			identifier: variable.undefined
 			count: 1
-			path: app/design/install/default/default/template/install/state.phtml
+			path: app/design/install/default/default/template/page/progress.phtml
 
 		-
 			rawMessage: 'Call to an undefined method Maho\Convert\Action::getData().'
