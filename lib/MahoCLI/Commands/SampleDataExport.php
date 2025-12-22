@@ -237,6 +237,30 @@ class SampleDataExport extends BaseMahoCommand
         $attributes = Mage::getResourceModel('catalog/product_attribute_collection')
             ->addFieldToFilter('is_user_defined', 1);
 
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+        // Get store labels for all attributes
+        $storeLabels = [];
+        $labelRows = $connection->fetchAll(
+            $connection->select()
+                ->from(
+                    ['al' => $connection->getTableName('eav_attribute_label')],
+                    ['attribute_id', 'store_id', 'value'],
+                )
+                ->join(
+                    ['s' => $connection->getTableName('core_store')],
+                    'al.store_id = s.store_id',
+                    ['store_code' => 'code'],
+                ),
+        );
+        foreach ($labelRows as $row) {
+            $attrId = (int) $row['attribute_id'];
+            if (!isset($storeLabels[$attrId])) {
+                $storeLabels[$attrId] = [];
+            }
+            $storeLabels[$attrId][$row['store_code']] = $row['value'];
+        }
+
         $data = ['catalog_product' => []];
 
         foreach ($attributes as $attr) {
@@ -271,6 +295,12 @@ class SampleDataExport extends BaseMahoCommand
 
             if (!empty($options)) {
                 $config['option'] = ['values' => $options];
+            }
+
+            // Add store-specific labels if available
+            $attrId = (int) $attr->getId();
+            if (isset($storeLabels[$attrId])) {
+                $config['store_labels'] = $storeLabels[$attrId];
             }
 
             $data['catalog_product'][$attr->getAttributeCode()] = $config;
@@ -510,7 +540,33 @@ class SampleDataExport extends BaseMahoCommand
             $configurableAttrs = $typeInstance->getConfigurableAttributesAsArray($product);
 
             if (!empty($configurableAttrs)) {
-                $productData['configurable_attributes'] = array_column($configurableAttrs, 'attribute_code');
+                $configAttrsData = [];
+                foreach ($configurableAttrs as $attr) {
+                    $attrData = [
+                        'attribute_code' => $attr['attribute_code'],
+                    ];
+
+                    // Include pricing data if present
+                    if (!empty($attr['values'])) {
+                        $pricing = [];
+                        foreach ($attr['values'] as $value) {
+                            if (!empty($value['pricing_value']) && (float) $value['pricing_value'] !== 0.0) {
+                                $pricing[] = [
+                                    'value_label' => $value['label'] ?? '',
+                                    'pricing_value' => (float) $value['pricing_value'],
+                                    'is_percent' => (int) ($value['is_percent'] ?? 0),
+                                ];
+                            }
+                        }
+                        if (!empty($pricing)) {
+                            $attrData['pricing'] = $pricing;
+                        }
+                    }
+
+                    $configAttrsData[] = $attrData;
+                }
+
+                $productData['configurable_attributes'] = $configAttrsData;
 
                 $childProducts = $typeInstance->getUsedProducts(null, $product);
                 $productData['associated_skus'] = array_map(
@@ -576,17 +632,25 @@ class SampleDataExport extends BaseMahoCommand
         try {
             /** @var \Mage_Downloadable_Model_Resource_Link_Collection $links */
             $links = Mage::getModel('downloadable/link')->getCollection()
-                ->addProductToFilter($product->getId());
+                ->addProductToFilter($product->getId())
+                ->addTitleToResult(0); // 0 = admin store for default title
 
             $linksData = [];
             /** @var Mage_Downloadable_Model_Link $link */
             foreach ($links as $link) {
-                $linksData[] = [
-                    'title' => $link->getTitle(),
+                $linkData = [
+                    'title' => $link->getTitle() ?: $link->getDefaultTitle(),
                     'price' => (float) $link->getPrice(),
                     'file' => $link->getLinkFile(),
                     'downloads' => (int) $link->getNumberOfDownloads(),
                 ];
+
+                // Add sample file if exists
+                if ($link->getSampleFile()) {
+                    $linkData['sample_file'] = $link->getSampleFile();
+                }
+
+                $linksData[] = $linkData;
             }
 
             if (!empty($linksData)) {
@@ -1023,6 +1087,15 @@ class SampleDataExport extends BaseMahoCommand
             $productSkuMap[(int) $row['entity_id']] = $row['sku'];
         }
 
+        // Build link attribute maps (link_id => attribute values)
+        $linkPositions = [];
+        $positionRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('catalog_product_link_attribute_int'), ['link_id', 'value']),
+        );
+        foreach ($positionRows as $row) {
+            $linkPositions[(int) $row['link_id']] = (int) $row['value'];
+        }
+
         // Fetch all product links
         $rows = $connection->fetchAll(
             $connection->select()
@@ -1040,10 +1113,18 @@ class SampleDataExport extends BaseMahoCommand
             $linkedSku = $productSkuMap[(int) $row['linked_product_id']] ?? null;
 
             if ($productSku && $linkedSku) {
-                $data[$linkType][] = [
+                $linkData = [
                     'product_sku' => $productSku,
                     'linked_sku' => $linkedSku,
                 ];
+
+                // Add position if available
+                $linkId = (int) $row['link_id'];
+                if (isset($linkPositions[$linkId])) {
+                    $linkData['position'] = $linkPositions[$linkId];
+                }
+
+                $data[$linkType][] = $linkData;
             }
         }
 

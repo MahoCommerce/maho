@@ -939,15 +939,33 @@ class Install extends BaseMahoCommand
         /** @var \Mage_Catalog_Model_Resource_Setup $installer */
         $installer = Mage::getResourceModel('catalog/setup', ['resourceName' => 'core_setup']);
         $entityTypeId = $installer->getEntityTypeId('catalog_product');
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        // Build store code to ID map
+        $storeIdMap = [];
+        $storeRows = $connection->fetchAll(
+            $connection->select()->from($connection->getTableName('core_store'), ['store_id', 'code']),
+        );
+        foreach ($storeRows as $row) {
+            $storeIdMap[$row['code']] = (int) $row['store_id'];
+        }
+
         $attributeCount = 0;
+        $storeLabelsToAdd = []; // Collect store labels for later processing
 
         foreach ($data['catalog_product'] as $attributeCode => $config) {
             // Check if attribute already exists
             $attribute = Mage::getModel('eav/entity_attribute')
                 ->loadByCode($entityTypeId, $attributeCode);
 
-            if ($attribute->getId()) {
-                continue; // Skip existing attributes
+            $isNewAttribute = !$attribute->getId();
+
+            if (!$isNewAttribute) {
+                // Still process store labels for existing attributes
+                if (!empty($config['store_labels'])) {
+                    $storeLabelsToAdd[$attributeCode] = $config['store_labels'];
+                }
+                continue;
             }
 
             $attributeData = [
@@ -977,6 +995,46 @@ class Install extends BaseMahoCommand
 
             $installer->addAttribute('catalog_product', $attributeCode, $attributeData);
             $attributeCount++;
+
+            // Store labels to add after attribute creation
+            if (!empty($config['store_labels'])) {
+                $storeLabelsToAdd[$attributeCode] = $config['store_labels'];
+            }
+        }
+
+        // Add store-specific labels
+        if (!empty($storeLabelsToAdd)) {
+            $labelTable = $connection->getTableName('eav_attribute_label');
+            foreach ($storeLabelsToAdd as $attributeCode => $storeLabels) {
+                $attribute = Mage::getModel('eav/entity_attribute')
+                    ->loadByCode($entityTypeId, $attributeCode);
+
+                if (!$attribute->getId()) {
+                    continue;
+                }
+
+                foreach ($storeLabels as $storeCode => $label) {
+                    $storeId = $storeIdMap[$storeCode] ?? null;
+                    if ($storeId === null) {
+                        continue;
+                    }
+
+                    // Check if label already exists
+                    $exists = $connection->fetchOne(
+                        $connection->select()->from($labelTable, ['attribute_label_id'])
+                            ->where('attribute_id = ?', $attribute->getId())
+                            ->where('store_id = ?', $storeId),
+                    );
+
+                    if (!$exists) {
+                        $connection->insert($labelTable, [
+                            'attribute_id' => $attribute->getId(),
+                            'store_id' => $storeId,
+                            'value' => $label,
+                        ]);
+                    }
+                }
+            }
         }
 
         $output->writeln("  Created {$attributeCount} attributes");
@@ -1313,13 +1371,26 @@ class Install extends BaseMahoCommand
             return;
         }
 
-        // Get configurable attribute IDs
+        // Get configurable attribute IDs and pricing data
         $attributeIds = [];
-        foreach ($productData['configurable_attributes'] as $attrCode) {
+        $pricingByAttrCode = [];
+
+        foreach ($productData['configurable_attributes'] as $attrData) {
+            // Support both old format (string) and new format (array with attribute_code)
+            $attrCode = is_array($attrData) ? ($attrData['attribute_code'] ?? '') : $attrData;
+            if (empty($attrCode)) {
+                continue;
+            }
+
             $attribute = Mage::getModel('eav/entity_attribute')
                 ->loadByCode('catalog_product', $attrCode);
             if ($attribute->getId()) {
                 $attributeIds[] = $attribute->getId();
+
+                // Store pricing data if available
+                if (is_array($attrData) && !empty($attrData['pricing'])) {
+                    $pricingByAttrCode[$attrCode] = $attrData['pricing'];
+                }
             }
         }
 
@@ -1345,6 +1416,30 @@ class Install extends BaseMahoCommand
         $configurableType->setUsedProductAttributeIds($attributeIds, $product);
 
         $configurableAttributesData = $configurableType->getConfigurableAttributesAsArray($product);
+
+        // Apply pricing data if available
+        if (!empty($pricingByAttrCode)) {
+            foreach ($configurableAttributesData as &$attrData) {
+                $attrCode = $attrData['attribute_code'] ?? '';
+                if (isset($pricingByAttrCode[$attrCode]) && !empty($attrData['values'])) {
+                    $pricingData = $pricingByAttrCode[$attrCode];
+                    // Map pricing by label
+                    $pricingByLabel = [];
+                    foreach ($pricingData as $p) {
+                        $pricingByLabel[$p['value_label']] = $p;
+                    }
+
+                    foreach ($attrData['values'] as &$valueData) {
+                        $label = $valueData['label'] ?? '';
+                        if (isset($pricingByLabel[$label])) {
+                            $valueData['pricing_value'] = $pricingByLabel[$label]['pricing_value'];
+                            $valueData['is_percent'] = $pricingByLabel[$label]['is_percent'];
+                        }
+                    }
+                }
+            }
+        }
+
         $product->setConfigurableAttributesData($configurableAttributesData);
 
         // Build configurable products data
@@ -1820,12 +1915,24 @@ class Install extends BaseMahoCommand
         }
 
         $linkTable = $connection->getTableName('catalog_product_link');
+        $linkAttrIntTable = $connection->getTableName('catalog_product_link_attribute_int');
 
         $linkTypes = [
             'related' => \Mage_Catalog_Model_Product_Link::LINK_TYPE_RELATED,
             'upsell' => \Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL,
             'crosssell' => \Mage_Catalog_Model_Product_Link::LINK_TYPE_CROSSSELL,
         ];
+
+        // Get position attribute IDs for each link type
+        $positionAttrIds = [];
+        $attrRows = $connection->fetchAll(
+            $connection->select()
+                ->from($connection->getTableName('catalog_product_link_attribute'), ['link_type_id', 'product_link_attribute_id'])
+                ->where('product_link_attribute_code = ?', 'position'),
+        );
+        foreach ($attrRows as $row) {
+            $positionAttrIds[(int) $row['link_type_id']] = (int) $row['product_link_attribute_id'];
+        }
 
         $counts = ['related' => 0, 'upsell' => 0, 'crosssell' => 0];
 
@@ -1839,20 +1946,30 @@ class Install extends BaseMahoCommand
                 }
 
                 // Check if link exists
-                $exists = $connection->fetchOne(
+                $existingLinkId = $connection->fetchOne(
                     $connection->select()->from($linkTable, ['link_id'])
                         ->where('product_id = ?', $productId)
                         ->where('linked_product_id = ?', $linkedProductId)
                         ->where('link_type_id = ?', $linkTypeId),
                 );
 
-                if (!$exists) {
+                if (!$existingLinkId) {
                     $connection->insert($linkTable, [
                         'product_id' => $productId,
                         'linked_product_id' => $linkedProductId,
                         'link_type_id' => $linkTypeId,
                     ]);
+                    $linkId = (int) $connection->lastInsertId();
                     $counts[$linkKey]++;
+
+                    // Add position attribute if available
+                    if (isset($link['position']) && isset($positionAttrIds[$linkTypeId])) {
+                        $connection->insert($linkAttrIntTable, [
+                            'product_link_attribute_id' => $positionAttrIds[$linkTypeId],
+                            'link_id' => $linkId,
+                            'value' => $link['position'],
+                        ]);
+                    }
                 }
             }
         }
