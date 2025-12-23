@@ -10,59 +10,53 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Install_Block_Config extends Mage_Install_Block_Abstract
+declare(strict_types=1);
+
+use Maho\DataObject;
+
+class Mage_Install_Block_Configuration extends Mage_Install_Block_Abstract
 {
     public function __construct()
     {
         parent::__construct();
-        $this->setTemplate('install/config.phtml');
+        $this->setTemplate('page/configuration.phtml');
     }
 
-    /**
-     * Retrieve form data post url
-     *
-     * @return string
-     */
-    public function getPostUrl()
+    public function getPostUrl(): string
     {
-        return $this->getUrl('*/*/configPost');
+        return $this->getUrl('*/*/configurationPost');
     }
 
-    /**
-     * Retrieve configuration form data object
-     *
-     * @return Varien_Object
-     */
-    public function getFormData()
+    public function getFormData(): DataObject
     {
         $data = $this->getData('form_data');
-        if (is_null($data)) {
+        if ($data === null) {
             $data = Mage::getSingleton('install/session')->getConfigData(true);
             if (empty($data)) {
                 $data = Mage::getModel('install/installer_config')->getFormData();
             } else {
-                $data = new Varien_Object($data);
+                $data = new DataObject($data);
             }
             $this->setFormData($data);
         }
         return $data;
     }
 
-    public function getSessionSaveOptions()
+    public function getSessionSaveOptions(): array
     {
         return [
-            'files' => Mage::helper('install')->__('File System'),
-            'db'    => Mage::helper('install')->__('Database'),
+            'files' => $this->helper('install')->__('File System'),
+            'db' => $this->helper('install')->__('Database'),
         ];
     }
 
-    public function getSessionSaveSelect()
+    public function getSessionSaveSelect(): string
     {
         return $this->getLayout()->createBlock('core/html_select')
             ->setName('config[session_save]')
             ->setId('session_save')
-            ->setTitle(Mage::helper('install')->__('Save Session Files In'))
-            ->setClass('required-entry')
+            ->setTitle($this->helper('install')->__('Save Session Files In'))
+            ->setExtraParams('required')
             ->setOptions($this->getSessionSaveOptions())
             ->getHtml();
     }

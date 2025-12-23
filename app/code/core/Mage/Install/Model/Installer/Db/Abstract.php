@@ -14,24 +14,22 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
 {
     /**
      *  Adapter instance
-     *
-     * @var Maho\Db\Adapter\AdapterInterface
      */
-    protected $_connection;
+    protected ?\Maho\Db\Adapter\AdapterInterface $_connection = null;
 
     /**
      *  Connection configuration
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_connectionData;
+    protected array $_connectionData = [];
 
     /**
-     *  Connection configuration
+     *  Configuration data
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_configData;
+    protected array $_configData = [];
 
     /**
      * Return the database engine from config

@@ -6,6 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -13,17 +14,13 @@ class Mage_Install_Model_Installer_Abstract
 {
     /**
      * Installer singleton
-     *
-     * @var Mage_Install_Model_Installer|null
      */
-    protected $_installer;
+    protected ?Mage_Install_Model_Installer $_installer = null;
 
     /**
      * Get installer singleton
-     *
-     * @return Mage_Install_Model_Installer
      */
-    protected function _getInstaller()
+    protected function _getInstaller(): Mage_Install_Model_Installer
     {
         if (is_null($this->_installer)) {
             $this->_installer = Mage::getSingleton('install/installer');
@@ -35,11 +32,9 @@ class Mage_Install_Model_Installer_Abstract
      * Validate session storage value (files or db)
      * If empty, will return 'files'
      *
-     * @param string $value
-     * @return string
      * @throws Exception
      */
-    protected function _checkSessionSave($value)
+    protected function _checkSessionSave(string $value): string
     {
         if (empty($value)) {
             return 'files';
@@ -54,11 +49,9 @@ class Mage_Install_Model_Installer_Abstract
      * Validate admin frontname value.
      * If empty, "admin" will be returned
      *
-     * @param string $value
-     * @return string
      * @throws Exception
      */
-    protected function _checkAdminFrontname($value)
+    protected function _checkAdminFrontname(string $value): string
     {
         if (empty($value)) {
             return 'admin';
