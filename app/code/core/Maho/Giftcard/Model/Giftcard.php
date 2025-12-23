@@ -87,7 +87,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * Get balance in a specific currency (converts from base currency)
      */
-    public function getBalance(string $currencyCode = null): float
+    public function getBalance(?string $currencyCode = null): float
     {
         $baseBalance = (float) $this->getBaseBalance();
 

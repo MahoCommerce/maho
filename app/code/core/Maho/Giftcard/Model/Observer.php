@@ -194,7 +194,7 @@ class Maho_Giftcard_Model_Observer
                 'giftcard' => $giftcard,
                 'order' => $order,
                 'code' => $giftcard->getCode(),
-                'balance' => Mage::helper('core')->formatCurrency($giftcard->getBalance($storeCurrencyCode), $storeCurrencyCode),
+                'balance' => Mage::app()->getLocale()->formatCurrency($giftcard->getBalance($storeCurrencyCode), $storeCurrencyCode),
                 'recipient_name' => $giftcard->getRecipientName(),
                 'sender_name' => $giftcard->getSenderName(),
                 'message' => $giftcard->getMessage(),
