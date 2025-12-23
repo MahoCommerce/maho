@@ -14,8 +14,5 @@ declare(strict_types=1);
 
 class Mage_Install_Block_Configuration_Database_Type_Mysql extends Mage_Install_Block_Configuration_Database_Type
 {
-    /**
-     * @var string
-     */
-    protected $_title = 'MySQL';
+    protected ?string $title = 'MySQL';
 }

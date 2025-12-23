@@ -6,33 +6,27 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
+use Maho\DataObject;
+
 class Mage_Install_Block_Configuration_Database_Type extends Mage_Core_Block_Template
 {
-    /**
-     * @var string
-     */
-    protected $_title = null;
+    protected ?string $title = null;
 
-    /**
-     * @return string
-     */
-    public function getTitle()
+    public function getTitle(): ?string
     {
-        return $this->_title;
+        return $this->title;
     }
 
-    /**
-     * Retrieve configuration form data object
-     *
-     * @return Varien_Object
-     */
-    public function getFormData()
+    public function getFormData(): DataObject
     {
         $data = $this->getData('form_data');
-        if (is_null($data)) {
+        if ($data === null) {
             $data = Mage::getSingleton('install/session')->getConfigData(true);
             if (empty($data)) {
                 $data = Mage::getModel('install/installer_config')->getFormData();
