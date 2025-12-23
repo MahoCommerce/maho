@@ -107,25 +107,20 @@ $giftcardIsRedeemable = $product->getData('giftcard_is_redeemable');
 </div>
 
 <script type="module">
-function toggleGiftcardAmountFields() {
-    alert(1)
-    const type = document.getElementById('giftcard_type').value;
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('giftcard_type');
     const amountsRow = document.getElementById('giftcard_amounts_row');
     const minRow = document.getElementById('giftcard_min_amount_row');
     const maxRow = document.getElementById('giftcard_max_amount_row');
 
-    // Show/hide based on type
-    amountsRow.style.display = (type === 'fixed' || type === 'combined') ? '' : 'none';
-    minRow.style.display = (type === 'range' || type === 'combined') ? '' : 'none';
-    maxRow.style.display = (type === 'range' || type === 'combined') ? '' : 'none';
-}
+    function toggleGiftcardAmountFields() {
+        const type = select.value || 'fixed';
+        amountsRow.style.display = (type === 'fixed' || type === 'combined') ? 'table-row' : 'none';
+        minRow.style.display = (type === 'range' || type === 'combined') ? 'table-row' : 'none';
+        maxRow.style.display = (type === 'range' || type === 'combined') ? 'table-row' : 'none';
+    }
 
-const selectElement = document.getElementById('giftcard_type');
-if (selectElement) {
-    // Add event listener to select element
-    selectElement.addEventListener('change', toggleGiftcardAmountFields);
-
-    // Initialize on page load
+    select.addEventListener('change', toggleGiftcardAmountFields);
     toggleGiftcardAmountFields();
-}
+});
 </script>
