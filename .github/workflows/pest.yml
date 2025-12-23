@@ -20,23 +20,23 @@ jobs:
 
     services:
       mysql:
-        image: ${{ matrix.db == 'mysql' && 'mysql:latest' || '' }}
+        image: mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho
         ports:
           - 3306:3306
-        options: ${{ matrix.db == 'mysql' && '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3' || '' }}
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
       postgres:
-        image: ${{ matrix.db == 'pgsql' && 'postgres:latest' || '' }}
+        image: postgres:latest
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: maho
         ports:
           - 5432:5432
-        options: ${{ matrix.db == 'pgsql' && '--health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5' || '' }}
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Setup PHP
