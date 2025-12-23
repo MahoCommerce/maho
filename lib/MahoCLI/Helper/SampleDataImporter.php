@@ -25,6 +25,20 @@ use PDO;
 class SampleDataImporter
 {
     private PDO $pdo;
+    private $logCallback;
+
+    /**
+     * Cached entity type IDs loaded from database
+     */
+    private array $entityTypeIds = [];
+
+    /**
+     * Whitelist of allowed table names for schema introspection
+     */
+    private const ALLOWED_SCHEMA_TABLES = [
+        'eav_attribute',
+        'catalog_eav_attribute',
+    ];
 
     /**
      * Tables that contain attribute_id column that needs remapping
@@ -102,10 +116,43 @@ class SampleDataImporter
      */
     private array $catalogEavAttributeColumns = [];
 
-    public function __construct(PDO $pdo)
+    public function __construct(PDO $pdo, ?callable $logCallback = null)
     {
         $this->pdo = $pdo;
+        $this->logCallback = $logCallback;
         $this->loadTableSchemas();
+        $this->loadEntityTypeIds();
+    }
+
+    /**
+     * Log a message via callback if provided
+     */
+    private function log(string $message, string $level = 'info'): void
+    {
+        if ($this->logCallback !== null) {
+            ($this->logCallback)($message, $level);
+        }
+    }
+
+    /**
+     * Load entity type IDs from database
+     */
+    private function loadEntityTypeIds(): void
+    {
+        $stmt = $this->pdo->query('SELECT entity_type_id, entity_type_code FROM eav_entity_type');
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($rows as $row) {
+            $this->entityTypeIds[$row['entity_type_code']] = (int) $row['entity_type_id'];
+        }
+    }
+
+    /**
+     * Get entity type ID by code
+     */
+    private function getEntityTypeId(string $code): ?int
+    {
+        return $this->entityTypeIds[$code] ?? null;
     }
 
     /**
@@ -122,10 +169,15 @@ class SampleDataImporter
      */
     private function getTableColumns(string $table): array
     {
+        // Validate table name against whitelist to prevent SQL injection
+        if (!in_array($table, self::ALLOWED_SCHEMA_TABLES, true)) {
+            throw new \InvalidArgumentException("Table '{$table}' is not allowed for schema introspection");
+        }
+
         $driver = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
         if ($driver === 'mysql') {
-            $stmt = $this->pdo->query("SHOW COLUMNS FROM `{$table}`");
+            $stmt = $this->pdo->query("SHOW COLUMNS FROM " . $this->quoteIdentifier($table));
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
         } elseif ($driver === 'pgsql') {
             $stmt = $this->pdo->prepare('
@@ -135,7 +187,7 @@ class SampleDataImporter
             $stmt->execute([$table]);
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'column_name');
         } elseif ($driver === 'sqlite') {
-            $stmt = $this->pdo->query("PRAGMA table_info(`{$table}`)");
+            $stmt = $this->pdo->query("PRAGMA table_info(" . $this->quoteIdentifier($table) . ")");
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'name');
         }
 
@@ -159,7 +211,7 @@ class SampleDataImporter
     /**
      * Import sample data SQL with attribute ID remapping
      */
-    public function import(string $sql, ?callable $progressCallback = null): string
+    public function import(string $sql): string
     {
         // Step 1: Parse eav_attribute from SQL
         $this->parseEavAttributeFromSql($sql);
@@ -369,7 +421,10 @@ class SampleDataImporter
                 $this->attributesToCreate[$oldId] = $info;
 
                 if (($info['is_user_defined'] ?? 0) != 1) {
-                    echo "INFO: Creating missing attribute (marked as system): {$info['code']} (entity_type={$info['entity_type_id']})\n";
+                    $this->log(
+                        "Creating missing attribute (marked as system): {$info['code']} (entity_type={$info['entity_type_id']})",
+                        'info'
+                    );
                 }
             }
         }
@@ -419,7 +474,11 @@ class SampleDataImporter
 
             // If this is a product/category attribute, also create catalog_eav_attribute entry
             $entityTypeId = (int) ($info['entity_type_id'] ?? 0);
-            if (in_array($entityTypeId, [3, 4]) && isset($this->oldCatalogEavAttributes[$oldId])) {
+            $catalogEntityTypes = array_filter([
+                $this->getEntityTypeId('catalog_category'),
+                $this->getEntityTypeId('catalog_product'),
+            ]);
+            if (in_array($entityTypeId, $catalogEntityTypes, true) && isset($this->oldCatalogEavAttributes[$oldId])) {
                 $this->createCatalogEavAttribute($newId, $this->oldCatalogEavAttributes[$oldId]);
             }
 

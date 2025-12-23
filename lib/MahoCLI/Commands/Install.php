@@ -214,7 +214,17 @@ class Install extends BaseMahoCommand
                     $output->writeln('<info>Importing db_data.sql with attribute ID remapping...</info>');
                     $dataSql = file_get_contents($dataFilePath);
 
-                    $importer = new \MahoCLI\Helper\SampleDataImporter($pdo);
+                    // Create logger callback for the importer
+                    $logCallback = function (string $message, string $level = 'info') use ($output) {
+                        $tag = match ($level) {
+                            'error' => 'error',
+                            'warning' => 'comment',
+                            default => 'info',
+                        };
+                        $output->writeln("  <{$tag}>{$message}</{$tag}>");
+                    };
+
+                    $importer = new \MahoCLI\Helper\SampleDataImporter($pdo, $logCallback);
                     $output->writeln('  Parsing attribute mappings...');
                     $remappedSql = $importer->import($dataSql);
 
