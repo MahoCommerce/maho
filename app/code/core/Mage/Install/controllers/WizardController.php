@@ -174,7 +174,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_checkIfInstalled();
         $step = $this->_getWizard()->getStepByName('configuration');
 
-        $config             = $this->getRequest()->getPost('configuration');
+        $config             = $this->getRequest()->getPost('config');
         $connectionConfig   = $this->getRequest()->getPost('connection');
 
         if ($config && $connectionConfig && isset($connectionConfig[$config['db_engine']])) {

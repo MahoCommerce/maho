@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Install_Block_Db_Main extends Mage_Core_Block_Template
+class Mage_Install_Block_Configuration_Database extends Mage_Core_Block_Template
 {
     /**
      * Array of Database blocks keyed by name
