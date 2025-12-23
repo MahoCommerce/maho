@@ -46,7 +46,6 @@ $giftcards = $this->getGiftcards();
             text-align: center;
             margin-bottom: 25px;
             padding-bottom: 20px;
-            border-bottom: 2px solid #e1e5eb;
         }
 
         .header h1 {
@@ -198,8 +197,7 @@ $giftcards = $this->getGiftcards();
         <?php foreach ($giftcards as $giftcard): ?>
         <div class="giftcard">
             <div class="header">
-                <h1>GIFT CARD</h1>
-                <div class="store-name"><?php echo $this->escapeHtml(Mage::getStoreConfig('general/store_information/name')) ?></div>
+                <h1>GIFT CARD <?php echo $this->escapeHtml(Mage::getStoreConfig('general/store_information/name')) ?></h1>
             </div>
 
             <div class="code-section">
@@ -215,14 +213,12 @@ $giftcards = $this->getGiftcards();
                 <?php if ($qrCode): ?>
                 <div style="margin-top: 20px;">
                     <img src="<?php echo $qrCode ?>" alt="QR Code" style="width: 150px; height: 150px;" />
-                    <div style="font-size: 8pt; color: #7f8c8d; margin-top: 5px;">Scan with mobile device</div>
                 </div>
                 <?php endif; ?>
 
                 <?php if ($barcode): ?>
                 <div style="margin-top: 15px;">
                     <img src="<?php echo $barcode ?>" alt="Barcode" style="height: 50px; width: auto; max-width: 250px;" />
-                    <div style="font-size: 8pt; color: #7f8c8d; margin-top: 5px;">For POS scanning</div>
                 </div>
                 <?php endif; ?>
             </div>
@@ -268,7 +264,6 @@ $giftcards = $this->getGiftcards();
                     <li>This gift card is redeemable for merchandise only</li>
                     <li>Cannot be redeemed for cash unless required by law</li>
                     <li>Lost or stolen cards will not be replaced</li>
-                    <li>No additional fees apply to this gift card</li>
                 </ul>
             </div>
 

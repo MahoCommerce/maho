@@ -20,10 +20,8 @@ class Maho_Giftcard_Block_Cart_Total extends Mage_Checkout_Block_Total_Default
 
     /**
      * Get applied gift card codes
-     *
-     * @return array
      */
-    public function getGiftCardCodes()
+    public function getGiftCardCodes(): array
     {
         $quote = Mage::getSingleton('checkout/session')->getQuote();
         $codesJson = $quote->getGiftcardCodes();
