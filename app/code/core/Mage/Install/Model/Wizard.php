@@ -50,7 +50,7 @@ class Mage_Install_Model_Wizard
     /**
      * Get wizard step by request
      *
-     * @return  Varien_Object | false
+     * @return false|Maho\DataObject
      */
     public function getStepByRequest(Mage_Core_Controller_Request_Http $request)
     {

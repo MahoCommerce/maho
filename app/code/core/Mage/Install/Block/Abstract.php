@@ -9,28 +9,23 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
+use Maho\DataObject;
+
 abstract class Mage_Install_Block_Abstract extends Mage_Core_Block_Template
 {
-    /**
-     * @return Mage_Install_Model_Installer
-     */
-    public function getInstaller()
+    public function getInstaller(): Mage_Install_Model_Installer
     {
         return Mage::getSingleton('install/installer');
     }
 
-    /**
-     * @return Mage_Install_Model_Wizard
-     */
-    public function getWizard()
+    public function getWizard(): Mage_Install_Model_Wizard
     {
         return Mage::getSingleton('install/wizard');
     }
 
-    /**
-     * @return Varien_Object
-     */
-    public function getCurrentStep()
+    public function getCurrentStep(): DataObject
     {
         return $this->getWizard()->getStepByRequest($this->getRequest());
     }

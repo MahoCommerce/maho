@@ -9,6 +9,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
+use Maho\DataObject;
+
 class Mage_Install_Block_Administrator extends Mage_Install_Block_Abstract
 {
     public function __construct()
@@ -17,27 +21,22 @@ class Mage_Install_Block_Administrator extends Mage_Install_Block_Abstract
         $this->setTemplate('page/administrator.phtml');
     }
 
-    public function getPostUrl()
+    public function getPostUrl(): string
     {
         return $this->getUrl('*/*/administratorPost');
     }
 
-    public function getFormData()
+    public function getFormData(): DataObject
     {
         $data = $this->getData('form_data');
-        if (is_null($data)) {
+        if ($data === null) {
             $data = new Varien_Object(Mage::getSingleton('install/session')->getAdminData(true));
             $this->setData('form_data', $data);
         }
         return $data;
     }
 
-    /**
-     * Retrieve minimum length of admin password
-     *
-     * @return int
-     */
-    public function getMinAdminPasswordLength()
+    public function getMinAdminPasswordLength(): int
     {
         return Mage::getModel('admin/user')->getMinAdminPasswordLength();
     }

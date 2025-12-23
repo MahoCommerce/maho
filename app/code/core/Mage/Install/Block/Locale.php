@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
 class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
 {
     public function __construct()
@@ -18,124 +20,73 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
         $this->setTemplate('page/locale.phtml');
     }
 
-    /**
-     * Retrieve locale code
-     *
-     * @return string
-     */
-    public function getLocale()
+    public function getLocale(): string
     {
         $locale = $this->getData('locale');
-        if (is_null($locale)) {
+        if ($locale === null) {
             $locale = Mage::app()->getLocale()->getLocaleCode();
             $this->setData('locale', $locale);
         }
         return $locale;
     }
 
-    /**
-     * Retrieve locale data post url
-     *
-     * @return string
-     */
-    public function getPostUrl()
+    public function getPostUrl(): string
     {
         return $this->getCurrentStep()->getNextUrl();
-        //return $this->getUrl('*/*/localePost');
     }
 
-    /**
-     * Retrieve locale change url
-     *
-     * @return string
-     */
-    public function getChangeUrl()
+    public function getChangeUrl(): string
     {
         return $this->getUrl('*/*/localeChange');
     }
 
-    /**
-     * Retrieve locale dropdown HTML
-     *
-     * @return string
-     */
-    public function getLocaleSelect()
+    public function getLocaleSelect(): string
     {
         return $this->getLayout()->createBlock('core/html_select')
             ->setName('config[locale]')
             ->setId('locale')
-            ->setTitle(Mage::helper('install')->__('Locale'))
+            ->setTitle($this->helper('install')->__('Locale'))
             ->setExtraParams('required')
             ->setValue($this->getLocale())
             ->setOptions(Mage::app()->getLocale()->getTranslatedOptionLocales())
             ->getHtml();
     }
 
-    /**
-     * Retrieve timezone dropdown HTML
-     *
-     * @return string
-     */
-    public function getTimezoneSelect()
+    public function getTimezoneSelect(): string
     {
         return $this->getLayout()->createBlock('core/html_select')
             ->setName('config[timezone]')
             ->setId('timezone')
-            ->setTitle(Mage::helper('install')->__('Time Zone'))
+            ->setTitle($this->helper('install')->__('Time Zone'))
             ->setExtraParams('required')
             ->setValue($this->getTimezone())
             ->setOptions(Mage::app()->getLocale()->getOptionTimezones())
             ->getHtml();
     }
 
-    /**
-     * Retrieve timezone
-     *
-     * @return string
-     */
-    public function getTimezone()
+    public function getTimezone(): string
     {
         $timezone = Mage::getSingleton('install/session')->getTimezone() ?: Mage::app()->getLocale()->getTimezone();
-        if ($timezone == Mage_Core_Model_Locale::DEFAULT_TIMEZONE) {
+        if ($timezone === Mage_Core_Model_Locale::DEFAULT_TIMEZONE) {
             $timezone = 'America/Los_Angeles';
         }
         return $timezone;
     }
 
-    /**
-     * Retrieve currency dropdown html
-     *
-     * @return string
-     */
-    public function getCurrencySelect()
+    public function getCurrencySelect(): string
     {
         return $this->getLayout()->createBlock('core/html_select')
             ->setName('config[currency]')
             ->setId('currency')
-            ->setTitle(Mage::helper('install')->__('Default Currency'))
+            ->setTitle($this->helper('install')->__('Default Currency'))
             ->setExtraParams('required')
             ->setValue($this->getCurrency())
             ->setOptions(Mage::app()->getLocale()->getOptionCurrencies())
             ->getHtml();
     }
 
-    /**
-     * Retrieve currency
-     *
-     * @return string
-     */
-    public function getCurrency()
+    public function getCurrency(): string
     {
         return Mage::getSingleton('install/session')->getCurrency() ?: Mage::app()->getLocale()->getCurrency();
-    }
-
-    public function getFormData()
-    {
-        $data = $this->getData('form_data');
-        if (is_null($data)) {
-            $data = new Varien_Object();
-            $this->setData('form_data', $data);
-        }
-        return $data;
     }
 }
