@@ -68,7 +68,7 @@ class Mage_Install_Block_Configuration_Database extends Mage_Core_Block_Template
             if (empty($data)) {
                 $data = Mage::getModel('install/installer_config')->getFormData();
             } else {
-                $data = new Varien_Object($data);
+                $data = new DataObject($data);
             }
             $this->setFormData($data);
         }

@@ -13,7 +13,7 @@ class Mage_Install_Model_Installer_Env extends Mage_Install_Model_Installer_Abst
 {
     public function __construct() {}
 
-    public function install()
+    public function install(): self
     {
         if (!$this->_checkPhpExtensions()) {
             throw new Exception();
@@ -21,7 +21,7 @@ class Mage_Install_Model_Installer_Env extends Mage_Install_Model_Installer_Abst
         return $this;
     }
 
-    protected function _checkPhpExtensions()
+    protected function _checkPhpExtensions(): bool
     {
         $res = true;
         $config = Mage::getSingleton('install/config')->getExtensionsForCheck();
@@ -35,7 +35,10 @@ class Mage_Install_Model_Installer_Env extends Mage_Install_Model_Installer_Abst
         return $res;
     }
 
-    protected function _checkExtension($extension)
+    /**
+     * @param string|array<string> $extension
+     */
+    protected function _checkExtension(string|array $extension): bool
     {
         if (is_array($extension)) {
             $oneLoaded = false;

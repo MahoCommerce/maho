@@ -31,7 +31,7 @@ class Mage_Install_Block_Configuration_Database_Type extends Mage_Core_Block_Tem
             if (empty($data)) {
                 $data = Mage::getModel('install/installer_config')->getFormData();
             } else {
-                $data = new Varien_Object($data);
+                $data = new DataObject($data);
             }
             $this->setFormData($data);
         }

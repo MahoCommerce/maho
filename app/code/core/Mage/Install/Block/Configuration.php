@@ -35,7 +35,7 @@ class Mage_Install_Block_Configuration extends Mage_Install_Block_Abstract
             if (empty($data)) {
                 $data = Mage::getModel('install/installer_config')->getFormData();
             } else {
-                $data = new Varien_Object($data);
+                $data = new DataObject($data);
             }
             $this->setFormData($data);
         }
