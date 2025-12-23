@@ -182,51 +182,15 @@ class Install extends BaseMahoCommand
             $dbEngine = $input->getOption('db_engine') ?? 'mysql';
             $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
-            $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
-
             try {
                 // Create PDO connection based on database engine
                 if ($dbEngine === 'pgsql') {
                     $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
                     $pdo = new \PDO($dsn, $dbUser, $dbPass);
                     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-                    // Use SQL converter for PostgreSQL
-                    $converter = new \MahoCLI\Helper\SqlConverter();
-                    $converter->setPdo($pdo);
-
-                    // Disable foreign key checks for the import
-                    // PostgreSQL uses session_replication_role to disable triggers/constraints
                     $pdo->exec('SET session_replication_role = replica');
-
-                    foreach ($sqlFiles as $sqlFile) {
-                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                        $output->writeln("<info>Importing {$sqlFile} (converting to PostgreSQL)...</info>");
-
-                        // Read and convert MySQL SQL to PostgreSQL
-                        $mysqlContent = file_get_contents($sqlFilePath);
-                        $pgsqlContent = $converter->mysqlToPostgresql($mysqlContent);
-
-                        // Execute statements one by one for better error handling
-                        $converter->executeStatements($pdo, $pgsqlContent, function ($current, $total) use ($output) {
-                            if ($current === $total || $current % 500 === 0) {
-                                $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
-                            }
-                        });
-                        $output->writeln("\n<info>Successfully imported {$sqlFile}</info>");
-                    }
-
-                    // Re-enable foreign key checks
-                    $pdo->exec('SET session_replication_role = DEFAULT');
-
-                    // Update sequences after importing data with explicit IDs
-                    $output->writeln('<info>Updating PostgreSQL sequences...</info>');
-                    $this->updatePostgresSequences($pdo);
-
                 } elseif ($dbEngine === 'sqlite') {
-                    // SQLite - convert MySQL SQL to SQLite
                     $dbPath = $dbName;
-                    // Resolve relative paths
                     if ($dbPath[0] !== '/' && !str_contains($dbPath, ':')) {
                         $baseDir = defined('BP') ? BP : getcwd();
                         $dbDir = $baseDir . '/var/db';
@@ -235,55 +199,57 @@ class Install extends BaseMahoCommand
                         }
                         $dbPath = $dbDir . '/' . $dbPath;
                     }
-
                     $dsn = "sqlite:{$dbPath}";
                     $pdo = new \PDO($dsn);
                     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-                    // Use SQL converter for SQLite
-                    $converter = new \MahoCLI\Helper\SqlConverter();
-                    $converter->setPdo($pdo);
-
-                    foreach ($sqlFiles as $sqlFile) {
-                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                        $output->writeln("<info>Importing {$sqlFile} (converting to SQLite)...</info>");
-
-                        // Read and convert MySQL SQL to SQLite
-                        $mysqlContent = file_get_contents($sqlFilePath);
-                        $sqliteContent = $converter->mysqlToSqlite($mysqlContent);
-
-                        // Execute statements one by one for better error handling
-                        $converter->executeStatements($pdo, $sqliteContent, function ($current, $total) use ($output) {
-                            if ($current === $total || $current % 500 === 0) {
-                                $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
-                            }
-                        });
-                        $output->writeln("\n<info>Successfully imported {$sqlFile}</info>");
-                    }
-
                 } else {
-                    // MySQL - use direct execution
                     $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
                     $pdo = new \PDO($dsn, $dbUser, $dbPass);
                     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                }
 
-                    foreach ($sqlFiles as $sqlFile) {
-                        $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                        $output->writeln("<info>Importing {$sqlFile}...</info>");
+                // Import db_data.sql with attribute ID remapping
+                $dataFilePath = $sampleDataDir . '/db_data.sql';
+                if (file_exists($dataFilePath)) {
+                    $output->writeln('<info>Importing db_data.sql with attribute ID remapping...</info>');
+                    $dataSql = file_get_contents($dataFilePath);
 
-                        // Read SQL file content
-                        $sqlContent = file_get_contents($sqlFilePath);
+                    $importer = new \MahoCLI\Helper\SampleDataImporter($pdo);
+                    $output->writeln('  Parsing attribute mappings...');
+                    $remappedSql = $importer->import($dataSql);
 
-                        // Execute the entire file as a single operation
-                        $pdo->exec($sqlContent);
-                        $output->writeln("<info>Successfully imported {$sqlFile}</info>");
+                    $attrRemap = $importer->getAttributeRemap();
+                    $output->writeln('  Remapped ' . count($attrRemap) . ' attributes');
+
+                    // Execute the remapped SQL
+                    $output->writeln('  Executing remapped SQL...');
+                    $this->executeSqlForEngine($pdo, $remappedSql, $dbEngine, $output);
+                    $output->writeln('<info>Successfully imported db_data.sql</info>');
+
+                    // Import db_config.sql with config value remapping
+                    $configFilePath = $sampleDataDir . '/db_config.sql';
+                    if (file_exists($configFilePath)) {
+                        $output->writeln('<info>Importing db_config.sql with config remapping...</info>');
+                        $configSql = file_get_contents($configFilePath);
+
+                        // Remap attribute IDs in config values (like configswatches)
+                        $remappedConfigSql = $importer->remapConfigValuesOnly($configSql);
+
+                        $this->executeSqlForEngine($pdo, $remappedConfigSql, $dbEngine, $output);
+                        $output->writeln('<info>Successfully imported db_config.sql</info>');
                     }
+                }
+
+                // PostgreSQL post-processing
+                if ($dbEngine === 'pgsql') {
+                    $pdo->exec('SET session_replication_role = DEFAULT');
+                    $output->writeln('<info>Updating PostgreSQL sequences...</info>');
+                    $this->updatePostgresSequences($pdo);
                 }
 
             } catch (\PDOException $e) {
                 $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
 
-                // If it's a connection error, provide more helpful message
                 if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
                     $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
                 } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
@@ -534,6 +500,36 @@ class Install extends BaseMahoCommand
             $output->writeln("<info>Successfully imported {$importedCount} blog posts</info>");
         } catch (Exception $e) {
             $output->writeln("<error>Failed to import blog posts: {$e->getMessage()}</error>");
+        }
+    }
+
+    /**
+     * Execute SQL content for the specified database engine
+     */
+    private function executeSqlForEngine(\PDO $pdo, string $sql, string $dbEngine, OutputInterface $output): void
+    {
+        $converter = new \MahoCLI\Helper\SqlConverter();
+        $converter->setPdo($pdo);
+
+        if ($dbEngine === 'pgsql') {
+            $convertedSql = $converter->mysqlToPostgresql($sql);
+            $converter->executeStatements($pdo, $convertedSql, function ($current, $total) use ($output) {
+                if ($current === $total || $current % 500 === 0) {
+                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                }
+            });
+            $output->writeln('');
+        } elseif ($dbEngine === 'sqlite') {
+            $convertedSql = $converter->mysqlToSqlite($sql);
+            $converter->executeStatements($pdo, $convertedSql, function ($current, $total) use ($output) {
+                if ($current === $total || $current % 500 === 0) {
+                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                }
+            });
+            $output->writeln('');
+        } else {
+            // MySQL - direct execution
+            $pdo->exec($sql);
         }
     }
 }
