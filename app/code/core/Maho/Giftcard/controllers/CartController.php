@@ -79,8 +79,9 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
             // For cart page application, we need to set an initial amount
             // The total collector will adjust this based on the actual cart total
-            // We set the gift card balance as the max amount it can use
-            $appliedCodes[$code] = $giftcard->getBalance();
+            // We set the gift card balance as the max amount it can use (in quote currency)
+            $quoteCurrency = $quote->getQuoteCurrencyCode();
+            $appliedCodes[$code] = $giftcard->getBalance($quoteCurrency);
 
             $quote->setGiftcardCodes(json_encode($appliedCodes));
             $quote->collectTotals()->save();

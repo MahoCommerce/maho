@@ -87,12 +87,14 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
                 break; // Nothing left to pay
             }
 
-            $availableBalance = $giftcard->getBalance();
+            // Get gift card balance in base currency (no conversion needed since we work in base)
+            $availableBaseBalance = $giftcard->getBalance(); // Returns base currency by default
+
             // If no specific amount requested (0), apply max available
             if ($requestedAmount <= 0) {
-                $baseAmountToApply = min($availableBalance, $remainingTotal);
+                $baseAmountToApply = min($availableBaseBalance, $remainingTotal);
             } else {
-                $baseAmountToApply = min($requestedAmount, $availableBalance, $remainingTotal);
+                $baseAmountToApply = min($requestedAmount, $availableBaseBalance, $remainingTotal);
             }
 
             if ($baseAmountToApply > 0) {

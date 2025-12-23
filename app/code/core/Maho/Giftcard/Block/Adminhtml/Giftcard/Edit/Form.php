@@ -57,29 +57,50 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
             ],
         ]);
 
-        $fieldset->addField('balance', 'text', [
-            'name'     => 'balance',
-            'label'    => Mage::helper('giftcard')->__('Balance'),
-            'title'    => Mage::helper('giftcard')->__('Balance'),
+        // Website selector
+        if (!$model->getId()) {
+            $websites = Mage::app()->getWebsites();
+            $websiteValues = [];
+            foreach ($websites as $website) {
+                $websiteValues[$website->getId()] = $website->getName();
+            }
+            $fieldset->addField('website_id', 'select', [
+                'name'     => 'website_id',
+                'label'    => Mage::helper('giftcard')->__('Website'),
+                'title'    => Mage::helper('giftcard')->__('Website'),
+                'required' => true,
+                'values'   => $websiteValues,
+                'value'    => $model->getWebsiteId() ?: Mage::app()->getWebsite()->getId(),
+            ]);
+        } else {
+            // Show website as read-only for existing gift cards
+            $website = Mage::app()->getWebsite($model->getWebsiteId());
+            $fieldset->addField('website_display', 'note', [
+                'label' => Mage::helper('giftcard')->__('Website'),
+                'text'  => $website->getName() . ' (Base Currency: ' . $model->getBaseCurrencyCode() . ')',
+            ]);
+            $fieldset->addField('website_id', 'hidden', [
+                'name' => 'website_id',
+            ]);
+        }
+
+        $fieldset->addField('base_balance', 'text', [
+            'name'     => 'base_balance',
+            'label'    => Mage::helper('giftcard')->__('Balance (Base Currency)'),
+            'title'    => Mage::helper('giftcard')->__('Balance (Base Currency)'),
             'required' => true,
             'class'    => 'validate-number',
+            'note'     => $model->getId() ? 'In ' . $model->getBaseCurrencyCode() : '',
         ]);
 
-        $fieldset->addField('initial_balance', 'text', [
-            'name'     => 'initial_balance',
-            'label'    => Mage::helper('giftcard')->__('Initial Balance'),
-            'title'    => Mage::helper('giftcard')->__('Initial Balance'),
+        $fieldset->addField('base_initial_balance', 'text', [
+            'name'     => 'base_initial_balance',
+            'label'    => Mage::helper('giftcard')->__('Initial Balance (Base Currency)'),
+            'title'    => Mage::helper('giftcard')->__('Initial Balance (Base Currency)'),
             'required' => !$model->getId(),
             'class'    => 'validate-number',
             'disabled' => $model->getId() ? true : false,
-        ]);
-
-        $fieldset->addField('currency_code', 'text', [
-            'name'     => 'currency_code',
-            'label'    => Mage::helper('giftcard')->__('Currency Code'),
-            'title'    => Mage::helper('giftcard')->__('Currency Code'),
-            'required' => !$model->getId(),
-            'value'    => $model->getCurrencyCode() ?: Mage::app()->getStore()->getCurrentCurrencyCode(),
+            'note'     => $model->getId() ? 'In ' . $model->getBaseCurrencyCode() : '',
         ]);
 
         $fieldset->addField('expires_at', 'date', [

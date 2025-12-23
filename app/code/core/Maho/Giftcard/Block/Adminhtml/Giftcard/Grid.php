@@ -62,22 +62,33 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
             ],
         ]);
 
-        $this->addColumn('balance', [
+        if (!Mage::app()->isSingleStoreMode()) {
+            $this->addColumn('website_id', [
+                'header'  => Mage::helper('giftcard')->__('Website'),
+                'align'   => 'left',
+                'width'   => '100px',
+                'index'   => 'website_id',
+                'type'    => 'options',
+                'options' => Mage::getSingleton('adminhtml/system_store')->getWebsiteOptionHash(),
+            ]);
+        }
+
+        $this->addColumn('base_balance', [
             'header'   => Mage::helper('giftcard')->__('Balance'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'balance',
+            'index'    => 'base_balance',
             'type'     => 'currency',
-            'currency' => 'currency_code',
+            'currency' => 'base_currency_code',
         ]);
 
-        $this->addColumn('initial_balance', [
+        $this->addColumn('base_initial_balance', [
             'header'   => Mage::helper('giftcard')->__('Initial Balance'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'initial_balance',
+            'index'    => 'base_initial_balance',
             'type'     => 'currency',
-            'currency' => 'currency_code',
+            'currency' => 'base_currency_code',
         ]);
 
         $this->addColumn('recipient_email', [

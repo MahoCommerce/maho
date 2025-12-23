@@ -79,29 +79,29 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             ],
         ]);
 
-        $this->addColumn('amount', [
+        $this->addColumn('base_amount', [
             'header'   => Mage::helper('giftcard')->__('Amount'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'amount',
+            'index'    => 'base_amount',
             'type'     => 'currency',
             'currency_code' => Mage::app()->getStore()->getBaseCurrencyCode(),
         ]);
 
-        $this->addColumn('balance_before', [
+        $this->addColumn('base_balance_before', [
             'header'   => Mage::helper('giftcard')->__('Balance Before'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'balance_before',
+            'index'    => 'base_balance_before',
             'type'     => 'currency',
             'currency_code' => Mage::app()->getStore()->getBaseCurrencyCode(),
         ]);
 
-        $this->addColumn('balance_after', [
+        $this->addColumn('base_balance_after', [
             'header'   => Mage::helper('giftcard')->__('Balance After'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'balance_after',
+            'index'    => 'base_balance_after',
             'type'     => 'currency',
             'currency_code' => Mage::app()->getStore()->getBaseCurrencyCode(),
         ]);

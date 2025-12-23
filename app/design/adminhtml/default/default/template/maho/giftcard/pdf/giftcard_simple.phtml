@@ -45,7 +45,7 @@ $giftcards = $this->getGiftcards();
     <div class="giftcard">
         <h2>Gift Card</h2>
         <div class="code">Code: <?php echo $this->escapeHtml($giftcard->getCode()) ?></div>
-        <div class="balance">Balance: <?php echo Mage::helper('core')->currency($giftcard->getBalance(), true, false) ?></div>
+        <div class="balance">Balance: <?php echo Mage::helper('core')->formatCurrency($giftcard->getBalance(), $giftcard->getBaseCurrencyCode()) ?></div>
 
         <?php if ($giftcard->getRecipientName()): ?>
         <div class="info">To: <?php echo $this->escapeHtml($giftcard->getRecipientName()) ?></div>

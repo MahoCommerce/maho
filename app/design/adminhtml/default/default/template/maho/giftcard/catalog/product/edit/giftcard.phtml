@@ -37,7 +37,7 @@ $giftcardIsRedeemable = $product->getData('giftcard_is_redeemable');
                     <label for="giftcard_type"><?= $this->__('Card Type') ?> <span class="required">*</span></label>
                 </td>
                 <td class="value">
-                    <select id="giftcard_type" name="product[giftcard_type]" class="required-entry select" onchange="toggleGiftcardAmountFields()">
+                    <select id="giftcard_type" name="product[giftcard_type]" class="required-entry select">
                         <option value="fixed" <?= $giftcardType === 'fixed' ? 'selected' : '' ?>><?= $this->__('Fixed Amount(s)') ?></option>
                         <option value="range" <?= $giftcardType === 'range' ? 'selected' : '' ?>><?= $this->__('Amount Range') ?></option>
                         <option value="combined" <?= $giftcardType === 'combined' ? 'selected' : '' ?>><?= $this->__('Fixed + Range') ?></option>
@@ -106,8 +106,9 @@ $giftcardIsRedeemable = $product->getData('giftcard_is_redeemable');
     </div>
 </div>
 
-<script>
+<script type="module">
 function toggleGiftcardAmountFields() {
+    alert(1)
     const type = document.getElementById('giftcard_type').value;
     const amountsRow = document.getElementById('giftcard_amounts_row');
     const minRow = document.getElementById('giftcard_min_amount_row');
@@ -119,6 +120,12 @@ function toggleGiftcardAmountFields() {
     maxRow.style.display = (type === 'range' || type === 'combined') ? '' : 'none';
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', toggleGiftcardAmountFields);
+const selectElement = document.getElementById('giftcard_type');
+if (selectElement) {
+    // Add event listener to select element
+    selectElement.addEventListener('change', toggleGiftcardAmountFields);
+
+    // Initialize on page load
+    toggleGiftcardAmountFields();
+}
 </script>

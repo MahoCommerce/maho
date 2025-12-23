@@ -76,13 +76,23 @@ class Maho_Giftcard_Model_Observer
     ): void {
         $helper = Mage::helper('giftcard');
 
+        // Get website and base currency from order
+        $store = $order->getStore();
+        $website = $store->getWebsite();
+        $baseCurrencyCode = $website->getBaseCurrencyCode();
+
+        // Convert amount to base currency using order's conversion rate
+        // Gift card amount is in order currency, need to convert to base currency
+        $baseAmount = $amount * $order->getBaseToOrderRate();
+
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
             'code' => $helper->generateCode(),
             'status' => Maho_Giftcard_Model_Giftcard::STATUS_PENDING,
-            'balance' => $amount,
-            'initial_balance' => $amount,
-            'currency_code' => $order->getOrderCurrencyCode(),
+            'website_id' => $website->getId(),
+            'base_balance' => $baseAmount,
+            'base_initial_balance' => $baseAmount,
+            'base_currency_code' => $baseCurrencyCode,
             'recipient_name' => $recipientName,
             'recipient_email' => $recipientEmail,
             'sender_name' => $senderName,
@@ -102,9 +112,9 @@ class Maho_Giftcard_Model_Observer
         $history->setData([
             'giftcard_id' => $giftcard->getId(),
             'action' => Maho_Giftcard_Model_Giftcard::ACTION_CREATED,
-            'amount' => $amount,
-            'balance_before' => 0,
-            'balance_after' => $amount,
+            'base_amount' => $baseAmount,
+            'base_balance_before' => 0,
+            'base_balance_after' => $baseAmount,
             'order_id' => $order->getId(),
             'comment' => "Created from order #{$order->getIncrementId()}",
             'created_at' => date('Y-m-d H:i:s'),
@@ -179,11 +189,12 @@ class Maho_Giftcard_Model_Observer
             $helper = Mage::helper('giftcard');
 
             // Prepare email variables
+            $storeCurrencyCode = $order->getStore()->getCurrentCurrencyCode();
             $emailVars = [
                 'giftcard' => $giftcard,
                 'order' => $order,
                 'code' => $giftcard->getCode(),
-                'balance' => Mage::helper('core')->currency($giftcard->getBalance(), true, false),
+                'balance' => Mage::helper('core')->formatCurrency($giftcard->getBalance($storeCurrencyCode), $storeCurrencyCode),
                 'recipient_name' => $giftcard->getRecipientName(),
                 'sender_name' => $giftcard->getSenderName(),
                 'message' => $giftcard->getMessage(),
@@ -398,11 +409,11 @@ class Maho_Giftcard_Model_Observer
                     continue;
                 }
 
-                $balanceBefore = (float) $giftcardData['balance'];
-                $newBalance = max(0, $balanceBefore - (float) $usedAmount);
+                $baseBalanceBefore = (float) $giftcardData['base_balance'];
+                $newBaseBalance = max(0, $baseBalanceBefore - (float) $usedAmount);
 
                 // Validate sufficient balance
-                if ($balanceBefore < (float) $usedAmount) {
+                if ($baseBalanceBefore < (float) $usedAmount) {
                     throw new Mage_Core_Exception(
                         Mage::helper('giftcard')->__('Insufficient balance on gift card %s', $code),
                     );
@@ -412,7 +423,7 @@ class Maho_Giftcard_Model_Observer
                 $adapter->update(
                     $giftcardTable,
                     [
-                        'balance' => $newBalance,
+                        'base_balance' => $newBaseBalance,
                         'updated_at' => Mage_Core_Model_Locale::now(),
                     ],
                     ['giftcard_id = ?' => $giftcardData['giftcard_id']],
@@ -423,9 +434,9 @@ class Maho_Giftcard_Model_Observer
                 $adapter->insert($historyTable, [
                     'giftcard_id' => $giftcardData['giftcard_id'],
                     'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
-                    'amount' => -(float) $usedAmount,
-                    'balance_before' => $balanceBefore,
-                    'balance_after' => $newBalance,
+                    'base_amount' => -(float) $usedAmount,
+                    'base_balance_before' => $baseBalanceBefore,
+                    'base_balance_after' => $newBaseBalance,
                     'order_id' => $order->getId(),
                     'comment' => "Used in order #{$order->getIncrementId()}",
                     'created_at' => Mage_Core_Model_Locale::now(),

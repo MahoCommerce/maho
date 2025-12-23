@@ -126,14 +126,23 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                     $data['code'] = Mage::helper('giftcard')->generateCode();
                 }
 
+                // Set website_id and base_currency_code for new gift cards
+                if (!$model->getId()) {
+                    if (empty($data['website_id'])) {
+                        $data['website_id'] = Mage::app()->getWebsite()->getId();
+                    }
+                    $website = Mage::app()->getWebsite($data['website_id']);
+                    $data['base_currency_code'] = $website->getBaseCurrencyCode();
+                }
+
                 // Set expiration if not set
                 if (!$model->getId() && empty($data['expires_at'])) {
                     $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
                 }
 
                 // If balance changed, record as adjustment
-                $oldBalance = (float) $model->getBalance();
-                $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
+                $oldBalance = (float) $model->getBaseBalance();
+                $newBalance = isset($data['base_balance']) ? (float) $data['base_balance'] : $oldBalance;
 
                 $model->setData($data);
                 $model->save();
@@ -295,8 +304,10 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             'success' => true,
             'giftcard_id' => $giftcard->getId(),
             'code' => $giftcard->getCode(),
-            'balance' => $giftcard->getBalance(),
-            'initial_balance' => $giftcard->getInitialBalance(),
+            'base_balance' => $giftcard->getBaseBalance(),
+            'base_initial_balance' => $giftcard->getBaseInitialBalance(),
+            'base_currency_code' => $giftcard->getBaseCurrencyCode(),
+            'website_id' => $giftcard->getWebsiteId(),
             'status' => $giftcard->getStatus(),
             'is_valid' => $giftcard->isValid(),
             'expires_at' => $giftcard->getExpiresAt(),

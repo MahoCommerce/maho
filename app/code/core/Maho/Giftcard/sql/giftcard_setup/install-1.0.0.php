@@ -33,18 +33,21 @@ $table = $connection->newTable($this->getTable('giftcard/giftcard'))
         'nullable' => false,
         'default'  => 'active',
     ], 'Status')
-    ->addColumn('balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ->addColumn('website_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
+        'unsigned' => true,
+        'nullable' => false,
+    ], 'Website ID')
+    ->addColumn('base_balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
-    ], 'Current Balance')
-    ->addColumn('initial_balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ], 'Current Balance (Base Currency)')
+    ->addColumn('base_initial_balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
-    ], 'Initial Balance')
-    ->addColumn('currency_code', Maho\Db\Ddl\Table::TYPE_VARCHAR, 3, [
+    ], 'Initial Balance (Base Currency)')
+    ->addColumn('base_currency_code', Maho\Db\Ddl\Table::TYPE_VARCHAR, 3, [
         'nullable' => false,
-        'default'  => 'AUD',
-    ], 'Currency Code')
+    ], 'Base Currency Code')
     ->addColumn('recipient_name', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable' => true,
     ], 'Recipient Name')
@@ -89,6 +92,10 @@ $table = $connection->newTable($this->getTable('giftcard/giftcard'))
         ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
+        $this->getIdxName('giftcard/giftcard', ['website_id']),
+        ['website_id'],
+    )
+    ->addIndex(
         $this->getIdxName('giftcard/giftcard', ['status']),
         ['status'],
     )
@@ -103,6 +110,14 @@ $table = $connection->newTable($this->getTable('giftcard/giftcard'))
     ->addIndex(
         $this->getIdxName('giftcard/giftcard', ['email_scheduled_at', 'email_sent_at']),
         ['email_scheduled_at', 'email_sent_at'],
+    )
+    ->addForeignKey(
+        $this->getFkName('giftcard/giftcard', 'website_id', 'core/website', 'website_id'),
+        'website_id',
+        $this->getTable('core/website'),
+        'website_id',
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
+        Maho\Db\Ddl\Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $this->getFkName('giftcard/giftcard', 'purchase_order_id', 'sales/order', 'entity_id'),
@@ -133,18 +148,18 @@ $table = $connection->newTable($this->getTable('giftcard/history'))
     ->addColumn('action', Maho\Db\Ddl\Table::TYPE_VARCHAR, 32, [
         'nullable' => false,
     ], 'Action')
-    ->addColumn('amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ->addColumn('base_amount', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
-    ], 'Amount')
-    ->addColumn('balance_before', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ], 'Amount (Base Currency)')
+    ->addColumn('base_balance_before', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
-    ], 'Balance Before')
-    ->addColumn('balance_after', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ], 'Balance Before (Base Currency)')
+    ->addColumn('base_balance_after', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
-    ], 'Balance After')
+    ], 'Balance After (Base Currency)')
     ->addColumn('order_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned' => true,
         'nullable' => true,

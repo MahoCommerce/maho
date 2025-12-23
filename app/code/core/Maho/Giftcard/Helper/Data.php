@@ -279,10 +279,12 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         $storeId = Mage::app()->getStore()->getId();
 
         // Prepare template variables
+        $store = Mage::app()->getStore($storeId);
+        $storeCurrencyCode = $store->getCurrentCurrencyCode();
         $vars = [
             'giftcard' => $giftcard,
             'code' => $giftcard->getCode(),
-            'balance' => $this->formatAmount((float) $giftcard->getBalance(), $giftcard->getCurrencyCode()),
+            'balance' => $this->formatAmount((float) $giftcard->getBalance($storeCurrencyCode), $storeCurrencyCode),
             'recipient_name' => $giftcard->getRecipientName() ?: 'Valued Customer',
             'sender_name' => $giftcard->getSenderName() ?: '',
             'message' => $giftcard->getMessage() ?: '',
