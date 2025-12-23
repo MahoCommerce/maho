@@ -25,7 +25,7 @@ use PDO;
 class SampleDataImporter
 {
     private PDO $pdo;
-    private ?callable $logCallback;
+    private mixed $logCallback;
 
     /**
      * Cached entity type IDs loaded from database
