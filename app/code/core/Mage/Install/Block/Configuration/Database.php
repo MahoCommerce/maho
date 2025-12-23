@@ -35,7 +35,7 @@ class Mage_Install_Block_Configuration_Database extends Mage_Core_Block_Template
         return $this;
     }
 
-    public function getDatabaseBlock(string $type): false|Mage_Install_Block_Configuration_Database_Type_Mysql|Mage_Install_Block_Configuration_Database_Type_Pgsql|Mage_Install_Block_Configuration_Database_Type_Sqlite
+    public function getDatabaseBlock(string $type): false|Mage_Install_Block_Configuration_Database_Type
     {
         $block = false;
         if (isset($this->databases[$type])) {
