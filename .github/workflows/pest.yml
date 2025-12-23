@@ -9,25 +9,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  pest-mysql:
-    name: Test Suite (MySQL)
+  pest-tests:
+    name: Test Suite (${{ matrix.db }})
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [mysql, pgsql, sqlite]
 
     services:
       mysql:
-        image: mysql:latest
+        image: ${{ matrix.db == 'mysql' && 'mysql:latest' || '' }}
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: ${{ matrix.db == 'mysql' && '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3' || '' }}
+
+      postgres:
+        image: ${{ matrix.db == 'pgsql' && 'postgres:latest' || '' }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: maho
+        ports:
+          - 5432:5432
+        options: ${{ matrix.db == 'pgsql' && '--health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5' || '' }}
 
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
+          extensions: ${{ matrix.db == 'pgsql' && 'pdo_pgsql' || (matrix.db == 'sqlite' && 'pdo_sqlite' || '') }}
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -46,7 +62,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
-      - name: Install Maho
+      - name: Install Maho (MySQL)
+        if: matrix.db == 'mysql'
         run: |
           ./maho install \
             --license_agreement_accepted yes \
@@ -71,49 +88,8 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
-      - name: Run Pest Tests
-        run: ./vendor/bin/pest --display-errors --display-warnings
-
-  pest-pgsql:
-    name: Test Suite (PostgreSQL)
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: maho
-        ports:
-          - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5
-
-    steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-          extensions: pdo_pgsql
-
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache dependencies
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
-
-      - name: Install Maho
+      - name: Install Maho (PostgreSQL)
+        if: matrix.db == 'pgsql'
         run: |
           ./maho install \
             --license_agreement_accepted yes \
@@ -138,38 +114,8 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
-      - name: Run Pest Tests
-        run: ./vendor/bin/pest --display-errors --display-warnings
-
-  pest-sqlite:
-    name: Test Suite (SQLite)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-          extensions: pdo_sqlite
-
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache dependencies
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
-
-      - name: Install Maho
+      - name: Install Maho (SQLite)
+        if: matrix.db == 'sqlite'
         run: |
           ./maho install \
             --license_agreement_accepted yes \
