@@ -25,7 +25,7 @@ use PDO;
 class SampleDataImporter
 {
     private PDO $pdo;
-    private $logCallback;
+    private ?callable $logCallback;
 
     /**
      * Cached entity type IDs loaded from database
@@ -177,7 +177,7 @@ class SampleDataImporter
         $driver = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
         if ($driver === 'mysql') {
-            $stmt = $this->pdo->query("SHOW COLUMNS FROM " . $this->quoteIdentifier($table));
+            $stmt = $this->pdo->query('SHOW COLUMNS FROM ' . $this->quoteIdentifier($table));
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
         } elseif ($driver === 'pgsql') {
             $stmt = $this->pdo->prepare('
@@ -187,7 +187,7 @@ class SampleDataImporter
             $stmt->execute([$table]);
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'column_name');
         } elseif ($driver === 'sqlite') {
-            $stmt = $this->pdo->query("PRAGMA table_info(" . $this->quoteIdentifier($table) . ")");
+            $stmt = $this->pdo->query('PRAGMA table_info(' . $this->quoteIdentifier($table) . ')');
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'name');
         }
 
@@ -423,7 +423,7 @@ class SampleDataImporter
                 if (($info['is_user_defined'] ?? 0) != 1) {
                     $this->log(
                         "Creating missing attribute (marked as system): {$info['code']} (entity_type={$info['entity_type_id']})",
-                        'info'
+                        'info',
                     );
                 }
             }
