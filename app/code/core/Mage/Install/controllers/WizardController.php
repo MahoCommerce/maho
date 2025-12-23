@@ -24,26 +24,17 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         parent::preDispatch();
     }
 
-    /**
-     * @return Mage_Install_Model_Installer
-     */
-    protected function _getInstaller()
+    protected function _getInstaller(): Mage_Install_Model_Installer
     {
         return Mage::getSingleton('install/installer');
     }
 
-    /**
-     * @return Mage_Install_Model_Wizard
-     */
-    protected function _getWizard()
+    protected function _getWizard(): Mage_Install_Model_Wizard
     {
         return Mage::getSingleton('install/wizard');
     }
 
-    /**
-     * @return $this
-     */
-    protected function _prepareLayout()
+    protected function _prepareLayout(): self
     {
         $this->loadLayout('install_wizard');
         $step = $this->_getWizard()->getStepByRequest($this->getRequest());
@@ -56,10 +47,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    protected function _checkIfInstalled()
+    protected function _checkIfInstalled(): bool
     {
         if ($this->_getInstaller()->isApplicationInstalled()) {
             $this->getResponse()->setRedirect(Mage::getBaseUrl())->sendResponse();

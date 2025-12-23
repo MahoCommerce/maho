@@ -15,17 +15,14 @@ class Mage_Install_Model_Installer_Data extends Maho\DataObject
     /**
      * Errors array
      *
-     * @var array
+     * @var array<string>
      */
-    protected $_errors = [];
+    protected array $_errors = [];
 
     /**
      * Add error
-     *
-     * @param string $error
-     * @return $this
      */
-    public function addError($error)
+    public function addError(string $error): self
     {
         $this->_errors[] = $error;
         return $this;
@@ -34,9 +31,9 @@ class Mage_Install_Model_Installer_Data extends Maho\DataObject
     /**
      * Get all errors
      *
-     * @return array
+     * @return array<string>
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->_errors;
     }
