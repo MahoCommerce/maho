@@ -143,6 +143,20 @@ class SampleDataImporter
     }
 
     /**
+     * Quote an identifier (table or column name) for the current database driver
+     */
+    private function quoteIdentifier(string $identifier): string
+    {
+        $driver = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+
+        return match ($driver) {
+            'pgsql' => "\"{$identifier}\"",
+            'sqlite' => "\"{$identifier}\"",
+            default => "`{$identifier}`", // mysql and others
+        };
+    }
+
+    /**
      * Import sample data SQL with attribute ID remapping
      */
     public function import(string $sql, ?callable $progressCallback = null): string
@@ -349,12 +363,13 @@ class SampleDataImporter
                 // Attribute exists - map old ID to current ID
                 $this->attributeRemap[$oldId] = $this->currentAttributes[$key]['attribute_id'];
             } else {
-                // Attribute doesn't exist - need to create it
-                // But only create user-defined attributes (system attributes should exist)
-                if (($info['is_user_defined'] ?? 0) == 1) {
-                    $this->attributesToCreate[$oldId] = $info;
-                } else {
-                    echo "WARNING: System attribute not found: {$info['code']} (entity_type={$info['entity_type_id']}, old_id={$oldId})\n";
+                // Attribute doesn't exist - create it
+                // If marked as system attribute but missing, it's likely a custom attribute
+                // incorrectly marked in the sample data, so we create it anyway
+                $this->attributesToCreate[$oldId] = $info;
+
+                if (($info['is_user_defined'] ?? 0) != 1) {
+                    echo "INFO: Creating missing attribute (marked as system): {$info['code']} (entity_type={$info['entity_type_id']})\n";
                 }
             }
         }
@@ -372,7 +387,7 @@ class SampleDataImporter
         // Build dynamic INSERT for eav_attribute using schema columns (excluding auto-increment attribute_id)
         $columns = array_filter($this->eavAttributeColumns, fn($c) => $c !== 'attribute_id');
         $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-        $columnList = implode(', ', array_map(fn($c) => "`{$c}`", $columns));
+        $columnList = implode(', ', array_map(fn($c) => $this->quoteIdentifier($c), $columns));
 
         $stmt = $this->pdo->prepare("INSERT INTO eav_attribute ({$columnList}) VALUES ({$placeholders})");
 
@@ -425,7 +440,7 @@ class SampleDataImporter
         // Build dynamic INSERT using schema columns
         $columns = $this->catalogEavAttributeColumns;
         $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-        $columnList = implode(', ', array_map(fn($c) => "`{$c}`", $columns));
+        $columnList = implode(', ', array_map(fn($c) => $this->quoteIdentifier($c), $columns));
 
         $stmt = $this->pdo->prepare("INSERT INTO catalog_eav_attribute ({$columnList}) VALUES ({$placeholders})");
 
