@@ -12,7 +12,7 @@
 
 class Mage_Install_Model_Observer
 {
-    public function bindLocale($observer)
+    public function bindLocale(Maho\Event\Observer $observer): self
     {
         if ($locale = $observer->getEvent()->getLocale()) {
             if ($choosedLocale = Mage::getSingleton('install/session')->getLocale()) {
@@ -22,7 +22,7 @@ class Mage_Install_Model_Observer
         return $this;
     }
 
-    public function installFailure($observer)
+    public function installFailure(Maho\Event\Observer $observer): void
     {
         echo '<h2>There was a problem proceeding with Maho installation.</h2>';
         echo '<p>Please contact developers with error messages on this page.</p>';

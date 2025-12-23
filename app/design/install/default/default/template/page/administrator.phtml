@@ -9,7 +9,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/** @var Mage_Install_Block_Admin $this */
+/** @var Mage_Install_Block_Administrator $this */
 ?>
 <div class="page-head">
     <h3><?= $this->__('Create Admin Account') ?></h3>
@@ -22,7 +22,7 @@
         <li>
             <label for="firstname"><?= $this->__('First Name') ?></label>
             <input type="text"
-                   name="admin[firstname]"
+                   name="administrator[firstname]"
                    id="firstname"
                    value="<?= $this->getFormData()->getFirstname() ?>"
                    title="<?= $this->quoteEscape($this->__('First Name')) ?>"
@@ -32,7 +32,7 @@
         <li>
             <label for="lastname"><?= $this->__('Last Name') ?></label>
             <input type="text"
-                   name="admin[lastname]"
+                   name="administrator[lastname]"
                    id="lastname"
                    value="<?= $this->getFormData()->getLastname() ?>"
                    title="<?= $this->quoteEscape($this->__('Last Name')) ?>"
@@ -42,7 +42,7 @@
         <li>
             <label for="email_address"><?= $this->__('Email') ?></label>
             <input type="email"
-                   name="admin[email]"
+                   name="administrator[email]"
                    id="email_address"
                    value="<?= $this->getFormData()->getEmail() ?>"
                    title="<?= $this->quoteEscape($this->__('Email Address')) ?>"
@@ -58,7 +58,7 @@
         <li>
             <label for="username"><?= $this->__('Username') ?></label>
             <input type="text"
-                   name="admin[username]"
+                   name="administrator[username]"
                    id="username"
                    value="<?= $this->getFormData()->getUsername() ?>"
                    title="<?= $this->quoteEscape($this->__('Username')) ?>"
@@ -69,7 +69,7 @@
             <label for="password"><?= $this->__('Password') ?></label>
             <?php $minAdminPasswordLength = $this->getMinAdminPasswordLength(); ?>
             <input type="password"
-                   name="admin[new_password]"
+                   name="administrator[new_password]"
                    id="password"
                    title="<?= $this->quoteEscape($this->__('Password')) ?>"
                    class="input-text"
@@ -83,7 +83,7 @@
         <li>
             <label for="confirmation"><?= $this->__('Confirm Password') ?></label>
             <input type="password"
-                   name="admin[password_confirmation]"
+                   name="administrator[password_confirmation]"
                    title="<?= $this->quoteEscape($this->__('Password Confirmation')) ?>"
                    id="confirmation"
                    class="input-text"

@@ -22,7 +22,7 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @var array
      */
-    protected $disallowedBlockNames = ['install/end'];
+    protected $disallowedBlockNames = ['install/complete'];
 
     #[\Override]
     protected function _construct()

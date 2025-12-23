@@ -10,12 +10,7 @@
 
 declare(strict_types=1);
 
-class Mage_Install_Block_Db_Type_Pgsql extends Mage_Install_Block_Db_Type
+class Mage_Install_Block_Configuration_Database_Type_Sqlite extends Mage_Install_Block_Configuration_Database_Type
 {
-    /**
-     * Db title
-     *
-     * @var string
-     */
-    protected $_title = 'PostgreSQL';
+    protected ?string $title = 'SQLite';
 }
