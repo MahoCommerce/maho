@@ -57,21 +57,29 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
             ],
         ]);
 
-        // Website selector
+        // Website selector with currency mapping
+        $websites = Mage::app()->getWebsites();
+        $websiteCurrencies = [];
+        $websiteValues = [];
+        foreach ($websites as $website) {
+            $websiteValues[$website->getId()] = $website->getName();
+            $websiteCurrencies[$website->getId()] = $website->getBaseCurrencyCode();
+        }
+
         if (!$model->getId()) {
-            $websites = Mage::app()->getWebsites();
-            $websiteValues = [];
-            foreach ($websites as $website) {
-                $websiteValues[$website->getId()] = $website->getName();
-            }
+            $defaultWebsiteId = $model->getWebsiteId() ?: (int) array_key_first($websiteCurrencies);
+            $defaultCurrency = $websiteCurrencies[$defaultWebsiteId] ?? '';
+
             $fieldset->addField('website_id', 'select', [
                 'name'     => 'website_id',
                 'label'    => Mage::helper('giftcard')->__('Website'),
                 'title'    => Mage::helper('giftcard')->__('Website'),
                 'required' => true,
                 'values'   => $websiteValues,
-                'value'    => $model->getWebsiteId() ?: Mage::app()->getWebsite()->getId(),
+                'value'    => $defaultWebsiteId,
+                'after_element_html' => $this->_getWebsiteCurrencyScript($websiteCurrencies),
             ]);
+            $currencyNote = '<span class="giftcard-currency-note">[' . $defaultCurrency . ']</span>';
         } else {
             // Show website as read-only for existing gift cards
             $website = Mage::app()->getWebsite($model->getWebsiteId());
@@ -82,9 +90,8 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
             $fieldset->addField('website_id', 'hidden', [
                 'name' => 'website_id',
             ]);
+            $currencyNote = '[' . $model->getCurrencyCode() . ']';
         }
-
-        $currencyNote = $model->getId() ? '[' . $model->getCurrencyCode() . ']' : '';
 
         $fieldset->addField('balance', 'text', [
             'name'     => 'balance',
@@ -167,6 +174,50 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
         $this->setForm($form);
 
         return parent::_prepareForm();
+    }
+
+    /**
+     * Get JavaScript for updating currency display when website changes
+     *
+     * @param array<int, string> $websiteCurrencies
+     */
+    protected function _getWebsiteCurrencyScript(array $websiteCurrencies): string
+    {
+        $currenciesJson = Mage::helper('core')->jsonEncode($websiteCurrencies);
+
+        return <<<HTML
+<script>
+(function() {
+    const websiteCurrencies = {$currenciesJson};
+
+    function updateCurrencyDisplay() {
+        const websiteSelect = document.getElementById('website_id');
+        if (!websiteSelect) return;
+
+        const websiteId = websiteSelect.value;
+        const currency = websiteCurrencies[websiteId] || '';
+        const currencyText = '[' + currency + ']';
+
+        document.querySelectorAll('.giftcard-currency-note').forEach(function(el) {
+            el.textContent = currencyText;
+        });
+    }
+
+    function init() {
+        const websiteSelect = document.getElementById('website_id');
+        if (websiteSelect) {
+            websiteSelect.addEventListener('change', updateCurrencyDisplay);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+HTML;
     }
 
     /**

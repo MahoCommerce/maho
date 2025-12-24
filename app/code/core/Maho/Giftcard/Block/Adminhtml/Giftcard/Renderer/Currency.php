@@ -30,11 +30,25 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency extends Mage_Admi
             return '';
         }
 
-        $currencyCode = $row->getData('currency_code');
-        if (!$currencyCode) {
-            $currencyCode = Mage::app()->getBaseCurrencyCode();
-        }
+        $currencyCode = $this->_getCurrencyCode($row);
 
         return Mage::app()->getLocale()->formatCurrency($value, $currencyCode);
+    }
+
+    /**
+     * Get currency code for the gift card row
+     */
+    protected function _getCurrencyCode(Maho\DataObject $row): string
+    {
+        $websiteId = $row->getData('website_id');
+        if ($websiteId) {
+            try {
+                return Mage::app()->getWebsite($websiteId)->getBaseCurrencyCode();
+            } catch (Exception $e) {
+                // Fall through to default
+            }
+        }
+
+        return Mage::app()->getBaseCurrencyCode();
     }
 }

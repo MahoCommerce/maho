@@ -9,29 +9,32 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Maho_Giftcard_Block_Sales_Order_Totals extends Mage_Sales_Block_Order_Totals
+class Maho_Giftcard_Block_Sales_Order_Totals extends Mage_Core_Block_Template
 {
     /**
-     * Initialize gift card totals
+     * Initialize gift card totals for parent block
      *
-     * @return $this
+     * Called by parent totals block via child block pattern
      */
-    #[\Override]
-    protected function _initTotals()
+    public function initTotals(): self
     {
-        parent::_initTotals();
-
-        $order = $this->getSource();
-        if (!$order) {
-            $order = $this->getOrder();
+        /** @var Mage_Sales_Block_Order_Totals|false $parent */
+        $parent = $this->getParentBlock();
+        if (!$parent) {
+            return $this;
         }
 
-        $giftcardAmount = $order->getGiftcardAmount();
+        $source = $parent->getSource();
+        if (!$source) {
+            return $this;
+        }
+
+        $giftcardAmount = $source->getGiftcardAmount();
 
         if ($giftcardAmount != 0) {
             // Get gift card codes for display
             $codes = [];
-            $giftcardCodes = $order->getGiftcardCodes();
+            $giftcardCodes = $source->getGiftcardCodes();
             if ($giftcardCodes) {
                 $codesArray = json_decode($giftcardCodes, true);
                 if (is_array($codesArray)) {
@@ -51,12 +54,11 @@ class Maho_Giftcard_Block_Sales_Order_Totals extends Mage_Sales_Block_Order_Tota
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
 
-            $this->addTotalBefore(new Maho\DataObject([
-                'code'      => 'giftcard',
-                'value'     => -abs($giftcardAmount),
-                'base_value' => -abs($order->getBaseGiftcardAmount()),
-                'label'     => $label,
-                'area'      => 'footer',
+            $parent->addTotalBefore(new Maho\DataObject([
+                'code'       => 'giftcard',
+                'value'      => -abs((float) $giftcardAmount),
+                'base_value' => -abs((float) $source->getBaseGiftcardAmount()),
+                'label'      => $label,
             ]), 'grand_total');
         }
 

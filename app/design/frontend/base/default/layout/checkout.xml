@@ -382,6 +382,7 @@ One page checkout main layout
                     <block type="checkout/onepage_payment_methods" name="checkout.payment.methods" as="methods" template="checkout/onepage/payment/info.phtml">
                         <action method="setMethodFormTemplate"><method>purchaseorder</method><template>payment/form/purchaseorder.phtml</template></action>
                     </block>
+                    <block type="core/template" name="checkout.onepage.payment.before_form" as="before_form" />
                     <block type="core/template" name="checkout.onepage.payment.additional" as="additional" />
                     <block type="core/template" name="checkout.onepage.payment.methods_additional" as="methods_additional" />
                 </block>

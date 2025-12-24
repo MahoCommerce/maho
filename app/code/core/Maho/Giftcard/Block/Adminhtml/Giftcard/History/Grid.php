@@ -28,11 +28,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     {
         $collection = Mage::getModel('giftcard/history')->getCollection();
 
-        // Join gift card table to get code and currency
+        // Join gift card table to get code and website_id (for currency lookup)
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
-            ['code', 'recipient_email', 'currency_code'],
+            ['code', 'recipient_email', 'website_id'],
         );
 
         // Join order table to get increment_id

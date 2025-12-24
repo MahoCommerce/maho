@@ -124,10 +124,10 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             return false;
         }
 
-        // Check expiration
+        // Check expiration (expires_at is stored in UTC)
         if ($this->getExpiresAt()) {
-            $now = new DateTime();
-            $expires = new DateTime($this->getExpiresAt());
+            $now = Mage::app()->getLocale()->utcDate(null, null, true);
+            $expires = new DateTime($this->getExpiresAt(), new DateTimeZone('UTC'));
 
             if ($now > $expires) {
                 $this->setStatus(self::STATUS_EXPIRED)->save();
@@ -136,6 +136,18 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         }
 
         return true;
+    }
+
+    /**
+     * Check if gift card is valid for use on a specific website
+     */
+    public function isValidForWebsite(int $websiteId): bool
+    {
+        if (!$this->isValid()) {
+            return false;
+        }
+
+        return (int) $this->getWebsiteId() === $websiteId;
     }
 
     /**
@@ -288,7 +300,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             'order_id' => $orderId,
             'comment' => $comment,
             'admin_user_id' => $adminUserId,
-            'created_at' => Mage_Core_Model_Locale::now(),
+            'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
         ]);
         $history->save();
     }

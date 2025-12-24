@@ -53,7 +53,6 @@
 "Gift card ""%s"" is already applied.","Gift card ""%s"" is already applied."
 "Gift card ""%s"" is not active.","Gift card ""%s"" is not active."
 "Gift card ""%s"" is not valid.","Gift card ""%s"" is not valid."
-"Gift card ""%s"" is pending activation.","Gift card ""%s"" is pending activation."
 "Gift card ""%s"" was applied.","Gift card ""%s"" was applied."
 "Gift Card(s):","Gift Card(s):"
 "Gift card amount cannot be less than %s","Gift card amount cannot be less than %s"
@@ -125,4 +124,3 @@
 "Your Email","Your Email"
 "Your Name","Your Name"
 "Your order is fully covered by gift cards!","Your order is fully covered by gift cards!"
-"Your order is fully covered by gift cards. No additional payment is required.","Your order is fully covered by gift cards. No additional payment is required."

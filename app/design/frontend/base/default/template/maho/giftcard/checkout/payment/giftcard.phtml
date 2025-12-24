@@ -45,17 +45,16 @@ $subtotalBeforeGiftcard = $this->getSubtotalBeforeGiftcard();
 
     <!-- Gift Card Input Form -->
     <div id="giftcard-apply-form" style="<?php echo $isFullyCovered ? 'display:none;' : '' ?>">
-        <div style="display: flex; gap: 10px;">
+        <div class="coupon-input-group" style="display: flex; gap: 10px; max-width: 600px;">
             <input type="text"
                    id="checkout-giftcard-code"
                    name="giftcard_code"
+                   class="input-text coupon-input"
                    placeholder="<?php echo $this->quoteEscape($this->__('Enter gift card code')) ?>"
-                   style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px;"
                    autocomplete="off">
             <button type="button"
                     id="btn-apply-giftcard"
-                    class="button"
-                    style="padding: 8px 16px; white-space: nowrap;">
+                    class="button2 btn-apply">
                 <?php echo $this->__('Apply') ?>
             </button>
         </div>

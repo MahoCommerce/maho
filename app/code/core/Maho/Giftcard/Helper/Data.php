@@ -141,6 +141,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Calculate expiration date from now for a specific product
+     * Returns expiration date in UTC
      */
     public function calculateProductExpirationDate(?Mage_Catalog_Model_Product $product): ?string
     {
@@ -150,10 +151,9 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             return null; // No expiration
         }
 
-        $expirationDate = new DateTime();
-        $expirationDate->modify("+{$lifetime} days");
+        $expirationDate = Mage::app()->getLocale()->utcDate(null, "+{$lifetime} days", true);
 
-        return $expirationDate->format('Y-m-d H:i:s');
+        return $expirationDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
 
     /**
@@ -328,7 +328,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
                 ->send();
 
             // Mark email as sent on giftcard
-            $giftcard->setEmailSentAt(Mage_Core_Model_Locale::now());
+            $giftcard->setEmailSentAt(Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
             $giftcard->save();
 
             return true;

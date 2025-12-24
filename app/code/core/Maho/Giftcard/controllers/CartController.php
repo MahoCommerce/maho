@@ -52,6 +52,12 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 Mage::throwException($this->__('Gift card "%s" is not valid.', $code));
             }
 
+            // Check website validity
+            $websiteId = (int) $quote->getStore()->getWebsiteId();
+            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+                Mage::throwException($this->__('Gift card "%s" is not valid.', $code));
+            }
+
             if (!$giftcard->isValid()) {
                 if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED) {
                     Mage::throwException($this->__('Gift card "%s" has expired.', $code));
@@ -76,10 +82,10 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             }
 
             // For cart page application, we need to set an initial amount
-            // The total collector will adjust this based on the actual cart total
-            // We set the gift card balance as the max amount it can use (in quote currency)
-            $quoteCurrency = $quote->getQuoteCurrencyCode();
-            $appliedCodes[$code] = $giftcard->getBalance($quoteCurrency);
+            // Store gift card with balance in quote's base currency for proper calculation
+            // The Total collector will determine actual amount to apply
+            $quoteBaseCurrency = $quote->getBaseCurrencyCode();
+            $appliedCodes[$code] = $giftcard->getBalance($quoteBaseCurrency);
 
             $quote->setGiftcardCodes(json_encode($appliedCodes));
             $quote->collectTotals()->save();
@@ -188,6 +194,14 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
+            // Check website validity
+            $websiteId = (int) $quote->getStore()->getWebsiteId();
+            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+                $result['message'] = $this->__('Gift card "%s" is not valid.', $code);
+                $this->_sendJsonResponse($result);
+                return;
+            }
+
             if (!$giftcard->isValid()) {
                 if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED) {
                     $result['message'] = $this->__('Gift card "%s" has expired.', $code);
@@ -215,9 +229,10 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            // Apply the gift card
-            $quoteCurrency = $quote->getQuoteCurrencyCode();
-            $appliedCodes[$code] = $giftcard->getBalance($quoteCurrency);
+            // Store gift card with balance in quote's base currency for proper calculation
+            // The Total collector will determine actual amount to apply
+            $quoteBaseCurrency = $quote->getBaseCurrencyCode();
+            $appliedCodes[$code] = $giftcard->getBalance($quoteBaseCurrency);
 
             $quote->setGiftcardCodes(json_encode($appliedCodes));
             $quote->collectTotals()->save();
@@ -305,17 +320,31 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             $codes = json_decode($appliedCodes, true);
             if (is_array($codes)) {
                 $quoteCurrency = $quote->getQuoteCurrencyCode();
-                foreach ($codes as $code => $amount) {
+                $store = $quote->getStore();
+
+                // Get the total display amount already calculated by the totals collector
+                // This is already converted to display currency
+                $totalDisplayAmount = abs((float) $quote->getGiftcardAmount());
+                $totalBaseAmount = abs((float) $quote->getBaseGiftcardAmount());
+
+                // Calculate the ratio to distribute display amounts proportionally
+                $ratio = $totalBaseAmount > 0 ? $totalDisplayAmount / $totalBaseAmount : 0;
+
+                foreach ($codes as $code => $baseAmount) {
                     $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
                     $displayCode = strlen($code) > 10
                         ? substr($code, 0, 4) . '...' . substr($code, -4)
                         : $code;
 
+                    // Use the ratio to calculate display amount (avoids re-conversion)
+                    $displayAmount = (float) $baseAmount * $ratio;
+
                     $giftcards[] = [
                         'code' => $code,
                         'display_code' => $displayCode,
-                        'amount' => (float) $amount,
-                        'amount_formatted' => Mage::helper('core')->currency($amount, true, false),
+                        'amount' => $displayAmount,
+                        // Use formatPrice instead of currency() - amount is already in display currency
+                        'amount_formatted' => $store->formatPrice($displayAmount, false),
                         'balance' => $giftcard->getId() ? $giftcard->getBalance($quoteCurrency) : 0,
                     ];
                 }
@@ -324,16 +353,18 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         $grandTotal = (float) $quote->getGrandTotal();
         $giftcardAmount = abs((float) $quote->getGiftcardAmount());
+        $store = $quote->getStore();
         $isFullyCovered = $giftcardAmount > 0 && $grandTotal <= 0.01;
 
+        // Use formatPrice instead of currency() - amounts are already in display currency
         return [
             'giftcards' => $giftcards,
             'total_giftcard_amount' => $giftcardAmount,
-            'total_giftcard_amount_formatted' => Mage::helper('core')->currency($giftcardAmount, true, false),
+            'total_giftcard_amount_formatted' => $store->formatPrice($giftcardAmount, false),
             'amount_due' => max(0, $grandTotal),
-            'amount_due_formatted' => Mage::helper('core')->currency(max(0, $grandTotal), true, false),
+            'amount_due_formatted' => $store->formatPrice(max(0, $grandTotal), false),
             'subtotal_before_giftcard' => $grandTotal + $giftcardAmount,
-            'subtotal_before_giftcard_formatted' => Mage::helper('core')->currency($grandTotal + $giftcardAmount, true, false),
+            'subtotal_before_giftcard_formatted' => $store->formatPrice($grandTotal + $giftcardAmount, false),
             'is_fully_covered' => $isFullyCovered,
         ];
     }

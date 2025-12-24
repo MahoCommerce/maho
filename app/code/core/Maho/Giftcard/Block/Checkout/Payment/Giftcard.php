@@ -41,11 +41,21 @@ class Maho_Giftcard_Block_Checkout_Payment_Giftcard extends Mage_Core_Block_Temp
         $result = [];
         $quoteCurrency = $quote->getQuoteCurrencyCode();
 
-        foreach ($codes as $code => $appliedAmount) {
+        // Get the total display amount already calculated by the totals collector
+        // This is already converted to display currency
+        $totalDisplayAmount = abs((float) $quote->getGiftcardAmount());
+        $totalBaseAmount = abs((float) $quote->getBaseGiftcardAmount());
+
+        // Calculate the ratio to distribute display amounts proportionally
+        $ratio = $totalBaseAmount > 0 ? $totalDisplayAmount / $totalBaseAmount : 0;
+
+        foreach ($codes as $code => $baseAppliedAmount) {
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
             if ($giftcard->getId()) {
+                // Use the ratio to calculate display amount (avoids re-conversion)
+                $displayAmount = (float) $baseAppliedAmount * $ratio;
                 $result[$code] = [
-                    'amount' => (float) $appliedAmount,
+                    'amount' => $displayAmount,
                     'balance' => $giftcard->getBalance($quoteCurrency),
                     'display_code' => $this->getDisplayCode($code),
                 ];
@@ -152,10 +162,10 @@ class Maho_Giftcard_Block_Checkout_Payment_Giftcard extends Mage_Core_Block_Temp
     }
 
     /**
-     * Format price
+     * Format price (amount is already in display currency, no conversion needed)
      */
     public function formatPrice(float $amount): string
     {
-        return Mage::helper('core')->currency($amount, true, false);
+        return $this->getQuote()->getStore()->formatPrice($amount, false);
     }
 }

@@ -12,8 +12,8 @@
 <layout>
     <!-- Checkout Payment - Add gift card form and handle payment method selection -->
     <checkout_onepage_index>
-        <!-- Add gift card form to payment step (rendered via methods_additional before payment methods) -->
-        <reference name="checkout.onepage.payment.methods_additional">
+        <!-- Add gift card form BEFORE the payment form (before_form is rendered before the form starts) -->
+        <reference name="checkout.onepage.payment.before_form">
             <block type="giftcard/checkout_payment_giftcard" name="checkout.payment.giftcard" template="maho/giftcard/checkout/payment/giftcard.phtml" />
         </reference>
         <!-- Handle payment method visibility based on gift card coverage -->
@@ -22,11 +22,8 @@
         </reference>
     </checkout_onepage_index>
 
-    <!-- Checkout Payment Method AJAX Load - Include gift card form -->
+    <!-- Checkout Payment Method AJAX Load - Only add JS handler, not the form (form is already in methods_additional) -->
     <checkout_onepage_paymentmethod>
-        <reference name="checkout.onepage.payment.methods.additional">
-            <block type="giftcard/checkout_payment_giftcard" name="checkout.payment.giftcard.ajax" template="maho/giftcard/checkout/payment/giftcard.phtml" />
-        </reference>
         <reference name="root">
             <block type="core/template" name="giftcard.payment.methods.ajax" template="maho/giftcard/checkout/payment/methods.phtml" />
         </reference>
@@ -39,6 +36,55 @@
             <block type="giftcard/checkout_cart_giftcard" name="checkout.cart.giftcard" as="giftcard" template="maho/giftcard/checkout/cart/giftcard.phtml" />
         </reference>
     </checkout_cart_index>
+
+    <!-- Sales Order View - Add gift card totals -->
+    <sales_order_view>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_view>
+
+    <!-- Sales Order Print - Add gift card totals -->
+    <sales_order_print>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_print>
+
+    <!-- Sales Order Invoice View - Add gift card totals -->
+    <sales_order_invoice>
+        <reference name="invoice_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_invoice>
+
+    <!-- Sales Order Creditmemo View - Add gift card totals -->
+    <sales_order_creditmemo>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_creditmemo>
+
+    <!-- Sales Order Email - Add gift card totals -->
+    <sales_email_order_items>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_email_order_items>
+
+    <!-- Sales Invoice Email - Add gift card totals -->
+    <sales_email_order_invoice_items>
+        <reference name="invoice_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_email_order_invoice_items>
+
+    <!-- Sales Creditmemo Email - Add gift card totals -->
+    <sales_email_order_creditmemo_items>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_email_order_creditmemo_items>
 
     <!-- Gift Card Product View -->
     <PRODUCT_TYPE_giftcard>

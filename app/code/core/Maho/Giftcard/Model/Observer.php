@@ -115,8 +115,8 @@ class Maho_Giftcard_Model_Observer
             'purchase_order_id' => $order->getId(),
             'purchase_order_item_id' => $item->getId(),
             'expires_at' => $helper->calculateExpirationDate(),
-            'created_at' => Mage_Core_Model_Locale::now(),
-            'updated_at' => Mage_Core_Model_Locale::now(),
+            'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
         ]);
 
         $giftcard->save();
@@ -131,7 +131,7 @@ class Maho_Giftcard_Model_Observer
             'balance_after' => $baseAmount,
             'order_id' => $order->getId(),
             'comment' => "Created from order #{$order->getIncrementId()}",
-            'created_at' => Mage_Core_Model_Locale::now(),
+            'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
         ]);
         $history->save();
 
@@ -308,11 +308,11 @@ class Maho_Giftcard_Model_Observer
         $giftcardAmount = 0;
         $baseGiftcardAmount = 0;
 
-        // Try to get from the shipping address first
-        foreach ($order->getAllAddresses() as $address) {
+        // Try to get from the order addresses first
+        foreach ($order->getAddressesCollection() as $address) {
             if ($address->getAddressType() == 'shipping' || ($address->getAddressType() == 'billing' && $order->getIsVirtual())) {
-                $giftcardAmount = abs($address->getGiftcardAmount());
-                $baseGiftcardAmount = abs($address->getBaseGiftcardAmount());
+                $giftcardAmount = abs((float) $address->getGiftcardAmount());
+                $baseGiftcardAmount = abs((float) $address->getBaseGiftcardAmount());
                 break;
             }
         }
@@ -391,7 +391,7 @@ class Maho_Giftcard_Model_Observer
                     $giftcardTable,
                     [
                         'balance' => $newBalance,
-                        'updated_at' => Mage_Core_Model_Locale::now(),
+                        'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
                     ],
                     ['giftcard_id = ?' => $giftcardData['giftcard_id']],
                 );
@@ -406,7 +406,7 @@ class Maho_Giftcard_Model_Observer
                     'balance_after' => $newBalance,
                     'order_id' => $order->getId(),
                     'comment' => "Used in order #{$order->getIncrementId()}",
-                    'created_at' => Mage_Core_Model_Locale::now(),
+                    'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
                 ]);
             }
 

@@ -72,12 +72,14 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
 
         // Apply each gift card
         $validCodes = [];
+        $websiteId = (int) $quote->getStore()->getWebsiteId();
+        $quoteBaseCurrency = $quote->getBaseCurrencyCode();
 
-        foreach ($codes as $code => $requestedAmount) {
+        foreach (array_keys($codes) as $code) {
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
-            if (!$giftcard->getId() || !$giftcard->isValid()) {
-                continue; // Skip invalid cards
+            if (!$giftcard->getId() || !$giftcard->isValidForWebsite($websiteId)) {
+                continue; // Skip invalid cards or cards from different website
             }
 
             // Calculate how much can be applied
@@ -87,15 +89,10 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
                 break; // Nothing left to pay
             }
 
-            // Get gift card balance in base currency (no conversion needed since we work in base)
-            $availableBalance = $giftcard->getBalance(); // Returns base currency by default
-
-            // If no specific amount requested (0), apply max available
-            if ($requestedAmount <= 0) {
-                $baseAmountToApply = min($availableBalance, $remainingTotal);
-            } else {
-                $baseAmountToApply = min($requestedAmount, $availableBalance, $remainingTotal);
-            }
+            // Get gift card balance converted to quote's base currency
+            // Always use full available balance (no partial usage support)
+            $availableBalance = $giftcard->getBalance($quoteBaseCurrency);
+            $baseAmountToApply = min($availableBalance, $remainingTotal);
 
             if ($baseAmountToApply > 0) {
                 $baseTotalDiscount += $baseAmountToApply;

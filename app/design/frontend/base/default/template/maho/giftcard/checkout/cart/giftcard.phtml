@@ -13,9 +13,9 @@ $appliedCodes = $this->getAppliedGiftcardCodes();
 ?>
 
 <form id="giftcard-cart-form" action="<?php echo $this->getUrl('giftcard/cart/apply') ?>" method="post">
-    <div class="giftcard">
+    <div class="discount">
         <h2><?php echo $this->__('Gift Cards') ?></h2>
-        <div class="giftcard-form">
+        <div class="discount-form">
             <input type="hidden" name="remove" id="remove-giftcard" value="0">
 
             <?php if (!empty($appliedCodes)): ?>
