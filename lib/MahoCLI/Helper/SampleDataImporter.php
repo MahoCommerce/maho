@@ -253,16 +253,16 @@ class SampleDataImporter
      */
     public function mergeEntityAttributes(): void
     {
-        $checkStmt = $this->pdo->prepare("
+        $checkStmt = $this->pdo->prepare('
             SELECT 1 FROM eav_entity_attribute
             WHERE attribute_set_id = ? AND attribute_id = ?
-        ");
+        ');
 
-        $insertStmt = $this->pdo->prepare("
+        $insertStmt = $this->pdo->prepare('
             INSERT INTO eav_entity_attribute
                 (entity_type_id, attribute_set_id, attribute_group_id, attribute_id, sort_order)
             VALUES (?, ?, ?, ?, ?)
-        ");
+        ');
 
         $addedCount = 0;
 
@@ -338,7 +338,7 @@ class SampleDataImporter
             ];
         }
 
-        $this->log("Parsed " . count($this->sampleEntityAttributes) . " attribute set assignments from sample data", 'info');
+        $this->log('Parsed ' . count($this->sampleEntityAttributes) . ' attribute set assignments from sample data', 'info');
     }
 
     /**
