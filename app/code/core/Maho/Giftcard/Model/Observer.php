@@ -14,28 +14,40 @@ declare(strict_types=1);
 class Maho_Giftcard_Model_Observer
 {
     /**
-     * Generate gift cards after order is placed
+     * Create gift cards when invoice is paid
+     *
+     * Gift cards are only created after payment is confirmed to prevent
+     * generating gift card codes for unpaid orders.
      *
      * @return void
      */
-    public function generateGiftcards(Maho\Event\Observer $observer)
+    public function createGiftcardsOnInvoicePaid(Maho\Event\Observer $observer)
     {
-        /** @var Mage_Sales_Model_Order $order */
-        $order = $observer->getEvent()->getOrder();
+        /** @var Mage_Sales_Model_Order_Invoice $invoice */
+        $invoice = $observer->getEvent()->getInvoice();
+        $order = $invoice->getOrder();
 
-        foreach ($order->getAllItems() as $item) {
+        // Only create when invoice is actually paid
+        if ($invoice->getState() != Mage_Sales_Model_Order_Invoice::STATE_PAID) {
+            return;
+        }
+
+        // Process each invoiced item
+        foreach ($invoice->getAllItems() as $invoiceItem) {
+            $orderItem = $invoiceItem->getOrderItem();
+
             // Check if item is a gift card
-            if ($item->getProductType() !== 'giftcard') {
+            if ($orderItem->getProductType() !== 'giftcard') {
                 continue;
             }
 
             // Get gift card details from info_buyRequest
-            $options = $item->getProductOptions();
+            $options = $orderItem->getProductOptions();
             $buyRequest = $options['info_buyRequest'] ?? [];
 
             $amount = $buyRequest['giftcard_amount'] ?? null;
 
-            if (!$amount || $amount <= 0) {
+            if ($amount === null || $amount <= 0) {
                 continue; // Not a valid gift card
             }
 
@@ -45,18 +57,22 @@ class Maho_Giftcard_Model_Observer
             $senderEmail = $buyRequest['giftcard_sender_email'] ?? '';
             $message = $buyRequest['giftcard_message'] ?? '';
 
-            // Generate gift cards for each quantity
-            for ($i = 0; $i < $item->getQtyOrdered(); $i++) {
-                $this->_createGiftcard(
+            // Generate gift cards for each invoiced quantity
+            $qtyInvoiced = (int) $invoiceItem->getQty();
+            for ($i = 0; $i < $qtyInvoiced; $i++) {
+                $giftcard = $this->_createGiftcard(
                     (float) $amount,
                     $order,
-                    $item,
+                    $orderItem,
                     $recipientName,
                     $recipientEmail,
                     $senderName,
                     $senderEmail,
                     $message,
                 );
+
+                // Send gift card email to recipient
+                $this->_sendGiftcardEmail($giftcard, $order);
             }
         }
     }
@@ -73,7 +89,7 @@ class Maho_Giftcard_Model_Observer
         string $senderName = '',
         string $senderEmail = '',
         string $message = '',
-    ): void {
+    ): Maho_Giftcard_Model_Giftcard {
         $helper = Mage::helper('giftcard');
 
         // Get website from order
@@ -87,7 +103,7 @@ class Maho_Giftcard_Model_Observer
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
             'code' => $helper->generateCode(),
-            'status' => Maho_Giftcard_Model_Giftcard::STATUS_PENDING,
+            'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
             'website_id' => $website->getId(),
             'balance' => $baseAmount,
             'initial_balance' => $baseAmount,
@@ -99,8 +115,8 @@ class Maho_Giftcard_Model_Observer
             'purchase_order_id' => $order->getId(),
             'purchase_order_item_id' => $item->getId(),
             'expires_at' => $helper->calculateExpirationDate(),
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
+            'created_at' => Mage_Core_Model_Locale::now(),
+            'updated_at' => Mage_Core_Model_Locale::now(),
         ]);
 
         $giftcard->save();
@@ -115,58 +131,11 @@ class Maho_Giftcard_Model_Observer
             'balance_after' => $baseAmount,
             'order_id' => $order->getId(),
             'comment' => "Created from order #{$order->getIncrementId()}",
-            'created_at' => date('Y-m-d H:i:s'),
+            'created_at' => Mage_Core_Model_Locale::now(),
         ]);
         $history->save();
 
-        // Gift card created successfully
-    }
-
-    /**
-     * Activate gift cards when invoice is paid
-     *
-     * @return void
-     */
-    public function activateGiftcardsOnInvoicePaid(Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Sales_Model_Order_Invoice $invoice */
-        $invoice = $observer->getEvent()->getInvoice();
-        $order = $invoice->getOrder();
-
-        // Only activate when invoice is actually paid
-        if ($invoice->getState() != Mage_Sales_Model_Order_Invoice::STATE_PAID) {
-            return;
-        }
-
-        // Find all pending gift cards for this order
-        $giftcards = Mage::getModel('giftcard/giftcard')->getCollection()
-            ->addFieldToFilter('purchase_order_id', $order->getId())
-            ->addFieldToFilter('status', Maho_Giftcard_Model_Giftcard::STATUS_PENDING);
-
-        foreach ($giftcards as $giftcard) {
-            // Activate the gift card
-            $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-            $giftcard->save();
-
-            // Add history entry
-            $history = Mage::getModel('giftcard/history');
-            $history->setData([
-                'giftcard_id' => $giftcard->getId(),
-                'action' => 'activated',
-                'amount' => 0,
-                'balance_before' => $giftcard->getBalance(),
-                'balance_after' => $giftcard->getBalance(),
-                'order_id' => $order->getId(),
-                'comment' => "Activated after invoice payment for order #{$order->getIncrementId()}",
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-            $history->save();
-
-            // Send gift card email to recipient
-            $this->_sendGiftcardEmail($giftcard, $order);
-
-            // Gift card activated successfully
-        }
+        return $giftcard;
     }
 
     /**

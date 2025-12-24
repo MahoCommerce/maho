@@ -44,7 +44,6 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 {
-    public const STATUS_PENDING = 'pending';
     public const STATUS_ACTIVE = 'active';
     public const STATUS_USED = 'used';
     public const STATUS_EXPIRED = 'expired';

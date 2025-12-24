@@ -84,7 +84,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
             ]);
         }
 
-        $currencyNote = $model->getId() ? 'In ' . $model->getCurrencyCode() : '';
+        $currencyNote = $model->getId() ? '[' . $model->getCurrencyCode() . ']' : '';
 
         $fieldset->addField('balance', 'text', [
             'name'     => 'balance',

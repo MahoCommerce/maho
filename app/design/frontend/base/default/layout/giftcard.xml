@@ -5,17 +5,32 @@
  *
  * @category   Maho
  * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
 <layout>
-    <!-- Checkout Payment - Handle gift card payment method selection -->
+    <!-- Checkout Payment - Add gift card form and handle payment method selection -->
     <checkout_onepage_index>
+        <!-- Add gift card form to payment step (rendered via methods_additional before payment methods) -->
+        <reference name="checkout.onepage.payment.methods_additional">
+            <block type="giftcard/checkout_payment_giftcard" name="checkout.payment.giftcard" template="maho/giftcard/checkout/payment/giftcard.phtml" />
+        </reference>
+        <!-- Handle payment method visibility based on gift card coverage -->
         <reference name="checkout.onepage.payment.methods">
             <block type="core/template" name="giftcard.payment.methods" template="maho/giftcard/checkout/payment/methods.phtml" />
         </reference>
     </checkout_onepage_index>
+
+    <!-- Checkout Payment Method AJAX Load - Include gift card form -->
+    <checkout_onepage_paymentmethod>
+        <reference name="checkout.onepage.payment.methods.additional">
+            <block type="giftcard/checkout_payment_giftcard" name="checkout.payment.giftcard.ajax" template="maho/giftcard/checkout/payment/giftcard.phtml" />
+        </reference>
+        <reference name="root">
+            <block type="core/template" name="giftcard.payment.methods.ajax" template="maho/giftcard/checkout/payment/methods.phtml" />
+        </reference>
+    </checkout_onepage_paymentmethod>
 
     <!-- Checkout Cart - Add Gift Card Form -->
     <checkout_cart_index>

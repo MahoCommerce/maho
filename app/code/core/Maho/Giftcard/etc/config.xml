@@ -135,10 +135,6 @@
         <events>
             <sales_order_place_after>
                 <observers>
-                    <giftcard_generate>
-                        <class>giftcard/observer</class>
-                        <method>generateGiftcards</method>
-                    </giftcard_generate>
                     <giftcard_deduct_balance>
                         <class>giftcard/observer</class>
                         <method>deductGiftcardBalance</method>
@@ -163,10 +159,10 @@
             </sales_quote_add_item>
             <sales_order_invoice_pay>
                 <observers>
-                    <giftcard_activate_on_payment>
+                    <giftcard_create_on_payment>
                         <class>giftcard/observer</class>
-                        <method>activateGiftcardsOnInvoicePaid</method>
-                    </giftcard_activate_on_payment>
+                        <method>createGiftcardsOnInvoicePaid</method>
+                    </giftcard_create_on_payment>
                 </observers>
             </sales_order_invoice_pay>
             <controller_action_predispatch_checkout_onepage_savePayment>

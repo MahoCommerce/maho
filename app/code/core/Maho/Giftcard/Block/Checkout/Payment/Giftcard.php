@@ -1,0 +1,161 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Giftcard
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/**
+ * Gift card block for checkout payment step
+ */
+class Maho_Giftcard_Block_Checkout_Payment_Giftcard extends Mage_Core_Block_Template
+{
+    /**
+     * Get applied gift card codes from quote
+     *
+     * @return array<string, array{amount: float, balance: float, display_code: string}>
+     */
+    public function getAppliedGiftcards(): array
+    {
+        $quote = $this->getQuote();
+        $codes = $quote->getGiftcardCodes();
+
+        if (!$codes) {
+            return [];
+        }
+
+        if (is_string($codes)) {
+            $codes = json_decode($codes, true);
+        }
+
+        if (!is_array($codes) || $codes === []) {
+            return [];
+        }
+
+        $result = [];
+        $quoteCurrency = $quote->getQuoteCurrencyCode();
+
+        foreach ($codes as $code => $appliedAmount) {
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+            if ($giftcard->getId()) {
+                $result[$code] = [
+                    'amount' => (float) $appliedAmount,
+                    'balance' => $giftcard->getBalance($quoteCurrency),
+                    'display_code' => $this->getDisplayCode($code),
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get display code (masked for security)
+     */
+    public function getDisplayCode(string $code): string
+    {
+        if (strlen($code) > 10) {
+            return substr($code, 0, 4) . '...' . substr($code, -4);
+        }
+        return $code;
+    }
+
+    /**
+     * Get quote
+     */
+    public function getQuote(): Mage_Sales_Model_Quote
+    {
+        return Mage::getSingleton('checkout/session')->getQuote();
+    }
+
+    /**
+     * Get total gift card amount applied
+     */
+    public function getTotalGiftcardAmount(): float
+    {
+        return abs((float) $this->getQuote()->getGiftcardAmount());
+    }
+
+    /**
+     * Get base total gift card amount applied
+     */
+    public function getBaseTotalGiftcardAmount(): float
+    {
+        return abs((float) $this->getQuote()->getBaseGiftcardAmount());
+    }
+
+    /**
+     * Get remaining amount to pay (grand total after gift card)
+     */
+    public function getAmountDue(): float
+    {
+        $grandTotal = (float) $this->getQuote()->getGrandTotal();
+        return max(0, $grandTotal);
+    }
+
+    /**
+     * Get subtotal before gift card
+     */
+    public function getSubtotalBeforeGiftcard(): float
+    {
+        return $this->getAmountDue() + $this->getTotalGiftcardAmount();
+    }
+
+    /**
+     * Check if order is fully covered by gift cards
+     */
+    public function isFullyCovered(): bool
+    {
+        $giftcardAmount = $this->getTotalGiftcardAmount();
+        $grandTotal = (float) $this->getQuote()->getGrandTotal();
+
+        return $giftcardAmount > 0 && $grandTotal <= 0.01;
+    }
+
+    /**
+     * Check if customer can apply gift cards
+     */
+    public function canApplyGiftcard(): bool
+    {
+        $quote = $this->getQuote();
+
+        // Check if cart has gift card products
+        foreach ($quote->getAllItems() as $item) {
+            if ($item->getProductType() === 'giftcard') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get apply gift card URL (AJAX)
+     */
+    public function getApplyUrl(): string
+    {
+        return $this->getUrl('giftcard/cart/ajaxApply');
+    }
+
+    /**
+     * Get remove gift card URL (AJAX)
+     */
+    public function getRemoveUrl(): string
+    {
+        return $this->getUrl('giftcard/cart/ajaxRemove');
+    }
+
+    /**
+     * Format price
+     */
+    public function formatPrice(float $amount): string
+    {
+        return Mage::helper('core')->currency($amount, true, false);
+    }
+}

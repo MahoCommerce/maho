@@ -28,18 +28,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     {
         $collection = Mage::getModel('giftcard/history')->getCollection();
 
-        // Join gift card table to get code
+        // Join gift card table to get code and currency
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
-            ['code', 'recipient_email', 'website_id'],
-        );
-
-        // Join website table to get base currency code for display
-        $collection->getSelect()->joinLeft(
-            ['website' => $collection->getTable('core/website')],
-            'gc.website_id = website.website_id',
-            ['currency_code' => 'base_currency_code'],
+            ['code', 'recipient_email', 'currency_code'],
         );
 
         // Join order table to get increment_id
@@ -78,11 +71,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             'index'   => 'action',
             'type'    => 'options',
             'options' => [
-                'created' => 'Created',
-                'redeemed' => 'Redeemed',
-                'adjusted' => 'Adjusted',
-                'refunded' => 'Refunded',
-                'expired' => 'Expired',
+                Maho_Giftcard_Model_Giftcard::ACTION_CREATED => 'Created',
+                Maho_Giftcard_Model_Giftcard::ACTION_USED => 'Used',
+                Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED => 'Adjusted',
+                Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED => 'Refunded',
+                Maho_Giftcard_Model_Giftcard::ACTION_EXPIRED => 'Expired',
             ],
         ]);
 
@@ -91,8 +84,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'base_amount',
-            'type'     => 'currency',
-            'currency' => 'currency_code',
+            'renderer' => 'Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency',
         ]);
 
         $this->addColumn('balance_before', [
@@ -100,8 +92,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'balance_before',
-            'type'     => 'currency',
-            'currency' => 'currency_code',
+            'renderer' => 'Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency',
         ]);
 
         $this->addColumn('balance_after', [
@@ -109,8 +100,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             'align'    => 'right',
             'width'    => '100px',
             'index'    => 'balance_after',
-            'type'     => 'currency',
-            'currency' => 'currency_code',
+            'renderer' => 'Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency',
         ]);
 
         $this->addColumn('order_increment_id', [
