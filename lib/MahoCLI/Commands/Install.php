@@ -234,6 +234,10 @@ class Install extends BaseMahoCommand
                     // Execute the remapped SQL
                     $output->writeln('  Executing remapped SQL...');
                     $this->executeSqlForEngine($pdo, $remappedSql, $dbEngine, $output);
+
+                    // Merge sample data's attribute set assignments (adds new ones, preserves existing)
+                    $importer->mergeEntityAttributes();
+
                     $output->writeln('<info>Successfully imported db_data.sql</info>');
 
                     // Import db_config.sql with config value remapping
