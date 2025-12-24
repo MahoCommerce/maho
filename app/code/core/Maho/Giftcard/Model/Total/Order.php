@@ -57,7 +57,7 @@ class Maho_Giftcard_Model_Total_Order extends Mage_Sales_Model_Order_Total_Abstr
             }
 
             $title = Mage::helper('giftcard')->__('Gift Cards');
-            if (!empty($codes)) {
+            if ($codes !== []) {
                 $title .= ' (' . implode(', ', $codes) . ')';
             }
 

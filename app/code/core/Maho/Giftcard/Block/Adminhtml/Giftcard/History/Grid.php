@@ -32,7 +32,14 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
-            ['code', 'recipient_email'],
+            ['code', 'recipient_email', 'website_id'],
+        );
+
+        // Join website table to get base currency code for display
+        $collection->getSelect()->joinLeft(
+            ['website' => $collection->getTable('core/website')],
+            'gc.website_id = website.website_id',
+            ['currency_code' => 'base_currency_code'],
         );
 
         // Join order table to get increment_id
@@ -85,25 +92,25 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             'width'    => '100px',
             'index'    => 'base_amount',
             'type'     => 'currency',
-            'currency_code' => Mage::app()->getStore()->getBaseCurrencyCode(),
+            'currency' => 'currency_code',
         ]);
 
-        $this->addColumn('base_balance_before', [
+        $this->addColumn('balance_before', [
             'header'   => Mage::helper('giftcard')->__('Balance Before'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'base_balance_before',
+            'index'    => 'balance_before',
             'type'     => 'currency',
-            'currency_code' => Mage::app()->getStore()->getBaseCurrencyCode(),
+            'currency' => 'currency_code',
         ]);
 
-        $this->addColumn('base_balance_after', [
+        $this->addColumn('balance_after', [
             'header'   => Mage::helper('giftcard')->__('Balance After'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'base_balance_after',
+            'index'    => 'balance_after',
             'type'     => 'currency',
-            'currency_code' => Mage::app()->getStore()->getBaseCurrencyCode(),
+            'currency' => 'currency_code',
         ]);
 
         $this->addColumn('order_increment_id', [

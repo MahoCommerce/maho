@@ -50,7 +50,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
                 $amountsArray = array_map('trim', explode(',', $amounts));
 
                 foreach ($amountsArray as $amount) {
-                    if (empty($amount) || !is_numeric($amount)) {
+                    if ($amount === '' || !is_numeric($amount)) {
                         continue;
                     }
 

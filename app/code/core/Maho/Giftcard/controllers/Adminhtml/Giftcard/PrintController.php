@@ -51,7 +51,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
 
-        if (!is_array($giftcardIds) || empty($giftcardIds)) {
+        if (!is_array($giftcardIds) || $giftcardIds === []) {
             $this->_getSession()->addError('Please select gift card(s).');
             $this->_redirect('*/giftcard/index');
             return;
@@ -66,7 +66,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
                 }
             }
 
-            if (empty($giftcards)) {
+            if ($giftcards === []) {
                 throw new Exception('No valid gift cards found.');
             }
 

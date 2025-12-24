@@ -76,10 +76,9 @@ class Maho_Giftcard_Model_Observer
     ): void {
         $helper = Mage::helper('giftcard');
 
-        // Get website and base currency from order
+        // Get website from order
         $store = $order->getStore();
         $website = $store->getWebsite();
-        $baseCurrencyCode = $website->getBaseCurrencyCode();
 
         // Convert amount to base currency using order's conversion rate
         // Gift card amount is in order currency, need to convert to base currency
@@ -90,9 +89,8 @@ class Maho_Giftcard_Model_Observer
             'code' => $helper->generateCode(),
             'status' => Maho_Giftcard_Model_Giftcard::STATUS_PENDING,
             'website_id' => $website->getId(),
-            'base_balance' => $baseAmount,
-            'base_initial_balance' => $baseAmount,
-            'base_currency_code' => $baseCurrencyCode,
+            'balance' => $baseAmount,
+            'initial_balance' => $baseAmount,
             'recipient_name' => $recipientName,
             'recipient_email' => $recipientEmail,
             'sender_name' => $senderName,
@@ -113,8 +111,8 @@ class Maho_Giftcard_Model_Observer
             'giftcard_id' => $giftcard->getId(),
             'action' => Maho_Giftcard_Model_Giftcard::ACTION_CREATED,
             'base_amount' => $baseAmount,
-            'base_balance_before' => 0,
-            'base_balance_after' => $baseAmount,
+            'balance_before' => 0,
+            'balance_after' => $baseAmount,
             'order_id' => $order->getId(),
             'comment' => "Created from order #{$order->getIncrementId()}",
             'created_at' => date('Y-m-d H:i:s'),
@@ -333,7 +331,7 @@ class Maho_Giftcard_Model_Observer
         }
 
         $codes = json_decode($giftcardCodes, true);
-        if (!is_array($codes) || empty($codes)) {
+        if (!is_array($codes) || $codes === []) {
             return;
         }
 
@@ -405,12 +403,12 @@ class Maho_Giftcard_Model_Observer
 
                 $giftcardData = $adapter->fetchRow($select);
 
-                if (!$giftcardData || empty($giftcardData['giftcard_id'])) {
+                if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
                     continue;
                 }
 
-                $baseBalanceBefore = (float) $giftcardData['base_balance'];
-                $newBaseBalance = max(0, $baseBalanceBefore - (float) $usedAmount);
+                $baseBalanceBefore = (float) $giftcardData['balance'];
+                $newBalance = max(0, $baseBalanceBefore - (float) $usedAmount);
 
                 // Validate sufficient balance
                 if ($baseBalanceBefore < (float) $usedAmount) {
@@ -423,7 +421,7 @@ class Maho_Giftcard_Model_Observer
                 $adapter->update(
                     $giftcardTable,
                     [
-                        'base_balance' => $newBaseBalance,
+                        'balance' => $newBalance,
                         'updated_at' => Mage_Core_Model_Locale::now(),
                     ],
                     ['giftcard_id = ?' => $giftcardData['giftcard_id']],
@@ -435,8 +433,8 @@ class Maho_Giftcard_Model_Observer
                     'giftcard_id' => $giftcardData['giftcard_id'],
                     'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
                     'base_amount' => -(float) $usedAmount,
-                    'base_balance_before' => $baseBalanceBefore,
-                    'base_balance_after' => $newBaseBalance,
+                    'balance_before' => $baseBalanceBefore,
+                    'balance_after' => $newBalance,
                     'order_id' => $order->getId(),
                     'comment' => "Used in order #{$order->getIncrementId()}",
                     'created_at' => Mage_Core_Model_Locale::now(),
@@ -490,7 +488,7 @@ class Maho_Giftcard_Model_Observer
             }
 
             $label = Mage::helper('giftcard')->__('Gift Cards');
-            if (!empty($codes)) {
+            if ($codes !== []) {
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
 
@@ -557,7 +555,7 @@ class Maho_Giftcard_Model_Observer
             $payment = $request->getPost('payment', []);
 
             // Only override if no payment method was selected
-            if (empty($payment['method'])) {
+            if (!isset($payment['method']) || $payment['method'] === '') {
                 $payment['method'] = 'giftcard';
                 $request->setPost('payment', $payment);
 

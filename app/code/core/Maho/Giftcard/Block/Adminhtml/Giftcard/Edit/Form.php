@@ -77,30 +77,32 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
             $website = Mage::app()->getWebsite($model->getWebsiteId());
             $fieldset->addField('website_display', 'note', [
                 'label' => Mage::helper('giftcard')->__('Website'),
-                'text'  => $website->getName() . ' (Base Currency: ' . $model->getBaseCurrencyCode() . ')',
+                'text'  => $website->getName() . ' (Base Currency: ' . $model->getCurrencyCode() . ')',
             ]);
             $fieldset->addField('website_id', 'hidden', [
                 'name' => 'website_id',
             ]);
         }
 
-        $fieldset->addField('base_balance', 'text', [
-            'name'     => 'base_balance',
-            'label'    => Mage::helper('giftcard')->__('Balance (Base Currency)'),
-            'title'    => Mage::helper('giftcard')->__('Balance (Base Currency)'),
+        $currencyNote = $model->getId() ? 'In ' . $model->getCurrencyCode() : '';
+
+        $fieldset->addField('balance', 'text', [
+            'name'     => 'balance',
+            'label'    => Mage::helper('giftcard')->__('Balance'),
+            'title'    => Mage::helper('giftcard')->__('Balance'),
             'required' => true,
             'class'    => 'validate-number',
-            'note'     => $model->getId() ? 'In ' . $model->getBaseCurrencyCode() : '',
+            'note'     => $currencyNote,
         ]);
 
-        $fieldset->addField('base_initial_balance', 'text', [
-            'name'     => 'base_initial_balance',
-            'label'    => Mage::helper('giftcard')->__('Initial Balance (Base Currency)'),
-            'title'    => Mage::helper('giftcard')->__('Initial Balance (Base Currency)'),
+        $fieldset->addField('initial_balance', 'text', [
+            'name'     => 'initial_balance',
+            'label'    => Mage::helper('giftcard')->__('Initial Balance'),
+            'title'    => Mage::helper('giftcard')->__('Initial Balance'),
             'required' => !$model->getId(),
             'class'    => 'validate-number',
-            'disabled' => $model->getId() ? true : false,
-            'note'     => $model->getId() ? 'In ' . $model->getBaseCurrencyCode() : '',
+            'disabled' => (bool) $model->getId(),
+            'note'     => $currencyNote,
         ]);
 
         $fieldset->addField('expires_at', 'date', [

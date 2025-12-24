@@ -48,13 +48,13 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
 
         $codesJson = $quote->getGiftcardCodes();
 
-        if (empty($codesJson)) {
+        if ($codesJson === null || $codesJson === '') {
             return $this;
         }
 
         $codes = json_decode($codesJson, true);
 
-        if (empty($codes)) {
+        if (!is_array($codes) || $codes === []) {
             return $this;
         }
 
@@ -88,13 +88,13 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             }
 
             // Get gift card balance in base currency (no conversion needed since we work in base)
-            $availableBaseBalance = $giftcard->getBalance(); // Returns base currency by default
+            $availableBalance = $giftcard->getBalance(); // Returns base currency by default
 
             // If no specific amount requested (0), apply max available
             if ($requestedAmount <= 0) {
-                $baseAmountToApply = min($availableBaseBalance, $remainingTotal);
+                $baseAmountToApply = min($availableBalance, $remainingTotal);
             } else {
-                $baseAmountToApply = min($requestedAmount, $availableBaseBalance, $remainingTotal);
+                $baseAmountToApply = min($requestedAmount, $availableBalance, $remainingTotal);
             }
 
             if ($baseAmountToApply > 0) {

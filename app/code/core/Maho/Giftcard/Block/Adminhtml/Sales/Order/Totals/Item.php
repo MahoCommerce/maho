@@ -36,7 +36,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Item extends Mage_Adminht
                 }
             }
 
-            if (!empty($codes)) {
+            if ($codes !== []) {
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
         }

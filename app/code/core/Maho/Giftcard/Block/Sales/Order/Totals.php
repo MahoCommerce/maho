@@ -47,7 +47,7 @@ class Maho_Giftcard_Block_Sales_Order_Totals extends Mage_Sales_Block_Order_Tota
             }
 
             $label = $this->__('Gift Cards');
-            if (!empty($codes)) {
+            if ($codes !== []) {
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
 

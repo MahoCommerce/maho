@@ -43,7 +43,7 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
             $order = $info->getOrder();
             $codesJson = $order->getGiftcardCodes();
 
-            if (!empty($codesJson)) {
+            if ($codesJson !== null && $codesJson !== '') {
                 $codes = json_decode($codesJson, true) ?: [];
                 $giftcardInfo = [];
 

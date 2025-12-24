@@ -27,6 +27,14 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
     protected function _prepareCollection()
     {
         $collection = Mage::getModel('giftcard/giftcard')->getCollection();
+
+        // Join website table to get base currency code for display
+        $collection->getSelect()->joinLeft(
+            ['website' => $collection->getTable('core/website')],
+            'main_table.website_id = website.website_id',
+            ['currency_code' => 'base_currency_code'],
+        );
+
         $this->setCollection($collection);
 
         return parent::_prepareCollection();
@@ -73,22 +81,22 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
             ]);
         }
 
-        $this->addColumn('base_balance', [
+        $this->addColumn('balance', [
             'header'   => Mage::helper('giftcard')->__('Balance'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'base_balance',
+            'index'    => 'balance',
             'type'     => 'currency',
-            'currency' => 'base_currency_code',
+            'currency' => 'currency_code',
         ]);
 
-        $this->addColumn('base_initial_balance', [
+        $this->addColumn('initial_balance', [
             'header'   => Mage::helper('giftcard')->__('Initial Balance'),
             'align'    => 'right',
             'width'    => '100px',
-            'index'    => 'base_initial_balance',
+            'index'    => 'initial_balance',
             'type'     => 'currency',
-            'currency' => 'base_currency_code',
+            'currency' => 'currency_code',
         ]);
 
         $this->addColumn('recipient_email', [

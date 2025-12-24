@@ -124,7 +124,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             if (isset($appliedCodes[$code])) {
                 unset($appliedCodes[$code]);
 
-                if (empty($appliedCodes)) {
+                if ($appliedCodes === []) {
                     $quote->setGiftcardCodes(null);
                     $quote->setGiftcardAmount(0);
                     $quote->setBaseGiftcardAmount(0);

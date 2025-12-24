@@ -42,7 +42,7 @@ class Maho_Giftcard_Helper_Payment extends Mage_Payment_Helper_Data
             }
 
             // If we have the gift card payment method, use only that
-            if (!empty($filteredMethods)) {
+            if ($filteredMethods !== []) {
                 return $filteredMethods;
             }
         } elseif ($quote && $this->hasPartialGiftcardCoverage($quote)) {

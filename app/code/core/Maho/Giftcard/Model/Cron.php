@@ -74,8 +74,8 @@ class Maho_Giftcard_Model_Cron
                         'giftcard_id' => $giftcard->getId(),
                         'action' => Maho_Giftcard_Model_Giftcard::ACTION_EXPIRED,
                         'base_amount' => 0,
-                        'base_balance_before' => (float) $giftcard->getBalance(),
-                        'base_balance_after' => (float) $giftcard->getBalance(),
+                        'balance_before' => (float) $giftcard->getBalance(),
+                        'balance_after' => (float) $giftcard->getBalance(),
                         'comment' => 'Automatically expired by cron',
                         'created_at' => date('Y-m-d H:i:s'),
                     ]);

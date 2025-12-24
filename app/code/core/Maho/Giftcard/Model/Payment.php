@@ -107,7 +107,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $order = $payment->getOrder();
         $codes = $this->_getAppliedCodes($order);
 
-        if (empty($codes)) {
+        if ($codes === []) {
             return $this;
         }
 
@@ -138,7 +138,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $order = $payment->getOrder();
         $codes = $this->_getAppliedCodes($order);
 
-        if (empty($codes)) {
+        if ($codes === []) {
             return $this;
         }
 
@@ -175,7 +175,7 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     {
         $codesJson = $order->getGiftcardCodes();
 
-        if (empty($codesJson)) {
+        if ($codesJson === null || $codesJson === '') {
             return [];
         }
 

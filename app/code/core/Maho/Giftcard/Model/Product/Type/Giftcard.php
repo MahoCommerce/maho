@@ -107,7 +107,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
             ];
         }
 
-        if (!empty($additionalOptions)) {
+        if ($additionalOptions !== []) {
             $options['additional_options'] = $additionalOptions;
         }
 
@@ -132,7 +132,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
             $giftcardOptions['giftcard_message'] = $buyRequest->getGiftcardMessage();
         }
 
-        if (!empty($giftcardOptions)) {
+        if ($giftcardOptions !== []) {
             $options['info_buyRequest']['giftcard_options'] = $giftcardOptions;
         }
 
@@ -259,7 +259,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
         if ($amounts) {
             $amountsArray = array_map('trim', explode(',', $amounts));
             $amountsArray = array_filter($amountsArray, fn($a) => is_numeric($a) && $a > 0);
-            if (!empty($amountsArray)) {
+            if ($amountsArray !== []) {
                 return (float) min($amountsArray);
             }
         }

@@ -37,17 +37,14 @@ $table = $connection->newTable($this->getTable('giftcard/giftcard'))
         'unsigned' => true,
         'nullable' => false,
     ], 'Website ID')
-    ->addColumn('base_balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ->addColumn('balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
-    ], 'Current Balance (Base Currency)')
-    ->addColumn('base_initial_balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ], 'Current Balance')
+    ->addColumn('initial_balance', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
-    ], 'Initial Balance (Base Currency)')
-    ->addColumn('base_currency_code', Maho\Db\Ddl\Table::TYPE_VARCHAR, 3, [
-        'nullable' => false,
-    ], 'Base Currency Code')
+    ], 'Initial Balance')
     ->addColumn('recipient_name', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable' => true,
     ], 'Recipient Name')
@@ -152,11 +149,11 @@ $table = $connection->newTable($this->getTable('giftcard/history'))
         'nullable' => false,
         'default'  => '0.0000',
     ], 'Amount (Base Currency)')
-    ->addColumn('base_balance_before', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ->addColumn('balance_before', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
     ], 'Balance Before (Base Currency)')
-    ->addColumn('base_balance_after', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
+    ->addColumn('balance_after', Maho\Db\Ddl\Table::TYPE_DECIMAL, [12, 4], [
         'nullable' => false,
         'default'  => '0.0000',
     ], 'Balance After (Base Currency)')

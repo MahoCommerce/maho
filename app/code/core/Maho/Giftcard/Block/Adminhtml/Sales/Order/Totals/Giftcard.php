@@ -46,7 +46,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard extends Mage_Cor
                     }
 
                     $label = Mage::helper('giftcard')->__('Gift Cards');
-                    if (!empty($codes)) {
+                    if ($codes !== []) {
                         $label .= ' (' . implode(', ', $codes) . ')';
                     }
 

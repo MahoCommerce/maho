@@ -20,12 +20,9 @@ declare(strict_types=1);
  * @method $this setStatus(string $value)
  * @method int getWebsiteId()
  * @method $this setWebsiteId(int $value)
- * @method float getBaseBalance()
- * @method $this setBaseBalance(float $value)
- * @method float getBaseInitialBalance()
- * @method $this setBaseInitialBalance(float $value)
- * @method string getBaseCurrencyCode()
- * @method $this setBaseCurrencyCode(string $value)
+ * @method $this setBalance(float $value)
+ * @method float getInitialBalance()
+ * @method $this setInitialBalance(float $value)
  * @method string getRecipientName()
  * @method $this setRecipientName(string $value)
  * @method string getRecipientEmail()
@@ -85,25 +82,32 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get balance in a specific currency (converts from base currency)
+     * Get currency code (derived from website's base currency)
+     */
+    public function getCurrencyCode(): string
+    {
+        return $this->getWebsite()->getBaseCurrencyCode();
+    }
+
+    /**
+     * Get balance in a specific currency (converts if needed)
      */
     public function getBalance(?string $currencyCode = null): float
     {
-        $baseBalance = (float) $this->getBaseBalance();
+        $balance = (float) $this->getData('balance');
 
         if (!$currencyCode) {
-            // Return in base currency
-            return $baseBalance;
+            return $balance;
         }
 
-        if ($currencyCode === $this->getBaseCurrencyCode()) {
-            return $baseBalance;
+        if ($currencyCode === $this->getCurrencyCode()) {
+            return $balance;
         }
 
-        // Convert from base currency to requested currency
+        // Convert to requested currency
         return (float) Mage::helper('directory')->currencyConvert(
-            $baseBalance,
-            $this->getBaseCurrencyCode(),
+            $balance,
+            $this->getCurrencyCode(),
             $currencyCode,
         );
     }
@@ -117,7 +121,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             return false;
         }
 
-        if ($this->getBaseBalance() <= 0) {
+        if ($this->getBalance() <= 0) {
             return false;
         }
 
@@ -154,15 +158,15 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
-        if ($baseAmount > $this->getBaseBalance()) {
+        if ($baseAmount > $this->getBalance()) {
             throw new Mage_Core_Exception('Amount exceeds gift card balance.');
         }
 
-        $balanceBefore = (float) $this->getBaseBalance();
+        $balanceBefore = (float) $this->getBalance();
         $balanceAfter = $balanceBefore - $baseAmount;
 
         // Update balance
-        $this->setBaseBalance($balanceAfter);
+        $this->setBalance($balanceAfter);
 
         // Update status if fully used
         if ($balanceAfter <= 0) {
@@ -197,11 +201,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
-        $balanceBefore = (float) $this->getBaseBalance();
+        $balanceBefore = (float) $this->getBalance();
         $balanceAfter = $balanceBefore + $baseAmount;
 
         // Update balance
-        $this->setBaseBalance($balanceAfter);
+        $this->setBalance($balanceAfter);
 
         // Reactivate if was used
         if ($this->getStatus() === self::STATUS_USED) {
@@ -226,18 +230,18 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * Adjust balance (admin action)
      *
-     * @param float $newBaseBalance New balance (in base currency)
+     * @param float $newBalance New balance (in base currency)
      * @return $this
      */
-    public function adjustBalance(float $newBaseBalance, ?string $comment = null): self
+    public function adjustBalance(float $newBalance, ?string $comment = null): self
     {
-        $balanceBefore = (float) $this->getBaseBalance();
-        $amount = $newBaseBalance - $balanceBefore;
+        $balanceBefore = (float) $this->getBalance();
+        $amount = $newBalance - $balanceBefore;
 
-        $this->setBaseBalance($newBaseBalance);
+        $this->setBalance($newBalance);
 
         // Update status based on new balance
-        if ($newBaseBalance <= 0) {
+        if ($newBalance <= 0) {
             $this->setStatus(self::STATUS_USED);
         } elseif ($this->getStatus() === self::STATUS_USED) {
             $this->setStatus(self::STATUS_ACTIVE);
@@ -250,7 +254,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             self::ACTION_ADJUSTED,
             $amount,
             $balanceBefore,
-            $newBaseBalance,
+            $newBalance,
             null,
             $comment,
         );
@@ -280,8 +284,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             'giftcard_id' => $this->getId(),
             'action' => $action,
             'base_amount' => (float) $baseAmount,
-            'base_balance_before' => (float) $baseBalanceBefore,
-            'base_balance_after' => (float) $baseBalanceAfter,
+            'balance_before' => (float) $baseBalanceBefore,
+            'balance_after' => (float) $baseBalanceAfter,
             'order_id' => $orderId,
             'comment' => $comment,
             'admin_user_id' => $adminUserId,

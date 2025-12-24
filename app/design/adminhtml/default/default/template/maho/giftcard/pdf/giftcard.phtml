@@ -225,7 +225,7 @@ $giftcards = $this->getGiftcards();
 
             <div class="balance-section">
                 <div class="balance-label">Current Balance</div>
-                <div class="balance"><?php echo Mage::app()->getLocale()->formatCurrency($giftcard->getBalance(), $giftcard->getBaseCurrencyCode()) ?></div>
+                <div class="balance"><?php echo Mage::app()->getLocale()->formatCurrency($giftcard->getBalance(), $giftcard->getCurrencyCode()) ?></div>
             </div>
 
             <div class="info-grid">

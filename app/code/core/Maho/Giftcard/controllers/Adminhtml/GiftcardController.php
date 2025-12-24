@@ -96,7 +96,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $this->_title($model->getId() ? $model->getCode() : Mage::helper('giftcard')->__('New Gift Card'));
 
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
-        if (!empty($data)) {
+        if (is_array($data) && $data !== []) {
             $model->setData($data);
         }
 
@@ -122,27 +122,23 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
             try {
                 // Generate code if creating new
-                if (!$model->getId() && empty($data['code'])) {
+                if (!$model->getId() && (!isset($data['code']) || $data['code'] === '')) {
                     $data['code'] = Mage::helper('giftcard')->generateCode();
                 }
 
-                // Set website_id and base_currency_code for new gift cards
-                if (!$model->getId()) {
-                    if (empty($data['website_id'])) {
-                        $data['website_id'] = Mage::app()->getWebsite()->getId();
-                    }
-                    $website = Mage::app()->getWebsite($data['website_id']);
-                    $data['base_currency_code'] = $website->getBaseCurrencyCode();
+                // Set website_id for new gift cards
+                if (!$model->getId() && (!isset($data['website_id']) || $data['website_id'] === '')) {
+                    $data['website_id'] = Mage::app()->getWebsite()->getId();
                 }
 
                 // Set expiration if not set
-                if (!$model->getId() && empty($data['expires_at'])) {
+                if (!$model->getId() && (!isset($data['expires_at']) || $data['expires_at'] === '')) {
                     $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
                 }
 
                 // If balance changed, record as adjustment
-                $oldBalance = (float) $model->getBaseBalance();
-                $newBalance = isset($data['base_balance']) ? (float) $data['base_balance'] : $oldBalance;
+                $oldBalance = (float) $model->getBalance();
+                $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
 
                 $model->setData($data);
                 $model->save();
@@ -282,7 +278,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         $code = $this->getRequest()->getParam('code');
 
-        if (empty($code)) {
+        if ($code === null || $code === '') {
             $this->getResponse()->setBody(json_encode([
                 'success' => false,
                 'message' => 'Please enter a gift card code.',
@@ -304,9 +300,9 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             'success' => true,
             'giftcard_id' => $giftcard->getId(),
             'code' => $giftcard->getCode(),
-            'base_balance' => $giftcard->getBaseBalance(),
-            'base_initial_balance' => $giftcard->getBaseInitialBalance(),
-            'base_currency_code' => $giftcard->getBaseCurrencyCode(),
+            'balance' => $giftcard->getBalance(),
+            'initial_balance' => $giftcard->getInitialBalance(),
+            'currency_code' => $giftcard->getCurrencyCode(),
             'website_id' => $giftcard->getWebsiteId(),
             'status' => $giftcard->getStatus(),
             'is_valid' => $giftcard->isValid(),
