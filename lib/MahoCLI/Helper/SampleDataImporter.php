@@ -253,6 +253,17 @@ class SampleDataImporter
      */
     public function mergeEntityAttributes(): void
     {
+        $checkStmt = $this->pdo->prepare("
+            SELECT 1 FROM eav_entity_attribute
+            WHERE attribute_set_id = ? AND attribute_id = ?
+        ");
+
+        $insertStmt = $this->pdo->prepare("
+            INSERT INTO eav_entity_attribute
+                (entity_type_id, attribute_set_id, attribute_group_id, attribute_id, sort_order)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+
         $addedCount = 0;
 
         foreach ($this->sampleEntityAttributes as $entry) {
@@ -266,19 +277,10 @@ class SampleDataImporter
             $newAttributeId = $this->attributeRemap[$oldAttributeId] ?? $oldAttributeId;
 
             // Check if this attribute is already in this attribute set
-            $stmt = $this->pdo->prepare("
-                SELECT 1 FROM eav_entity_attribute
-                WHERE attribute_set_id = ? AND attribute_id = ?
-            ");
-            $stmt->execute([$attributeSetId, $newAttributeId]);
+            $checkStmt->execute([$attributeSetId, $newAttributeId]);
 
-            if (!$stmt->fetch()) {
+            if (!$checkStmt->fetch()) {
                 // Attribute not in this set yet, add it
-                $insertStmt = $this->pdo->prepare("
-                    INSERT INTO eav_entity_attribute
-                        (entity_type_id, attribute_set_id, attribute_group_id, attribute_id, sort_order)
-                    VALUES (?, ?, ?, ?, ?)
-                ");
                 $insertStmt->execute([
                     $entityTypeId,
                     $attributeSetId,
