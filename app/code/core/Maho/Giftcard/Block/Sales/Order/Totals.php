@@ -54,12 +54,20 @@ class Maho_Giftcard_Block_Sales_Order_Totals extends Mage_Core_Block_Template
                 $label .= ' (' . implode(', ', $codes) . ')';
             }
 
+            // Add giftcard before grand_total
             $parent->addTotalBefore(new Maho\DataObject([
                 'code'       => 'giftcard',
                 'value'      => -abs((float) $giftcardAmount),
                 'base_value' => -abs((float) $source->getBaseGiftcardAmount()),
                 'label'      => $label,
-            ]), 'grand_total');
+            ]), ['grand_total', 'base_grandtotal']);
+
+            // Ensure tax appears before giftcard (fix for when tax is mispositioned after grand_total)
+            $taxTotal = $parent->getTotal('tax');
+            if ($taxTotal) {
+                $parent->removeTotal('tax');
+                $parent->addTotalBefore($taxTotal, 'giftcard');
+            }
         }
 
         return $this;

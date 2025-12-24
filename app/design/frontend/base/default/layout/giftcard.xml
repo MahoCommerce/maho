@@ -51,6 +51,34 @@
         </reference>
     </sales_order_print>
 
+    <!-- Sales Guest Order View - Add gift card totals -->
+    <sales_guest_view>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_view>
+
+    <!-- Sales Guest Order Print - Add gift card totals -->
+    <sales_guest_print>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_print>
+
+    <!-- Sales Guest Invoice View - Add gift card totals -->
+    <sales_guest_invoice>
+        <reference name="invoice_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_invoice>
+
+    <!-- Sales Guest Creditmemo View - Add gift card totals -->
+    <sales_guest_creditmemo>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_creditmemo>
+
     <!-- Sales Order Invoice View - Add gift card totals -->
     <sales_order_invoice>
         <reference name="invoice_totals">
