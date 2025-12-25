@@ -17,6 +17,137 @@ declare(strict_types=1);
 class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 {
     /**
+     * Rate limit: max attempts per window
+     */
+    protected const RATE_LIMIT_MAX_ATTEMPTS = 10;
+
+    /**
+     * Rate limit: window in seconds
+     */
+    protected const RATE_LIMIT_WINDOW = 60;
+
+    /**
+     * Validate form key for POST requests
+     */
+    #[\Override]
+    public function preDispatch(): static
+    {
+        parent::preDispatch();
+
+        $action = strtolower($this->getRequest()->getActionName());
+        $postActions = ['apply', 'remove', 'ajaxapply', 'ajaxremove', 'checkbalance'];
+
+        if (in_array($action, $postActions)) {
+            if (!$this->getRequest()->isPost()) {
+                $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+                $this->_redirect('checkout/cart');
+                return $this;
+            }
+
+            if (!$this->_validateFormKey()) {
+                $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+                Mage::getSingleton('checkout/session')->addError(
+                    $this->__('Invalid form key. Please refresh the page and try again.'),
+                );
+                $this->_redirect('checkout/cart');
+                return $this;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Check if rate limited (session-based bucket)
+     */
+    protected function _isRateLimited(): bool
+    {
+        $session = Mage::getSingleton('core/session');
+        $attempts = (array) $session->getGiftcardCheckAttempts();
+        $now = time();
+
+        // Clean old attempts outside the window
+        $attempts = array_filter($attempts, fn($timestamp) => ($now - $timestamp) < self::RATE_LIMIT_WINDOW);
+
+        if (count($attempts) >= self::RATE_LIMIT_MAX_ATTEMPTS) {
+            return true;
+        }
+
+        // Record this attempt
+        $attempts[] = $now;
+        $session->setGiftcardCheckAttempts($attempts);
+
+        return false;
+    }
+
+    /**
+     * Check gift card balance (AJAX)
+     */
+    public function checkBalanceAction(): void
+    {
+        $result = ['success' => false, 'message' => ''];
+
+        // Rate limiting
+        if ($this->_isRateLimited()) {
+            $result['message'] = $this->__('Too many attempts. Please wait a moment and try again.');
+            $this->_sendJsonResponse($result);
+            return;
+        }
+
+        $code = trim((string) $this->getRequest()->getPost('giftcard_code'));
+
+        if (!$code) {
+            $result['message'] = $this->__('Please enter a gift card code.');
+            $this->_sendJsonResponse($result);
+            return;
+        }
+
+        try {
+            // Load gift card by code
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+
+            // Don't leak info - return same message for non-existent, wrong website, or inactive cards
+            if (!$giftcard->getId()) {
+                $result['message'] = $this->__('Gift card not found.');
+                $this->_sendJsonResponse($result);
+                return;
+            }
+
+            $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
+            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+                $result['message'] = $this->__('Gift card not found.');
+                $this->_sendJsonResponse($result);
+                return;
+            }
+
+            // Only show balance for valid (active) gift cards
+            if (!$giftcard->isValid()) {
+                $result['message'] = $this->__('Gift card not found.');
+                $this->_sendJsonResponse($result);
+                return;
+            }
+
+            // Get store currency for display
+            $storeCurrencyCode = Mage::app()->getStore()->getCurrentCurrencyCode();
+            $balance = $giftcard->getBalance($storeCurrencyCode);
+            $balanceFormatted = Mage::app()->getStore()->formatPrice($balance, false);
+
+            $result['success'] = true;
+            $result['message'] = $this->__('Balance: %s', $balanceFormatted);
+            $result['data'] = [
+                'balance' => $balance,
+                'balance_formatted' => $balanceFormatted,
+            ];
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $result['message'] = $this->__('Unable to check balance.');
+        }
+
+        $this->_sendJsonResponse($result);
+    }
+
+    /**
      * Apply gift card to cart
      */
     public function applyAction(): void
@@ -106,7 +237,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
      */
     public function removeAction(): void
     {
-        $code = $this->getRequest()->getParam('code');
+        $code = $this->getRequest()->getPost('code');
 
         if (!$code) {
             $this->_redirect('checkout/cart');
