@@ -35,8 +35,7 @@ class Maho_Giftcard_Helper_Payment extends Mage_Payment_Helper_Data
             // Filter to only show gift card payment method
             $filteredMethods = [];
             foreach ($methods as $method) {
-                if ($method->getCode() === 'giftcard' ||
-                    $method->getCode() === 'free') {
+                if ($method->getCode() === 'giftcard') {
                     $filteredMethods[] = $method;
                 }
             }

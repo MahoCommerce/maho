@@ -278,6 +278,53 @@ class Maho_Giftcard_Model_Observer
     }
 
     /**
+     * Apply gift card amounts to order during quote address-to-order conversion
+     *
+     * This event fires AFTER fieldsets are copied from address to order,
+     * so we can reduce the grand_total that was copied from address.
+     *
+     * @return void
+     */
+    public function applyGiftcardToOrder(Maho\Event\Observer $observer)
+    {
+        /** @var Mage_Sales_Model_Order $order */
+        $order = $observer->getEvent()->getOrder();
+        /** @var Mage_Sales_Model_Quote_Address $address */
+        $address = $observer->getEvent()->getAddress();
+
+        if (!$address) {
+            return;
+        }
+
+        $quote = $address->getQuote();
+
+        // Get gift card amount - try address first, then quote
+        $baseGiftcardAmount = abs((float) $address->getBaseGiftcardAmount());
+        $giftcardAmount = abs((float) $address->getGiftcardAmount());
+
+        if (!$baseGiftcardAmount && $quote) {
+            $baseGiftcardAmount = abs((float) $quote->getBaseGiftcardAmount());
+            $giftcardAmount = abs((float) $quote->getGiftcardAmount());
+        }
+
+        // Get codes from quote
+        $giftcardCodes = $quote ? $quote->getGiftcardCodes() : null;
+
+        if ($baseGiftcardAmount > 0) {
+            // Set gift card amounts on order
+            $order->setBaseGiftcardAmount($baseGiftcardAmount);
+            $order->setGiftcardAmount($giftcardAmount);
+            if ($giftcardCodes) {
+                $order->setGiftcardCodes($giftcardCodes);
+            }
+
+            // Reduce grand total by gift card amount
+            $order->setGrandTotal(max(0, $order->getGrandTotal() - $giftcardAmount));
+            $order->setBaseGrandTotal(max(0, $order->getBaseGrandTotal() - $baseGiftcardAmount));
+        }
+    }
+
+    /**
      * Deduct gift card balance when order is placed
      *
      * @return void
@@ -316,18 +363,37 @@ class Maho_Giftcard_Model_Observer
             }
         }
 
-        // If not found on addresses, try to calculate from codes
-        if (!$baseGiftcardAmount) {
-            foreach ($codes as $code => $amount) {
-                $baseGiftcardAmount += (float) $amount;
-            }
-            $giftcardAmount = $order->getStore()->convertPrice($baseGiftcardAmount, false);
+        // If not found on addresses, try to get from quote directly
+        if (!$baseGiftcardAmount && $quote) {
+            $baseGiftcardAmount = abs((float) $quote->getBaseGiftcardAmount());
+            $giftcardAmount = abs((float) $quote->getGiftcardAmount());
         }
 
-        // Save gift card info to order
+        // If still not found, calculate from codes stored in quote
+        if (!$baseGiftcardAmount && $quote) {
+            $quoteCodesJson = $quote->getGiftcardCodes();
+            if ($quoteCodesJson) {
+                $quoteCodes = json_decode($quoteCodesJson, true);
+                if (is_array($quoteCodes)) {
+                    foreach ($quoteCodes as $amount) {
+                        $baseGiftcardAmount += (float) $amount;
+                    }
+                    $giftcardAmount = $order->getStore()->convertPrice($baseGiftcardAmount, false);
+                }
+            }
+        }
+
+        // Set gift card amounts on order
         $order->setGiftcardCodes($giftcardCodes);
         $order->setBaseGiftcardAmount($baseGiftcardAmount);
         $order->setGiftcardAmount($giftcardAmount);
+
+        // Reduce grand total by gift card amount (if not already reduced)
+        $currentGrandTotal = (float) $order->getGrandTotal();
+        if ($giftcardAmount > 0 && $currentGrandTotal > 0) {
+            $order->setGrandTotal(max(0, $currentGrandTotal - $giftcardAmount));
+            $order->setBaseGrandTotal(max(0, (float) $order->getBaseGrandTotal() - $baseGiftcardAmount));
+        }
 
         // Add gift card info to payment additional information for display in grid
         $payment = $order->getPayment();
@@ -356,63 +422,80 @@ class Maho_Giftcard_Model_Observer
 
         $order->save();
 
-        // Deduct balance from each gift card with transaction and row locking
+        // Deduct balance from each gift card with row locking
+        // Don't start a new transaction - use the order's transaction so rollback works
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $adapter->beginTransaction();
 
-        try {
-            foreach ($codes as $code => $usedAmount) {
-                // Load gift card with row lock to prevent race conditions
-                $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
-                $select = $adapter->select()
-                    ->from($giftcardTable)
-                    ->where('code = ?', $code)
-                    ->forUpdate();
+        $orderBaseCurrency = $order->getBaseCurrencyCode();
 
-                $giftcardData = $adapter->fetchRow($select);
-
-                if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
-                    continue;
+        // Calculate proportional amounts if codes have full balances but order has capped amount
+        $totalFromCodes = array_sum($codes);
+        $actualAmounts = [];
+        if ($totalFromCodes > 0 && $baseGiftcardAmount > 0) {
+            $remainingAmount = $baseGiftcardAmount;
+            $cardCodes = array_keys($codes);
+            foreach ($cardCodes as $i => $code) {
+                if ($i === count($cardCodes) - 1) {
+                    // Last card gets remaining amount to avoid rounding issues
+                    $actualAmounts[$code] = $remainingAmount;
+                } else {
+                    // Proportional distribution
+                    $proportion = $codes[$code] / $totalFromCodes;
+                    $amount = min($codes[$code], round($baseGiftcardAmount * $proportion, 2));
+                    $actualAmounts[$code] = $amount;
+                    $remainingAmount -= $amount;
                 }
+            }
+        } else {
+            $actualAmounts = $codes;
+        }
 
-                $baseBalanceBefore = (float) $giftcardData['balance'];
-                $newBalance = max(0, $baseBalanceBefore - (float) $usedAmount);
+        foreach ($actualAmounts as $code => $usedAmount) {
+            // Load gift card with row lock to prevent race conditions
+            $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
+            $select = $adapter->select()
+                ->from($giftcardTable)
+                ->where('code = ?', $code)
+                ->forUpdate();
 
-                // Validate sufficient balance
-                if ($baseBalanceBefore < (float) $usedAmount) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Insufficient balance on gift card %s', $code),
-                    );
-                }
+            $giftcardData = $adapter->fetchRow($select);
 
-                // Update gift card balance directly with locked row
-                $adapter->update(
-                    $giftcardTable,
-                    [
-                        'balance' => $newBalance,
-                        'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
-                    ],
-                    ['giftcard_id = ?' => $giftcardData['giftcard_id']],
-                );
-
-                // Log the usage in history
-                $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
-                $adapter->insert($historyTable, [
-                    'giftcard_id' => $giftcardData['giftcard_id'],
-                    'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
-                    'base_amount' => -(float) $usedAmount,
-                    'balance_before' => $baseBalanceBefore,
-                    'balance_after' => $newBalance,
-                    'order_id' => $order->getId(),
-                    'comment' => "Used in order #{$order->getIncrementId()}",
-                    'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
-                ]);
+            if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
+                continue;
             }
 
-            $adapter->commit();
-        } catch (Exception $e) {
-            $adapter->rollBack();
-            throw $e;
+            $baseBalanceBefore = (float) $giftcardData['balance'];
+
+            // Cap deduction to available balance (don't deduct more than what's available)
+            $amountToDeduct = min($usedAmount, $baseBalanceBefore);
+            if ($amountToDeduct <= 0) {
+                continue;
+            }
+
+            $newBalance = $baseBalanceBefore - $amountToDeduct;
+
+            // Update gift card balance directly with locked row
+            $adapter->update(
+                $giftcardTable,
+                [
+                    'balance' => $newBalance,
+                    'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                ],
+                ['giftcard_id = ?' => $giftcardData['giftcard_id']],
+            );
+
+            // Log the usage in history
+            $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
+            $adapter->insert($historyTable, [
+                'giftcard_id' => $giftcardData['giftcard_id'],
+                'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
+                'base_amount' => -$amountToDeduct,
+                'balance_before' => $baseBalanceBefore,
+                'balance_after' => $newBalance,
+                'order_id' => $order->getId(),
+                'comment' => "Used in order #{$order->getIncrementId()}",
+                'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            ]);
         }
     }
 
@@ -468,7 +551,8 @@ class Maho_Giftcard_Model_Observer
                 'strong'     => false,
             ]);
 
-            $block->addTotalBefore($total, 'grand_total');
+            // Add after tax, before grand_total
+            $block->addTotal($total, 'tax');
         }
     }
 
@@ -534,6 +618,96 @@ class Maho_Giftcard_Model_Observer
                     Mage::logException($e);
                 }
             }
+        }
+    }
+
+    /**
+     * Refund gift card balance when credit memo is created
+     *
+     * @return void
+     */
+    public function refundGiftcardBalance(Maho\Event\Observer $observer)
+    {
+        /** @var Mage_Sales_Model_Order_Creditmemo $creditmemo */
+        $creditmemo = $observer->getEvent()->getCreditmemo();
+        $order = $creditmemo->getOrder();
+
+        // Get the gift card amount being refunded from this credit memo
+        $baseGiftcardAmount = abs((float) $creditmemo->getBaseGiftcardAmount());
+
+        if ($baseGiftcardAmount <= 0) {
+            return;
+        }
+
+        // Get the codes from the order
+        $giftcardCodes = $order->getGiftcardCodes();
+        if (!$giftcardCodes) {
+            return;
+        }
+
+        $codes = json_decode($giftcardCodes, true);
+        if (!is_array($codes) || $codes === []) {
+            return;
+        }
+
+        // Calculate total that was applied from these codes
+        $totalApplied = array_sum($codes);
+        if ($totalApplied <= 0) {
+            return;
+        }
+
+        // Refund proportionally to each gift card
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
+        $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
+
+        foreach ($codes as $code => $appliedAmount) {
+            if ($appliedAmount <= 0) {
+                continue;
+            }
+
+            // Calculate proportional refund amount
+            $refundAmount = ($appliedAmount / $totalApplied) * $baseGiftcardAmount;
+            if ($refundAmount <= 0) {
+                continue;
+            }
+
+            // Load gift card
+            $select = $adapter->select()
+                ->from($giftcardTable)
+                ->where('code = ?', $code);
+
+            $giftcardData = $adapter->fetchRow($select);
+
+            if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
+                continue;
+            }
+
+            $balanceBefore = (float) $giftcardData['balance'];
+            $newBalance = $balanceBefore + $refundAmount;
+
+            // Update gift card balance
+            $adapter->update(
+                $giftcardTable,
+                [
+                    'balance' => $newBalance,
+                    'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
+                    'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                ],
+                ['giftcard_id = ?' => $giftcardData['giftcard_id']],
+            );
+
+            // Log the refund in history
+            $adapter->insert($historyTable, [
+                'giftcard_id' => $giftcardData['giftcard_id'],
+                'action' => Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED,
+                'base_amount' => $refundAmount,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $newBalance,
+                'order_id' => $order->getId(),
+                'comment' => "Refund for order #{$order->getIncrementId()}",
+                'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            ]);
         }
     }
 
@@ -641,9 +815,8 @@ class Maho_Giftcard_Model_Observer
                     );
                 }
 
-                // Store gift card with balance in quote's base currency for proper calculation
-                $quoteBaseCurrency = $quote->getBaseCurrencyCode();
-                $appliedCodes[$code] = $giftcard->getBalance($quoteBaseCurrency);
+                // Store gift card code with placeholder amount (collect will calculate actual amount)
+                $appliedCodes[$code] = 0;
 
                 $quote->setGiftcardCodes(json_encode($appliedCodes));
 

@@ -9,52 +9,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * Admin order totals block - gift card totals are added via child block
+ * @see Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard
+ */
 class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals extends Mage_Adminhtml_Block_Sales_Order_Totals
 {
-    /**
-     * Initialize gift card totals
-     *
-     * @return $this
-     */
-    #[\Override]
-    protected function _initTotals()
-    {
-        parent::_initTotals();
-
-        $order = $this->getSource();
-        $giftcardAmount = $order->getGiftcardAmount();
-
-        if ($giftcardAmount != 0) {
-            // Get gift card codes for display
-            $codes = [];
-            $giftcardCodes = $order->getGiftcardCodes();
-            if ($giftcardCodes) {
-                $codesArray = json_decode($giftcardCodes, true);
-                if (is_array($codesArray)) {
-                    // Show partial codes for security
-                    foreach (array_keys($codesArray) as $code) {
-                        if (strlen($code) > 10) {
-                            $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                        } else {
-                            $codes[] = $code;
-                        }
-                    }
-                }
-            }
-
-            $label = $this->helper('giftcard')->__('Gift Cards');
-            if ($codes !== []) {
-                $label .= ' (' . implode(', ', $codes) . ')';
-            }
-
-            $this->addTotalBefore(new Maho\DataObject([
-                'code'      => 'giftcard',
-                'value'     => -abs((float) $giftcardAmount),
-                'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
-                'label'     => $label,
-            ]), 'grand_total');
-        }
-
-        return $this;
-    }
+    // Gift card totals are added via initTotals() in child block
+    // configured in layout XML (adminhtml_sales_order_view handle)
 }

@@ -121,6 +121,7 @@
                 <totals>
                     <giftcard>
                         <class>giftcard/total_invoice</class>
+                        <after>subtotal,shipping,discount,tax,grand_total</after>
                     </giftcard>
                 </totals>
             </order_invoice>
@@ -128,6 +129,7 @@
                 <totals>
                     <giftcard>
                         <class>giftcard/total_creditmemo</class>
+                        <after>subtotal,shipping,discount,tax,grand_total</after>
                     </giftcard>
                 </totals>
             </order_creditmemo>
@@ -182,6 +184,22 @@
                     </giftcard_add_total_to_admin>
                 </observers>
             </core_block_abstract_to_html_after>
+            <sales_convert_quote_address_to_order>
+                <observers>
+                    <giftcard_apply_to_order>
+                        <class>giftcard/observer</class>
+                        <method>applyGiftcardToOrder</method>
+                    </giftcard_apply_to_order>
+                </observers>
+            </sales_convert_quote_address_to_order>
+            <sales_order_creditmemo_refund>
+                <observers>
+                    <giftcard_refund_balance>
+                        <class>giftcard/observer</class>
+                        <method>refundGiftcardBalance</method>
+                    </giftcard_refund_balance>
+                </observers>
+            </sales_order_creditmemo_refund>
         </events>
 
         <fieldsets>

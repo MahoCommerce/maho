@@ -32,11 +32,22 @@ class Maho_Giftcard_Block_Payment_Form extends Mage_Payment_Block_Form
     }
 
     /**
+     * Get the current quote (handles both frontend and admin contexts)
+     */
+    protected function getQuote(): Mage_Sales_Model_Quote
+    {
+        if (Mage::app()->getStore()->isAdmin()) {
+            return Mage::getSingleton('adminhtml/session_quote')->getQuote();
+        }
+        return Mage::getSingleton('checkout/session')->getQuote();
+    }
+
+    /**
      * Get applied gift card codes with amounts
      */
     public function getAppliedGiftcards(): array
     {
-        $quote = Mage::getSingleton('checkout/session')->getQuote();
+        $quote = $this->getQuote();
         $codesJson = $quote->getGiftcardCodes();
 
         if ($codesJson === null || $codesJson === '') {

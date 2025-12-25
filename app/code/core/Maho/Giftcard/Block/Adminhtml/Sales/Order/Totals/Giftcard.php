@@ -12,54 +12,58 @@
 class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard extends Mage_Core_Block_Abstract
 {
     /**
-     * Add gift card total to parent block
+     * Add gift card total to parent totals block
+     * This method is called by the parent block after _initTotals() and after tax's initTotals()
      *
-     * @return string
+     * @return $this
      */
-    #[\Override]
-    protected function _toHtml()
+    public function initTotals()
     {
         $parent = $this->getParentBlock();
 
-        if ($parent && $parent instanceof Mage_Adminhtml_Block_Sales_Order_Totals) {
-            $order = $parent->getOrder();
-
-            if ($order) {
-                $giftcardAmount = $order->getGiftcardAmount();
-
-                if ($giftcardAmount != 0) {
-                    // Get gift card codes for display
-                    $codes = [];
-                    $giftcardCodes = $order->getGiftcardCodes();
-                    if ($giftcardCodes) {
-                        $codesArray = json_decode($giftcardCodes, true);
-                        if (is_array($codesArray)) {
-                            // Show partial codes for security
-                            foreach (array_keys($codesArray) as $code) {
-                                if (strlen($code) > 10) {
-                                    $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                                } else {
-                                    $codes[] = $code;
-                                }
-                            }
-                        }
-                    }
-
-                    $label = Mage::helper('giftcard')->__('Gift Cards');
-                    if ($codes !== []) {
-                        $label .= ' (' . implode(', ', $codes) . ')';
-                    }
-
-                    $parent->addTotal(new Maho\DataObject([
-                        'code'       => 'giftcard',
-                        'value'      => -abs((float) $giftcardAmount),
-                        'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
-                        'label'      => $label,
-                    ]), 'discount');
-                }
-            }
+        if (!$parent) {
+            return $this;
         }
 
-        return '';
+        $order = $parent->getOrder();
+        if (!$order) {
+            return $this;
+        }
+
+        $giftcardAmount = $order->getGiftcardAmount();
+
+        if ($giftcardAmount != 0) {
+            // Get gift card codes for display
+            $codes = [];
+            $giftcardCodes = $order->getGiftcardCodes();
+            if ($giftcardCodes) {
+                $codesArray = json_decode($giftcardCodes, true);
+                if (is_array($codesArray)) {
+                    // Show partial codes for security
+                    foreach (array_keys($codesArray) as $code) {
+                        if (strlen($code) > 10) {
+                            $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
+                        } else {
+                            $codes[] = $code;
+                        }
+                    }
+                }
+            }
+
+            $label = Mage::helper('giftcard')->__('Gift Cards');
+            if ($codes !== []) {
+                $label .= ' (' . implode(', ', $codes) . ')';
+            }
+
+            // Add after tax
+            $parent->addTotal(new Maho\DataObject([
+                'code'       => 'giftcard',
+                'value'      => -abs((float) $giftcardAmount),
+                'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
+                'label'      => $label,
+            ]), 'tax');
+        }
+
+        return $this;
     }
 }

@@ -96,7 +96,9 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Capture payment - deduct from gift card balances
+     * Capture payment - gift card balance is already deducted by the Observer
+     * when the order is placed. This method is a no-op since the gift card
+     * works as a discount that reduces the grand total to $0.
      *
      * @param float $amount
      * @return $this
@@ -104,30 +106,16 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     #[\Override]
     public function capture(Maho\DataObject $payment, $amount)
     {
-        $order = $payment->getOrder();
-        $codes = $this->_getAppliedCodes($order);
-
-        if ($codes === []) {
-            return $this;
-        }
-
-        foreach ($codes as $code => $appliedAmount) {
-            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-            if ($giftcard->getId() && $giftcard->isValid()) {
-                $giftcard->use(
-                    (float) $appliedAmount,
-                    (int) $order->getId(),
-                    "Payment for order #{$order->getIncrementId()}",
-                );
-            }
-        }
-
+        // Gift card balance deduction is handled by deductGiftcardBalance observer
+        // on sales_order_place_after event. The gift card acts as a discount
+        // reducing the grand total, not as a traditional payment method.
         return $this;
     }
 
     /**
-     * Refund payment - add back to gift card balances
+     * Refund payment - gift card balance restoration is handled by the
+     * refundGiftcardBalance observer on sales_order_creditmemo_refund event.
+     * This method is a no-op to avoid double refunding.
      *
      * @param float $amount
      * @return $this
@@ -135,50 +123,9 @@ class Maho_Giftcard_Model_Payment extends Mage_Payment_Model_Method_Abstract
     #[\Override]
     public function refund(Maho\DataObject $payment, $amount)
     {
-        $order = $payment->getOrder();
-        $codes = $this->_getAppliedCodes($order);
-
-        if ($codes === []) {
-            return $this;
-        }
-
-        // Refund proportionally to each gift card used
-        $totalApplied = array_sum($codes);
-
-        // Guard against division by zero
-        if ($totalApplied <= 0) {
-            return $this;
-        }
-
-        foreach ($codes as $code => $appliedAmount) {
-            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-            if ($giftcard->getId()) {
-                $refundAmount = ($appliedAmount / $totalApplied) * $amount;
-                $giftcard->refund(
-                    $refundAmount,
-                    (int) $order->getId(),
-                    "Refund for order #{$order->getIncrementId()}",
-                );
-            }
-        }
-
+        // Gift card balance restoration is handled by Observer::refundGiftcardBalance()
+        // on the sales_order_creditmemo_refund event, which has access to the
+        // credit memo's gift card amount for accurate proportional refunds.
         return $this;
-    }
-
-    /**
-     * Get applied gift card codes from order
-     *
-     * @return array [code => amount]
-     */
-    protected function _getAppliedCodes(Mage_Sales_Model_Order $order): array
-    {
-        $codesJson = $order->getGiftcardCodes();
-
-        if ($codesJson === null || $codesJson === '') {
-            return [];
-        }
-
-        return json_decode($codesJson, true) ?: [];
     }
 }

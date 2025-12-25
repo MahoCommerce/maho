@@ -35,43 +35,47 @@
     </adminhtml_catalog_product_giftcard>
 
     <!-- Add gift card totals to admin order views -->
-    <!-- Gift card totals are added via block rewrite in config.xml -->
+    <adminhtml_sales_order_view>
+        <reference name="order_totals">
+            <block type="giftcard/adminhtml_sales_order_totals_giftcard" name="giftcard" />
+        </reference>
+    </adminhtml_sales_order_view>
 
     <adminhtml_sales_order_invoice_view>
-        <reference name="sales.order.view.totals.main">
-            <block type="giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
-                <action method="setSourceField"><value>giftcard_amount</value></action>
-                <action method="setDisplayZero"><value>false</value></action>
-            </block>
+        <reference name="invoice_totals">
+            <block type="giftcard/adminhtml_sales_order_invoice_totals_giftcard" name="giftcard" />
         </reference>
     </adminhtml_sales_order_invoice_view>
 
     <adminhtml_sales_order_creditmemo_view>
-        <reference name="sales.order.view.totals.main">
-            <block type="giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
-                <action method="setSourceField"><value>giftcard_amount</value></action>
-                <action method="setDisplayZero"><value>false</value></action>
-            </block>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/adminhtml_sales_order_creditmemo_totals_giftcard" name="giftcard" />
         </reference>
     </adminhtml_sales_order_creditmemo_view>
 
     <adminhtml_sales_order_invoice_new>
-        <reference name="sales.order.view.totals.main">
-            <block type="giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
-                <action method="setSourceField"><value>giftcard_amount</value></action>
-                <action method="setDisplayZero"><value>false</value></action>
-            </block>
+        <reference name="invoice_totals">
+            <block type="giftcard/adminhtml_sales_order_invoice_totals_giftcard" name="giftcard" />
         </reference>
     </adminhtml_sales_order_invoice_new>
 
+    <adminhtml_sales_order_invoice_updateqty>
+        <reference name="invoice_totals">
+            <block type="giftcard/adminhtml_sales_order_invoice_totals_giftcard" name="giftcard" />
+        </reference>
+    </adminhtml_sales_order_invoice_updateqty>
+
     <adminhtml_sales_order_creditmemo_new>
-        <reference name="sales.order.view.totals.main">
-            <block type="giftcard/adminhtml_sales_order_totals_item" name="giftcard" template="sales/order/totals/item.phtml" after="discount">
-                <action method="setSourceField"><value>giftcard_amount</value></action>
-                <action method="setDisplayZero"><value>false</value></action>
-            </block>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/adminhtml_sales_order_creditmemo_totals_giftcard" name="giftcard" />
         </reference>
     </adminhtml_sales_order_creditmemo_new>
+
+    <adminhtml_sales_order_creditmemo_updateqty>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/adminhtml_sales_order_creditmemo_totals_giftcard" name="giftcard" />
+        </reference>
+    </adminhtml_sales_order_creditmemo_updateqty>
 
     <!-- Admin Order Create - Add gift card form next to coupons -->
     <adminhtml_sales_order_create_index>

@@ -129,16 +129,11 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             // Update valid codes (remove invalid ones)
             $quote->setGiftcardCodes(json_encode($validCodes));
 
-            // DON'T modify grand total directly - let _addAmount handle it
-            // $address->setBaseGrandTotal($address->getBaseGrandTotal() - $baseTotalDiscount);
-            // $address->setGrandTotal($address->getGrandTotal() - $totalDiscount);
-
-            // Reset the total amounts before adding (to prevent accumulation)
+            // Reset total amounts before setting (to prevent accumulation from multiple calls)
             $address->setTotalAmount($this->getCode(), 0);
             $address->setBaseTotalAmount($this->getCode(), 0);
 
-            // Use negative amounts for the total collector
-            // This will handle updating the grand total properly
+            // Add negative amounts - Grand collector will sum these into grand_total
             $this->_addAmount(-$totalDiscount);
             $this->_addBaseAmount(-$baseTotalDiscount);
         } else {
@@ -175,33 +170,17 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
         $amount = $address->getGiftcardAmount();
         $giftcardCodes = $address->getGiftcardCodes();
 
-        // If not set on address, recalculate from quote codes with proper validation
+        // If not set on address, use stored amounts from quote codes
         if (!$amount && $quote->getGiftcardCodes()) {
             $codesJson = $quote->getGiftcardCodes();
             $codes = json_decode($codesJson, true);
 
             if (is_array($codes) && $codes !== []) {
-                $websiteId = (int) $quote->getStore()->getWebsiteId();
-                $quoteCurrency = $quote->getStoreCurrencyCode();
-                $totalAmount = 0;
-                $validCodes = [];
-
-                foreach (array_keys($codes) as $code) {
-                    $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-                    // Validate gift card: exists, active, correct website
-                    if (!$giftcard->getId() || !$giftcard->isValid() || !$giftcard->isValidForWebsite($websiteId)) {
-                        continue;
-                    }
-
-                    // Get balance converted to quote's store currency
-                    $balance = $giftcard->getBalance($quoteCurrency);
-                    $totalAmount += $balance;
-                    $validCodes[] = $code;
-                }
-
-                $amount = $totalAmount;
-                $giftcardCodes = json_encode(array_flip($validCodes));
+                // The codes array stores [code => baseAppliedAmount]
+                // Sum the stored applied amounts (already capped to order total)
+                $baseAmount = array_sum($codes);
+                $amount = $quote->getStore()->convertPrice($baseAmount);
+                $giftcardCodes = $codesJson;
             }
         }
 
