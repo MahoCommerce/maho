@@ -111,6 +111,7 @@
                     <giftcard>
                         <class>giftcard/total_quote</class>
                         <renderer>giftcard/cart_total</renderer>
+                        <admin_renderer>giftcard/adminhtml_sales_order_create_totals_giftcard</admin_renderer>
                         <after>subtotal,shipping,discount,tax</after>
                         <before>grand_total</before>
                     </giftcard>
@@ -301,5 +302,15 @@
                 </giftcard>
             </updates>
         </layout>
+        <events>
+            <adminhtml_sales_order_create_process_data_before>
+                <observers>
+                    <giftcard_process_admin_order>
+                        <class>giftcard/observer</class>
+                        <method>processAdminOrderGiftcard</method>
+                    </giftcard_process_admin_order>
+                </observers>
+            </adminhtml_sales_order_create_process_data_before>
+        </events>
     </adminhtml>
 </config>

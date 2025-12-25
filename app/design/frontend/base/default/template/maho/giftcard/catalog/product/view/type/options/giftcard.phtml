@@ -37,6 +37,9 @@ $isMessageAllowed = $this->isMessageAllowed();
     flex-direction: column;
     gap: 0.3rem;
 }
+.giftcard-options .field.hidden {
+    display: none;
+}
 .giftcard-options .field.full-width {
     grid-column: 1 / -1;
 }
@@ -66,26 +69,57 @@ $isMessageAllowed = $this->isMessageAllowed();
                 <?php endforeach; ?>
             </select>
         </div>
+    <?php elseif ($type === 'combined' && !empty($amounts)): ?>
+        <div class="field">
+            <label for="giftcard_amount_select" class="required">
+                <?php echo $this->__('Select Amount'); ?>
+            </label>
+            <select name="giftcard_amount_select" id="giftcard_amount_select" class="required-entry" required>
+                <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
+                <?php foreach ($amounts as $amount): ?>
+                    <option value="<?php echo $this->escapeHtml($amount); ?>">
+                        <?php echo $this->formatPrice((float)$amount); ?>
+                    </option>
+                <?php endforeach; ?>
+                <option value="custom"><?php echo $this->__('Other Amount'); ?></option>
+            </select>
+            <input type="hidden" name="giftcard_amount" id="giftcard_amount" value="" />
+        </div>
+        <div class="field hidden" id="giftcard_custom_amount_field">
+            <label for="giftcard_custom_amount" class="required">
+                <?php echo $this->__('Custom Amount'); ?>
+                <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?>
+                    <span class="hint">(<?php echo (int)$this->getMinAmount(); ?> - <?php echo (int)$this->getMaxAmount(); ?>)</span>
+                <?php endif; ?>
+            </label>
+            <input
+                type="number"
+                id="giftcard_custom_amount"
+                class="validate-digits validate-greater-than-zero"
+                step="1"
+                placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
+                <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
+            />
+        </div>
     <?php else: ?>
         <div class="field">
             <label for="giftcard_amount" class="required">
                 <?php echo $this->__('Amount'); ?>
-                <?php if ($this->getMinAmount() || $this->getMaxAmount()): ?>
-                    <span class="hint">
-                        (<?php if ($this->getMinAmount()): ?><?php echo $this->formatPrice($this->getMinAmount()); ?><?php endif; ?>
-                        <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?> - <?php endif; ?>
-                        <?php if ($this->getMaxAmount()): ?><?php echo $this->formatPrice($this->getMaxAmount()); ?><?php endif; ?>)
-                    </span>
+                <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?>
+                    <span class="hint">(<?php echo (int)$this->getMinAmount(); ?> - <?php echo (int)$this->getMaxAmount(); ?>)</span>
                 <?php endif; ?>
             </label>
             <input
-                type="text"
+                type="number"
                 name="giftcard_amount"
                 id="giftcard_amount"
-                class="required-entry validate-number validate-greater-than-zero"
+                class="required-entry validate-digits validate-greater-than-zero"
                 required
-                <?php if ($this->getMinAmount()): ?>data-validate-min="<?php echo $this->getMinAmount(); ?>"<?php endif; ?>
-                <?php if ($this->getMaxAmount()): ?>data-validate-max="<?php echo $this->getMaxAmount(); ?>"<?php endif; ?>
+                step="1"
+                placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
+                <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
             />
         </div>
     <?php endif; ?>
@@ -137,8 +171,17 @@ $isMessageAllowed = $this->isMessageAllowed();
 </div>
 
 <script type="module">
-const amountField = document.getElementById('giftcard_amount');
 const currencySymbol = '<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>';
+<?php if ($this->getMinAmount()): ?>
+const minAmount = <?php echo $this->getMinAmount(); ?>;
+<?php else: ?>
+const minAmount = null;
+<?php endif; ?>
+<?php if ($this->getMaxAmount()): ?>
+const maxAmount = <?php echo $this->getMaxAmount(); ?>;
+<?php else: ?>
+const maxAmount = null;
+<?php endif; ?>
 
 function updateGiftCardPrice(amount) {
     const price = parseFloat(amount);
@@ -153,48 +196,89 @@ function updateGiftCardPrice(amount) {
     }
 }
 
+function validateAndClampAmount(input) {
+    let value = parseInt(input.value, 10);
+    if (isNaN(value) || value <= 0) {
+        input.value = '';
+        return null;
+    }
+    if (minAmount !== null && value < minAmount) {
+        value = minAmount;
+    }
+    if (maxAmount !== null && value > maxAmount) {
+        value = maxAmount;
+    }
+    input.value = value;
+    return value;
+}
+
+<?php if ($type === 'combined'): ?>
+// Combined type: dropdown + custom amount option
+const amountSelect = document.getElementById('giftcard_amount_select');
+const amountHidden = document.getElementById('giftcard_amount');
+const customField = document.getElementById('giftcard_custom_amount_field');
+const customInput = document.getElementById('giftcard_custom_amount');
+
+if (amountSelect) {
+    amountSelect.addEventListener('change', () => {
+        if (amountSelect.value === 'custom') {
+            customField.classList.remove('hidden');
+            customInput.classList.add('required-entry');
+            customInput.required = true;
+            amountHidden.value = customInput.value || '';
+            if (customInput.value) {
+                updateGiftCardPrice(customInput.value);
+            }
+        } else {
+            customField.classList.add('hidden');
+            customInput.classList.remove('required-entry');
+            customInput.required = false;
+            amountHidden.value = amountSelect.value;
+            if (amountSelect.value) {
+                updateGiftCardPrice(amountSelect.value);
+            }
+        }
+    });
+}
+
+if (customInput) {
+    customInput.addEventListener('input', () => {
+        amountHidden.value = customInput.value;
+        updateGiftCardPrice(customInput.value);
+    });
+    customInput.addEventListener('blur', () => {
+        const value = validateAndClampAmount(customInput);
+        if (value !== null) {
+            amountHidden.value = value;
+            updateGiftCardPrice(value);
+        } else {
+            amountHidden.value = '';
+        }
+    });
+}
+<?php else: ?>
+// Fixed or Range type
+const amountField = document.getElementById('giftcard_amount');
+
 if (amountField) {
     if (amountField.tagName === 'SELECT') {
         amountField.addEventListener('change', () => updateGiftCardPrice(amountField.value));
         if (amountField.value) updateGiftCardPrice(amountField.value);
     } else {
-        <?php if ($this->getMinAmount()): ?>
-        const minAmount = <?php echo $this->getMinAmount(); ?>;
-        <?php endif; ?>
-        <?php if ($this->getMaxAmount()): ?>
-        const maxAmount = <?php echo $this->getMaxAmount(); ?>;
-        <?php endif; ?>
-
         amountField.addEventListener('input', () => updateGiftCardPrice(amountField.value));
         amountField.addEventListener('blur', () => {
-            let value = parseFloat(amountField.value);
-            if (isNaN(value) || value <= 0) {
-                amountField.value = '';
-                return;
+            const value = validateAndClampAmount(amountField);
+            if (value !== null) {
+                updateGiftCardPrice(value);
             }
-            <?php if ($this->getMinAmount()): ?>
-            if (value < minAmount) {
-                amountField.value = minAmount.toFixed(2);
-                value = minAmount;
-            }
-            <?php endif; ?>
-            <?php if ($this->getMaxAmount()): ?>
-            if (value > maxAmount) {
-                amountField.value = maxAmount.toFixed(2);
-                value = maxAmount;
-            }
-            <?php endif; ?>
-            amountField.value = value.toFixed(2);
-            updateGiftCardPrice(value);
         });
 
-        <?php if ($this->getMinAmount()): ?>
-        if (!amountField.value) {
-            amountField.value = minAmount.toFixed(2);
+        if (minAmount !== null && !amountField.value) {
+            amountField.value = minAmount;
             updateGiftCardPrice(minAmount);
         }
-        <?php endif; ?>
     }
 }
+<?php endif; ?>
 </script>
 <?php endif; ?>

@@ -160,14 +160,55 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
     #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
-        $amount = $address->getGiftcardAmount();
+        $quote = $address->getQuote();
 
+        // Only add total to the appropriate address type to avoid doubling
+        $addressType = $address->getAddressType();
+        if ($addressType == 'billing' && !$quote->isVirtual()) {
+            return $this;
+        }
+        if ($addressType == 'shipping' && $quote->isVirtual()) {
+            return $this;
+        }
+
+        // Get gift card amount from address (set by collect)
+        $amount = $address->getGiftcardAmount();
+        $giftcardCodes = $address->getGiftcardCodes();
+
+        // If not set on address, recalculate from quote codes with proper validation
+        if (!$amount && $quote->getGiftcardCodes()) {
+            $codesJson = $quote->getGiftcardCodes();
+            $codes = json_decode($codesJson, true);
+
+            if (is_array($codes) && $codes !== []) {
+                $websiteId = (int) $quote->getStore()->getWebsiteId();
+                $quoteCurrency = $quote->getStoreCurrencyCode();
+                $totalAmount = 0;
+                $validCodes = [];
+
+                foreach (array_keys($codes) as $code) {
+                    $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+
+                    // Validate gift card: exists, active, correct website
+                    if (!$giftcard->getId() || !$giftcard->isValid() || !$giftcard->isValidForWebsite($websiteId)) {
+                        continue;
+                    }
+
+                    // Get balance converted to quote's store currency
+                    $balance = $giftcard->getBalance($quoteCurrency);
+                    $totalAmount += $balance;
+                    $validCodes[] = $code;
+                }
+
+                $amount = $totalAmount;
+                $giftcardCodes = json_encode(array_flip($validCodes));
+            }
+        }
 
         if ($amount != 0) {
             // Get gift card codes for display
-            $giftcardCodes = $address->getGiftcardCodes();
             if (!$giftcardCodes) {
-                $giftcardCodes = $address->getQuote()->getGiftcardCodes();
+                $giftcardCodes = $quote->getGiftcardCodes();
             }
 
             $codes = [];

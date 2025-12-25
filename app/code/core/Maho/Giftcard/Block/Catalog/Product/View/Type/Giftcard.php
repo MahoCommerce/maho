@@ -41,35 +41,16 @@ class Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard extends Mage_Catalo
     }
 
     /**
-     * Get gift card type (fixed or custom)
+     * Get gift card type (fixed, range, or combined)
      */
     public function getGiftcardType(): string
     {
         $this->_loadGiftcardAttributes();
-        $product = $this->getProduct();
+        $type = $this->getProduct()->getData('giftcard_type');
 
-        // Get the attribute text value, not the option ID
-        $typeText = $product->getAttributeText('giftcard_type');
-        if (!$typeText) {
-            // Try to load it directly if not available
-            $typeId = $product->getData('giftcard_type');
-            if ($typeId) {
-                $attribute = Mage::getSingleton('eav/config')
-                    ->getAttribute('catalog_product', 'giftcard_type');
-                if ($attribute->usesSource()) {
-                    $typeText = $attribute->getSource()->getOptionText($typeId);
-                }
-            }
-        }
-
-        // Map the option text to our expected values
-        if ($typeText) {
-            $typeTextLower = strtolower($typeText);
-            if (str_contains($typeTextLower, 'custom')) {
-                return 'custom';
-            } elseif (str_contains($typeTextLower, 'fixed')) {
-                return 'fixed';
-            }
+        // The admin form saves direct values: fixed, range, combined
+        if (in_array($type, ['fixed', 'range', 'combined'], true)) {
+            return $type;
         }
 
         return 'fixed'; // Default to fixed

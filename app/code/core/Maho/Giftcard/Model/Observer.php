@@ -536,4 +536,132 @@ class Maho_Giftcard_Model_Observer
             }
         }
     }
+
+    /**
+     * Process gift card in admin order create
+     */
+    public function processAdminOrderGiftcard(Maho\Event\Observer $observer): void
+    {
+        /** @var Mage_Core_Controller_Request_Http $requestModel */
+        $requestModel = $observer->getEvent()->getRequestModel();
+        $orderCreateModel = $observer->getEvent()->getOrderCreateModel();
+
+        if (!$requestModel) {
+            return;
+        }
+
+        // Check for gift card data in request
+        $orderData = $requestModel->getPost('order') ?? [];
+        $giftcardData = $orderData['giftcard'] ?? [];
+
+        if (empty($giftcardData['code'])) {
+            return;
+        }
+
+        $code = trim((string) $giftcardData['code']);
+        $action = $giftcardData['action'] ?? 'apply';
+        $quote = $orderCreateModel->getQuote();
+        $session = Mage::getSingleton('adminhtml/session_quote');
+
+        // Get currently applied codes
+        $appliedCodes = $quote->getGiftcardCodes();
+        if ($appliedCodes) {
+            $appliedCodes = json_decode($appliedCodes, true);
+        }
+        if (!is_array($appliedCodes)) {
+            $appliedCodes = [];
+        }
+
+        if ($action === 'remove') {
+            // Remove gift card
+            if (isset($appliedCodes[$code])) {
+                unset($appliedCodes[$code]);
+
+                if ($appliedCodes === []) {
+                    $quote->setGiftcardCodes(null);
+                    $quote->setGiftcardAmount(0);
+                    $quote->setBaseGiftcardAmount(0);
+                } else {
+                    $quote->setGiftcardCodes(json_encode($appliedCodes));
+                }
+
+                $session->addSuccess(
+                    Mage::helper('giftcard')->__('Gift card was removed.'),
+                );
+            }
+        } else {
+            // Apply gift card
+            try {
+                // Check if cart has gift card products
+                foreach ($quote->getAllItems() as $item) {
+                    if ($item->getProductType() === 'giftcard') {
+                        throw new Mage_Core_Exception(
+                            Mage::helper('giftcard')->__('Gift cards cannot be used to purchase gift card products.'),
+                        );
+                    }
+                }
+
+                // Load gift card by code
+                $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+
+                if (!$giftcard->getId()) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('giftcard')->__('Gift card "%s" is not valid.', $code),
+                    );
+                }
+
+                // Check website validity
+                $websiteId = (int) $quote->getStore()->getWebsiteId();
+                if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('giftcard')->__('Gift card "%s" is not valid for this website.', $code),
+                    );
+                }
+
+                if (!$giftcard->isValid()) {
+                    if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED) {
+                        throw new Mage_Core_Exception(
+                            Mage::helper('giftcard')->__('Gift card "%s" has expired.', $code),
+                        );
+                    } elseif ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_USED) {
+                        throw new Mage_Core_Exception(
+                            Mage::helper('giftcard')->__('Gift card "%s" has been fully used.', $code),
+                        );
+                    } else {
+                        throw new Mage_Core_Exception(
+                            Mage::helper('giftcard')->__('Gift card "%s" is not active.', $code),
+                        );
+                    }
+                }
+
+                // Check if already applied
+                if (isset($appliedCodes[$code])) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('giftcard')->__('Gift card "%s" is already applied.', $code),
+                    );
+                }
+
+                // Store gift card with balance in quote's base currency for proper calculation
+                $quoteBaseCurrency = $quote->getBaseCurrencyCode();
+                $appliedCodes[$code] = $giftcard->getBalance($quoteBaseCurrency);
+
+                $quote->setGiftcardCodes(json_encode($appliedCodes));
+
+                $session->addSuccess(
+                    Mage::helper('giftcard')->__('Gift card "%s" was applied.', $code),
+                );
+
+            } catch (Mage_Core_Exception $e) {
+                $session->addError($e->getMessage());
+            } catch (Exception $e) {
+                Mage::logException($e);
+                $session->addError(
+                    Mage::helper('giftcard')->__('Cannot apply gift card.'),
+                );
+            }
+        }
+
+        // Mark for recollection
+        $orderCreateModel->setRecollect(true);
+    }
 }

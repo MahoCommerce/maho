@@ -72,4 +72,31 @@
             </block>
         </reference>
     </adminhtml_sales_order_creditmemo_new>
+
+    <!-- Admin Order Create - Add gift card form next to coupons -->
+    <adminhtml_sales_order_create_index>
+        <reference name="head">
+            <action method="addJs"><script>maho/giftcard/adminhtml/order.js</script></action>
+        </reference>
+        <reference name="items_grid">
+            <block type="giftcard/adminhtml_sales_order_create_giftcard" template="maho/giftcard/sales/order/create/giftcard.phtml" name="giftcard" after="coupons" />
+        </reference>
+    </adminhtml_sales_order_create_index>
+
+    <!-- Admin Order Edit (Reorder) - Add gift card form next to coupons -->
+    <adminhtml_sales_order_edit_index>
+        <reference name="head">
+            <action method="addJs"><script>maho/giftcard/adminhtml/order.js</script></action>
+        </reference>
+        <reference name="items_grid">
+            <block type="giftcard/adminhtml_sales_order_create_giftcard" template="maho/giftcard/sales/order/create/giftcard.phtml" name="giftcard" after="coupons" />
+        </reference>
+    </adminhtml_sales_order_edit_index>
+
+    <!-- Admin Order Create - Load block items (for AJAX reload) -->
+    <adminhtml_sales_order_create_load_block_items>
+        <reference name="items_grid">
+            <block type="giftcard/adminhtml_sales_order_create_giftcard" template="maho/giftcard/sales/order/create/giftcard.phtml" name="giftcard" after="coupons" />
+        </reference>
+    </adminhtml_sales_order_create_load_block_items>
 </layout>
