@@ -11,9 +11,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Gift Card Admin Order Create Totals Renderer
- */
 class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Totals_Giftcard extends Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default
 {
     protected $_template = 'maho/giftcard/sales/order/create/totals/giftcard.phtml';
