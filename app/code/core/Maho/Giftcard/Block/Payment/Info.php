@@ -24,9 +24,8 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
     }
 
     /**
-     * Prepare payment info
-     *
-     * @return $this
+     * @param Maho\DataObject|array|null $transport
+     * @return Maho\DataObject
      */
     #[\Override]
     protected function _prepareSpecificInformation($transport = null)
@@ -48,7 +47,7 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
                 $giftcardInfo = [];
 
                 foreach ($codes as $code => $amount) {
-                    $maskedCode = $this->maskGiftcardCode($code);
+                    $maskedCode = $this->maskGiftcardCode((string) $code);
                     $formattedAmount = Mage::helper('core')->currency($amount, true, false);
                     $giftcardInfo[] = "{$maskedCode}: {$formattedAmount}";
                 }
@@ -63,7 +62,7 @@ class Maho_Giftcard_Block_Payment_Info extends Mage_Payment_Block_Info
 
         $this->_paymentSpecificInformation = $transport;
 
-        return $transport;
+        return $this->_paymentSpecificInformation;
     }
 
     /**
