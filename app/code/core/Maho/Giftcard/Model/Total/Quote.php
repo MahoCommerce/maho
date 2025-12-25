@@ -58,14 +58,28 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             return $this;
         }
 
-        // Get the total from all collected totals so far
-        if ($address->getAllBaseTotalAmounts()) {
-            $totalAmounts = $address->getAllBaseTotalAmounts();
-            $baseGrandTotal = array_sum($totalAmounts);
-        } else {
-            $baseGrandTotal = $address->getBaseGrandTotal();
+        // Calculate eligible total (excluding gift card products to prevent circular purchases)
+        $baseEligibleTotal = 0;
+        $eligibleTotal = 0;
+
+        foreach ($address->getAllItems() as $item) {
+            if ($item->getParentItemId()) {
+                continue;
+            }
+            // Exclude gift card products from gift card payment
+            if ($item->getProductType() === 'giftcard') {
+                continue;
+            }
+            $baseEligibleTotal += $item->getBaseRowTotalInclTax() - $item->getBaseDiscountAmount();
+            $eligibleTotal += $item->getRowTotalInclTax() - $item->getDiscountAmount();
         }
-        $grandTotal = $address->getGrandTotal();
+
+        // Add shipping if applicable
+        $baseEligibleTotal += $address->getBaseShippingInclTax() - $address->getBaseShippingDiscountAmount();
+        $eligibleTotal += $address->getShippingInclTax() - $address->getShippingDiscountAmount();
+
+        $baseGrandTotal = $baseEligibleTotal;
+        $grandTotal = $eligibleTotal;
 
         $baseTotalDiscount = 0;
         $totalDiscount = 0;
