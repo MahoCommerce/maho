@@ -213,7 +213,6 @@ class Maho_Giftcard_Model_Observer
             'giftcard_max_amount',
             'giftcard_allow_message',
             'giftcard_lifetime',
-            'giftcard_is_redeemable',
         ];
 
         foreach ($attributes as $attribute) {

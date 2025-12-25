@@ -396,23 +396,6 @@ $attributes = [
         'apply_to' => 'giftcard',
         // No default - NULL means use system config
     ],
-    'giftcard_is_redeemable' => [
-        'type' => 'int',
-        'label' => 'Is Redeemable',
-        'input' => 'boolean',
-        'required' => false,
-        'sort_order' => 70,
-        'global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,
-        'visible' => false, // Rendered via custom tab with "Use Default" option
-        'searchable' => false,
-        'filterable' => false,
-        'comparable' => false,
-        'visible_on_front' => false,
-        'used_in_product_listing' => false,
-        'unique' => false,
-        'apply_to' => 'giftcard',
-        // No default - NULL means use system config
-    ],
 ];
 
 foreach ($attributes as $code => $config) {

@@ -14,7 +14,6 @@ $helper = Mage::helper('giftcard');
 // Get config defaults for placeholders
 $defaultLifetime = Mage::getStoreConfig('giftcard/general/lifetime');
 $defaultAllowMessage = Mage::getStoreConfigFlag('giftcard/general/allow_message') ? $this->__('Yes') : $this->__('No');
-$defaultIsRedeemable = Mage::getStoreConfigFlag('giftcard/general/is_redeemable') ? $this->__('Yes') : $this->__('No');
 
 // Current values (null means use default)
 $giftcardType = $product->getData('giftcard_type') ?: 'fixed';
@@ -23,7 +22,6 @@ $giftcardMinAmount = $product->getData('giftcard_min_amount');
 $giftcardMaxAmount = $product->getData('giftcard_max_amount');
 $giftcardAllowMessage = $product->getData('giftcard_allow_message');
 $giftcardLifetime = $product->getData('giftcard_lifetime');
-$giftcardIsRedeemable = $product->getData('giftcard_is_redeemable');
 ?>
 
 <div class="entry-edit">
@@ -87,18 +85,6 @@ $giftcardIsRedeemable = $product->getData('giftcard_is_redeemable');
                         <option value="" <?= $giftcardAllowMessage === null || $giftcardAllowMessage === '' ? 'selected' : '' ?>><?= $this->__('Use Default (%s)', $defaultAllowMessage) ?></option>
                         <option value="1" <?= $giftcardAllowMessage === '1' || $giftcardAllowMessage === 1 ? 'selected' : '' ?>><?= $this->__('Yes') ?></option>
                         <option value="0" <?= $giftcardAllowMessage === '0' || $giftcardAllowMessage === 0 ? 'selected' : '' ?>><?= $this->__('No') ?></option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    <label for="giftcard_is_redeemable"><?= $this->__('Is Redeemable') ?></label>
-                </td>
-                <td class="value">
-                    <select id="giftcard_is_redeemable" name="product[giftcard_is_redeemable]" class="select">
-                        <option value="" <?= $giftcardIsRedeemable === null || $giftcardIsRedeemable === '' ? 'selected' : '' ?>><?= $this->__('Use Default (%s)', $defaultIsRedeemable) ?></option>
-                        <option value="1" <?= $giftcardIsRedeemable === '1' || $giftcardIsRedeemable === 1 ? 'selected' : '' ?>><?= $this->__('Yes') ?></option>
-                        <option value="0" <?= $giftcardIsRedeemable === '0' || $giftcardIsRedeemable === 0 ? 'selected' : '' ?>><?= $this->__('No') ?></option>
                     </select>
                 </td>
             </tr>

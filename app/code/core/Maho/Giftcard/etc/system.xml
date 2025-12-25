@@ -60,15 +60,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </allow_message>
-                        <is_redeemable translate="label comment">
-                            <label>Is Redeemable</label>
-                            <comment>Can be overridden per product.</comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>46</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </is_redeemable>
                         <show_qrcode translate="label">
                             <label>Show QR Code</label>
                             <frontend_type>boolean</frontend_type>

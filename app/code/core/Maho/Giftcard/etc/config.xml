@@ -252,7 +252,6 @@
                 <code_prefix>GC</code_prefix>
                 <lifetime>365</lifetime>
                 <allow_message>1</allow_message>
-                <is_redeemable>1</is_redeemable>
                 <show_qrcode>1</show_qrcode>
                 <show_barcode>1</show_barcode>
             </general>

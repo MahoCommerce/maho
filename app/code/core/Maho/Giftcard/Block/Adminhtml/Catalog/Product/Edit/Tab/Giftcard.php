@@ -36,7 +36,6 @@ class Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard extends Ma
                 'giftcard_max_amount',
                 'giftcard_allow_message',
                 'giftcard_lifetime',
-                'giftcard_is_redeemable',
             ];
 
             foreach ($attributes as $code) {

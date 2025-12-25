@@ -119,19 +119,6 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Check if gift card is redeemable for a specific product
-     * Uses product attribute if set, otherwise falls back to config default
-     */
-    public function getProductIsRedeemable(Mage_Catalog_Model_Product $product): bool
-    {
-        $value = $product->getData('giftcard_is_redeemable');
-        if ($value !== null && $value !== '') {
-            return (bool) $value;
-        }
-        return Mage::getStoreConfigFlag('giftcard/general/is_redeemable');
-    }
-
-    /**
      * Calculate expiration date from now using config default
      */
     public function calculateExpirationDate(): ?string
