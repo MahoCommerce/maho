@@ -816,6 +816,27 @@ td.product-cart-remove a {
     text-transform: none;
 }
 
+.applied-giftcards {
+    margin-bottom: 10px;
+
+    .applied-code {
+        margin-bottom: 5px;
+    }
+
+    .btn-remove-giftcard {
+        margin-left: 10px;
+        color: var(--maho-color-primary);
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+            color: var(--maho-color-primary-hover);
+        }
+    }
+}
+
 /* Responsive styles for discount coupon form and gift card form */
 @media only screen and (max-width: 770px) {
     #discount-coupon-form .coupon-input-group,

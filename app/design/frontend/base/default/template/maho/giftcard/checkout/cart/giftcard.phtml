@@ -18,7 +18,7 @@ $formKey = Mage::getSingleton('core/session')->getFormKey();
         <h2><?php echo $this->__('Gift Cards') ?></h2>
         <div class="discount-form">
             <?php if (!empty($appliedCodes)): ?>
-                <div class="applied-giftcards" style="margin-bottom: 10px;">
+                <div class="applied-giftcards">
                     <?php foreach ($appliedCodes as $code => $amount): ?>
                         <?php
                             $displayCode = $code;
@@ -26,9 +26,9 @@ $formKey = Mage::getSingleton('core/session')->getFormKey();
                                 $displayCode = substr($code, 0, 4) . '...' . substr($code, -4);
                             }
                         ?>
-                        <div class="applied-code" style="margin-bottom: 5px;">
+                        <div class="applied-code">
                             <span><?php echo $this->escapeHtml($displayCode) ?>: -<?php echo Mage::helper('core')->currency($amount, true, false) ?></span>
-                            <button type="button" class="btn-remove-giftcard" data-code="<?php echo $this->escapeHtml($code) ?>" title="<?php echo $this->__('Remove') ?>" style="margin-left: 10px; color: #cc0000; background: none; border: none; cursor: pointer; text-decoration: underline;">[<?php echo $this->__('Remove') ?>]</button>
+                            <button type="button" class="btn-remove-giftcard" data-code="<?php echo $this->escapeHtml($code) ?>" title="<?php echo $this->__('Remove') ?>">[<?php echo $this->__('Remove') ?>]</button>
                         </div>
                     <?php endforeach; ?>
                 </div>
