@@ -44,16 +44,16 @@ $giftcardLifetime = $product->getData('giftcard_lifetime');
             </tr>
             <tr id="giftcard_amounts_row">
                 <td class="label">
-                    <label for="giftcard_amounts"><?= $this->__('Fixed Amounts') ?></label>
+                    <label for="giftcard_amounts"><?= $this->__('Fixed Amounts') ?> <span class="required" id="giftcard_amounts_required">*</span></label>
                 </td>
                 <td class="value">
-                    <input type="text" id="giftcard_amounts" name="product[giftcard_amounts]" value="<?= $this->escapeHtml($giftcardAmounts) ?>" class="input-text" />
+                    <input type="text" id="giftcard_amounts" name="product[giftcard_amounts]" value="<?= $this->escapeHtml($giftcardAmounts) ?>" class="input-text required-entry" />
                     <p class="note"><?= $this->__('Comma-separated values (e.g., 25,50,100)') ?></p>
                 </td>
             </tr>
             <tr id="giftcard_min_amount_row">
                 <td class="label">
-                    <label for="giftcard_min_amount"><?= $this->__('Minimum Amount') ?></label>
+                    <label for="giftcard_min_amount"><?= $this->__('Minimum Amount') ?> <span class="required" id="giftcard_min_amount_required">*</span></label>
                 </td>
                 <td class="value">
                     <input type="text" id="giftcard_min_amount" name="product[giftcard_min_amount]" value="<?= $this->escapeHtml($giftcardMinAmount) ?>" class="input-text validate-number" />
@@ -61,7 +61,7 @@ $giftcardLifetime = $product->getData('giftcard_lifetime');
             </tr>
             <tr id="giftcard_max_amount_row">
                 <td class="label">
-                    <label for="giftcard_max_amount"><?= $this->__('Maximum Amount') ?></label>
+                    <label for="giftcard_max_amount"><?= $this->__('Maximum Amount') ?> <span class="required" id="giftcard_max_amount_required">*</span></label>
                 </td>
                 <td class="value">
                     <input type="text" id="giftcard_max_amount" name="product[giftcard_max_amount]" value="<?= $this->escapeHtml($giftcardMaxAmount) ?>" class="input-text validate-number" />
@@ -98,15 +98,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const amountsRow = document.getElementById('giftcard_amounts_row');
     const minRow = document.getElementById('giftcard_min_amount_row');
     const maxRow = document.getElementById('giftcard_max_amount_row');
+    const amountsInput = document.getElementById('giftcard_amounts');
+    const minInput = document.getElementById('giftcard_min_amount');
+    const maxInput = document.getElementById('giftcard_max_amount');
+    const amountsRequired = document.getElementById('giftcard_amounts_required');
+    const minRequired = document.getElementById('giftcard_min_amount_required');
+    const maxRequired = document.getElementById('giftcard_max_amount_required');
 
-    function toggleGiftcardAmountFields() {
-        const type = select.value || 'fixed';
-        amountsRow.style.display = (type === 'fixed' || type === 'combined') ? 'table-row' : 'none';
-        minRow.style.display = (type === 'range' || type === 'combined') ? 'table-row' : 'none';
-        maxRow.style.display = (type === 'range' || type === 'combined') ? 'table-row' : 'none';
+    function setRequired(input, requiredSpan, isRequired, clearValue = false) {
+        if (isRequired) {
+            input.classList.add('required-entry');
+            requiredSpan.style.display = '';
+        } else {
+            input.classList.remove('required-entry');
+            requiredSpan.style.display = 'none';
+            if (clearValue) {
+                input.value = '';
+            }
+        }
     }
 
-    select.addEventListener('change', toggleGiftcardAmountFields);
-    toggleGiftcardAmountFields();
+    function toggleGiftcardAmountFields(isUserChange = false) {
+        const type = select.value || 'fixed';
+
+        // fixed: amounts required
+        // range: min + max required
+        // combined: all required
+        const showAmounts = type === 'fixed' || type === 'combined';
+        const showRange = type === 'range' || type === 'combined';
+
+        amountsRow.style.display = showAmounts ? 'table-row' : 'none';
+        minRow.style.display = showRange ? 'table-row' : 'none';
+        maxRow.style.display = showRange ? 'table-row' : 'none';
+
+        // Clear hidden fields only when user changes the type (not on page load)
+        setRequired(amountsInput, amountsRequired, showAmounts, isUserChange && !showAmounts);
+        setRequired(minInput, minRequired, showRange, isUserChange && !showRange);
+        setRequired(maxInput, maxRequired, showRange, isUserChange && !showRange);
+    }
+
+    select.addEventListener('change', () => toggleGiftcardAmountFields(true));
+    toggleGiftcardAmountFields(false);
 });
 </script>
