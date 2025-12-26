@@ -246,34 +246,14 @@ class Maho_Giftcard_Model_Observer
             $quoteItem->getProduct()->setIsSuperMode(true);
 
             // Ensure additional_options are added to the quote item
-            $additionalOptions = [];
+            $additionalOptions = Mage::helper('giftcard')->buildAdditionalOptions($buyRequest);
 
-            if ($buyRequest->getGiftcardRecipientName()) {
-                $additionalOptions[] = [
-                    'label' => 'Recipient Name',
-                    'value' => $buyRequest->getGiftcardRecipientName(),
-                ];
+            if ($additionalOptions !== []) {
+                $quoteItem->addOption([
+                    'code' => 'additional_options',
+                    'value' => serialize($additionalOptions),
+                ]);
             }
-
-            if ($buyRequest->getGiftcardRecipientEmail()) {
-                $additionalOptions[] = [
-                    'label' => 'Recipient Email',
-                    'value' => $buyRequest->getGiftcardRecipientEmail(),
-                ];
-            }
-
-            if ($buyRequest->getGiftcardMessage()) {
-                $additionalOptions[] = [
-                    'label' => 'Message',
-                    'value' => $buyRequest->getGiftcardMessage(),
-                ];
-            }
-
-            // Add additional options to quote item
-            $quoteItem->addOption([
-                'code' => 'additional_options',
-                'value' => serialize($additionalOptions),
-            ]);
         }
     }
 

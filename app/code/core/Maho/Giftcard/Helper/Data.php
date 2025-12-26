@@ -14,6 +14,40 @@ declare(strict_types=1);
 class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
+     * Gift card display options configuration
+     * Maps buyRequest field names to display labels
+     */
+    public const DISPLAY_OPTIONS = [
+        'giftcard_recipient_name' => 'Recipient Name',
+        'giftcard_recipient_email' => 'Recipient Email',
+        'giftcard_sender_name' => 'Sender Name',
+        'giftcard_message' => 'Message',
+        'giftcard_delivery_date' => 'Delivery Date',
+    ];
+
+    /**
+     * Build additional options array from buy request for cart/order display
+     *
+     * @return array Array of ['label' => string, 'value' => string]
+     */
+    public function buildAdditionalOptions(Maho\DataObject $buyRequest): array
+    {
+        $additionalOptions = [];
+
+        foreach (self::DISPLAY_OPTIONS as $field => $label) {
+            $value = $buyRequest->getData($field);
+            if ($value) {
+                $additionalOptions[] = [
+                    'label' => $this->__($label),
+                    'value' => $value,
+                ];
+            }
+        }
+
+        return $additionalOptions;
+    }
+
+    /**
      * Generate a unique gift card code
      */
     public function generateCode(): string

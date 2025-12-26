@@ -56,11 +56,14 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
 
     /**
      * Prepare additional options/information for order item
+     *
+     * Transfer gift card fields from request to buyRequest so they get
+     * serialized into info_buyRequest by the parent _prepareProduct method.
      */
     #[\Override]
     protected function _prepareOptions(Maho\DataObject $buyRequest, $product, $processMode)
     {
-        // First, check if gift card fields need to be transferred from request
+        // Transfer gift card fields from request to buyRequest
         $request = Mage::app()->getRequest();
         if ($request->getParam('giftcard_amount') && !$buyRequest->getGiftcardAmount()) {
             $buyRequest->setGiftcardAmount($request->getParam('giftcard_amount'));
@@ -80,63 +83,12 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
         if ($request->getParam('giftcard_message') && !$buyRequest->getGiftcardMessage()) {
             $buyRequest->setGiftcardMessage($request->getParam('giftcard_message'));
         }
-
-        $options = parent::_prepareOptions($buyRequest, $product, $processMode);
-
-        // Add gift card specific options for display in cart/order
-        $additionalOptions = [];
-
-        if ($buyRequest->getGiftcardRecipientName()) {
-            $additionalOptions[] = [
-                'label' => 'Recipient Name',
-                'value' => $buyRequest->getGiftcardRecipientName(),
-            ];
+        if ($request->getParam('giftcard_delivery_date') && !$buyRequest->getGiftcardDeliveryDate()) {
+            $buyRequest->setGiftcardDeliveryDate($request->getParam('giftcard_delivery_date'));
         }
 
-        if ($buyRequest->getGiftcardRecipientEmail()) {
-            $additionalOptions[] = [
-                'label' => 'Recipient Email',
-                'value' => $buyRequest->getGiftcardRecipientEmail(),
-            ];
-        }
-
-        if ($buyRequest->getGiftcardMessage()) {
-            $additionalOptions[] = [
-                'label' => 'Message',
-                'value' => $buyRequest->getGiftcardMessage(),
-            ];
-        }
-
-        if ($additionalOptions !== []) {
-            $options['additional_options'] = $additionalOptions;
-        }
-
-        // Also store in info_buyRequest for later processing
-        $giftcardOptions = [];
-        if ($buyRequest->getGiftcardAmount()) {
-            $giftcardOptions['giftcard_amount'] = $buyRequest->getGiftcardAmount();
-        }
-        if ($buyRequest->getGiftcardRecipientName()) {
-            $giftcardOptions['giftcard_recipient_name'] = $buyRequest->getGiftcardRecipientName();
-        }
-        if ($buyRequest->getGiftcardRecipientEmail()) {
-            $giftcardOptions['giftcard_recipient_email'] = $buyRequest->getGiftcardRecipientEmail();
-        }
-        if ($buyRequest->getGiftcardSenderName()) {
-            $giftcardOptions['giftcard_sender_name'] = $buyRequest->getGiftcardSenderName();
-        }
-        if ($buyRequest->getGiftcardSenderEmail()) {
-            $giftcardOptions['giftcard_sender_email'] = $buyRequest->getGiftcardSenderEmail();
-        }
-        if ($buyRequest->getGiftcardMessage()) {
-            $giftcardOptions['giftcard_message'] = $buyRequest->getGiftcardMessage();
-        }
-
-        if ($giftcardOptions !== []) {
-            $options['info_buyRequest']['giftcard_options'] = $giftcardOptions;
-        }
-
-        return $options;
+        // Return parent options (product custom options only)
+        return parent::_prepareOptions($buyRequest, $product, $processMode);
     }
 
     /**
@@ -172,22 +124,42 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                 }
             }
 
-            // Validate custom amount against min/max if type is custom
-            if ($productInstance->getGiftcardType() === 'custom') {
+            // Validate custom amount against min/max if type allows custom
+            $giftcardType = $productInstance->getGiftcardType();
+            if ($giftcardType === 'custom' || $giftcardType === 'combined') {
                 $minAmount = $productInstance->getGiftcardMinAmount();
                 $maxAmount = $productInstance->getGiftcardMaxAmount();
 
-                if ($minAmount && $amount < (float) $minAmount) {
-                    return Mage::helper('giftcard')->__('Gift card amount cannot be less than %s', Mage::app()->getStore()->formatPrice($minAmount));
+                // For combined type, check if amount matches a fixed value first
+                $isFixedAmount = false;
+                if ($giftcardType === 'combined') {
+                    $allowedAmounts = $productInstance->getData('giftcard_amounts');
+                    if ($allowedAmounts) {
+                        $amounts = array_map('trim', explode(',', $allowedAmounts));
+                        $amounts = array_map('floatval', $amounts);
+                        foreach ($amounts as $allowedAmount) {
+                            if (abs($amount - $allowedAmount) < 0.01) {
+                                $isFixedAmount = true;
+                                break;
+                            }
+                        }
+                    }
                 }
 
-                if ($maxAmount && $amount > (float) $maxAmount) {
-                    return Mage::helper('giftcard')->__('Gift card amount cannot be more than %s', Mage::app()->getStore()->formatPrice($maxAmount));
+                // Only validate min/max for custom amounts
+                if (!$isFixedAmount) {
+                    if ($minAmount && $amount < (float) $minAmount) {
+                        return Mage::helper('giftcard')->__('Gift card amount cannot be less than %s', Mage::app()->getStore()->formatPrice($minAmount));
+                    }
+
+                    if ($maxAmount && $amount > (float) $maxAmount) {
+                        return Mage::helper('giftcard')->__('Gift card amount cannot be more than %s', Mage::app()->getStore()->formatPrice($maxAmount));
+                    }
                 }
             }
 
             // Validate fixed amount is in allowed list
-            if ($productInstance->getGiftcardType() === 'fixed') {
+            if ($giftcardType === 'fixed') {
                 $allowedAmounts = $productInstance->getData('giftcard_amounts');
                 if ($allowedAmounts) {
                     $amounts = array_map('trim', explode(',', $allowedAmounts));
@@ -208,16 +180,32 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                 }
             }
 
+            // Set custom price and add additional options for each item
             foreach ($result as $item) {
                 $item->setCustomPrice($amount);
                 $item->setOriginalCustomPrice($amount);
                 if ($item->getProduct()) {
                     $item->getProduct()->setIsSuperMode(true);
                 }
+
+                // Add additional options for display in cart/order
+                $this->_addAdditionalOptions($item, $buyRequest);
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Add additional options for display in cart/order
+     */
+    protected function _addAdditionalOptions(Mage_Catalog_Model_Product $product, Maho\DataObject $buyRequest): void
+    {
+        $additionalOptions = Mage::helper('giftcard')->buildAdditionalOptions($buyRequest);
+
+        if ($additionalOptions !== []) {
+            $product->addCustomOption('additional_options', serialize($additionalOptions));
+        }
     }
 
     /**
