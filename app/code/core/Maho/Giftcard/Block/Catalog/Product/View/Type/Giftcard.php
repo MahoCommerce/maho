@@ -121,4 +121,28 @@ class Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard extends Mage_Catalo
     {
         return Mage::helper('core')->currency($price, true, false);
     }
+
+    /**
+     * Get preconfigured value for a gift card field
+     *
+     * Used when editing a cart item to restore previously entered values.
+     */
+    public function getPreconfiguredValue(string $key): ?string
+    {
+        $product = $this->getProduct();
+        if (!$product->hasPreconfiguredValues()) {
+            return null;
+        }
+
+        $value = $product->getPreconfiguredValues()->getData($key);
+        return $value !== null ? (string) $value : null;
+    }
+
+    /**
+     * Check if product has preconfigured values (editing cart item)
+     */
+    public function hasPreconfiguredValues(): bool
+    {
+        return $this->getProduct()->hasPreconfiguredValues();
+    }
 }

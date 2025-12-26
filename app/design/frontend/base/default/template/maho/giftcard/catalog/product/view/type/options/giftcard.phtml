@@ -13,6 +13,15 @@ $product = $this->getProduct();
 $type = $this->getGiftcardType();
 $amounts = $this->getGiftcardAmounts();
 $isMessageAllowed = $this->isMessageAllowed();
+
+// Get preconfigured values for editing cart item
+$preAmount = $this->getPreconfiguredValue('giftcard_amount');
+$preRecipientName = $this->getPreconfiguredValue('giftcard_recipient_name');
+$preRecipientEmail = $this->getPreconfiguredValue('giftcard_recipient_email');
+$preSenderName = $this->getPreconfiguredValue('giftcard_sender_name');
+$preSenderEmail = $this->getPreconfiguredValue('giftcard_sender_email');
+$preMessage = $this->getPreconfiguredValue('giftcard_message');
+$preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
 ?>
 
 <?php if ($product->isSaleable()): ?>
@@ -64,13 +73,29 @@ $isMessageAllowed = $this->isMessageAllowed();
             <select name="giftcard_amount" id="giftcard_amount" class="required-entry" required>
                 <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
                 <?php foreach ($amounts as $amount): ?>
-                    <option value="<?php echo $this->escapeHtml($amount); ?>">
+                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preAmount !== null && abs((float)$amount - (float)$preAmount) < 0.01): ?> selected<?php endif; ?>>
                         <?php echo $this->formatPrice((float)$amount); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
         </div>
     <?php elseif ($type === 'combined' && !empty($amounts)): ?>
+        <?php
+        // Check if preconfigured amount matches a fixed value or is custom
+        $preIsCustom = false;
+        $preMatchedAmount = null;
+        if ($preAmount !== null) {
+            foreach ($amounts as $amount) {
+                if (abs((float)$amount - (float)$preAmount) < 0.01) {
+                    $preMatchedAmount = $amount;
+                    break;
+                }
+            }
+            if ($preMatchedAmount === null) {
+                $preIsCustom = true;
+            }
+        }
+        ?>
         <div class="field">
             <label for="giftcard_amount_select" class="required">
                 <?php echo $this->__('Select Amount'); ?>
@@ -78,15 +103,15 @@ $isMessageAllowed = $this->isMessageAllowed();
             <select name="giftcard_amount_select" id="giftcard_amount_select" class="required-entry" required>
                 <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
                 <?php foreach ($amounts as $amount): ?>
-                    <option value="<?php echo $this->escapeHtml($amount); ?>">
+                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preMatchedAmount !== null && abs((float)$amount - (float)$preMatchedAmount) < 0.01): ?> selected<?php endif; ?>>
                         <?php echo $this->formatPrice((float)$amount); ?>
                     </option>
                 <?php endforeach; ?>
-                <option value="custom"><?php echo $this->__('Other Amount'); ?></option>
+                <option value="custom"<?php if ($preIsCustom): ?> selected<?php endif; ?>><?php echo $this->__('Other Amount'); ?></option>
             </select>
-            <input type="hidden" name="giftcard_amount" id="giftcard_amount" value="" />
+            <input type="hidden" name="giftcard_amount" id="giftcard_amount" value="<?php echo $preAmount !== null ? $this->escapeHtml($preAmount) : ''; ?>" />
         </div>
-        <div class="field hidden" id="giftcard_custom_amount_field">
+        <div class="field<?php if (!$preIsCustom): ?> hidden<?php endif; ?>" id="giftcard_custom_amount_field">
             <label for="giftcard_custom_amount" class="required">
                 <?php echo $this->__('Custom Amount'); ?>
                 <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?>
@@ -96,11 +121,13 @@ $isMessageAllowed = $this->isMessageAllowed();
             <input
                 type="number"
                 id="giftcard_custom_amount"
-                class="validate-digits validate-greater-than-zero"
+                class="<?php if ($preIsCustom): ?>required-entry <?php endif; ?>validate-digits validate-greater-than-zero"
                 step="1"
                 placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
                 <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
                 <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
+                <?php if ($preIsCustom): ?>required<?php endif; ?>
+                value="<?php echo $preIsCustom ? $this->escapeHtml($preAmount) : ''; ?>"
             />
         </div>
     <?php else: ?>
@@ -121,6 +148,7 @@ $isMessageAllowed = $this->isMessageAllowed();
                 placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
                 <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
                 <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
+                value="<?php echo $preAmount !== null ? $this->escapeHtml($preAmount) : ''; ?>"
             />
         </div>
     <?php endif; ?>
@@ -129,11 +157,11 @@ $isMessageAllowed = $this->isMessageAllowed();
     <div class="fields-row">
         <div class="field">
             <label for="giftcard_sender_name" class="required"><?php echo $this->__('Your Name'); ?></label>
-            <input type="text" name="giftcard_sender_name" id="giftcard_sender_name" class="required-entry" maxlength="255" required />
+            <input type="text" name="giftcard_sender_name" id="giftcard_sender_name" class="required-entry" maxlength="255" required value="<?php echo $preSenderName !== null ? $this->escapeHtml($preSenderName) : ''; ?>" />
         </div>
         <div class="field">
             <label for="giftcard_sender_email" class="required"><?php echo $this->__('Your Email'); ?></label>
-            <input type="email" name="giftcard_sender_email" id="giftcard_sender_email" class="required-entry validate-email" maxlength="255" required />
+            <input type="email" name="giftcard_sender_email" id="giftcard_sender_email" class="required-entry validate-email" maxlength="255" required value="<?php echo $preSenderEmail !== null ? $this->escapeHtml($preSenderEmail) : ''; ?>" />
         </div>
     </div>
 
@@ -141,11 +169,11 @@ $isMessageAllowed = $this->isMessageAllowed();
     <div class="fields-row">
         <div class="field">
             <label for="giftcard_recipient_name" class="required"><?php echo $this->__('Recipient Name'); ?></label>
-            <input type="text" name="giftcard_recipient_name" id="giftcard_recipient_name" class="required-entry" maxlength="255" required />
+            <input type="text" name="giftcard_recipient_name" id="giftcard_recipient_name" class="required-entry" maxlength="255" required value="<?php echo $preRecipientName !== null ? $this->escapeHtml($preRecipientName) : ''; ?>" />
         </div>
         <div class="field">
             <label for="giftcard_recipient_email" class="required"><?php echo $this->__('Recipient Email'); ?></label>
-            <input type="email" name="giftcard_recipient_email" id="giftcard_recipient_email" class="required-entry validate-email" maxlength="255" required />
+            <input type="email" name="giftcard_recipient_email" id="giftcard_recipient_email" class="required-entry validate-email" maxlength="255" required value="<?php echo $preRecipientEmail !== null ? $this->escapeHtml($preRecipientEmail) : ''; ?>" />
         </div>
     </div>
 
@@ -154,18 +182,18 @@ $isMessageAllowed = $this->isMessageAllowed();
     <div class="fields-row">
         <div class="field full-width">
             <label for="giftcard_message"><?php echo $this->__('Personal Message'); ?></label>
-            <textarea name="giftcard_message" id="giftcard_message" maxlength="500" placeholder="<?php echo $this->__('Add a message...'); ?>"></textarea>
+            <textarea name="giftcard_message" id="giftcard_message" maxlength="500" placeholder="<?php echo $this->__('Add a message...'); ?>"><?php echo $preMessage !== null ? $this->escapeHtml($preMessage) : ''; ?></textarea>
         </div>
         <div class="field">
             <label for="giftcard_delivery_date"><?php echo $this->__('Schedule Delivery'); ?></label>
-            <input type="date" name="giftcard_delivery_date" id="giftcard_delivery_date" min="<?php echo date('Y-m-d'); ?>" />
+            <input type="date" name="giftcard_delivery_date" id="giftcard_delivery_date" min="<?php echo date('Y-m-d'); ?>" value="<?php echo $preDeliveryDate !== null ? $this->escapeHtml($preDeliveryDate) : ''; ?>" />
             <p class="note"><?php echo $this->__('Leave blank for immediate delivery'); ?></p>
         </div>
     </div>
     <?php else: ?>
     <div class="field">
         <label for="giftcard_delivery_date"><?php echo $this->__('Schedule Delivery'); ?> <span class="hint">(<?php echo $this->__('Optional'); ?>)</span></label>
-        <input type="date" name="giftcard_delivery_date" id="giftcard_delivery_date" min="<?php echo date('Y-m-d'); ?>" />
+        <input type="date" name="giftcard_delivery_date" id="giftcard_delivery_date" min="<?php echo date('Y-m-d'); ?>" value="<?php echo $preDeliveryDate !== null ? $this->escapeHtml($preDeliveryDate) : ''; ?>" />
         <p class="note"><?php echo $this->__('Leave blank for immediate delivery'); ?></p>
     </div>
     <?php endif; ?>
@@ -240,6 +268,11 @@ if (amountSelect) {
             }
         }
     });
+
+    // Initialize price on page load if value is preconfigured
+    if (amountHidden.value) {
+        updateGiftCardPrice(amountHidden.value);
+    }
 }
 
 if (customInput) {
@@ -274,7 +307,10 @@ if (amountField) {
             }
         });
 
-        if (minAmount !== null && !amountField.value) {
+        // Initialize price: use preconfigured value if set, otherwise use min amount
+        if (amountField.value) {
+            updateGiftCardPrice(amountField.value);
+        } else if (minAmount !== null) {
             amountField.value = minAmount;
             updateGiftCardPrice(minAmount);
         }

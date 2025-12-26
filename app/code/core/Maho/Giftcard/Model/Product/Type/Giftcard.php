@@ -280,4 +280,27 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     {
         return true;
     }
+
+    /**
+     * Process buy request to return preconfigured values for form pre-filling
+     *
+     * This method is called when editing a cart item to restore form field values.
+     *
+     * @param Mage_Catalog_Model_Product $product
+     * @param Maho\DataObject $buyRequest
+     * @return array
+     */
+    #[\Override]
+    public function processBuyRequest($product, $buyRequest)
+    {
+        return [
+            'giftcard_amount' => $buyRequest->getGiftcardAmount(),
+            'giftcard_recipient_name' => $buyRequest->getGiftcardRecipientName(),
+            'giftcard_recipient_email' => $buyRequest->getGiftcardRecipientEmail(),
+            'giftcard_sender_name' => $buyRequest->getGiftcardSenderName(),
+            'giftcard_sender_email' => $buyRequest->getGiftcardSenderEmail(),
+            'giftcard_message' => $buyRequest->getGiftcardMessage(),
+            'giftcard_delivery_date' => $buyRequest->getGiftcardDeliveryDate(),
+        ];
+    }
 }
