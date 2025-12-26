@@ -739,7 +739,20 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
          * for this we have additional diapason for 0
          * TotalPaid - contains amount, that were not rounded.
          */
-        if (abs($this->getStore()->roundPrice($this->getTotalPaid()) - $this->getTotalRefunded()) < .0001) {
+        $hasPaymentToRefund = abs($this->getStore()->roundPrice($this->getTotalPaid()) - $this->getTotalRefunded()) >= .0001;
+
+        // Check for gift card amount that can be refunded
+        $hasGiftcardToRefund = false;
+        $giftcardAmount = abs((float) $this->getGiftcardAmount());
+        if ($giftcardAmount > 0 && $this->hasInvoices()) {
+            $giftcardRefunded = 0;
+            foreach ($this->getCreditmemosCollection() as $creditmemo) {
+                $giftcardRefunded += abs((float) $creditmemo->getGiftcardAmount());
+            }
+            $hasGiftcardToRefund = ($giftcardAmount - $giftcardRefunded) >= .0001;
+        }
+
+        if (!$hasPaymentToRefund && !$hasGiftcardToRefund) {
             return false;
         }
 

@@ -24,6 +24,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Options extends Mage_Admi
         $showMissingOptionValues = (bool) $this->getColumn()->getShowMissingOptionValues();
         if (!empty($options) && is_array($options)) {
             $value = $row->getData($this->getColumn()->getIndex());
+            if ($value === null) {
+                return '';
+            }
             if (is_array($value)) {
                 $res = [];
                 foreach ($value as $item) {

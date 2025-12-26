@@ -34,6 +34,18 @@
     <tr>
         <td colspan="2"><div id="adjustment_negative_adv"></div></td>
     </tr>
+    <?php
+        $orderId = $this->getSource()->getOrderId();
+        $invoiceId = $this->getRequest()->getParam('invoice_id');
+        $updateUrl = $this->getUrl('*/*/updateQty', ['order_id' => $orderId, 'invoice_id' => $invoiceId]);
+    ?>
+    <tr>
+        <td colspan="2" class="a-right" style="padding-top:10px">
+            <button type="button" class="scalable" onclick="submitAndReloadArea(document.getElementById('creditmemo_item_container'),'<?= $updateUrl ?>')">
+                <span><span><span><?= $this->helper('sales')->__('Update Totals') ?></span></span></span>
+            </button>
+        </td>
+    </tr>
     <script type="text/javascript">
         Validation.addAllThese([
             ['not-negative-amount', '<?= $this->jsQuoteEscape($this->helper('sales')->__('Please enter positive number in this field.')) ?>', function(v) {

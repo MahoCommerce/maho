@@ -43,6 +43,6 @@ class Text extends AbstractElement
     #[\Override]
     public function getHtmlAttributes()
     {
-        return ['type', 'title', 'class', 'style', 'onclick', 'onchange', 'onkeyup', 'disabled', 'readonly', 'maxlength', 'tabindex'];
+        return ['type', 'title', 'class', 'style', 'onclick', 'onchange', 'onkeyup', 'disabled', 'readonly', 'maxlength', 'tabindex', 'placeholder'];
     }
 }
