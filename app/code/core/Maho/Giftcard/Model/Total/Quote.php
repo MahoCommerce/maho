@@ -117,12 +117,6 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
         }
 
         if ($baseTotalDiscount > 0) {
-            // Store amounts on both quote and address as POSITIVE values
-            $quote->setBaseGiftcardAmount($baseTotalDiscount);
-            $quote->setGiftcardAmount($totalDiscount);
-            $address->setBaseGiftcardAmount($baseTotalDiscount);
-            $address->setGiftcardAmount($totalDiscount);
-
             // Store gift card codes on address for display
             $address->setGiftcardCodes(json_encode($validCodes));
 
@@ -136,6 +130,13 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             // Add negative amounts - Grand collector will sum these into grand_total
             $this->_addAmount(-$totalDiscount);
             $this->_addBaseAmount(-$baseTotalDiscount);
+
+            // Store amounts on both quote and address as POSITIVE values
+            // Note: Must be set AFTER setBaseTotalAmount() since that method also sets base_giftcard_amount
+            $quote->setBaseGiftcardAmount($baseTotalDiscount);
+            $quote->setGiftcardAmount($totalDiscount);
+            $address->setBaseGiftcardAmount($baseTotalDiscount);
+            $address->setGiftcardAmount($totalDiscount);
         } else {
             // No gift card discount - reset amounts
             $address->setBaseGiftcardAmount(0);
