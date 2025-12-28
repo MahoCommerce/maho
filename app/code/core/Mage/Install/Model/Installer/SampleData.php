@@ -250,9 +250,6 @@ class Mage_Install_Model_Installer_SampleData
         $this->currentImporter = $importer;
     }
 
-    /**
-     * @var SampleDataImporter|null
-     */
     private ?SampleDataImporter $currentImporter = null;
 
     /**
