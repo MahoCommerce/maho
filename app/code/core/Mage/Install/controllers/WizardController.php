@@ -204,6 +204,80 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         }
     }
 
+    public function sampledataAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        // Clear any previous progress state when loading the page
+        Mage::getSingleton('install/installer_sampleData')->clearProgress();
+
+        $this->setFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT, true);
+        $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
+
+        $this->_prepareLayout();
+        $this->_initLayoutMessages('install/session');
+
+        $this->getLayout()->getBlock('content')->append(
+            $this->getLayout()->createBlock('install/sampleData', 'install.sampledata'),
+        );
+
+        $this->renderLayout();
+    }
+
+    public function sampledataPostAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+
+        try {
+            /** @var Mage_Install_Model_Installer_SampleData $installer */
+            $installer = Mage::getSingleton('install/installer_sampleData');
+
+            // Clear any previous progress
+            $installer->clearProgress();
+
+            // Run installation (this will update progress file as it goes)
+            $installer->install();
+
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                'success' => true,
+            ]));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
+
+    public function sampledataProgressAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+
+        /** @var Mage_Install_Model_Installer_SampleData $installer */
+        $installer = Mage::getSingleton('install/installer_sampleData');
+        $progress = $installer->getProgress();
+
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($progress));
+    }
+
+    public function sampledataSkipAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        // Clear any progress file
+        /** @var Mage_Install_Model_Installer_SampleData $installer */
+        $installer = Mage::getSingleton('install/installer_sampleData');
+        $installer->clearProgress();
+
+        $step = $this->_getWizard()->getStepByName('sampledata');
+        $this->getResponse()->setRedirect($step->getNextUrl());
+    }
+
     public function administratorAction(): void
     {
         $this->_checkIfInstalled();
