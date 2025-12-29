@@ -95,6 +95,9 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
             $adapter = $this->getConnection();
             $entity  = $this->getEntity();
 
+            /** @var Mage_Eav_Model_Resource_Helper_Mysql|Mage_Eav_Model_Resource_Helper_Pgsql $helper */
+            $helper = Mage::getResourceHelper('eav');
+
             // see also Mage_Catalog_Model_Resource_Abstract::getAttributeRawValue()
             $select = $adapter->select()
                 ->from(['e' => $entity->getEntityTable()], [])
@@ -120,12 +123,12 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
                 ]),
                 [],
             );
-            // t_s join
-            $attributeIdExpr = $adapter->getCheckSql(
+            // t_s join - for PostgreSQL, we need to wrap non-grouped columns in aggregate functions
+            $attributeIdExpr = $helper->wrapForGroupBy($adapter->getCheckSql(
                 't_s.attribute_id IS NULL',
                 't_d.attribute_id',
                 't_s.attribute_id',
-            );
+            ));
             $select->joinLeft(
                 ['t_s' => $table],
                 implode(' AND ', [
@@ -155,18 +158,22 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
     {
         $storeId = $this->getStoreId();
         if ($storeId) {
-            /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
+            /** @var Mage_Eav_Model_Resource_Helper_Mysql|Mage_Eav_Model_Resource_Helper_Pgsql $helper */
             $helper = Mage::getResourceHelper('eav');
-            $adapter        = $this->getConnection();
-            $valueExpr      = $adapter->getCheckSql(
+            $adapter = $this->getConnection();
+
+            // For PostgreSQL, we need to wrap non-grouped columns in aggregate functions
+            $defaultValue = $helper->wrapForGroupBy($helper->prepareEavAttributeValue('t_d.value', $type));
+            $storeValue = $helper->wrapForGroupBy($helper->prepareEavAttributeValue('t_s.value', $type));
+            $valueExpr = $helper->wrapForGroupBy($adapter->getCheckSql(
                 't_s.value_id IS NULL',
                 $helper->prepareEavAttributeValue('t_d.value', $type),
                 $helper->prepareEavAttributeValue('t_s.value', $type),
-            );
+            ));
 
             $select->columns([
-                'default_value' => $helper->prepareEavAttributeValue('t_d.value', $type),
-                'store_value'   => $helper->prepareEavAttributeValue('t_s.value', $type),
+                'default_value' => $defaultValue,
+                'store_value'   => $storeValue,
                 'value'         => $valueExpr,
             ]);
         } else {

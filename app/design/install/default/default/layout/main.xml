@@ -18,12 +18,14 @@
             <block type="core/text_list" name="left" as="left"/>
             <block type="core/text_list" name="content" as="content" />
         </block>
-        <block type="install/db_main" name="database" as="database"/>
+        <block type="install/configuration_database" name="database" as="database"/>
     </install_wizard>
-    <install_wizard_config>
+    <install_wizard_configuration>
         <reference name="database">
-            <action method="setTemplate"><template>install/db/main.phtml</template></action>
-            <action method="addDatabaseBlock"><type>mysql4</type><block>install/db_type_mysql4</block><template>install/db/mysql4.phtml</template></action>
+            <action method="setTemplate"><template>page/configuration/database.phtml</template></action>
+            <action method="addDatabaseBlock"><type>mysql</type><block>install/configuration_database_type_mysql</block><template>page/configuration/database/mysql.phtml</template></action>
+            <action method="addDatabaseBlock"><type>pgsql</type><block>install/configuration_database_type_pgsql</block><template>page/configuration/database/pgsql.phtml</template></action>
+            <action method="addDatabaseBlock"><type>sqlite</type><block>install/configuration_database_type_sqlite</block><template>page/configuration/database/sqlite.phtml</template></action>
         </reference>
-    </install_wizard_config>
+    </install_wizard_configuration>
 </layout>

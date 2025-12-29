@@ -160,16 +160,20 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
         $psExpr = $this->_addAttributeToSelect($select, 'status', 'e.entity_id', 'cs.store_id');
         $psCondition = $adapter->quoteInto($psExpr . '=?', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
+        // Use COALESCE for is_in_stock to handle NULL values from LEFT JOIN
+        // This ensures we don't get NULL constraint violations on the stock_status column
+        $isInStockExpr = $adapter->getIfNullSql('cisi.is_in_stock', '0');
+
         if ($this->_isManageStock()) {
             $statusExpr = $adapter->getCheckSql(
                 'cisi.use_config_manage_stock = 0 AND cisi.manage_stock = 0',
                 '1',
-                'cisi.is_in_stock',
+                $isInStockExpr,
             );
         } else {
             $statusExpr = $adapter->getCheckSql(
                 'cisi.use_config_manage_stock = 0 AND cisi.manage_stock = 1',
-                'cisi.is_in_stock',
+                $isInStockExpr,
                 '1',
             );
         }

@@ -195,9 +195,9 @@ class Mage_Reports_Model_Resource_Customer_Collection extends Mage_Customer_Mode
             $baseSubtotalRefunded   = $adapter->getIfNullSql('orders.base_subtotal_refunded', 0);
             $baseSubtotalCanceled   = $adapter->getIfNullSql('orders.base_subtotal_canceled', 0);
 
-            $totalExpr = (!$this->_addOrderStatisticsIsFilter)
-                ? "(orders.base_subtotal - {$baseSubtotalCanceled} - {$baseSubtotalRefunded}) * orders.base_to_global_rate"
-                : "orders.base_subtotal - {$baseSubtotalCanceled} - {$baseSubtotalRefunded}";
+            $totalExpr = ($this->_addOrderStatisticsIsFilter)
+                ? "orders.base_subtotal - {$baseSubtotalCanceled} - {$baseSubtotalRefunded}"
+                : "(orders.base_subtotal - {$baseSubtotalCanceled} - {$baseSubtotalRefunded}) * orders.base_to_global_rate";
 
             $select = $this->getConnection()->select();
             $select->from(['orders' => $this->getTable('sales/order')], [
@@ -209,7 +209,7 @@ class Mage_Reports_Model_Resource_Customer_Collection extends Mage_Customer_Mode
               ->where('orders.customer_id IN(?)', $customerIds)
               ->group('orders.customer_id');
 
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
+            /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
             $helper = Mage::getResourceHelper('core');
 
             /*

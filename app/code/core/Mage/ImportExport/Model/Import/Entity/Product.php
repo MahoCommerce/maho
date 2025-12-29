@@ -454,7 +454,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             if ($idToDelete) {
                 $this->_connection->query(
                     $this->_connection->quoteInto(
-                        "DELETE FROM `{$productEntityTable}` WHERE `entity_id` IN (?)",
+                        "DELETE FROM {$productEntityTable} WHERE entity_id IN (?)",
                         $idToDelete,
                     ),
                 );
@@ -817,7 +817,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $typePriceTable = $coreResource->getTableName('catalog/product_option_type_price');
         $typeTitleTable = $coreResource->getTableName('catalog/product_option_type_title');
         $typeValueTable = $coreResource->getTableName('catalog/product_option_type_value');
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextOptionId   = $helper->getNextAutoincrement($optionTable);
         $nextValueId    = $helper->getNextAutoincrement($typeValueTable);
@@ -956,8 +956,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                             'option_type_id' => $nextValueId,
                             'sort_order'     => empty($rowData['_custom_option_row_sort'])
                                 ? 0 : abs($rowData['_custom_option_row_sort']),
-                            'sku'            => !empty($rowData['_custom_option_row_sku'])
-                                ? $rowData['_custom_option_row_sku'] : '',
+                            'sku'            => empty($rowData['_custom_option_row_sku'])
+                                ? '' : $rowData['_custom_option_row_sku'],
                         ];
                         if (!isset($customOptions[$typeTitleTable][$nextValueId][0])) { // ensure default title is set
                             $customOptions[$typeTitleTable][$nextValueId][0] = $rowData['_custom_option_row_title'];
@@ -1143,7 +1143,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             $positionAttrId[$linkId] = $adapter->fetchOne($select, $bind);
         }
 
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('importexport');
         $nextLinkId = $helper->getNextAutoincrement($mainTable);
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {

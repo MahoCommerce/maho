@@ -87,10 +87,13 @@
         "psy/psysh": "^0.12.10"
     },
     "suggest": {
+        "ext-pdo_pgsql": "Required for PostgreSQL database support",
+        "ext-pdo_sqlite": "Required for SQLite database support",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution",
         "laminas/laminas-json-server": "Install this package if you need JSON-RPC web services functionality",
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
-        "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality"
+        "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
+        "mahocommerce/module-braintree": "Braintree payment gateway integration"
     },
     "conflict": {
         "colinmollenhour/cache-backend-redis": "*",
@@ -110,7 +113,9 @@
         }
     },
     "scripts": {
-        "test": "php tests/pest-with-test-db.php"
+        "test": "php tests/pest-with-test-db.php",
+        "test:pgsql": "MAHO_DB_TYPE=pgsql php tests/pest-with-test-db.php",
+        "test:sqlite": "MAHO_DB_TYPE=sqlite php tests/pest-with-test-db.php"
     },
     "config": {
         "allow-plugins": {

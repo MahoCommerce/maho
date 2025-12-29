@@ -19,12 +19,11 @@
             <default_setup>
                 <connection>
                     <host>localhost</host>
-                    <username/>
+                    <username>maho</username>
                     <password/>
                     <dbname>maho</dbname>
-                    <model>mysql4</model>
+                    <engine>mysql</engine>
                     <initStatements>SET NAMES utf8</initStatements>
-                    <type>pdo_mysql</type>
                     <active>0</active>
                     <persistent>0</persistent>
                 </connection>
@@ -64,8 +63,15 @@
                     <pdo_mysql>
                         <adapter>Maho\Db\Adapter\Pdo\Mysql</adapter>
                         <class>Mage_Core_Model_Resource_Type_Db_Pdo_Mysql</class>
-                        <compatibleMode>1</compatibleMode>
                     </pdo_mysql>
+                    <pdo_pgsql>
+                        <adapter>Maho\Db\Adapter\Pdo\Pgsql</adapter>
+                        <class>Mage_Core_Model_Resource_Type_Db_Pdo_Pgsql</class>
+                    </pdo_pgsql>
+                    <pdo_sqlite>
+                        <adapter>Maho\Db\Adapter\Pdo\Sqlite</adapter>
+                        <class>Mage_Core_Model_Resource_Type_Db_Pdo_Sqlite</class>
+                    </pdo_sqlite>
                 </types>
             </connection>
         </resource>

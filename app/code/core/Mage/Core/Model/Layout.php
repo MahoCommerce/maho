@@ -218,7 +218,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
 
         $blockName = (string) $node['name'];
         $profilerKey = 'BLOCK: ' . $blockName;
-        Varien_Profiler::start($profilerKey);
+        \Maho\Profiler::start($profilerKey);
 
         $block = $this->addBlock($className, $blockName);
         if (!$block) {
@@ -259,7 +259,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
             $method = (string) $node['output'];
             $this->addOutputBlock($blockName, $method);
         }
-        Varien_Profiler::stop($profilerKey);
+        \Maho\Profiler::stop($profilerKey);
 
         return $this;
     }
@@ -285,7 +285,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
         }
 
         $profilerKey = 'BLOCK ACTION: ' . $parentName . ' -> ' . $method;
-        Varien_Profiler::start($profilerKey);
+        \Maho\Profiler::start($profilerKey);
 
         if (!empty($parentName)) {
             $block = $this->getBlock($parentName);
@@ -329,13 +329,13 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
                 }
             }
 
-            Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($block, $method, $args);
+            Mage::helper('core/security')->ensureBlockMethodAllowed($block, $method, $args);
 
             $this->_translateLayoutNode($node, $args);
             call_user_func_array([$block, $method], array_values($args));
         }
 
-        Varien_Profiler::stop($profilerKey);
+        \Maho\Profiler::stop($profilerKey);
 
         return $this;
     }

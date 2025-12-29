@@ -350,9 +350,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadModulesCache()
     {
         if ($this->_canUseCacheForInit()) {
-            Varien_Profiler::start('mage::app::init::config::load_cache');
+            \Maho\Profiler::start('mage::app::init::config::load_cache');
             $loaded = $this->loadCache();
-            Varien_Profiler::stop('mage::app::init::config::load_cache');
+            \Maho\Profiler::stop('mage::app::init::config::load_cache');
             if ($loaded) {
                 $this->_useCache = true;
                 return true;
@@ -368,7 +368,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadModules()
     {
-        Varien_Profiler::start('config/load-modules');
+        \Maho\Profiler::start('config/load-modules');
         $this->_loadDeclaredModules();
 
         $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
@@ -380,7 +380,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         $this->applyExtends();
-        Varien_Profiler::stop('config/load-modules');
+        \Maho\Profiler::stop('config/load-modules');
         return $this;
     }
 
@@ -402,10 +402,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadDb()
     {
         if ($this->_isLocalConfigLoaded && Mage::isInstalled()) {
-            Varien_Profiler::start('config/load-db');
+            \Maho\Profiler::start('config/load-db');
             $dbConf = $this->getResourceModel();
             $dbConf->loadToXml($this);
-            Varien_Profiler::stop('config/load-db');
+            \Maho\Profiler::stop('config/load-db');
         }
         return $this;
     }
@@ -416,11 +416,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadEnv(): Mage_Core_Model_Config
     {
         if ($this->_isLocalConfigLoaded && Mage::isInstalled()) {
-            Varien_Profiler::start('config/load-env');
+            \Maho\Profiler::start('config/load-env');
             /** @var Mage_Core_Helper_EnvironmentConfigLoader $environmentConfigLoaderHelper */
             $environmentConfigLoaderHelper = Mage::helper('core/environmentConfigLoader');
             $environmentConfigLoaderHelper->overrideEnvironment($this);
-            Varien_Profiler::stop('config/load-env');
+            \Maho\Profiler::stop('config/load-env');
         }
         return $this;
     }
@@ -481,7 +481,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection) {
             return;
         }
-        if (!$connection->fetchOne("SELECT GET_LOCK('core_config_cache_save_lock', ?)", [$waitTime])) {
+        if (!$connection->getLock('core_config_cache_save_lock', $waitTime)) {
             if ($ignoreFailure) {
                 return;
             } elseif (PHP_SAPI === 'cli') {
@@ -508,7 +508,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection) {
             return;
         }
-        $connection->fetchOne("SELECT RELEASE_LOCK('core_config_cache_save_lock')");
+        $connection->releaseLock('core_config_cache_save_lock');
     }
 
     /**
@@ -672,9 +672,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $sectionKey = implode('_', $sectionPath);
 
         if (!isset($this->_cacheLoadedSections[$sectionKey])) {
-            Varien_Profiler::start('init_config_section:' . $sectionKey);
+            \Maho\Profiler::start('init_config_section:' . $sectionKey);
             $this->_cacheLoadedSections[$sectionKey] = $this->_loadSectionCache($sectionKey);
-            Varien_Profiler::stop('init_config_section:' . $sectionKey);
+            \Maho\Profiler::stop('init_config_section:' . $sectionKey);
         }
         return $this->_cacheLoadedSections[$sectionKey];
     }
@@ -845,7 +845,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             return ;
         }
 
-        Varien_Profiler::start('config/load-modules-declaration');
+        \Maho\Profiler::start('config/load-modules-declaration');
 
         $unsortedConfig = new Mage_Core_Model_Config_Base();
         $unsortedConfig->loadString('<config/>');
@@ -896,7 +896,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         $this->extend($sortedConfig);
 
-        Varien_Profiler::stop('config/load-modules-declaration');
+        \Maho\Profiler::stop('config/load-modules-declaration');
         return $this;
     }
 
@@ -1274,7 +1274,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         $classArr = explode('/', trim($classAlias));
         $group = $classArr[0];
-        $class = !empty($classArr[1]) ? $classArr[1] : null;
+        $class = empty($classArr[1]) ? null : $classArr[1];
 
         if (isset($this->_classNameCache[$groupRootNode][$group][$class])) {
             return $this->_classNameCache[$groupRootNode][$group][$class];
@@ -1345,9 +1345,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className();
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1360,9 +1360,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($className === false || !class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className($moduleAlias);
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1418,9 +1418,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className($constructArguments);
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1464,9 +1464,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($className === false || !class_exists($className)) {
             return false;
         }
-        Varien_Profiler::start('CORE::create_object_of::' . $className);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className($constructArguments);
-        Varien_Profiler::stop('CORE::create_object_of::' . $className);
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1683,12 +1683,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
-     * Retrieve resource connection model name
+     * Retrieve resource connection model name (database engine)
      *
-     * @param string $moduleName
-     * @return string
+     * Supports new 'engine' config with backward compatibility for legacy 'model' config.
      */
-    protected function _getResourceConnectionModel($moduleName = null)
+    protected function _getResourceConnectionModel(?string $moduleName = null): string
     {
         $config = null;
         if (!is_null($moduleName)) {
@@ -1699,7 +1698,20 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $config = $this->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE);
         }
 
-        return (string) $config->model;
+        // New config: use 'engine'
+        if (!empty($config->engine)) {
+            return (string) $config->engine;
+        }
+
+        // Backward compatibility: use 'model'
+        $model = (string) $config->model;
+
+        // Normalize legacy mysql4 model name to mysql for backwards compatibility
+        if ($model === 'mysql4') {
+            $model = 'mysql';
+        }
+
+        return $model ?: 'mysql';
     }
 
     /**

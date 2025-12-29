@@ -1,0 +1,46 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Install_Block_License $this */
+?>
+<div class="page-head">
+    <h3><?= $this->__("Welcome to Maho's Installation Wizard") ?>!</h3>
+</div>
+
+<div class="messages">
+    <?= $this->getMessagesBlock()->toHtml() ?>
+</div>
+
+<?php if (count($this->getMessagesBlock()->getMessages()) === 0): ?>
+    <form action="<?= $this->getPostUrl() ?>" method="post" id="licenseForm">
+        <div class="license-container">
+            <div class="license-box" id="licenseBox">
+                <?= $this->getLicenseHtml() ?>
+            </div>
+        </div>
+
+        <label for="agree" class="checkbox-label">
+            <input type="checkbox"
+                   name="agree"
+                   value="1"
+                   id="agree"
+                   aria-describedby="licenseBox"
+                   required>
+            <span><?= $this->__('I agree to the above terms and conditions.') ?></span>
+        </label>
+
+        <div class="button-set">
+            <button class="form-button" type="submit" id="submitButton" disabled>
+                <span><?= $this->__('Continue') ?></span>
+            </button>
+        </div>
+    </form>
+<?php endif ?>

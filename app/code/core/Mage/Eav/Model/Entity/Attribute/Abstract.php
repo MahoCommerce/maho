@@ -119,7 +119,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
      */
     public function loadByCode($entityType, $code)
     {
-        Varien_Profiler::start('_LOAD_ATTRIBUTE_BY_CODE__');
+        \Maho\Profiler::start('_LOAD_ATTRIBUTE_BY_CODE__');
         $model = Mage::getSingleton('eav/config')->getAttribute($entityType, $code);
         if ($model) {
             $this->setData($model->getData());
@@ -140,7 +140,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         $this->_afterLoad();
         $this->setOrigData();
         $this->_hasDataChanges = false;
-        Varien_Profiler::stop('_LOAD_ATTRIBUTE_BY_CODE__');
+        \Maho\Profiler::stop('_LOAD_ATTRIBUTE_BY_CODE__');
         return $this;
     }
 
@@ -633,11 +633,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
             return $this->getSource()->getFlatColums();
         }
 
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            return $this->_getFlatColumnsOldDefinition();
-        } else {
-            return $this->_getFlatColumnsDdlDefinition();
-        }
+        return $this->_getFlatColumnsDdlDefinition();
     }
 
     /**
@@ -647,7 +643,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
      */
     public function _getFlatColumnsDdlDefinition()
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
+        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper  = Mage::getResourceHelper('eav');
         $columns = [];
         switch ($this->getBackendType()) {
@@ -719,85 +715,6 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
                 break;
         }
 
-        return $columns;
-    }
-
-    /**
-     * Retrieve flat columns definition in old format (before MMDB support)
-     * Used in database compatible mode
-     *
-     * @return array
-     */
-    protected function _getFlatColumnsOldDefinition()
-    {
-        $columns = [];
-        switch ($this->getBackendType()) {
-            case 'static':
-                $describe = $this->_getResource()->describeTable($this->getBackend()->getTable());
-                if (!isset($describe[$this->getAttributeCode()])) {
-                    break;
-                }
-                $prop = $describe[$this->getAttributeCode()];
-                $type = $prop['DATA_TYPE'];
-                if (isset($prop['PRECISION'], $prop['SCALE'])) {
-                    $type .= "({$prop['PRECISION']},{$prop['SCALE']})";
-                } else {
-                    $type .= (isset($prop['LENGTH']) && $prop['LENGTH']) ? "({$prop['LENGTH']})" : '';
-                }
-                $columns[$this->getAttributeCode()] = [
-                    'type'      => $type,
-                    'unsigned'  => $prop['UNSIGNED'] ? true : false,
-                    'is_null'   => $prop['NULLABLE'],
-                    'default'   => $prop['DEFAULT'],
-                    'extra'     => null,
-                ];
-                break;
-            case 'datetime':
-                $columns[$this->getAttributeCode()] = [
-                    'type'      => 'datetime',
-                    'unsigned'  => false,
-                    'is_null'   => true,
-                    'default'   => null,
-                    'extra'     => null,
-                ];
-                break;
-            case 'decimal':
-                $columns[$this->getAttributeCode()] = [
-                    'type'      => 'decimal(12,4)',
-                    'unsigned'  => false,
-                    'is_null'   => true,
-                    'default'   => null,
-                    'extra'     => null,
-                ];
-                break;
-            case 'int':
-                $columns[$this->getAttributeCode()] = [
-                    'type'      => 'int',
-                    'unsigned'  => false,
-                    'is_null'   => true,
-                    'default'   => null,
-                    'extra'     => null,
-                ];
-                break;
-            case 'text':
-                $columns[$this->getAttributeCode()] = [
-                    'type'      => 'text',
-                    'unsigned'  => false,
-                    'is_null'   => true,
-                    'default'   => null,
-                    'extra'     => null,
-                ];
-                break;
-            case 'varchar':
-                $columns[$this->getAttributeCode()] = [
-                    'type'      => 'varchar(255)',
-                    'unsigned'  => false,
-                    'is_null'   => true,
-                    'default'   => null,
-                    'extra'     => null,
-                ];
-                break;
-        }
         return $columns;
     }
 

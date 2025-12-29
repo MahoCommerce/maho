@@ -22,6 +22,7 @@ $this->getConnection()
         [
             'TYPE' => Maho\Db\Ddl\Table::TYPE_INTEGER,
             'NULLABLE' => false,
+            'DEFAULT' => 0,
             'COMMENT' => 'Calculate off subtotal option',
         ],
     );

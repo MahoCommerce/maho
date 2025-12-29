@@ -223,8 +223,9 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('wishlist_item');
             expect($sql)->toContain('wishlist');
             expect($sql)->toContain('MAX(wi.added_at)');
-            expect($sql)->toContain('DATEDIFF');
-            expect($sql)->toContain('2025-'); // Verify date is properly formatted
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
+            expect($sql)->toMatch('/202[5-9]-/'); // Verify date is properly formatted
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');
         });
@@ -355,12 +356,13 @@ describe('Product Wishlist Condition Integration Tests', function () {
             $this->condition->setValue('1');
 
             $sql = $this->condition->getConditionsSql($this->adapter);
-            expect($sql)->toContain('w.shared = \'1\'');
+            // SQLite may not quote integer values
+            expect($sql)->toMatch('/w\.shared = .?1.?/');
 
             // Test No (not shared)
             $this->condition->setValue('0');
             $sql = $this->condition->getConditionsSql($this->adapter);
-            expect($sql)->toContain('w.shared = \'0\'');
+            expect($sql)->toMatch('/w\.shared = .?0.?/');
         });
 
         test('handles wishlist items count aggregation', function () {
@@ -373,7 +375,8 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('COUNT(*)');
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');
-            expect($sql)->toContain('COUNT(*) >= \'10\'');
+            // SQLite may not quote integer values
+            expect($sql)->toMatch('/COUNT\(\*\) >= .?10.?/');
         });
 
         test('handles date-based wishlist conditions', function () {
@@ -383,9 +386,11 @@ describe('Product Wishlist Condition Integration Tests', function () {
 
             $sql = $this->condition->getConditionsSql($this->adapter);
 
-            expect($sql)->toContain('DATEDIFF');
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
             expect($sql)->toContain('MAX(wi.added_at)');
-            expect($sql)->toContain('< \'7\'');
+            // SQLite may not quote integer values
+            expect($sql)->toMatch('/< .?7.?/');
         });
     });
 
@@ -1125,6 +1130,7 @@ function setupWishlistTestData(): void
                 $wishlistItem->setWishlistId($wishlist->getId());
                 $wishlistItem->setProductId($itemData['product_id']);
                 $wishlistItem->setStoreId(1);
+                $wishlistItem->setQty(1);
 
                 $addedDate = date('Y-m-d H:i:s', strtotime("-{$itemData['days_ago']} days"));
                 $wishlistItem->setAddedAt($addedDate);

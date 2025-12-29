@@ -105,6 +105,15 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
                 'class'     => 'ajax',
             ]);
 
+            // Parent Products tab - only for non-composite products (simple, virtual, downloadable)
+            if ($product->getId() && !$product->isComposite()) {
+                $this->addTab('parent_products', [
+                    'label'     => Mage::helper('catalog')->__('Parent Products'),
+                    'url'       => $this->getUrl('*/*/parentProducts', ['_current' => true]),
+                    'class'     => 'ajax',
+                ]);
+            }
+
             $storeId = 0;
             if ($this->getRequest()->getParam('store')) {
                 $storeId = Mage::app()->getStore($this->getRequest()->getParam('store'))->getId();

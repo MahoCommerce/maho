@@ -76,10 +76,8 @@ class Db extends Collection
 
     /**
      * Database's statement for fetch item one by one
-     *
-     * @var Mysql
      */
-    protected $_fetchStmt = null;
+    protected ?\Maho\Db\Statement\StatementInterface $_fetchStmt = null;
 
     /**
      * Whether orders are rendered

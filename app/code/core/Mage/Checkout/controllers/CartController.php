@@ -169,14 +169,14 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
          */
         $this->_getSession()->setCartWasUpdated(true);
 
-        Varien_Profiler::start(__METHOD__ . 'cart_display');
+        \Maho\Profiler::start(__METHOD__ . 'cart_display');
         $this
             ->loadLayout()
             ->_initLayoutMessages('checkout/session')
             ->_initLayoutMessages('catalog/session')
             ->getLayout()->getBlock('head')->setTitle($this->__('Shopping Cart'));
         $this->renderLayout();
-        Varien_Profiler::stop(__METHOD__ . 'cart_display');
+        \Maho\Profiler::stop(__METHOD__ . 'cart_display');
     }
 
     /**
@@ -186,12 +186,23 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
      */
     public function addAction(): void
     {
+        $isAjax = (bool) $this->getRequest()->getParam('isAjax');
+
         if (!$this->_validateFormKey()) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => $this->__('Invalid form key. Please refresh the page.'),
+                ]);
+                return;
+            }
             $this->_goBack();
             return;
         }
+
         $cart   = $this->_getCart();
         $params = $this->getRequest()->getParams();
+
         try {
             if (isset($params['qty'])) {
                 $params['qty'] = Mage::app()->getLocale()->normalizeNumber($params['qty']);
@@ -204,6 +215,13 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
              * Check product availability
              */
             if (!$product) {
+                if ($isAjax) {
+                    $this->getResponse()->setBodyJson([
+                        'success' => false,
+                        'error' => $this->__('Product not found.'),
+                    ]);
+                    return;
+                }
                 $this->_goBack();
                 return;
             }
@@ -225,6 +243,19 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 ['product' => $product, 'request' => $this->getRequest(), 'response' => $this->getResponse()],
             );
 
+            if ($isAjax) {
+                $message = $this->__('%s was added to your shopping cart.', Mage::helper('core')->escapeHtml($product->getName()));
+
+                $this->loadLayout();
+                $this->getResponse()->setBodyJson([
+                    'success' => true,
+                    'message' => $message,
+                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
+                ]);
+                return;
+            }
+
             if (!$this->_getSession()->getNoCartRedirect(true)) {
                 if (!$cart->getQuote()->getHasError()) {
                     $message = $this->__('%s was added to your shopping cart.', Mage::helper('core')->escapeHtml($product->getName()));
@@ -233,6 +264,14 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->_goBack();
             }
         } catch (Mage_Core_Exception $e) {
+            if ($this->getRequest()->getParam('isAjax')) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ]);
+                return;
+            }
+
             if ($this->_getSession()->getUseNotice(true)) {
                 $this->_getSession()->addNotice(Mage::helper('core')->escapeHtml($e->getMessage()));
             } else {
@@ -250,6 +289,14 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->_redirectReferer(Mage::helper('checkout/cart')->getCartUrl());
             }
         } catch (Exception $e) {
+            if ($this->getRequest()->getParam('isAjax')) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => $this->__('Cannot add the item to shopping cart.'),
+                ]);
+                return;
+            }
+
             $this->_setProductBuyRequest();
             $this->_getSession()->addException($e, $this->__('Cannot add the item to shopping cart.'));
             $this->_goBack();
@@ -507,10 +554,19 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $city       = (string) $this->getRequest()->getParam('estimate_city');
         $regionId   = (string) $this->getRequest()->getParam('region_id');
         $region     = (string) $this->getRequest()->getParam('region');
+        $isAjax     = (bool) $this->getRequest()->getParam('isAjax');
 
         try {
             Mage::getModel('directory/country')->loadByCode($country);
         } catch (Mage_Core_Exception $e) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => true,
+                    'message' => $e->getMessage(),
+                ]);
+                return;
+            }
             $this->_getSession()->addError($e->getMessage());
             $this->_goBack();
             return;
@@ -522,7 +578,8 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             ->setPostcode($postcode)
             ->setRegionId($regionId)
             ->setRegion($region)
-            ->setCollectShippingRates(true);
+            ->setCollectShippingRates(true)
+            ->collectShippingRates();
         $this->_getQuote()->save();
         $this->_getSession()->setEstimatedShippingAddressData([
             'country_id' => $country,
@@ -531,6 +588,19 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             'region_id'  => $regionId,
             'region'     => $region,
         ]);
+
+        if ($isAjax) {
+            /** @var Mage_Checkout_Block_Cart_Shipping $block */
+            $block = $this->getLayout()->createBlock('checkout/cart_shipping')
+                ->setTemplate('checkout/cart/shipping/rates.phtml');
+
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'rates_html' => $block->toHtml(),
+            ]);
+            return;
+        }
+
         $this->_goBack();
     }
 
@@ -540,9 +610,22 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     public function estimateUpdatePostAction(): void
     {
         $code = (string) $this->getRequest()->getParam('estimate_method');
+        $isAjax = (bool) $this->getRequest()->getParam('isAjax');
+
         if (!empty($code)) {
-            $this->_getQuote()->getShippingAddress()->setShippingMethod($code)/*->collectTotals()*/->save();
+            $this->_getQuote()->getShippingAddress()->setShippingMethod($code)->save();
+            $this->_getQuote()->collectTotals()->save();
         }
+
+        if ($isAjax) {
+            $this->loadLayout('checkout_cart_index');
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'totals_html' => $this->getLayout()->getBlock('checkout.cart.totals')->toHtml(),
+            ]);
+            return;
+        }
+
         $this->_goBack();
     }
 

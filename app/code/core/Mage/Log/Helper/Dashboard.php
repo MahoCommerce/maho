@@ -294,7 +294,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
             foreach ($visitors as $visitor) {
                 $referer = $visitor['http_referer'] ?? '';
-                $host = !empty($referer) ? parse_url($referer, PHP_URL_HOST) : null;
+                $host = empty($referer) ? null : parse_url($referer, PHP_URL_HOST);
 
                 // Skip internal referrers (same domain)
                 if ($host === $storeHost) {
@@ -404,7 +404,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             $select = $adapter->select()
                 ->from(['v' => $this->_getTable('log_visitor')], [
                     'visitor_id',
-                    'duration' => new \Maho\Db\Expr('TIMESTAMPDIFF(SECOND, v.first_visit_at, v.last_visit_at)'),
+                    'duration' => $adapter->getTimestampDiffExpr('v.first_visit_at', 'v.last_visit_at'),
                 ])
                 ->where('v.first_visit_at >= ?', $this->_getUtcDaysAgo($days))
                 ->where('v.first_visit_at != v.last_visit_at'); // Exclude single-page sessions for duration

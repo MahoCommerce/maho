@@ -63,10 +63,15 @@ class Mage_Checkout_Model_Resource_Cart extends Mage_Core_Model_Resource_Db_Abst
      */
     public function addExcludeProductFilter($collection, $quoteId)
     {
+        // Skip filter if no quote ID - nothing to exclude
+        if (empty($quoteId)) {
+            return $this;
+        }
+
         $adapter = $this->_getReadAdapter();
         $exclusionSelect = $adapter->select()
             ->from($this->getTable('sales/quote_item'), ['product_id'])
-            ->where('quote_id = ?', $quoteId);
+            ->where('quote_id = ?', (int) $quoteId);
         $condition = $adapter->prepareSqlCondition('e.entity_id', ['nin' => $exclusionSelect]);
         $collection->getSelect()->where($condition);
         return $this;

@@ -22,7 +22,7 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
      */
     protected function _fixQty($qty)
     {
-        return (!empty($qty) ? (float) $qty : null);
+        return (empty($qty) ? null : (float) $qty);
     }
 
     /**

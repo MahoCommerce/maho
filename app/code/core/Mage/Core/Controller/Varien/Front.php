@@ -124,7 +124,7 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
 
         $routersInfo = Mage::app()->getStore()->getConfig(self::XML_STORE_ROUTERS_PATH);
 
-        Varien_Profiler::start('mage::app::init_front_controller::collect_routers');
+        \Maho\Profiler::start('mage::app::init_front_controller::collect_routers');
         foreach ($routersInfo as $routerCode => $routerInfo) {
             if (isset($routerInfo['disabled']) && $routerInfo['disabled']) {
                 continue;
@@ -138,7 +138,7 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
                 $this->addRouter($routerCode, $router);
             }
         }
-        Varien_Profiler::stop('mage::app::init_front_controller::collect_routers');
+        \Maho\Profiler::stop('mage::app::init_front_controller::collect_routers');
 
         Mage::dispatchEvent('controller_front_init_routers', ['front' => $this]);
 
@@ -168,7 +168,7 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
             $this->_getRequestRewriteController()->rewrite();
         }
 
-        Varien_Profiler::start('mage::dispatch::routers_match');
+        \Maho\Profiler::start('mage::dispatch::routers_match');
         $i = 0;
         while (!$request->isDispatched() && $i++ < 100) {
             foreach ($this->_routers as $router) {
@@ -178,15 +178,15 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
                 }
             }
         }
-        Varien_Profiler::stop('mage::dispatch::routers_match');
+        \Maho\Profiler::stop('mage::dispatch::routers_match');
         if ($i > 100) {
             Mage::throwException('Front controller reached 100 router match iterations');
         }
         // This event gives possibility to launch something before sending output (allow cookie setting)
         Mage::dispatchEvent('controller_front_send_response_before', ['front' => $this]);
-        Varien_Profiler::start('mage::app::dispatch::send_response');
+        \Maho\Profiler::start('mage::app::dispatch::send_response');
         $this->getResponse()->sendResponse();
-        Varien_Profiler::stop('mage::app::dispatch::send_response');
+        \Maho\Profiler::stop('mage::app::dispatch::send_response');
         Mage::dispatchEvent('controller_front_send_response_after', ['front' => $this]);
         return $this;
     }
@@ -304,7 +304,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     }
 
     /**
-     * Redirect to canonical URL if trailing slash doesn't match configured behavior
+     * Normalize request path and redirect to canonical URL if needed
+     *
+     * Handles:
+     * - Consecutive slashes (e.g., //men -> /men)
+     * - Trailing slash based on store configuration
      */
     protected function checkTrailingSlash(Mage_Core_Controller_Request_Http $request): void
     {
@@ -317,7 +321,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
 
         $requestUri = $request->getRequestUri();
 
-        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($requestUri);
+        // Normalize consecutive slashes to single slash
+        $canonicalUri = preg_replace('#/{2,}#', '/', $requestUri);
+
+        // Apply trailing slash configuration
+        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
 
         if ($canonicalUri !== $requestUri) {
             Mage::app()->getFrontController()->getResponse()

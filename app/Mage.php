@@ -393,9 +393,9 @@ final class Mage
      */
     public static function dispatchEvent($name, array $data = [])
     {
-        Varien_Profiler::start('DISPATCH EVENT:' . $name);
+        \Maho\Profiler::start('DISPATCH EVENT:' . $name);
         $result = self::app()->dispatchEvent($name, $data);
-        Varien_Profiler::stop('DISPATCH EVENT:' . $name);
+        \Maho\Profiler::stop('DISPATCH EVENT:' . $name);
         return $result;
     }
 
@@ -593,9 +593,9 @@ final class Mage
             self::_setIsInstalled($options);
             self::_setConfigModel($options);
 
-            Varien_Profiler::start('self::app::init');
+            \Maho\Profiler::start('self::app::init');
             self::$_app->init($code, $type, $options);
-            Varien_Profiler::stop('self::app::init');
+            \Maho\Profiler::stop('self::app::init');
             self::$_app->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
         }
         return self::$_app;
@@ -643,7 +643,7 @@ final class Mage
     public static function run($code = '', $type = 'store', $options = [])
     {
         try {
-            Varien_Profiler::start('mage');
+            \Maho\Profiler::start('mage');
             self::setRoot();
             self::$_app = new Mage_Core_Model_App();
             if (isset($options['request'])) {
@@ -660,7 +660,7 @@ final class Mage
                 'scope_type' => $type,
                 'options'    => $options,
             ]);
-            Varien_Profiler::stop('mage');
+            \Maho\Profiler::stop('mage');
         } catch (Mage_Core_Model_Session_Exception $e) {
             header('Location: ' . self::getBaseUrl());
             die();
@@ -837,7 +837,7 @@ final class Mage
             print '</pre>';
         } else {
             $reportData = [
-                (!empty($extra) ? $extra . "\n\n" : '') . $e->getMessage(),
+                (empty($extra) ? '' : $extra . "\n\n") . $e->getMessage(),
                 $e->getTraceAsString(),
             ];
 

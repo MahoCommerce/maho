@@ -88,20 +88,14 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
     {
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $column = [
+            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
+            'length'    => 1,
             'unsigned'  => false,
+            'nullable'  => true,
             'default'   => null,
             'extra'     => null,
+            'comment'   => $attributeCode . ' column',
         ];
-
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $column['type']     = 'tinyint(1)';
-            $column['is_null']  = true;
-        } else {
-            $column['type']     = Maho\Db\Ddl\Table::TYPE_SMALLINT;
-            $column['length']   = 1;
-            $column['nullable'] = true;
-            $column['comment']  = $attributeCode . ' column';
-        }
 
         return [$attributeCode => $column];
     }

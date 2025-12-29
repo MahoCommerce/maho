@@ -626,10 +626,10 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
             $select = $this->_getWriteAdapter()->select()
                 ->join(
                     ['p' => $this->getTable('catalogindex/price')],
-                    '`e`.`entity_id`=`p`.`entity_id`'
-                        . " AND `p`.`attribute_id`={$priceAttribute}"
-                        . " AND `p`.`customer_group_id`={$group->getId()}"
-                        . " AND `p`.`website_id`={$websiteId}",
+                    'e.entity_id = p.entity_id'
+                        . " AND p.attribute_id = {$priceAttribute}"
+                        . " AND p.customer_group_id = {$group->getId()}"
+                        . " AND p.website_id = {$websiteId}",
                     [$columnName => 'value'],
                 );
             if ($addChildData) {
@@ -652,10 +652,10 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                 $select = $this->_getWriteAdapter()->select()
                     ->join(
                         ['p' => $this->getTable('catalogindex/price')],
-                        '`e`.`child_id`=`p`.`entity_id`'
-                            . " AND `p`.`attribute_id`={$priceAttribute}"
-                            . " AND `p`.`customer_group_id`={$group->getId()}"
-                            . " AND `p`.`website_id`={$websiteId}",
+                        'e.child_id = p.entity_id'
+                            . " AND p.attribute_id = {$priceAttribute}"
+                            . " AND p.customer_group_id = {$group->getId()}"
+                            . " AND p.website_id = {$websiteId}",
                         [$columnName => 'value'],
                     )
                     ->where('e.is_child=?', 1);

@@ -165,6 +165,11 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         }
 
         foreach ($value['values'] as $mediaAttrCode => $attrData) {
+            // Skip null keys - array_key_exists() doesn't accept null in PHP 8.1+
+            if ($attrData === null) {
+                continue;
+            }
+
             if (array_key_exists($attrData, $newImages)) {
                 $object->setData($mediaAttrCode, $newImages[$attrData]['new_file']);
                 $label = $newImages[$attrData]['label'] === null || !empty($newImages[$attrData]['label_use_default']) ? $newImages[$attrData]['label_default'] : $newImages[$attrData]['label'];

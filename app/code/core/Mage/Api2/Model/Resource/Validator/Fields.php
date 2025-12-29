@@ -87,7 +87,7 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
                     }
                     $rule = [
                         'type' => $validatorConfig['type'],
-                        'options' => !empty($validatorConfig['options']) ? $validatorConfig['options'] : [],
+                        'options' => empty($validatorConfig['options']) ? [] : $validatorConfig['options'],
                         'message' => $validatorConfig['message'] ?? null,
                     ];
                     // add to list of rules

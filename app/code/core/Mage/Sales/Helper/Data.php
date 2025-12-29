@@ -154,4 +154,34 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
         }
         return (array) $node;
     }
+
+    /**
+     * Check if current customer has any recurring profiles
+     */
+    public function customerHasRecurringProfiles(): bool
+    {
+        $customer = Mage::getSingleton('customer/session')->getCustomer();
+        if (!$customer || !$customer->getId()) {
+            return false;
+        }
+
+        return Mage::getResourceModel('sales/recurring_profile_collection')
+            ->addFieldToFilter('customer_id', $customer->getId())
+            ->getSize() > 0;
+    }
+
+    /**
+     * Check if current customer has any billing agreements
+     */
+    public function customerHasBillingAgreements(): bool
+    {
+        $customerId = Mage::getSingleton('customer/session')->getCustomerId();
+        if (!$customerId) {
+            return false;
+        }
+
+        return Mage::getResourceModel('sales/billing_agreement_collection')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->getSize() > 0;
+    }
 }

@@ -520,7 +520,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
                 $params = $args;
             }
 
-            Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($child, $callback, $params);
+            Mage::helper('core/security')->ensureBlockMethodAllowed($child, $callback, $params);
             if ($result == call_user_func_array([&$child, $callback], $params)) {
                 $this->unsetChild($alias);
             }
@@ -837,7 +837,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $alias = $block->getBlockAlias();
             if (in_array($alias, $this->_childGroups[$groupName])) {
                 if ($callback) {
-                    Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($this, $callback, [$alias]);
+                    Mage::helper('core/security')->ensureBlockMethodAllowed($this, $callback, [$alias]);
                     $row = $this->$callback($alias);
                     if (!$skipEmptyResults || $row) {
                         $result[$alias] = $row;
@@ -1382,11 +1382,11 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         if ($this->_getApp()->useCache(self::CACHE_GROUP)) {
             $this->_getApp()->setUseSessionVar(false);
-            Varien_Profiler::start('CACHE_URL');
+            \Maho\Profiler::start('CACHE_URL');
             /** @var Mage_Core_Model_Url $model */
             $model = Mage::getSingleton($this->_getUrlModelClass());
             $html = $model->sessionUrlVar($html);
-            Varien_Profiler::stop('CACHE_URL');
+            \Maho\Profiler::stop('CACHE_URL');
         }
         return $html;
     }
@@ -1444,7 +1444,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $tags = json_decode($tagsCache);
         }
         if (!isset($tags) || !is_array($tags) || empty($tags)) {
-            $tags = !$this->hasData(self::CACHE_TAGS_DATA_KEY) ? [] : $this->getData(self::CACHE_TAGS_DATA_KEY);
+            $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY) ? $this->getData(self::CACHE_TAGS_DATA_KEY) : [];
             if (!in_array(self::CACHE_GROUP, $tags)) {
                 $tags[] = self::CACHE_GROUP;
             }
@@ -1461,8 +1461,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     public function addCacheTag($tag)
     {
         $tag = is_array($tag) ? $tag : [$tag];
-        $tags = !$this->hasData(self::CACHE_TAGS_DATA_KEY) ?
-            $tag : array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag);
+        $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY) ?
+            array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag) : $tag;
         $this->setData(self::CACHE_TAGS_DATA_KEY, $tags);
         return $this;
     }
@@ -1568,7 +1568,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      */
     protected function _getTagsCacheKey($cacheKey = null)
     {
-        $cacheKey = !empty($cacheKey) ? $cacheKey : $this->getCacheKey();
+        $cacheKey = empty($cacheKey) ? $this->getCacheKey() : $cacheKey;
         $cacheKey = md5($cacheKey . '_tags');
         return $cacheKey;
     }

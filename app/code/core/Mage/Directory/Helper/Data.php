@@ -80,8 +80,8 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('core/factory');
-        $this->_app = !empty($args['app']) ? $args['app'] : Mage::app();
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
+        $this->_app = empty($args['app']) ? Mage::app() : $args['app'];
     }
 
     /**
@@ -124,7 +124,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRegionJsonByStore($storeId = null)
     {
-        Varien_Profiler::start('TEST: ' . __METHOD__);
+        \Maho\Profiler::start('TEST: ' . __METHOD__);
         if (!$this->_regionJson) {
             $store = $this->_app->getStore($storeId);
             $cacheKey = 'DIRECTORY_REGIONS_JSON_STORE' . (string) $store->getId();
@@ -144,7 +144,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             $this->_regionJson = $json;
         }
 
-        Varien_Profiler::stop('TEST: ' . __METHOD__);
+        \Maho\Profiler::stop('TEST: ' . __METHOD__);
         return $this->_regionJson;
     }
 

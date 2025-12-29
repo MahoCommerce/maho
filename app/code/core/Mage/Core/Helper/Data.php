@@ -22,7 +22,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
     public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
-    public const XML_PATH_CONNECTION_TYPE              = 'global/resources/default_setup/connection/type';
 
     public const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
     public const CHARS_UPPERS                          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -736,19 +735,6 @@ XML;
             throw new Mage_Core_Exception($this->__('Invalid template path: contains parent directory traversal'));
         }
         return true;
-    }
-
-    /**
-     * Check whether database compatible mode is used (configs enable it for MySQL by default).
-     *
-     * @return bool
-     */
-    public function useDbCompatibleMode()
-    {
-        $connType = (string) Mage::getConfig()->getNode(self::XML_PATH_CONNECTION_TYPE);
-        $path = 'global/resource/connection/types/' . $connType . '/compatibleMode';
-        $value = (string) Mage::getConfig()->getNode($path);
-        return (bool) $value;
     }
 
     /**

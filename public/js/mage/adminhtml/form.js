@@ -518,7 +518,7 @@ class formElementDependenceController {
                         });
                     }
                     dependentEl.addEventListener('update', (event) => {
-                        if (event instanceof FormElementDependenceEvent) {
+                        if (event instanceof formElementDependenceEvent) {
                             this.trackChange(event, ...eventArgs);
                         }
                     });

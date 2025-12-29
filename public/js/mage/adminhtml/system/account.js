@@ -34,7 +34,7 @@ class MahoAdminhtmlSystemAccountController
     setPasskeyEnabled(flag) {
         document.getElementById('password_enabled').value = flag ? 0 : 1;
         document.getElementById('passkey_enabled').value = flag ? 1 : 0;
-        document.getElementById('passkey_enabled').dispatchEvent(new FormElementDependenceEvent());
+        document.getElementById('passkey_enabled').dispatchEvent(new formElementDependenceEvent());
     }
 
     async startRegistration() {

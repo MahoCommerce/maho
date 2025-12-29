@@ -260,10 +260,10 @@ class Mage_Catalog_Model_Layer extends Varien_Object
     {
         $state = $this->getData('state');
         if (is_null($state)) {
-            Varien_Profiler::start(__METHOD__);
+            \Maho\Profiler::start(__METHOD__);
             $state = Mage::getModel('catalog/layer_state');
             $this->setData('state', $state);
-            Varien_Profiler::stop(__METHOD__);
+            \Maho\Profiler::stop(__METHOD__);
         }
 
         return $state;

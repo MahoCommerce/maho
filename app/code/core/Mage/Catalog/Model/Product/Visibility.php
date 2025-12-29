@@ -165,19 +165,13 @@ class Mage_Catalog_Model_Product_Visibility extends Varien_Object
     {
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $column = [
+            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
             'unsigned'  => true,
+            'nullable'  => true,
             'default'   => null,
             'extra'     => null,
+            'comment'   => 'Catalog Product Visibility ' . $attributeCode . ' column',
         ];
-
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $column['type']     = 'tinyint';
-            $column['is_null']  = true;
-        } else {
-            $column['type']     = Maho\Db\Ddl\Table::TYPE_SMALLINT;
-            $column['nullable'] = true;
-            $column['comment']  = 'Catalog Product Visibility ' . $attributeCode . ' column';
-        }
 
         return [$attributeCode => $column];
     }

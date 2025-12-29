@@ -296,7 +296,7 @@ class Template
                         }
                         $stackVars[$i]['variable'] = call_user_func_array(
                             [$stackVars[$i - 1]['variable'], $stackVars[$i]['name']],
-                            !$isEncrypted ? $stackVars[$i]['args'] : [null],
+                            $isEncrypted ? [null] : $stackVars[$i]['args'],
                         );
                     }
                 }

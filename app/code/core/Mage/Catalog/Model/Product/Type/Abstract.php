@@ -607,7 +607,10 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
         $entityType = $product->getResource()->getEntityType();
         foreach ($eavConfig->getEntityAttributeCodes($entityType, $product) as $attributeCode) {
             $attribute = $eavConfig->getAttribute($entityType, $attributeCode);
-            $applyTo   = $attribute->getApplyTo();
+            if (!$attribute) {
+                continue;
+            }
+            $applyTo = $attribute->getApplyTo();
             if (is_array($applyTo) && count($applyTo) > 0 && !in_array($product->getTypeId(), $applyTo)) {
                 $product->unsetData($attribute->getAttributeCode());
             }

@@ -136,7 +136,7 @@ abstract class AbstractContainer implements ContainerInterface
     public function addException(string $error, string|int|null $level = null): Exception
     {
         $e = new Exception($error);
-        $e->setLevel(!is_null($level) ? $level : Exception::NOTICE);
+        $e->setLevel(is_null($level) ? Exception::NOTICE : $level);
         $e->setContainer($this);
         $e->setPosition($this->getPosition());
 
