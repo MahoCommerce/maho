@@ -55,11 +55,6 @@ const GAP_SIZES = {
 };
 
 /**
- * Column style options
- */
-const COLUMN_STYLES = ['none', 'cards', 'separated'];
-
-/**
  * MahoColumn Node
  *
  * Individual column container within a columns layout
@@ -273,7 +268,6 @@ export const MahoColumns = Node.create({
                 );
 
                 // Insert at current position
-                const { from } = state.selection;
                 if (dispatch) {
                     tr.replaceSelectionWith(columnsNode);
                     dispatch(tr);

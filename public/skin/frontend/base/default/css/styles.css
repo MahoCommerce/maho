@@ -8081,7 +8081,7 @@ input[type="datetime-local"]:focus {
 
 /* ============================================ *
  * WYSIWYG Content - Columns Layout
-/* ============================================ *
+ * ============================================ */
 [data-type="maho-columns"] {
     display: grid;
     margin: 1rem 0;
