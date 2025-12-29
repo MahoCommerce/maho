@@ -228,27 +228,47 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     {
         $this->_checkIfInstalled();
 
-        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+        /** @var Mage_Install_Model_Installer_SampleData $installer */
+        $installer = Mage::getSingleton('install/installer_sampleData');
 
+        // Clear any previous progress
+        $installer->clearProgress();
+
+        // Clear all output buffers
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        // Send response immediately with Connection: close header
+        $json = Mage::helper('core')->jsonEncode(['success' => true]);
+        header('Content-Type: application/json');
+        header('Content-Length: ' . strlen($json));
+        header('Connection: close');
+        echo $json;
+
+        // Flush output to client
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } else {
+            flush();
+        }
+
+        // Continue processing in background
+        ignore_user_abort(true);
+        set_time_limit(0);
+
+        // Close session to allow progress polling requests to proceed
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        // Now run the installation
+        // Errors are written to progress file by install() method
         try {
-            /** @var Mage_Install_Model_Installer_SampleData $installer */
-            $installer = Mage::getSingleton('install/installer_sampleData');
-
-            // Clear any previous progress
-            $installer->clearProgress();
-
-            // Run installation (this will update progress file as it goes)
             $installer->install();
-
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => true,
-            ]));
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ]));
+            // Error already written to progress file
         }
     }
 
@@ -276,6 +296,59 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
 
         $step = $this->_getWizard()->getStepByName('sampledata');
         $this->getResponse()->setRedirect($step->getNextUrl());
+    }
+
+    /**
+     * Reindex all - only available during installation
+     */
+    public function reindexAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+
+        try {
+            /** @var Mage_Index_Model_Resource_Process_Collection $indexCollection */
+            $indexCollection = Mage::getResourceModel('index/process_collection');
+
+            foreach ($indexCollection as $index) {
+                /** @var Mage_Index_Model_Process $index */
+                if ($index->isLocked()) {
+                    $index->unlock();
+                }
+                $index->reindexEverything();
+            }
+
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(['success' => true]));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
+
+    /**
+     * Flush cache - only available during installation
+     */
+    public function cacheflushAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+
+        try {
+            Mage::app()->getCache()->flush();
+
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(['success' => true]));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
     }
 
     public function administratorAction(): void

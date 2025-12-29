@@ -9,7 +9,7 @@
 
 /** @var Mage_Install_Block_SampleData $this */
 ?>
-<div class="page-head">
+<div class="page-head" id="page-head">
     <h3><?= $this->__('Sample Data') ?></h3>
 </div>
 
@@ -110,9 +110,13 @@
             <div class="phase-indicator"></div>
             <span class="phase-label"><?= $this->__('Database') ?></span>
         </div>
-        <div class="progress-phase" data-phase="finalizing">
+        <div class="progress-phase" data-phase="reindexing">
             <div class="phase-indicator"></div>
-            <span class="phase-label"><?= $this->__('Finalize') ?></span>
+            <span class="phase-label"><?= $this->__('Reindex') ?></span>
+        </div>
+        <div class="progress-phase" data-phase="cache_flush">
+            <div class="phase-indicator"></div>
+            <span class="phase-label"><?= $this->__('Cache') ?></span>
         </div>
     </div>
 
@@ -151,6 +155,7 @@
     const progressUrl = '<?= $this->getProgressUrl() ?>';
     const nextUrl = '<?= $this->getNextStepUrl() ?>';
 
+    const pageHead = document.getElementById('page-head');
     const formContainer = document.getElementById('sampledata-form-container');
     const progressContainer = document.getElementById('sampledata-progress-container');
     const errorContainer = document.getElementById('sampledata-error-container');
@@ -162,15 +167,17 @@
     const progressMessage = document.getElementById('progress-message');
     const errorMessage = document.getElementById('error-message');
 
-    const phaseOrder = ['downloading', 'extracting', 'copying_media', 'importing_data', 'importing_config', 'finalizing', 'complete'];
+    const phaseOrder = ['downloading', 'extracting', 'copying_media', 'importing_data', 'importing_config', 'reindexing', 'cache_flush', 'complete'];
 
     function showProgress() {
+        pageHead.style.display = 'none';
         formContainer.style.display = 'none';
         errorContainer.style.display = 'none';
         progressContainer.style.display = 'block';
     }
 
     function showError(message) {
+        pageHead.style.display = 'none';
         formContainer.style.display = 'none';
         progressContainer.style.display = 'none';
         errorContainer.style.display = 'block';
@@ -178,6 +185,7 @@
     }
 
     function showForm() {
+        pageHead.style.display = 'block';
         progressContainer.style.display = 'none';
         errorContainer.style.display = 'none';
         formContainer.style.display = 'block';

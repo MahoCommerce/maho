@@ -110,21 +110,24 @@ class Mage_Install_Model_Installer_SampleData
             $this->updateProgress('downloading', 0, Mage::helper('install')->__('Downloading sample data...'));
             $this->tempFile = $this->downloadSampleData();
 
-            $this->updateProgress('extracting', 20, Mage::helper('install')->__('Extracting files...'));
+            $this->updateProgress('extracting', 40, Mage::helper('install')->__('Extracting files...'));
             $this->sampleDataDir = $this->extractArchive($this->tempFile);
 
-            $this->updateProgress('copying_media', 30, Mage::helper('install')->__('Copying media files...'));
+            $this->updateProgress('copying_media', 50, Mage::helper('install')->__('Copying media files...'));
             $this->copyMediaFiles($this->sampleDataDir);
 
-            $this->updateProgress('importing_data', 40, Mage::helper('install')->__('Importing database...'));
+            $this->updateProgress('importing_data', 60, Mage::helper('install')->__('Importing database...'));
             $this->importDatabase($this->sampleDataDir);
 
-            $this->updateProgress('importing_config', 85, Mage::helper('install')->__('Importing configuration...'));
+            $this->updateProgress('importing_config', 70, Mage::helper('install')->__('Importing configuration...'));
             $this->importConfig($this->sampleDataDir);
-
-            $this->updateProgress('finalizing', 95, Mage::helper('install')->__('Finalizing installation...'));
             $this->importBlogPosts($this->sampleDataDir);
             $this->cleanup();
+
+            $this->updateProgress('reindexing', 80, Mage::helper('install')->__('Reindexing data...'));
+            $this->reindexAll();
+
+            $this->updateProgress('cache_flush', 95, Mage::helper('install')->__('Flushing caches...'));
             $this->clearCaches();
 
             $this->updateProgress('complete', 100, Mage::helper('install')->__('Sample data installed successfully!'));
@@ -352,14 +355,73 @@ class Mage_Install_Model_Installer_SampleData
     }
 
     /**
-     * Clear caches after installation
+     * Reindex all indexers via HTTP request (fresh PHP process)
+     */
+    private function reindexAll(): void
+    {
+        $url = $this->getInstallUrl('reindex');
+        $result = $this->callInstallEndpoint($url);
+
+        if (!$result['success']) {
+            throw new Mage_Core_Exception(
+                Mage::helper('install')->__('Reindexing failed: %s', $result['error'] ?? 'Unknown error'),
+            );
+        }
+    }
+
+    /**
+     * Clear caches via HTTP request (fresh PHP process)
      */
     private function clearCaches(): void
     {
-        Mage::app()->cleanCache();
-        Mage::getSingleton('eav/config')->clear();
-        Mage::unregister('_singleton/eav/config');
-        Mage::unregister('_helper/eav');
+        $url = $this->getInstallUrl('cacheflush');
+        $result = $this->callInstallEndpoint($url);
+
+        if (!$result['success']) {
+            throw new Mage_Core_Exception(
+                Mage::helper('install')->__('Cache flush failed: %s', $result['error'] ?? 'Unknown error'),
+            );
+        }
+    }
+
+    /**
+     * Get install wizard URL from current request
+     */
+    private function getInstallUrl(string $action): string
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+
+        return "{$scheme}://{$host}{$scriptName}/install/wizard/{$action}/";
+    }
+
+    /**
+     * Call an install endpoint via HTTP
+     */
+    private function callInstallEndpoint(string $url): array
+    {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 300, // 5 minutes for reindex
+                'ignore_errors' => true,
+            ],
+        ]);
+
+        $response = file_get_contents($url, false, $context);
+
+        if ($response === false) {
+            return ['success' => false, 'error' => 'Failed to connect to endpoint'];
+        }
+
+        $data = json_decode($response, true);
+
+        if (!is_array($data)) {
+            return ['success' => false, 'error' => 'Invalid response from endpoint'];
+        }
+
+        return $data;
     }
 
     /**
@@ -388,36 +450,71 @@ class Mage_Install_Model_Installer_SampleData
         $converter = new SqlConverter();
         $converter->setPdo($pdo);
 
+        // Progress ranges from 60% (importing_data start) to 70% (importing_config start)
+        $progressCallback = function ($current, $total): void {
+            $percent = 60 + (int) (($current / max($total, 1)) * 10);
+            $this->updateProgress(
+                'importing_data',
+                $percent,
+                Mage::helper('install')->__('Importing database... (%s/%s)', $current, $total),
+            );
+        };
+
         if ($dbEngine === 'pgsql') {
             $pdo->exec('SET session_replication_role = replica');
             $convertedSql = $converter->mysqlToPostgresql($sql);
-            $converter->executeStatements($pdo, $convertedSql, function ($current, $total): void {
-                $percent = 40 + (int) (($current / max($total, 1)) * 45);
-                $this->updateProgress(
-                    'importing_data',
-                    $percent,
-                    Mage::helper('install')->__('Importing database... (%s/%s)', $current, $total),
-                );
-            });
+            $converter->executeStatements($pdo, $convertedSql, $progressCallback);
             $pdo->exec('SET session_replication_role = DEFAULT');
         } elseif ($dbEngine === 'sqlite') {
             // Disable foreign keys for bulk import (adapter enables them by default)
             $pdo->exec('PRAGMA foreign_keys = OFF');
             $convertedSql = $converter->mysqlToSqlite($sql);
-            $converter->executeStatements($pdo, $convertedSql, function ($current, $total): void {
-                $percent = 40 + (int) (($current / max($total, 1)) * 45);
-                $this->updateProgress(
-                    'importing_data',
-                    $percent,
-                    Mage::helper('install')->__('Importing database... (%s/%s)', $current, $total),
-                );
-            });
+            $converter->executeStatements($pdo, $convertedSql, $progressCallback);
             $pdo->exec('PRAGMA foreign_keys = ON');
         } else {
             // MySQL - disable foreign key checks for bulk import
+            // Don't use executeStatements() as it adds PostgreSQL-specific ON CONFLICT syntax
             $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-            $pdo->exec($sql);
+            $this->executeMysqlStatements($pdo, $sql, $progressCallback);
             $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+        }
+    }
+
+    /**
+     * Execute MySQL statements with progress tracking (without ON CONFLICT conversion)
+     */
+    private function executeMysqlStatements(\PDO $pdo, string $sql, ?callable $progressCallback = null): void
+    {
+        // Split SQL into individual statements
+        $statements = preg_split('/;\s*$/m', $sql);
+        $statements = array_filter(array_map('trim', $statements));
+        $total = count($statements);
+        $current = 0;
+
+        foreach ($statements as $statement) {
+            if (empty($statement)) {
+                continue;
+            }
+
+            try {
+                $pdo->exec($statement);
+            } catch (\PDOException $e) {
+                $shortStatement = substr($statement, 0, 100);
+                throw new \PDOException(
+                    "Failed to execute: {$shortStatement}... Error: " . $e->getMessage(),
+                    (int) $e->getCode(),
+                    $e,
+                );
+            }
+
+            $current++;
+            if ($progressCallback && $current % 100 === 0) {
+                $progressCallback($current, $total);
+            }
+        }
+
+        if ($progressCallback) {
+            $progressCallback($total, $total);
         }
     }
 
