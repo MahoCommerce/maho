@@ -28,6 +28,11 @@
                 <controller>wizard</controller>
                 <action>configuration</action>
             </configuration>
+            <sampledata translate="code">
+                <code>Sample Data</code>
+                <controller>wizard</controller>
+                <action>sampledata</action>
+            </sampledata>
             <administrator translate="code">
                 <code>Administrator</code>
                 <controller>wizard</controller>
