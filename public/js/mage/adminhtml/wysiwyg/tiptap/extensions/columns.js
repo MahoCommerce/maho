@@ -162,6 +162,7 @@ export const MahoColumns = Node.create({
             dom.setAttribute('data-gap', node.attrs.gap);
             dom.setAttribute('data-style', node.attrs.style);
             dom.style.position = 'relative';
+            dom.style.width = '100%';
 
             // Badge button
             const badge = document.createElement('button');
