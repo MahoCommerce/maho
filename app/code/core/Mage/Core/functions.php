@@ -67,6 +67,15 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         return false;
     }
 
+    // Ignore symlink "File exists" warnings from Symfony cache
+    // @see https://github.com/MahoCommerce/maho/issues/269
+    if ($errno === E_WARNING
+        && str_contains($errstr, 'symlink(): File exists')
+        && str_contains($errfile, 'FilesystemTagAwareAdapter.php')
+    ) {
+        return false;
+    }
+
     $errno = $errno & error_reporting();
     if ($errno == 0) {
         return false;
