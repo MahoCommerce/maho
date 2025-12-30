@@ -13,10 +13,12 @@ import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.13';
 import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.13';
 import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.13';
 import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.13';
+import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
 
 export {
     Editor, Node, Mark, Extension, StarterKit, TextAlign,
     Table, TableRow, TableCell, TableHeader, BubbleMenu, DragHandle,
+    MahoColumns, MahoColumn, COLUMN_PRESETS,
 };
 
 const parseDirective = (directiveStr) => {
@@ -115,6 +117,7 @@ export const GlobalAttributes = Extension.create({
                 types: [
                     'heading', 'paragraph', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock',
                     'tableRow', 'tableCell', 'tableHeader', 'table',
+                    'mahoColumns', 'mahoColumn',
                 ],
                 attributes: {
                     class: {
