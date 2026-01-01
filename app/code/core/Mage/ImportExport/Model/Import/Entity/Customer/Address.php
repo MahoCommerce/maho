@@ -139,7 +139,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
         /** @var Mage_Customer_Model_Address $resource */
         $resource       = Mage::getModel('customer/address');
         $table          = $resource->getResource()->getEntityTable();
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextEntityId   = $helper->getNextAutoincrement($table);
         $customerId     = null;

@@ -28,7 +28,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     protected $_order;
 
     /**
-     * @var Mage_Sales_Model_Order_Invoice
+     * @var Mage_Sales_Model_Order|Mage_Sales_Model_Order_Invoice|Mage_Sales_Model_Order_Creditmemo|Maho\DataObject
      */
     protected $_source;
 
@@ -68,7 +68,6 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
      */
     public function initTotals()
     {
-        /** @var Mage_Adminhtml_Block_Sales_Order_Invoice_Totals $parent */
         $parent = $this->getParentBlock();
         $this->_order   = $parent->getOrder();
         $this->_source  = $parent->getSource();

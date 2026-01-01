@@ -115,6 +115,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
                 $result = false;
             }
         } elseif ($entity == Mage_Core_Model_Config_Data::ENTITY) {
+            /** @var Mage_Core_Model_Config_Data $configData */
             $configData = $event->getDataObject();
             if ($configData && in_array($configData->getPath(), $this->_relatedConfigSettings)) {
                 $result = $configData->isValueChanged();

@@ -115,7 +115,6 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                 usort($groups, [$this, '_sortForm']);
 
                 foreach ($groups as $group) {
-                    /** @var Varien_Simplexml_Element $group */
                     if (!$this->_canShowField($group)) {
                         continue;
                     }

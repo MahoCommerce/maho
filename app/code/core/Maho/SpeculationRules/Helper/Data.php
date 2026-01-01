@@ -67,7 +67,6 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
             }
 
             // Parse selectors (one per line)
-            /** @var string[] $selectors */
             $selectors = array_filter(array_map('trim', explode("\n", $selectorsConfig)));
 
             if (empty($selectors)) {

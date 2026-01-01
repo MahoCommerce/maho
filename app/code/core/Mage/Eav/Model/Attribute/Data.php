@@ -37,7 +37,6 @@ class Mage_Eav_Model_Attribute_Data
         $dataModelClass = $attribute->getDataModel();
         if (!empty($dataModelClass)) {
             if (empty(self::$_dataModels[$dataModelClass])) {
-                /** @var Mage_Eav_Model_Attribute_Data_Abstract $dataModel */
                 $dataModel = Mage::getModel($dataModelClass);
                 self::$_dataModels[$dataModelClass] = $dataModel;
             } else {
@@ -46,7 +45,6 @@ class Mage_Eav_Model_Attribute_Data
         } else {
             if (empty(self::$_dataModels[$attribute->getFrontendInput()])) {
                 $dataModelClass = sprintf('eav/attribute_data_%s', $attribute->getFrontendInput());
-                /** @var Mage_Eav_Model_Attribute_Data_Abstract $dataModel */
                 $dataModel      = Mage::getModel($dataModelClass);
                 self::$_dataModels[$attribute->getFrontendInput()] = $dataModel;
             } else {

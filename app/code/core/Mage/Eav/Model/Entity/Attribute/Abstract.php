@@ -643,7 +643,6 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
      */
     public function _getFlatColumnsDdlDefinition()
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper  = Mage::getResourceHelper('eav');
         $columns = [];
         switch ($this->getBackendType()) {

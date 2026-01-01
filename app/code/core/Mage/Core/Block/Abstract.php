@@ -983,8 +983,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      */
     protected function _getUrlModel()
     {
-        /** @var Mage_Core_Model_Url $model */
         $model = Mage::getModel($this->_getUrlModelClass());
+        assert($model instanceof \Mage_Core_Model_Url);
         return $model;
     }
 
@@ -1381,8 +1381,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         if ($this->_getApp()->useCache(self::CACHE_GROUP)) {
             $this->_getApp()->setUseSessionVar(false);
             \Maho\Profiler::start('CACHE_URL');
-            /** @var Mage_Core_Model_Url $model */
             $model = Mage::getSingleton($this->_getUrlModelClass());
+            assert($model instanceof \Mage_Core_Model_Url);
             $html = $model->sessionUrlVar($html);
             \Maho\Profiler::stop('CACHE_URL');
         }

@@ -163,7 +163,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     {
         $adapter = $this->_getWriteAdapter();
         $requestPathField = new Maho\Db\Expr($adapter->quoteIdentifier('request_path'));
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('eav');
         //select increment part of request path and cast expression to integer
         $urlIncrementPartExpression = $helper

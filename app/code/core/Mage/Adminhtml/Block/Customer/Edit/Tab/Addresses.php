@@ -120,7 +120,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
                 ->processStreetAttribute($attributes['street']);
         }
         foreach ($attributes as $attribute) {
-            /** @var Mage_Eav_Model_Entity_Attribute $attribute */
+            /** @var Mage_Customer_Model_Attribute $attribute */
             $attribute->setFrontendLabel(Mage::helper('customer')->__($attribute->getFrontend()->getLabel()));
             $attribute->setNote(Mage::helper('customer')->__($attribute->getNote()));
             $attribute->unsIsVisible();

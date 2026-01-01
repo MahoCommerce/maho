@@ -509,7 +509,6 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      */
     protected function _prepareSelect(\Maho\Db\Select $select)
     {
-        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('core');
 
         $unionParts = $select->getPart(Maho\Db\Select::UNION);

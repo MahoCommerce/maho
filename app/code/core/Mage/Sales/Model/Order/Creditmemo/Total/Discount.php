@@ -38,7 +38,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             $baseTotalDiscountAmount = $baseTotalDiscountAmount + $baseShippingDiscount;
         }
 
-        /** @var Mage_Sales_Model_Order_Invoice_Item $item */
+        /** @var Mage_Sales_Model_Order_Creditmemo_Item $item */
         foreach ($creditmemo->getAllItems() as $item) {
             $orderItem = $item->getOrderItem();
 

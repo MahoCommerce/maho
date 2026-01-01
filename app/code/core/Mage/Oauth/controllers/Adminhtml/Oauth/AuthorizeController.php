@@ -85,10 +85,9 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initForm($simple = false)
     {
-        /** @var Mage_Oauth_Model_Server $server */
         $server = Mage::getModel('oauth/server');
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         $isException = false;
         try {
@@ -132,11 +131,10 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initConfirmPage($simple = false)
     {
-        /** @var Mage_Oauth_Helper_Data $helper */
         $helper = Mage::helper('oauth');
 
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         /** @var Mage_Admin_Model_User $user */
         $user = $session->getData('user');
@@ -187,11 +185,10 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initRejectPage($simple = false)
     {
-        /** @var Mage_Oauth_Model_Server $server */
         $server = Mage::getModel('oauth/server');
 
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         $this->loadLayout();
 

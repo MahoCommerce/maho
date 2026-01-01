@@ -94,8 +94,6 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
         if ($storeId) {
             $adapter = $this->getConnection();
             $entity  = $this->getEntity();
-
-            /** @var Mage_Eav_Model_Resource_Helper_Mysql|Mage_Eav_Model_Resource_Helper_Pgsql $helper */
             $helper = Mage::getResourceHelper('eav');
 
             // see also Mage_Catalog_Model_Resource_Abstract::getAttributeRawValue()
@@ -158,7 +156,6 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
     {
         $storeId = $this->getStoreId();
         if ($storeId) {
-            /** @var Mage_Eav_Model_Resource_Helper_Mysql|Mage_Eav_Model_Resource_Helper_Pgsql $helper */
             $helper = Mage::getResourceHelper('eav');
             $adapter = $this->getConnection();
 

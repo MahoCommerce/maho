@@ -63,9 +63,8 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
             if (!$model = Mage::getStoreConfig($prefix . 'model', $store)) {
                 continue;
             }
-            /** @var Mage_Payment_Model_Method_Abstract|false $methodInstance */
             $methodInstance = Mage::getModel($model);
-            if (!$methodInstance) {
+            if (!$methodInstance instanceof Mage_Payment_Model_Method_Abstract) {
                 continue;
             }
             $methodInstance->setStore($store);
@@ -173,9 +172,8 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
                 continue;
             }
 
-            /** @var Mage_Payment_Model_Method_Abstract $method */
             $method = Mage::getModel($paymentMethodModelClassName);
-            if ($method && $method->canManageRecurringProfiles()) {
+            if ($method instanceof Mage_Payment_Model_Method_Abstract && $method->canManageRecurringProfiles()) {
                 $result[] = $method;
             }
         }
@@ -227,7 +225,10 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
             } else {
                 $paymentMethodModelClassName = $this->getMethodModelClassName($code);
                 if ($paymentMethodModelClassName) {
-                    $methods[$code] = Mage::getModel($paymentMethodModelClassName)->getConfigData('title', $store);
+                    $paymentMethod = Mage::getModel($paymentMethodModelClassName);
+                    if ($paymentMethod instanceof Mage_Payment_Model_Method_Abstract) {
+                        $methods[$code] = $paymentMethod->getConfigData('title', $store);
+                    }
                 }
             }
             if ($asLabelValue && $withGroups && isset($data['group'])) {

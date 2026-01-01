@@ -79,7 +79,6 @@ class Mage_Api_Model_Server
         $adapters = $helper->getActiveAdapters();
 
         if (isset($adapters[$adapterCode])) {
-            /** @var Mage_Api_Model_Server_Adapter_Interface $adapterModel */
             $adapterModel = Mage::getModel((string) $adapters[$adapterCode]->model);
 
             if (!($adapterModel instanceof Mage_Api_Model_Server_Adapter_Interface)) {

@@ -201,7 +201,6 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
             // apply field options
             foreach ($this->_fieldOptions as $fieldId => $fieldOptions) {
                 $field = $fieldset->getElements()->searchById($fieldId);
-                /** @var Varien_Object $field */
                 if ($field) {
                     foreach ($fieldOptions as $k => $v) {
                         $field->setDataUsingMethod($k, $v);

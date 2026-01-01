@@ -42,7 +42,6 @@ class Mage_Api2_Model_Auth
                 Mage_Api2_Model_Server::HTTP_UNAUTHORIZED,
             );
         }
-        /** @var Mage_Api2_Model_Auth_User_Abstract $userModel */
         $userModel = Mage::getModel($userTypes[$userParamsObj->type]);
 
         if (!$userModel instanceof Mage_Api2_Model_Auth_User_Abstract) {

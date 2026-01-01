@@ -66,7 +66,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 ),
             );
 
-            /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
             $helper = Mage::getResourceHelper('core');
             $select = $adapter->select();
 
@@ -232,7 +231,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
         /** @var Mage_Catalog_Model_Resource_Product $product */
         $product    = Mage::getResourceSingleton('catalog/product');
         $attr       = $product->getAttribute('price');
-        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper     = Mage::getResourceHelper('core');
 
         $columns = [
@@ -306,7 +304,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
             'yearly'  => self::AGGREGATION_YEARLY,
         ];
 
-        /** @var Mage_Sales_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('sales');
         $helper->getBestsellersReportUpdateRatingPos(
             $aggregation,

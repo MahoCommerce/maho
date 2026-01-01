@@ -185,11 +185,11 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     {
         $data = $this->getRequest()->getPost();
         if ($data) {
-            /** @var Mage_Admin_Model_Session $session */
+            /** @var Mage_Adminhtml_Model_Session $session */
             $session = Mage::getSingleton('adminhtml/session');
 
             $redirectBack   = $this->getRequest()->getParam('back', false);
-            /** @var Mage_Catalog_Model_Entity_Attribute $model */
+            /** @var Mage_Catalog_Model_Resource_Eav_Attribute $model */
             $model = Mage::getModel('catalog/resource_eav_attribute');
             /** @var Mage_Catalog_Helper_Product $helper */
             $helper = Mage::helper('catalog/product');

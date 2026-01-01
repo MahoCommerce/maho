@@ -193,7 +193,6 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
                     ->save();
             }
 
-            /** @var Mage_Eav_Model_Entity_Increment_Abstract $incrementInstance */
             $incrementInstance = Mage::getModel($this->getIncrementModel())
                 ->setPrefix($entityStoreConfig->getIncrementPrefix())
                 ->setPadLength($this->getIncrementPadLength())
@@ -332,8 +331,10 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
      */
     public function getEntity()
     {
-        /** @var Mage_Eav_Model_Entity_Abstract $entity */
         $entity = Mage::getResourceSingleton($this->_data['entity_model']);
+        if (!$entity instanceof Mage_Eav_Model_Entity_Abstract) {
+            throw new Mage_Core_Exception('Invalid entity model');
+        }
         return $entity;
     }
 

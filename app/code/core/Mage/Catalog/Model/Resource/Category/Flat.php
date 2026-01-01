@@ -628,7 +628,6 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     protected function _getStaticColumns()
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalog');
         $columns = [];
         $columnsToSkip = ['entity_type_id', 'attribute_set_id'];

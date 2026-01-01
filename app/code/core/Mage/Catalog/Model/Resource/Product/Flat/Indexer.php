@@ -437,7 +437,6 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
      */
     protected function _compareColumnProperties($column, $describe)
     {
-        /** @var Mage_Catalog_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalog');
         return $helper->compareIndexColumnProperties($column, $describe);
     }
