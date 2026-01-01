@@ -308,10 +308,7 @@ class Mage_Core_Controller_Request_Http
 
     public function __get(string $key): mixed
     {
-        if (isset($this->_params[$key])) {
-            return $this->_params[$key];
-        }
-        return $_GET[$key] ?? $_POST[$key] ?? $_COOKIE[$key] ?? $_SERVER[$key] ?? $_ENV[$key] ?? null;
+        return $this->_params[$key] ?? $_GET[$key] ?? $_POST[$key] ?? $_COOKIE[$key] ?? $_SERVER[$key] ?? $_ENV[$key] ?? null;
     }
 
     public function get(string $key): mixed
