@@ -1191,13 +1191,13 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function getProductCount($category)
     {
-        $select =  $this->_getReadAdapter()->select()
+        $select = $this->_getReadAdapter()->select()
             ->from(
-                $this->getTable('catalog/category_product'),
-                "COUNT({$this->getTable('catalog/category_product')}.product_id)",
+                ['main_table' => $this->getTable('catalog/category_product')],
+                [new \Maho\Db\Expr('COUNT(main_table.product_id)')],
             )
-            ->where("{$this->getTable('catalog/category_product')}.category_id = ?", $category->getId())
-            ->group("{$this->getTable('catalog/category_product')}.category_id");
+            ->where('main_table.category_id = ?', $category->getId());
+
         return (int) $this->_getReadAdapter()->fetchOne($select);
     }
 
