@@ -46,6 +46,11 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
     #[\Override]
     public function isEnabled($skipAdminCheck = false)
     {
+        // Flat catalog is only supported on MySQL
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof Maho\Db\Adapter\Pdo\Mysql)) {
+            return false;
+        }
         return Mage::getStoreConfigFlag(self::XML_PATH_IS_ENABLED_FLAT_CATALOG_CATEGORY);
     }
 

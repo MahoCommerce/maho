@@ -20,7 +20,13 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Select_Flatproduct extends M
     #[\Override]
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
     {
-        if (!Mage::helper('catalog/product_flat')->isBuilt()) {
+        // Flat catalog is only supported on MySQL
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        if (!($adapter instanceof Maho\Db\Adapter\Pdo\Mysql)) {
+            $element->setDisabled(true)
+                ->setValue(0)
+                ->setComment('Flat catalog is only supported with MySQL database engine.');
+        } elseif (!Mage::helper('catalog/product_flat')->isBuilt()) {
             $element->setDisabled(true)
                 ->setValue(0);
         }
