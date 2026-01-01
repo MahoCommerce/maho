@@ -726,18 +726,16 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
             case '>':
                 if (!is_scalar($validatedValue)) {
                     return false;
-                } else {
-                    $result = $validatedValue <= $value;
                 }
+                $result = $validatedValue <= $value;
                 break;
 
             case '>=':
             case '<':
                 if (!is_scalar($validatedValue)) {
                     return false;
-                } else {
-                    $result = $validatedValue >= $value;
                 }
+                $result = $validatedValue >= $value;
                 break;
 
             case '{}':
@@ -809,14 +807,13 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     {
         if ($strict && is_numeric($validatedValue) && is_numeric($value)) {
             return $validatedValue == $value;
-        } else {
-            $validatedValue ??= '';
-            $validatePattern = preg_quote($validatedValue, '~');
-            if ($strict) {
-                $validatePattern = '^' . $validatePattern . '$';
-            }
-            return (bool) preg_match('~' . $validatePattern . '~iu', $value);
         }
+        $validatedValue ??= '';
+        $validatePattern = preg_quote($validatedValue, '~');
+        if ($strict) {
+            $validatePattern = '^' . $validatePattern . '$';
+        }
+        return (bool) preg_match('~' . $validatePattern . '~iu', $value);
     }
 
     /**

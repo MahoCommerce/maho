@@ -204,6 +204,153 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         }
     }
 
+    public function sampledataAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        // Clear any previous progress state when loading the page
+        Mage::getSingleton('install/installer_sampleData')->clearProgress();
+
+        $this->setFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT, true);
+        $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
+
+        $this->_prepareLayout();
+        $this->_initLayoutMessages('install/session');
+
+        $this->getLayout()->getBlock('content')->append(
+            $this->getLayout()->createBlock('install/sampleData', 'install.sampledata'),
+        );
+
+        $this->renderLayout();
+    }
+
+    public function sampledataPostAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        /** @var Mage_Install_Model_Installer_SampleData $installer */
+        $installer = Mage::getSingleton('install/installer_sampleData');
+
+        // Clear any previous progress
+        $installer->clearProgress();
+
+        // Clear all output buffers
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        // Send response immediately with Connection: close header
+        $json = Mage::helper('core')->jsonEncode(['success' => true]);
+        header('Content-Type: application/json');
+        header('Content-Length: ' . strlen($json));
+        header('Connection: close');
+        echo $json;
+
+        // Flush output to client
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } else {
+            flush();
+        }
+
+        // Continue processing in background
+        ignore_user_abort(true);
+        set_time_limit(0);
+
+        // Close session to allow progress polling requests to proceed
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        // Now run the installation
+        // Errors are written to progress file by install() method
+        try {
+            $installer->install();
+        } catch (Exception $e) {
+            Mage::logException($e);
+            // Error already written to progress file
+        }
+    }
+
+    public function sampledataProgressAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+
+        /** @var Mage_Install_Model_Installer_SampleData $installer */
+        $installer = Mage::getSingleton('install/installer_sampleData');
+        $progress = $installer->getProgress();
+
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($progress));
+    }
+
+    public function sampledataSkipAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        // Clear any progress file
+        /** @var Mage_Install_Model_Installer_SampleData $installer */
+        $installer = Mage::getSingleton('install/installer_sampleData');
+        $installer->clearProgress();
+
+        $step = $this->_getWizard()->getStepByName('sampledata');
+        $this->getResponse()->setRedirect($step->getNextUrl());
+    }
+
+    /**
+     * Reindex all - only available during installation
+     */
+    public function reindexAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+
+        try {
+            /** @var Mage_Index_Model_Resource_Process_Collection $indexCollection */
+            $indexCollection = Mage::getResourceModel('index/process_collection');
+
+            foreach ($indexCollection as $index) {
+                /** @var Mage_Index_Model_Process $index */
+                if ($index->isLocked()) {
+                    $index->unlock();
+                }
+                $index->reindexEverything();
+            }
+
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(['success' => true]));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
+
+    /**
+     * Flush cache - only available during installation
+     */
+    public function cacheflushAction(): void
+    {
+        $this->_checkIfInstalled();
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+
+        try {
+            Mage::app()->getCache()->flush();
+
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode(['success' => true]));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
+
     public function administratorAction(): void
     {
         $this->_checkIfInstalled();

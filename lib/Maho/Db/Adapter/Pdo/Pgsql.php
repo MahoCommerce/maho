@@ -228,9 +228,8 @@ class Pgsql extends AbstractPdoAdapter
 
         if (empty($field)) {
             return $row;
-        } else {
-            return $row[$field] ?? false;
         }
+        return $row[$field] ?? false;
     }
 
     /**
@@ -2840,9 +2839,8 @@ class Pgsql extends AbstractPdoAdapter
         $value = str_replace("\0", '', (string) $value);
         if ($value == '') {
             return ($conditionKey == 'seq') ? 'null' : 'notnull';
-        } else {
-            return ($conditionKey == 'seq') ? 'eq' : 'neq';
         }
+        return ($conditionKey == 'seq') ? 'eq' : 'neq';
     }
 
     /**

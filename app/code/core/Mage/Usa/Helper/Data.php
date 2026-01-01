@@ -124,9 +124,8 @@ class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
         ])
         ) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

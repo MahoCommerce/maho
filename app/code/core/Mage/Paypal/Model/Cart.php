@@ -149,7 +149,6 @@ class Mage_Paypal_Model_Cart
     public function getTotals($mergeDiscount = false)
     {
         $this->_render();
-
         // cut down totals to one total if they are invalid
         if (!$this->_areTotalsValid) {
             $totals = [
@@ -162,7 +161,9 @@ class Mage_Paypal_Model_Cart
                 $totals[self::TOTAL_SUBTOTAL] -= $this->_totals[self::TOTAL_DISCOUNT];
             }
             return $totals;
-        } elseif ($mergeDiscount) {
+        }
+
+        if ($mergeDiscount) {
             $totals = $this->_totals;
             unset($totals[self::TOTAL_DISCOUNT]);
             if (!$this->_isDiscountAsItem) {

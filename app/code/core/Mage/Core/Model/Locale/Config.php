@@ -6,6 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,7 +45,7 @@ class Mage_Core_Model_Locale_Config
         'th_TH' /*Thai (Thailand)*/,            'tr_TR' /*Turkish (Turkey)*/,       'uk_UA' /*Ukrainian (Ukraine)*/,
         'vi_VN' /*Vietnamese (Vietnam)*/,       'zh_CN' /*Chinese (China)*/,        'zh_HK' /*Chinese (Hong Kong SAR)*/,
         'zh_TW' /*Chinese (Taiwan)*/,           'es_CL' /*Spanich (Chile)*/,        'lo_LA' /*Laotian*/,
-        'es_VE' /*Spanish (Venezuela)*/,        'en_IE' /*English (Ireland)*/,
+        'es_VE' /*Spanish (Venezuela)*/,        'en_IE' /*English (Ireland)*/,      'es_BO' /*Spanish (Bolivia)*/,
         'fr_CH' /*French (Switzerland)*/,
     ];
 

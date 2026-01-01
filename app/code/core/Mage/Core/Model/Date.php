@@ -113,7 +113,8 @@ class Mage_Core_Model_Date
     {
         if (is_null($input)) {
             return gmdate('U');
-        } elseif (is_numeric($input)) {
+        }
+        if (is_numeric($input)) {
             $result = $input;
         } else {
             $result = strtotime($input);

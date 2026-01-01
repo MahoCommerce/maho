@@ -345,7 +345,8 @@ abstract class AbstractElement extends AbstractForm
     {
         if ($this->hasData('container_id')) {
             return $this->getData('container_id');
-        } elseif ($idPrefix = $this->getForm()->getFieldContainerIdPrefix()) {
+        }
+        if ($idPrefix = $this->getForm()->getFieldContainerIdPrefix()) {
             return $idPrefix . $this->getId();
         }
         return '';

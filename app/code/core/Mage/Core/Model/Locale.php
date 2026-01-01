@@ -450,9 +450,8 @@ class Mage_Core_Model_Locale extends Varien_Object
         if (Mage::isInstalled()) {
             $data = Mage::app()->getStore()->getConfig(self::XML_PATH_ALLOW_CURRENCIES_INSTALLED);
             return explode(',', $data);
-        } else {
-            $data = Mage::getSingleton('core/locale_config')->getAllowedCurrencies();
         }
+        $data = Mage::getSingleton('core/locale_config')->getAllowedCurrencies();
         return $data;
     }
 
@@ -625,9 +624,8 @@ class Mage_Core_Model_Locale extends Varien_Object
 
                 if ($includeTime) {
                     return $dateObj->format(self::HTML5_DATETIME_FORMAT);
-                } else {
-                    return $dateObj->format(self::DATE_FORMAT);
                 }
+                return $dateObj->format(self::DATE_FORMAT);
             } catch (Exception $e) {
                 return null;
             }
@@ -1338,10 +1336,9 @@ class Mage_Core_Model_Locale extends Varien_Object
             $countryName = Locale::getDisplayRegion('-' . $countryId, $displayLocale);
             if ($countryName && $countryName !== $countryId) {
                 return $countryName;
-            } else {
-                // Use country code itself as fallback when translation fails
-                return $countryId;
             }
+            // Use country code itself as fallback when translation fails
+            return $countryId;
         } catch (IntlException $e) {
             // Use country code itself as fallback for exceptions
             return $countryId;

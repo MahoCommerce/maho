@@ -99,9 +99,8 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
 
         if ($this->getCustomerAddressCount()) {
             return $this->getUrl('customer/address');
-        } else {
-            return $this->getUrl('customer/account/');
         }
+        return $this->getUrl('customer/account/');
     }
 
     /**
@@ -203,8 +202,7 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     {
         if ($this->getCustomerAddressCount()) {
             return $this->getUrl('customer/address');
-        } else {
-            return $this->getUrl('customer/account/');
         }
+        return $this->getUrl('customer/account/');
     }
 }

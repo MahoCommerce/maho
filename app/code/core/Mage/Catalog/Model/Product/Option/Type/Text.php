@@ -59,9 +59,8 @@ class Mage_Catalog_Model_Product_Option_Type_Text extends Mage_Catalog_Model_Pro
     {
         if ($this->getIsValid() && $this->getUserValue() !== '') {
             return $this->getUserValue();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

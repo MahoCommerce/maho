@@ -282,9 +282,8 @@ class Mysql extends AbstractPdoAdapter
 
         if (empty($field)) {
             return $row;
-        } else {
-            return $row[$field] ?? false;
         }
+        return $row[$field] ?? false;
     }
 
     /**
@@ -1202,18 +1201,19 @@ class Mysql extends AbstractPdoAdapter
             }
             return implode(', ', $quoted);
         }
-
         // Handle numeric types
         if ($type !== null
             && array_key_exists($type = strtoupper($type), $this->_numericDataTypes)
-            && $this->_numericDataTypes[$type] == self::FLOAT_TYPE
-        ) {
+            && $this->_numericDataTypes[$type] == self::FLOAT_TYPE) {
             $value = $this->_convertFloat($value);
             $quoteValue = sprintf('%F', $value);
             return $quoteValue;
-        } elseif (is_float($value)) {
+        }
+        if (is_float($value)) {
             return (string) $this->_quote($value);
-        } elseif (is_int($value)) {
+        }
+
+        if (is_int($value)) {
             return (string) $value;
         }
 
@@ -1255,13 +1255,12 @@ class Mysql extends AbstractPdoAdapter
 
         if ($count === null) {
             return str_replace('?', (string) $this->quote($value, $type), $text, $count);
-        } else {
-            while ($count > 0) {
-                $text = substr_replace($text, (string) $this->quote($value, $type), strpos($text, '?'), 1);
-                --$count;
-            }
-            return $text;
         }
+        while ($count > 0) {
+            $text = substr_replace($text, (string) $this->quote($value, $type), strpos($text, '?'), 1);
+            --$count;
+        }
+        return $text;
     }
 
     /**
@@ -2872,9 +2871,8 @@ class Mysql extends AbstractPdoAdapter
         $value = str_replace("\0", '', (string) $value);
         if ($value == '') {
             return ($conditionKey == 'seq') ? 'null' : 'notnull';
-        } else {
-            return ($conditionKey == 'seq') ? 'eq' : 'neq';
         }
+        return ($conditionKey == 'seq') ? 'eq' : 'neq';
     }
 
     /**
@@ -3891,9 +3889,8 @@ class Mysql extends AbstractPdoAdapter
         $indexes = $this->getIndexList($tableName, $schemaName);
         if (isset($indexes['PRIMARY'])) {
             return $indexes['PRIMARY']['KEY_NAME'];
-        } else {
-            return 'PK_' . strtoupper($tableName);
         }
+        return 'PK_' . strtoupper($tableName);
     }
 
     /**

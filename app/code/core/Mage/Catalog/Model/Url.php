@@ -703,9 +703,8 @@ class Mage_Catalog_Model_Url
             return $match['prefix']
                 . (empty($match['increment']) ? ('1') : (int) $match['increment'] + 1)
                 . $match['suffix'];
-        } else {
-            return $requestPath;
         }
+        return $requestPath;
     }
 
     /**

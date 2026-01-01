@@ -175,18 +175,20 @@ class SampleDataImporter
         }
 
         $driver = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-
         if ($driver === 'mysql') {
             $stmt = $this->pdo->query('SHOW COLUMNS FROM ' . $this->quoteIdentifier($table));
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
-        } elseif ($driver === 'pgsql') {
+        }
+        if ($driver === 'pgsql') {
             $stmt = $this->pdo->prepare('
                 SELECT column_name FROM information_schema.columns
                 WHERE table_name = ? ORDER BY ordinal_position
             ');
             $stmt->execute([$table]);
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'column_name');
-        } elseif ($driver === 'sqlite') {
+        }
+
+        if ($driver === 'sqlite') {
             $stmt = $this->pdo->query('PRAGMA table_info(' . $this->quoteIdentifier($table) . ')');
             return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'name');
         }

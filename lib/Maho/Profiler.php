@@ -94,7 +94,8 @@ class Profiler
     {
         if (empty(self::$_timers[$timerName])) {
             return false;
-        } elseif (empty($key)) {
+        }
+        if (empty($key)) {
             return self::$_timers[$timerName];
         }
         switch ($key) {

@@ -887,9 +887,8 @@ class Mage_Core_Model_App
             if ($this->_currentStore) {
                 $this->getRequest()->setActionName('noRoute');
                 return new Varien_Object();
-            } else {
-                Mage::throwException(Mage::helper('core')->__('Requested invalid store "%s"', $id));
             }
+            Mage::throwException(Mage::helper('core')->__('Requested invalid store "%s"', $id));
         }
     }
 

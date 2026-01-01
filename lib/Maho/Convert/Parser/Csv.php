@@ -40,10 +40,9 @@ class Csv extends AbstractParser
                 if ($this->getVar('fieldnames')) {
                     $fields = $line;
                     continue;
-                } else {
-                    foreach (array_keys($line) as $j) {
-                        $fields[$j] = 'column' . ($j + 1);
-                    }
+                }
+                foreach (array_keys($line) as $j) {
+                    $fields[$j] = 'column' . ($j + 1);
                 }
             }
             $row = [];
@@ -84,10 +83,9 @@ class Csv extends AbstractParser
                 if ($this->getVar('fieldnames')) {
                     $fields = $line;
                     continue;
-                } else {
-                    foreach (array_keys($line) as $j) {
-                        $fields[$j] = 'column' . ($j + 1);
-                    }
+                }
+                foreach (array_keys($line) as $j) {
+                    $fields[$j] = 'column' . ($j + 1);
                 }
             }
             $row = [];

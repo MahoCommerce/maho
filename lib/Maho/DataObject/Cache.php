@@ -221,7 +221,8 @@ class Cache
             unset($this->_objects[$idx]);
             //Maho\Profiler::stop("OBJECT_DELETE");
             return false;
-        } elseif (!isset($this->_objects[$idx])) {
+        }
+        if (!isset($this->_objects[$idx])) {
             //Maho\Profiler::stop("OBJECT_DELETE");
             return false;
         }

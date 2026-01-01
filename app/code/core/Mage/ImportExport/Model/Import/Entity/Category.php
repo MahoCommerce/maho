@@ -200,9 +200,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     {
         if (Mage_ImportExport_Model_Import::BEHAVIOR_DELETE == $this->getBehavior()) {
             return $this->_deleteCategories();
-        } elseif (Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE == $this->getBehavior()) {
+        }
+        if (Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE == $this->getBehavior()) {
             return $this->_saveAndReplaceCategories();
-        } elseif (Mage_ImportExport_Model_Import::BEHAVIOR_APPEND == $this->getBehavior()) {
+        }
+        if (Mage_ImportExport_Model_Import::BEHAVIOR_APPEND == $this->getBehavior()) {
             return $this->_saveCategories();
         }
 
@@ -998,12 +1000,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 parent::validateData();
                 $this->_permanentAttributes = $originalPermanentAttributes;
                 return $this;
-            } else {
-                // Neither column present - add a custom error and return this
-                $this->addRowError(self::ERROR_DELETE_IDENTIFIER_MISSING, 0);
-                $this->_permanentAttributes = $originalPermanentAttributes;
-                return $this;
             }
+            // Neither column present - add a custom error and return this
+            $this->addRowError(self::ERROR_DELETE_IDENTIFIER_MISSING, 0);
+            $this->_permanentAttributes = $originalPermanentAttributes;
+            return $this;
         }
 
         // For non-DELETE behaviors, require parent_id for new categories

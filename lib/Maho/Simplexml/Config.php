@@ -119,11 +119,11 @@ class Config
     {
         if (!$this->_xml instanceof Element) {
             return false;
-        } elseif ($path === null) {
-            return $this->_xml;
-        } else {
-            return $this->_xml->descend($path);
         }
+        if ($path === null) {
+            return $this->_xml;
+        }
+        return $this->_xml->descend($path);
     }
 
     /**

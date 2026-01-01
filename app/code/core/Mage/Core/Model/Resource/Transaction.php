@@ -144,9 +144,8 @@ class Mage_Core_Model_Resource_Transaction
         if ($error) {
             $this->_rollbackTransaction();
             throw $error;
-        } else {
-            $this->_commitTransaction();
         }
+        $this->_commitTransaction();
 
         return $this;
     }
@@ -181,9 +180,8 @@ class Mage_Core_Model_Resource_Transaction
         if ($error) {
             $this->_rollbackTransaction();
             throw $error;
-        } else {
-            $this->_commitTransaction();
         }
+        $this->_commitTransaction();
         return $this;
     }
 }

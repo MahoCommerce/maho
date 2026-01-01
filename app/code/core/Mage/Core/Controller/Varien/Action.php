@@ -165,11 +165,8 @@ abstract class Mage_Core_Controller_Varien_Action
         }
         if ($flag === '') {
             return $this->_flags;
-        } elseif (isset($this->_flags[$action][$flag])) {
-            return $this->_flags[$action][$flag];
-        } else {
-            return false;
         }
+        return $this->_flags[$action][$flag] ?? false;
     }
 
     /**
@@ -1077,9 +1074,8 @@ abstract class Mage_Core_Controller_Varien_Action
                 }
 
                 exit(0);
-            } else {
-                $this->getResponse()->setBody($content);
             }
+            $this->getResponse()->setBody($content);
         }
         return $this;
     }

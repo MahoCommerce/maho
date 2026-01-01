@@ -217,9 +217,8 @@ class Template
 
         if ($this->_getVariable($construction[1], '') == '') {
             return '';
-        } else {
-            return $construction[2];
         }
+        return $construction[2];
     }
 
     public function ifDirective($construction)
@@ -233,9 +232,8 @@ class Template
                 return $construction[4];
             }
             return '';
-        } else {
-            return $construction[2];
         }
+        return $construction[2];
     }
 
     /**

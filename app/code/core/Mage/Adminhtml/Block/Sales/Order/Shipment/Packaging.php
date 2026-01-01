@@ -204,7 +204,8 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
         foreach ($items as $item) {
             if ($itemsOf === 'order' && $item->getOrderItemId() == $itemId) {
                 return $item;
-            } elseif ($itemsOf === 'shipment' && $item->getId() == $itemId) {
+            }
+            if ($itemsOf === 'shipment' && $item->getId() == $itemId) {
                 return $item;
             }
         }
@@ -347,8 +348,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
     {
         if ($itemId) {
             return $this->getShipment()->getOrder()->getItemById($itemId)->getQtyOrdered() * 1;
-        } else {
-            return;
         }
+        return;
     }
 }

@@ -67,8 +67,7 @@ class Mage_Oauth_Model_Resource_Token extends Mage_Core_Model_Resource_Db_Abstra
                     date(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $minutes * 60),
                 ),
             );
-        } else {
-            return 0;
         }
+        return 0;
     }
 }

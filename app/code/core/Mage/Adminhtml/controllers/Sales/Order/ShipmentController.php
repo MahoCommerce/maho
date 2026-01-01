@@ -547,25 +547,25 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                         $labelContent,
                         'application/zip',
                     );
-                } elseif (stripos($labelContent, '%PDF-') !== false) {
+                }
+                if (stripos($labelContent, '%PDF-') !== false) {
                     // Single PDF file
                     return $this->_prepareDownloadResponse(
                         'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
                         $labelContent,
                         'application/pdf',
                     );
+                }
+                // Image content - convert to PDF
+                $pdfContent = $this->createPdfFromImageString($labelContent, $shipment->getIncrementId());
+                if (!$pdfContent) {
+                    $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
                 } else {
-                    // Image content - convert to PDF
-                    $pdfContent = $this->createPdfFromImageString($labelContent, $shipment->getIncrementId());
-                    if (!$pdfContent) {
-                        $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
-                    } else {
-                        return $this->_prepareDownloadResponse(
-                            'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
-                            $pdfContent,
-                            'application/pdf',
-                        );
-                    }
+                    return $this->_prepareDownloadResponse(
+                        'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
+                        $pdfContent,
+                        'application/pdf',
+                    );
                 }
             }
         } catch (Mage_Core_Exception $e) {

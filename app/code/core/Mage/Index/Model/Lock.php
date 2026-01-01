@@ -99,9 +99,8 @@ class Mage_Index_Model_Lock
     {
         if ($file) {
             return $this->_setLockFile($lockName, $block);
-        } else {
-            return $this->_setLockDb($lockName, $block);
         }
+        return $this->_setLockDb($lockName, $block);
     }
 
     /**
@@ -162,9 +161,8 @@ class Mage_Index_Model_Lock
     {
         if ($file) {
             return $this->_releaseLockFile($lockName);
-        } else {
-            return $this->_releaseLockDb($lockName);
         }
+        return $this->_releaseLockDb($lockName);
     }
 
     /**
@@ -208,9 +206,8 @@ class Mage_Index_Model_Lock
     {
         if ($file) {
             return $this->_isLockExistsFile($lockName);
-        } else {
-            return $this->_isLockExistsDb($lockName);
         }
+        return $this->_isLockExistsDb($lockName);
     }
 
     /**

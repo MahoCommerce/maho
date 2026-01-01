@@ -177,7 +177,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
             return true;
         }
         // not found and we're making sure it doesn't exist
-        elseif (!$found && !$true) {
+        if (!$found && !$true) {
             return true;
         }
         return false;
