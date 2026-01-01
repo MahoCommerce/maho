@@ -82,10 +82,10 @@
         "mahocommerce/maho-phpstan-plugin": "^4.1",
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
         "rector/rector": "^2",
         "pestphp/pest": "^4",
-        "psy/psysh": "^0.12.10",
-        "phpstan/phpstan-strict-rules": "^2.0"
+        "psy/psysh": "^0.12.10"
     },
     "suggest": {
         "ext-pdo_pgsql": "Required for PostgreSQL database support",
