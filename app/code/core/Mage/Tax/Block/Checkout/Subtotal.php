@@ -22,7 +22,7 @@ class Mage_Tax_Block_Checkout_Subtotal extends Mage_Checkout_Block_Total_Default
     /**
      * The factory instance to get helper
      *
-     * @var Mage_Core_Model_Factory
+     * @var Mage_Core_Model_Factory|null
      */
     protected $_factory;
 

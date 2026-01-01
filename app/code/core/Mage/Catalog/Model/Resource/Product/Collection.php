@@ -128,7 +128,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Map of price fields
      *
-     * @var array
+     * @var array|null
      */
     protected $_map = ['fields' => [
         'price'         => 'price_index.price',

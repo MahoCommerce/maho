@@ -131,7 +131,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Cache flag
      *
-     * @var bool
+     * @var string|bool|array
      */
     protected $_cacheTag    = true;
 

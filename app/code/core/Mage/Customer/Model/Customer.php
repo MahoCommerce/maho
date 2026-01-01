@@ -218,7 +218,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Model cache tag for clear cache in after save and after delete
      *
-     * @var string
+     * @var string|bool|array
      */
     protected $_cacheTag = self::CACHE_TAG;
 

@@ -49,8 +49,19 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     public const CHECK_RECURRING_PROFILES    = 64;
     public const CHECK_ZERO_TOTAL            = 128;
 
+    /**
+     * @var string
+     */
     protected $_code;
+
+    /**
+     * @var string
+     */
     protected $_formBlockType = 'payment/form';
+
+    /**
+     * @var string
+     */
     protected $_infoBlockType = 'payment/info';
 
     /**
@@ -58,21 +69,53 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @var bool
      */
     protected $_isGateway                   = false;
+
+    /** @var bool */
     protected $_canOrder                    = false;
+
+    /** @var bool */
     protected $_canAuthorize                = false;
+
+    /** @var bool */
     protected $_canCapture                  = false;
+
+    /** @var bool */
     protected $_canCapturePartial           = false;
+
+    /** @var bool */
     protected $_canCaptureOnce              = false;
+
+    /** @var bool */
     protected $_canRefund                   = false;
+
+    /** @var bool */
     protected $_canRefundInvoicePartial     = false;
+
+    /** @var bool */
     protected $_canVoid                     = false;
+
+    /** @var bool */
     protected $_canUseInternal              = true;
+
+    /** @var bool */
     protected $_canUseCheckout              = true;
+
+    /** @var bool */
     protected $_canUseForMultishipping      = true;
+
+    /** @var bool */
     protected $_isInitializeNeeded          = false;
+
+    /** @var bool */
     protected $_canFetchTransactionInfo     = false;
+
+    /** @var bool */
     protected $_canReviewPayment            = false;
+
+    /** @var bool */
     protected $_canCreateBillingAgreement   = false;
+
+    /** @var bool */
     protected $_canManageRecurringProfiles  = true;
     /**
      * TODO: whether a captured transaction may be voided by this gateway
