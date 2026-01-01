@@ -777,15 +777,15 @@ class Maho_Giftcard_Model_Observer
                         throw new Mage_Core_Exception(
                             Mage::helper('giftcard')->__('Gift card "%s" has expired.', $code),
                         );
-                    } elseif ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_USED) {
+                    }
+                    if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_USED) {
                         throw new Mage_Core_Exception(
                             Mage::helper('giftcard')->__('Gift card "%s" has been fully used.', $code),
                         );
-                    } else {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('giftcard')->__('Gift card "%s" is not active.', $code),
-                        );
                     }
+                    throw new Mage_Core_Exception(
+                        Mage::helper('giftcard')->__('Gift card "%s" is not active.', $code),
+                    );
                 }
 
                 // Check if already applied

@@ -67,8 +67,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit extends Mage_Adminhtml_Block_W
                 "Edit Gift Card '%s'",
                 $this->escapeHtml(Mage::registry('current_giftcard')->getCode()),
             );
-        } else {
-            return Mage::helper('giftcard')->__('New Gift Card');
         }
+        return Mage::helper('giftcard')->__('New Gift Card');
     }
 }
