@@ -21,7 +21,6 @@ parameters:
 
     # Disable strict-rules parameters that aren't controlled by allRules
     reportMaybesInMethodSignatures: false
-    reportStaticMethodSignatures: false
     reportMaybesInPropertyPhpDocTypes: false
     reportWrongPhpDocTypeInVarTag: false
 
