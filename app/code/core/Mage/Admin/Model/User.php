@@ -660,10 +660,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 if (!$child->children) {
                     return (string) $child->action;
                 }
-                if ($child->children) {
-                    $action = $this->findFirstAvailableMenu($child->children, $path . $childName . '/', $level + 1);
-                    return $action ?: (string) $child->action;
-                }
+                $action = $this->findFirstAvailableMenu($child->children, $path . $childName . '/', $level + 1);
+                return $action ?: (string) $child->action;
             }
         }
         $this->_hasAvailableResources = false;
