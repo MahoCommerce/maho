@@ -353,8 +353,7 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
     {
         if ($isPercent) {
             return ($basePrice * $price / 100);
-        } else {
-            return $price;
         }
+        return $price;
     }
 }

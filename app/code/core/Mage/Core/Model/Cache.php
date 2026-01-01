@@ -266,9 +266,8 @@ class Mage_Core_Model_Cache
 
         if (isset($this->allowedCacheOptions[$typeCode])) {
             return (bool) $this->allowedCacheOptions[$typeCode];
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

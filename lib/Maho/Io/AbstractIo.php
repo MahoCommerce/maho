@@ -78,7 +78,8 @@ abstract class AbstractIo implements IoInterface
         for ($i = 0, $realPathParts = []; $i < count($pathParts); $i++) {
             if ($pathParts[$i] == '.') {
                 continue;
-            } elseif ($pathParts[$i] == '..') {
+            }
+            if ($pathParts[$i] == '..') {
                 if ((isset($realPathParts[0])  &&  $realPathParts[0] != '..') || ($pathTokR != '')) {
                     array_pop($realPathParts);
                     continue;

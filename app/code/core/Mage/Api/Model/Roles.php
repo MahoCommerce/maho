@@ -146,18 +146,16 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
         if (empty($children)) {
             if ($rawNodes) {
                 return $resource;
-            } else {
-                return $result;
             }
+            return $result;
         }
         foreach ($children as $child) {
             $this->_buildResourcesArray($child, $resourceName, $level + 1, $represent2Darray, $rawNodes, $module);
         }
         if ($rawNodes) {
             return $resource;
-        } else {
-            return $result;
         }
+        return $result;
     }
 
     /**

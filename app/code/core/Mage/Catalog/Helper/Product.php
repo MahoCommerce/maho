@@ -48,7 +48,8 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
     {
         if ($product instanceof Mage_Catalog_Model_Product) {
             return $product->getProductUrl();
-        } elseif (is_numeric($product)) {
+        }
+        if (is_numeric($product)) {
             return Mage::getModel('catalog/product')->load($product)->getProductUrl();
         }
         return false;
@@ -231,10 +232,8 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
 
         if (is_null($inputType)) {
             return $inputTypes;
-        } elseif (isset($inputTypes[$inputType])) {
-            return $inputTypes[$inputType];
         }
-        return [];
+        return $inputTypes[$inputType] ?? [];
     }
 
     /**

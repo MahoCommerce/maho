@@ -363,9 +363,8 @@ class Select
 
         if ($bool === true) {
             return [self::SQL_AND => $cond];
-        } else {
-            return [self::SQL_OR => $cond];
         }
+        return [self::SQL_OR => $cond];
     }
 
     /**

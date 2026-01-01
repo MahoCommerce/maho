@@ -90,7 +90,8 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
         $rules = $this->getData('validate_rules');
         if (is_array($rules)) {
             return $rules;
-        } elseif (!empty($rules)) {
+        }
+        if (!empty($rules)) {
             return Mage::helper('core/unserializeArray')->unserialize($rules);
         }
         return [];

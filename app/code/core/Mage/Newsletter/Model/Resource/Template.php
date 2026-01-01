@@ -53,15 +53,13 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
             $select = $this->_getReadAdapter()->select()
                 ->from($this->getTable('newsletter/queue'), new Maho\Db\Expr('COUNT(queue_id)'))
                 ->where('template_id = :template_id');
-
             $countOfQueue = $this->_getReadAdapter()->fetchOne($select, ['template_id' => $template->getId()]);
-
             return $countOfQueue > 0;
-        } elseif ($template->getIsSystem()) {
-            return false;
-        } else {
-            return true;
         }
+        if ($template->getIsSystem()) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -86,9 +84,8 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
             $countOfCodes = $this->_getReadAdapter()->fetchOne($select, $bind);
 
             return $countOfCodes > 0;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

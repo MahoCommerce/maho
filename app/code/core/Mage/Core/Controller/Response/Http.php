@@ -437,13 +437,11 @@ class Mage_Core_Controller_Response_Http
     {
         if (false === $spec) {
             return $this->outputBody();
-        } elseif (true === $spec) {
-            return $this->_body;
-        } elseif (isset($this->_body[$spec])) {
-            return $this->_body[$spec];
         }
-
-        return '';
+        if (true === $spec) {
+            return $this->_body;
+        }
+        return $this->_body[$spec] ?? '';
     }
 
     /**

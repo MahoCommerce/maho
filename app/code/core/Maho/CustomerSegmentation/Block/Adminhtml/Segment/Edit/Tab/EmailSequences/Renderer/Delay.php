@@ -21,15 +21,15 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences_
         if ($minutes === 0) {
             return Mage::helper('customersegmentation')->__('Immediate');
         }
-
         if ($minutes < 60) {
             return $minutes . ' ' . Mage::helper('customersegmentation')->__('minutes');
-        } elseif ($minutes < 1440) {
+        }
+
+        if ($minutes < 1440) {
             $hours = round($minutes / 60, 1);
             return $hours . ' ' . Mage::helper('customersegmentation')->__('hours');
-        } else {
-            $days = round($minutes / 1440, 1);
-            return $days . ' ' . Mage::helper('customersegmentation')->__('days');
         }
+        $days = round($minutes / 1440, 1);
+        return $days . ' ' . Mage::helper('customersegmentation')->__('days');
     }
 }

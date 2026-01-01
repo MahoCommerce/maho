@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Rector\CodeQuality\Rector as CodeQuality;
 use Rector\DeadCode\Rector as DeadCode;
+use Rector\EarlyReturn\Rector as EarlyReturn;
 use Rector\Config\RectorConfig;
 use Rector\TypeDeclaration\Rector as TypeDeclaration;
 
@@ -30,6 +31,7 @@ return RectorConfig::configure()
         CodeQuality\Ternary\SwitchNegatedTernaryRector::class,
         DeadCode\ClassMethod\RemoveUselessParamTagRector::class,
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
+        EarlyReturn\If_\RemoveAlwaysElseRector::class,
         DeadCode\MethodCall\RemoveNullArgOnNullDefaultParamRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,

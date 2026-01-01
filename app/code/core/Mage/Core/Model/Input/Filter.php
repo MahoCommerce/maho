@@ -165,9 +165,8 @@ class Mage_Core_Model_Input_Filter
     {
         if ($name === null) {
             return $this->_filters;
-        } else {
-            return $this->_filters[$name] ?? null;
         }
+        return $this->_filters[$name] ?? null;
     }
 
     /**

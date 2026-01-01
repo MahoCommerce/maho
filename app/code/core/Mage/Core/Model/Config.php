@@ -484,13 +484,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection->getLock('core_config_cache_save_lock', $waitTime)) {
             if ($ignoreFailure) {
                 return;
-            } elseif (PHP_SAPI === 'cli') {
-                throw new Exception('Could not get lock on cache save operation.');
-            } else {
-                Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Mage::LOG_NOTICE);
-                Maho::errorReport();
-                die();
             }
+            if (PHP_SAPI === 'cli') {
+                throw new Exception('Could not get lock on cache save operation.');
+            }
+            Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Mage::LOG_NOTICE);
+            Maho::errorReport();
+            die();
         }
     }
 
@@ -595,9 +595,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $this->_useCache = false;
             $this->reinit($this->_options);
             return false;
-        } else {
-            return simplexml_load_string($xmlString, $this->_elementClass);
         }
+        return simplexml_load_string($xmlString, $this->_elementClass);
     }
 
     /**
@@ -827,9 +826,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         if (empty($this->_allowedModules)) {
             return true;
-        } else {
-            return in_array($moduleName, $this->_allowedModules);
         }
+        return in_array($moduleName, $this->_allowedModules);
     }
 
     /**
@@ -1117,9 +1115,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $modules = $this->getNode('modules');
         if ($moduleName === '') {
             return $modules;
-        } else {
-            return $modules->$moduleName;
         }
+        return $modules->$moduleName;
     }
 
     /**
@@ -1496,9 +1493,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             if ($conn) {
                 if (!empty($conn->use)) {
                     return $this->getResourceConnectionConfig((string) $conn->use);
-                } else {
-                    return $conn;
                 }
+                return $conn;
             }
         }
         return false;

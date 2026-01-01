@@ -60,9 +60,8 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
             return $this->getCategory()->getId()
                 ? (int) $this->getCategory()->getId()
                 : null;
-        } else {
-            return Mage_Catalog_Model_Category::TREE_ROOT_ID;
         }
+        return Mage_Catalog_Model_Category::TREE_ROOT_ID;
     }
 
     /**

@@ -303,9 +303,8 @@ class Mage_Core_Model_Url_Rewrite_Request
             }
             if ($hasChanges) {
                 return http_build_query($queryParams);
-            } else {
-                return $_SERVER['QUERY_STRING'];
             }
+            return $_SERVER['QUERY_STRING'];
         }
         return false;
     }

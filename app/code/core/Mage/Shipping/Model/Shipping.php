@@ -163,9 +163,8 @@ class Mage_Shipping_Model_Shipping
                             $result = $carrierObj->collectRates($request);
                             if (!$result) {
                                 return $this;
-                            } else {
-                                $result->updateRatePrice($packageCount);
                             }
+                            $result->updateRatePrice($packageCount);
                             $sumResults[] = $result;
                         }
                         if (count($sumResults) > 1) {

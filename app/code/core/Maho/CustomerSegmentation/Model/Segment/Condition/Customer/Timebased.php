@@ -232,9 +232,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
         if ($requireValid) {
             return $adapter->quoteInto("{$fieldName} IN (?)", new Maho\Db\Expr((string) $customerIds));
-        } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $customerIds));
         }
+        return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $customerIds));
     }
 
     #[\Override]
