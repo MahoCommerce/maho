@@ -2065,7 +2065,7 @@ class Pgsql extends AbstractPdoAdapter
      * Change table auto increment value (PostgreSQL uses sequences)
      */
     #[\Override]
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Pgsql
+    public function changeTableAutoIncrement(string $tableName, int $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Pgsql
     {
         // Find the sequence name
         $primaryKeys = $this->_getPrimaryKeyColumns($tableName);
@@ -2073,7 +2073,7 @@ class Pgsql extends AbstractPdoAdapter
         $sequenceName = sprintf('%s_%s_seq', $tableName, $primaryKey);
 
         $sql = sprintf(
-            'ALTER SEQUENCE %s RESTART WITH %s',
+            'ALTER SEQUENCE %s RESTART WITH %d',
             $this->quoteIdentifier($sequenceName),
             $increment,
         );

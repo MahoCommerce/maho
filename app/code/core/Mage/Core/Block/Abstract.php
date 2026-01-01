@@ -860,6 +860,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         if ($child) {
             return $child->getData($key);
         }
+        return null;
     }
 
     /**

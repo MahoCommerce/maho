@@ -321,12 +321,13 @@ class Mysql extends AbstractPdoAdapter
             $this->_debugStat(self::DEBUG_QUERY, $sql, $bind);
 
             // Detect implicit rollback - MySQL SQLSTATE: ER_LOCK_WAIT_TIMEOUT or ER_LOCK_DEADLOCK
+            $previous = $e->getPrevious();
             if ($this->_transactionLevel > 0
-                && $e->getPrevious() && isset($e->getPrevious()->errorInfo[1])
-                && in_array($e->getPrevious()->errorInfo[1], [1205, 1213])
+                && $previous instanceof \PDOException && isset($previous->errorInfo[1])
+                && in_array($previous->errorInfo[1], [1205, 1213])
             ) {
                 if ($this->_debug) {
-                    $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER SQLSTATE: ' . $e->getPrevious()->errorInfo[1]);
+                    $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER SQLSTATE: ' . $previous->errorInfo[1]);
                 }
                 $this->_transactionLevel = 1; // Deadlock rolls back entire transaction
                 $this->rollBack();
@@ -1786,7 +1787,7 @@ class Mysql extends AbstractPdoAdapter
      * Change table auto increment value
      */
     #[\Override]
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql
+    public function changeTableAutoIncrement(string $tableName, int $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql
     {
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $sql = sprintf('ALTER TABLE %s AUTO_INCREMENT=%d', $table, $increment);

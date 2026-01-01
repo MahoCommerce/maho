@@ -195,6 +195,13 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     protected $_addressesCollection;
 
     /**
+     * Customer subscription status
+     *
+     * @var bool|null
+     */
+    protected $_isSubscribed;
+
+    /**
      * Is model deleteable
      *
      * @var bool

@@ -77,7 +77,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      * Set widget type and widget parameters if available
      */
     #[\Override]
-    protected function _preparelayout()
+    protected function _prepareLayout()
     {
         $this->setWidgetType($this->getWidgetInstance()->getType())
             ->setWidgetValues($this->getWidgetInstance()->getWidgetParameters());
