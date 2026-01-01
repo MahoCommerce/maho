@@ -91,6 +91,13 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     protected $_storeCodeToId = [];
 
     /**
+     * Category path to ID mapping.
+     *
+     * @var array
+     */
+    protected $_pathToId = [];
+
+    /**
      * Default attribute set ID for categories.
      *
      * @var int

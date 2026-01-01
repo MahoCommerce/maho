@@ -35,7 +35,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit extends Mage_Adminhtml_Bl
      * Adding save_and_continue button
      */
     #[\Override]
-    protected function _preparelayout()
+    protected function _prepareLayout()
     {
         if ($this->getWidgetInstance()->isCompleteToCreate()) {
             $this->_addButton(

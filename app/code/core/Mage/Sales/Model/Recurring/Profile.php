@@ -509,7 +509,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
     {
         $info = $this->getData($infoKey);
         if (!$info) {
-            return;
+            return null;
         }
         if (!is_object($info)) {
             if (is_array($info) && isset($info[$infoValueKey])) {
@@ -523,6 +523,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
                 return $info->$infoValueKey;
             }
         }
+        return null;
     }
 
     #[\Override]
