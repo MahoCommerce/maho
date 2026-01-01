@@ -87,8 +87,11 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     public function getTargetConditions(): Mage_Rule_Model_Condition_Combine
     {
-        /** @var Maho_CatalogLinkRule_Model_Rule_Target_Combine */
-        return $this->getActions();
+        $actions = $this->getActions();
+        if (!$actions instanceof Mage_Rule_Model_Condition_Combine) {
+            throw new Mage_Core_Exception('Target conditions must be a Mage_Rule_Model_Condition_Combine');
+        }
+        return $actions;
     }
 
     /**

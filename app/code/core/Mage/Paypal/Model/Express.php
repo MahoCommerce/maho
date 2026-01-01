@@ -12,8 +12,19 @@
 
 class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract implements Mage_Payment_Model_Recurring_Profile_MethodInterface
 {
+    /**
+     * @var string
+     */
     protected $_code  = Mage_Paypal_Model_Config::METHOD_WPP_EXPRESS;
+
+    /**
+     * @var string
+     */
     protected $_formBlockType = 'paypal/express_form';
+
+    /**
+     * @var string
+     */
     protected $_infoBlockType = 'paypal/payment_info';
 
     /**
@@ -66,8 +77,8 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         if ($proInstance instanceof Mage_Paypal_Model_Pro) {
             $this->_pro = $proInstance;
         } else {
-            /** @var Mage_Paypal_Model_Pro $model */
             $model = Mage::getModel($this->_proType);
+            assert($model instanceof \Mage_Paypal_Model_Pro);
             $this->_pro = $model;
         }
         $this->_pro->setMethod($this->_code);

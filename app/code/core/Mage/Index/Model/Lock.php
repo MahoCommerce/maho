@@ -253,8 +253,8 @@ class Mage_Index_Model_Lock
     {
         if (!$this->_storage instanceof Mage_Index_Model_Lock_Storage_Interface) {
             $config = Mage::getConfig()->getNode(self::STORAGE_CONFIG_PATH);
-            /** @var Mage_Index_Model_Lock_Storage_Interface $model */
             $model = Mage::getModel($config->model);
+            assert($model instanceof \Mage_Index_Model_Lock_Storage_Interface);
             $this->_storage = $model;
         }
         return $this->_storage;

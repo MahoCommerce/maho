@@ -64,7 +64,6 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
             $fieldset = $form->addFieldset('website_fieldset', [
                 'legend' => Mage::helper('core')->__('Website Information'),
             ]);
-            /** @var Varien_Data_Form $fieldset */
 
             $fieldset->addField('website_name', 'text', [
                 'name'      => 'website[name]',

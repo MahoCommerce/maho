@@ -26,8 +26,11 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
      */
     protected function _getResource()
     {
-        /** @var Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax */
-        return Mage::getResourceSingleton(self::getBackendModelName());
+        $resource = Mage::getResourceSingleton(self::getBackendModelName());
+        if (!$resource instanceof Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax) {
+            throw new Mage_Core_Exception('Invalid Weee tax resource model');
+        }
+        return $resource;
     }
 
     /**

@@ -15,14 +15,14 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
     /**
      * Factory instance
      *
-     * @var Mage_Core_Model_Factory
+     * @var Mage_Core_Model_Factory|null
      */
     protected $_factory;
 
     /**
      * Application instance
      *
-     * @var Mage_Core_Model_App
+     * @var Mage_Core_Model_App|null
      */
     protected $_app;
 
@@ -47,8 +47,10 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
     {
         $defaultStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
         //check default store first
-        /** @var Mage_Tax_Model_Config $model */
         $model = $this->_factory->getSingleton('tax/config');
+        if (!$model instanceof Mage_Tax_Model_Config) {
+            return [];
+        }
         if (!$model->checkDisplaySettings($defaultStoreId)) {
             return true;
         }
@@ -108,8 +110,10 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
      */
     public function checkDisplaySettings($store = null)
     {
-        /** @var Mage_Tax_Model_Config $model */
         $model = $this->_factory->getSingleton('tax/config');
+        if (!$model instanceof Mage_Tax_Model_Config) {
+            return false;
+        }
         return $model->checkDisplaySettings($store);
     }
 
@@ -121,8 +125,10 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
      */
     public function getWebsitesWithWrongDiscountSettings()
     {
-        /** @var Mage_Tax_Model_Config $model */
         $model = $this->_factory->getSingleton('tax/config');
+        if (!$model instanceof Mage_Tax_Model_Config) {
+            return [];
+        }
 
         $defaultStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
         //check default store first
@@ -180,9 +186,8 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
     #[\Override]
     protected function _toHtml()
     {
-        /** @var Mage_Admin_Model_Session $model */
         $model = $this->_factory->getSingleton('admin/session');
-        if ($model->isAllowed('system/config/tax')) {
+        if ($model instanceof Mage_Admin_Model_Session && $model->isAllowed('system/config/tax')) {
             return parent::_toHtml();
         }
         return '';

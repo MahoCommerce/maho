@@ -353,7 +353,6 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
         $productSuperAttrId = null;
         $productId       = null;
         $productData     = null;
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper          = Mage::getResourceHelper('importexport');
         $nextAttrId      = $helper->getNextAutoincrement($mainTable);
 

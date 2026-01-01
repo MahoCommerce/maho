@@ -18,6 +18,9 @@
  */
 abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstract
 {
+    /**
+     * @var array
+     */
     protected $_matchedEntities = [];
 
     /**

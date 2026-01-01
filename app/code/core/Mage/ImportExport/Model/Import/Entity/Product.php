@@ -816,7 +816,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $typePriceTable = $coreResource->getTableName('catalog/product_option_type_price');
         $typeTitleTable = $coreResource->getTableName('catalog/product_option_type_title');
         $typeValueTable = $coreResource->getTableName('catalog/product_option_type_value');
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextOptionId   = $helper->getNextAutoincrement($optionTable);
         $nextValueId    = $helper->getNextAutoincrement($typeValueTable);
@@ -1124,7 +1123,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $resource       = Mage::getResourceModel('catalog/product_link');
         $mainTable      = $resource->getMainTable();
         $positionAttrId = [];
-        /** @var Maho\Db\Adapter\AdapterInterface $adapter */
         $adapter = $this->_connection;
 
         // pre-load 'position' attributes ID for each link type once
@@ -1142,7 +1140,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             $positionAttrId[$linkId] = $adapter->fetchOne($select, $bind);
         }
 
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('importexport');
         $nextLinkId = $helper->getNextAutoincrement($mainTable);
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {

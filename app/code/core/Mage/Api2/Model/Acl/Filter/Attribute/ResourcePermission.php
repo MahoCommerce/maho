@@ -89,9 +89,8 @@ class Mage_Api2_Model_Acl_Filter_Attribute_ResourcePermission implements Mage_Ap
                         continue;
                     }
                     try {
-                        /** @var Mage_Api2_Model_Resource $resourceModel */
                         $resourceModel = Mage::getModel($config->getResourceModel($resource));
-                        if ($resourceModel) {
+                        if ($resourceModel instanceof Mage_Api2_Model_Resource) {
                             $resourceModel->setResourceType($resource)
                                 ->setUserType($this->_userType);
 

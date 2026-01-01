@@ -32,7 +32,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
             if ($use == $useRouterName) {
                 $modules = [(string) $routerConfig->args->module];
                 if ($routerConfig->args->modules) {
-                    /** @var Varien_Simplexml_Element $customModule */
+                    /** @var Mage_Core_Model_Config_Element $customModule */
                     foreach ($routerConfig->args->modules->children() as $customModule) {
                         if ((string) $customModule) {
                             if ($before = $customModule->getAttribute('before')) {

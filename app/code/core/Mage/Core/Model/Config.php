@@ -75,13 +75,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public const CACHE_TAG         = 'CONFIG';
 
     /**
-     * Configuration xml
-     *
-     * @var Mage_Core_Model_Config_Element|null
-     */
-    protected $_xml = null;
-
-    /**
      * Flag which allow use cache logic
      *
      * @var bool
@@ -528,6 +521,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         if (!empty($this->_cacheSections)) {
+            /** @var Mage_Core_Model_Config_Element $xml */
             $xml = clone $this->_xml;
             foreach ($this->_cacheSections as $sectionName => $level) {
                 $this->_saveSectionCache($this->getCacheId(), $sectionName, $xml, $level, $tags);
@@ -552,7 +546,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $idPrefix cache id prefix
      * @param string $sectionName
-     * @param Varien_Simplexml_Element $source
+     * @param Mage_Core_Model_Config_Element $source
      * @param int $recursionLevel
      * @param array $tags
      * @return Mage_Core_Model_Config
@@ -1529,7 +1523,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $stores = $this->getNode('stores');
         /**
          * @var string $code
-         * @var Varien_Simplexml_Element $store
+         * @var Mage_Core_Model_Config_Element $store
          */
         foreach ($stores->children() as $code => $store) {
             switch ($useAsKey) {
@@ -1594,10 +1588,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Get DB table names prefix
      *
-     * @return Mage_Core_Model_Config_Element
+     * @return Mage_Core_Model_Config_Element|null
      */
     public function getTablePrefix()
     {
+        /** @var Mage_Core_Model_Config_Element|null */
         return $this->_xml->global->resources->db->table_prefix;
     }
 
