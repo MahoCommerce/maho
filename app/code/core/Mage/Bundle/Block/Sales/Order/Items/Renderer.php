@@ -27,9 +27,8 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
                         && $options['shipment_type'] == Mage_Catalog_Model_Product_Type_Abstract::SHIPMENT_SEPARATELY
                     ) {
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 }
             } else {
                 if ($options = $item->getProductOptions()) {
@@ -37,9 +36,8 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
                         && $options['shipment_type'] == Mage_Catalog_Model_Product_Type_Abstract::SHIPMENT_SEPARATELY
                     ) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    return true;
                 }
             }
         }
@@ -70,9 +68,8 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
                         && $options['product_calculations'] == Mage_Catalog_Model_Product_Type_Abstract::CALCULATE_CHILD
                     ) {
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 }
             } else {
                 if ($options = $item->getProductOptions()) {
@@ -80,9 +77,8 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
                         && $options['product_calculations'] == Mage_Catalog_Model_Product_Type_Abstract::CALCULATE_CHILD
                     ) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    return true;
                 }
             }
         }
@@ -124,9 +120,8 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
             return sprintf('%d', $attributes['qty']) . ' x ' .
                 $this->escapeHtml($item->getName()) .
                 ' ' . $this->getOrder()->formatPrice($attributes['price']);
-        } else {
-            return $this->escapeHtml($item->getName());
         }
+        return $this->escapeHtml($item->getName());
     }
 
     /**

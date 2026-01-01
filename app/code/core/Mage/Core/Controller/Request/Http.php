@@ -310,18 +310,20 @@ class Mage_Core_Controller_Request_Http
     {
         if (isset($this->_params[$key])) {
             return $this->_params[$key];
-        } elseif (isset($_GET[$key])) {
-            return $_GET[$key];
-        } elseif (isset($_POST[$key])) {
-            return $_POST[$key];
-        } elseif (isset($_COOKIE[$key])) {
-            return $_COOKIE[$key];
-        } elseif (isset($_SERVER[$key])) {
-            return $_SERVER[$key];
-        } elseif (isset($_ENV[$key])) {
-            return $_ENV[$key];
         }
-        return null;
+        if (isset($_GET[$key])) {
+            return $_GET[$key];
+        }
+        if (isset($_POST[$key])) {
+            return $_POST[$key];
+        }
+        if (isset($_COOKIE[$key])) {
+            return $_COOKIE[$key];
+        }
+        if (isset($_SERVER[$key])) {
+            return $_SERVER[$key];
+        }
+        return $_ENV[$key] ?? null;
     }
 
     public function get(string $key): mixed
@@ -948,11 +950,9 @@ class Mage_Core_Controller_Request_Http
     {
         if (is_null($name)) {
             return $this->_beforeForwardInfo;
-        } elseif (isset($this->_beforeForwardInfo[$name])) {
-            return $this->_beforeForwardInfo[$name];
         }
 
-        return null;
+        return $this->_beforeForwardInfo[$name] ?? null;
     }
 
     /**

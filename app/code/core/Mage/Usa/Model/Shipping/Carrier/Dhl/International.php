@@ -436,10 +436,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
             ],
         ];
-
         if (!isset($codes[$type])) {
             return false;
-        } elseif ($code === '') {
+        }
+
+        if ($code === '') {
             return $codes[$type];
         }
 
@@ -500,10 +501,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($doc == self::DHL_CONTENT_TYPE_DOC) {
             // Documents shipping
             return $docType;
-        } else {
-            // Services for shipping non-documents cargo
-            return $nonDocType;
         }
+        // Services for shipping non-documents cargo
+        return $nonDocType;
     }
 
     /**
@@ -1154,9 +1154,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $error->setErrorMessage($this->getConfigData('specificerrmsg'));
             $this->_debug($this->_errors);
             return $error;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

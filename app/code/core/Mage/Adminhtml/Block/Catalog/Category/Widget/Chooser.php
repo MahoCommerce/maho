@@ -129,16 +129,15 @@ class Mage_Adminhtml_Block_Catalog_Category_Widget_Chooser extends Mage_Adminhtm
                     }));
                 }
             JS;
-        } else {
-            $chooserJsObject = $this->getId();
-            return <<<JS
+        }
+        $chooserJsObject = $this->getId();
+        return <<<JS
                 function ([node]) {
                     {$chooserJsObject}.setElementValue("category/" + node.id);
                     {$chooserJsObject}.setElementLabel(node.text);
                     {$chooserJsObject}.close();
                 }
             JS;
-        }
     }
 
     #[\Override]
@@ -146,9 +145,8 @@ class Mage_Adminhtml_Block_Catalog_Category_Widget_Chooser extends Mage_Adminhtm
     {
         if ($parentNodeCategory === null && $this->getSelectedCategories()) {
             return $this->getRootByIds($this->getSelectedCategories(), $recursionLevel);
-        } else {
-            return parent::getRoot($parentNodeCategory, $recursionLevel);
         }
+        return parent::getRoot($parentNodeCategory, $recursionLevel);
     }
 
     #[\Override]

@@ -70,9 +70,8 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
     {
         if ($parentNodeCategory === null && $this->getCategoryIds()) {
             return $this->getRootByIds($this->getCategoryIds(), $recursionLevel);
-        } else {
-            return parent::getRoot($parentNodeCategory, $recursionLevel);
         }
+        return parent::getRoot($parentNodeCategory, $recursionLevel);
     }
 
     #[\Override]

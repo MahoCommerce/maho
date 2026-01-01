@@ -202,7 +202,8 @@ class Mage_Api2_Model_Route_Base
         foreach ($this->_variables as $var) {
             if (!array_key_exists($var, $return)) {
                 return false;
-            } elseif ($return[$var] === '' || $return[$var] === null) {
+            }
+            if ($return[$var] === '' || $return[$var] === null) {
                 // Empty variable? Replace with the default value.
                 $return[$var] = $this->_defaults[$var] ?? null;
             }

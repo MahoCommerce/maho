@@ -29,7 +29,8 @@ class Variable extends AbstractTokenizer
             if ($this->isWhiteSpace()) {
                 // Ignore white spaces
                 continue;
-            } elseif ($this->char() != '.' && $this->char() != '(') {
+            }
+            if ($this->char() != '.' && $this->char() != '(') {
                 // Property or method name
                 $parameterName .= $this->char();
             } elseif ($this->char() == '(') {
@@ -136,9 +137,11 @@ class Variable extends AbstractTokenizer
         while ($this->next() && $this->char() != ')') {
             if ($this->isWhiteSpace() || $this->char() == ',') {
                 continue;
-            } elseif ($this->isNumeric()) {
+            }
+            if ($this->isNumeric()) {
                 $value[] = $this->getNumber();
-            } else {
+            }
+            else {
                 $value[] = $this->getString();
             }
         }

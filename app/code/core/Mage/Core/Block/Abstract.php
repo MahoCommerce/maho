@@ -550,10 +550,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         if ($name === '') {
             return $this->_children;
-        } elseif (isset($this->_children[$name])) {
-            return $this->_children[$name];
         }
-        return false;
+        return $this->_children[$name] ?? false;
     }
 
     /**
@@ -580,9 +578,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
                 $out .= $this->_getChildHtml($child->getBlockAlias(), $useCache);
             }
             return $out;
-        } else {
-            return $this->_getChildHtml($name, $useCache);
         }
+        return $this->_getChildHtml($name, $useCache);
     }
 
     /**

@@ -45,8 +45,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit extends Mage_Adminhtml_Bloc
                 "Edit Rule '%s'",
                 $this->escapeHtml(Mage::registry('current_linkrule')->getName()),
             );
-        } else {
-            return Mage::helper('cataloglinkrule')->__('New Rule');
         }
+        return Mage::helper('cataloglinkrule')->__('New Rule');
     }
 }

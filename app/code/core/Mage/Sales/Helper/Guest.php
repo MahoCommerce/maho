@@ -39,27 +39,25 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
         /** @var Mage_Core_Model_Cookie $cookieModel */
         $cookieModel = Mage::getSingleton('core/cookie');
         $errorMessage = 'Entered data is incorrect. Please try again.';
-
         if (empty($post) && !$cookieModel->get($this->_cookieName)) {
             Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
             return false;
-        } elseif (!empty($post) && isset($post['oar_order_id']) && isset($post['oar_type'])) {
+        }
+
+        if (!empty($post) && isset($post['oar_order_id']) && isset($post['oar_type'])) {
             $type           = $post['oar_type'];
             $incrementId    = $post['oar_order_id'];
             $lastName       = $post['oar_billing_lastname'];
             $email          = $post['oar_email'];
             $zip            = $post['oar_zip'];
-
             if (empty($incrementId) || empty($lastName) || empty($type) || (!in_array($type, ['email', 'zip']))
                 || ($type == 'email' && empty($email)) || ($type == 'zip' && empty($zip))
             ) {
                 $errors = true;
             }
-
             if (!$errors) {
                 $order->loadByIncrementId($incrementId);
             }
-
             if ($order->getId()) {
                 $billingAddress = $order->getBillingAddress();
                 if ((strtolower($lastName) != strtolower($billingAddress->getLastname()))
@@ -73,12 +71,10 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             } else {
                 $errors = true;
             }
-
             if ($errors === false && !is_null($order->getCustomerId())) {
                 $errorMessage = 'Please log in to view your order details.';
                 $errors = true;
             }
-
             if (!$errors) {
                 $toCookie = base64_encode($order->getProtectCode() . ':' . $incrementId);
                 $cookieModel->set($this->_cookieName, $toCookie, $this->_lifeTime, '/');

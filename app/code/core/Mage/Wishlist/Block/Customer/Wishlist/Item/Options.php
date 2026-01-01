@@ -63,11 +63,8 @@ class Mage_Wishlist_Block_Customer_Wishlist_Item_Options extends Mage_Wishlist_B
     {
         if (isset($this->_optionsCfg[$productType])) {
             return $this->_optionsCfg[$productType];
-        } elseif (isset($this->_optionsCfg['default'])) {
-            return $this->_optionsCfg['default'];
-        } else {
-            return null;
         }
+        return $this->_optionsCfg['default'] ?? null;
     }
 
     /**

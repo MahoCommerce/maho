@@ -26,9 +26,8 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
     {
         if (($this->getFilterData()->getData('report_type') == 'updated_at_order')) {
             return 'salesrule/report_updatedat_collection';
-        } else {
-            return 'salesrule/report_collection';
         }
+        return 'salesrule/report_collection';
     }
 
     #[\Override]

@@ -195,19 +195,19 @@ class Mage_Core_Model_File_Validator_AvailablePath
                 $reg = $pathsData[$path]['regDir'];
             }
             $resultDir = preg_match($reg, $valuePathInfo['dirname'] . DS);
-
             if ($protected && ($resultDir && $resultFile)) {
                 return false;
-            } elseif (!$protected && ($resultDir && $resultFile)) {
+            }
+
+            if (!$protected && ($resultDir && $resultFile)) {
                 //return true because one match with available path mask
                 return true;
             }
         }
         if ($protected) {
             return true;
-        } else {
-            //return false because no one match with available path mask
-            return false;
         }
+        //return false because no one match with available path mask
+        return false;
     }
 }

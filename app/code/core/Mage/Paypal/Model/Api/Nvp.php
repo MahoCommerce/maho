@@ -1296,7 +1296,8 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
     {
         if ($value === 'false' || $value === '0') {
             return false;
-        } elseif ($value === 'true' || $value === '1') {
+        }
+        if ($value === 'true' || $value === '1') {
             return true;
         }
         return $value;

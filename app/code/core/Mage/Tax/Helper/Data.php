@@ -575,9 +575,8 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         }
         if ($roundPrice) {
             return $store->roundPrice($price);
-        } else {
-            return $price;
         }
+        return $price;
     }
 
     /**
@@ -643,10 +642,9 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         if ($type) {
             $taxAmount = $calculator->calcTaxAmount($price, $percent, false, $roundTaxFirst);
             return $price + $taxAmount;
-        } else {
-            $taxAmount = $calculator->calcTaxAmount($price, $percent, true, $roundTaxFirst);
-            return $price - $taxAmount;
         }
+        $taxAmount = $calculator->calcTaxAmount($price, $percent, true, $roundTaxFirst);
+        return $price - $taxAmount;
     }
 
     /**

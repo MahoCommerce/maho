@@ -28,8 +28,7 @@ class Grid extends ObjectFilter
                 $out[$i] = parent::filter($object);
             }
             return $out;
-        } else {
-            return parent::filter($grid);
         }
+        return parent::filter($grid);
     }
 }

@@ -36,8 +36,7 @@ class Mage_Directory_Block_Adminhtml_Region_Edit extends Mage_Adminhtml_Block_Wi
         $region = Mage::registry('current_region');
         if ($region->getId()) {
             return Mage::helper('directory')->__('Edit Region "%s"', $this->escapeHtml($region->getName()));
-        } else {
-            return Mage::helper('directory')->__('New Region');
         }
+        return Mage::helper('directory')->__('New Region');
     }
 }

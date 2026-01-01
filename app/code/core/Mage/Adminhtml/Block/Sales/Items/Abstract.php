@@ -261,14 +261,13 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
                 $strong,
                 $separator,
             );
-        } else {
-            return $this->displayPrices(
-                $this->getPriceDataObject()->getData('base_' . $code),
-                $this->getPriceDataObject()->getData($code),
-                $strong,
-                $separator,
-            );
         }
+        return $this->displayPrices(
+            $this->getPriceDataObject()->getData('base_' . $code),
+            $this->getPriceDataObject()->getData($code),
+            $strong,
+            $separator,
+        );
     }
 
     /**
@@ -383,9 +382,8 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
     {
         if ($item->getTaxPercent()) {
             return sprintf('%s%%', $item->getTaxPercent() + 0);
-        } else {
-            return '0%';
         }
+        return '0%';
     }
 
     /**
@@ -495,9 +493,8 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         $canReturnToStock = Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT);
         if (Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

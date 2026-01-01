@@ -59,9 +59,8 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_Items_Renderer extends Mage_Adminh
                         && $options['shipment_type'] == Mage_Catalog_Model_Product_Type_Abstract::SHIPMENT_SEPARATELY
                     ) {
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 }
             } else {
                 if ($options = $item->getProductOptions()) {
@@ -69,9 +68,8 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_Items_Renderer extends Mage_Adminh
                         && $options['shipment_type'] == Mage_Catalog_Model_Product_Type_Abstract::SHIPMENT_SEPARATELY
                     ) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    return true;
                 }
             }
         }
@@ -102,9 +100,8 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_Items_Renderer extends Mage_Adminh
                         && $options['product_calculations'] == Mage_Catalog_Model_Product_Type_Abstract::CALCULATE_CHILD
                     ) {
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 }
             } else {
                 if ($options = $item->getProductOptions()) {
@@ -112,9 +109,8 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_Items_Renderer extends Mage_Adminh
                         && $options['product_calculations'] == Mage_Catalog_Model_Product_Type_Abstract::CALCULATE_CHILD
                     ) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    return true;
                 }
             }
         }

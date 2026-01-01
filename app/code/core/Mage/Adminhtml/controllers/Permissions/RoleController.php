@@ -284,10 +284,9 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
 
         if ($user->roleUserExists() === true) {
             return false;
-        } else {
-            $user->add();
-            return true;
         }
+        $user->add();
+        return true;
     }
 
     /**

@@ -163,8 +163,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
 
         if ($rawNodes) {
             return $resource;
-        } else {
-            return $result;
         }
+        return $result;
     }
 }

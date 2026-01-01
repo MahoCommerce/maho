@@ -144,9 +144,8 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
                 }
 
                 exit(0);
-            } else {
-                $this->getResponse()->setBody($content);
             }
+            $this->getResponse()->setBody($content);
         }
         return $this;
     }

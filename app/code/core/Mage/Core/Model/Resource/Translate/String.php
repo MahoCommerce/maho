@@ -32,9 +32,8 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
             $object->setData($result);
             $this->_afterLoad($object);
             return $this;
-        } else {
-            return parent::load($object, $value, $field);
         }
+        return parent::load($object, $value, $field);
     }
 
     /**

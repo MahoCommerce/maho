@@ -33,8 +33,7 @@ class Mage_Oauth_Model_Resource_Nonce extends Mage_Core_Model_Resource_Db_Abstra
                 $this->getMainTable(),
                 $adapter->quoteInto('timestamp <= ?', time() - $minutes * 60),
             );
-        } else {
-            return 0;
         }
+        return 0;
     }
 }

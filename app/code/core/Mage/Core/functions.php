@@ -117,10 +117,9 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
     $errorMessage .= ": {$errstr}  in {$errfile} on line {$errline}";
     if (Mage::getIsDeveloperMode()) {
         throw new Exception($errorMessage);
-    } else {
-        Mage::log($errorMessage, Mage::LOG_ERROR);
-        return null;
     }
+    Mage::log($errorMessage, Mage::LOG_ERROR);
+    return null;
 }
 
 /**
@@ -148,10 +147,9 @@ function mageDebugBacktrace($return = false, $html = true, $showFirst = false)
     }
     if ($return) {
         return $out;
-    } else {
-        echo $out;
-        return null;
     }
+    echo $out;
+    return null;
 }
 
 function mageSendErrorHeader()

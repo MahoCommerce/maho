@@ -405,18 +405,16 @@ class Mage_Eav_Model_Config
         if (empty($field) && is_numeric($code)) {
             if (isset($this->_entityTypes[$code])) {
                 return $this->_entityTypes[$code];
-            } else {
-                Mage::throwException('Invalid entity type: ' . $code);
             }
+            Mage::throwException('Invalid entity type: ' . $code);
         }
 
         // lookup by code
         if (empty($field) || $field == 'entity_type_code') {
             if (isset($this->_entityTypeByCode[$code])) {
                 return $this->_entityTypeByCode[$code];
-            } else {
-                Mage::throwException('Invalid entity type: ' . $code);
             }
+            Mage::throwException('Invalid entity type: ' . $code);
         }
 
         // lookup by other field
@@ -572,11 +570,10 @@ class Mage_Eav_Model_Config
                 }
             }
             return $attributeCodes;
-        } else {
-            return isset($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
-                ? array_keys($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
-                : [];
         }
+        return isset($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
+            ? array_keys($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
+            : [];
     }
 
     /**

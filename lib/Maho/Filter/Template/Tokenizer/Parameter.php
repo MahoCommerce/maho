@@ -27,9 +27,11 @@ class Parameter extends AbstractTokenizer
         while ($this->next()) {
             if ($this->isWhiteSpace()) {
                 continue;
-            } elseif ($this->char() != '=') {
+            }
+            if ($this->char() != '=') {
                 $parameterName .= $this->char();
-            } else {
+            }
+            else {
                 $parameters[$parameterName] = $this->getValue();
                 $parameterName = '';
             }
