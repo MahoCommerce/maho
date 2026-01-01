@@ -106,6 +106,6 @@ class Mage_Payment_Block_Info_Cc extends Mage_Payment_Block_Info
      */
     protected function _formatCardDate($year, $month)
     {
-        return sprintf('%s/%s', sprintf('%02d', $month), $year);
+        return sprintf('%s/%s', sprintf('%02d', (int) $month), $year);
     }
 }

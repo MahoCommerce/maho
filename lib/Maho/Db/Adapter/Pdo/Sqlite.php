@@ -2055,11 +2055,11 @@ class Sqlite extends AbstractPdoAdapter
      * SQLite uses sqlite_sequence table for autoincrement tracking
      */
     #[\Override]
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Sqlite
+    public function changeTableAutoIncrement(string $tableName, int $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Sqlite
     {
         // SQLite stores autoincrement values in sqlite_sequence table
         $sql = sprintf(
-            'UPDATE sqlite_sequence SET seq = %s WHERE name = %s',
+            'UPDATE sqlite_sequence SET seq = %d WHERE name = %s',
             $increment,
             $this->quote($tableName),
         );

@@ -24,7 +24,6 @@ parameters:
     reportStaticMethodSignatures: false
     reportMaybesInPropertyPhpDocTypes: false
     reportWrongPhpDocTypeInVarTag: false
-    checkStrictPrintfPlaceholderTypes: false
 
     fileExtensions:
         - php
