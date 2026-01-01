@@ -82,9 +82,7 @@ class Sftp extends AbstractIo implements IoInterface
             $this->_connection->chdir($cwd); // @phpstan-ignore class.notFound
             return $no_errors;
         }
-        return $this->_connection->mkdir($dir);
-        // @phpstan-ignore class.notFound
-
+        return $this->_connection->mkdir($dir); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -116,9 +114,7 @@ class Sftp extends AbstractIo implements IoInterface
             $no_errors = $no_errors && ($this->_connection->chdir($cwd) && $this->_connection->rmdir($dir)); // @phpstan-ignore class.notFound, class.notFound
             return $no_errors;
         }
-        return $this->_connection->rmdir($dir);
-        // @phpstan-ignore class.notFound
-
+        return $this->_connection->rmdir($dir); // @phpstan-ignore class.notFound
     }
 
     /**
