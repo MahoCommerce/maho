@@ -52,10 +52,29 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     protected $_varNameDir      = 'dir';
     protected $_varNameFilter   = 'filter';
 
+    /**
+     * @var int
+     */
     protected $_defaultLimit    = 20;
+
+    /**
+     * @var int
+     */
     protected $_defaultPage     = 1;
+
+    /**
+     * @var string|false
+     */
     protected $_defaultSort     = false;
+
+    /**
+     * @var string
+     */
     protected $_defaultDir      = 'desc';
+
+    /**
+     * @var array
+     */
     protected $_defaultFilter   = [];
 
     /**
@@ -107,6 +126,9 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     protected $_messageBlockVisibility = false;
 
+    /**
+     * @var bool
+     */
     protected $_saveParametersInSession = false;
 
     /**

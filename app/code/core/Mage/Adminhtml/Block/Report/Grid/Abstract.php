@@ -12,9 +12,24 @@
 
 class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Widget_Grid
 {
+    /**
+     * @var string
+     */
     protected $_resourceCollectionName  = '';
+
+    /**
+     * @var string|null
+     */
     protected $_currentCurrencyCode     = null;
+
+    /**
+     * @var array
+     */
     protected $_storeIds                = [];
+
+    /**
+     * @var array|null
+     */
     protected $_aggregatedColumns       = null;
 
     /**

@@ -18,11 +18,10 @@ parameters:
     checkInternalClassCaseSensitivity: true
     checkMissingOverrideMethodAttribute: true
     treatPhpDocTypesAsCertain: false
+    reportMaybesInPropertyPhpDocTypes: true
 
     # Disable strict-rules parameters that aren't controlled by allRules
     reportMaybesInMethodSignatures: false
-    reportMaybesInPropertyPhpDocTypes: false
-
     fileExtensions:
         - php
         - phtml

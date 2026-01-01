@@ -30,7 +30,6 @@
 "Done import data validation","Done import data validation"
 "Duplicate Unique Attribute for '%s'","Duplicate Unique Attribute for '%s'"
 "Each data row must be an array","Each data row must be an array"
-"Entity adapter obejct must be an instance of Mage_ImportExport_Model_Export_Entity_Abstract","Entity adapter obejct must be an instance of Mage_ImportExport_Model_Export_Entity_Abstract"
 "Entity adapter object must be an instance of Mage_ImportExport_Model_Import_Entity_Abstract","Entity adapter object must be an instance of Mage_ImportExport_Model_Import_Entity_Abstract"
 "Entity is unknown","Entity is unknown"
 "Entity Type","Entity Type"

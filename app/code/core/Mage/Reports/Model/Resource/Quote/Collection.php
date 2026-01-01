@@ -26,7 +26,7 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
     /**
      * Map
      *
-     * @var array
+     * @var array|null
      */
     protected $_map              = ['fields' => ['store_id' => 'main_table.store_id']];
 

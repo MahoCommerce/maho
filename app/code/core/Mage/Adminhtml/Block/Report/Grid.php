@@ -19,22 +19,43 @@
  */
 class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    /**
+     * @var bool
+     */
     protected $_storeSwitcherVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_dateFilterVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_exportVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_subtotalVisibility = false;
 
+    /**
+     * @var array
+     */
     protected $_filters = [];
 
+    /**
+     * @var array
+     */
     protected $_defaultFilters = [
         'report_from' => '',
         'report_to' => '',
         'report_period' => 'day',
     ];
 
+    /**
+     * @var int
+     */
     protected $_subReportSize = 5;
 
     protected $_grandTotals;

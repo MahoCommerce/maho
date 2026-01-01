@@ -15,14 +15,14 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
     /**
      * Factory instance
      *
-     * @var Mage_Core_Model_Factory
+     * @var Mage_Core_Model_Factory|null
      */
     protected $_factory;
 
     /**
      * Application instance
      *
-     * @var Mage_Core_Model_App
+     * @var Mage_Core_Model_App|null
      */
     protected $_app;
 
