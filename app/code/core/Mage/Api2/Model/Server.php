@@ -63,10 +63,9 @@ class Mage_Api2_Model_Server
         }
         // can not render errors case
         try {
-            /** @var Mage_Api2_Model_Request $request */
             $request = Mage::getSingleton('api2/request');
-            /** @var Mage_Api2_Model_Renderer_Interface $renderer */
             $renderer = Mage_Api2_Model_Renderer::factory($request->getAcceptTypes());
+            assert($renderer instanceof \Mage_Api2_Model_Renderer_Interface);
         } catch (Exception $e) {
             Mage::logException($e);
 

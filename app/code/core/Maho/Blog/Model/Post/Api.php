@@ -14,8 +14,10 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
     public function items(?array $filters = null): array
     {
         try {
-            /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
             $collection = Mage::getModel('blog/post')->getCollection();
+            if (!$collection instanceof Maho_Blog_Model_Resource_Post_Collection) {
+                return [];
+            }
             $collection->addAttributeToSelect('*');
 
             if (is_array($filters)) {

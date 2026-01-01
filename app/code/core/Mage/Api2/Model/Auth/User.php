@@ -25,7 +25,6 @@ class Mage_Api2_Model_Auth_User
         $helper = Mage::helper('api2');
 
         foreach ($helper->getUserTypes() as $modelPath) {
-            /** @var Mage_Api2_Model_Auth_User_Abstract $userModel */
             $userModel = Mage::getModel($modelPath);
 
             if ($asOptionArray) {

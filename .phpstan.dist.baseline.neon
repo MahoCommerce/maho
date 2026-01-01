@@ -6583,12 +6583,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
-			rawMessage: 'Parameter #2 $selectionProduct of method Mage_Bundle_Model_Product_Price::getSelectionFinalTotalPrice() expects Mage_Catalog_Model_Product, Mage_Bundle_Model_Selection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Product/Price.php
-
-		-
 			rawMessage: 'Parameter #3 $bundleQty of method Mage_Bundle_Model_Product_Price::getLowestPrice() expects int, float given.'
 			identifier: argument.type
 			count: 1
@@ -7669,12 +7663,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Index.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Core_Model_Store|Mage_Core_Model_Store_Group::isValueChanged().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Indexer_Url::_processEvent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8117,12 +8105,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Flat.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Core_Model_Store|Mage_Core_Model_Store_Group::isValueChanged().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Indexer_Price::_processEvent() has no return type specified.'
@@ -9253,12 +9235,6 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Core_Model_Store|Mage_Core_Model_Store_Group::isValueChanged().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Indexer/Stock.php
-
-		-
 			rawMessage: 'Method Mage_CatalogInventory_Model_Indexer_Stock::_processEvent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9721,12 +9697,6 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Advanced.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Core_Model_Store|Mage_Core_Model_Store_Group::isValueChanged().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
-
-		-
 			rawMessage: 'Method Mage_CatalogSearch_Model_Indexer_Fulltext::_processEvent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9815,12 +9785,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Checkout/Block/Cart.php
-
-		-
-			rawMessage: 'Cannot call method setItem() on array.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Cart/Abstract.php
 
 		-
 			rawMessage: Property Mage_Checkout_Block_Cart_Abstract::$_checkout has no type specified.
@@ -10427,12 +10391,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Sales_Model_Service_Order::register().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Session::getCartWasUpdated() invoked with 1 parameter, 0 required.'
@@ -15895,12 +15853,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Helper/Data.php
 
 		-
-			rawMessage: 'Method Maho\DataObject::getConfigData() invoked with 2 parameters, 0-1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Payment/Helper/Data.php
-
-		-
 			rawMessage: 'Method Mage_Payment_Model_Billing_Agreement_MethodInterface::getBillingAgreementTokenInfo() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -20958,12 +20910,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Tax_Block_Sales_Order_Tax::_initDiscount() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Block/Sales/Order/Tax.php
-
-		-
-			rawMessage: 'Property Mage_Tax_Block_Sales_Order_Tax::$_source (Mage_Sales_Model_Order_Invoice) does not accept Mage_Sales_Model_Order.'
-			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Tax/Block/Sales/Order/Tax.php
 

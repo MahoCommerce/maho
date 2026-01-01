@@ -63,9 +63,9 @@ class Mage_Api2_Model_Request extends Mage_Core_Controller_Request_Http
     protected function _getInterpreter()
     {
         if ($this->_interpreter === null) {
-            /** @var Mage_Api2_Model_Request_Interpreter_Interface $factory */
-            $factory = Mage_Api2_Model_Request_Interpreter::factory($this->getContentType());
-            $this->_interpreter = $factory;
+            $interpreter = Mage_Api2_Model_Request_Interpreter::factory($this->getContentType());
+            assert($interpreter instanceof \Mage_Api2_Model_Request_Interpreter_Interface);
+            $this->_interpreter = $interpreter;
         }
         return $this->_interpreter;
     }

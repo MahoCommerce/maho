@@ -209,7 +209,6 @@ class Mage_Reports_Model_Resource_Customer_Collection extends Mage_Customer_Mode
               ->where('orders.customer_id IN(?)', $customerIds)
               ->group('orders.customer_id');
 
-            /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
             $helper = Mage::getResourceHelper('core');
 
             /*

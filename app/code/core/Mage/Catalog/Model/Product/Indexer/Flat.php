@@ -220,7 +220,6 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
                 break;
 
             case Mage_Index_Model_Event::TYPE_MASS_ACTION:
-                /** @var Varien_Object $actionObject */
                 $actionObject = $event->getDataObject();
 
                 $reindexData  = [];

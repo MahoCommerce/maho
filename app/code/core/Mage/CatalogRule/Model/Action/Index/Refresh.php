@@ -87,8 +87,10 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     {
         $this->_app->dispatchEvent('catalogrule_before_apply', ['resource' => $this->_resource]);
 
-        /** @var Mage_Core_Model_Date $coreDate */
-        $coreDate  = $this->_factory->getModel('core/date');
+        $coreDate = $this->_factory->getModel('core/date');
+        if (!$coreDate instanceof Mage_Core_Model_Date) {
+            throw new Mage_Core_Exception('Invalid core/date model');
+        }
         $timestamp = $coreDate->gmtTimestamp();
 
         foreach ($this->_app->getWebsites(false) as $website) {
@@ -240,11 +242,15 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      */
     protected function _prepareTemporarySelect(Mage_Core_Model_Website $website)
     {
-        /** @var Mage_Catalog_Helper_Product_Flat $catalogFlatHelper */
         $catalogFlatHelper = $this->_factory->getHelper('catalog/product_flat');
+        if (!$catalogFlatHelper instanceof Mage_Catalog_Helper_Product_Flat) {
+            throw new Mage_Core_Exception('Invalid catalog product flat helper');
+        }
 
-        /** @var Mage_Eav_Model_Config $eavConfig */
         $eavConfig = $this->_factory->getSingleton('eav/config');
+        if (!$eavConfig instanceof Mage_Eav_Model_Config) {
+            throw new Mage_Core_Exception('Invalid eav config model');
+        }
         $priceAttribute = $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'price');
 
         $select = $this->_connection->select()
@@ -616,7 +622,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      */
     protected function _prepareAffectedProduct()
     {
-        /** @var Mage_Catalog_Model_Product_Condition $modelCondition */
         $modelCondition = $this->_factory->getModel('catalog/product_condition');
 
         $productCondition = $modelCondition->setTable($this->_resource->getTable('catalogrule/affected_product'))

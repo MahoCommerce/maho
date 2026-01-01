@@ -379,8 +379,10 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         if (empty($this->_resourceCollectionName)) {
             Mage::throwException(Mage::helper('catalog')->__('The model collection resource name is not defined.'));
         }
-        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
         $collection = Mage::getResourceModel($this->_resourceCollectionName);
+        if (!$collection instanceof Mage_Catalog_Model_Resource_Product_Collection) {
+            Mage::throwException(Mage::helper('catalog')->__('Invalid product collection resource.'));
+        }
         $collection->setStoreId($this->getStoreId());
         return $collection;
     }

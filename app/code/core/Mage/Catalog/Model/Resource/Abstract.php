@@ -138,7 +138,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     #[\Override]
     protected function _addLoadAttributesSelectFields($select, $table, $type)
     {
-        /** @var Mage_Catalog_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('catalog');
         $select->columns(
             $helper->attributeSelectFields('attr_table', $type),
@@ -586,7 +585,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
 
             $store = (int) $store;
 
-            /** @var Mage_Eav_Model_Resource_Helper_Mysql|Mage_Eav_Model_Resource_Helper_Pgsql $helper */
             $helper = Mage::getResourceHelper('eav');
 
             foreach ($typedAttributes as $table => $attributes) {

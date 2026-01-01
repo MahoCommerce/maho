@@ -74,8 +74,8 @@ class Mage_Paypal_Model_Pro
                 $params[] = $storeId;
             }
 
-            /** @var Mage_Paypal_Model_Config $model */
             $model = Mage::getModel($this->_configType, $params);
+            assert($model instanceof \Mage_Paypal_Model_Config);
             $this->_config = $model;
         } else {
             $this->_config->setMethod($code);

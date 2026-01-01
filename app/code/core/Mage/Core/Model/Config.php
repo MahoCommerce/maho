@@ -1529,7 +1529,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $stores = $this->getNode('stores');
         /**
          * @var string $code
-         * @var Varien_Simplexml_Element $store
+         * @var Mage_Core_Model_Config_Element $store
          */
         foreach ($stores->children() as $code => $store) {
             switch ($useAsKey) {
