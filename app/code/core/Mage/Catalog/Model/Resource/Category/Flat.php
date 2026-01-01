@@ -1194,9 +1194,9 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
         $select = $this->_getReadAdapter()->select()
             ->from(
                 ['main_table' => $this->getTable('catalog/category_product')],
-                [new \Maho\Db\Expr('COUNT(main_table.product_id)')],
+                [new Maho\Db\Expr('COUNT(main_table.product_id)')],
             )
-            ->where('main_table.category_id = ?', $category->getId());
+            ->where('main_table.category_id = ?', (int) $category->getId());
 
         return (int) $this->_getReadAdapter()->fetchOne($select);
     }
