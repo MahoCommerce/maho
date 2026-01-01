@@ -43,7 +43,7 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
     {
         $parent     = Mage::app()->getStore()->getRootCategoryId();
-        $cacheKey   = sprintf('%d-%d-%d-%d', $parent, $sorted, $asCollection, $toLoad);
+        $cacheKey   = sprintf('%d-%d-%d-%d', $parent, (int) $sorted, (int) $asCollection, (int) $toLoad);
         if (isset($this->_storeCategories[$cacheKey])) {
             return $this->_storeCategories[$cacheKey];
         }

@@ -169,9 +169,8 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
      *
      * @param null|string $lastmod
      * @param null|string $changefreq
-     * @param null|string $priority
      */
-    protected function getSitemapRow(string $url, $lastmod = null, $changefreq = null, $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
+    protected function getSitemapRow(string $url, $lastmod = null, $changefreq = null, ?float $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
     {
         $row = '<loc>' . htmlspecialchars($url) . '</loc>';
         if ($lastmod) {
@@ -198,7 +197,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function generateCategoriesSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
     {
         $changefreq = (string) Mage::getStoreConfig('sitemap/category/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('sitemap/category/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('sitemap/category/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/category/lastmod', $storeId) ? $date : '';
         $includeImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
         $categoryResource = Mage::getResourceModel('sitemap/catalog_category');
@@ -251,7 +250,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function generateProductsSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
     {
         $changefreq = (string) Mage::getStoreConfig('sitemap/product/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('sitemap/product/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('sitemap/product/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/product/lastmod', $storeId) ? $date : '';
         $includeImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
         $productResource = Mage::getResourceModel('sitemap/catalog_product');
@@ -305,7 +304,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     {
         $homepage = (string) Mage::getStoreConfig('web/default/cms_home_page', $storeId);
         $changefreq = (string) Mage::getStoreConfig('sitemap/page/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('sitemap/page/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('sitemap/page/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/page/lastmod', $storeId) ? $date : '';
         $pagesResource = Mage::getResourceModel('sitemap/cms_page');
         $fullCollection = $pagesResource->getCollection($storeId);
@@ -351,7 +350,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Write a single sitemap file for a collection page
      */
-    protected function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, string $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
+    protected function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
     {
         if (empty($items)) {
             return;

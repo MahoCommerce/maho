@@ -863,7 +863,7 @@ interface AdapterInterface
     /**
      * Change table auto increment value
      */
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\StatementInterface;
+    public function changeTableAutoIncrement(string $tableName, int $increment, ?string $schemaName = null): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Create new table from provided select statement

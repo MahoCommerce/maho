@@ -48,7 +48,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * @param string $coreRoute
      */
     #[\Override]
-    public function noRouteAction($coreRoute = null): void
+    public function norouteAction($coreRoute = null): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
         $this->getResponse()->setHeader('Status', '404 File not found');

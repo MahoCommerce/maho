@@ -301,6 +301,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             $this->setStore($request->getStoreId());
         }
         $data = [];
+        $result = null;
         foreach ($packages as $packageId => $package) {
             $request->setPackageId($packageId);
             $request->setPackagingType($package['params']['container']);
@@ -327,7 +328,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         $response = new Varien_Object([
             'info'   => $data,
         ]);
-        if ($result->getErrors()) {
+        if ($result && $result->getErrors()) {
             $response->setErrors($result->getErrors());
         }
         return $response;
@@ -351,6 +352,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             $this->setStore($request->getStoreId());
         }
         $data = [];
+        $result = null;
         foreach ($packages as $packageId => $package) {
             $request->setPackageId($packageId);
             $request->setPackagingType($package['params']['container']);
@@ -377,7 +379,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         $response = new Varien_Object([
             'info'   => $data,
         ]);
-        if ($result->getErrors()) {
+        if ($result && $result->getErrors()) {
             $response->setErrors($result->getErrors());
         }
         return $response;

@@ -18,6 +18,13 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
      */
     protected ?Varien_Data_Form $_form = null;
 
+    /**
+     * Associated rule instance
+     *
+     * @var Mage_Payment_Model_Restriction_Rule|null
+     */
+    protected $_rule;
+
     public function __construct()
     {
         parent::__construct();
