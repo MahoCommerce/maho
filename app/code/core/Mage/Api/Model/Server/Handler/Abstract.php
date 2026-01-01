@@ -577,8 +577,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
             foreach ($result as $key => $value) {
                 $result[$key] = $this->processingMethodResult($value);
             }
-        }
-        else {
+        } else {
             $result = $this->processingRow($result);
         }
 

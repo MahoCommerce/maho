@@ -30,8 +30,7 @@ class Parameter extends AbstractTokenizer
             }
             if ($this->char() != '=') {
                 $parameterName .= $this->char();
-            }
-            else {
+            } else {
                 $parameters[$parameterName] = $this->getValue();
                 $parameterName = '';
             }

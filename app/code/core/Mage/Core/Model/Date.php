@@ -116,8 +116,7 @@ class Mage_Core_Model_Date
         }
         if (is_numeric($input)) {
             $result = $input;
-        }
-        else {
+        } else {
             $result = strtotime($input);
         }
 

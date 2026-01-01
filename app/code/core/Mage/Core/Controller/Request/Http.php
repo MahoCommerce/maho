@@ -320,10 +320,7 @@ class Mage_Core_Controller_Request_Http
         if (isset($_COOKIE[$key])) {
             return $_COOKIE[$key];
         }
-        if (isset($_SERVER[$key])) {
-            return $_SERVER[$key];
-        }
-        return $_ENV[$key] ?? null;
+        return $_SERVER[$key] ?? $_ENV[$key] ?? null;
     }
 
     public function get(string $key): mixed

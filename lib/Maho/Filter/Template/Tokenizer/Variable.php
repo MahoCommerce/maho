@@ -140,8 +140,7 @@ class Variable extends AbstractTokenizer
             }
             if ($this->isNumeric()) {
                 $value[] = $this->getNumber();
-            }
-            else {
+            } else {
                 $value[] = $this->getString();
             }
         }
