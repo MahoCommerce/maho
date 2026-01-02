@@ -77,17 +77,27 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Retrieve default attribute source model
-     *
-     * @return string
+     * Get default source model
      */
     #[\Override]
-    protected function _getDefaultSourceModel()
+    public function getDefaultSourceModel(): string
     {
         if ($this->getAttributeCode() == 'store_id') {
             return 'eav/entity_attribute_source_store';
         }
-        return parent::_getDefaultSourceModel();
+        return parent::getDefaultSourceModel();
+    }
+
+    /**
+     * Retrieve default attribute source model
+     *
+     * @return string
+     * @deprecated since 26.1 use getDefaultSourceModel() instead
+     */
+    #[\Override]
+    protected function _getDefaultSourceModel()
+    {
+        return $this->getDefaultSourceModel();
     }
 
     /**

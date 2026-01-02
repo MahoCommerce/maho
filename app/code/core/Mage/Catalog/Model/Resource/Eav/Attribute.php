@@ -245,7 +245,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         $model = $this->getData('source_model');
         if (empty($model)) {
             if ($this->getBackendType() == 'int' && $this->getFrontendInput() == 'select') {
-                return $this->_getDefaultSourceModel();
+                return $this->getDefaultSourceModel();
             }
         }
         return $model;
@@ -283,13 +283,21 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
 
     /**
      * Get default attribute source model
-     *
-     * @return string
      */
     #[\Override]
-    public function _getDefaultSourceModel()
+    public function getDefaultSourceModel(): string
     {
         return 'eav/entity_attribute_source_table';
+    }
+
+    /**
+     * @return string
+     * @deprecated since 26.1 use getDefaultSourceModel() instead
+     */
+    #[\Override]
+    protected function _getDefaultSourceModel()
+    {
+        return $this->getDefaultSourceModel();
     }
 
     /**

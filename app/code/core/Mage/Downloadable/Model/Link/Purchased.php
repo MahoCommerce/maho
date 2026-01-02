@@ -50,7 +50,7 @@ class Mage_Downloadable_Model_Link_Purchased extends Mage_Core_Model_Abstract
      * Check order id
      */
     #[\Override]
-    public function _beforeSave()
+    protected function _beforeSave()
     {
         if ($this->getOrderId() == null) {
             throw new Exception(

@@ -43,7 +43,7 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate_Collection extends Mage_Cor
      * @return $this
      */
     #[\Override]
-    public function _initSelect()
+    protected function _initSelect()
     {
         parent::_initSelect();
 
