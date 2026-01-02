@@ -84,9 +84,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     {
         if ($parentNodeCategory === null && $this->getCategoryIds()) {
             return $this->getRootByIds($this->getCategoryIds(), $recursionLevel);
-        } else {
-            return parent::getRoot($parentNodeCategory, $recursionLevel);
         }
+        return parent::getRoot($parentNodeCategory, $recursionLevel);
     }
 
     #[\Override]

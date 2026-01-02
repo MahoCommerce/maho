@@ -153,6 +153,46 @@ final class Maho
     }
 
     /**
+     * Display the maintenance page and exit
+     *
+     * Looks for templates using Maho's fallback system:
+     * 1. app/design/maintenance/{store_code}.phtml (if MAGE_RUN_CODE is set)
+     * 2. app/design/maintenance/default.phtml
+     */
+    public static function maintenancePage(): never
+    {
+        header('HTTP/1.1 503 Service Unavailable', true, 503);
+        header('Retry-After: 3600');
+        header('X-Robots-Tag: noindex');
+        header('Content-Type: text/html; charset=UTF-8');
+
+        $template = self::findMaintenanceTemplate();
+
+        if ($template !== false) {
+            include $template;
+        }
+
+        exit;
+    }
+
+    /**
+     * Find the maintenance template file using Maho's fallback system
+     */
+    private static function findMaintenanceTemplate(): string|false
+    {
+        $runCode = $_SERVER['MAGE_RUN_CODE'] ?? '';
+
+        if ($runCode !== '') {
+            $storeTemplate = self::findFile("app/design/maintenance/{$runCode}.phtml");
+            if ($storeTemplate !== false) {
+                return $storeTemplate;
+            }
+        }
+
+        return self::findFile('app/design/maintenance/default.phtml');
+    }
+
+    /**
      * Generate an error report and output HTML
      */
     public static function errorReport(array $reportData = [], int $httpResponseCode = 503): void

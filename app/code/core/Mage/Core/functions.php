@@ -67,6 +67,15 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         return false;
     }
 
+    // Ignore symlink "File exists" warnings from Symfony cache
+    // @see https://github.com/MahoCommerce/maho/issues/269
+    if ($errno === E_WARNING
+        && str_contains($errstr, 'symlink(): File exists')
+        && str_contains($errfile, 'FilesystemTagAwareAdapter.php')
+    ) {
+        return false;
+    }
+
     $errno = $errno & error_reporting();
     if ($errno == 0) {
         return false;
@@ -108,10 +117,9 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
     $errorMessage .= ": {$errstr}  in {$errfile} on line {$errline}";
     if (Mage::getIsDeveloperMode()) {
         throw new Exception($errorMessage);
-    } else {
-        Mage::log($errorMessage, Mage::LOG_ERROR);
-        return null;
     }
+    Mage::log($errorMessage, Mage::LOG_ERROR);
+    return null;
 }
 
 /**
@@ -139,10 +147,9 @@ function mageDebugBacktrace($return = false, $html = true, $showFirst = false)
     }
     if ($return) {
         return $out;
-    } else {
-        echo $out;
-        return null;
     }
+    echo $out;
+    return null;
 }
 
 function mageSendErrorHeader()

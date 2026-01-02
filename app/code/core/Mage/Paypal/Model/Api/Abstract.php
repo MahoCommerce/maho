@@ -43,7 +43,15 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
      * @var array
      */
     protected $_lineItemExportItemsFormat = [];
+
+    /**
+     * @var array
+     */
     protected $_lineItemExportItemsFilters = [];
+
+    /**
+     * @var array
+     */
     protected $_lineItemTotalExportMap = [];
 
     /**

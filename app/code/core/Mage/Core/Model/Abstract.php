@@ -70,7 +70,7 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
      *
      * When you use true - all cache will be clean
      *
-     * @var string|true
+     * @var string|bool|array
      */
     protected $_cacheTag    = false;
 
@@ -207,9 +207,8 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
         $fieldName = $this->getIdFieldName();
         if ($fieldName) {
             return $this->_getData($fieldName);
-        } else {
-            return $this->_getData('id');
         }
+        return $this->_getData('id');
     }
 
     /**

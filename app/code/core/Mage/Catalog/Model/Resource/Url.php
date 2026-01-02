@@ -163,7 +163,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     {
         $adapter = $this->_getWriteAdapter();
         $requestPathField = new Maho\Db\Expr($adapter->quoteIdentifier('request_path'));
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('eav');
         //select increment part of request path and cast expression to integer
         $urlIncrementPartExpression = $helper
@@ -874,10 +873,11 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     public function getCategoryParentPath(Varien_Object $category)
     {
         $store = Mage::app()->getStore($category->getStoreId());
-
         if ($category->getId() == $store->getRootCategoryId()) {
             return '';
-        } elseif ($category->getParentId() == 1 || $category->getParentId() == $store->getRootCategoryId()) {
+        }
+
+        if ($category->getParentId() == 1 || $category->getParentId() == $store->getRootCategoryId()) {
             return '';
         }
 
@@ -1308,9 +1308,8 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
             $idPath = $this->findFinalTargetPath($row['target_path'], $storeId, $checkedPaths);
             if (!$idPath) {
                 return $row['id_path'];
-            } else {
-                return $idPath;
             }
+            return $idPath;
         }
 
         return false;

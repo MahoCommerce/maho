@@ -35,15 +35,15 @@ class Csv extends AbstractParser
         fseek($fp, 0);
 
         $data = [];
+        $fields = [];
         for ($i = 0; $line = fgetcsv($fp, 4096, $fDel, $fEnc, $fEsc); $i++) {
             if (0 == $i) {
                 if ($this->getVar('fieldnames')) {
                     $fields = $line;
                     continue;
-                } else {
-                    foreach (array_keys($line) as $j) {
-                        $fields[$j] = 'column' . ($j + 1);
-                    }
+                }
+                foreach (array_keys($line) as $j) {
+                    $fields[$j] = 'column' . ($j + 1);
                 }
             }
             $row = [];
@@ -79,15 +79,15 @@ class Csv extends AbstractParser
         $sessionId = \Mage::registry('current_dataflow_session_id');
         $import = \Mage::getModel('dataflow/import');
         $map = new Column();
+        $fields = [];
         for ($i = 0; $line = fgetcsv($fp, 4096, $fDel, $fEnc, $fEsc); $i++) {
             if (0 == $i) {
                 if ($this->getVar('fieldnames')) {
                     $fields = $line;
                     continue;
-                } else {
-                    foreach (array_keys($line) as $j) {
-                        $fields[$j] = 'column' . ($j + 1);
-                    }
+                }
+                foreach (array_keys($line) as $j) {
+                    $fields[$j] = 'column' . ($j + 1);
                 }
             }
             $row = [];

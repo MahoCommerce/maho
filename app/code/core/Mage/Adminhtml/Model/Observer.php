@@ -57,7 +57,7 @@ class Mage_Adminhtml_Model_Observer
     public function setCookieLifetime(Varien_Event_Observer $observer): void
     {
         if ($observer->getSessionName() === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
-            /** @var Mage_Core_Model_Session $session */
+            /** @var Mage_Adminhtml_Model_Session $session */
             $session = Mage::getSingleton('adminhtml/session');
 
             $lifetime = Mage::getStoreConfigAsInt('admin/security/session_cookie_lifetime');

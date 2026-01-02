@@ -213,7 +213,9 @@ class Minicart {
 
     updateCartQty(qty) {
         if (typeof qty !== 'undefined') {
-            document.querySelector(this.selectors.qty).textContent = qty;
+            const el = document.querySelector(this.selectors.qty);
+            el.textContent = qty;
+            el.className = el.className.replace(/count-\d+/, 'count-' + qty);
         }
     }
 

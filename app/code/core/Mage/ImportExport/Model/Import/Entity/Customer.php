@@ -349,7 +349,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
         /** @var Mage_Customer_Model_Customer $resource */
         $resource       = Mage::getModel('customer/customer');
         $table = $resource->getResource()->getEntityTable();
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextEntityId   = $helper->getNextAutoincrement($table);
         $passId         = $resource->getAttribute('password_hash')->getId();
@@ -400,7 +399,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                     // attribute values
                     foreach (array_intersect_key($rowData, $this->_attributes) as $attrCode => $value) {
                         if (!$this->_attributes[$attrCode]['is_static'] && strlen($value)) {
-                            /** @var Mage_Customer_Model_Attribute $attribute */
                             $attribute  = $resource->getAttribute($attrCode);
                             $backModel  = $attribute->getBackendModel();
                             $attrParams = $this->_attributes[$attrCode];
@@ -507,15 +505,12 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      * @param string $websiteCode
      * @return string|null
      */
-    public function getCustomerId(#[\SensitiveParameter] $email, $websiteCode)
-    {
-        if (isset($this->_oldCustomers[$email][$websiteCode])) {
-            return $this->_oldCustomers[$email][$websiteCode];
-        } elseif (isset($this->_newCustomers[$email][$websiteCode])) {
-            return $this->_newCustomers[$email][$websiteCode];
-        } else {
-            return null;
-        }
+    public function getCustomerId(
+        #[\SensitiveParameter]
+        $email,
+        $websiteCode,
+    ) {
+        return $this->_oldCustomers[$email][$websiteCode] ?? $this->_newCustomers[$email][$websiteCode] ?? null;
     }
 
     /**

@@ -245,7 +245,6 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
         $bunchRows       = [];
         $startNewBunch   = false;
         $nextRowBackup   = [];
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql $helper */
         $helper          = Mage::getResourceHelper('importexport');
         $maxDataSize     = $helper->getMaxDataSize();
         $bunchSize       = Mage::helper('importexport')->getBunchSize();

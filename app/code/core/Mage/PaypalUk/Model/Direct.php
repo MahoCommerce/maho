@@ -82,6 +82,6 @@ class Mage_PaypalUk_Model_Direct extends Mage_Paypal_Model_Direct
     #[\Override]
     protected function _getFormattedCcExpirationDate($month, $year)
     {
-        return sprintf('%02d', $month) . sprintf('%02d', substr($year, -2, 2));
+        return sprintf('%02d', (int) $month) . sprintf('%02d', (int) substr($year, -2, 2));
     }
 }

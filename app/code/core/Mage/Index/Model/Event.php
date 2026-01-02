@@ -22,7 +22,7 @@
  * @method $this setCreatedAt(string $value)
  * @method $this setOldData(string|array $value)
  * @method $this setNewData(string|array $value)
- * @method Mage_Core_Model_Store|Mage_Core_Model_Store_Group getDataObject()
+ * @method Mage_Core_Model_Abstract getDataObject()
  * @method $this setDataObject(Varien_Object $value)
  * @method bool hasCreatedAt()
  */

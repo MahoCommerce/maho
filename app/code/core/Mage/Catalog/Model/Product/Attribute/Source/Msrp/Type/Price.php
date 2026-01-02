@@ -45,21 +45,14 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Price extends Mage_C
     {
         $attributeType = $this->getAttribute()->getBackendType();
         $attributeCode = $this->getAttribute()->getAttributeCode();
+        $helper = Mage::getResourceHelper('eav');
         $column = [
+            'type'      => $helper->getDdlTypeByColumnType($attributeType),
             'unsigned'  => false,
+            'nullable'  => true,
             'default'   => null,
             'extra'     => null,
         ];
-
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $column['type']     = $attributeType;
-            $column['is_null']  = true;
-        } else {
-            /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
-            $helper = Mage::getResourceHelper('eav');
-            $column['type']     = $helper->getDdlTypeByColumnType($attributeType);
-            $column['nullable'] = true;
-        }
 
         return [$attributeCode => $column];
     }

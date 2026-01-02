@@ -251,7 +251,7 @@ class Mage_Customer_Model_Observer
     public function setCookieLifetime(Varien_Event_Observer $observer)
     {
         if ($observer->getSessionName() === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-            /** @var Mage_Core_Model_Session $session */
+            /** @var Mage_Customer_Model_Session $session */
             $session = Mage::getSingleton('customer/session');
 
             if ($session->getRememberMe() && Mage::getStoreConfigFlag('web/cookie/remember_enabled')) {

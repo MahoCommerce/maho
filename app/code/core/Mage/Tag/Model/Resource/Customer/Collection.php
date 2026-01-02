@@ -39,7 +39,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      * @return $this
      */
     #[\Override]
-    public function _initSelect()
+    protected function _initSelect()
     {
         parent::_initSelect();
         $this->_joinFields();
@@ -307,9 +307,8 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
             $where = $this->_getConditionSql('t.name', $condition);
             $this->getSelect()->where($where, null, Maho\Db\Select::TYPE_CONDITION);
             return $this;
-        } else {
-            return parent::addFieldToFilter($attribute, $condition);
         }
+        return parent::addFieldToFilter($attribute, $condition);
     }
 
     /**

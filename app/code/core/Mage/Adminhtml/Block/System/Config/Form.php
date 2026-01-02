@@ -115,7 +115,6 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                 usort($groups, [$this, '_sortForm']);
 
                 foreach ($groups as $group) {
-                    /** @var Varien_Simplexml_Element $group */
                     if (!$this->_canShowField($group)) {
                         continue;
                     }
@@ -230,9 +229,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     }
                 }
                 return [$operator, $conditions];
-            } else {
-                Mage::throwException($this->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
             }
+            Mage::throwException($this->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
         }
 
         // Conditions may reference fields in other groups by specifying a <fieldset> node
@@ -537,7 +535,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     {
         if ($element->tooltip) {
             return Mage::helper($helper)->__((string) $element->tooltip);
-        } elseif ($element->tooltip_block) {
+        }
+        if ($element->tooltip_block) {
             return $this->getLayout()->createBlock((string) $element->tooltip_block)->toHtml();
         }
         return '';
@@ -645,7 +644,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     {
         if ((int) $element->show_in_store === 1) {
             return $this->_scopeLabels[self::SCOPE_STORES];
-        } elseif ((int) $element->show_in_website === 1) {
+        }
+        if ((int) $element->show_in_website === 1) {
             return $this->_scopeLabels[self::SCOPE_WEBSITES];
         }
         return $this->_scopeLabels[self::SCOPE_DEFAULT];

@@ -44,7 +44,8 @@ class Color extends AbstractElement
     public function getElementHtml()
     {
         $id = $this->getHtmlId();
-        $with_hash = strtolower((string) ($this->original_data['with_hash'] ?? 1));
+        $originalData = $this->getData('original_data') ?? [];
+        $with_hash = strtolower((string) ($originalData['with_hash'] ?? 1));
 
         if (!empty($with_hash) && $with_hash !== 'false' && $with_hash !== 'off') {
             $oninput = "document.getElementById('{$id}').value = this.value";

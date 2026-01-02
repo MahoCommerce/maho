@@ -496,9 +496,15 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     {
         $cols = [];
         $vals = [];
-        foreach (array_keys($bind) as $col) {
+        $params = [];
+        foreach ($bind as $col => $value) {
             $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
+            if ($value instanceof Expr) {
+                $vals[] = $value->__toString();
+            } else {
+                $vals[] = '?';
+                $params[] = $value;
+            }
         }
 
         $sql = sprintf(
@@ -508,7 +514,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             implode(', ', $vals),
         );
 
-        $stmt = $this->query($sql, array_values($bind));
+        $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
     }
 
@@ -1406,10 +1412,10 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
             // Get column names as strings (DBAL returns UnqualifiedName objects)
             $localColumns = $fk->getReferencingColumnNames();
-            $localColumnStr = !empty($localColumns) ? $localColumns[0]->getIdentifier()->getValue() : '';
+            $localColumnStr = empty($localColumns) ? '' : $localColumns[0]->getIdentifier()->getValue();
 
             $foreignColumns = $fk->getReferencedColumnNames();
-            $foreignColumnStr = !empty($foreignColumns) ? $foreignColumns[0]->getIdentifier()->getValue() : '';
+            $foreignColumnStr = empty($foreignColumns) ? '' : $foreignColumns[0]->getIdentifier()->getValue();
 
             // Get referenced table name as string (DBAL returns OptionallyQualifiedName object)
             $refTableName = $fk->getReferencedTableName();

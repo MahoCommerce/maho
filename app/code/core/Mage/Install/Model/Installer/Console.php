@@ -325,6 +325,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->installConfig($this->_getDataModel()->getConfigData());
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -341,6 +342,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->installDb();
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -354,6 +356,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $user = $installer->validateAndPrepareAdministrator($this->_getDataModel()->getAdminData());
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -363,6 +366,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->createAdministrator($user);
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -372,6 +376,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->installEnryptionKey();
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -381,6 +386,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->finish();
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }

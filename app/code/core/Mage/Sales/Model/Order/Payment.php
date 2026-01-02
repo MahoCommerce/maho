@@ -1418,9 +1418,9 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         if ($preparedMessage) {
             if (is_string($preparedMessage)) {
                 return $preparedMessage . ' ' . $messagePrependTo;
-            } elseif (is_object($preparedMessage)
-                && ($preparedMessage instanceof Mage_Sales_Model_Order_Status_History)
-            ) {
+            }
+            if (is_object($preparedMessage)
+                && ($preparedMessage instanceof Mage_Sales_Model_Order_Status_History)) {
                 $comment = $preparedMessage->getComment() . ' ' . $messagePrependTo;
                 $preparedMessage->setComment($comment);
                 return $comment;
@@ -1439,7 +1439,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     protected function _formatAmount($amount, $asFloat = false)
     {
         $amount = Mage::app()->getStore()->roundPrice($amount);
-        return !$asFloat ? (string) $amount : $amount;
+        return $asFloat ? $amount : (string) $amount;
     }
 
     /**

@@ -549,10 +549,11 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
 
         $sort1 =  ($attribute1->getData($groupSortPath) * 1000) + ($attribute1->getData($sortPath) * 0.0001);
         $sort2 =  ($attribute2->getData($groupSortPath) * 1000) + ($attribute2->getData($sortPath) * 0.0001);
-
         if ($sort1 > $sort2) {
             return 1;
-        } elseif ($sort1 < $sort2) {
+        }
+
+        if ($sort1 < $sort2) {
             return -1;
         }
 
@@ -956,7 +957,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
             $select = $this->_getLoadAttributesSelect($object, $table);
             $selects[$eavType][] = $this->_addLoadAttributesSelectFields($select, $table, $eavType);
         }
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('eav');
         $selectGroups = $helper->getLoadAttributesSelectGroups($selects);
         foreach ($selectGroups as $selects) {
@@ -1027,7 +1027,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _addLoadAttributesSelectFields($select, $table, $type)
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('eav');
         $select->columns($helper->attributeSelectFields($table, $type));
         return $select;

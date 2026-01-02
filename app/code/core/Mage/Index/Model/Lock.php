@@ -99,9 +99,8 @@ class Mage_Index_Model_Lock
     {
         if ($file) {
             return $this->_setLockFile($lockName, $block);
-        } else {
-            return $this->_setLockDb($lockName, $block);
         }
+        return $this->_setLockDb($lockName, $block);
     }
 
     /**
@@ -162,9 +161,8 @@ class Mage_Index_Model_Lock
     {
         if ($file) {
             return $this->_releaseLockFile($lockName);
-        } else {
-            return $this->_releaseLockDb($lockName);
         }
+        return $this->_releaseLockDb($lockName);
     }
 
     /**
@@ -208,9 +206,8 @@ class Mage_Index_Model_Lock
     {
         if ($file) {
             return $this->_isLockExistsFile($lockName);
-        } else {
-            return $this->_isLockExistsDb($lockName);
         }
+        return $this->_isLockExistsDb($lockName);
     }
 
     /**
@@ -256,8 +253,8 @@ class Mage_Index_Model_Lock
     {
         if (!$this->_storage instanceof Mage_Index_Model_Lock_Storage_Interface) {
             $config = Mage::getConfig()->getNode(self::STORAGE_CONFIG_PATH);
-            /** @var Mage_Index_Model_Lock_Storage_Interface $model */
             $model = Mage::getModel($config->model);
+            assert($model instanceof \Mage_Index_Model_Lock_Storage_Interface);
             $this->_storage = $model;
         }
         return $this->_storage;

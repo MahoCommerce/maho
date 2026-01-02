@@ -228,9 +228,8 @@ class Pgsql extends AbstractPdoAdapter
 
         if (empty($field)) {
             return $row;
-        } else {
-            return $row[$field] ?? false;
         }
+        return $row[$field] ?? false;
     }
 
     /**
@@ -738,15 +737,21 @@ class Pgsql extends AbstractPdoAdapter
         // Extract and quote col names from the array keys
         $cols = [];
         $vals = [];
-        foreach (array_keys($bind) as $col) {
+        $params = [];
+        foreach ($bind as $col => $value) {
             $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
+            if ($value instanceof \Maho\Db\Expr) {
+                $vals[] = $value->__toString();
+            } else {
+                $vals[] = '?';
+                $params[] = $value;
+            }
         }
 
         // Get the primary key column for RETURNING clause
         $tableName = is_array($table) ? reset($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
-        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+        $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
         // Build the statement
         $sql = sprintf(
@@ -762,7 +767,7 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         // Execute the statement
-        $stmt = $this->query($sql, array_values($bind));
+        $stmt = $this->query($sql, $params);
 
         // Capture the returned ID if available
         if ($returningColumn !== null) {
@@ -846,7 +851,7 @@ class Pgsql extends AbstractPdoAdapter
         // Get the primary key column for RETURNING clause
         $tableName = is_array($table) ? reset($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
-        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+        $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
         $insertSql = $this->_getInsertSqlQuery($table, $cols, $values);
 
@@ -1045,7 +1050,7 @@ class Pgsql extends AbstractPdoAdapter
         // Get the primary key column for RETURNING clause
         $tableName = is_array($table) ? reset($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
-        $returningColumn = !empty($primaryKey) ? $primaryKey[0] : null;
+        $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
         $sql = 'INSERT INTO '
             . $this->quoteIdentifier($table, true)
@@ -2060,7 +2065,7 @@ class Pgsql extends AbstractPdoAdapter
      * Change table auto increment value (PostgreSQL uses sequences)
      */
     #[\Override]
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Pgsql
+    public function changeTableAutoIncrement(string $tableName, int $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Pgsql
     {
         // Find the sequence name
         $primaryKeys = $this->_getPrimaryKeyColumns($tableName);
@@ -2068,7 +2073,7 @@ class Pgsql extends AbstractPdoAdapter
         $sequenceName = sprintf('%s_%s_seq', $tableName, $primaryKey);
 
         $sql = sprintf(
-            'ALTER SEQUENCE %s RESTART WITH %s',
+            'ALTER SEQUENCE %s RESTART WITH %d',
             $this->quoteIdentifier($sequenceName),
             $increment,
         );
@@ -2834,9 +2839,8 @@ class Pgsql extends AbstractPdoAdapter
         $value = str_replace("\0", '', (string) $value);
         if ($value == '') {
             return ($conditionKey == 'seq') ? 'null' : 'notnull';
-        } else {
-            return ($conditionKey == 'seq') ? 'eq' : 'neq';
         }
+        return ($conditionKey == 'seq') ? 'eq' : 'neq';
     }
 
     /**

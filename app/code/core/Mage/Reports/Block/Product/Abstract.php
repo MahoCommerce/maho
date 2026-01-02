@@ -19,7 +19,7 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
     /**
      * Product Index model name
      *
-     * @var string|null
+     * @var string
      */
     protected $_indexName;
 

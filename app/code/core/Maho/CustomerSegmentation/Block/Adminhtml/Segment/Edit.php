@@ -44,8 +44,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit extends Mage_Adminh
         $segment = Mage::registry('current_customer_segment');
         if ($segment && $segment->getId()) {
             return Mage::helper('customersegmentation')->__("Edit Segment '%s'", $this->escapeHtml($segment->getName()));
-        } else {
-            return Mage::helper('customersegmentation')->__('Add Segment');
         }
+        return Mage::helper('customersegmentation')->__('Add Segment');
     }
 }

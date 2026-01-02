@@ -61,12 +61,13 @@ class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template
 
         // evaluate conditions (equality)
         if (!empty($conditionKeys)) {
+            $lastValue = null;
             foreach ($conditionKeys as $key) {
                 if (!isset($this->_data[$key])) {
                     return false;
                 }
+                $lastValue = $this->_data[$key];
             }
-            $lastValue = $this->_data[$key];
             foreach ($conditionKeys as $key) {
                 if ($this->_data[$key] !== $lastValue) {
                     return false;

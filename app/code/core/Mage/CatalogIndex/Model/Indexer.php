@@ -193,9 +193,8 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
         if ($flag->getState() == Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_RUNNING) {
             /*if ($flag->getState() == Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_QUEUED)*/
             return $this;
-        } else {
-            $flag->setState(Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_RUNNING)->save();
         }
+        $flag->setState(Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_RUNNING)->save();
 
         try {
             /**
@@ -357,7 +356,8 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                     $this->_afterPlainReindex($storeObject->getId(), $products);
                 }
                 return $this;
-            } elseif ($store instanceof Mage_Core_Model_Store) {
+            }
+            if ($store instanceof Mage_Core_Model_Store) {
                 $store = $store->getId();
             } elseif (is_array($store)) { // array of stores
                 foreach ($store as $storeObject) {

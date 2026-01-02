@@ -86,7 +86,7 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength
 
     public function getMessage(): string
     {
-        return !empty($this->messages) ? $this->messages[0] : '';
+        return empty($this->messages) ? '' : $this->messages[0];
     }
 
     public function isValid(mixed $value): bool

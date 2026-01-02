@@ -234,7 +234,7 @@ describe('Blog Navigation Integration', function () {
         $futurePost->setTitle('Nav Test Future Post');
         $futurePost->setContent('Future post should not be visible');
         $futurePost->setIsActive(1);
-        $futurePost->setPublishDate('2025-12-31'); // Future date
+        $futurePost->setPublishDate((new DateTime('+1 day'))->format('Y-m-d')); // Future date
         $futurePost->setStores([$currentStoreId]);
         $futurePost->save();
 

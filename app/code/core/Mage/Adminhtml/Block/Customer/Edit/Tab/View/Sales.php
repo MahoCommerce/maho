@@ -36,7 +36,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
     }
 
     #[\Override]
-    public function _beforeToHtml()
+    protected function _beforeToHtml()
     {
         $this->_currency = Mage::getModel('directory/currency')
             ->load(Mage_Directory_Helper_Data::getConfigCurrencyBase());

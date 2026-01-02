@@ -85,10 +85,9 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initForm($simple = false)
     {
-        /** @var Mage_Oauth_Model_Server $server */
         $server = Mage::getModel('oauth/server');
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         $isException = false;
         try {
@@ -132,11 +131,10 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initConfirmPage($simple = false)
     {
-        /** @var Mage_Oauth_Helper_Data $helper */
         $helper = Mage::helper('oauth');
 
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         /** @var Mage_Admin_Model_User $user */
         $user = $session->getData('user');
@@ -162,10 +160,9 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
             if (($callback = $helper->getFullCallbackUrl($token))) { //false in case of OOB
                 $this->getResponse()->setRedirect($callback . ($simple ? '&simple=1' : ''));
                 return $this;
-            } else {
-                $block->setVerifier($token->getVerifier());
-                $session->addSuccess($this->__('Authorization confirmed.'));
             }
+            $block->setVerifier($token->getVerifier());
+            $session->addSuccess($this->__('Authorization confirmed.'));
         } catch (Mage_Core_Exception $e) {
             $block->setHasException(true);
             $session->addError($e->getMessage());
@@ -188,11 +185,10 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initRejectPage($simple = false)
     {
-        /** @var Mage_Oauth_Model_Server $server */
         $server = Mage::getModel('oauth/server');
 
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         $this->loadLayout();
 
@@ -208,9 +204,8 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
             if (($callback = $helper->getFullCallbackUrl($token, true))) {
                 $this->_redirectUrl($callback . ($simple ? '&simple=1' : ''));
                 return $this;
-            } else {
-                $session->addNotice($this->__('The application access request is rejected.'));
             }
+            $session->addNotice($this->__('The application access request is rejected.'));
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
         } catch (Exception $e) {

@@ -75,13 +75,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public const CACHE_TAG         = 'CONFIG';
 
     /**
-     * Configuration xml
-     *
-     * @var Mage_Core_Model_Config_Element|null
-     */
-    protected $_xml = null;
-
-    /**
      * Flag which allow use cache logic
      *
      * @var bool
@@ -484,13 +477,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection->getLock('core_config_cache_save_lock', $waitTime)) {
             if ($ignoreFailure) {
                 return;
-            } elseif (PHP_SAPI === 'cli') {
-                throw new Exception('Could not get lock on cache save operation.');
-            } else {
-                Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Mage::LOG_NOTICE);
-                Maho::errorReport();
-                die();
             }
+            if (PHP_SAPI === 'cli') {
+                throw new Exception('Could not get lock on cache save operation.');
+            }
+            Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Mage::LOG_NOTICE);
+            Maho::errorReport();
+            die();
         }
     }
 
@@ -528,6 +521,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         if (!empty($this->_cacheSections)) {
+            /** @var Mage_Core_Model_Config_Element $xml */
             $xml = clone $this->_xml;
             foreach ($this->_cacheSections as $sectionName => $level) {
                 $this->_saveSectionCache($this->getCacheId(), $sectionName, $xml, $level, $tags);
@@ -552,7 +546,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $idPrefix cache id prefix
      * @param string $sectionName
-     * @param Varien_Simplexml_Element $source
+     * @param Mage_Core_Model_Config_Element $source
      * @param int $recursionLevel
      * @param array $tags
      * @return Mage_Core_Model_Config
@@ -595,9 +589,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $this->_useCache = false;
             $this->reinit($this->_options);
             return false;
-        } else {
-            return simplexml_load_string($xmlString, $this->_elementClass);
         }
+        return simplexml_load_string($xmlString, $this->_elementClass);
     }
 
     /**
@@ -827,9 +820,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         if (empty($this->_allowedModules)) {
             return true;
-        } else {
-            return in_array($moduleName, $this->_allowedModules);
         }
+        return in_array($moduleName, $this->_allowedModules);
     }
 
     /**
@@ -1117,9 +1109,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $modules = $this->getNode('modules');
         if ($moduleName === '') {
             return $modules;
-        } else {
-            return $modules->$moduleName;
         }
+        return $modules->$moduleName;
     }
 
     /**
@@ -1274,7 +1265,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         $classArr = explode('/', trim($classAlias));
         $group = $classArr[0];
-        $class = !empty($classArr[1]) ? $classArr[1] : null;
+        $class = empty($classArr[1]) ? null : $classArr[1];
 
         if (isset($this->_classNameCache[$groupRootNode][$group][$class])) {
             return $this->_classNameCache[$groupRootNode][$group][$class];
@@ -1496,9 +1487,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             if ($conn) {
                 if (!empty($conn->use)) {
                     return $this->getResourceConnectionConfig((string) $conn->use);
-                } else {
-                    return $conn;
                 }
+                return $conn;
             }
         }
         return false;
@@ -1533,7 +1523,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $stores = $this->getNode('stores');
         /**
          * @var string $code
-         * @var Varien_Simplexml_Element $store
+         * @var Mage_Core_Model_Config_Element $store
          */
         foreach ($stores->children() as $code => $store) {
             switch ($useAsKey) {
@@ -1598,10 +1588,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Get DB table names prefix
      *
-     * @return Mage_Core_Model_Config_Element
+     * @return Mage_Core_Model_Config_Element|null
      */
     public function getTablePrefix()
     {
+        /** @var Mage_Core_Model_Config_Element|null */
         return $this->_xml->global->resources->db->table_prefix;
     }
 
@@ -1683,12 +1674,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
-     * Retrieve resource connection model name
+     * Retrieve resource connection model name (database engine)
      *
-     * @param string $moduleName
-     * @return string
+     * Supports new 'engine' config with backward compatibility for legacy 'model' config.
      */
-    protected function _getResourceConnectionModel($moduleName = null)
+    protected function _getResourceConnectionModel(?string $moduleName = null): string
     {
         $config = null;
         if (!is_null($moduleName)) {
@@ -1699,6 +1689,12 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $config = $this->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE);
         }
 
+        // New config: use 'engine'
+        if (!empty($config->engine)) {
+            return (string) $config->engine;
+        }
+
+        // Backward compatibility: use 'model'
         $model = (string) $config->model;
 
         // Normalize legacy mysql4 model name to mysql for backwards compatibility
@@ -1706,7 +1702,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $model = 'mysql';
         }
 
-        return $model;
+        return $model ?: 'mysql';
     }
 
     /**

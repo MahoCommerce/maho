@@ -65,7 +65,7 @@ class Maho_Blog_Model_Observer
 
         // Get blog sitemap configuration
         $changefreq = (string) Mage::getStoreConfig('blog/sitemap/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('blog/sitemap/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('blog/sitemap/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('blog/sitemap/lastmod', $storeId) ? $date : '';
         $includeBlogImages = Mage::getStoreConfigFlag('blog/sitemap/include_images', $storeId);
 
@@ -111,7 +111,7 @@ class Maho_Blog_Model_Observer
         string $baseUrl,
         string $lastmod,
         string $changefreq,
-        string $priority,
+        float $priority,
         int $maxUrlsPerFile,
     ): void {
         if (empty($items)) {
@@ -199,7 +199,7 @@ class Maho_Blog_Model_Observer
     /**
      * Generate sitemap row XML for a URL
      */
-    protected function getSitemapRow(string $url, ?string $lastmod = null, ?string $changefreq = null, ?string $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
+    protected function getSitemapRow(string $url, ?string $lastmod = null, ?string $changefreq = null, ?float $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
     {
         $row = '<loc>' . htmlspecialchars($url) . '</loc>';
         if ($lastmod) {

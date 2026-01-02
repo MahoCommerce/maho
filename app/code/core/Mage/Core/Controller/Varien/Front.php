@@ -53,10 +53,8 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     {
         if (is_null($key)) {
             return $this->_defaults;
-        } elseif (isset($this->_defaults[$key])) {
-            return $this->_defaults[$key];
         }
-        return false;
+        return $this->_defaults[$key] ?? false;
     }
 
     /**
@@ -200,10 +198,10 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     protected function _getRequestRewriteController()
     {
         $className = (string) Mage::getConfig()->getNode('global/request_rewrite/model');
-        /** @var Mage_Core_Model_Url_Rewrite_Request $model */
         $model = Mage::getSingleton('core/factory')->getModel($className, [
             'routers' => $this->getRouters(),
         ]);
+        assert($model instanceof \Mage_Core_Model_Url_Rewrite_Request);
         return $model;
     }
 
@@ -274,7 +272,8 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
         $redirectCode = Mage::getStoreConfigAsInt('web/url/redirect_to_base');
         if (!$redirectCode) {
             return;
-        } elseif ($redirectCode != 301) {
+        }
+        if ($redirectCode != 301) {
             $redirectCode = 302;
         }
 
@@ -304,7 +303,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     }
 
     /**
-     * Redirect to canonical URL if trailing slash doesn't match configured behavior
+     * Normalize request path and redirect to canonical URL if needed
+     *
+     * Handles:
+     * - Consecutive slashes (e.g., //men -> /men)
+     * - Trailing slash based on store configuration
      */
     protected function checkTrailingSlash(Mage_Core_Controller_Request_Http $request): void
     {
@@ -317,7 +320,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
 
         $requestUri = $request->getRequestUri();
 
-        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($requestUri);
+        // Normalize consecutive slashes to single slash
+        $canonicalUri = preg_replace('#/{2,}#', '/', $requestUri);
+
+        // Apply trailing slash configuration
+        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
 
         if ($canonicalUri !== $requestUri) {
             Mage::app()->getFrontController()->getResponse()

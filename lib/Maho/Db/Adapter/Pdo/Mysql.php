@@ -282,9 +282,8 @@ class Mysql extends AbstractPdoAdapter
 
         if (empty($field)) {
             return $row;
-        } else {
-            return $row[$field] ?? false;
         }
+        return $row[$field] ?? false;
     }
 
     /**
@@ -322,12 +321,13 @@ class Mysql extends AbstractPdoAdapter
             $this->_debugStat(self::DEBUG_QUERY, $sql, $bind);
 
             // Detect implicit rollback - MySQL SQLSTATE: ER_LOCK_WAIT_TIMEOUT or ER_LOCK_DEADLOCK
+            $previous = $e->getPrevious();
             if ($this->_transactionLevel > 0
-                && $e->getPrevious() && isset($e->getPrevious()->errorInfo[1])
-                && in_array($e->getPrevious()->errorInfo[1], [1205, 1213])
+                && $previous instanceof \PDOException && isset($previous->errorInfo[1])
+                && in_array($previous->errorInfo[1], [1205, 1213])
             ) {
                 if ($this->_debug) {
-                    $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER SQLSTATE: ' . $e->getPrevious()->errorInfo[1]);
+                    $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER SQLSTATE: ' . $previous->errorInfo[1]);
                 }
                 $this->_transactionLevel = 1; // Deadlock rolls back entire transaction
                 $this->rollBack();
@@ -1202,18 +1202,19 @@ class Mysql extends AbstractPdoAdapter
             }
             return implode(', ', $quoted);
         }
-
         // Handle numeric types
         if ($type !== null
             && array_key_exists($type = strtoupper($type), $this->_numericDataTypes)
-            && $this->_numericDataTypes[$type] == self::FLOAT_TYPE
-        ) {
+            && $this->_numericDataTypes[$type] == self::FLOAT_TYPE) {
             $value = $this->_convertFloat($value);
             $quoteValue = sprintf('%F', $value);
             return $quoteValue;
-        } elseif (is_float($value)) {
+        }
+        if (is_float($value)) {
             return (string) $this->_quote($value);
-        } elseif (is_int($value)) {
+        }
+
+        if (is_int($value)) {
             return (string) $value;
         }
 
@@ -1255,13 +1256,12 @@ class Mysql extends AbstractPdoAdapter
 
         if ($count === null) {
             return str_replace('?', (string) $this->quote($value, $type), $text, $count);
-        } else {
-            while ($count > 0) {
-                $text = substr_replace($text, (string) $this->quote($value, $type), strpos($text, '?'), 1);
-                --$count;
-            }
-            return $text;
         }
+        while ($count > 0) {
+            $text = substr_replace($text, (string) $this->quote($value, $type), strpos($text, '?'), 1);
+            --$count;
+        }
+        return $text;
     }
 
     /**
@@ -1787,40 +1787,11 @@ class Mysql extends AbstractPdoAdapter
      * Change table auto increment value
      */
     #[\Override]
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql
+    public function changeTableAutoIncrement(string $tableName, int $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql
     {
         $table = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $sql = sprintf('ALTER TABLE %s AUTO_INCREMENT=%d', $table, $increment);
         return $this->raw_query($sql);
-    }
-
-    /**
-     * Inserts a table row with specified data.
-     *
-     * @throws \Maho\Db\Exception
-     */
-    #[\Override]
-    public function insert(string|array|\Maho\Db\Select $table, array $bind): int
-    {
-        // Extract and quote col names from the array keys
-        $cols = [];
-        $vals = [];
-        foreach (array_keys($bind) as $col) {
-            $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
-        }
-
-        // Build the statement
-        $sql = sprintf(
-            'INSERT INTO %s (%s) VALUES(%s)',
-            $this->quoteIdentifier($table),
-            implode(', ', $cols),
-            implode(', ', $vals),
-        );
-
-        // Execute the statement and return the number of affected rows
-        $stmt = $this->query($sql, array_values($bind));
-        return $stmt->rowCount();
     }
 
     /**
@@ -2901,9 +2872,8 @@ class Mysql extends AbstractPdoAdapter
         $value = str_replace("\0", '', (string) $value);
         if ($value == '') {
             return ($conditionKey == 'seq') ? 'null' : 'notnull';
-        } else {
-            return ($conditionKey == 'seq') ? 'eq' : 'neq';
         }
+        return ($conditionKey == 'seq') ? 'eq' : 'neq';
     }
 
     /**
@@ -3563,32 +3533,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Updates table rows with specified data based on a WHERE clause.
-     */
-    #[\Override]
-    public function update(string|array|\Maho\Db\Select $table, array $bind, string|array $where = ''): int
-    {
-        $set = [];
-        foreach (array_keys($bind) as $col) {
-            $set[] = $this->quoteIdentifier($col) . ' = ?';
-        }
-
-        $where = $this->_whereExpr($where);
-
-        // Build the UPDATE statement
-        $sql = sprintf(
-            'UPDATE %s SET %s%s',
-            $this->quoteIdentifier($table),
-            implode(', ', $set),
-            ($where) ? " WHERE $where" : '',
-        );
-
-        // Execute the statement and return the number of affected rows
-        $stmt = $this->query($sql, array_values($bind));
-        return $stmt->rowCount();
-    }
-
-    /**
      * Get update table query using select object for join and update
      *
      * @throws \Maho\Db\Exception
@@ -3946,9 +3890,8 @@ class Mysql extends AbstractPdoAdapter
         $indexes = $this->getIndexList($tableName, $schemaName);
         if (isset($indexes['PRIMARY'])) {
             return $indexes['PRIMARY']['KEY_NAME'];
-        } else {
-            return 'PK_' . strtoupper($tableName);
         }
+        return 'PK_' . strtoupper($tableName);
     }
 
     /**

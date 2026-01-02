@@ -162,9 +162,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
 
         if ($requireValid) {
             return $adapter->quoteInto("{$fieldName} IN (?)", new Maho\Db\Expr((string) $clvSelect));
-        } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $clvSelect));
         }
+        return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $clvSelect));
     }
 
     #[\Override]

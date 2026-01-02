@@ -72,11 +72,10 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit extends Ma
                 $sequence->getStepNumber(),
                 $segmentName,
             );
-        } else {
-            return Mage::helper('customersegmentation')->__(
-                'New Email Sequence Step for "%s"',
-                $segmentName,
-            );
         }
+        return Mage::helper('customersegmentation')->__(
+            'New Email Sequence Step for "%s"',
+            $segmentName,
+        );
     }
 }

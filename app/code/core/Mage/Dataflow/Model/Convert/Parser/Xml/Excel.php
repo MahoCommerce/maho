@@ -102,32 +102,28 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
                     $xmlString = substr($xmlTmpString, $strposF);
                     $isWorksheet = true;
                     continue;
-                } else {
-                    if (preg_match('/ss:Name=\"' . preg_quote($worksheet, '/') . '\"/siU', substr($xmlTmpString, 0, $strposF))) {
-                        $xmlString = substr($xmlTmpString, $strposF);
-                        $isWorksheet = true;
-                        continue;
-                    } else {
-                        $xmlString = '';
-                        continue;
-                    }
                 }
-            } else {
-                $xmlString = $this->_parseXmlRow($xmlString);
-
-                $strposS = strpos($xmlString, '</Worksheet>');
-                $substrL = 12;
-                //fix for OpenOffice
-                if ($strposS === false) {
-                    $strposS = strpos($xmlString, '</ss:Worksheet>');
-                    $substrL = 15;
-                }
-                if ($strposS !== false) {
-                    $xmlString = substr($xmlString, $strposS + $substrL);
-                    $isWorksheet = false;
-
+                if (preg_match('/ss:Name=\"' . preg_quote($worksheet, '/') . '\"/siU', substr($xmlTmpString, 0, $strposF))) {
+                    $xmlString = substr($xmlTmpString, $strposF);
+                    $isWorksheet = true;
                     continue;
                 }
+                $xmlString = '';
+                continue;
+            }
+            $xmlString = $this->_parseXmlRow($xmlString);
+            $strposS = strpos($xmlString, '</Worksheet>');
+            $substrL = 12;
+            //fix for OpenOffice
+            if ($strposS === false) {
+                $strposS = strpos($xmlString, '</ss:Worksheet>');
+                $substrL = 15;
+            }
+            if ($strposS !== false) {
+                $xmlString = substr($xmlString, $strposS + $substrL);
+                $isWorksheet = false;
+
+                continue;
             }
         }
 
@@ -270,7 +266,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         $io->write($xml);
 
         $wsName = htmlspecialchars($this->getVar('single_sheet'));
-        $wsName = !empty($wsName) ? $wsName : Mage::helper('dataflow')->__('Sheet 1');
+        $wsName = empty($wsName) ? Mage::helper('dataflow')->__('Sheet 1') : $wsName;
 
         $xml = '<Worksheet ss:Name="' . $wsName . '"><Table>';
         $io->write($xml);

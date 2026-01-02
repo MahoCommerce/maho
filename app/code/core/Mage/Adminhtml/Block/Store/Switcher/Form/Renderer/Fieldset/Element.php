@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends
     /**
      * Form element which re-rendering
      *
-     * @var Varien_Data_Form_Element_Fieldset
+     * @var Maho\Data\Form\Element\AbstractElement
      */
     protected $_element;
 
@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends
     /**
      * Retrieve an element
      *
-     * @return Varien_Data_Form_Element_Fieldset
+     * @return Maho\Data\Form\Element\AbstractElement
      */
     #[\Override]
     public function getElement()

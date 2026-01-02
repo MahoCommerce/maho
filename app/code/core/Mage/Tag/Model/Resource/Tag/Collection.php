@@ -29,7 +29,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     /**
      * Mapping for fields
      *
-     * @var array
+     * @var array|null
      */
     public $_map               = [
         'fields' => [

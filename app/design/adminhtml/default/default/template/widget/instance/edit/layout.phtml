@@ -40,7 +40,7 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
             '<col />'+
             '<thead>'+
                 '<tr>'+
-                    '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('%s', $container['label'])) ?></label></th>'+
+                    '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__($container['label'])) ?></label></th>'+
                     '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Block Reference')) ?> <span class="required">*</span></label></th>'+
                     '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Template')) ?></label></th>'+
                     '<th>&nbsp;</th>'+

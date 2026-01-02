@@ -61,7 +61,6 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
      */
     public function setQueryFilter($query)
     {
-        /** @var Mage_Core_Model_Resource_Helper_Mysql $helper */
         $helper = Mage::getResourceHelper('core');
 
         $ifSynonymFor = $this->getConnection()

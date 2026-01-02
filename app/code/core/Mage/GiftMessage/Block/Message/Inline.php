@@ -106,9 +106,8 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             return Mage::getSingleton('customer/session')->getCustomer()->getName();
-        } else {
-            return $this->getEntity()->getBillingAddress()->getName();
         }
+        return $this->getEntity()->getBillingAddress()->getName();
     }
 
     /**
@@ -120,9 +119,8 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
     {
         if ($this->getEntity()->getShippingAddress()) {
             return $this->getEntity()->getShippingAddress()->getName();
-        } else {
-            return $this->getEntity()->getName();
         }
+        return $this->getEntity()->getName();
     }
 
     /**

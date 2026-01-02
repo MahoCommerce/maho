@@ -32,11 +32,12 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     public const XML_PATH_INTERVAL_DIVISION_LIMIT = 'catalog/layered_navigation/interval_division_limit';
 
     /**
-     * Price layered navigation modes: Automatic (equalize price ranges), Automatic (equalize product counts), Manual
+     * Price layered navigation modes: Automatic (equalize price ranges), Automatic (equalize product counts), Manual, Input
      */
     public const RANGE_CALCULATION_AUTO     = 'auto'; // equalize price ranges
     public const RANGE_CALCULATION_IMPROVED = 'improved'; // equalize product counts
     public const RANGE_CALCULATION_MANUAL   = 'manual';
+    public const RANGE_CALCULATION_INPUT    = 'input'; // from-to input fields
 
     /**
      * Minimal size of the range
@@ -171,14 +172,14 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
         $formattedFromPrice  = $store->formatPrice($fromPrice);
         if ($toPrice === '') {
             return Mage::helper('catalog')->__('%s and above', $formattedFromPrice);
-        } elseif ($fromPrice == $toPrice && Mage::app()->getStore()->getConfig(self::XML_PATH_ONE_PRICE_INTERVAL)) {
-            return $formattedFromPrice;
-        } else {
-            if ($fromPrice != $toPrice) {
-                $toPrice = (float) $toPrice - .01;
-            }
-            return Mage::helper('catalog')->__('%s - %s', $formattedFromPrice, $store->formatPrice($toPrice));
         }
+        if ($fromPrice == $toPrice && Mage::app()->getStore()->getConfig(self::XML_PATH_ONE_PRICE_INTERVAL)) {
+            return $formattedFromPrice;
+        }
+        if ($fromPrice != $toPrice) {
+            $toPrice = (float) $toPrice - .01;
+        }
+        return sprintf('%s - %s', $formattedFromPrice, $store->formatPrice($toPrice));
     }
 
     /**
@@ -254,7 +255,8 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     {
         if (Mage::app()->getStore()->getConfig(self::XML_PATH_RANGE_CALCULATION) == self::RANGE_CALCULATION_IMPROVED) {
             return $this->_getCalculatedItemsData();
-        } elseif ($this->getInterval()) {
+        }
+        if ($this->getInterval()) {
             return [];
         }
 

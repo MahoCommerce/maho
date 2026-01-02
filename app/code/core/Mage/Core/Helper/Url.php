@@ -156,7 +156,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      */
     public function addRequestParam($url, $param)
     {
-        $startDelimiter = (!str_contains($url, '?')) ? '?' : '&';
+        $startDelimiter = (str_contains($url, '?')) ? '&' : '?';
 
         $arrQueryParams = [];
         foreach ($param as $key => $value) {
@@ -258,14 +258,14 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
         }
 
         $mode = Mage::getStoreConfig('web/url/trailing_slash_behavior');
-
         if ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH) {
             return $this->removeTrailingSlash($url);
-        } elseif ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH) {
-            return $this->addTrailingSlash($url);
-        } else {
-            return $url;
         }
+
+        if ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH) {
+            return $this->addTrailingSlash($url);
+        }
+        return $url;
     }
 
     /**

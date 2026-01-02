@@ -1003,7 +1003,7 @@ class Mage_Core_Model_Url extends Varien_Object
 
         $query = $this->getQuery($escapeQuery);
         if ($query) {
-            $mark = (!str_contains($url, '?')) ? '?' : ($escapeQuery ? '&amp;' : '&');
+            $mark = (str_contains($url, '?')) ? ($escapeQuery ? '&amp;' : '&') : ('?');
             $url .= $mark . $query;
         }
 
@@ -1123,13 +1123,12 @@ class Mage_Core_Model_Url extends Varien_Object
     {
         if (!str_contains($html, '__SID')) {
             return $html;
-        } else {
-            return preg_replace_callback(
-                '#(\?|&amp;|&)___SID=([SU])(&amp;|&)?#',
-                [$this, 'sessionVarCallback'],
-                $html,
-            );
         }
+        return preg_replace_callback(
+            '#(\?|&amp;|&)___SID=([SU])(&amp;|&)?#',
+            [$this, 'sessionVarCallback'],
+            $html,
+        );
     }
 
     /**
@@ -1172,16 +1171,18 @@ class Mage_Core_Model_Url extends Varien_Object
                 . $session->getSessionIdQueryParam()
                 . '=' . $session->getEncryptedSessionId()
                 . ($match[3] ?? '');
-        } else {
-            if ($match[1] == '?' && isset($match[3])) {
-                return '?';
-            } elseif ($match[1] == '?' && !isset($match[3])) {
-                return '';
-            } elseif (($match[1] == '&amp;' || $match[1] == '&') && !isset($match[3])) {
-                return '';
-            } elseif (($match[1] == '&amp;' || $match[1] == '&') && isset($match[3])) {
-                return $match[3];
-            }
+        }
+        if ($match[1] == '?' && isset($match[3])) {
+            return '?';
+        }
+        if ($match[1] == '?' && !isset($match[3])) {
+            return '';
+        }
+        if (($match[1] == '&amp;' || $match[1] == '&') && !isset($match[3])) {
+            return '';
+        }
+        if (($match[1] == '&amp;' || $match[1] == '&') && isset($match[3])) {
+            return $match[3];
         }
         return '';
     }
@@ -1226,7 +1227,7 @@ class Mage_Core_Model_Url extends Varien_Object
 
         $query = $this->getQuery(false);
         if ($query) {
-            $url .= (!str_contains($url, '?') ? '?' : '&') . $query;
+            $url .= (str_contains($url, '?') ? '&' : '?') . $query;
         }
 
         return $url;

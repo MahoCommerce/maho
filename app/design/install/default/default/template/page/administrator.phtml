@@ -1,0 +1,134 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Install_Block_Administrator $this */
+?>
+<div class="page-head">
+    <h3><?= $this->__('Create Admin Account') ?></h3>
+</div>
+<?= $this->getMessagesBlock()->toHtml() ?>
+<form action="<?= $this->getPostUrl() ?>" method="post" id="form-validate">
+<h4 class="section-title"><?= $this->__('Personal Information') ?></h4>
+<div class="form-list">
+    <ul>
+        <li>
+            <label for="firstname"><?= $this->__('First Name') ?></label>
+            <input type="text"
+                   name="administrator[firstname]"
+                   id="firstname"
+                   value="<?= $this->getFormData()->getFirstname() ?>"
+                   title="<?= $this->quoteEscape($this->__('First Name')) ?>"
+                   class="input-text"
+                   required>
+        </li>
+        <li>
+            <label for="lastname"><?= $this->__('Last Name') ?></label>
+            <input type="text"
+                   name="administrator[lastname]"
+                   id="lastname"
+                   value="<?= $this->getFormData()->getLastname() ?>"
+                   title="<?= $this->quoteEscape($this->__('Last Name')) ?>"
+                   class="input-text"
+                   required>
+        </li>
+        <li>
+            <label for="email_address"><?= $this->__('Email') ?></label>
+            <input type="email"
+                   name="administrator[email]"
+                   id="email_address"
+                   value="<?= $this->getFormData()->getEmail() ?>"
+                   title="<?= $this->quoteEscape($this->__('Email Address')) ?>"
+                   class="input-text"
+                   required>
+        </li>
+    </ul>
+</div>
+
+<h4 class="section-title"><?= $this->__('Login Information') ?></h4>
+<div class="form-list">
+    <ul>
+        <li>
+            <label for="username"><?= $this->__('Username') ?></label>
+            <input type="text"
+                   name="administrator[username]"
+                   id="username"
+                   value="<?= $this->getFormData()->getUsername() ?>"
+                   title="<?= $this->quoteEscape($this->__('Username')) ?>"
+                   class="input-text"
+                   required>
+        </li>
+        <li>
+            <label for="password"><?= $this->__('Password') ?></label>
+            <?php $minAdminPasswordLength = $this->getMinAdminPasswordLength(); ?>
+            <input type="password"
+                   name="administrator[new_password]"
+                   id="password"
+                   title="<?= $this->quoteEscape($this->__('Password')) ?>"
+                   class="input-text"
+                   minlength="<?= $minAdminPasswordLength ?>"
+                   autocomplete="new-password"
+                   required>
+            <p class="field-note">
+                <?= $this->helper('adminhtml')->__('Password must be at least of %d characters.', $minAdminPasswordLength) ?>
+            </p>
+        </li>
+        <li>
+            <label for="confirmation"><?= $this->__('Confirm Password') ?></label>
+            <input type="password"
+                   name="administrator[password_confirmation]"
+                   title="<?= $this->quoteEscape($this->__('Password Confirmation')) ?>"
+                   id="confirmation"
+                   class="input-text"
+                   autocomplete="new-password"
+                   required>
+        </li>
+    </ul>
+</div>
+<div class="button-set">
+    <p class="required">* <?= $this->__('Required Fields') ?></p>
+    <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>
+</div>
+</form>
+
+<div id="installation-overlay" class="installation-overlay" style="display: none;">
+    <div class="installation-overlay-content">
+        <div class="installation-spinner"></div>
+        <h2><?= $this->__('Creating Your Admin Account') ?></h2>
+        <p><?= $this->__('Just a moment...') ?></p>
+    </div>
+</div>
+
+<script type="module">
+    const password = document.getElementById('password');
+    const confirmation = document.getElementById('confirmation');
+
+    // Validate password confirmation matches
+    function validatePasswordMatch() {
+        if (confirmation.value !== password.value) {
+            confirmation.setCustomValidity('<?= $this->quoteEscape($this->__('Passwords do not match.')) ?>');
+        } else {
+            confirmation.setCustomValidity('');
+        }
+    }
+
+    password?.addEventListener('input', validatePasswordMatch);
+    password?.addEventListener('blur', validatePasswordMatch);
+    confirmation?.addEventListener('input', validatePasswordMatch);
+    confirmation?.addEventListener('blur', validatePasswordMatch);
+
+    // Show installation overlay on form submit
+    document.getElementById('form-validate')?.addEventListener('submit', function() {
+        if (this.checkValidity()) {
+            document.getElementById('installation-overlay').style.display = 'flex';
+            document.body.classList.add('installation-active');
+        }
+    });
+</script>

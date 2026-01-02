@@ -91,9 +91,8 @@ class Mage_Shipping_Model_Config extends Varien_Object
             return false;
         }
         $modelName = $config['model'];
-        /** @var Mage_Shipping_Model_Carrier_Abstract $carrier */
         $carrier = Mage::getModel($modelName);
-        if (!$carrier) {
+        if (!$carrier instanceof Mage_Shipping_Model_Carrier_Abstract) {
             return false;
         }
         $carrier->setId($code)->setStore($store);

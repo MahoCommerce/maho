@@ -71,7 +71,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
     public function __construct(array $args = [])
     {
         parent::__construct();
-        $this->_taxHelper = !empty($args['helper']) ? $args['helper'] : Mage::helper('tax');
+        $this->_taxHelper = empty($args['helper']) ? Mage::helper('tax') : $args['helper'];
     }
 
     /**
@@ -276,9 +276,8 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
         $value = $this->_productDiscounts[$key];
         if ($value) {
             return 100 - min(100, max(0, $value));
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     /**

@@ -56,18 +56,17 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
 
             if (isset($validTypes[$this->getEntity()])) {
                 try {
-                    /** @var Mage_ImportExport_Model_Export_Entity_Abstract $_entityAdapter */
                     $_entityAdapter = Mage::getModel($validTypes[$this->getEntity()]['model']);
+                    if (!$_entityAdapter instanceof Mage_ImportExport_Model_Export_Entity_Abstract) {
+                        Mage::throwException(
+                            Mage::helper('importexport')->__('Entity adapter object must be an instance of Mage_ImportExport_Model_Export_Entity_Abstract'),
+                        );
+                    }
                     $this->_entityAdapter = $_entityAdapter;
                 } catch (Exception $e) {
                     Mage::logException($e);
                     Mage::throwException(
                         Mage::helper('importexport')->__('Invalid entity model'),
-                    );
-                }
-                if (!$this->_entityAdapter instanceof Mage_ImportExport_Model_Export_Entity_Abstract) {
-                    Mage::throwException(
-                        Mage::helper('importexport')->__('Entity adapter obejct must be an instance of Mage_ImportExport_Model_Export_Entity_Abstract'),
                     );
                 }
             } else {
@@ -97,18 +96,17 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
 
             if (isset($validWriters[$this->getFileFormat()])) {
                 try {
-                    /** @var Mage_ImportExport_Model_Export_Adapter_Abstract $_writer */
                     $_writer = Mage::getModel($validWriters[$this->getFileFormat()]['model']);
+                    if (!$_writer instanceof Mage_ImportExport_Model_Export_Adapter_Abstract) {
+                        Mage::throwException(
+                            Mage::helper('importexport')->__('Adapter object must be an instance of %s', 'Mage_ImportExport_Model_Export_Adapter_Abstract'),
+                        );
+                    }
                     $this->_writer = $_writer;
                 } catch (Exception $e) {
                     Mage::logException($e);
                     Mage::throwException(
                         Mage::helper('importexport')->__('Invalid entity model'),
-                    );
-                }
-                if (!$this->_writer instanceof Mage_ImportExport_Model_Export_Adapter_Abstract) {
-                    Mage::throwException(
-                        Mage::helper('importexport')->__('Adapter object must be an instance of %s', 'Mage_ImportExport_Model_Export_Adapter_Abstract'),
                     );
                 }
             } else {
@@ -154,11 +152,10 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
             }
 
             return $result;
-        } else {
-            Mage::throwException(
-                Mage::helper('importexport')->__('No filter data provided'),
-            );
         }
+        Mage::throwException(
+            Mage::helper('importexport')->__('No filter data provided'),
+        );
     }
 
     /**
@@ -182,20 +179,21 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
     {
         if ($attribute->usesSource() || $attribute->getFilterOptions()) {
             return self::FILTER_TYPE_SELECT;
-        } elseif ($attribute->getBackendType() == 'datetime') {
-            return self::FILTER_TYPE_DATE;
-        } elseif ($attribute->getBackendType() == 'decimal' || $attribute->getBackendType() == 'int') {
-            return self::FILTER_TYPE_NUMBER;
-        } elseif ($attribute->isStatic()
-                  || $attribute->getBackendType() == 'varchar'
-                  || $attribute->getBackendType() == 'text'
-        ) {
-            return self::FILTER_TYPE_INPUT;
-        } else {
-            Mage::throwException(
-                Mage::helper('importexport')->__('Can not determine attribute filter type'),
-            );
         }
+        if ($attribute->getBackendType() == 'datetime') {
+            return self::FILTER_TYPE_DATE;
+        }
+        if ($attribute->getBackendType() == 'decimal' || $attribute->getBackendType() == 'int') {
+            return self::FILTER_TYPE_NUMBER;
+        }
+        if ($attribute->isStatic()
+                  || $attribute->getBackendType() == 'varchar'
+                  || $attribute->getBackendType() == 'text') {
+            return self::FILTER_TYPE_INPUT;
+        }
+        Mage::throwException(
+            Mage::helper('importexport')->__('Can not determine attribute filter type'),
+        );
     }
 
     /**

@@ -60,10 +60,19 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
 
     /**
      * Payment method code
+     *
+     * @var string
      */
     protected $_code = Mage_Paypal_Model_Config::METHOD_PAYFLOWLINK;
 
+    /**
+     * @var string
+     */
     protected $_formBlockType = 'paypal/payflow_link_form';
+
+    /**
+     * @var string
+     */
     protected $_infoBlockType = 'paypal/payflow_link_info';
 
     /**
@@ -135,9 +144,8 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     {
         if ($this->getConfigData('mobile_optimized')) {
             return self::MOBILE_LAYOUT_TEMPLATE;
-        } else {
-            return self::LAYOUT_TEMPLATE;
         }
+        return self::LAYOUT_TEMPLATE;
     }
 
     /**

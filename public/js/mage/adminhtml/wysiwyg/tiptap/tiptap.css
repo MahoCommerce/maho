@@ -595,6 +595,7 @@
     align-items: center;
     gap: 2px;
     white-space: nowrap;
+    z-index: 1000;
 
     .toolbar-group {
         display: flex;
@@ -762,11 +763,24 @@
     svg {
         width: 1rem;
         height: 1rem;
+    }
 
-        &:last-child {
-            width: 0.75rem;
-            height: 0.75rem;
-            opacity: 0.6;
+    /* Chevron styling - only when not the only svg */
+    svg:last-child:not(:first-child) {
+        width: 0.75rem;
+        height: 0.75rem;
+        opacity: 0.6;
+    }
+
+    /* Icon-only dropdown toggle - match regular button sizing */
+    &.icon-only {
+        width: var(--tt-btn-size);
+        padding: 0;
+
+        svg {
+            width: 60%;
+            height: 60%;
+            opacity: 1;
         }
     }
 }
@@ -1006,5 +1020,148 @@
     svg {
         width: 1.25rem;
         height: 1.25rem;
+    }
+}
+
+/* ========================================
+   COLUMNS LAYOUT
+   ======================================== */
+
+.ProseMirror [data-type="maho-columns"] {
+    margin: 1rem 0;
+
+    .columns-grid {
+        display: grid;
+        width: 100%;
+    }
+
+    .columns-badge {
+        position: absolute;
+        top: -12px;
+        left: 8px;
+        background: #8b5cf6;
+        color: white;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 500;
+        line-height: 1;
+        border-radius: 3px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.15s, background 0.15s;
+        z-index: 1;
+
+        svg {
+            opacity: 0.8;
+        }
+
+        &:hover {
+            background: #7c3aed;
+        }
+    }
+
+    &:hover .columns-badge,
+    &.ProseMirror-selectednode .columns-badge {
+        opacity: 1;
+    }
+
+    &:hover,
+    &.ProseMirror-selectednode {
+        outline: 2px dashed #8b5cf6;
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+}
+
+.ProseMirror [data-type="maho-column"] {
+    min-height: 100px;
+    padding: 0.75rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+
+    > *:first-child {
+        margin-top: 0;
+    }
+
+    > *:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Column style: none (editor-only dashed outline for visual feedback) */
+.ProseMirror [data-type="maho-columns"][data-style="none"] [data-type="maho-column"] {
+    border: 1px dashed var(--tt-color-border-light);
+    background: rgba(249, 250, 251, 0.5);
+
+    &:hover {
+        border-color: #9ca3af;
+        background: rgba(249, 250, 251, 0.8);
+    }
+
+    &:focus-within {
+        border-color: #8b5cf6;
+        border-style: solid;
+        background: white;
+    }
+}
+
+/* Column style: cards */
+.ProseMirror [data-type="maho-columns"][data-style="cards"] [data-type="maho-column"] {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    background: transparent;
+
+    &:hover {
+        border-color: #d1d5db;
+    }
+
+    &:focus-within {
+        border-color: #8b5cf6;
+    }
+}
+
+/* Column style: separated */
+.ProseMirror [data-type="maho-columns"][data-style="separated"] .columns-grid {
+    gap: 0 !important;
+}
+.ProseMirror [data-type="maho-columns"][data-style="separated"] [data-type="maho-column"] {
+    border: none;
+    border-right: 1px solid #e5e7eb;
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    background: transparent;
+
+    &:first-child {
+        padding-left: 0.75rem;
+    }
+
+    &:last-child {
+        border-right: none;
+        padding-right: 0.75rem;
+    }
+
+    &:focus-within {
+        background: rgba(139, 92, 246, 0.05);
+    }
+}
+
+/* Toolbar label */
+.toolbar-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--tt-color-text-light);
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Responsive: stack columns on small screens */
+@media (max-width: 768px) {
+    .ProseMirror [data-type="maho-columns"] {
+        grid-template-columns: 1fr !important;
     }
 }

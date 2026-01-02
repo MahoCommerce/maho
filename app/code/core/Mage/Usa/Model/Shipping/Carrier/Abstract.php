@@ -193,14 +193,15 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         if (!$errorMsg && !$request->getDestPostcode() && $this->isZipCodeRequired($request->getDestCountryId())) {
             $errorMsg = Mage::helper('shipping')->__('This shipping method is not available, please specify ZIP-code');
         }
-
         if ($errorMsg && $showMethod) {
             $error = Mage::getModel('shipping/rate_result_error');
             $error->setCarrier($this->_code);
             $error->setCarrierTitle($this->getConfigData('title'));
             $error->setErrorMessage($errorMsg);
             return $error;
-        } elseif ($errorMsg) {
+        }
+
+        if ($errorMsg) {
             return false;
         }
         return $this;
@@ -300,6 +301,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             $this->setStore($request->getStoreId());
         }
         $data = [];
+        $result = null;
         foreach ($packages as $packageId => $package) {
             $request->setPackageId($packageId);
             $request->setPackagingType($package['params']['container']);
@@ -326,7 +328,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         $response = new Varien_Object([
             'info'   => $data,
         ]);
-        if ($result->getErrors()) {
+        if ($result && $result->getErrors()) {
             $response->setErrors($result->getErrors());
         }
         return $response;
@@ -350,6 +352,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             $this->setStore($request->getStoreId());
         }
         $data = [];
+        $result = null;
         foreach ($packages as $packageId => $package) {
             $request->setPackageId($packageId);
             $request->setPackagingType($package['params']['container']);
@@ -376,7 +379,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         $response = new Varien_Object([
             'info'   => $data,
         ]);
-        if ($result->getErrors()) {
+        if ($result && $result->getErrors()) {
             $response->setErrors($result->getErrors());
         }
         return $response;

@@ -196,19 +196,13 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
     {
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $column = [
+            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
             'unsigned'  => true,
+            'nullable'  => true,
             'default'   => null,
             'extra'     => null,
+            'comment'   => 'Catalog Product Status ' . $attributeCode . ' column',
         ];
-
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $column['type']     = 'tinyint';
-            $column['is_null']  = true;
-        } else {
-            $column['type']     = Maho\Db\Ddl\Table::TYPE_SMALLINT;
-            $column['nullable'] = true;
-            $column['comment']  = 'Catalog Product Status ' . $attributeCode . ' column';
-        }
 
         return [$attributeCode => $column];
     }

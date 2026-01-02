@@ -18,29 +18,10 @@ declare(strict_types=1);
 class Mage_Install_Model_Installer_Db_Mysql extends Mage_Install_Model_Installer_Db_Abstract
 {
     /**
-     * Retrieve DB server version
-     *
-     * @return string (string version number | 'undefined')
-     */
-    public function getVersion()
-    {
-        $version = $this->_getConnection()
-            ->fetchOne('SELECT VERSION()');
-        $version = $version ?: 'undefined';
-        $match = [];
-        if (preg_match("#^([0-9\.]+)#", $version, $match)) {
-            $version = $match[0];
-        }
-        return $version;
-    }
-
-    /**
      * Check InnoDB support
-     *
-     * @return bool
      */
     #[\Override]
-    public function supportEngine()
+    public function supportEngine(): bool
     {
         $variables = $this->_getConnection()
             ->fetchPairs('SHOW ENGINES');

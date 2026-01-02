@@ -509,7 +509,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
     {
         $info = $this->getData($infoKey);
         if (!$info) {
-            return;
+            return null;
         }
         if (!is_object($info)) {
             if (is_array($info) && isset($info[$infoValueKey])) {
@@ -518,10 +518,12 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
         } else {
             if ($info instanceof Varien_Object) {
                 return $info->getDataUsingMethod($infoValueKey);
-            } elseif (isset($info->$infoValueKey)) {
+            }
+            if (isset($info->$infoValueKey)) {
                 return $info->$infoValueKey;
             }
         }
+        return null;
     }
 
     #[\Override]

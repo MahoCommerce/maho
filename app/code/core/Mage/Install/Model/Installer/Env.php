@@ -6,6 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -13,7 +14,7 @@ class Mage_Install_Model_Installer_Env extends Mage_Install_Model_Installer_Abst
 {
     public function __construct() {}
 
-    public function install()
+    public function install(): self
     {
         if (!$this->_checkPhpExtensions()) {
             throw new Exception();
@@ -21,7 +22,7 @@ class Mage_Install_Model_Installer_Env extends Mage_Install_Model_Installer_Abst
         return $this;
     }
 
-    protected function _checkPhpExtensions()
+    protected function _checkPhpExtensions(): bool
     {
         $res = true;
         $config = Mage::getSingleton('install/config')->getExtensionsForCheck();
@@ -35,7 +36,10 @@ class Mage_Install_Model_Installer_Env extends Mage_Install_Model_Installer_Abst
         return $res;
     }
 
-    protected function _checkExtension($extension)
+    /**
+     * @param string|array<string> $extension
+     */
+    protected function _checkExtension(string|array $extension): bool
     {
         if (is_array($extension)) {
             $oneLoaded = false;

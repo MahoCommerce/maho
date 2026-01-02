@@ -13,7 +13,7 @@
 class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Qty extends Mage_Core_Block_Template
 {
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         parent::_construct();
         $this->setIsLastFieldset(true);

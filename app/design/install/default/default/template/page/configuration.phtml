@@ -1,0 +1,155 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Install_Block_Configuration $this */
+?>
+<div class="page-head">
+    <h3><?= $this->__('Configuration') ?></h3>
+</div>
+
+<div class="messages">
+    <?= $this->getMessagesBlock()->toHtml() ?>
+</div>
+<?php if ($this->getInstaller()->getServerCheckStatus()): ?>
+<form action="<?= $this->getPostUrl() ?>" method="post" id="form-validate">
+<?= $this->getLayout()->getBlock('database')->toHtml() ?>
+
+<h4 class="section-title"><?= $this->__('Web Access Options') ?></h4>
+<div class="form-list">
+    <ul>
+        <li>
+            <label for="base_url"><?= $this->__('Base URL') ?></label>
+            <input type="text"
+                   name="config[unsecure_base_url]"
+                   id="base_url"
+                   value="<?= $this->getFormData()->getUnsecureBaseUrl() ?>"
+                   title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
+                   class="input-text"
+                   pattern="https?://.+/"
+                   required>
+            <p class="field-note">
+                <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>http://mydomain.com/maho/</strong>') ?>
+            </p>
+        </li>
+        <li>
+            <label for="admin_frontname"><?= $this->__('Admin Path') ?></label>
+            <input type="text"
+                   name="config[admin_frontname]"
+                   id="admin_frontname"
+                   value="<?= $this->getFormData()->getAdminFrontname() ?>"
+                   title="<?= $this->quoteEscape($this->__('Admin Path')) ?>"
+                   class="input-text"
+                   required>
+            <p class="field-note">
+                <?= $this->__('Additional path added after Base URL to access your Administrative Panel (e.g. admin, backend, control etc.).') ?>
+            </p>
+        </li>
+        <li>
+            <label for="use_secure" class="checkbox-label">
+                <input type="checkbox"
+                       name="config[use_secure]"
+                       id="use_secure"
+                       value="1"
+                       <?php if ($this->getFormData()->getUseSecure()): ?>checked<?php endif ?>>
+                <span><?= $this->__('Use Secure URLs (SSL)') ?></span>
+            </label>
+        </li>
+    </ul>
+    <ul id="use_secure_options" class="<?php if (!$this->getFormData()->getUseSecure()): ?>hidden<?php endif ?>">
+        <li>
+            <label for="secure_base_url"><?= $this->__('Secure Base URL') ?></label>
+            <input type="text"
+                   name="config[secure_base_url]"
+                   id="secure_base_url"
+                   value="<?= $this->getFormData()->getSecureBaseUrl() ?>"
+                   title="<?= $this->quoteEscape($this->__('URL must end with a trailing slash (/)')) ?>"
+                   class="input-text"
+                   pattern="https?://.+/"
+                   <?php if ($this->getFormData()->getUseSecure()): ?>required<?php endif ?>>
+            <p class="field-note">
+                <?= $this->__('Ensure the URL ends with a trailing slash (/). For example: %s', '<strong>https://mydomain.com/maho/</strong>') ?>
+            </p>
+        </li>
+        <li>
+            <label for="use_secure_admin" class="checkbox-label">
+                <input type="checkbox"
+                       name="config[use_secure_admin]"
+                       id="use_secure_admin"
+                       value="1"
+                       <?php if ($this->getFormData()->getUseSecureAdmin()): ?>checked<?php endif ?>>
+                <span><?= $this->__('Run admin interface with SSL') ?></span>
+            </label>
+        </li>
+    </ul>
+</div>
+
+<h4 class="section-title"><?= $this->__('Session Storage Options') ?></h4>
+<div class="form-list">
+    <ul>
+        <li>
+            <label for="password"><?= $this->__('Save Session Data In') ?></label>
+            <?= $this->getSessionSaveSelect() ?>
+        </li>
+    </ul>
+</div>
+
+<div class="button-set">
+    <p class="required">* <?= $this->__('Required Fields') ?></p>
+    <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>
+</div>
+</form>
+
+<div id="installation-overlay" class="installation-overlay" style="display: none;">
+    <div class="installation-overlay-content">
+        <div class="installation-spinner"></div>
+        <h2><?= $this->__('Installing Maho') ?></h2>
+        <p><?= $this->__('Please wait while we set up your store...') ?></p>
+    </div>
+</div>
+
+<script type="module">
+    // Toggle secure URL options visibility and required state
+    const useSecureCheckbox = document.getElementById('use_secure');
+    const secureOptions = document.getElementById('use_secure_options');
+    const secureBaseUrl = document.getElementById('secure_base_url');
+
+    function updateSecureOptions() {
+        const isEnabled = useSecureCheckbox.checked;
+        secureOptions.classList.toggle('hidden', !isEnabled);
+        secureBaseUrl.disabled = !isEnabled;
+        secureBaseUrl.required = isEnabled;
+    }
+
+    useSecureCheckbox?.addEventListener('change', updateSecureOptions);
+
+    // Set initial state
+    if (useSecureCheckbox) {
+        updateSecureOptions();
+    }
+
+    // Show installation overlay on form submit
+    document.getElementById('form-validate')?.addEventListener('submit', function() {
+        if (this.checkValidity()) {
+            document.getElementById('installation-overlay').style.display = 'flex';
+            document.body.classList.add('installation-active');
+        }
+    });
+</script>
+<?php else: ?>
+    <div><?= $this->__('Please set all required settings before clicking Continue') ?></div>
+    <div class="button-set">
+        <button class="form-button"
+                type="button"
+                onclick="setLocation('<?= $this->getUrl('*/*/*', ['_current'=>true]) ?>')">
+            <span><?= $this->__('Continue') ?></span>
+        </button>
+    </div>
+<?php endif ?>

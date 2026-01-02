@@ -19,22 +19,43 @@
  */
 class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    /**
+     * @var bool
+     */
     protected $_storeSwitcherVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_dateFilterVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_exportVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_subtotalVisibility = false;
 
+    /**
+     * @var array
+     */
     protected $_filters = [];
 
+    /**
+     * @var array
+     */
     protected $_defaultFilters = [
         'report_from' => '',
         'report_to' => '',
         'report_period' => 'day',
     ];
 
+    /**
+     * @var int
+     */
     protected $_subReportSize = 5;
 
     protected $_grandTotals;
@@ -328,12 +349,8 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 
     public function getFilter($name)
     {
-        if (isset($this->_filters[$name])) {
-            return $this->_filters[$name];
-        } else {
-            return ($this->getRequest()->getParam($name))
-                    ? htmlspecialchars($this->getRequest()->getParam($name)) : '';
-        }
+        return $this->_filters[$name] ?? (($this->getRequest()->getParam($name))
+                ? htmlspecialchars($this->getRequest()->getParam($name)) : '');
     }
 
     public function setSubReportSize($size)
@@ -613,9 +630,8 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $totals = $this->getGrandTotals()->getData();
         if (parent::getCountTotals() && count($totals)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

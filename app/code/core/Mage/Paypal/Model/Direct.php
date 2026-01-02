@@ -52,8 +52,8 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
         if ($proInstance instanceof Mage_Paypal_Model_Pro) {
             $this->_pro = $proInstance;
         } else {
-            /** @var Mage_Paypal_Model_Pro $model */
             $model = Mage::getModel($this->_proType);
+            assert($model instanceof \Mage_Paypal_Model_Pro);
             $this->_pro = $model;
         }
         $this->_pro->setMethod($this->_code);
@@ -293,7 +293,7 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
             ->setMaestroSoloIssueNumber($payment->getCcSsIssue())
         ;
         if ($payment->getCcSsStartMonth() && $payment->getCcSsStartYear()) {
-            $year = sprintf('%02d', substr($payment->getCcSsStartYear(), -2, 2));
+            $year = sprintf('%02d', (int) substr($payment->getCcSsStartYear(), -2, 2));
             $api->setMaestroSoloIssueDate(
                 $this->_getFormattedCcExpirationDate($payment->getCcSsStartMonth(), $year),
             );

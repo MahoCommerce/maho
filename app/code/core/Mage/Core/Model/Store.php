@@ -131,7 +131,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Cache flag
      *
-     * @var bool
+     * @var string|bool|array
      */
     protected $_cacheTag    = true;
 
@@ -678,9 +678,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $configValue = $this->getConfig(self::XML_PATH_PRICE_SCOPE);
         if ($configValue == self::PRICE_SCOPE_GLOBAL) {
             return Mage::app()->getBaseCurrencyCode();
-        } else {
-            return $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
         }
+        return $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
     }
 
     /**
@@ -1134,7 +1133,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         if (is_null($this->_frontendName)) {
             $storeGroupName = (string) Mage::getStoreConfig(self::XML_PATH_STORE_STORE_NAME, $this);
-            $this->_frontendName = (!empty($storeGroupName)) ? $storeGroupName : $this->getGroup()->getName();
+            $this->_frontendName = (empty($storeGroupName)) ? $this->getGroup()->getName() : $storeGroupName;
         }
         return $this->_frontendName;
     }

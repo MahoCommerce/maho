@@ -189,7 +189,6 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog
             return $this;
         }
 
-        /** @var Mage_CatalogSearch_Model_Resource_Helper_Mysql $resourceHelper */
         $resourceHelper = Mage::getResourceHelper('catalogsearch');
         $this->_select->order(
             new Maho\Db\Expr(

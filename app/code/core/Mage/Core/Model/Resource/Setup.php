@@ -310,14 +310,6 @@ class Mage_Core_Model_Resource_Setup
         $dbVer = $this->_getResource()->getDbVersion($this->_resourceName);
         $configVer = (string) $this->_moduleConfig->version;
 
-        /**
-         * Hook queries in adapter, so that in MySQL compatibility mode extensions and custom modules will avoid
-         * errors due to changes in database structure
-         */
-        if (((string) $this->_moduleConfig->codePool != 'core') && Mage::helper('core')->useDbCompatibleMode()) {
-            $this->_hookQueries();
-        }
-
         // Module is installed
         if ($dbVer !== false) {
             $status = version_compare($configVer, $dbVer);
@@ -494,6 +486,27 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
+     * Get the database engine identifier from connection config
+     *
+     * Supports new 'engine' config with backward compatibility for legacy 'model' config.
+     */
+    protected function _getConnectionEngine(): string
+    {
+        // New config: use 'engine'
+        if (!empty($this->_connectionConfig->engine)) {
+            return (string) $this->_connectionConfig->engine;
+        }
+
+        // Backward compatibility: use 'model' (legacy name for engine)
+        if (!empty($this->_connectionConfig->model)) {
+            return (string) $this->_connectionConfig->model;
+        }
+
+        // Default to MySQL for safety
+        return 'mysql';
+    }
+
+    /**
      * Retrieve available Database install/upgrade files for current module
      *
      * @param string $actionType
@@ -503,7 +516,7 @@ class Mage_Core_Model_Resource_Setup
      */
     protected function _getAvailableDbFiles($actionType, $fromVersion, $toVersion)
     {
-        $resModel   = (string) $this->_connectionConfig->model;
+        $resModel   = $this->_getConnectionEngine();
         $modName    = (string) $this->_moduleConfig[0]->getName();
 
         // Backwards compatibility: also match mysql4- prefix when model is mysql
@@ -546,7 +559,7 @@ class Mage_Core_Model_Resource_Setup
     protected function _getAvailableDataFiles($actionType, $fromVersion, $toVersion)
     {
         $modName    = (string) $this->_moduleConfig[0]->getName();
-        $resModel   = (string) $this->_connectionConfig->model;
+        $resModel   = $this->_getConnectionEngine();
         $files      = [];
 
         // Backwards compatibility: also match mysql4- prefix when model is mysql

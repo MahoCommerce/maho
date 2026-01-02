@@ -95,11 +95,12 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
         // Get values from both products
         $targetValue = $targetProduct->getData($attributeCode);
         $sourceValue = $sourceProduct->getData($attributeCode);
-
         // Compare values
         if ($operator === '~=') {
             return $targetValue == $sourceValue;
-        } elseif ($operator === '~!') {
+        }
+
+        if ($operator === '~!') {
             return $targetValue != $sourceValue;
         }
 
@@ -123,10 +124,11 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
 
         // Check if they share at least one category
         $hasCommonCategory = !empty(array_intersect($targetCategories, $sourceCategories));
-
         if ($operator === '~=') {
             return $hasCommonCategory;
-        } elseif ($operator === '~!') {
+        }
+
+        if ($operator === '~!') {
             return !$hasCommonCategory;
         }
 

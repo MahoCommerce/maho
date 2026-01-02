@@ -324,7 +324,8 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     {
         if ($this->isPlain() && $html) {
             return $html;
-        } elseif ($this->isPlain()) {
+        }
+        if ($this->isPlain()) {
             return $this->getTemplateText();
         }
 
@@ -612,7 +613,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             foreach ($variables as $value => $label) {
                 $optionArray[] = [
                     'value' => '{{' . $value . '}}',
-                    'label' => Mage::helper('core')->__('%s', $label),
+                    'label' => Mage::helper('core')->__($label),
                 ];
             }
             if ($withGroup) {

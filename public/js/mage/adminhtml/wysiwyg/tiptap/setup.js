@@ -204,6 +204,10 @@ class tiptapWysiwygSetup {
         const tableBubbleMenu = this.createTableBubbleMenu();
         this.wrapper.appendChild(tableBubbleMenu);
 
+        // Create columns bubble menu
+        const columnsBubbleMenu = this.createColumnsBubbleMenu();
+        this.wrapper.appendChild(columnsBubbleMenu);
+
         // Create container for Tiptap editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
@@ -286,6 +290,11 @@ class tiptapWysiwygSetup {
                     },
                 }),
                 TiptapModules.MahoDiv,
+                TiptapModules.MahoColumns.configure({
+                    // Store bubble menu reference for NodeView to access
+                    bubbleMenu: columnsBubbleMenu,
+                }),
+                TiptapModules.MahoColumn,
                 TiptapModules.MahoFullscreen,
                 TiptapModules.DragHandle.configure({
                     render: () => {
@@ -379,6 +388,21 @@ class tiptapWysiwygSetup {
             { type: 'separator'},
             { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
             { type: 'button', title: 'Insert Table', icon: 'table', command: 'insertTable', args: [{rows:3, cols:3, withHeaderRow:true}] },
+            {
+                type: 'dropdown',
+                title: 'Columns',
+                icon: 'columns-2',
+                showTitle: false,
+                showChevron: false,
+                items: [
+                    { title: '2 Columns', icon: 'columns-2', command: 'insertColumns', args: ['2-equal'] },
+                    { title: '3 Columns', icon: 'columns-3', command: 'insertColumns', args: ['3-equal'] },
+                    { title: '4 Columns', icon: 'columns-4', command: 'insertColumns', args: ['4-equal'] },
+                    { title: 'Sidebar Left', icon: 'columns-sidebar-left', command: 'insertColumns', args: ['sidebar-left'] },
+                    { title: 'Sidebar Right', icon: 'columns-sidebar-right', command: 'insertColumns', args: ['sidebar-right'] },
+                    { title: 'Wide Center', icon: 'columns-wide-center', command: 'insertColumns', args: ['wide-center'] },
+                ],
+            },
             { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
             { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images && this.config.add_slideshows !== false },
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
@@ -446,6 +470,28 @@ class tiptapWysiwygSetup {
         return bubbleMenu;
     }
 
+    createColumnsBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'label', text: 'Gap:' },
+            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setColumnsGap', args: ['none'], dataGap: 'none' },
+            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setColumnsGap', args: ['small'], dataGap: 'small' },
+            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setColumnsGap', args: ['medium'], dataGap: 'medium' },
+            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setColumnsGap', args: ['large'], dataGap: 'large' },
+            { type: 'separator' },
+            { type: 'label', text: 'Style:' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setColumnsStyle', args: ['none'], dataColStyle: 'none' },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], dataColStyle: 'cards' },
+            { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], dataColStyle: 'separated' },
+            { type: 'separator' },
+            { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
+        ]);
+
+        bubbleMenu.id = `${this.id}_columns_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
+        return bubbleMenu;
+    }
+
     createToolbar(items) {
         const toolbar = document.createElement('div');
         const addGroup = () => {
@@ -470,6 +516,12 @@ class tiptapWysiwygSetup {
                 toolbar.append(spacer);
                 group = addGroup();
             }
+            else if (item.type === 'label') {
+                const label = document.createElement('span');
+                label.className = 'toolbar-label';
+                label.textContent = this.translate(item.text);
+                group.append(label);
+            }
             else if (item.type === 'select') {
                 const select = document.createElement('select');
                 for (const option of item.options) {
@@ -487,8 +539,11 @@ class tiptapWysiwygSetup {
 
                 const toggle = document.createElement('button');
                 toggle.type = 'button';
-                toggle.className = 'toolbar-dropdown-toggle';
-                toggle.innerHTML = this.getIcon(item.icon) + `<span>${this.translate(item.title ?? '')}</span>` + this.getIcon('chevron-down');
+                const isIconOnly = item.showTitle === false && item.showChevron === false;
+                toggle.className = 'toolbar-dropdown-toggle' + (isIconOnly ? ' icon-only' : '');
+                const titleHtml = item.showTitle !== false ? `<span>${this.translate(item.title ?? '')}</span>` : '';
+                const chevronHtml = item.showChevron !== false ? this.getIcon('chevron-down') : '';
+                toggle.innerHTML = this.getIcon(item.icon) + titleHtml + chevronHtml;
                 dropdown.append(toggle);
 
                 const menu = document.createElement('div');
@@ -551,6 +606,12 @@ class tiptapWysiwygSetup {
                     });
                     button.dataset.command = item.command;
                     button.dataset.args = JSON.stringify(item.args);
+                }
+                if (item.dataGap) {
+                    button.dataset.gap = item.dataGap;
+                }
+                if (item.dataColStyle) {
+                    button.dataset.colStyle = item.dataColStyle;
                 }
                 group.append(button);
             }
@@ -680,6 +741,26 @@ class tiptapWysiwygSetup {
         'columns': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4v16"/>',
         'rows': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M4 12h16"/>',
         'cells': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M4 10h16"/><path d="M10 4v16"/><path d="M4 16h16"/>',
+
+        // Column layout icons
+        'layout-columns': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4v16"/>',
+        'columns-2': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4v16"/>',
+        'columns-3': '<rect x="1" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="9" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="17" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="none"/>',
+        'columns-4': '<rect x="1" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="6.5" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="12" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="17.5" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/>',
+        'columns-sidebar-left': '<rect x="2" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" fill="none"/>',
+        'columns-sidebar-right': '<rect x="2" y="3" width="12" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'columns-wide-center': '<rect x="1" y="3" width="5" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="8" y="3" width="8" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="18" y="3" width="5" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+
+        // Gap icons
+        'gap-none': '<rect x="3" y="4" width="8" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="13" y="4" width="8" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+        'gap-small': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+        'gap-medium': '<rect x="3" y="4" width="6" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="15" y="4" width="6" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+        'gap-large': '<rect x="3" y="4" width="5" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="16" y="4" width="5" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+
+        // Style icons
+        'style-none': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-dasharray="2 2"/>',
+        'style-cards': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor"/>',
+        'style-separated': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><path d="M12 4v16" stroke="currentColor" stroke-width="1"/>',
     };
 }
 

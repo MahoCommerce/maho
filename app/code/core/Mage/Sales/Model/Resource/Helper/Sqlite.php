@@ -26,7 +26,6 @@ class Mage_Sales_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_H
         $mainTable,
         $aggregationTable,
     ) {
-        /** @var Mage_Reports_Model_Resource_Helper_Interface $reportsResourceHelper */
         $reportsResourceHelper = Mage::getResourceHelper('reports');
 
         if ($aggregation == $aggregationAliases['monthly']) {

@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use Rector\CodeQuality\Rector as CodeQuality;
+use Rector\CodingStyle\Rector as CodingStyle;
 use Rector\DeadCode\Rector as DeadCode;
+use Rector\EarlyReturn\Rector as EarlyReturn;
 use Rector\Config\RectorConfig;
 use Rector\TypeDeclaration\Rector as TypeDeclaration;
 
@@ -27,10 +29,13 @@ return RectorConfig::configure()
         CodeQuality\NotEqual\CommonNotEqualRector::class,
         CodeQuality\LogicalAnd\LogicalToBooleanRector::class,
         CodeQuality\Ternary\SimplifyTautologyTernaryRector::class,
+        CodeQuality\Ternary\SwitchNegatedTernaryRector::class,
+        CodingStyle\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector::class,
         DeadCode\ClassMethod\RemoveUselessParamTagRector::class,
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
         DeadCode\MethodCall\RemoveNullArgOnNullDefaultParamRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
+        EarlyReturn\If_\RemoveAlwaysElseRector::class,
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
         Rector\Php71\Rector\List_\ListToArrayDestructRector::class,
         Rector\Php74\Rector\Assign\NullCoalescingOperatorRector::class,

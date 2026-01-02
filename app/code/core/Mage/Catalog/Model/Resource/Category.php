@@ -522,12 +522,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 ['main_table' => $productTable],
                 [new Maho\Db\Expr('COUNT(main_table.product_id)')],
             )
-            ->where('main_table.category_id = :category_id');
+            ->where('main_table.category_id = ?', (int) $category->getId());
 
-        $bind = ['category_id' => (int) $category->getId()];
-        $counts = $this->getReadConnection()->fetchOne($select, $bind);
-
-        return (int) $counts;
+        return (int) $this->getReadConnection()->fetchOne($select);
     }
 
     /**

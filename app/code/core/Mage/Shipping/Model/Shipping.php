@@ -136,7 +136,6 @@ class Mage_Shipping_Model_Shipping
      */
     public function collectCarrierRates($carrierCode, $request)
     {
-        /** @var Mage_Shipping_Model_Carrier_Abstract $carrier */
         $carrier = $this->getCarrierByCode($carrierCode, $request->getStoreId());
         if (!$carrier) {
             return $this;
@@ -163,9 +162,8 @@ class Mage_Shipping_Model_Shipping
                             $result = $carrierObj->collectRates($request);
                             if (!$result) {
                                 return $this;
-                            } else {
-                                $result->updateRatePrice($packageCount);
                             }
+                            $result->updateRatePrice($packageCount);
                             $sumResults[] = $result;
                         }
                         if (count($sumResults) > 1) {
@@ -391,7 +389,7 @@ class Mage_Shipping_Model_Shipping
      *
      * @param string $carrierCode
      * @param null|int $storeId
-     * @return bool|Mage_Core_Model_Abstract
+     * @return Mage_Shipping_Model_Carrier_Abstract|false
      */
     public function getCarrierByCode($carrierCode, $storeId = null)
     {
@@ -403,6 +401,9 @@ class Mage_Shipping_Model_Shipping
             return false;
         }
         $obj = Mage::getModel($className);
+        if (!$obj instanceof Mage_Shipping_Model_Carrier_Abstract) {
+            return false;
+        }
         if ($storeId) {
             $obj->setStore($storeId);
         }

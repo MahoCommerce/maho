@@ -22,7 +22,7 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
      */
     protected function _fixQty($qty)
     {
-        return (!empty($qty) ? (float) $qty : null);
+        return (empty($qty) ? null : (float) $qty);
     }
 
     /**
@@ -36,7 +36,8 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
         if (is_numeric($value)) {
             $data = (float) $value;
             return (string) $data;
-        } elseif (is_array($value)) {
+        }
+        if (is_array($value)) {
             $data = [];
             foreach ($value as $groupId => $qty) {
                 if (!array_key_exists($groupId, $data)) {
@@ -47,9 +48,8 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
                 return (string) $data[Mage_Customer_Model_Group::CUST_GROUP_ALL];
             }
             return serialize($data);
-        } else {
-            return '';
         }
+        return '';
     }
 
     /**
@@ -64,7 +64,8 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
             return [
                 Mage_Customer_Model_Group::CUST_GROUP_ALL => $this->_fixQty($value),
             ];
-        } elseif (is_string($value) && !empty($value)) {
+        }
+        if (is_string($value) && !empty($value)) {
             try {
                 return Mage::helper('core/unserializeArray')->unserialize($value);
             } catch (Exception $e) {

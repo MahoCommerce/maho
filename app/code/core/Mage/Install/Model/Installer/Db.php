@@ -15,26 +15,22 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
     /**
      * @var Mage_Install_Model_Installer_Db_Abstract|null database
      */
-    protected $_dbResource;
+    protected ?Mage_Install_Model_Installer_Db_Abstract $_dbResource = null;
 
     /**
      * Check database connection
      * and return checked connection data
      *
-     * @param array $data
-     * @return array
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
-    public function checkDbConnectionData($data)
+    public function checkDbConnectionData(array $data): array
     {
         $data = $this->_getCheckedData($data);
 
         try {
             $dbEngine = $data['db_engine'];
-
-            if (!$resource = $this->_getDbResource($dbEngine)) {
-                Mage::throwException(Mage::helper('install')->__('No resource for %s database engine.', $dbEngine));
-            }
-
+            $resource = $this->_getDbResource($dbEngine);
             $resource->setConfig($data);
 
             // check required extensions
@@ -48,17 +44,6 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
             if (!empty($absenteeExtensions)) {
                 Mage::throwException(
                     Mage::helper('install')->__('PHP Extensions "%s" must be loaded.', implode(',', $absenteeExtensions)),
-                );
-            }
-
-            $version    = $resource->getVersion();
-            $requiredVersion = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/min_version', $dbEngine));
-
-            // check DB server version
-            if (version_compare($version, $requiredVersion) == -1) {
-                Mage::throwException(
-                    Mage::helper('install')->__('The database server version doesn\'t match system requirements (required: %s, actual: %s).', $requiredVersion, $version),
                 );
             }
 
@@ -84,10 +69,10 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
     /**
      * Check database connection data
      *
-     * @param  array $data
-     * @return array
+     * @param  array<string, mixed> $data
+     * @return array<string, mixed>
      */
-    protected function _getCheckedData($data)
+    protected function _getCheckedData(array $data): array
     {
         if (!isset($data['db_name']) || empty($data['db_name'])) {
             Mage::throwException(Mage::helper('install')->__('Database Name cannot be empty.'));
@@ -110,15 +95,6 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
             $data['db_engine'] = 'mysql';
         }
 
-        // Set db type according to the db engine
-        if (!isset($data['db_type'])) {
-            $data['db_type'] = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/type', $data['db_engine']));
-        }
-
-        $dbResource = $this->_getDbResource($data['db_engine']);
-        $data['db_pdo_type'] = $dbResource->getPdoType();
-
         if (!isset($data['db_init_statemants'])) {
             $data['db_init_statemants'] = (string) Mage::getConfig()
                 ->getNode(sprintf('install/databases/%s/initStatements', $data['db_engine']));
@@ -131,19 +107,18 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
      * Retrieve the database resource
      *
      * @param  string $engine database engine (mysql, pgsql)
-     * @return Mage_Install_Model_Installer_Db_Abstract
      * @throws Mage_Core_Exception
      */
-    protected function _getDbResource($engine)
+    protected function _getDbResource(string $engine): Mage_Install_Model_Installer_Db_Abstract
     {
         if (!isset($this->_dbResource)) {
-            /** @var Mage_Install_Model_Installer_Db_Abstract $resource */
             $resource = Mage::getSingleton(sprintf('install/installer_db_%s', $engine));
             if (!$resource) {
                 Mage::throwException(
                     Mage::helper('install')->__('Installer does not exist for %s database engine', $engine),
                 );
             }
+            assert($resource instanceof \Mage_Install_Model_Installer_Db_Abstract);
             $this->_dbResource = $resource;
         }
         return $this->_dbResource;

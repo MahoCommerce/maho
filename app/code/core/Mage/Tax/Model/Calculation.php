@@ -124,7 +124,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     public function __construct(array $args = [])
     {
         parent::__construct();
-        $this->_taxHelper = !empty($args['helper']) ? $args['helper'] : Mage::helper('tax');
+        $this->_taxHelper = empty($args['helper']) ? Mage::helper('tax') : $args['helper'];
     }
 
     /**
@@ -355,9 +355,8 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         if ($this->_taxHelper->isCrossBorderTradeEnabled($store)) {
             //If cross border trade is enabled, we will use customer tax rate as store tax rate
             return $this->getRateRequest(null, null, null, $store);
-        } else {
-            return $this->getRateOriginRequest($store);
         }
+        return $this->getRateOriginRequest($store);
     }
 
     /**

@@ -1278,7 +1278,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
         if ($payment->getCcNumber()) {
             $request->setXCardNum($payment->getCcNumber())
-                ->setXExpDate(sprintf('%02d-%04d', $payment->getCcExpMonth(), $payment->getCcExpYear()))
+                ->setXExpDate(sprintf('%02d-%04d', (int) $payment->getCcExpMonth(), (int) $payment->getCcExpYear()))
                 ->setXCardCode($payment->getCcCid());
         }
 
@@ -1385,9 +1385,8 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     {
         if (Mage::app()->getStore()->isAdmin()) {
             return Mage::getSingleton('adminhtml/session_quote');
-        } else {
-            return Mage::getSingleton('checkout/session');
         }
+        return Mage::getSingleton('checkout/session');
     }
 
     /**

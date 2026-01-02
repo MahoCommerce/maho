@@ -42,7 +42,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         try {
             if (isset($optionInfo['option_value'])) {
                 return $this->_getOptionHtml($optionInfo['option_value']);
-            } elseif (isset($optionInfo['value'])) {
+            }
+            if (isset($optionInfo['value'])) {
                 return $optionInfo['value'];
             }
         } catch (Exception $e) {
@@ -136,9 +137,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             if ($this->getSkipCheckRequiredOption()) {
                 $this->setUserValue(null);
                 return $this;
-            } else {
-                Mage::throwException($e->getMessage());
             }
+            Mage::throwException($e->getMessage());
         }
         return $this;
     }
@@ -509,9 +509,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 $sizes = '';
             }
 
-            $urlRoute = !empty($value['url']['route']) ? $value['url']['route'] : '';
-            $urlParams = !empty($value['url']['params']) ? $value['url']['params'] : '';
-            $title = !empty($value['title']) ? $value['title'] : '';
+            $urlRoute = empty($value['url']['route']) ? '' : $value['url']['route'];
+            $urlParams = empty($value['url']['params']) ? '' : $value['url']['params'];
+            $title = empty($value['title']) ? '' : $value['title'];
 
             return sprintf(
                 '<a href="%s" target="_blank">%s</a> %s',
@@ -534,11 +534,11 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         if (is_array($value)) {
             return $value;
-        } elseif (is_string($value) && !empty($value)) {
-            return Mage::helper('core/unserializeArray')->unserialize($value);
-        } else {
-            return [];
         }
+        if (is_string($value) && !empty($value)) {
+            return Mage::helper('core/unserializeArray')->unserialize($value);
+        }
+        return [];
     }
 
     /**
