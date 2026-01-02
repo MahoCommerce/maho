@@ -22,7 +22,7 @@
 class Mage_Customer_Block_Widget_Taxvat extends Mage_Customer_Block_Widget_Abstract
 {
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         parent::_construct();
         $this->setTemplate('customer/widget/taxvat.phtml');

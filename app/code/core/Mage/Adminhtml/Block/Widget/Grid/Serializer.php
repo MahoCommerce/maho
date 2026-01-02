@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Serializer extends Mage_Core_Block_Templa
      * @return $this
      */
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         parent::_construct();
         $this->setTemplate('widget/grid/serializer.phtml');

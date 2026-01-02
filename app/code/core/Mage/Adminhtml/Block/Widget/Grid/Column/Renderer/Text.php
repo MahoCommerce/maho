@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminht
      * @return mixed
      */
     #[\Override]
-    public function _getValue(Varien_Object $row)
+    protected function _getValue(Varien_Object $row)
     {
         $format = $this->getColumn()->getFormat() ?: null;
         $defaultValue = $this->getColumn()->getDefault();

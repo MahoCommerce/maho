@@ -454,7 +454,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     {
         if (empty($this->_source)) {
             if (!$this->getSourceModel()) {
-                $this->setSourceModel($this->_getDefaultSourceModel());
+                $this->setSourceModel($this->getDefaultSourceModel());
             }
             $source = Mage::getModel($this->getSourceModel());
             if (!$source) {
@@ -498,11 +498,20 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     }
 
     /**
+     * Get default source model
+     */
+    public function getDefaultSourceModel(): string
+    {
+        return $this->getEntity()->getDefaultAttributeSourceModel();
+    }
+
+    /**
      * @return string
+     * @deprecated since 26.1 use getDefaultSourceModel() instead
      */
     protected function _getDefaultSourceModel()
     {
-        return $this->getEntity()->getDefaultAttributeSourceModel();
+        return $this->getDefaultSourceModel();
     }
 
     /**

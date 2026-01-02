@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Customer_Online extends Mage_Adminhtml_Block_Template
     }
 
     #[\Override]
-    public function _beforeToHtml()
+    protected function _beforeToHtml()
     {
         $this->setChild('grid', $this->getLayout()->createBlock('adminhtml/customer_online_grid', 'customer.grid'));
         return parent::_beforeToHtml();

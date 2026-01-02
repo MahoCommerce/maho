@@ -74,7 +74,7 @@ class Mage_Downloadable_Model_Link_Purchased_Item extends Mage_Core_Model_Abstra
      * @return Mage_Core_Model_Abstract
      */
     #[\Override]
-    public function _beforeSave()
+    protected function _beforeSave()
     {
         if ($this->getOrderItemId() == null) {
             throw new Exception(
