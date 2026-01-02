@@ -77,7 +77,10 @@
     </td>
 </tr>
 </table>
-<?php if(!$this->getParentBlock()->canDisplayContainer()): ?>
+<?php
+/** @var Mage_Adminhtml_Block_Widget_Grid $parent */
+$parent = $this->getParentBlock();
+if (!$parent->canDisplayContainer()): ?>
 <script type="text/javascript">
     <?= $this->getJsObjectName() ?>.setGridIds('<?= $this->getGridIdsJson() ?>');
 </script>

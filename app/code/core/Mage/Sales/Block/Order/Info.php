@@ -30,7 +30,6 @@ class Mage_Sales_Block_Order_Info extends Mage_Core_Block_Template
             $headBlock->setTitle($this->__('Order # %s', $this->getOrder()->getRealOrderId()));
         }
 
-        /** @var Mage_Payment_Helper_Data $helper */
         $helper = $this->helper('payment');
         $this->setChild(
             'payment_info',

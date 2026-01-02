@@ -20,7 +20,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Creditmemo_Totals_Giftcard exten
      */
     public function initTotals()
     {
-        /** @var Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals $parent */
+        /** @var Mage_Sales_Block_Order_Totals|null $parent */
         $parent = $this->getParentBlock();
         if (!$parent) {
             return $this;

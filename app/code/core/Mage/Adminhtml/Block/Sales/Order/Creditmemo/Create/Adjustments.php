@@ -23,6 +23,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Adjustments extends Mag
      */
     public function initTotals()
     {
+        /** @var Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals $parent */
         $parent = $this->getParentBlock();
         $this->_source  = $parent->getSource();
         $total = new Varien_Object([

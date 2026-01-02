@@ -18,7 +18,7 @@ class Maho_Giftcard_Block_Sales_Order_Totals extends Mage_Core_Block_Template
      */
     public function initTotals(): self
     {
-        /** @var Mage_Sales_Block_Order_Totals|false $parent */
+        /** @var Mage_Sales_Block_Order_Totals|null $parent */
         $parent = $this->getParentBlock();
         if (!$parent) {
             return $this;
