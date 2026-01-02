@@ -2741,8 +2741,54 @@ class Sqlite extends AbstractPdoAdapter
         $schemaManager = $this->_connection->createSchemaManager();
         $comparator = $schemaManager->createComparator();
 
-        // Introspect the current table
+        // Introspect the table using the recommended DBAL 4.4 method
+        // Note: There's a bug where introspectTableByUnquotedName() returns index column names
+        // with literal quote characters (e.g., "sku" instead of sku). We'll fix this ourselves.
+        //
+        // TODO: Once Doctrine DBAL fixes this bug, remove the index fixing workaround below
+        // (lines 2751-2787) and the drop/add index loop (lines 2817-2830). Simply use:
+        //   $newTable = $table->edit()->addForeignKeyConstraint($fk)->create();
         $table = $schemaManager->introspectTableByUnquotedName($actualTableName);
+
+        // Identify indexes that need fixing (have quoted column names)
+        // We'll fix these together with adding the FK in a single operation
+        $indexesToFix = [];
+
+        foreach ($table->getIndexes() as $index) {
+            $indexedColumns = $index->getIndexedColumns();
+            $columnNames = [];
+            $unquotedColumnNames = [];
+
+            foreach ($indexedColumns as $indexedColumn) {
+                $indexColumnName = $indexedColumn->getColumnName()->toString();
+                $columnNames[] = $indexColumnName;
+                $unquotedColumnNames[] = trim($indexColumnName, '"');
+            }
+
+            // Check if this index has quoted column names
+            if ($columnNames !== $unquotedColumnNames) {
+                $indexName = $index->getObjectName()->toString();
+
+                // Skip primary key - it's managed separately
+                if (strtolower($indexName) === 'primary') {
+                    continue;
+                }
+
+                // Skip auto-generated indexes (like IDX_XXXXX from constraints)
+                // These are implicit in SQLite and can't be dropped
+                if (preg_match('/^IDX_[0-9A-F]{15}$/i', trim($indexName, '"'))) {
+                    continue;
+                }
+
+                $indexesToFix[] = [
+                    'nameObject' => $index->getObjectName(),  // Keep the actual Name object
+                    'name' => $indexName,
+                    'type' => $index->getType(),
+                    'columns' => $unquotedColumnNames,
+                    'clustered' => $index->isClustered(),
+                ];
+            }
+        }
 
         // Map action strings to ReferentialAction enum
         $actionMap = [
@@ -2766,10 +2812,32 @@ class Sqlite extends AbstractPdoAdapter
             ->setOnUpdateAction($onUpdateAction)
             ->create();
 
-        // Add foreign key using DBAL's fluent API
-        $newTable = $table->edit()
-            ->addForeignKeyConstraint($fk)
-            ->create();
+        // Build the new table with both index fixes AND the new FK
+        // This is done in a single edit session to avoid multiple table recreations
+        $tableEditor = $table->edit();
+
+        // First, drop and re-add any indexes with quoted column names
+        foreach ($indexesToFix as $indexInfo) {
+            // Drop the old index with quoted column names using the original name object
+            $tableEditor = $tableEditor->dropIndex($indexInfo['nameObject']);
+
+            // Create the fixed index with unquoted column names
+            $fixedIndex = \Doctrine\DBAL\Schema\Index::editor()
+                ->setUnquotedName($indexInfo['name'])
+                ->setType($indexInfo['type'])
+                ->setUnquotedColumnNames(...$indexInfo['columns'])
+                ->setIsClustered($indexInfo['clustered'])
+                ->create();
+
+            // Add the fixed index
+            $tableEditor = $tableEditor->addIndex($fixedIndex);
+        }
+
+        // Then add the new foreign key
+        $tableEditor = $tableEditor->addForeignKeyConstraint($fk);
+
+        // Create the new table with all changes
+        $newTable = $tableEditor->create();
 
         // Compare and apply changes - DBAL handles table recreation for SQLite
         $diff = $comparator->compareTables($table, $newTable);
