@@ -332,6 +332,11 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
     #[\Override]
     public function reindexAll()
     {
+        /** @var Mage_Catalog_Helper_Product_Flat $productFlatHelper */
+        $productFlatHelper = Mage::helper('catalog/product_flat');
+        if (!$productFlatHelper->isEnabled()) {
+            return;
+        }
         $this->_getIndexer()->reindexAll();
     }
 

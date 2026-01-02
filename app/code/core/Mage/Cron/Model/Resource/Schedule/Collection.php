@@ -16,7 +16,7 @@ class Mage_Cron_Model_Resource_Schedule_Collection extends Mage_Core_Model_Resou
      * Initialize resource collection
      */
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         $this->_init('cron/schedule');
     }

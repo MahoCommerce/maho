@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Messages extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    public function _prepareLayout()
+    protected function _prepareLayout()
     {
         /**
          * Check customer existing (only for non-guest orders)

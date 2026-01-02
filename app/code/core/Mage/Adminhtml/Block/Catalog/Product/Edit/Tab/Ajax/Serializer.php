@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Ajax_Serializer extends Mage
      * @return $this
      */
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         parent::_construct();
         $this->setTemplate('catalog/product/edit/serializer.phtml');
