@@ -563,10 +563,12 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function validateSerializedObject($str)
     {
-        if ($this->isSerializedArrayOrObject($str)) {
-            if (!unserialize($str)) {
-                return false;
-            }
+        if (!$this->isSerializedArrayOrObject($str)) {
+            return true;
+        }
+
+        if (!unserialize($str)) {
+            return false;
         }
 
         return true;

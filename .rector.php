@@ -35,6 +35,7 @@ return RectorConfig::configure()
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
         DeadCode\MethodCall\RemoveNullArgOnNullDefaultParamRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
+        EarlyReturn\If_\ChangeNestedIfsToEarlyReturnRector::class,
         EarlyReturn\If_\RemoveAlwaysElseRector::class,
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
         Rector\Php71\Rector\List_\ListToArrayDestructRector::class,
