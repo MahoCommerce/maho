@@ -1,5 +1,8 @@
+"Captcha","Captcha"
 "Captcha is disabled","Captcha is disabled"
 "CSS Selectors","CSS Selectors"
 "Enable","Enable"
+"Enable Captcha","Enable Captcha"
 "Incorrect CAPTCHA.","Incorrect CAPTCHA."
 "Internal Error","Internal Error"
+"These CSS selectors are used to identify the forms for which captcha will be activated.<br />One selector per line.<br />To disable a selector, type // at the beginning of the line.","These CSS selectors are used to identify the forms for which captcha will be activated.<br />One selector per line.<br />To disable a selector, type // at the beginning of the line."
