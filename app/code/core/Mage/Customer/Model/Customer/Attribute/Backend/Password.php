@@ -49,10 +49,12 @@ class Mage_Customer_Model_Customer_Attribute_Backend_Password extends Mage_Eav_M
     #[\Override]
     public function validate($object)
     {
-        if ($password = $object->getPassword()) {
-            if ($password == $object->getPasswordConfirm()) {
-                return true;
-            }
+        if (!$password = $object->getPassword()) {
+            return parent::validate($object);
+        }
+
+        if ($password == $object->getPasswordConfirm()) {
+            return true;
         }
 
         return parent::validate($object);

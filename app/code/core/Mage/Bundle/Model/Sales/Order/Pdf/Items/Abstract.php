@@ -147,12 +147,11 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     public function getBundleOptions($item = null): array
     {
         $options = $this->getOrderItem()->getProductOptions();
-        if ($options) {
-            if (isset($options['bundle_options'])) {
-                return $options['bundle_options'];
-            }
+        if (!$options) {
+            return $options['bundle_options'] ?? [];
         }
-        return [];
+
+        return $options['bundle_options'] ?? [];
     }
 
     /**
