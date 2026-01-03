@@ -21,7 +21,6 @@ class Mage_Sales_Block_Order_Print extends Mage_Sales_Block_Items_Abstract
             $headBlock->setTitle($this->__('Print Order # %s', $this->getOrder()->getRealOrderId()));
         }
 
-        /** @var Mage_Payment_Helper_Data $helper */
         $helper = $this->helper('payment');
         $this->setChild(
             'payment_info',

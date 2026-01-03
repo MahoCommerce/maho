@@ -360,6 +360,7 @@
 "Invalid image file type.","Invalid image file type."
 "Invalid image type.","Invalid image type."
 "Invalid option ID specified for %s (%s), skipping the record.","Invalid option ID specified for %s (%s), skipping the record."
+"Invalid product collection resource.","Invalid product collection resource."
 "Invalid product type specified, skipping the record.","Invalid product type specified, skipping the record."
 "Invalid store specified","Invalid store specified"
 "Invalid store specified, skipping the record.","Invalid store specified, skipping the record."
