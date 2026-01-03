@@ -193,11 +193,14 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      */
     protected function _getPriceBlockTemplate($productTypeId)
     {
-        if (isset($this->_priceBlockTypes[$productTypeId])) {
-            if ($this->_priceBlockTypes[$productTypeId]['template'] != '') {
-                return $this->_priceBlockTypes[$productTypeId]['template'];
-            }
+        if (!isset($this->_priceBlockTypes[$productTypeId])) {
+            return $this->_priceBlockDefaultTemplate;
         }
+
+        if ($this->_priceBlockTypes[$productTypeId]['template'] != '') {
+            return $this->_priceBlockTypes[$productTypeId]['template'];
+        }
+
         return $this->_priceBlockDefaultTemplate;
     }
 

@@ -243,11 +243,14 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     public function getSourceModel()
     {
         $model = $this->getData('source_model');
-        if (empty($model)) {
-            if ($this->getBackendType() == 'int' && $this->getFrontendInput() == 'select') {
-                return $this->getDefaultSourceModel();
-            }
+        if (!empty($model)) {
+            return $model;
         }
+
+        if ($this->getBackendType() == 'int' && $this->getFrontendInput() == 'select') {
+            return $this->getDefaultSourceModel();
+        }
+
         return $model;
     }
 
