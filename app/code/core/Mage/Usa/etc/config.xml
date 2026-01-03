@@ -101,7 +101,7 @@
                 <model>usa/shipping_carrier_fedex</model>
                 <packaging>YOUR_PACKAGING</packaging>
                 <title>Federal Express</title>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>
                 <max_package_weight>150</max_package_weight>
                 <handling_type>F</handling_type>
                 <handling_action>O</handling_action>
@@ -134,7 +134,7 @@
                 <password backend_model="adminhtml/system_config_backend_encrypted"/>
                 <client_id backend_model="adminhtml/system_config_backend_encrypted"/>
                 <client_secret backend_model="adminhtml/system_config_backend_encrypted"/>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>
                 <min_package_weight>0.1</min_package_weight>
                 <max_package_weight>150</max_package_weight>
                 <handling_type>F</handling_type>
@@ -150,8 +150,15 @@
                 <container>VARIABLE</container>
                 <cutoff_cost/>
                 <free_method/>
-                <gateway_url>https://production.shippingapis.com/ShippingAPI.dll</gateway_url>
-                <gateway_secure_url>https://secure.shippingapis.com/ShippingAPI.dll</gateway_secure_url>
+                <client_id backend_model="adminhtml/system_config_backend_encrypted"/>
+                <client_secret backend_model="adminhtml/system_config_backend_encrypted"/>
+                <api_environment>production</api_environment>
+                <commercial_pricing>1</commercial_pricing>
+                <payment_account_type/>
+                <payment_account_number backend_model="adminhtml/system_config_backend_encrypted"/>
+                <payment_permit_zip/>
+                <payment_crid backend_model="adminhtml/system_config_backend_encrypted"/>
+                <payment_mid backend_model="adminhtml/system_config_backend_encrypted"/>
                 <shipment_requesttype>0</shipment_requesttype>
                 <handling/>
                 <machinable>true</machinable>
@@ -159,10 +166,7 @@
                 <model>usa/shipping_carrier_usps</model>
                 <size>REGULAR</size>
                 <title>United States Postal Service</title>
-                <userid backend_model="adminhtml/system_config_backend_encrypted"/>
-                <password backend_model="adminhtml/system_config_backend_encrypted"/>
-                <isproduction>0</isproduction>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>
                 <max_package_weight>70</max_package_weight>
                 <handling_type>F</handling_type>
                 <handling_action>O</handling_action>
@@ -182,7 +186,7 @@
                 <id backend_model="adminhtml/system_config_backend_encrypted"/>
                 <password backend_model="adminhtml/system_config_backend_encrypted"/>
                 <shipment_type>N</shipment_type>
-                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>
                 <divide_order_weight>1</divide_order_weight>
                 <unit_of_measure>K</unit_of_measure>
                 <size>R</size>
