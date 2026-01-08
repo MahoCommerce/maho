@@ -1084,6 +1084,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 $responseData = $restClient->getTracking($trackingNumber);
                 $this->_parseRestTrackingResponse($trackingNumber, $responseData);
             } catch (Exception $e) {
+                Mage::log('USPS Tracking Error for ' . $trackingNumber . ': ' . $e->getMessage(), Mage::LOG_ERROR, 'usps_rest_api.log');
                 $this->_parseRestTrackingResponse($trackingNumber, []);
             }
         }

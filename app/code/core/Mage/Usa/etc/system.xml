@@ -640,8 +640,8 @@
                             <depends><active>1</active></depends>
                         </title>
                         <client_id translate="label comment">
-                            <label>Client ID</label>
-                            <comment><![CDATA[Register your application at <a href="https://developers.usps.com" target="_blank">developers.usps.com</a> to obtain OAuth credentials. Use the same credentials for both test and production environments.]]></comment>
+                            <label>Client ID (Consumer Key)</label>
+                            <comment><![CDATA[Register your application at <a href="https://developers.usps.com" target="_blank">developers.usps.com</a> to obtain OAuth credentials. Copy the Consumer Key as your Client ID and the Consumer Secret as your Client Secret. Use the same credentials for both test and production environments.]]></comment>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>50</sort_order>
@@ -652,7 +652,7 @@
                             <validate>required-entry</validate>
                         </client_id>
                         <client_secret translate="label">
-                            <label>Client Secret</label>
+                            <label>Client Secret (Consumer Secret)</label>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>53</sort_order>
