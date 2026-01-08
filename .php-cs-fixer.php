@@ -7,6 +7,7 @@
 $config = new PhpCsFixer\Config();
 return $config
     ->setRiskyAllowed(true)
+    ->setParallelConfig(new PhpCsFixer\Runner\Parallel\ParallelConfig())
     ->setRules([
         // see https://cs.symfony.com/doc/ruleSets/PER-CS2.0.html
         '@PER-CS2.0' => true,
