@@ -15,7 +15,7 @@
         <shipping translate="label" module="shipping">
             <label>Shipping Settings</label>
             <tab>sales</tab>
-            <sort_order>310</sort_order>
+            <sort_order>800</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>0</show_in_store>
@@ -105,7 +105,7 @@
         <carriers translate="label" module="shipping">
             <label>Shipping Methods</label>
             <tab>sales</tab>
-            <sort_order>320</sort_order>
+            <sort_order>700</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>

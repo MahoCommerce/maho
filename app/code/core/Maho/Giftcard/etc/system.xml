@@ -4,7 +4,7 @@
         <giftcard translate="label" module="giftcard">
             <label>Gift Cards</label>
             <tab>sales</tab>
-            <sort_order>400</sort_order>
+            <sort_order>200</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
