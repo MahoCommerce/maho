@@ -56,23 +56,28 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
             }
         }
 
-        // For fixed amounts, return the lowest amount
+        $minPrice = 0.0;
+
+        // Check fixed amounts
         $amounts = $product->getData('giftcard_amounts');
         if ($amounts) {
             $amountsArray = array_map('trim', explode(',', $amounts));
             $amountsArray = array_filter($amountsArray, fn($a) => is_numeric($a) && $a > 0);
             if ($amountsArray !== []) {
-                return (float) min($amountsArray);
+                $minPrice = (float) min($amountsArray);
             }
         }
 
-        // For custom amounts, return the minimum amount
-        $minAmount = $product->getData('giftcard_min_amount');
-        if ($minAmount && $minAmount > 0) {
-            return (float) $minAmount;
+        // For combined/custom type, also check min_amount and take the lower value
+        $giftcardType = $product->getData('giftcard_type');
+        if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+            $customMin = (float) $product->getData('giftcard_min_amount');
+            if ($customMin > 0) {
+                $minPrice = ($minPrice > 0) ? min($minPrice, $customMin) : $customMin;
+            }
         }
 
-        return 0.0;
+        return $minPrice;
     }
 
     /**

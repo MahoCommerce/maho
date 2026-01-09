@@ -79,6 +79,7 @@
                         <model>giftcard/product_type_giftcard</model>
                         <price_model>giftcard/product_price</price_model>
                         <price_indexer>giftcard/indexer_price</price_indexer>
+                        <is_qty>1</is_qty>
                         <is_virtual>1</is_virtual>
                         <composite>0</composite>
                         <index_priority>50</index_priority>
