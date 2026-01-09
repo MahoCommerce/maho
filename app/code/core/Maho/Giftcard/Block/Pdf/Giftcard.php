@@ -38,34 +38,4 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
     {
         return $this->getData('giftcards') ?: [];
     }
-
-    /**
-     * Get gift card helper
-     *
-     * @return Maho_Giftcard_Helper_Data
-     */
-    public function getGiftcardHelper()
-    {
-        return Mage::helper('giftcard');
-    }
-
-    /**
-     * Get store name
-     */
-    public function getStoreName(): string
-    {
-        return Mage::getStoreConfig('general/store_information/name') ?: 'Store';
-    }
-
-    /**
-     * Get logo URL
-     */
-    public function getLogoUrl(): string
-    {
-        $logoPath = Mage::getStoreConfig('sales/identity/logo');
-        if ($logoPath) {
-            return Mage::getBaseDir('media') . DS . 'sales' . DS . 'store' . DS . 'logo' . DS . $logoPath;
-        }
-        return '';
-    }
 }

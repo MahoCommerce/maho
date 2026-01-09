@@ -10,269 +10,167 @@
 
 /** @var Maho_Giftcard_Block_Pdf_Giftcard $this */
 $giftcards = $this->getGiftcards();
+$helper = Mage::helper('giftcard');
+$storeUrl = rtrim(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/');
+$logoSrc = $this->getLogoUrl();
+
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #333; }
 
         .giftcard {
-            background-color: #f5f7fa;
+            width: 500px;
+            margin: 50px auto;
+            border: 2px solid #3260a8;
             border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 30px;
+            overflow: hidden;
             page-break-inside: avoid;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+        }
+        .header img {
+            max-height: 50pt;
+            width: auto;
         }
 
-        .header h1 {
-            font-size: 28pt;
-            color: #2c3e50;
-            margin-bottom: 8px;
-            font-weight: 300;
-        }
+        .body { padding: 15px; }
 
-        .header .store-name {
+        .title {
             font-size: 14pt;
-            color: #7f8c8d;
-            font-weight: normal;
-        }
-
-        .code-section {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 6px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .code-label {
-            font-size: 10pt;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .code {
-            font-size: 24pt;
             font-weight: bold;
-            color: #2c3e50;
-            font-family: 'Courier New', monospace;
+            color: #3260a8;
             letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
         }
 
-        .balance-section {
-            background-color: #667eea;
-            color: #fff;
-            padding: 20px;
-            border-radius: 6px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .balance-label {
-            font-size: 12pt;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .balance {
-            font-size: 36pt;
-            font-weight: bold;
-        }
-
-        .info-grid {
+        .main-row {
             display: table;
             width: 100%;
-            margin: 20px 0;
+            margin-bottom: 12px;
         }
+        .info-section {
+            display: table-cell;
+            vertical-align: middle;
+        }
+        .code-block { margin-bottom: 8px; }
+        .label { font-size: 8pt; color: #666; text-transform: uppercase; margin-bottom: 2px; }
+        .code { font-size: 13pt; font-weight: bold; font-family: Courier, monospace; letter-spacing: 1px; }
+        .balance { font-size: 20pt; font-weight: bold; color: #3260a8; }
+
+        .qr-section {
+            display: table-cell;
+            width: 130px;
+            vertical-align: middle;
+            text-align: right;
+        }
+        .qr-section img { width: 120px; height: 120px; }
 
         .info-row {
-            display: table-row;
+            display: table;
+            width: 100%;
+            font-size: 9pt;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
-
-        .info-label {
+        .info-item {
             display: table-cell;
-            padding: 8px 0;
-            font-size: 10pt;
-            color: #7f8c8d;
-            width: 30%;
+            width: 33%;
+            padding: 0 5px;
         }
-
-        .info-value {
-            display: table-cell;
-            padding: 8px 0;
-            font-size: 11pt;
-            color: #2c3e50;
-        }
-
-
-        .message-section {
-            background-color: #fff9e6;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 20px 0;
-            border-left: 4px solid #f39c12;
-        }
-
-        .message-label {
-            font-size: 10pt;
-            color: #7f8c8d;
-            margin-bottom: 8px;
-        }
+        .info-label { color: #999; font-size: 8pt; }
+        .info-value { color: #333; margin-top: 2px; }
 
         .message {
-            font-size: 11pt;
-            color: #2c3e50;
-            font-style: italic;
-        }
-
-        .terms {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #e1e5eb;
-        }
-
-        .terms h3 {
-            font-size: 11pt;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .terms ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .terms li {
+            background: #f8f9fa;
+            border-left: 3px solid #3260a8;
+            padding: 10px 12px;
+            margin-top: 12px;
             font-size: 9pt;
-            color: #7f8c8d;
-            margin-bottom: 6px;
-            padding-left: 15px;
-            position: relative;
-        }
-
-        .terms li:before {
-            content: "•";
-            position: absolute;
-            left: 0;
+            color: #333;
         }
 
         .footer {
+            background: #f5f5f5;
+            padding: 8px;
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e1e5eb;
-            font-size: 9pt;
-            color: #95a5a6;
+            font-size: 7pt;
+            color: #666;
+            border-top: 1px solid #eee;
         }
+        .footer a { color: #3260a8; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <?php foreach ($giftcards as $giftcard): ?>
-        <div class="giftcard">
-            <div class="header">
-                <h1>GIFT CARD <?php echo $this->escapeHtml(Mage::getStoreConfig('general/store_information/name')) ?></h1>
-            </div>
+    <?php foreach ($giftcards as $giftcard): ?>
+    <div class="giftcard">
+        <?php if ($logoSrc): ?>
+        <div class="header">
+            <img src="<?= $logoSrc ?>" alt="Logo" />
+        </div>
+        <?php endif; ?>
 
-            <div class="code-section">
-                <div class="code-label">Gift Card Code</div>
-                <div class="code"><?php echo $this->escapeHtml($giftcard->getCode()) ?></div>
+        <div class="body">
+            <div class="title">Gift Card</div>
 
-                <?php
-                $helper = Mage::helper('giftcard');
-                $qrCode = $helper->getQrCodeDataUrl($giftcard->getCode(), 150);
-                $barcode = $helper->getBarcodeDataUrl($giftcard->getCode());
-                ?>
-
+            <div class="main-row">
+                <div class="info-section">
+                    <div class="code-block">
+                        <div class="label">Code</div>
+                        <div class="code"><?= $this->escapeHtml($giftcard->getCode()) ?></div>
+                    </div>
+                    <div class="balance-block">
+                        <div class="label">Balance</div>
+                        <div class="balance"><?= Mage::app()->getLocale()->formatCurrency($giftcard->getBalance(), $giftcard->getCurrencyCode()) ?></div>
+                    </div>
+                </div>
+                <?php $qrCode = $helper->getQrCodeDataUrl($giftcard->getCode()); ?>
                 <?php if ($qrCode): ?>
-                <div style="margin-top: 20px;">
-                    <img src="<?php echo $qrCode ?>" alt="QR Code" style="width: 150px; height: 150px;" />
-                </div>
-                <?php endif; ?>
-
-                <?php if ($barcode): ?>
-                <div style="margin-top: 15px;">
-                    <img src="<?php echo $barcode ?>" alt="Barcode" style="height: 50px; width: auto; max-width: 250px;" />
+                <div class="qr-section">
+                    <img src="<?= $qrCode ?>" alt="QR" />
                 </div>
                 <?php endif; ?>
             </div>
 
-            <div class="balance-section">
-                <div class="balance-label">Current Balance</div>
-                <div class="balance"><?php echo Mage::app()->getLocale()->formatCurrency($giftcard->getBalance(), $giftcard->getCurrencyCode()) ?></div>
-            </div>
-
-            <div class="info-grid">
+            <div class="info-row">
                 <?php if ($giftcard->getRecipientName()): ?>
-                <div class="info-row">
-                    <div class="info-label">To:</div>
-                    <div class="info-value"><?php echo $this->escapeHtml($giftcard->getRecipientName()) ?></div>
+                <div class="info-item">
+                    <div class="info-label">To</div>
+                    <div class="info-value"><?= $this->escapeHtml($giftcard->getRecipientName()) ?></div>
                 </div>
                 <?php endif; ?>
-
                 <?php if ($giftcard->getSenderName()): ?>
-                <div class="info-row">
-                    <div class="info-label">From:</div>
-                    <div class="info-value"><?php echo $this->escapeHtml($giftcard->getSenderName()) ?></div>
+                <div class="info-item">
+                    <div class="info-label">From</div>
+                    <div class="info-value"><?= $this->escapeHtml($giftcard->getSenderName()) ?></div>
                 </div>
                 <?php endif; ?>
-
                 <?php if ($giftcard->getExpiresAt()): ?>
-                <div class="info-row">
-                    <div class="info-label">Expires:</div>
-                    <div class="info-value"><?php echo $this->formatDate($giftcard->getExpiresAt(), 'medium') ?></div>
+                <div class="info-item">
+                    <div class="info-label">Expires</div>
+                    <div class="info-value"><?= $this->formatDate($giftcard->getExpiresAt(), 'short') ?></div>
                 </div>
                 <?php endif; ?>
             </div>
 
             <?php if ($giftcard->getMessage()): ?>
-            <div class="message-section">
-                <div class="message-label">Personal Message</div>
-                <div class="message"><?php echo nl2br($this->escapeHtml($giftcard->getMessage())) ?></div>
-            </div>
+            <div class="message"><?= nl2br($this->escapeHtml($giftcard->getMessage())) ?></div>
             <?php endif; ?>
-
-            <div class="terms">
-                <h3>Terms & Conditions</h3>
-                <ul>
-                    <li>This gift card is redeemable for merchandise only</li>
-                    <li>Cannot be redeemed for cash unless required by law</li>
-                    <li>Lost or stolen cards will not be replaced</li>
-                </ul>
-            </div>
-
-            <div class="footer">
-                <p>Thank you for choosing <?php echo $this->escapeHtml(Mage::getStoreConfig('general/store_information/name')) ?></p>
-                <p><?php echo $this->escapeHtml(Mage::getStoreConfig('web/unsecure/base_url')) ?></p>
-            </div>
         </div>
-        <?php endforeach; ?>
+
+        <div class="footer">
+            <a href="<?= $this->escapeHtml($storeUrl) ?>"><?= $this->escapeHtml($storeUrl) ?></a><br />
+            Not redeemable for cash &bull; Lost cards not replaced
+        </div>
     </div>
+    <?php endforeach; ?>
 </body>
 </html>
