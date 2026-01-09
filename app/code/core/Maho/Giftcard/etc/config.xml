@@ -272,6 +272,7 @@
                 <code_format>XXXX-XXXX-XXXX-XXXX</code_format>
                 <code_prefix>GC</code_prefix>
                 <lifetime>365</lifetime>
+                <refund_expiration_extension>30</refund_expiration_extension>
                 <allow_message>1</allow_message>
                 <show_qrcode>1</show_qrcode>
                 <show_barcode>1</show_barcode>

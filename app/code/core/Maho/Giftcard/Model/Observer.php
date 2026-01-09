@@ -652,10 +652,11 @@ class Maho_Giftcard_Model_Observer
                 continue;
             }
 
-            // Load gift card
+            // Load gift card with row lock to prevent race conditions
             $select = $adapter->select()
                 ->from($giftcardTable)
-                ->where('code = ?', $code);
+                ->where('code = ?', $code)
+                ->forUpdate();
 
             $giftcardData = $adapter->fetchRow($select);
 
@@ -665,15 +666,60 @@ class Maho_Giftcard_Model_Observer
 
             $balanceBefore = (float) $giftcardData['balance'];
             $newBalance = $balanceBefore + $refundAmount;
+            $currentStatus = $giftcardData['status'];
+            $currentExpiresAt = $giftcardData['expires_at'];
+
+            // Determine new status and expiration
+            $newStatus = Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE;
+            $newExpiresAt = $currentExpiresAt;
+            $historyComment = "Refund for order #{$order->getIncrementId()}";
+
+            // Check if card is expired or needs extension
+            $isExpired = $currentStatus === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED;
+            $extensionDays = (int) Mage::getStoreConfig('giftcard/general/refund_expiration_extension', $order->getStoreId());
+            $needsExtension = false;
+
+            if ($currentExpiresAt && $extensionDays > 0) {
+                $now = Mage::app()->getLocale()->utcDate(null, null, true);
+                $expiresAt = new DateTime($currentExpiresAt, new DateTimeZone('UTC'));
+
+                // Calculate the minimum acceptable expiration (now + extension days)
+                $minimumExpiration = (clone $now)->modify("+{$extensionDays} days");
+
+                // Extend if card is expired OR will expire before the minimum
+                $needsExtension = $expiresAt < $minimumExpiration;
+            } elseif ($isExpired && $extensionDays > 0) {
+                // Card is expired but has no expiration date set (edge case)
+                $needsExtension = true;
+            }
+
+            // Extend expiration if needed
+            if ($needsExtension && $extensionDays > 0) {
+                $newExpiration = Mage::app()->getLocale()->utcDate(null, null, true);
+                $newExpiration->modify("+{$extensionDays} days");
+                $newExpiresAt = $newExpiration->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                $historyComment .= " (expiration extended to {$extensionDays} days from now)";
+            } elseif ($isExpired && $extensionDays === 0) {
+                // If extension is 0 and card is expired, keep it expired but still add balance
+                $newStatus = Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED;
+            }
+
+            // Build update data
+            $updateData = [
+                'balance' => $newBalance,
+                'status' => $newStatus,
+                'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            ];
+
+            // Only update expires_at if we're extending it
+            if ($newExpiresAt !== $currentExpiresAt) {
+                $updateData['expires_at'] = $newExpiresAt;
+            }
 
             // Update gift card balance
             $adapter->update(
                 $giftcardTable,
-                [
-                    'balance' => $newBalance,
-                    'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
-                    'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
-                ],
+                $updateData,
                 ['giftcard_id = ?' => $giftcardData['giftcard_id']],
             );
 
@@ -685,7 +731,7 @@ class Maho_Giftcard_Model_Observer
                 'balance_before' => $balanceBefore,
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
-                'comment' => "Refund for order #{$order->getIncrementId()}",
+                'comment' => $historyComment,
                 'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
             ]);
         }
