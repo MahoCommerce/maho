@@ -5,7 +5,7 @@
  *
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2018-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -341,7 +341,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
              * Set same_as_billing to "1" when default shipping address is set as default
              * and it is not equal billing address
              */
-            if (!$this->getId()) {
+            if (!$this->getId() && !$this->hasSameAsBilling()) {
                 $this->setSameAsBilling((int) $this->_isSameAsBilling());
             }
         }
