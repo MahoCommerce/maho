@@ -61,7 +61,7 @@ if ($_product->getPriceType() == 1) {
 <div class="price-box">
         <?php if ($_product->getPriceView()): ?>
             <p class="minimal-price">
-                <span class="price-label"><?= $this->__('From') ?>:</span>
+                <span class="price-label"><?= $this->__('From') ?></span>
                 <?php if ($this->displayBothPrices()): ?>
                     <span class="price-excluding-tax">
                         <span class="label"><?= $_taxHelper->__('Excl. Tax:') ?></span>
@@ -115,7 +115,7 @@ if ($_product->getPriceType() == 1) {
         <?php else: ?>
             <?php if ($_minimalPriceTax <> $_maximalPriceTax): ?>
             <p class="price-from">
-                <span class="price-label"><?= $this->__('From') ?>:</span>
+                <span class="price-label"><?= $this->__('From') ?></span>
                 <?php if ($this->displayBothPrices()): ?>
                     <span class="price-excluding-tax">
                         <span class="label"><?= $_taxHelper->__('Excl. Tax:') ?></span>

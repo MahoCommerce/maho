@@ -34,7 +34,7 @@ $_minPriceInclTax = $_taxHelper->getPrice($_product, $_minPriceConverted, true);
     <?php if ($_minPrice > 0): ?>
         <?php if ($_hasPriceRange): ?>
             <p class="minimal-price">
-                <span class="price-label"><?= $this->__('From') ?>:</span>
+                <span class="price-label"><?= $this->__('From') ?></span>
                 <?php if ($_taxHelper->displayBothPrices()): ?>
                     <span class="price-excluding-tax">
                         <span class="label"><?= $_taxHelper->__('Excl. Tax:') ?></span>
