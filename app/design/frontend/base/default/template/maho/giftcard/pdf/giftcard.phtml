@@ -1,0 +1,91 @@
+<?php
+/**
+ * Maho
+ *
+ * Gift Card PDF Template
+ * Override this file in your theme to customize gift card layout
+ *
+ * @category   design
+ * @package    base_default
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Giftcard_Block_Pdf_Giftcard $this */
+$giftcards = $this->getGiftcards();
+$helper = Mage::helper('giftcard');
+$storeUrl = rtrim($this->getStoreUrl(), '/');
+$logoSrc = $this->getLogoUrl();
+$css = $this->getCssContent();
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style><?= $css ?></style>
+</head>
+<body>
+    <?php foreach ($giftcards as $giftcard): ?>
+    <div class="giftcard">
+        <?php if ($logoSrc): ?>
+        <div class="giftcard-header">
+            <img src="<?= $logoSrc ?>" alt="Logo" />
+        </div>
+        <?php endif; ?>
+
+        <div class="giftcard-body">
+            <div class="giftcard-title"><?= $this->__('Gift Card') ?></div>
+
+            <div class="giftcard-main">
+                <div class="giftcard-info">
+                    <div class="giftcard-code-block">
+                        <div class="giftcard-label"><?= $this->__('Code') ?></div>
+                        <div class="giftcard-code"><?= $this->escapeHtml($giftcard->getCode()) ?></div>
+                    </div>
+                    <div class="giftcard-balance-block">
+                        <div class="giftcard-label"><?= $this->__('Balance') ?></div>
+                        <div class="giftcard-balance"><?= $this->formatPrice($giftcard->getBalance(), $giftcard->getCurrencyCode()) ?></div>
+                    </div>
+                </div>
+                <?php $qrCode = $helper->getQrCodeDataUrl($giftcard->getCode()); ?>
+                <?php if ($qrCode): ?>
+                <div class="giftcard-qr">
+                    <img src="<?= $qrCode ?>" alt="QR" />
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="giftcard-details">
+                <?php if ($giftcard->getRecipientName()): ?>
+                <div class="giftcard-detail">
+                    <div class="giftcard-detail-label"><?= $this->__('To') ?></div>
+                    <div class="giftcard-detail-value"><?= $this->escapeHtml($giftcard->getRecipientName()) ?></div>
+                </div>
+                <?php endif; ?>
+                <?php if ($giftcard->getSenderName()): ?>
+                <div class="giftcard-detail">
+                    <div class="giftcard-detail-label"><?= $this->__('From') ?></div>
+                    <div class="giftcard-detail-value"><?= $this->escapeHtml($giftcard->getSenderName()) ?></div>
+                </div>
+                <?php endif; ?>
+                <?php if ($giftcard->getExpiresAt()): ?>
+                <div class="giftcard-detail">
+                    <div class="giftcard-detail-label"><?= $this->__('Expires') ?></div>
+                    <div class="giftcard-detail-value"><?= $this->formatDate($giftcard->getExpiresAt(), 'short') ?></div>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($giftcard->getMessage()): ?>
+            <div class="giftcard-message"><?= nl2br($this->escapeHtml($giftcard->getMessage())) ?></div>
+            <?php endif; ?>
+        </div>
+
+        <div class="giftcard-footer">
+            <a href="<?= $this->escapeHtml($storeUrl) ?>"><?= $this->escapeHtml($storeUrl) ?></a><br />
+            <?= $this->__('Not redeemable for cash') ?> &bull; <?= $this->__('Lost cards not replaced') ?>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</body>
+</html>
