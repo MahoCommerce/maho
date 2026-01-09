@@ -21,6 +21,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         'giftcard_recipient_name' => 'Recipient Name',
         'giftcard_recipient_email' => 'Recipient Email',
         'giftcard_sender_name' => 'Sender Name',
+        'giftcard_sender_email' => 'Sender Email',
         'giftcard_message' => 'Message',
         'giftcard_delivery_date' => 'Delivery Date',
     ];

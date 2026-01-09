@@ -105,57 +105,88 @@
         </reference>
     </checkout_cart_index>
 
-    <!-- Sales Order View - Add gift card totals -->
+    <!-- Checkout Onepage Review - Add gift card item renderer for date formatting -->
+    <checkout_onepage_review>
+        <reference name="root">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/checkout_cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
+        </reference>
+    </checkout_onepage_review>
+
+    <!-- Sales Order View - Add gift card totals and custom item renderer -->
     <sales_order_view>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="order_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>
     </sales_order_view>
 
-    <!-- Sales Order Print - Add gift card totals -->
+    <!-- Sales Order Print - Add gift card totals and custom item renderer -->
     <sales_order_print>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="order_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>
     </sales_order_print>
 
-    <!-- Sales Guest Order View - Add gift card totals -->
+    <!-- Sales Guest Order View - Add gift card totals and custom item renderer -->
     <sales_guest_view>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="order_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>
     </sales_guest_view>
 
-    <!-- Sales Guest Order Print - Add gift card totals -->
+    <!-- Sales Guest Order Print - Add gift card totals and custom item renderer -->
     <sales_guest_print>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="order_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>
     </sales_guest_print>
 
-    <!-- Sales Guest Invoice View - Add gift card totals -->
+    <!-- Sales Guest Invoice View - Add gift card totals and custom item renderer -->
     <sales_guest_invoice>
+        <reference name="invoice_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="invoice_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>
     </sales_guest_invoice>
 
-    <!-- Sales Guest Creditmemo View - Add gift card totals -->
+    <!-- Sales Guest Creditmemo View - Add gift card totals and custom item renderer -->
     <sales_guest_creditmemo>
+        <reference name="creditmemo_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="creditmemo_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>
     </sales_guest_creditmemo>
 
-    <!-- Sales Order Invoice View - Add gift card totals -->
+    <!-- Sales Order Invoice View - Add gift card totals and custom item renderer -->
     <sales_order_invoice>
+        <reference name="invoice_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="invoice_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>
     </sales_order_invoice>
 
-    <!-- Sales Order Creditmemo View - Add gift card totals -->
+    <!-- Sales Order Creditmemo View - Add gift card totals and custom item renderer -->
     <sales_order_creditmemo>
+        <reference name="creditmemo_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
         <reference name="creditmemo_totals">
             <block type="giftcard/sales_order_totals" name="giftcard" />
         </reference>

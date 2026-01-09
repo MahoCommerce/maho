@@ -254,7 +254,8 @@
                 <active>0</active>
                 <model>giftcard/payment</model>
                 <title>Gift Card</title>
-                <order_status>pending</order_status>
+                <order_status>processing</order_status>
+                <payment_action>authorize_capture</payment_action>
                 <allowspecific>0</allowspecific>
                 <sort_order>-1</sort_order>
                 <can_use_checkout>1</can_use_checkout>
@@ -262,7 +263,6 @@
                 <can_authorize>0</can_authorize>
                 <can_capture>1</can_capture>
                 <can_refund>1</can_refund>
-                <payment_action>authorize_capture</payment_action>
             </giftcard>
         </payment>
         <giftcard>

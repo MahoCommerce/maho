@@ -11,17 +11,13 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Gift Card cart item renderer
- * Extends default renderer to format date fields in additional options
- */
-class Maho_Giftcard_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Block_Cart_Item_Renderer
+class Maho_Giftcard_Block_Sales_Order_Item_Renderer extends Mage_Sales_Block_Order_Item_Renderer_Default
 {
     /**
      * Get formatted option value with date formatting support
      */
     #[\Override]
-    public function getFormatedOptionValue(mixed $optionValue): array
+    public function getFormatedOptionValue($optionValue): array
     {
         // Extract value from option array if needed
         $value = is_array($optionValue) && isset($optionValue['value']) ? $optionValue['value'] : $optionValue;
