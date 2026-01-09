@@ -10,16 +10,17 @@
 @-->
 
 <!--@styles
-.giftcard-box { border: 2px solid #ddd; padding: 20px; margin: 20px 0; background: #f9f9f9; border-radius: 8px; }
-.giftcard-code { font-size: 24px; font-weight: bold; color: #333; padding: 15px 20px; background: white; border: 2px dashed #ccc; display: inline-block; margin: 10px 0; letter-spacing: 2px; font-family: monospace; }
-.giftcard-amount { font-size: 20px; color: #2e7d32; font-weight: bold; }
-.giftcard-message { font-style: italic; background: #fff; padding: 15px; border-left: 4px solid #ddd; margin: 15px 0; }
+.giftcard-box { border: 2px solid #dddddd; padding: 25px; margin: 20px 0; background-color: #f9f9f9; }
+.giftcard-code { font-size: 22px; font-weight: bold; color: #333333; padding: 15px 20px; background-color: #ffffff; border: 2px dashed #cccccc; display: inline-block; margin: 10px 0; letter-spacing: 2px; font-family: 'Courier New', Courier, monospace; }
+.giftcard-amount { font-size: 28px; color: #2e7d32; font-weight: bold; }
+.giftcard-message { font-style: italic; color: #555555; background-color: #ffffff; padding: 15px; border-left: 4px solid #2e7d32; margin: 15px 0; }
+.giftcard-expiry { color: #666666; margin-top: 15px; }
 @-->
 
 {{template config_path="design/email/header"}}
 {{inlinecss file="email-inline.css"}}
 
-<table cellpadding="0" cellspacing="0" border="0">
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
     <tr>
         <td class="action-content">
             <h1>You've Received a Gift Card!</h1>
@@ -30,25 +31,21 @@
                 <p><strong>Your Gift Card Code:</strong></p>
                 <div class="giftcard-code">{{var code}}</div>
 
-                <p><strong>Value:</strong> <span class="giftcard-amount">{{var formatted_amount}}</span></p>
+                <p style="margin-top: 20px;"><strong>Value:</strong> <span class="giftcard-amount">{{var formatted_amount}}</span></p>
 
                 {{depend message}}
-                <p><strong>Message from {{var sender_name}}:</strong></p>
+                <p style="margin-top: 20px;"><strong>Message from {{var sender_name}}:</strong></p>
                 <div class="giftcard-message">{{var message}}</div>
                 {{/depend}}
 
                 {{depend expiry_date}}
-                <p><strong>Valid Until:</strong> {{var expiry_date}}</p>
+                <p class="giftcard-expiry"><strong>Valid Until:</strong> {{var expiry_date}}</p>
                 {{/depend}}
             </div>
 
             <p>To redeem your gift card, simply enter the code above at checkout.</p>
 
-            <p>
-                If you have any questions, please feel free to contact us at
-                <a href="mailto:{{var store_email}}">{{var store_email}}</a>
-                {{depend store_phone}} or by phone at <a href="tel:{{var store_phone}}">{{var store_phone}}</a>{{/depend}}.
-            </p>
+            <p>If you have any questions, please contact us at <a href="mailto:{{var store_email}}">{{var store_email}}</a>{{depend store_phone}} or call <a href="tel:{{var store_phone}}">{{var store_phone}}</a>{{/depend}}.</p>
 
             <p>Happy Shopping!</p>
         </td>

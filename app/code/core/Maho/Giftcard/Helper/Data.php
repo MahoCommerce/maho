@@ -306,7 +306,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         $vars = [
             'giftcard' => $giftcard,
             'code' => $giftcard->getCode(),
-            'balance' => Mage::app()->getLocale()->formatCurrency($giftcard->getBalance($storeCurrencyCode), $storeCurrencyCode),
+            'formatted_amount' => Mage::app()->getLocale()->formatCurrency($giftcard->getBalance($storeCurrencyCode), $storeCurrencyCode),
             'recipient_name' => $giftcard->getRecipientName() ?: 'Valued Customer',
             'sender_name' => $giftcard->getSenderName() ?: '',
             'message' => $giftcard->getMessage() ?: '',
@@ -317,8 +317,8 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
         ];
 
         if ($giftcard->getExpiresAt()) {
-            $expiryDate = new DateTime($giftcard->getExpiresAt());
-            $vars['expires_at'] = $expiryDate->format('F j, Y');
+            $expiresAt = new DateTime($giftcard->getExpiresAt());
+            $vars['expiry_date'] = $expiresAt->format('F j, Y');
         }
 
         try {
