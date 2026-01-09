@@ -1280,19 +1280,27 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 }
 
 #review-buttons-container {
-    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
     margin-top: 15px;
     margin-bottom: 15px;
-}
-#review-buttons-container .btn-checkout {
-    min-width: 220px;
-}
-#review-buttons-container .please-wait {
-    float: left;
-    margin-right: 10px;
-}
-#review-buttons-container .f-left {
-    float: right;
+
+    .btn-checkout {
+        order: 1;
+        min-width: 220px;
+    }
+    .please-wait {
+        order: 1;
+        margin-right: 10px;
+    }
+    .continue-shopping {
+        @media (max-width: 599px) {
+            display: none;
+        }
+    }
 }
 
 @media only screen and (max-width: 599px) {
