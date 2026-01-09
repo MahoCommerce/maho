@@ -184,7 +184,8 @@ class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Sales_Block_Order_Pdf_Abst
         return $totals;
     }
 
-    public function formatPrice(float $price): string
+    #[\Override]
+    public function formatPrice(float $price, ?string $currency = null): string
     {
         return $this->_order->formatPriceTxt($price);
     }

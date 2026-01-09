@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <giftcard translate="label" module="giftcard">
+            <label>Gift Cards</label>
+            <tab>sales</tab>
+            <sort_order>200</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label">
+                    <label>General Settings</label>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enable Gift Cards</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <code_length translate="label">
+                            <label>Code Length</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number validate-greater-than-zero</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </code_length>
+                        <code_prefix translate="label">
+                            <label>Code Prefix (e.g., GC)</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </code_prefix>
+                        <lifetime translate="label comment">
+                            <label>Default Expiry (days)</label>
+                            <comment>0 = never expires. Can be overridden per product.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </lifetime>
+                        <refund_expiration_extension translate="label comment">
+                            <label>Refund Expiration Extension (days)</label>
+                            <comment>When refunding to an expired gift card, extend expiration by this many days. 0 = no extension (card stays expired but balance is restored).</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number</validate>
+                            <sort_order>42</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </refund_expiration_extension>
+                        <allow_message translate="label comment">
+                            <label>Allow Gift Message</label>
+                            <comment>Can be overridden per product.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>45</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </allow_message>
+                        <show_qrcode translate="label">
+                            <label>Show QR Code</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </show_qrcode>
+                        <show_barcode translate="label">
+                            <label>Show Barcode (Code128)</label>
+                            <frontend_type>select</frontend_type>
+                            <frontend_model>giftcard/adminhtml_system_config_form_field_barcode</frontend_model>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </show_barcode>
+                    </fields>
+                </general>
+                <email translate="label">
+                    <label>Email Settings</label>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <template translate="label">
+                            <label>Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </template>
+                        <identity translate="label">
+                            <label>Email Sender</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </identity>
+                    </fields>
+                </email>
+            </groups>
+        </giftcard>
+    </sections>
+</config>

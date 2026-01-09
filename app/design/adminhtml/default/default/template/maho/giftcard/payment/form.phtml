@@ -1,0 +1,28 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    default_default
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Giftcard_Block_Payment_Form $this */
+$appliedGiftcards = $this->getAppliedGiftcards();
+?>
+<ul id="payment_form_<?= $this->getMethodCode() ?>" style="display:none">
+    <li>
+        <div class="input-box">
+            <p><strong><?= $this->escapeHtml($this->getMethodTitle()) ?></strong></p>
+            <?php if (!empty($appliedGiftcards)): ?>
+                <p><?= $this->__('Applied gift cards:') ?></p>
+                <ul style="list-style: disc; margin-left: 20px;">
+                    <?php foreach ($appliedGiftcards as $giftcard): ?>
+                        <li><?= $this->escapeHtml($giftcard['code']) ?>: <?= $giftcard['amount'] ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    </li>
+</ul>

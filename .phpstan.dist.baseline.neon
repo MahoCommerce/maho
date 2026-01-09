@@ -763,12 +763,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Simple.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Config/Simple.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Type_Configurable::canUseAttribute() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -2071,18 +2065,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Totals/Table.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Adjustments::addTotal().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Create/Adjustments.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Adjustments::removeTotal().'
-			identifier: method.notFound
-			count: 3
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Create/Adjustments.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Form::getSaveUrl() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -2129,18 +2111,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Create/Items.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals::getCreditmemo() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Totals.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals::$_creditmemo has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Totals.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Creditmemo_View::updateBackButtonUrl() has parameter $flag with no type specified.'
@@ -5161,12 +5131,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_SearchController::_initAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7789,12 +7753,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Api.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Product/Api.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Product_Api::$_defaultProductAttributeList has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -7809,12 +7767,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Api_V2::_prepareDataForSave() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setTypeId() expects int, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
 
@@ -10527,12 +10479,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Core_Block_Abstract::addToChildGroup() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Core_Block_Abstract::getParentBlock() should return $this(Mage_Core_Block_Abstract) but returns Mage_Core_Block_Abstract.'
-			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Core/Block/Abstract.php
 
@@ -19996,18 +19942,6 @@ parameters:
 			path: app/code/core/Mage/Tax/Block/Adminhtml/Notifications.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Tax_Block_Sales_Order_Tax::addTotal().'
-			identifier: method.notFound
-			count: 7
-			path: app/code/core/Mage/Tax/Block/Sales/Order/Tax.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Tax_Block_Sales_Order_Tax::removeTotal().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Tax/Block/Sales/Order/Tax.php
-
-		-
 			rawMessage: 'Method Mage_Tax_Block_Sales_Order_Tax::_initDiscount() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -21424,12 +21358,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/widget/grid.phtml
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Adminhtml_Block_Widget_Grid_Massaction::canDisplayContainer().'
-			identifier: method.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/grid/massaction.phtml
-
-		-
 			rawMessage: Variable $id might not be defined.
 			identifier: variable.undefined
 			count: 4
@@ -21450,7 +21378,7 @@ parameters:
 		-
 			rawMessage: Variable $_weeeTaxAttributes might not be defined.
 			identifier: variable.undefined
-			count: 8
+			count: 6
 			path: app/design/frontend/base/default/template/bundle/catalog/product/price.phtml
 
 		-
@@ -21480,7 +21408,7 @@ parameters:
 		-
 			rawMessage: Variable $_weeeTaxAttributes might not be defined.
 			identifier: variable.undefined
-			count: 8
+			count: 6
 			path: app/design/frontend/base/default/template/bundle/rss/catalog/product/price.phtml
 
 		-

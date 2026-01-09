@@ -256,7 +256,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Retrieve parent block
      *
-     * @return $this
+     * @return self|null
      */
     public function getParentBlock()
     {

@@ -128,7 +128,9 @@ abstract class AbstractForm extends \Maho\DataObject
         if (isset($this->_types[$type])) {
             $className = $this->_types[$type];
         } else {
-            $className = '\\Maho\\Data\\Form\\Element\\' . ucfirst(strtolower($type));
+            // Convert type to PascalCase (e.g., 'text_configurable' -> 'TextConfigurable')
+            $typePascalCase = str_replace('_', '', ucwords($type, '_'));
+            $className = '\\Maho\\Data\\Form\\Element\\' . $typePascalCase;
         }
 
         if (class_exists($className)) {

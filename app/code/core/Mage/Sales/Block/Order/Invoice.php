@@ -28,7 +28,6 @@ class Mage_Sales_Block_Order_Invoice extends Mage_Sales_Block_Order_Invoice_Item
             $headBlock->setTitle($this->__('Order # %s', $this->getOrder()->getRealOrderId()));
         }
 
-        /** @var Mage_Payment_Helper_Data $helper */
         $helper = $this->helper('payment');
         $this->setChild(
             'payment_info',

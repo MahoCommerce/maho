@@ -102,7 +102,6 @@ class Mage_Sales_Block_Billing_Agreements extends Mage_Core_Block_Template
     protected function _loadPaymentMethods()
     {
         if (!$this->_paymentMethods) {
-            /** @var Mage_Payment_Helper_Data $helper */
             $helper = $this->helper('payment');
             foreach ($helper->getBillingAgreementMethods() as $paymentMethod) {
                 $this->_paymentMethods[$paymentMethod->getCode()] = $paymentMethod->getTitle();
@@ -118,7 +117,6 @@ class Mage_Sales_Block_Billing_Agreements extends Mage_Core_Block_Template
      */
     public function getWizardPaymentMethodOptions()
     {
-        /** @var Mage_Payment_Helper_Data $helper */
         $helper = $this->helper('payment');
         $paymentMethodOptions = [];
         foreach ($helper->getBillingAgreementMethods() as $paymentMethod) {

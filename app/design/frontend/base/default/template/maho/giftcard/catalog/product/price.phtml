@@ -1,0 +1,90 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * Gift Card price template for catalog listings
+ *
+ * @var Maho_Giftcard_Block_Catalog_Product_Price $this
+ */
+$_coreHelper = $this->helper('core');
+$_taxHelper = $this->helper('tax');
+
+$_product = $this->getProduct();
+$_id = $_product->getId();
+
+$_minPrice = $this->getMinPrice();
+$_hasPriceRange = $this->hasPriceRange();
+
+// Apply store currency conversion
+$_store = $_product->getStore();
+$_minPriceConverted = $_store->roundPrice($_store->convertPrice($_minPrice));
+
+// Calculate prices with/without tax
+$_minPriceTax = $_taxHelper->getPrice($_product, $_minPriceConverted);
+$_minPriceInclTax = $_taxHelper->getPrice($_product, $_minPriceConverted, true);
+?>
+
+<div class="price-box">
+    <?php if ($_minPrice > 0): ?>
+        <?php if ($_hasPriceRange): ?>
+            <p class="minimal-price">
+                <span class="price-label"><?= $this->__('From') ?></span>
+                <?php if ($_taxHelper->displayBothPrices()): ?>
+                    <span class="price-excluding-tax">
+                        <span class="label"><?= $_taxHelper->__('Excl. Tax:') ?></span>
+                        <span class="price" id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                            <?= $_coreHelper->formatPrice($_minPriceTax, false) ?>
+                        </span>
+                    </span>
+                    <span class="price-including-tax">
+                        <span class="label"><?= $_taxHelper->__('Incl. Tax:') ?></span>
+                        <span class="price" id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                            <?= $_coreHelper->formatPrice($_minPriceInclTax, false) ?>
+                        </span>
+                    </span>
+                <?php else: ?>
+                    <span class="price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <?php if ($_taxHelper->displayPriceIncludingTax()): ?>
+                            <?= $_coreHelper->formatPrice($_minPriceInclTax, false) ?>
+                        <?php else: ?>
+                            <?= $_coreHelper->formatPrice($_minPriceTax, false) ?>
+                        <?php endif ?>
+                    </span>
+                <?php endif ?>
+            </p>
+        <?php else: ?>
+            <?php if ($_taxHelper->displayBothPrices()): ?>
+                <span class="price-excluding-tax">
+                    <span class="label"><?= $_taxHelper->__('Excl. Tax:') ?></span>
+                    <span class="price" id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <?= $_coreHelper->formatPrice($_minPriceTax, false) ?>
+                    </span>
+                </span>
+                <span class="price-including-tax">
+                    <span class="label"><?= $_taxHelper->__('Incl. Tax:') ?></span>
+                    <span class="price" id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <?= $_coreHelper->formatPrice($_minPriceInclTax, false) ?>
+                    </span>
+                </span>
+            <?php else: ?>
+                <span class="regular-price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                    <?php if ($_taxHelper->displayPriceIncludingTax()): ?>
+                        <?= $_coreHelper->formatPrice($_minPriceInclTax, true) ?>
+                    <?php else: ?>
+                        <?= $_coreHelper->formatPrice($_minPriceTax, true) ?>
+                    <?php endif ?>
+                </span>
+            <?php endif ?>
+        <?php endif ?>
+    <?php else: ?>
+        <span class="regular-price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
+            <span class="price"><?= $this->__('Price varies') ?></span>
+        </span>
+    <?php endif ?>
+</div>

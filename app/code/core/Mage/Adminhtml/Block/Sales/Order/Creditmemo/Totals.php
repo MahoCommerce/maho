@@ -12,8 +12,14 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals extends Mage_Adminhtml_Block_Sales_Totals
 {
+    /**
+     * @var Mage_Sales_Model_Order_Creditmemo|null
+     */
     protected $_creditmemo;
 
+    /**
+     * @return Mage_Sales_Model_Order_Creditmemo|null
+     */
     public function getCreditmemo()
     {
         if ($this->_creditmemo === null) {
@@ -28,6 +34,9 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals extends Mage_Adminhtml_
         return $this->_creditmemo;
     }
 
+    /**
+     * @return Mage_Sales_Model_Order_Creditmemo|null
+     */
     #[\Override]
     public function getSource()
     {

@@ -68,7 +68,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
     /**
      * Get totals source object
      *
-     * @return Mage_Sales_Model_Order
+     * @return Mage_Sales_Model_Abstract
      */
     public function getSource()
     {

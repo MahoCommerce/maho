@@ -670,6 +670,7 @@ td.product-cart-remove a {
 }
 
 #discount-coupon-form h2,
+#giftcard-cart-form h2,
 .cart .giftcard h2 {
     font-size: 0.875rem;
     font-weight: 600;
@@ -691,14 +692,16 @@ td.product-cart-remove a {
     border: 0;
 }
 
-#discount-coupon-form .coupon-input-group {
+#discount-coupon-form .coupon-input-group,
+#giftcard-cart-form .coupon-input-group {
     display: flex;
     align-items: stretch;
     gap: 8px;
     max-width: 600px;
 }
 
-#discount-coupon-form .coupon-input {
+#discount-coupon-form .coupon-input,
+#giftcard-cart-form .coupon-input {
     flex: 1;
     min-width: 0;
     height: 40px;
@@ -709,28 +712,65 @@ td.product-cart-remove a {
     transition: border-color 0.2s ease;
 }
 
-#discount-coupon-form .coupon-input:focus {
+#discount-coupon-form .coupon-input:focus,
+#giftcard-cart-form .coupon-input:focus {
     outline: none;
     border-color: var(--maho-color-primary);
     box-shadow: 0 0 0 2px rgba(var(--maho-color-primary-rgb, 0, 112, 220), 0.1);
 }
 
-#discount-coupon-form .coupon-input::placeholder {
+#discount-coupon-form .coupon-input::placeholder,
+#giftcard-cart-form .coupon-input::placeholder {
     color: #999;
 }
 
 #discount-coupon-form .btn-apply,
-#discount-coupon-form .btn-cancel {
+#discount-coupon-form .btn-cancel,
+#giftcard-cart-form .btn-apply,
+#giftcard-cart-form .btn-cancel {
     height: 40px;
     padding: 8px 20px;
     white-space: nowrap;
     flex-shrink: 0;
 }
 
-#discount-coupon-form .validation-advice {
+#discount-coupon-form .validation-advice,
+#giftcard-cart-form .validation-advice {
     display: block;
     margin-top: 6px;
     font-size: 0.813rem;
+}
+
+/* Checkout payment gift card form */
+#checkout-giftcard-container .coupon-input-group {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    max-width: 600px;
+}
+
+#checkout-giftcard-container .coupon-input {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+}
+
+#checkout-giftcard-container .coupon-input:focus {
+    outline: none;
+    border-color: var(--maho-color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--maho-color-primary-rgb, 0, 112, 220), 0.1);
+}
+
+#checkout-giftcard-container .btn-apply {
+    height: 40px;
+    padding: 8px 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* Legacy field-wrapper support for giftcard */
@@ -776,18 +816,43 @@ td.product-cart-remove a {
     text-transform: none;
 }
 
-/* Responsive styles for discount coupon form */
+.applied-giftcards {
+    margin-bottom: 10px;
+
+    .applied-code {
+        margin-bottom: 5px;
+    }
+
+    .btn-remove-giftcard {
+        margin-left: 10px;
+        color: var(--maho-color-primary);
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+            color: var(--maho-color-primary-hover);
+        }
+    }
+}
+
+/* Responsive styles for discount coupon form and gift card form */
 @media only screen and (max-width: 770px) {
-    #discount-coupon-form .coupon-input-group {
+    #discount-coupon-form .coupon-input-group,
+    #giftcard-cart-form .coupon-input-group {
         flex-wrap: wrap;
     }
 
-    #discount-coupon-form .coupon-input {
+    #discount-coupon-form .coupon-input,
+    #giftcard-cart-form .coupon-input {
         flex: 1 1 100%;
     }
 
     #discount-coupon-form .btn-apply,
-    #discount-coupon-form .btn-cancel {
+    #discount-coupon-form .btn-cancel,
+    #giftcard-cart-form .btn-apply,
+    #giftcard-cart-form .btn-cancel {
         flex: 1 1 auto;
         height: 44px;
     }
@@ -1215,19 +1280,27 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 }
 
 #review-buttons-container {
-    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
     margin-top: 15px;
     margin-bottom: 15px;
-}
-#review-buttons-container .btn-checkout {
-    min-width: 220px;
-}
-#review-buttons-container .please-wait {
-    float: left;
-    margin-right: 10px;
-}
-#review-buttons-container .f-left {
-    float: right;
+
+    .btn-checkout {
+        order: 1;
+        min-width: 220px;
+    }
+    .please-wait {
+        order: 1;
+        margin-right: 10px;
+    }
+    .continue-shopping {
+        @media (max-width: 599px) {
+            display: none;
+        }
+    }
 }
 
 @media only screen and (max-width: 599px) {
