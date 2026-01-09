@@ -21378,7 +21378,7 @@ parameters:
 		-
 			rawMessage: Variable $_weeeTaxAttributes might not be defined.
 			identifier: variable.undefined
-			count: 8
+			count: 6
 			path: app/design/frontend/base/default/template/bundle/catalog/product/price.phtml
 
 		-
@@ -21408,7 +21408,7 @@ parameters:
 		-
 			rawMessage: Variable $_weeeTaxAttributes might not be defined.
 			identifier: variable.undefined
-			count: 8
+			count: 6
 			path: app/design/frontend/base/default/template/bundle/rss/catalog/product/price.phtml
 
 		-

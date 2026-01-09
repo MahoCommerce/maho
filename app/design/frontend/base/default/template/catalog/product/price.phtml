@@ -404,7 +404,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php else: ?>
             <span class="minimal-price-link">
         <?php endif ?>
-        <span class="label"><?= $this->__('As low as:') ?></span>
+        <span class="label"><?= $this->__('From:') ?></span>
         <span class="price" id="product-minimal-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                 <?= $_coreHelper->formatPrice($_minimalPriceDisplayValue, false) ?>
             </span>
@@ -433,7 +433,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <div class="price-box">
             <p<?php if ($showMinPrice): ?> class="minimal-price"<?php endif ?>>
                 <?php if ($showMinPrice): ?>
-                    <span class="price-label"><?= $this->__('Starting at:') ?></span>
+                    <span class="price-label"><?= $this->__('From:') ?></span>
                 <?php endif ?>
                 <?php if ($_taxHelper->displayBothPrices()): ?>
                     <span class="price-excluding-tax">

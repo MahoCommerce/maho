@@ -10,6 +10,66 @@
  */
 -->
 <layout>
+    <!-- Category listing - Add gift card price block -->
+    <catalog_category_default>
+        <reference name="product_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_category_default>
+
+    <catalog_category_view>
+        <reference name="product_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_category_view>
+
+    <catalog_category_layered>
+        <reference name="product_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_category_layered>
+
+    <!-- Search results - Add gift card price block -->
+    <catalogsearch_result_index>
+        <reference name="search_result_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalogsearch_result_index>
+
+    <catalogsearch_advanced_result>
+        <reference name="search_result_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalogsearch_advanced_result>
+
+    <!-- Compare list - Add gift card price block -->
+    <catalog_product_compare_index>
+        <reference name="catalog.compare.list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_product_compare_index>
+
+    <!-- Product view related/upsell - Add gift card price block -->
+    <catalog_product_view>
+        <reference name="catalog.product.related">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+        <reference name="product.info.upsell">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_product_view>
+
+
+    <!-- Default - Add gift card price block to wishlist sidebar and price template -->
+    <default>
+        <reference name="wishlist_sidebar">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+        <reference name="catalog_product_price_template">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </default>
+
     <!-- Checkout Payment - Add gift card form and handle payment method selection -->
     <checkout_onepage_index>
         <!-- Add gift card form BEFORE the payment form (before_form is rendered before the form starts) -->
@@ -29,7 +89,7 @@
         </reference>
     </checkout_onepage_paymentmethod>
 
-    <!-- Checkout Cart - Add Gift Card Form and Custom Renderer -->
+    <!-- Checkout Cart - Add Gift Card Form, Custom Renderer, and Price Block -->
     <checkout_cart_index>
         <!-- Use custom renderer for gift card items to format dates -->
         <reference name="checkout.cart">
@@ -38,6 +98,10 @@
         <!-- Add to the extra section where discount codes appear -->
         <reference name="checkout.cart.extra">
             <block type="giftcard/checkout_cart_giftcard" name="checkout.cart.giftcard" as="giftcard" template="maho/giftcard/checkout/cart/giftcard.phtml" />
+        </reference>
+        <!-- Add gift card price block for crosssell products -->
+        <reference name="checkout.cart.crosssell">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
         </reference>
     </checkout_cart_index>
 
