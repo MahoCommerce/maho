@@ -1466,7 +1466,7 @@ XML;
             },
 
             updateHiddenField: function() {
-                var field = document.getElementById("csv_columns");
+                var field = document.getElementById("mapping_csv_columns");
                 if (field) {
                     field.value = JSON.stringify(this.columns);
                 }
@@ -1960,7 +1960,7 @@ XML;
             },
 
             updateHiddenField: function() {
-                var field = document.getElementById("json_structure");
+                var field = document.getElementById("mapping_json_structure");
                 if (field) {
                     field.value = JSON.stringify(this.structure);
                 }

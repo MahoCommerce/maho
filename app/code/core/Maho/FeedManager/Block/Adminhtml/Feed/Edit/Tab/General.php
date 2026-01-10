@@ -29,6 +29,21 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
             $fieldset->addField('feed_id', 'hidden', [
                 'name' => 'feed_id',
             ]);
+
+            // Show Feed URL and Last Generated at top for existing feeds
+            $feedUrl = Mage::helper('feedmanager')->getFeedUrl($feed);
+            $fieldset->addField('feed_url', 'note', [
+                'label' => $this->__('Feed URL'),
+                'text' => '<a href="' . $this->escapeHtml($feedUrl) . '" target="_blank">' . $this->escapeHtml($feedUrl) . '</a>',
+            ]);
+
+            if ($feed->getLastGeneratedAt()) {
+                $fieldset->addField('last_generated', 'note', [
+                    'label' => $this->__('Last Generated'),
+                    'text' => Mage::helper('core')->formatDate($feed->getLastGeneratedAt(), 'medium', true) .
+                        ' (' . $feed->getLastProductCount() . ' ' . $this->__('products') . ')',
+                ]);
+            }
         }
 
         $fieldset->addField('name', 'text', [
@@ -124,27 +139,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
             ],
             'note' => $this->__('Automatically upload feed after generation'),
         ]);
-
-        // Feed URL (read-only for existing feeds)
-        if ($feed->getId()) {
-            $infoFieldset = $form->addFieldset('info_fieldset', [
-                'legend' => $this->__('Feed Information'),
-            ]);
-
-            $feedUrl = Mage::helper('feedmanager')->getFeedUrl($feed);
-            $infoFieldset->addField('feed_url', 'note', [
-                'label' => $this->__('Feed URL'),
-                'text' => '<a href="' . $feedUrl . '" target="_blank">' . $feedUrl . '</a>',
-            ]);
-
-            if ($feed->getLastGeneratedAt()) {
-                $infoFieldset->addField('last_generated', 'note', [
-                    'label' => $this->__('Last Generated'),
-                    'text' => Mage::helper('core')->formatDate($feed->getLastGeneratedAt(), 'medium', true) .
-                        ' (' . $feed->getLastProductCount() . ' products)',
-                ]);
-            }
-        }
 
         $form->setValues($feed->getData());
         $this->setForm($form);

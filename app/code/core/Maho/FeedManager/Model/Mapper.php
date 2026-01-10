@@ -323,7 +323,7 @@ class Maho_FeedManager_Model_Mapper
     {
         $sourceType = $config['source_type'];
         $sourceValue = $config['source_value'];
-        $useParentMode = $config['use_parent'] ?? '';
+        $useParentMode = (string) ($config['use_parent'] ?? '');
 
         return match ($sourceType) {
             self::SOURCE_TYPE_ATTRIBUTE => self::getValueWithParentMode($sourceValue, $rawData, $useParentMode),
