@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_FeedManager>
+            <version>1.6.0</version>
+        </Maho_FeedManager>
+    </modules>
+
+    <global>
+        <models>
+            <feedmanager>
+                <class>Maho_FeedManager_Model</class>
+                <resourceModel>feedmanager_resource</resourceModel>
+            </feedmanager>
+            <feedmanager_resource>
+                <class>Maho_FeedManager_Model_Resource</class>
+                <entities>
+                    <feed>
+                        <table>maho_feedmanager_feed</table>
+                    </feed>
+                    <attribute_mapping>
+                        <table>maho_feedmanager_attribute_mapping</table>
+                    </attribute_mapping>
+                    <category_mapping>
+                        <table>maho_feedmanager_category_mapping</table>
+                    </category_mapping>
+                    <log>
+                        <table>maho_feedmanager_log</table>
+                    </log>
+                    <destination>
+                        <table>maho_feedmanager_destination</table>
+                    </destination>
+                </entities>
+            </feedmanager_resource>
+        </models>
+
+        <resources>
+            <feedmanager_setup>
+                <setup>
+                    <module>Maho_FeedManager</module>
+                </setup>
+            </feedmanager_setup>
+        </resources>
+
+        <blocks>
+            <feedmanager>
+                <class>Maho_FeedManager_Block</class>
+            </feedmanager>
+        </blocks>
+
+        <helpers>
+            <feedmanager>
+                <class>Maho_FeedManager_Helper</class>
+            </feedmanager>
+        </helpers>
+    </global>
+
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <maho_feedmanager before="Mage_Adminhtml">Maho_FeedManager_Adminhtml</maho_feedmanager>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_FeedManager>
+                    <files>
+                        <default>Maho_FeedManager.csv</default>
+                    </files>
+                </Maho_FeedManager>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <feedmanager>
+                    <file>maho/feedmanager.xml</file>
+                </feedmanager>
+            </updates>
+        </layout>
+    </adminhtml>
+
+    <crontab>
+        <jobs>
+            <feedmanager_generate_scheduled>
+                <schedule>
+                    <cron_expr>0 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>feedmanager/cron::generateScheduledFeeds</model>
+                </run>
+            </feedmanager_generate_scheduled>
+        </jobs>
+    </crontab>
+
+    <default>
+        <feedmanager>
+            <general>
+                <enabled>1</enabled>
+                <output_directory>feeds</output_directory>
+                <batch_size>500</batch_size>
+                <gzip_compression>0</gzip_compression>
+            </general>
+        </feedmanager>
+    </default>
+</config>

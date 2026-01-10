@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <!-- Feed Grid -->
+    <adminhtml_feedmanager_feed_index>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Manage Feeds</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_feed" name="feedmanager_feed"/>
+        </reference>
+    </adminhtml_feedmanager_feed_index>
+
+    <!-- Feed Edit -->
+    <adminhtml_feedmanager_feed_edit>
+        <update handle="editor"/>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_feed_edit" name="feedmanager_feed_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="feedmanager/adminhtml_feed_edit_tabs" name="feedmanager_feed_edit_tabs">
+                <block type="feedmanager/adminhtml_feed_edit_tab_general" name="feedmanager_feed_edit_tab_general"/>
+                <block type="feedmanager/adminhtml_feed_edit_tab_attributes" name="feedmanager_feed_edit_tab_attributes"/>
+                <block type="feedmanager/adminhtml_feed_edit_tab_filters" name="feedmanager_feed_edit_tab_filters"/>
+                <block type="feedmanager/adminhtml_feed_edit_tab_schedule" name="feedmanager_feed_edit_tab_schedule"/>
+                <block type="feedmanager/adminhtml_feed_edit_tab_logs" name="feedmanager_feed_edit_tab_logs"/>
+            </block>
+        </reference>
+    </adminhtml_feedmanager_feed_edit>
+
+    <!-- Feed Logs Grid (AJAX) -->
+    <adminhtml_feedmanager_feed_logsgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="feedmanager/adminhtml_feed_edit_tab_logs_grid" name="feedmanager_feed_logs_grid"/>
+        </block>
+    </adminhtml_feedmanager_feed_logsgrid>
+
+    <!-- Destination Grid -->
+    <adminhtml_feedmanager_destination_index>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Manage Destinations</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_destination" name="feedmanager_destination"/>
+        </reference>
+    </adminhtml_feedmanager_destination_index>
+
+    <!-- Destination Edit -->
+    <adminhtml_feedmanager_destination_edit>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_destination_edit" name="feedmanager_destination_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="feedmanager/adminhtml_destination_edit_tabs" name="feedmanager_destination_edit_tabs">
+                <block type="feedmanager/adminhtml_destination_edit_tab_general" name="feedmanager_destination_edit_tab_general"/>
+            </block>
+        </reference>
+    </adminhtml_feedmanager_destination_edit>
+</layout>
