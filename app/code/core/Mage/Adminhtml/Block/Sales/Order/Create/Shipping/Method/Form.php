@@ -41,7 +41,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form extends Mage_
             /*
             if (!empty($groups)) {
 
-                $ratesFilter = new Varien_Filter_Object_Grid();
+                $ratesFilter = new \Maho\Filter\ObjectGrid();
                 $ratesFilter->addFilter($this->getStore()->getPriceFilter(), 'price');
 
                 foreach ($groups as $code => $groupItems) {

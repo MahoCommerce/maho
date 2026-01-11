@@ -1601,7 +1601,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     }
 
     /**
-     * Parses xml response object with full transaction details to Varien_Object
+     * Parses xml response object with full transaction details to \Maho\DataObject
      *
      * @param \Maho\Simplexml\Element $responseXmlDocument - xml object with full transaction details for a specified transaction ID
      * @return \Maho\DataObject

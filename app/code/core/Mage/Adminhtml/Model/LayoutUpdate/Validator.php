@@ -81,7 +81,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
      * validation failed.
      *
      * @throws Exception            Throw exception when xml object is not
-     *                              instance of Varien_Simplexml_Element
+     *                              instance of \Maho\Simplexml\Element
      * @param \Maho\Simplexml\Element|string $value
      * @return bool
      */
@@ -119,7 +119,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
                 ),
                 self::INVALID_BLOCK_NAME => Mage::helper('adminhtml')->__('Disallowed block name for frontend.'),
                 Mage_Core_Model_Layout_Validator::INVALID_XML_OBJECT_EXCEPTION =>
-                    Mage::helper('adminhtml')->__('XML object is not instance of "Varien_Simplexml_Element".'),
+                    Mage::helper('adminhtml')->__('XML object is not instance of "\Maho\Simplexml\Element".'),
             ];
         }
         return $this;

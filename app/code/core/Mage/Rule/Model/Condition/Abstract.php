@@ -562,7 +562,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     /**
      * Value element type will define renderer for condition value element
      *
-     * @see Varien_Data_Form_Element
+     * @see \Maho\Data\Form\Element
      * @return string
      */
     public function getValueElementType()

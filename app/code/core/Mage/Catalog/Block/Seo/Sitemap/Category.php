@@ -15,7 +15,7 @@
  *
  * @package    Mage_Catalog
  *
- * @method $this setCollection(array|Mage_Catalog_Model_Resource_Category_Collection|Varien_Data_Collection|Varien_Data_Tree_Node_Collection $value)
+ * @method $this setCollection(array|Mage_Catalog_Model_Resource_Category_Collection|\Maho\Data\Collection|\Maho\Data\Tree\Node\Collection $value)
  */
 class Mage_Catalog_Block_Seo_Sitemap_Category extends Mage_Catalog_Block_Seo_Sitemap_Abstract
 {

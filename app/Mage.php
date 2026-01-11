@@ -370,7 +370,7 @@ final class Mage
     public static function addObserver($eventName, $callback, $data = [], $observerName = '', $observerClass = '')
     {
         if ($observerClass == '') {
-            $observerClass = 'Varien_Event_Observer';
+            $observerClass = \Maho\Event\Observer::class;
         }
         if (!class_exists($observerClass)) {
             self::throwException("Invalid observer class: $observerClass");

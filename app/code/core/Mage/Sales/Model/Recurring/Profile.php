@@ -238,7 +238,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
     /**
      * Initialize new order based on profile data
      *
-     * Takes arbitrary number of Varien_Object instances to be treated as items for new order
+     * Takes arbitrary number of \Maho\DataObject instances to be treated as items for new order
      *
      * @return Mage_Sales_Model_Order
      */

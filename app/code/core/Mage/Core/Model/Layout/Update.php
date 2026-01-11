@@ -339,7 +339,7 @@ class Mage_Core_Model_Layout_Update
         if (empty($this->_packageLayout)) {
             $this->fetchFileLayoutUpdates();
         }
-        /** @var Varien_Simplexml_Element $updateXml */
+        /** @var \Maho\Simplexml\Element $updateXml */
         foreach ($this->_packageLayout->$handle as $updateXml) {
             $this->fetchRecursiveUpdates($updateXml);
             $this->addUpdate($updateXml->innerXml());

@@ -51,7 +51,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements 
     }
 
     /**
-     * Retrieve webservice api controller. If no controller have been set - emulate it by the use of Varien_Object
+     * Retrieve webservice api controller. If no controller have been set - emulate it by the use of \Maho\DataObject
      *
      * @return Mage_Api_Controller_Action|\Maho\DataObject
      */

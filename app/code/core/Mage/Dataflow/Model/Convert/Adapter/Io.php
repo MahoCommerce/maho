@@ -22,7 +22,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
     {
         if (!$this->_resource) {
             $type = $this->getVar('type', 'file');
-            $className = 'Varien_Io_' . ucwords($type);
+            $className = '\Maho\Io\\' . ucwords($type);
             $this->_resource = new $className();
 
             $isError = false;

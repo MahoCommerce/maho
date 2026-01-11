@@ -1187,7 +1187,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * It's passed to Mage_Catalog_Helper_Product->addParamsToBuyRequest() to compose resulting buyRequest.
      *
      * Basically it can hold
-     * - 'current_config', Varien_Object or array - current buyRequest that configures product in this item,
+     * - 'current_config', \Maho\DataObject or array - current buyRequest that configures product in this item,
      *   used to restore currently attached files
      * - 'files_prefix': string[a-z0-9_] - prefix that was added at frontend to names of file options (file inputs), so they won't
      *   intersect with other submitted options

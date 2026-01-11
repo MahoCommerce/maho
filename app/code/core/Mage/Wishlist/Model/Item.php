@@ -390,7 +390,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
         $option = $this->getOptionByCode('info_buyRequest');
         $initialData = $option ? unserialize($option->getValue(), ['allowed_classes' => false]) : null;
 
-        // There can be wrong data due to bug in Grouped products - it formed 'info_buyRequest' as Varien_Object
+        // There can be wrong data due to bug in Grouped products - it formed 'info_buyRequest' as \Maho\DataObject
         if ($initialData instanceof \Maho\DataObject) {
             $initialData = $initialData->getData();
         }

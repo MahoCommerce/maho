@@ -59,7 +59,7 @@ class Mage_Api2_Model_Acl_Global_Rule_ResourcePermission implements Mage_Api2_Mo
             $privilegeSource = Mage::getModel('api2/acl_global_rule_privilege');
             $privileges = array_keys($privilegeSource::toArray());
 
-            /** @var Varien_Simplexml_Element $node */
+            /** @var \Maho\Simplexml\Element $node */
             foreach ($config->getResources() as $resourceType => $node) {
                 $resourceId = (string) $resourceType;
                 $allowedRoles = (array) $node->privileges;

@@ -21,7 +21,7 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
 
     /**
      * Prepare global layout
-     * Add renderers to Varien_Data_Form
+     * Add renderers to \Maho\Data\Form
      *
      * @return Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract
      */

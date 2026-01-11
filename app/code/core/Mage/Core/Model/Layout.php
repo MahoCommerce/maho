@@ -611,7 +611,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
         if ($result) {
             return (string) $result;
         }
-        /** @var Varien_Simplexml_Element $element */
+        /** @var \Maho\Simplexml\Element $element */
         foreach (array_reverse($node->xpath('ancestor::*[@module]')) as $element) {
             $result = $element->getAttribute('module');
             if ($result) {

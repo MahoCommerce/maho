@@ -15,7 +15,7 @@
  * @method bool getDisplayZero()
  * @method int getFontSize()
  * @method Mage_Sales_Model_Order getOrder()
- * @method Varien_Object getSource()
+ * @method \Maho\DataObject getSource()
  * @method string getSourceField()
  * @method string getTitle()
  * @method string getTitleSourceField()

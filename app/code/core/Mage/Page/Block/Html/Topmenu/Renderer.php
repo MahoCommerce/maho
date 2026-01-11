@@ -13,7 +13,7 @@
 /**
  * Top menu block item renderer
  *
- * @method Varien_Data_Tree_Node getMenuTree()
+ * @method \Maho\Data\Tree\Node getMenuTree()
  * @method string getChildrenWrapClass()
  */
 class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu

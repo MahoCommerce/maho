@@ -22,7 +22,7 @@ class Mage_Eav_Model_Attribute_Data_Datetime extends Mage_Eav_Model_Attribute_Da
     {
         $filterCode = $this->getAttribute()->getInputFilter();
         if ($filterCode) {
-            $filterClass = 'Varien_Data_Form_Filter_' . ucfirst($filterCode);
+            $filterClass = '\Maho\Data\Form\Filter\\' . ucfirst($filterCode);
             if ($filterCode == 'datetime') {
                 $filter = new $filterClass(
                     $this->_getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),

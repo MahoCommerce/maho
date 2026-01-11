@@ -173,7 +173,7 @@
  * @method float getQty()
  * @method $this setQty(float $value)
  *
- * @method $this setRatingSummary(Varien_Object $summary)
+ * @method $this setRatingSummary(\Maho\DataObject $summary)
  * @method $this setRatingVotes(Mage_Rating_Model_Resource_Rating_Option_Vote_Collection $value)
  * @method string getRealPriceHtml()
  * @method $this setRealPriceHtml(string $value)
@@ -231,8 +231,8 @@
  * @method bool hasUpSellProductIds()
  * @method $this setUpSellProductIds(array $value)
  * @method bool hasUrlDataObject()
- * @method Varien_Object getUrlDataObject()
- * @method $this setUrlDataObject(Varien_Object $value)
+ * @method \Maho\DataObject getUrlDataObject()
+ * @method $this setUrlDataObject(\Maho\DataObject $value)
  * @method string getUrlKey()
  * @method $this setUrlKey(string $value)
  *
