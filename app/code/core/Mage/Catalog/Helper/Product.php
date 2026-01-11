@@ -228,6 +228,9 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
             'boolean'       => [
                 'source_model'      => 'eav/entity_attribute_source_boolean',
             ],
+            'file'          => [
+                'backend_model'     => 'catalog/product_attribute_backend_file',
+            ],
         ];
 
         if (is_null($inputType)) {
