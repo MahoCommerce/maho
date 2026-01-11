@@ -1,0 +1,488 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_FeedManager_Block_Adminhtml_Category $this */
+$platforms = $this->getPlatformOptions();
+$categories = $this->getCategoriesTree();
+?>
+
+<div class="content-header">
+    <table cellspacing="0" width="100%">
+        <tr>
+            <td><h3 class="icon-head head-products"><?php echo $this->__('Category Mapping') ?></h3></td>
+            <td class="form-buttons" style="text-align: right;">
+                <button type="button" class="scalable back" onclick="setLocation('<?php echo $this->getUrl('*/feedmanager_feed/') ?>')">
+                    <span><span><span><?php echo $this->__('Back') ?></span></span></span>
+                </button>
+                <button type="button" class="scalable" onclick="CategoryMapping.autoMap()">
+                    <span><span><span><?php echo $this->__('Auto-Map Unmapped') ?></span></span></span>
+                </button>
+                <button type="button" class="scalable save" onclick="CategoryMapping.save()">
+                    <span><span><span><?php echo $this->__('Save Mappings') ?></span></span></span>
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="category-mapping-container" style="margin-top: 20px;">
+    <div class="platform-selector" style="margin-bottom: 20px;">
+        <label for="platform-select"><strong><?php echo $this->__('Platform:') ?></strong></label>
+        <select id="platform-select" onchange="CategoryMapping.loadCategories()" style="margin-left: 10px; padding: 5px;">
+            <?php foreach ($platforms as $code => $name): ?>
+                <?php if ($code): ?>
+                    <option value="<?php echo $this->escapeHtml($code) ?>"><?php echo $this->escapeHtml($name) ?></option>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Bulk Mode Indicator (hidden by default) -->
+    <div id="bulk-mode-bar" style="display: none; background: #1e88e5; color: white; padding: 12px 20px; margin-bottom: 20px; border-radius: 4px; position: sticky; top: 0; z-index: 100;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong><?php echo $this->__('Bulk Mode Active') ?></strong>
+                <span style="margin-left: 15px;"><?php echo $this->__('Click to apply, Shift+Click for range:') ?></span>
+                <span id="bulk-category-display" style="margin-left: 10px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 3px;"></span>
+            </div>
+            <div>
+                <button type="button" onclick="CategoryMapping.exitBulkMode()" style="background: white; color: #1e88e5; border: none; padding: 6px 16px; border-radius: 3px; cursor: pointer; font-weight: bold;">
+                    <?php echo $this->__('Exit Bulk Mode') ?> (ESC)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-mapping-table">
+        <table class="data" id="category-mapping-grid" style="width: 100%;">
+            <thead>
+                <tr class="headings">
+                    <th style="width: 35%;"><?php echo $this->__('Store Category') ?></th>
+                    <th style="width: 45%;"><?php echo $this->__('Platform Category') ?></th>
+                    <th style="width: 20%;"><?php echo $this->__('Actions') ?></th>
+                </tr>
+            </thead>
+            <tbody id="category-rows">
+                <?php foreach ($categories as $category): ?>
+                    <tr data-category-id="<?php echo (int) $category['id'] ?>">
+                        <td>
+                            <span style="padding-left: <?php echo (($category['level'] - 1) * 20) ?>px;">
+                                <?php echo $this->escapeHtml($category['path']) ?>
+                            </span>
+                        </td>
+                        <td>
+                            <input type="text"
+                                   class="input-text platform-category-input"
+                                   id="category-<?php echo (int) $category['id'] ?>-path"
+                                   data-category-id="<?php echo (int) $category['id'] ?>"
+                                   placeholder="<?php echo $this->__('Search or enter platform category...') ?>"
+                                   style="width: 90%;"
+                                   autocomplete="off" />
+                            <input type="hidden"
+                                   id="category-<?php echo (int) $category['id'] ?>-id"
+                                   data-category-id="<?php echo (int) $category['id'] ?>" />
+                            <div class="autocomplete-results" id="autocomplete-<?php echo (int) $category['id'] ?>" style="display: none;"></div>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <button type="button" class="scalable copy-btn" onclick="CategoryMapping.copyMapping(<?php echo (int) $category['id'] ?>)" title="<?php echo $this->__('Copy this mapping for bulk apply') ?>">
+                                <span><span><span><?php echo $this->__('Copy') ?></span></span></span>
+                            </button>
+                            <button type="button" class="scalable" onclick="CategoryMapping.clearMapping(<?php echo (int) $category['id'] ?>)">
+                                <span><span><span><?php echo $this->__('Clear') ?></span></span></span>
+                            </button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.category-mapping-table { position: relative; }
+.autocomplete-results {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 400px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.autocomplete-results .autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.autocomplete-results .autocomplete-item:hover {
+    background: #f0f0f0;
+}
+.autocomplete-results .autocomplete-item .category-id {
+    color: #999;
+    font-size: 0.85em;
+}
+.platform-category-input.mapped {
+    background-color: #e8f5e9;
+}
+.platform-category-input.bulk-target {
+    cursor: pointer;
+    box-shadow: 0 0 0 2px #1e88e5;
+}
+.platform-category-input.bulk-target:hover {
+    background-color: #e3f2fd;
+}
+.bulk-mode-active .copy-btn {
+    opacity: 0.5;
+    pointer-events: none;
+}
+tr.bulk-source td {
+    background-color: #bbdefb;
+}
+</style>
+
+<script>
+const CategoryMapping = {
+    urls: {
+        categories: '<?php echo $this->getCategoriesJsonUrl() ?>',
+        save: '<?php echo $this->getSaveUrl() ?>',
+        autoMap: '<?php echo $this->getAutoMapUrl() ?>',
+        searchTaxonomy: '<?php echo $this->getSearchTaxonomyUrl() ?>'
+    },
+    currentPlatform: 'google',
+    searchTimeout: null,
+    bulkMode: false,
+    bulkCategoryId: null,
+    bulkCategoryPath: null,
+    bulkSourceCategoryId: null,
+    lastClickedIndex: null,
+    categoryInputs: [],
+
+    init: function() {
+        this.currentPlatform = document.getElementById('platform-select').value;
+        this.loadCategories();
+        this.initAutocomplete();
+        this.initKeyboardShortcuts();
+    },
+
+    initKeyboardShortcuts: function() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.bulkMode) {
+                this.exitBulkMode();
+            }
+        });
+    },
+
+    loadCategories: function() {
+        this.currentPlatform = document.getElementById('platform-select').value;
+
+        mahoFetch(this.urls.categories + '?platform=' + encodeURIComponent(this.currentPlatform), {
+            method: 'GET'
+        })
+        .then(data => {
+            data.forEach(cat => {
+                const pathInput = document.getElementById('category-' + cat.id + '-path');
+                const idInput = document.getElementById('category-' + cat.id + '-id');
+                if (pathInput) {
+                    pathInput.value = cat.platform_category_path || '';
+                    if (cat.platform_category_path) {
+                        pathInput.classList.add('mapped');
+                    } else {
+                        pathInput.classList.remove('mapped');
+                    }
+                }
+                if (idInput) {
+                    idInput.value = cat.platform_category_id || '';
+                }
+            });
+        })
+        .catch(error => {
+            alert('Error loading categories: ' + (error?.message || error || 'Unknown error'));
+        });
+    },
+
+    initAutocomplete: function() {
+        // Build array of inputs for shift-select
+        this.categoryInputs = Array.from(document.querySelectorAll('.platform-category-input'));
+
+        this.categoryInputs.forEach((input, index) => {
+            input.dataset.index = index;
+
+            input.addEventListener('click', (e) => {
+                if (this.bulkMode) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const categoryId = e.target.dataset.categoryId;
+                    const currentIndex = parseInt(e.target.dataset.index);
+
+                    if (categoryId != this.bulkSourceCategoryId) {
+                        if (e.shiftKey && this.lastClickedIndex !== null) {
+                            // Shift-click: apply to range
+                            this.applyBulkMappingRange(this.lastClickedIndex, currentIndex);
+                        } else {
+                            // Normal click: apply to single
+                            this.applyBulkMapping(categoryId);
+                        }
+                        this.lastClickedIndex = currentIndex;
+                    }
+                    return false;
+                }
+            });
+            input.addEventListener('input', (e) => {
+                if (!this.bulkMode) {
+                    this.handleSearch(e.target);
+                }
+            });
+            input.addEventListener('focus', (e) => {
+                if (!this.bulkMode) {
+                    this.handleSearch(e.target);
+                }
+            });
+            input.addEventListener('blur', (e) => {
+                setTimeout(() => this.hideAutocomplete(e.target.dataset.categoryId), 200);
+            });
+        });
+    },
+
+    handleSearch: function(input) {
+        const query = input.value;
+        const categoryId = input.dataset.categoryId;
+
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+
+        if (query.length < 2) {
+            this.hideAutocomplete(categoryId);
+            return;
+        }
+
+        this.searchTimeout = setTimeout(() => {
+            this.searchTaxonomy(query, categoryId);
+        }, 300);
+    },
+
+    searchTaxonomy: function(query, categoryId) {
+        mahoFetch(this.urls.searchTaxonomy + '?platform=' + encodeURIComponent(this.currentPlatform) + '&q=' + encodeURIComponent(query), {
+            method: 'GET'
+        })
+        .then(results => {
+            this.showAutocomplete(categoryId, results);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+        });
+    },
+
+    showAutocomplete: function(categoryId, results) {
+        const container = document.getElementById('autocomplete-' + categoryId);
+        if (!container) return;
+
+        if (results.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        let html = '';
+        results.forEach(result => {
+            html += '<div class="autocomplete-item" onclick="CategoryMapping.selectCategory(' + categoryId + ', \'' +
+                    this.escapeHtml(result.id) + '\', \'' + this.escapeHtml(result.path) + '\')">' +
+                    '<div>' + this.escapeHtml(result.path) + '</div>' +
+                    '<div class="category-id">ID: ' + this.escapeHtml(result.id) + '</div>' +
+                    '</div>';
+        });
+
+        container.innerHTML = html;
+        container.style.display = 'block';
+    },
+
+    hideAutocomplete: function(categoryId) {
+        const container = document.getElementById('autocomplete-' + categoryId);
+        if (container) {
+            container.style.display = 'none';
+        }
+    },
+
+    selectCategory: function(categoryId, platformCategoryId, platformCategoryPath) {
+        const pathInput = document.getElementById('category-' + categoryId + '-path');
+        const idInput = document.getElementById('category-' + categoryId + '-id');
+
+        if (pathInput) {
+            pathInput.value = platformCategoryPath;
+            pathInput.classList.add('mapped');
+        }
+        if (idInput) {
+            idInput.value = platformCategoryId;
+        }
+
+        this.hideAutocomplete(categoryId);
+    },
+
+    clearMapping: function(categoryId) {
+        const pathInput = document.getElementById('category-' + categoryId + '-path');
+        const idInput = document.getElementById('category-' + categoryId + '-id');
+
+        if (pathInput) {
+            pathInput.value = '';
+            pathInput.classList.remove('mapped');
+        }
+        if (idInput) {
+            idInput.value = '';
+        }
+    },
+
+    copyMapping: function(categoryId) {
+        const pathInput = document.getElementById('category-' + categoryId + '-path');
+        const idInput = document.getElementById('category-' + categoryId + '-id');
+
+        if (!pathInput || !pathInput.value) {
+            alert('<?php echo $this->__('Please set a category mapping first before copying.') ?>');
+            return;
+        }
+
+        this.bulkMode = true;
+        this.bulkCategoryId = idInput ? idInput.value : '';
+        this.bulkCategoryPath = pathInput.value;
+        this.bulkSourceCategoryId = categoryId;
+
+        // Show bulk mode UI
+        document.getElementById('bulk-mode-bar').style.display = 'block';
+        document.getElementById('bulk-category-display').textContent = this.bulkCategoryPath;
+        document.querySelector('.category-mapping-container').classList.add('bulk-mode-active');
+
+        // Highlight source row
+        const sourceRow = document.querySelector('tr[data-category-id="' + categoryId + '"]');
+        if (sourceRow) {
+            sourceRow.classList.add('bulk-source');
+        }
+
+        // Add bulk target styling to all other inputs
+        document.querySelectorAll('.platform-category-input').forEach(input => {
+            if (input.dataset.categoryId != categoryId) {
+                input.classList.add('bulk-target');
+                input.readOnly = true;
+            }
+        });
+    },
+
+    exitBulkMode: function() {
+        this.bulkMode = false;
+        this.bulkCategoryId = null;
+        this.bulkCategoryPath = null;
+        this.bulkSourceCategoryId = null;
+        this.lastClickedIndex = null;
+
+        // Hide bulk mode UI
+        document.getElementById('bulk-mode-bar').style.display = 'none';
+        document.querySelector('.category-mapping-container').classList.remove('bulk-mode-active');
+
+        // Remove source row highlight
+        document.querySelectorAll('tr.bulk-source').forEach(row => {
+            row.classList.remove('bulk-source');
+        });
+
+        // Remove bulk target styling
+        document.querySelectorAll('.platform-category-input').forEach(input => {
+            input.classList.remove('bulk-target');
+            input.readOnly = false;
+        });
+    },
+
+    applyBulkMapping: function(categoryId) {
+        const pathInput = document.getElementById('category-' + categoryId + '-path');
+        const idInput = document.getElementById('category-' + categoryId + '-id');
+
+        if (pathInput) {
+            pathInput.value = this.bulkCategoryPath;
+            pathInput.classList.add('mapped');
+            // Flash effect to confirm application
+            pathInput.style.transition = 'background-color 0.3s';
+            pathInput.style.backgroundColor = '#a5d6a7';
+            setTimeout(() => {
+                pathInput.style.backgroundColor = '';
+            }, 300);
+        }
+        if (idInput) {
+            idInput.value = this.bulkCategoryId;
+        }
+    },
+
+    applyBulkMappingRange: function(startIndex, endIndex) {
+        // Ensure correct order
+        const min = Math.min(startIndex, endIndex);
+        const max = Math.max(startIndex, endIndex);
+
+        // Apply to all inputs in range (excluding the source)
+        for (let i = min; i <= max; i++) {
+            const input = this.categoryInputs[i];
+            if (input && input.dataset.categoryId != this.bulkSourceCategoryId) {
+                this.applyBulkMapping(input.dataset.categoryId);
+            }
+        }
+    },
+
+    save: function() {
+        const mappings = {};
+
+        document.querySelectorAll('.platform-category-input').forEach(input => {
+            const categoryId = input.dataset.categoryId;
+            const idInput = document.getElementById('category-' + categoryId + '-id');
+
+            mappings[categoryId] = {
+                platform_category_id: idInput ? idInput.value : '',
+                platform_category_path: input.value
+            };
+        });
+
+        mahoFetch(this.urls.save, {
+            method: 'POST',
+            body: new URLSearchParams({
+                form_key: FORM_KEY,
+                platform: this.currentPlatform,
+                mappings: JSON.stringify(mappings)
+            })
+        })
+        .then(data => {
+            // Reload to show session message
+            window.location.reload();
+        })
+        .catch(error => {
+            alert('Error saving: ' + (error?.message || error || 'Unknown error'));
+        });
+    },
+
+    autoMap: function() {
+        if (!confirm('<?php echo $this->__('This will attempt to automatically map unmapped categories based on name matching. Continue?') ?>')) {
+            return;
+        }
+
+        mahoFetch(this.urls.autoMap + '?platform=' + encodeURIComponent(this.currentPlatform), {
+            method: 'POST',
+            body: new URLSearchParams({ form_key: FORM_KEY })
+        })
+        .then(data => {
+            // Reload to show session message
+            window.location.reload();
+        })
+        .catch(error => {
+            alert('Error: ' + (error?.message || error || 'Unknown error'));
+        });
+    },
+
+    escapeHtml: function(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML.replace(/'/g, "\\'");
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    CategoryMapping.init();
+});
+</script>

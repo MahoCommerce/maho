@@ -64,4 +64,14 @@
             </block>
         </reference>
     </adminhtml_feedmanager_destination_edit>
+
+    <!-- Category Mapping -->
+    <adminhtml_feedmanager_category_index>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Category Mapping</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_category" name="feedmanager_category"/>
+        </reference>
+    </adminhtml_feedmanager_category_index>
 </layout>

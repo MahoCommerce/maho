@@ -133,6 +133,73 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
     }
 
     /**
+     * Search taxonomy for matching categories
+     *
+     * @param string $query Search query
+     * @param int $limit Maximum number of results
+     * @return array Array of matching categories with 'id' and 'path' keys
+     */
+    public function searchTaxonomy(string $query, int $limit = 10): array
+    {
+        $taxonomyFile = $this->getTaxonomyFilePath();
+        if (!$taxonomyFile || !file_exists($taxonomyFile)) {
+            return [];
+        }
+
+        $results = [];
+        $query = strtolower(trim($query));
+        $queryParts = explode(' ', $query);
+
+        $handle = fopen($taxonomyFile, 'r');
+        if (!$handle) {
+            return [];
+        }
+
+        while (($line = fgets($handle)) !== false) {
+            $line = trim($line);
+            if (empty($line) || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            // Parse line - format depends on taxonomy file
+            // Google format: "id - Category > Subcategory > ..." or just "Category > Subcategory > ..."
+            $lineLower = strtolower($line);
+
+            // Check if all query parts match
+            $allMatch = true;
+            foreach ($queryParts as $part) {
+                if (!str_contains($lineLower, $part)) {
+                    $allMatch = false;
+                    break;
+                }
+            }
+
+            if ($allMatch) {
+                // Extract ID and path
+                if (preg_match('/^(\d+)\s*-\s*(.+)$/', $line, $matches)) {
+                    $results[] = [
+                        'id' => $matches[1],
+                        'path' => trim($matches[2]),
+                    ];
+                } else {
+                    $results[] = [
+                        'id' => '',
+                        'path' => $line,
+                    ];
+                }
+
+                if (count($results) >= $limit) {
+                    break;
+                }
+            }
+        }
+
+        fclose($handle);
+
+        return $results;
+    }
+
+    /**
      * Get platform-specific helper
      */
     protected function _getHelper(): Maho_FeedManager_Helper_Data

@@ -25,6 +25,10 @@ class Maho_FeedManager_Model_Platform
     protected static array $_adapters = [
         'google' => Maho_FeedManager_Model_Platform_Google::class,
         'facebook' => Maho_FeedManager_Model_Platform_Facebook::class,
+        'bing' => Maho_FeedManager_Model_Platform_Bing::class,
+        'pinterest' => Maho_FeedManager_Model_Platform_Pinterest::class,
+        'idealo' => Maho_FeedManager_Model_Platform_Idealo::class,
+        'trovaprezzi' => Maho_FeedManager_Model_Platform_Trovaprezzi::class,
         'custom' => Maho_FeedManager_Model_Platform_Custom::class,
     ];
 
