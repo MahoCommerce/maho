@@ -537,7 +537,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
 
     /**
      * Update item in shopping cart (quote)
-     * $requestInfo - either qty (int) or buyRequest in form of array or Varien_Object
+     * $requestInfo - either qty (int) or buyRequest in form of array or \Maho\DataObject
      * $updatingParams - information on how to perform update, passed to Quote->updateItem() method
      *
      * @param int $itemId

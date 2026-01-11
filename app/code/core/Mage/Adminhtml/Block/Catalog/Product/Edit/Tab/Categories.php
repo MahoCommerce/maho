@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     /**
      * Cache for selected tree nodes
      *
-     * list<Varien_Data_Tree_Node>
+     * list<\Maho\Data\Tree\Node>
      */
     protected $_selectedNodes = null;
 

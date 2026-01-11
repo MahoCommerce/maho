@@ -301,7 +301,7 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
             }
         }
 
-        /** @var Varien_Simplexml_Element $child */
+        /** @var \Maho\Simplexml\Element $child */
         foreach ($children as $child) {
             if ($child->getName() != 'title' && $child->getName() != 'sort_order') {
                 if (!(string) $child->title) {

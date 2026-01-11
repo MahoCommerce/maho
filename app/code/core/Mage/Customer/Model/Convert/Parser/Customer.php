@@ -484,7 +484,6 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                         $attribute = $entity->getAttribute($field);
                         if (!$attribute) {
                             continue;
-                            #$this->addException(Mage::helper('catalog')->__("Unknown attribute: %s.", $field), Varien_Convert_Exception::ERROR);
                         }
 
                         if ($attribute->usesSource()) {

@@ -14,8 +14,8 @@
  * Recurring profiles listing
  *
  * @method $this setBackUrl(string $value)
- * @method $this setGridColumns(Varien_Object[] $profiles)
- * @method $this setGridElements(Varien_Object[] $profiles)
+ * @method $this setGridColumns(\Maho\DataObject[] $profiles)
+ * @method $this setGridElements(\Maho\DataObject[] $profiles)
  */
 class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
 {

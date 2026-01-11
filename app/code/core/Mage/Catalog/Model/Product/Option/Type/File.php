@@ -62,7 +62,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $buyRequest = $this->getRequest();
         $params = $buyRequest->getData('_processing_params');
         /*
-         * Notice check for params to be Varien_Object - by using object we protect from
+         * Notice check for params to be \Maho\DataObject - by using object we protect from
          * params being forged and contain data from user frontend input
          */
         if ($params instanceof \Maho\DataObject) {

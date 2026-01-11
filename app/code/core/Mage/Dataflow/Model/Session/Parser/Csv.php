@@ -55,7 +55,7 @@ class Mage_Dataflow_Model_Session_Parser_Csv extends Mage_Dataflow_Model_Convert
                 $data[] = $row;
             }
             */
-            //$map = new Varien_Convert_Mapper_Column();
+            //$map = new \Maho\Convert\Mapper\Column();
             $map->setData([$row]);
             $map->map();
             $row = $map->getData();

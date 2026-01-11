@@ -590,7 +590,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
      */
     public function resetItemsDataChanged()
     {
-        /** @var Varien_Object $item */
+        /** @var \Maho\DataObject $item */
         foreach ($this->_items as $item) {
             $item->setDataChanges(false);
         }
@@ -607,7 +607,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     protected function _afterLoad()
     {
         parent::_afterLoad();
-        /** @var Varien_Object $item */
+        /** @var \Maho\DataObject $item */
         foreach ($this->_items as $item) {
             $item->setOrigData();
             if ($this->_resetItemsDataChanged) {

@@ -31,7 +31,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
     }
 
     /**
-     * Unserialize Varien_Object field in an object
+     * Unserialize \Maho\DataObject field in an object
      *
      * @param string $field
      * @param mixed $defaultValue

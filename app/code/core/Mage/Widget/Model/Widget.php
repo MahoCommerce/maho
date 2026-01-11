@@ -65,7 +65,7 @@ class Mage_Widget_Model_Widget extends \Maho\DataObject
     }
 
     /**
-     * Return widget XML configuration as Varien_Object and makes some data preparations
+     * Return widget XML configuration as \Maho\DataObject and makes some data preparations
      *
      * @param string $type Widget type
      * @return \Maho\DataObject
@@ -174,7 +174,7 @@ class Mage_Widget_Model_Widget extends \Maho\DataObject
     {
         if (!$this->_getData('widgets_array')) {
             $result = [];
-            /** @var Varien_Simplexml_Element $widget */
+            /** @var \Maho\Simplexml\Element $widget */
             foreach ($this->getWidgetsXml($filters) as $widget) {
                 $helper = $widget->getAttribute('module') ?: 'widget';
                 $helper = Mage::helper($helper);

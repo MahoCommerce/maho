@@ -13,8 +13,8 @@
 /**
  * WYSIWYG widget options form
  *
- * @method $this setConfig(Varien_Object $value)
- * @method $this setElement(Varien_Data_Form_Element_Abstract $value)
+ * @method $this setConfig(\Maho\DataObject $value)
+ * @method $this setElement(\Maho\Data\Form\Element\AbstractElement $value)
  * @method $this setFieldsetId(string $value)
  * @method string getLabel()
  * @method $this setSourceUrl(string $value)

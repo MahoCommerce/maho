@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Apply extends \Maho\Data\
     }
 
     /**
-     * Duplicate interface of Varien_Data_Form_Element_Abstract::setReadonly
+     * Duplicate interface of \Maho\Data\Form\Element\AbstractElement::setReadonly
      *
      * @param bool $readonly
      * @param bool $useDisabled

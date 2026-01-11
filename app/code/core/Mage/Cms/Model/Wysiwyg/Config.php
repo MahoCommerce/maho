@@ -37,7 +37,7 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
     public const IMAGE_DIRECTORY = 'wysiwyg';
 
     /**
-     * Return Wysiwyg config as Varien_Object
+     * Return Wysiwyg config as \Maho\DataObject
      *
      * Config options description:
      *

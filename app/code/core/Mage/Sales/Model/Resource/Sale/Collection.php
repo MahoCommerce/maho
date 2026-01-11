@@ -188,7 +188,7 @@ class Mage_Sales_Model_Resource_Sale_Collection extends \Maho\Data\Collection\Db
     }
 
     /**
-     * Retrieve totals data converted into Varien_Object
+     * Retrieve totals data converted into \Maho\DataObject
      *
      * @return \Maho\DataObject
      */

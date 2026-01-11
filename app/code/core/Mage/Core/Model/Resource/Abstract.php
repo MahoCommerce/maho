@@ -179,7 +179,7 @@ abstract class Mage_Core_Model_Resource_Abstract
     }
 
     /**
-     * Unserialize Varien_Object field in an object
+     * Unserialize \Maho\DataObject field in an object
      *
      * @param string $field
      * @param mixed $defaultValue
@@ -190,7 +190,7 @@ abstract class Mage_Core_Model_Resource_Abstract
         if (empty($value)) {
             $object->setData($field, $defaultValue);
         } elseif (!is_array($value) && !is_object($value)) {
-            $object->setData($field, unserialize($value, ['allowed_classes' => ['Varien_Object']]));
+            $object->setData($field, unserialize($value, ['allowed_classes' => [\Maho\DataObject::class]]));
         }
     }
 

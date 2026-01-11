@@ -89,7 +89,7 @@ class Mage_Api2_Model_Config extends \Maho\Simplexml\Config
                 continue;
             }
 
-            /** @var Varien_Simplexml_Element $route */
+            /** @var \Maho\Simplexml\Element $route */
             foreach ($resource->routes->children() as $route) {
                 $arguments = [
                     Mage_Api2_Model_Route_Abstract::PARAM_ROUTE    => (string) $route->route,
@@ -147,7 +147,7 @@ class Mage_Api2_Model_Config extends \Maho\Simplexml\Config
         $groups = $groups[0];
 
         if (!$this->_resourcesGrouped) {
-            /** @var Varien_Simplexml_Element $node */
+            /** @var \Maho\Simplexml\Element $node */
             foreach ($this->getResources() as $node) {
                 $result = $node->xpath('group');
                 if (!$result) {

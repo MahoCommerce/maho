@@ -190,7 +190,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
             $this->_mergeLayoutHandles($handle);
         }
         $updatesStr = '<' . '?xml version="1.0"?' . '><layout>' . implode('', $this->_layoutHandleUpdates) . '</layout>';
-        $this->_layoutHandleUpdatesXml = simplexml_load_string($updatesStr, 'Varien_Simplexml_Element');
+        $this->_layoutHandleUpdatesXml = simplexml_load_string($updatesStr, \Maho\Simplexml\Element::class);
     }
 
     /**

@@ -16,7 +16,7 @@
 class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template
 {
     /**
-     * Just set data, like Varien_Object
+     * Just set data, like \Maho\DataObject
      *
      * This method is to be used in layout.
      * In layout it can be understood better, than setSomeKeyBlahBlah()

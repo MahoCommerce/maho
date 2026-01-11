@@ -1358,7 +1358,7 @@ class Mage_Core_Model_App
      *
      * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
      * ```php
-     * public function process(Varien_Event_Observer $observer): void
+     * public function process(\Maho\Event\Observer $observer): void
      * {
      *     $isAjax = (bool) $observer->getIsAjax();
      *     // ...

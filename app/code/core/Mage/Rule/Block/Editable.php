@@ -13,7 +13,7 @@
 class Mage_Rule_Block_Editable extends Mage_Core_Block_Abstract implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
-     * @see Varien_Data_Form_Element_Renderer_Interface::render()
+     * @see \Maho\Data\Form\Element\Renderer\RendererInterface::render()
      * @return string
      */
     #[\Override]

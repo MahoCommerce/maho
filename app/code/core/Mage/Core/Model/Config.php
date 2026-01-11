@@ -190,7 +190,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected $_prototype;
 
     /**
-     * Reference to the Varien_Simplexml_Config object where local.xml was loaded in to
+     * Reference to the \Maho\Simplexml\Config object where local.xml was loaded in to
      */
     protected Mage_Core_Model_Config_Base $_refLocalConfigObject;
 

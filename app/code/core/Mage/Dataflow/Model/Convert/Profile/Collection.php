@@ -17,7 +17,7 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
 
     protected $_profiles = [];
 
-    protected $_simplexmlDefaultClass = 'Varien_Simplexml_Element';
+    protected $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
 
     protected $_profileDefaultClass = 'Mage_Dataflow_Model_Convert_Profile';
 
@@ -135,7 +135,7 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
 
             $country = '';
 
-            /** @var Varien_Simplexml_Element $varNode */
+            /** @var \Maho\Simplexml\Element $varNode */
             foreach ($actionNode->var as $key => $varNode) {
                 if ($varNode['name'] == 'map') {
                     $mapData = [];

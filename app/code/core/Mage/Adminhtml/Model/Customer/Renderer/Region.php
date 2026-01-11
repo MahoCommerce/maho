@@ -16,7 +16,7 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements \Maho\Data\Form\E
      * Country region collections
      *
      * [
-     *      [$countryId] => Varien_Data_Collection_Db
+     *      [$countryId] => \Maho\Data\Collection\Db
      * ]
      *
      * @var array

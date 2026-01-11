@@ -32,7 +32,7 @@ class Mage_Sales_Model_Resource_Recurring_Profile extends Mage_Sales_Model_Resou
     }
 
     /**
-     * Unserialize Varien_Object field in an object
+     * Unserialize \Maho\DataObject field in an object
      *
      * @param string $field
      * @param mixed $defaultValue

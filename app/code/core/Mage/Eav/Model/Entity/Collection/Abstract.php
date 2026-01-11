@@ -308,7 +308,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     }
 
     /**
-     * Wrapper for compatibility with Varien_Data_Collection_Db
+     * Wrapper for compatibility with \Maho\Data\Collection\Db
      */
     #[\Override]
     public function addFieldToFilter($attribute, $condition = null)

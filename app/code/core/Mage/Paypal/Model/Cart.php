@@ -35,7 +35,7 @@ class Mage_Paypal_Model_Cart
 
     /**
      * Rendered cart items
-     * Array of Varien_Objects
+     * Array of \Maho\DataObject
      *
      * @var array
      */

@@ -367,7 +367,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      * This method is used to attach additional parameters to processed buyRequest.
      *
      * $params holds parameters of what operation must be performed:
-     * - 'current_config', Varien_Object or array - current buyRequest that configures product in this item,
+     * - 'current_config', \Maho\DataObject or array - current buyRequest that configures product in this item,
      *   used to restore currently attached files
      * - 'files_prefix': string[a-z0-9_] - prefix that was added at frontend to names of file inputs,
      *   so they won't intersect with other submitted options
@@ -385,7 +385,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
             $params = new \Maho\DataObject($params);
         }
 
-        // Ensure that currentConfig goes as Varien_Object - for easier work with it later
+        // Ensure that currentConfig goes as \Maho\DataObject - for easier work with it later
         $currentConfig = $params->getCurrentConfig();
         if ($currentConfig) {
             if (is_array($currentConfig)) {
