@@ -335,65 +335,6 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
         return $map[$normalized] ?? 'out of stock';
     }
 
-    protected function _transformCondition(mixed $value): string
-    {
-        $map = [
-            'new' => 'new',
-            'refurbished' => 'refurbished',
-            'used' => 'used',
-            'like new' => 'refurbished',
-            'renewed' => 'refurbished',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'new';
-    }
-
-    protected function _transformGender(mixed $value): string
-    {
-        $map = [
-            'male' => 'male',
-            'men' => 'male',
-            'm' => 'male',
-            'female' => 'female',
-            'women' => 'female',
-            'f' => 'female',
-            'unisex' => 'unisex',
-            'both' => 'unisex',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'unisex';
-    }
-
-    protected function _transformAgeGroup(mixed $value): string
-    {
-        $map = [
-            'newborn' => 'newborn',
-            'infant' => 'infant',
-            'baby' => 'infant',
-            'toddler' => 'toddler',
-            'kids' => 'kids',
-            'children' => 'kids',
-            'child' => 'kids',
-            'adult' => 'adult',
-            'adults' => 'adult',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'adult';
-    }
-
-    protected function _transformBoolean(mixed $value): string
-    {
-        if (is_bool($value)) {
-            return $value ? 'yes' : 'no';
-        }
-
-        $normalized = strtolower(trim((string) $value));
-        return in_array($normalized, ['1', 'true', 'yes']) ? 'yes' : 'no';
-    }
-
     protected function _limitCategoryLevels(string $path, int $maxLevels): string
     {
         $parts = explode(' > ', $path);

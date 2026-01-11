@@ -377,64 +377,6 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
     }
 
     /**
-     * Transform condition value
-     */
-    protected function _transformCondition(mixed $value): string
-    {
-        $map = [
-            'new' => 'new',
-            'refurbished' => 'refurbished',
-            'used' => 'used',
-            'like new' => 'refurbished',
-            'renewed' => 'refurbished',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'new';
-    }
-
-    /**
-     * Transform gender value
-     */
-    protected function _transformGender(mixed $value): string
-    {
-        $map = [
-            'male' => 'male',
-            'men' => 'male',
-            'm' => 'male',
-            'female' => 'female',
-            'women' => 'female',
-            'f' => 'female',
-            'unisex' => 'unisex',
-            'both' => 'unisex',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'unisex';
-    }
-
-    /**
-     * Transform age group value
-     */
-    protected function _transformAgeGroup(mixed $value): string
-    {
-        $map = [
-            'newborn' => 'newborn',
-            'infant' => 'infant',
-            'baby' => 'infant',
-            'toddler' => 'toddler',
-            'kids' => 'kids',
-            'children' => 'kids',
-            'child' => 'kids',
-            'adult' => 'adult',
-            'adults' => 'adult',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'adult';
-    }
-
-    /**
      * Get attributes that need the g: namespace prefix
      */
     public function getNamespacedAttributes(): array

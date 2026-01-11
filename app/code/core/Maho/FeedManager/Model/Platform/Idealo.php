@@ -255,6 +255,10 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
         return $errors;
     }
 
+    /**
+     * Idealo uses 'true'/'false' instead of 'yes'/'no'
+     */
+    #[\Override]
     protected function _transformBoolean(mixed $value): string
     {
         if (is_bool($value)) {
@@ -265,6 +269,10 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
         return in_array($normalized, ['1', 'true', 'yes']) ? 'true' : 'false';
     }
 
+    /**
+     * Idealo uses uppercase gender values and includes German terms
+     */
+    #[\Override]
     protected function _transformGender(mixed $value): string
     {
         $map = [

@@ -109,4 +109,13 @@ interface Maho_FeedManager_Model_Platform_AdapterInterface
      * Check if platform supports category mapping
      */
     public function supportsCategoryMapping(): bool;
+
+    /**
+     * Search taxonomy for matching categories
+     *
+     * @param string $query Search query
+     * @param int $limit Maximum number of results
+     * @return array<int, array{id: string, path: string}> Array of matching categories
+     */
+    public function searchTaxonomy(string $query, int $limit = 10): array;
 }

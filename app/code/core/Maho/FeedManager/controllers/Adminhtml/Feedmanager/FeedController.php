@@ -1313,6 +1313,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 ->setOrder('started_at', 'DESC')
                 ->setPageSize(1);
 
+            /** @var Maho_FeedManager_Model_Log $log */
             $log = $logCollection->getFirstItem();
 
             if ($success) {

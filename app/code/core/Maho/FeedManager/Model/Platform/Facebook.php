@@ -349,23 +349,6 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
     }
 
     /**
-     * Transform condition value
-     */
-    protected function _transformCondition(mixed $value): string
-    {
-        $map = [
-            'new' => 'new',
-            'refurbished' => 'refurbished',
-            'used' => 'used',
-            'like new' => 'refurbished',
-            'renewed' => 'refurbished',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'new';
-    }
-
-    /**
      * Get attributes that need the g: namespace prefix (for XML format)
      */
     public function getNamespacedAttributes(): array

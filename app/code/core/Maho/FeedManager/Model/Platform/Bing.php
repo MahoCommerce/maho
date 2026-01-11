@@ -327,55 +327,6 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
         return $map[$normalized] ?? 'out of stock';
     }
 
-    protected function _transformCondition(mixed $value): string
-    {
-        $map = [
-            'new' => 'new',
-            'refurbished' => 'refurbished',
-            'used' => 'used',
-            'like new' => 'refurbished',
-            'renewed' => 'refurbished',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'new';
-    }
-
-    protected function _transformGender(mixed $value): string
-    {
-        $map = [
-            'male' => 'male',
-            'men' => 'male',
-            'm' => 'male',
-            'female' => 'female',
-            'women' => 'female',
-            'f' => 'female',
-            'unisex' => 'unisex',
-            'both' => 'unisex',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'unisex';
-    }
-
-    protected function _transformAgeGroup(mixed $value): string
-    {
-        $map = [
-            'newborn' => 'newborn',
-            'infant' => 'infant',
-            'baby' => 'infant',
-            'toddler' => 'toddler',
-            'kids' => 'kids',
-            'children' => 'kids',
-            'child' => 'kids',
-            'adult' => 'adult',
-            'adults' => 'adult',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'adult';
-    }
-
     /**
      * Get attributes that need the g: namespace prefix in XML
      */

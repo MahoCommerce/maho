@@ -137,8 +137,9 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
      *
      * @param string $query Search query
      * @param int $limit Maximum number of results
-     * @return array Array of matching categories with 'id' and 'path' keys
+     * @return array<int, array{id: string, path: string}> Array of matching categories
      */
+    #[\Override]
     public function searchTaxonomy(string $query, int $limit = 10): array
     {
         $taxonomyFile = $this->getTaxonomyFilePath();
@@ -244,5 +245,76 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
             $formatted .= ' ' . $currencyCode;
         }
         return $formatted;
+    }
+
+    /**
+     * Transform condition value to platform format
+     */
+    protected function _transformCondition(mixed $value): string
+    {
+        $map = [
+            'new' => 'new',
+            'refurbished' => 'refurbished',
+            'used' => 'used',
+            'like new' => 'refurbished',
+            'renewed' => 'refurbished',
+        ];
+
+        $normalized = strtolower(trim((string) $value));
+        return $map[$normalized] ?? 'new';
+    }
+
+    /**
+     * Transform gender value to platform format
+     */
+    protected function _transformGender(mixed $value): string
+    {
+        $map = [
+            'male' => 'male',
+            'men' => 'male',
+            'm' => 'male',
+            'female' => 'female',
+            'women' => 'female',
+            'f' => 'female',
+            'unisex' => 'unisex',
+            'both' => 'unisex',
+        ];
+
+        $normalized = strtolower(trim((string) $value));
+        return $map[$normalized] ?? 'unisex';
+    }
+
+    /**
+     * Transform age group value to platform format
+     */
+    protected function _transformAgeGroup(mixed $value): string
+    {
+        $map = [
+            'newborn' => 'newborn',
+            'infant' => 'infant',
+            'baby' => 'infant',
+            'toddler' => 'toddler',
+            'kids' => 'kids',
+            'children' => 'kids',
+            'child' => 'kids',
+            'adult' => 'adult',
+            'adults' => 'adult',
+        ];
+
+        $normalized = strtolower(trim((string) $value));
+        return $map[$normalized] ?? 'adult';
+    }
+
+    /**
+     * Transform boolean value to yes/no format
+     */
+    protected function _transformBoolean(mixed $value): string
+    {
+        if (is_bool($value)) {
+            return $value ? 'yes' : 'no';
+        }
+
+        $normalized = strtolower(trim((string) $value));
+        return in_array($normalized, ['1', 'true', 'yes']) ? 'yes' : 'no';
     }
 }
