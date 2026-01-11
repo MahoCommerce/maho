@@ -65,8 +65,6 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     /**
      * Save attribute value to database
      * Uses direct SQL to avoid UNIQUE constraint violations from double-save
-     *
-     * @param \Maho\DataObject $object
      */
     protected function _saveAttributeValue(\Maho\DataObject $object, string $value): void
     {
