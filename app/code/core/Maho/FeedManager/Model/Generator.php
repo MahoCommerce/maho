@@ -394,7 +394,230 @@ class Maho_FeedManager_Model_Generator
         // Apply custom filters from feed configuration (legacy support)
         $this->_applyCustomFilters($collection);
 
+        // Apply condition groups as SQL filters (much more efficient than PHP filtering)
+        $this->_applyConditionGroupsToCollection($collection);
+
         return $collection;
+    }
+
+    /**
+     * Apply condition groups to collection as SQL WHERE clauses
+     *
+     * This is much more efficient than loading all products and filtering in PHP.
+     * Logic: All groups must pass (AND), within each group ANY condition can pass (OR)
+     */
+    protected function _applyConditionGroupsToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection): void
+    {
+        $groups = $this->_feed->getConditionGroupsArray();
+
+        if (empty($groups)) {
+            return;
+        }
+
+        foreach ($groups as $group) {
+            $conditions = $group['conditions'] ?? [];
+            if (empty($conditions)) {
+                continue;
+            }
+
+            // Build OR conditions for this group
+            $orConditions = [];
+            $stockConditions = [];
+            $categoryConditions = [];
+            $typeConditions = [];
+
+            foreach ($conditions as $condition) {
+                $attribute = $condition['attribute'] ?? '';
+                $operator = $condition['operator'] ?? 'eq';
+                $value = $condition['value'] ?? '';
+
+                if (empty($attribute)) {
+                    continue;
+                }
+
+                // Handle special attributes that need different treatment
+                if ($attribute === 'qty' || $attribute === 'is_in_stock') {
+                    $stockConditions[] = $this->_buildStockCondition($attribute, $operator, $value, $condition);
+                } elseif ($attribute === 'category_ids') {
+                    $categoryConditions[] = $this->_buildCategoryCondition($operator, $value, $condition);
+                } elseif ($attribute === 'type_id') {
+                    $typeConditions[] = $this->_buildTypeCondition($operator, $value, $condition);
+                } else {
+                    // Standard EAV attribute
+                    $sqlCondition = $this->_buildSqlCondition($attribute, $operator, $value);
+                    if ($sqlCondition !== null) {
+                        $orConditions[] = $sqlCondition;
+                    }
+                }
+            }
+
+            // Apply standard attribute conditions (OR within group)
+            if (!empty($orConditions)) {
+                if (count($orConditions) === 1) {
+                    $collection->addAttributeToFilter($orConditions[0]['attribute'], $orConditions[0]['condition']);
+                } else {
+                    // Multiple OR conditions
+                    $collection->addAttributeToFilter($orConditions);
+                }
+            }
+
+            // Apply stock conditions
+            foreach ($stockConditions as $stockCond) {
+                $this->_applyStockConditionToCollection($collection, $stockCond);
+            }
+
+            // Apply category conditions
+            foreach ($categoryConditions as $catCond) {
+                $this->_applyCategoryConditionToCollection($collection, $catCond);
+            }
+
+            // Apply type conditions
+            foreach ($typeConditions as $typeCond) {
+                $collection->addAttributeToFilter('type_id', $typeCond);
+            }
+        }
+    }
+
+    /**
+     * Build SQL condition array for standard attributes
+     */
+    protected function _buildSqlCondition(string $attribute, string $operator, string $value): ?array
+    {
+        $condition = match ($operator) {
+            'eq' => ['eq' => $value],
+            'neq' => ['neq' => $value],
+            'gt' => ['gt' => $value],
+            'gteq' => ['gteq' => $value],
+            'lt' => ['lt' => $value],
+            'lteq' => ['lteq' => $value],
+            'in' => ['in' => array_map('trim', explode(',', $value))],
+            'nin' => ['nin' => array_map('trim', explode(',', $value))],
+            'like' => ['like' => '%' . $value . '%'],
+            'nlike' => ['nlike' => '%' . $value . '%'],
+            'null' => ['null' => true],
+            'notnull' => ['notnull' => true],
+            default => ['eq' => $value],
+        };
+
+        return [
+            'attribute' => $attribute,
+            'condition' => $condition,
+        ];
+    }
+
+    /**
+     * Build stock condition info
+     */
+    protected function _buildStockCondition(string $attribute, string $operator, string $value, array $condition): array
+    {
+        return [
+            'attribute' => $attribute,
+            'operator' => $operator,
+            'value' => $value,
+            'stock_value' => $condition['stock_value'] ?? null,
+        ];
+    }
+
+    /**
+     * Apply stock condition to collection
+     */
+    protected function _applyStockConditionToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection, array $stockCond): void
+    {
+        $attribute = $stockCond['attribute'];
+        $operator = $stockCond['operator'];
+        $value = $stockCond['value'];
+
+        // Join stock table if not already joined
+        $collection->joinField(
+            'qty',
+            'cataloginventory/stock_item',
+            'qty',
+            'product_id=entity_id',
+            '{{table}}.stock_id=1',
+            'left',
+        );
+
+        if ($attribute === 'qty') {
+            $sqlCondition = $this->_buildSqlCondition('qty', $operator, $value);
+            if ($sqlCondition) {
+                $collection->addFieldToFilter('qty', $sqlCondition['condition']);
+            }
+        } elseif ($attribute === 'is_in_stock') {
+            // Use stock_value from condition if available
+            $stockValue = $stockCond['stock_value'] ?? $value;
+            $collection->joinField(
+                'is_in_stock',
+                'cataloginventory/stock_item',
+                'is_in_stock',
+                'product_id=entity_id',
+                '{{table}}.stock_id=1',
+                'left',
+            );
+            $collection->addFieldToFilter('is_in_stock', ['eq' => (int) $stockValue]);
+        }
+    }
+
+    /**
+     * Build category condition info
+     */
+    protected function _buildCategoryCondition(string $operator, string $value, array $condition): array
+    {
+        return [
+            'operator' => $operator,
+            'value' => $value,
+            'category_value' => $condition['category_value'] ?? null,
+        ];
+    }
+
+    /**
+     * Apply category condition to collection
+     */
+    protected function _applyCategoryConditionToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection, array $catCond): void
+    {
+        $operator = $catCond['operator'];
+        $categoryIds = $catCond['category_value'] ?? $catCond['value'];
+
+        if (is_string($categoryIds)) {
+            $categoryIds = array_map('trim', explode(',', $categoryIds));
+        }
+        $categoryIds = array_filter($categoryIds);
+
+        if (empty($categoryIds)) {
+            return;
+        }
+
+        // Join with category_product table to filter by category
+        $categoryTable = $collection->getTable('catalog/category_product');
+
+        if ($operator === 'in' || $operator === 'eq') {
+            $collection->getSelect()->join(
+                ['cat_filter' => $categoryTable],
+                'cat_filter.product_id = e.entity_id',
+                [],
+            );
+            $collection->getSelect()->where('cat_filter.category_id IN (?)', $categoryIds);
+            $collection->getSelect()->distinct(true);
+        } elseif ($operator === 'nin' || $operator === 'neq') {
+            // For NOT IN, we need products that are NOT in any of the specified categories
+            $subSelect = $collection->getConnection()->select()
+                ->from($categoryTable, ['product_id'])
+                ->where('category_id IN (?)', $categoryIds);
+            $collection->getSelect()->where('e.entity_id NOT IN (?)', $subSelect);
+        }
+    }
+
+    /**
+     * Build type condition
+     */
+    protected function _buildTypeCondition(string $operator, string $value, array $condition): array
+    {
+        $typeValue = $condition['type_value'] ?? $value;
+
+        return match ($operator) {
+            'eq', 'in' => ['in' => is_array($typeValue) ? $typeValue : [$typeValue]],
+            'neq', 'nin' => ['nin' => is_array($typeValue) ? $typeValue : [$typeValue]],
+            default => ['eq' => $typeValue],
+        };
     }
 
     /**
