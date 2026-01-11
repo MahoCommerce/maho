@@ -82,16 +82,33 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
     }
 
     /**
-     * Delete physical file from filesystem
+     * Delete physical file from filesystem and its cached versions
      */
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'category';
-            $filePath = $baseDir . DS . $fileName;
+            $baseDir = Mage::getBaseDir('media') . '/catalog/category';
+            $filePath = $baseDir . '/' . $fileName;
 
+            // Delete original file
             if (file_exists($filePath)) {
                 unlink($filePath);
+            }
+
+            // Delete all cached versions - search for all cache files matching this dispersed path
+            $cacheDir = Mage::getBaseDir('media') . '/catalog/product/cache';
+            if (is_dir($cacheDir)) {
+                // Category images can also be cached in product cache
+                // Cache structure: /cache/*/image/*/{dispersed_path}
+                $pattern = $cacheDir . '/*/image/*/catalog/category/' . ltrim($fileName, '/');
+                $cachedFiles = glob($pattern);
+                if ($cachedFiles) {
+                    foreach ($cachedFiles as $cachedFile) {
+                        if (file_exists($cachedFile)) {
+                            unlink($cachedFile);
+                        }
+                    }
+                }
             }
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical

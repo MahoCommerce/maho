@@ -82,16 +82,33 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
     }
 
     /**
-     * Delete physical file from filesystem
+     * Delete physical file from filesystem and its cached versions
      */
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product';
-            $filePath = $baseDir . DS . $fileName;
+            $baseDir = Mage::getBaseDir('media') . '/catalog/product';
+            $filePath = $baseDir . '/' . $fileName;
 
+            // Delete original file
             if (file_exists($filePath)) {
                 unlink($filePath);
+            }
+
+            // Delete all cached versions - search for all cache files matching this dispersed path
+            $cacheDir = $baseDir . '/cache';
+            if (is_dir($cacheDir)) {
+                // Use glob to find all cached versions of this file
+                // Cache structure: /cache/*/image/*/{dispersed_path}
+                $pattern = $cacheDir . '/*/image/*/' . ltrim($fileName, '/');
+                $cachedFiles = glob($pattern);
+                if ($cachedFiles) {
+                    foreach ($cachedFiles as $cachedFile) {
+                        if (file_exists($cachedFile)) {
+                            unlink($cachedFile);
+                        }
+                    }
+                }
             }
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical
