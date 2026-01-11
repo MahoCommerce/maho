@@ -74,7 +74,6 @@ class Mage_Catalog_Model_Product_Attribute_Frontend_File extends Mage_Eav_Model_
     /**
      * Get attribute value for display (calls getValueAsHtml)
      *
-     * @param \Maho\DataObject $object
      * @return string
      */
     #[\Override]

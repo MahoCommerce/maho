@@ -65,7 +65,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_E
             if ($oldValue) {
                 $this->_deleteFile($oldValue);
             }
-            $object->setData($name, null);
+            $object->setData($name);
             $this->getAttribute()->getEntity()->saveAttribute($object, $name);
             return $this;
         }
