@@ -13,352 +13,181 @@ $categories = $this->getCategoriesTree();
 ?>
 
 <style>
-/* FeedManager Category Mapping - Consistent Design System */
-.fm-category-page {
-    padding: 20px;
-}
-.fm-page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.fm-page-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #374151;
-    margin: 0;
-}
-.fm-header-actions {
-    display: flex;
-    gap: 8px;
-}
+/* Only custom styles for unique components not covered by Maho defaults */
 
-/* Button styles matching Filters tab */
-.fm-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: #fff;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #374151;
-    cursor: pointer;
-    white-space: nowrap;
-    text-decoration: none;
-}
-.fm-btn:hover {
-    background: #f8fafc;
-    border-color: #9ca3af;
-}
-.fm-btn-primary {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    color: #fff;
-}
-.fm-btn-primary:hover {
-    background: #2563eb;
-    border-color: #2563eb;
-}
-.fm-btn-secondary {
-    background: #f8fafc;
-    border-color: #d1d5db;
-}
-.fm-btn-small {
-    padding: 6px 12px;
-    font-size: 12px;
-}
-
-/* Platform selector */
-.fm-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-}
-.fm-toolbar-label {
-    font-weight: 600;
-    font-size: 13px;
-    color: #374151;
-}
-.fm-select {
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    font-size: 13px;
-    background: #fff;
-    height: 36px;
-    min-width: 200px;
-}
-.fm-select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
-}
-
-/* Bulk mode bar */
-.fm-bulk-bar {
+/* Bulk mode bar - unique component */
+#bulk-mode-bar {
     display: none;
-    background: #3b82f6;
+    background: #eb5202;
     color: #fff;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    border-radius: 6px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
 }
-.fm-bulk-bar.active {
-    display: block;
-}
-.fm-bulk-bar-content {
+#bulk-mode-bar.active { display: block; }
+#bulk-mode-bar .bar-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-.fm-bulk-bar-info {
+#bulk-mode-bar .bar-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
-.fm-bulk-bar-title {
-    font-weight: 600;
-}
-.fm-bulk-bar-category {
+#bulk-mode-bar .bar-category {
     background: rgba(255,255,255,0.2);
-    padding: 4px 12px;
-    border-radius: 4px;
+    padding: 3px 10px;
+    border-radius: 3px;
     font-size: 12px;
 }
-.fm-btn-exit {
-    background: #fff;
-    color: #3b82f6;
-    border: none;
-    padding: 6px 16px;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 13px;
-}
-.fm-btn-exit:hover {
-    background: #f0f9ff;
-}
 
-/* Table styles */
-.fm-table-container {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    overflow: hidden;
-}
-.fm-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.fm-table th {
-    background: #f8fafc;
-    padding: 12px 16px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 12px;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid #e2e8f0;
-}
-.fm-table td {
-    padding: 10px 16px;
-    border-bottom: 1px solid #f3f4f6;
-    font-size: 13px;
-    color: #374151;
-    vertical-align: middle;
-}
-.fm-table tbody tr:hover {
-    background: #f9fafb;
-}
-.fm-table tbody tr:last-child td {
-    border-bottom: none;
-}
-.fm-table tbody tr.bulk-source td {
-    background: #dbeafe;
-}
-
-/* Category path with indentation */
-.fm-category-path {
-    display: inline-block;
-}
-
-/* Input styles */
-.fm-input {
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    font-size: 13px;
-    background: #fff;
-    width: 100%;
-    box-sizing: border-box;
-}
-.fm-input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
-}
-.fm-input.mapped {
-    background-color: #ecfdf5;
-    border-color: #6ee7b7;
-}
-.fm-input.bulk-target {
-    cursor: pointer;
-    box-shadow: 0 0 0 2px #3b82f6;
-}
-.fm-input.bulk-target:hover {
-    background-color: #eff6ff;
-}
-
-/* Autocomplete dropdown */
-.fm-autocomplete {
+/* Autocomplete dropdown - unique component */
+.autocomplete-dropdown {
     position: absolute;
     background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    max-height: 240px;
+    border: 1px solid #ccc;
+    max-height: 200px;
     overflow-y: auto;
     z-index: 1000;
-    width: 400px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 350px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     display: none;
 }
-.fm-autocomplete-item {
-    padding: 10px 14px;
+.autocomplete-item {
+    padding: 8px 12px;
     cursor: pointer;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid #eee;
 }
-.fm-autocomplete-item:last-child {
-    border-bottom: none;
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover { background: #f5f5f5; }
+.autocomplete-item .path { font-size: 13px; }
+.autocomplete-item .id { font-size: 11px; color: #888; margin-top: 2px; }
+
+/* State classes */
+input.input-text.mapped {
+    background-color: #e6f7e6;
+    border-color: #5cb85c;
 }
-.fm-autocomplete-item:hover {
-    background: #f8fafc;
+input.input-text.bulk-target {
+    cursor: pointer;
+    box-shadow: 0 0 0 2px #eb5202;
 }
-.fm-autocomplete-path {
-    font-size: 13px;
-    color: #374151;
+input.input-text.bulk-target:hover {
+    background-color: #fff5f0;
 }
-.fm-autocomplete-id {
-    font-size: 11px;
-    color: #9ca3af;
-    margin-top: 2px;
+tr.bulk-source td {
+    background: #fff0e6;
 }
 
-/* Action buttons in table */
-.fm-actions {
+/* Input container for positioning */
+.input-wrapper { position: relative; }
+
+/* Button spacing in grid */
+.grid td .btn-group {
     display: flex;
-    gap: 6px;
-    white-space: nowrap;
+    gap: 5px;
 }
-.bulk-mode-active .fm-btn-copy {
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-/* Input container for positioning autocomplete */
-.fm-input-container {
-    position: relative;
-}
+.grid td .btn-group button { margin: 0; }
 </style>
 
-<div class="fm-category-page">
-    <div class="fm-page-header">
-        <h2 class="fm-page-title"><?php echo $this->__('Category Mapping') ?></h2>
-        <div class="fm-header-actions">
-            <a href="<?php echo $this->getUrl('*/feedmanager_feed/') ?>" class="fm-btn fm-btn-secondary">
-                ← <?php echo $this->__('Back') ?>
-            </a>
-            <button type="button" class="fm-btn" onclick="CategoryMapping.autoMap()">
-                <?php echo $this->__('Auto-Map Unmapped') ?>
-            </button>
-            <button type="button" class="fm-btn fm-btn-primary" onclick="CategoryMapping.save()">
-                <?php echo $this->__('Save Mappings') ?>
-            </button>
-        </div>
-    </div>
+<div class="content-header">
+    <table cellspacing="0" width="100%">
+        <tr>
+            <td><h3><?php echo $this->__('Category Mapping') ?></h3></td>
+            <td class="form-buttons" style="text-align: right;">
+                <button type="button" class="back" onclick="window.location='<?php echo $this->getUrl('*/feedmanager_feed/') ?>'">
+                    <span><?php echo $this->__('Back') ?></span>
+                </button>
+                <button type="button" onclick="CategoryMapping.autoMap()">
+                    <span><?php echo $this->__('Auto-Map Unmapped') ?></span>
+                </button>
+                <button type="button" class="save" onclick="CategoryMapping.save()">
+                    <span><?php echo $this->__('Save Mappings') ?></span>
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
 
-    <div class="fm-toolbar">
-        <label class="fm-toolbar-label" for="platform-select"><?php echo $this->__('Platform:') ?></label>
-        <select id="platform-select" class="fm-select" onchange="CategoryMapping.loadCategories()">
-            <?php foreach ($platforms as $code => $name): ?>
-                <?php if ($code): ?>
-                    <option value="<?php echo $this->escapeHtml($code) ?>"><?php echo $this->escapeHtml($name) ?></option>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </select>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4><?php echo $this->__('Platform') ?></h4>
     </div>
-
-    <div id="bulk-mode-bar" class="fm-bulk-bar">
-        <div class="fm-bulk-bar-content">
-            <div class="fm-bulk-bar-info">
-                <span class="fm-bulk-bar-title"><?php echo $this->__('Bulk Mode Active') ?></span>
-                <span><?php echo $this->__('Click to apply, Shift+Click for range:') ?></span>
-                <span id="bulk-category-display" class="fm-bulk-bar-category"></span>
-            </div>
-            <button type="button" class="fm-btn-exit" onclick="CategoryMapping.exitBulkMode()">
-                <?php echo $this->__('Exit Bulk Mode') ?> (ESC)
-            </button>
-        </div>
-    </div>
-
-    <div class="fm-table-container">
-        <table class="fm-table" id="category-mapping-grid">
-            <thead>
-                <tr>
-                    <th style="width: 35%;"><?php echo $this->__('Store Category') ?></th>
-                    <th style="width: 45%;"><?php echo $this->__('Platform Category') ?></th>
-                    <th style="width: 20%;"><?php echo $this->__('Actions') ?></th>
-                </tr>
-            </thead>
-            <tbody id="category-rows">
-                <?php foreach ($categories as $category): ?>
-                    <tr data-category-id="<?php echo (int) $category['id'] ?>">
-                        <td>
-                            <span class="fm-category-path" style="padding-left: <?php echo (($category['level'] - 1) * 20) ?>px;">
-                                <?php echo $this->escapeHtml($category['path']) ?>
-                            </span>
-                        </td>
-                        <td>
-                            <div class="fm-input-container">
-                                <input type="text"
-                                       class="fm-input platform-category-input"
-                                       id="category-<?php echo (int) $category['id'] ?>-path"
-                                       data-category-id="<?php echo (int) $category['id'] ?>"
-                                       placeholder="<?php echo $this->__('Search or enter platform category...') ?>"
-                                       autocomplete="off" />
-                                <input type="hidden"
-                                       id="category-<?php echo (int) $category['id'] ?>-id"
-                                       data-category-id="<?php echo (int) $category['id'] ?>" />
-                                <div class="fm-autocomplete" id="autocomplete-<?php echo (int) $category['id'] ?>"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="fm-actions">
-                                <button type="button" class="fm-btn fm-btn-small fm-btn-copy" onclick="CategoryMapping.copyMapping(<?php echo (int) $category['id'] ?>)" title="<?php echo $this->__('Copy this mapping for bulk apply') ?>">
-                                    <?php echo $this->__('Copy') ?>
-                                </button>
-                                <button type="button" class="fm-btn fm-btn-small" onclick="CategoryMapping.clearMapping(<?php echo (int) $category['id'] ?>)">
-                                    <?php echo $this->__('Clear') ?>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
+    <fieldset>
+        <table class="form-list">
+            <tr>
+                <td class="label"><label for="platform-select"><?php echo $this->__('Platform') ?></label></td>
+                <td class="value">
+                    <select id="platform-select" onchange="CategoryMapping.loadCategories()">
+                        <?php foreach ($platforms as $code => $name): ?>
+                            <?php if ($code): ?>
+                                <option value="<?php echo $this->escapeHtml($code) ?>"><?php echo $this->escapeHtml($name) ?></option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
         </table>
+    </fieldset>
+</div>
+
+<div id="bulk-mode-bar">
+    <div class="bar-content">
+        <div class="bar-info">
+            <strong><?php echo $this->__('Bulk Mode Active') ?></strong>
+            <span><?php echo $this->__('Click to apply, Shift+Click for range:') ?></span>
+            <span id="bulk-category-display" class="bar-category"></span>
+        </div>
+        <button type="button" onclick="CategoryMapping.exitBulkMode()">
+            <span><?php echo $this->__('Exit Bulk Mode') ?> (ESC)</span>
+        </button>
     </div>
+</div>
+
+<div class="grid">
+    <table id="category-mapping-grid">
+        <thead>
+            <tr class="headings">
+                <th style="width: 35%;"><?php echo $this->__('Store Category') ?></th>
+                <th style="width: 45%;"><?php echo $this->__('Platform Category') ?></th>
+                <th style="width: 20%;"><?php echo $this->__('Actions') ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($categories as $category): ?>
+                <tr data-category-id="<?php echo (int) $category['id'] ?>">
+                    <td style="padding-left: <?php echo (($category['level'] - 1) * 20) + 8 ?>px;">
+                        <?php echo $this->escapeHtml($category['path']) ?>
+                    </td>
+                    <td>
+                        <div class="input-wrapper">
+                            <input type="text"
+                                   class="input-text platform-category-input"
+                                   id="category-<?php echo (int) $category['id'] ?>-path"
+                                   data-category-id="<?php echo (int) $category['id'] ?>"
+                                   placeholder="<?php echo $this->__('Search or enter platform category...') ?>"
+                                   autocomplete="off" />
+                            <input type="hidden"
+                                   id="category-<?php echo (int) $category['id'] ?>-id"
+                                   data-category-id="<?php echo (int) $category['id'] ?>" />
+                            <div class="autocomplete-dropdown" id="autocomplete-<?php echo (int) $category['id'] ?>"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button type="button" class="btn-copy" onclick="CategoryMapping.copyMapping(<?php echo (int) $category['id'] ?>)" title="<?php echo $this->__('Copy this mapping for bulk apply') ?>">
+                                <span><?php echo $this->__('Copy') ?></span>
+                            </button>
+                            <button type="button" class="delete" onclick="CategoryMapping.clearMapping(<?php echo (int) $category['id'] ?>)">
+                                <span><?php echo $this->__('Clear') ?></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>
 
 <script>
@@ -502,10 +331,10 @@ const CategoryMapping = {
 
         let html = '';
         results.forEach(result => {
-            html += '<div class="fm-autocomplete-item" onclick="CategoryMapping.selectCategory(' + categoryId + ', \'' +
+            html += '<div class="autocomplete-item" onclick="CategoryMapping.selectCategory(' + categoryId + ', \'' +
                     this.escapeHtml(result.id) + '\', \'' + this.escapeHtml(result.path) + '\')">' +
-                    '<div class="fm-autocomplete-path">' + this.escapeHtml(result.path) + '</div>' +
-                    '<div class="fm-autocomplete-id">ID: ' + this.escapeHtml(result.id) + '</div>' +
+                    '<div class="path">' + this.escapeHtml(result.path) + '</div>' +
+                    '<div class="id">ID: ' + this.escapeHtml(result.id) + '</div>' +
                     '</div>';
         });
 
@@ -565,7 +394,6 @@ const CategoryMapping = {
         // Show bulk mode UI
         document.getElementById('bulk-mode-bar').classList.add('active');
         document.getElementById('bulk-category-display').textContent = this.bulkCategoryPath;
-        document.querySelector('.fm-category-page').classList.add('bulk-mode-active');
 
         // Highlight source row
         const sourceRow = document.querySelector('tr[data-category-id="' + categoryId + '"]');
@@ -591,7 +419,6 @@ const CategoryMapping = {
 
         // Hide bulk mode UI
         document.getElementById('bulk-mode-bar').classList.remove('active');
-        document.querySelector('.fm-category-page').classList.remove('bulk-mode-active');
 
         // Remove source row highlight
         document.querySelectorAll('tr.bulk-source').forEach(row => {
@@ -612,9 +439,9 @@ const CategoryMapping = {
         if (pathInput) {
             pathInput.value = this.bulkCategoryPath;
             pathInput.classList.add('mapped');
-            // Flash effect to confirm application
+            // Flash effect
             pathInput.style.transition = 'background-color 0.3s';
-            pathInput.style.backgroundColor = '#86efac';
+            pathInput.style.backgroundColor = '#90ee90';
             setTimeout(() => {
                 pathInput.style.backgroundColor = '';
             }, 300);

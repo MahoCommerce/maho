@@ -53,8 +53,8 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
             throw new RuntimeException("Cannot open file for writing: {$filePath}");
         }
 
-        // Pre-define headers from platform if available
-        if ($platform) {
+        // Pre-define headers from platform if available AND no custom headers already set
+        if ($platform && empty($this->_headers)) {
             $this->_headers = array_keys($platform->getAllAttributes());
         }
 

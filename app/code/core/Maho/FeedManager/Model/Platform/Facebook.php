@@ -60,7 +60,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
         'price' => [
             'label' => 'Price',
             'required' => true,
-            'description' => 'Product price with currency (e.g., 25.00 AUD)',
+            'description' => 'Product price with currency (e.g., 25.00 USD)',
         ],
         'link' => [
             'label' => 'Link',

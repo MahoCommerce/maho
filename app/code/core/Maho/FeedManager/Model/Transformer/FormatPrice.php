@@ -21,7 +21,7 @@ class Maho_FeedManager_Model_Transformer_FormatPrice extends Maho_FeedManager_Mo
             'label' => 'Currency Code',
             'type' => 'text',
             'required' => false,
-            'note' => 'ISO currency code (e.g., AUD, USD). Leave empty for no currency suffix.',
+            'note' => 'ISO currency code (e.g., USD, EUR). Leave empty for no currency suffix.',
         ],
         'decimals' => [
             'label' => 'Decimal Places',

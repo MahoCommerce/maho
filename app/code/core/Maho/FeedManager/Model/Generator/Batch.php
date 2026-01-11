@@ -244,6 +244,11 @@ class Maho_FeedManager_Model_Generator_Batch
                 }
             }
 
+            // Close JSON array if needed
+            if ($this->_feed->getFileFormat() === 'json' && ($this->_state['json_started'] ?? false)) {
+                file_put_contents($tempPath, "\n]}", FILE_APPEND);
+            }
+
             // Validate the generated feed
             $validator = new Maho_FeedManager_Model_Validator();
             if (!$validator->validate($tempPath, $this->_feed->getFileFormat())) {
@@ -388,18 +393,56 @@ class Maho_FeedManager_Model_Generator_Batch
 
         $tempPath = $this->_state['temp_path'];
         $processedInBatch = 0;
+        $format = $this->_feed->getFileFormat();
 
-        // Determine XML generation mode
+        // Determine generation mode
         $xmlStructure = $this->_feed->getXmlStructure();
         $xmlTemplate = $this->_feed->getXmlItemTemplate();
-        $isStructureMode = !empty($xmlStructure) && $this->_feed->getFileFormat() === 'xml';
-        $isTemplateMode = !empty($xmlTemplate) && $this->_feed->getFileFormat() === 'xml' && !$isStructureMode;
+        $isStructureMode = !empty($xmlStructure) && $format === 'xml';
+        $isTemplateMode = !empty($xmlTemplate) && $format === 'xml' && !$isStructureMode;
+        $isCsvMode = $format === 'csv';
+        $isJsonMode = $format === 'json';
         $itemTag = trim($this->_feed->getXmlItemTag() ?: 'item');
 
         // Parse structure once if using structure mode
         $structure = null;
         if ($isStructureMode) {
             $structure = Mage::helper('core')->jsonDecode($xmlStructure);
+        }
+
+        // For CSV, get headers from CSV columns or mapper
+        $csvHeaders = [];
+        $csvDelimiter = ',';
+        $csvEnclosure = '"';
+        if ($isCsvMode) {
+            $csvColumns = $this->_feed->getCsvColumns();
+            if ($csvColumns) {
+                $columns = Mage::helper('core')->jsonDecode($csvColumns);
+                if (is_array($columns) && !empty($columns)) {
+                    $csvHeaders = array_column($columns, 'name');
+                    $this->_mapper->setMappingsFromCsvColumns($columns);
+                }
+            }
+            $delimiter = $this->_feed->getCsvDelimiter();
+            if ($delimiter !== null && $delimiter !== '') {
+                $csvDelimiter = $delimiter === '&#9;' ? "\t" : $delimiter;
+            }
+            $enclosure = $this->_feed->getCsvEnclosure();
+            if ($enclosure !== null) {
+                $csvEnclosure = $enclosure === '&quot;' ? '"' : ($enclosure === '&#39;' ? "'" : $enclosure);
+            }
+        }
+
+        // For JSON, get structure if available
+        $jsonStructure = null;
+        if ($isJsonMode) {
+            $jsonStructureData = $this->_feed->getJsonStructure();
+            if ($jsonStructureData) {
+                $jsonStructure = Mage::helper('core')->jsonDecode($jsonStructureData);
+                if (is_array($jsonStructure) && !empty($jsonStructure)) {
+                    $this->_mapper->setMappingsFromJsonStructure($jsonStructure);
+                }
+            }
         }
 
         foreach ($collection as $product) {
@@ -437,10 +480,49 @@ class Maho_FeedManager_Model_Generator_Batch
                     }
 
                     file_put_contents($tempPath, $output, FILE_APPEND);
-                } else {
-                    // Standard mapped output (would need writer support)
+                } elseif ($isCsvMode) {
+                    // CSV generation
                     $mappedData = $this->_mapper->mapProduct($product);
-                    // TODO: Append to CSV/JSON file
+
+                    // Write header row on first product
+                    if (!($this->_state['csv_header_written'] ?? false)) {
+                        if (empty($csvHeaders)) {
+                            $csvHeaders = array_keys($mappedData);
+                        }
+                        if ($this->_feed->getCsvIncludeHeader() !== false) {
+                            $this->_writeCsvRow($tempPath, $csvHeaders, $csvDelimiter, $csvEnclosure);
+                        }
+                        $this->_state['csv_header_written'] = true;
+                        $this->_state['csv_headers'] = $csvHeaders;
+                    }
+
+                    // Write data row in header order
+                    $row = [];
+                    foreach ($this->_state['csv_headers'] as $header) {
+                        $value = $mappedData[$header] ?? '';
+                        if (is_array($value)) {
+                            $value = implode(',', $value);
+                        }
+                        $row[] = (string) $value;
+                    }
+                    $this->_writeCsvRow($tempPath, $row, $csvDelimiter, $csvEnclosure);
+                } elseif ($isJsonMode) {
+                    // JSON generation
+                    if ($jsonStructure) {
+                        $mappedData = $this->_mapper->mapProductToJsonStructure($product, $jsonStructure);
+                    } else {
+                        $mappedData = $this->_mapper->mapProduct($product);
+                    }
+
+                    // Handle JSON array structure
+                    $isFirstProduct = !($this->_state['json_started'] ?? false);
+                    if ($isFirstProduct) {
+                        file_put_contents($tempPath, '{"products":[' . "\n", FILE_APPEND);
+                        $this->_state['json_started'] = true;
+                    } else {
+                        file_put_contents($tempPath, ",\n", FILE_APPEND);
+                    }
+                    file_put_contents($tempPath, json_encode($mappedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), FILE_APPEND);
                 }
 
                 $this->_state['product_count']++;
@@ -462,6 +544,18 @@ class Maho_FeedManager_Model_Generator_Batch
         gc_collect_cycles();
 
         return $processedInBatch;
+    }
+
+    /**
+     * Write a CSV row to file
+     */
+    protected function _writeCsvRow(string $filePath, array $row, string $delimiter = ',', string $enclosure = '"'): void
+    {
+        $handle = fopen($filePath, 'a');
+        if ($handle) {
+            fputcsv($handle, $row, $delimiter, $enclosure);
+            fclose($handle);
+        }
     }
 
     /**

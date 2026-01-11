@@ -55,7 +55,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                 ['value' => 0, 'label' => $this->__('No')],
             ],
             'value' => $feed->getData('price_currency_suffix') ?? 1,
-            'note' => $this->__('Append currency code (e.g., "295.00 AUD") to price fields'),
+            'note' => $this->__('Append currency code (e.g., "295.00 USD") to price fields'),
         ]);
 
         $formatsFieldset->addField('price_decimals', 'text', [
@@ -76,7 +76,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
         $formatsFieldset->addField('price_thousands_sep', 'text', [
             'name' => 'price_thousands_sep',
             'label' => $this->__('Price Thousands Separator'),
-            'value' => $feed->getData('price_thousands_sep') ?? ',',
+            'value' => $feed->getData('price_thousands_sep') ?? '',
             'note' => $this->__('Character used as thousands separator (usually , or . or space). Leave empty for none.'),
         ]);
 
@@ -239,10 +239,20 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
     {
         return <<<SCRIPT
         <style type="text/css">
-        /* Make XML builder textareas full width with labels above */
+        /* Ensure formats fieldset has proper label widths */
+        #mapping_formats_fieldset .form-list td.label {
+            width: 200px;
+            min-width: 200px;
+        }
+
+        /* Make XML builder fieldset use block layout for full-width fields */
+        #mapping_xml_builder_fieldset .form-list,
+        #mapping_xml_builder_fieldset .form-list tbody {
+            display: block;
+        }
         #mapping_xml_builder_fieldset .form-list tr {
-            display: contents;
-            margin-bottom: 20px;
+            display: block;
+            margin-bottom: 15px;
         }
         #mapping_xml_builder_fieldset .form-list td.label {
             display: block;
@@ -262,10 +272,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             max-width: 100%;
         }
 
-        /* Hide empty labels and make builders full width */
-        #mapping_csv_builder_fieldset .form-list td.label,
-        #mapping_json_builder_fieldset .form-list td.label,
+        /* Hide empty labels for builder rows */
         #mapping_xml_builder_fieldset tr:has(#xml-builder-container) td.label {
+            display: none;
+        }
+
+        /* CSV/JSON builder fieldsets */
+        #mapping_csv_builder_fieldset .form-list td.label,
+        #mapping_json_builder_fieldset .form-list td.label {
             display: none;
         }
         #mapping_csv_builder_fieldset .form-list td.value,
@@ -1646,7 +1660,7 @@ XML;
                 </button>
             </div>
 
-            <div id="json-builder-panels" style="display: flex; gap: 20px;">
+            <div id="json-builder-panels" style="display: flex; gap: 20px; max-height: 600px; overflow-y: auto; align-items: flex-start;">
                 <!-- Tree Panel -->
                 <div id="json-tree-panel" style="flex: 1; border: 1px solid #ddd; border-radius: 4px; min-height: 400px;">
                     <div style="padding: 10px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: 600;">
@@ -1668,8 +1682,8 @@ XML;
                 </div>
 
                 <!-- Properties Panel -->
-                <div id="json-properties-panel" style="width: 350px; border: 1px solid #ddd; border-radius: 4px; position: sticky; top: 20px; align-self: flex-start;">
-                    <div style="padding: 10px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: 600;">
+                <div id="json-properties-panel" style="width: 350px; border: 1px solid #ddd; border-radius: 4px; position: sticky; top: 0; align-self: flex-start; max-height: 580px; overflow-y: auto;">
+                    <div style="padding: 10px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: 600; position: sticky; top: 0; z-index: 1;">
                         ' . $this->__('Properties') . '
                     </div>
                     <div id="json-properties-content" style="padding: 15px;">
@@ -2167,7 +2181,7 @@ XML;
                 </button>
             </div>
 
-            <div id="xml-builder-panels" style="display: flex; gap: 20px;">
+            <div id="xml-builder-panels" style="display: flex; gap: 20px; max-height: 600px; overflow-y: auto; align-items: flex-start;">
                 <!-- Tree Panel -->
                 <div id="xml-tree-panel" style="flex: 1; border: 1px solid #ddd; border-radius: 4px; min-height: 400px;">
                     <div style="padding: 10px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: 600;">
@@ -2186,8 +2200,8 @@ XML;
                 </div>
 
                 <!-- Properties Panel -->
-                <div id="xml-properties-panel" style="width: 350px; border: 1px solid #ddd; border-radius: 4px; position: sticky; top: 20px; align-self: flex-start;">
-                    <div style="padding: 10px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: 600;">
+                <div id="xml-properties-panel" style="width: 350px; border: 1px solid #ddd; border-radius: 4px; position: sticky; top: 0; align-self: flex-start; max-height: 580px; overflow-y: auto;">
+                    <div style="padding: 10px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: 600; position: sticky; top: 0; z-index: 1;">
                         ' . $this->__('Properties') . '
                     </div>
                     <div id="xml-properties-content" style="padding: 15px;">

@@ -65,7 +65,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'price' => [
             'label' => 'Price',
             'required' => true,
-            'description' => 'Product price with currency (e.g., 25.00 AUD)',
+            'description' => 'Product price with currency (e.g., 25.00 USD)',
         ],
         'brand' => [
             'label' => 'Brand',
@@ -334,7 +334,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
 
         // Validate price format
         if (isset($productData['price']) && !preg_match('/^\d+\.\d{2}\s[A-Z]{3}$/', $productData['price'])) {
-            $errors[] = 'Price must be in format "XX.XX CUR" (e.g., 25.00 AUD)';
+            $errors[] = 'Price must be in format "XX.XX CUR" (e.g., 25.00 USD)';
         }
 
         // Validate availability values

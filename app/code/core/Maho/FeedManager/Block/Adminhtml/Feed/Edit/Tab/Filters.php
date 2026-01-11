@@ -89,19 +89,19 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             ];
         }
 
-        $html = '<div id="fm-condition-groups-container">';
+        $html = '<div id="cond-groups-container">';
         $html .= $this->_getStyles();
 
-        // Help text
-        $html .= '<div class="fm-help-text">' .
+        // Help text in notice message box
+        $html .= '<ul class="messages"><li class="notice-msg"><ul><li>' .
                  '<strong>' . $this->__('How it works:') . '</strong> ' .
                  $this->__('Create condition groups that products must match. All groups must pass (AND logic). Within each group, if ANY condition matches, the group passes (OR logic).') .
-                 '</div>';
+                 '</li></ul></li></ul>';
 
-        $html .= '<div id="fm-groups-container">';
+        $html .= '<div id="groups-container">';
 
         if (empty($existingGroups)) {
-            $html .= '<div id="fm-empty-state" class="fm-empty-state">' .
+            $html .= '<div id="cond-empty-state" class="cond-empty">' .
                      $this->__('No conditions defined. All products will be included (subject to common exclusions above).') .
                      '</div>';
         } else {
@@ -113,9 +113,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $html .= '</div>';
 
         // Add group button
-        $html .= '<div class="fm-add-group-container">' .
-                 '<button type="button" class="fm-btn fm-btn-primary" onclick="FMConditions.addGroup(); return false;">' .
-                 '<span class="fm-btn-icon">+</span> ' . $this->__('Add Condition Group') .
+        $html .= '<div class="cond-add-group">' .
+                 '<button type="button" class="add" onclick="FMConditions.addGroup(); return false;">' .
+                 '<span>' . $this->__('Add Condition Group') . '</span>' .
                  '</button>' .
                  '</div>';
 
@@ -138,24 +138,24 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
 
         // AND separator between groups
         if ($showAndLabel && $groupIndex > 0) {
-            $html .= '<div class="fm-logic-separator fm-and-separator">' .
-                     '<span class="fm-logic-label">' . $this->__('AND') . '</span>' .
+            $html .= '<div class="logic-sep logic-and">' .
+                     '<span class="logic-label">' . $this->__('AND') . '</span>' .
                      '</div>';
         }
 
-        $html .= '<div class="fm-group" id="fm-group-' . $groupIndex . '" data-group-index="' . $groupIndex . '">';
+        $html .= '<div class="cond-group" id="cond-group-' . $groupIndex . '" data-group-index="' . $groupIndex . '">';
 
         // Group header
-        $html .= '<div class="fm-group-header">' .
-                 '<span class="fm-group-title">' . $this->__('Condition Group') . '</span>' .
-                 '<button type="button" class="fm-btn-icon-only fm-btn-danger" onclick="FMConditions.removeGroup(' . $groupIndex . '); return false;" title="' . $this->__('Remove Group') . '">' .
-                 '&#x2715;</button>' .
+        $html .= '<div class="cond-group-header">' .
+                 '<span class="cond-group-title">' . $this->__('Condition Group') . '</span>' .
+                 '<button type="button" class="delete" onclick="FMConditions.removeGroup(' . $groupIndex . '); return false;" title="' . $this->__('Remove Group') . '">' .
+                 '<span>&#x2715;</span></button>' .
                  '</div>';
 
-        $html .= '<div class="fm-group-body">';
+        $html .= '<div class="cond-group-body">';
 
         // Conditions
-        $html .= '<div class="fm-conditions-list" id="fm-conditions-' . $groupIndex . '">';
+        $html .= '<div class="cond-list" id="cond-list-' . $groupIndex . '">';
 
         if (empty($conditions)) {
             $html .= $this->_renderCondition($groupIndex, 0, '', 'eq', '', $attributes, $operators, $categories, $productTypes, false);
@@ -179,8 +179,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $html .= '</div>';
 
         // Add condition button
-        $html .= '<button type="button" class="fm-btn fm-btn-small" onclick="FMConditions.addCondition(' . $groupIndex . '); return false;">' .
-                 '<span class="fm-btn-icon">+</span> ' . $this->__('Add OR Condition') .
+        $html .= '<button type="button" onclick="FMConditions.addCondition(' . $groupIndex . '); return false;">' .
+                 '<span>' . $this->__('Add OR Condition') . '</span>' .
                  '</button>';
 
         $html .= '</div></div>';
@@ -197,15 +197,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
 
         // OR separator
         if ($showOrLabel) {
-            $html .= '<div class="fm-logic-separator fm-or-separator">' .
-                     '<span class="fm-logic-label fm-or-label">' . $this->__('OR') . '</span>' .
+            $html .= '<div class="logic-sep logic-or">' .
+                     '<span class="logic-label">' . $this->__('OR') . '</span>' .
                      '</div>';
         }
 
-        $html .= '<div class="fm-condition" id="fm-cond-' . $groupIndex . '-' . $condIndex . '">';
+        $html .= '<div class="cond-row" id="cond-row-' . $groupIndex . '-' . $condIndex . '">';
 
         // Attribute select with optgroups
-        $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][attribute]" class="fm-select fm-attr-select" onchange="FMConditions.onAttributeChange(this)">';
+        $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][attribute]" class="attr-select" onchange="FMConditions.onAttributeChange(this)">';
         $html .= '<option value="">' . $this->__('-- Select Attribute --') . '</option>';
         foreach ($attributeData['groups'] as $groupLabel => $groupAttrs) {
             $html .= '<optgroup label="' . $this->escapeHtml($groupLabel) . '">';
@@ -218,7 +218,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $html .= '</select>';
 
         // Operator select
-        $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][operator]" class="fm-select fm-op-select" onchange="FMConditions.onOperatorChange(this)">';
+        $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][operator]" class="op-select" onchange="FMConditions.onOperatorChange(this)">';
         foreach ($operators as $code => $label) {
             $selected = ($operator === $code) ? ' selected' : '';
             $html .= '<option value="' . $this->escapeHtml($code) . '"' . $selected . '>' . $this->escapeHtml($label) . '</option>';
@@ -236,7 +236,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         // Stock availability select (shown when attribute is is_in_stock)
         $stockStyle = (!$isStock || $hideValue) ? ' style="display:none"' : '';
         $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][stock_value]" ' .
-                 'class="fm-select fm-stock-select"' . $stockStyle . ' onchange="FMConditions.onStockChange(this)">';
+                 'class="stock-select"' . $stockStyle . ' onchange="FMConditions.onStockChange(this)">';
         $html .= '<option value="1"' . ($value === '1' ? ' selected' : '') . '>' . $this->__('In Stock') . '</option>';
         $html .= '<option value="0"' . ($value === '0' ? ' selected' : '') . '>' . $this->__('Out of Stock') . '</option>';
         $html .= '</select>';
@@ -246,7 +246,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $selectedTypes = $isProductType ? array_map('trim', explode(',', $value)) : [];
         $multipleTypeAttr = $isSingleProductType ? '' : ' multiple="multiple"';
         $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][type_value]" ' .
-                 'class="fm-select fm-type-select"' . $productTypeStyle . $multipleTypeAttr . ' onchange="FMConditions.onTypeChange(this)">';
+                 'class="type-select"' . $productTypeStyle . $multipleTypeAttr . ' onchange="FMConditions.onTypeChange(this)">';
         foreach ($productTypes as $typeCode => $typeLabel) {
             $selected = in_array($typeCode, $selectedTypes) ? ' selected' : '';
             $html .= '<option value="' . $this->escapeHtml($typeCode) . '"' . $selected . '>' . $this->escapeHtml($typeLabel) . '</option>';
@@ -257,15 +257,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $categoryContainerStyle = (!$isCategory || $hideValue) ? ' style="display:none"' : '';
         $selectedCategories = $isCategory ? array_map('trim', explode(',', $value)) : [];
 
-        $html .= '<div class="fm-category-container"' . $categoryContainerStyle . '>';
+        $html .= '<div class="cond-category-wrap"' . $categoryContainerStyle . '>';
 
         // Search filter input
-        $html .= '<input type="text" class="fm-input fm-category-search" placeholder="' . $this->__('Filter categories...') . '" onkeyup="FMConditions.filterCategories(this)" />';
+        $html .= '<input type="text" class="input-text" placeholder="' . $this->__('Filter categories...') . '" onkeyup="FMConditions.filterCategories(this)" />';
 
         // Category select (single or multi based on operator)
         $multipleAttr = $isSingleCategory ? '' : ' multiple="multiple"';
         $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][category_value]" ' .
-                 'class="fm-select fm-category-select"' . $multipleAttr . ' onchange="FMConditions.onCategoryChange(this)">';
+                 'class="category-select"' . $multipleAttr . ' onchange="FMConditions.onCategoryChange(this)">';
         foreach ($categories as $catId => $catLabel) {
             $selected = in_array((string) $catId, $selectedCategories) ? ' selected' : '';
             $html .= '<option value="' . $this->escapeHtml((string) $catId) . '"' . $selected . '>' . $this->escapeHtml($catLabel) . '</option>';
@@ -277,12 +277,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         // Text value input (hidden for null/notnull operators and special attributes)
         $valueStyle = ($hideValue || $isCategory || $isStock || $isProductType) ? ' style="display:none"' : '';
         $html .= '<input type="text" name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][value]" ' .
-                 'class="fm-input fm-value-input" value="' . $this->escapeHtml($value) . '" ' .
+                 'class="input-text value-input" value="' . $this->escapeHtml($value) . '" ' .
                  'placeholder="' . $this->__('Value') . '"' . $valueStyle . ' />';
 
         // Remove button
-        $html .= '<button type="button" class="fm-btn-icon-only" onclick="FMConditions.removeCondition(' . $groupIndex . ', ' . $condIndex . '); return false;" title="' . $this->__('Remove') . '">' .
-                 '&#x2715;</button>';
+        $html .= '<button type="button" class="delete" onclick="FMConditions.removeCondition(' . $groupIndex . ', ' . $condIndex . '); return false;" title="' . $this->__('Remove') . '">' .
+                 '<span>&#x2715;</span></button>';
 
         $html .= '</div>';
 
@@ -295,211 +295,100 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
     protected function _getStyles(): string
     {
         return '<style>
-            /* Hide empty label and make value span full width for condition groups */
+            /* Layout adjustments for condition groups fieldset */
             #feed_condition_groups_fieldset .form-list td.label:has(label[for="feed_condition_groups_note"]) { display: none; }
             #feed_condition_groups_fieldset .form-list td.value { width: 100%; }
-            .fm-help-text {
-                padding: 12px 16px;
-                margin-bottom: 16px;
-                background: #f0f9ff;
-                border: 1px solid #bae6fd;
-                border-radius: 6px;
-                font-size: 13px;
-                color: #0369a1;
-                line-height: 1.5;
-            }
-            .fm-empty-state {
-                padding: 32px;
+
+            /* Empty state */
+            .cond-empty {
+                padding: 30px;
                 text-align: center;
-                color: #9ca3af;
-                font-size: 13px;
-                background: #f8fafc;
-                border: 1px dashed #d1d5db;
-                border-radius: 6px;
+                color: #888;
+                background: #fafafa;
+                border: 1px dashed #ccc;
             }
-            .fm-group {
+
+            /* Condition group box */
+            .cond-group {
                 background: #fff;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
+                border: 1px solid #ccc;
                 margin-bottom: 0;
             }
-            .fm-group-header {
+            .cond-group-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 12px 16px;
-                background: #f8fafc;
-                border-bottom: 1px solid #e2e8f0;
-                border-radius: 8px 8px 0 0;
+                padding: 10px 12px;
+                background: #f6f6f6;
+                border-bottom: 1px solid #ccc;
             }
-            .fm-group-title {
-                font-weight: 600;
-                font-size: 13px;
-                color: #374151;
-            }
-            .fm-group-body {
-                padding: 16px;
-            }
-            .fm-conditions-list {
-                margin-bottom: 12px;
-            }
-            .fm-condition {
+            .cond-group-title { font-weight: bold; }
+            .cond-group-body { padding: 12px; }
+            .cond-list { margin-bottom: 10px; }
+
+            /* Condition row */
+            .cond-row {
                 display: flex;
-                gap: 8px;
+                gap: 6px;
                 align-items: center;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
-            .fm-condition:last-child {
-                margin-bottom: 0;
-            }
-            .fm-select {
-                padding: 8px 12px;
-                border: 1px solid #d1d5db;
-                border-radius: 4px;
-                font-size: 13px;
-                background: #fff;
-                height: 36px;
-            }
-            .fm-input {
-                padding: 8px 12px;
-                border: 1px solid #d1d5db;
-                border-radius: 4px;
-                font-size: 13px;
-                background: #fff;
-                height: 36px;
-                box-sizing: border-box;
-            }
-            .fm-select:focus, .fm-input:focus {
-                outline: none;
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
-            }
-            .fm-attr-select { width: 220px; }
-            .fm-op-select { width: 150px; }
-            .fm-stock-select { width: 140px; }
-            .fm-type-select { width: 200px; min-height: auto; }
-            .fm-type-select[multiple] { min-height: 100px; height: auto; }
-            .fm-value-input { flex: 1; min-width: 150px; }
-            .fm-category-container {
+            .cond-row:last-child { margin-bottom: 0; }
+
+            /* Form element widths */
+            .cond-row select.attr-select { width: 200px; }
+            .cond-row select.op-select { width: 140px; }
+            .cond-row select.stock-select { width: 120px; }
+            .cond-row select.type-select { width: 180px; min-height: auto; }
+            .cond-row select.type-select[multiple] { min-height: 80px; height: auto; }
+            .cond-row .input-text.value-input { flex: 1; min-width: 120px; }
+
+            /* Category container */
+            .cond-category-wrap {
                 display: flex;
                 flex-direction: column;
                 gap: 4px;
                 flex: 1;
-                min-width: 250px;
+                min-width: 220px;
             }
-            .fm-category-search {
-                height: 32px;
-                font-size: 12px;
-                padding: 6px 10px;
-            }
-            .fm-category-select {
+            .cond-category-wrap .input-text { height: 28px; font-size: 12px; }
+            .cond-category-wrap select {
                 width: 100%;
-                min-height: 120px;
+                min-height: 100px;
                 height: auto;
             }
-            .fm-category-select:not([multiple]) {
+            .cond-category-wrap select:not([multiple]) {
                 min-height: auto;
-                height: 36px;
+                height: 28px;
             }
-            .fm-category-select option.fm-hidden {
-                display: none;
-            }
-            .fm-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 8px 16px;
-                background: #fff;
-                border: 1px solid #d1d5db;
-                border-radius: 4px;
-                font-size: 13px;
-                font-weight: 500;
-                color: #374151;
-                cursor: pointer;
-                white-space: nowrap;
-            }
-            .fm-btn:hover {
-                background: #f8fafc;
-                border-color: #9ca3af;
-            }
-            .fm-btn-primary {
-                background: #3b82f6;
-                border-color: #3b82f6;
-                color: #fff;
-            }
-            .fm-btn-primary:hover {
-                background: #2563eb;
-                border-color: #2563eb;
-            }
-            .fm-btn-small {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-            .fm-btn-icon {
-                font-size: 14px;
-                line-height: 1;
-            }
-            .fm-btn-icon-only {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 32px;
-                height: 32px;
-                padding: 0;
-                background: #fff;
-                border: 1px solid #d1d5db;
-                border-radius: 4px;
-                cursor: pointer;
-                color: #6b7280;
-                font-size: 14px;
-            }
-            .fm-btn-icon-only:hover {
-                background: #f3f4f6;
-                border-color: #9ca3af;
-            }
-            .fm-btn-danger:hover {
-                background: #fef2f2;
-                border-color: #ef4444;
-                color: #ef4444;
-            }
-            .fm-logic-separator {
+            .cond-category-wrap select option.hidden { display: none; }
+
+            /* Logic separators */
+            .logic-sep {
                 display: flex;
                 align-items: center;
-                margin: 12px 0;
+                margin: 10px 0;
             }
-            .fm-logic-separator::before,
-            .fm-logic-separator::after {
+            .logic-sep::before, .logic-sep::after {
                 content: "";
                 flex: 1;
                 height: 1px;
-                background: #e2e8f0;
+                background: #ddd;
             }
-            .fm-logic-label {
-                padding: 4px 12px;
-                font-size: 11px;
-                font-weight: 600;
+            .logic-label {
+                padding: 3px 10px;
+                font-size: 10px;
+                font-weight: bold;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
-                border-radius: 4px;
+                border-radius: 3px;
             }
-            .fm-and-separator .fm-logic-label {
-                background: #dbeafe;
-                color: #1d4ed8;
-            }
-            .fm-or-separator {
-                margin: 8px 0;
-            }
-            .fm-or-separator::before,
-            .fm-or-separator::after {
-                background: #f3e8ff;
-            }
-            .fm-or-label {
-                background: #f3e8ff;
-                color: #7c3aed;
-            }
-            .fm-add-group-container {
-                margin-top: 16px;
-            }
+            .logic-and .logic-label { background: #e3f2fd; color: #1565c0; }
+            .logic-or { margin: 6px 0; }
+            .logic-or::before, .logic-or::after { background: #f3e5f5; }
+            .logic-or .logic-label { background: #f3e5f5; color: #7b1fa2; }
+
+            /* Add group button container */
+            .cond-add-group { margin-top: 12px; }
         </style>';
     }
 
@@ -528,16 +417,16 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             specialAttributes: {$specialAttrs},
 
             init: function() {
-                document.querySelectorAll('.fm-group').forEach(function(group) {
+                document.querySelectorAll('.cond-group').forEach(function(group) {
                     var gIdx = parseInt(group.dataset.groupIndex);
-                    var conditions = group.querySelectorAll('.fm-condition');
+                    var conditions = group.querySelectorAll('.cond-row');
                     this.conditionIndexes[gIdx] = conditions.length;
                 }.bind(this));
             },
 
             addGroup: function() {
-                var container = document.getElementById('fm-groups-container');
-                var emptyState = document.getElementById('fm-empty-state');
+                var container = document.getElementById('groups-container');
+                var emptyState = document.getElementById('cond-empty-state');
                 if (emptyState) emptyState.remove();
                 var groupHtml = this.getGroupHtml(this.groupIndex);
                 container.insertAdjacentHTML('beforeend', groupHtml);
@@ -547,10 +436,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             },
 
             removeGroup: function(groupIndex) {
-                var group = document.getElementById('fm-group-' + groupIndex);
+                var group = document.getElementById('cond-group-' + groupIndex);
                 if (group) {
                     var prev = group.previousElementSibling;
-                    if (prev && prev.classList.contains('fm-and-separator')) prev.remove();
+                    if (prev && prev.classList.contains('logic-and')) prev.remove();
                     group.remove();
                     delete this.conditionIndexes[groupIndex];
                     this.updateAndSeparators();
@@ -559,7 +448,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             },
 
             addCondition: function(groupIndex) {
-                var condList = document.getElementById('fm-conditions-' + groupIndex);
+                var condList = document.getElementById('cond-list-' + groupIndex);
                 if (!condList) return;
                 var condIndex = this.conditionIndexes[groupIndex] || 0;
                 var condHtml = this.getConditionHtml(groupIndex, condIndex, true);
@@ -568,13 +457,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             },
 
             removeCondition: function(groupIndex, condIndex) {
-                var cond = document.getElementById('fm-cond-' + groupIndex + '-' + condIndex);
+                var cond = document.getElementById('cond-row-' + groupIndex + '-' + condIndex);
                 if (cond) {
                     var prev = cond.previousElementSibling;
-                    if (prev && prev.classList.contains('fm-or-separator')) prev.remove();
+                    if (prev && prev.classList.contains('logic-or')) prev.remove();
                     cond.remove();
-                    var condList = document.getElementById('fm-conditions-' + groupIndex);
-                    if (condList && condList.querySelectorAll('.fm-condition').length === 0) {
+                    var condList = document.getElementById('cond-list-' + groupIndex);
+                    if (condList && condList.querySelectorAll('.cond-row').length === 0) {
                         this.removeGroup(groupIndex);
                     }
                 }
@@ -585,12 +474,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             stockOperators: ['eq'],
 
             onAttributeChange: function(select) {
-                var condition = select.closest('.fm-condition');
+                var condition = select.closest('.cond-row');
                 var attrValue = select.value;
                 var isCategory = (attrValue === 'category_ids');
                 var isProductType = (attrValue === 'type_id');
                 var isStock = (attrValue === 'is_in_stock');
-                var opSelect = condition.querySelector('.fm-op-select');
+                var opSelect = condition.querySelector('.op-select');
 
                 // Filter operators based on attribute type
                 this.filterOperators(opSelect, attrValue);
@@ -598,10 +487,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 var hideValue = ['null', 'notnull'].indexOf(opSelect.value) !== -1;
 
                 // Show/hide appropriate inputs
-                var categoryContainer = condition.querySelector('.fm-category-container');
-                var typeSelect = condition.querySelector('.fm-type-select');
-                var stockSelect = condition.querySelector('.fm-stock-select');
-                var valueInput = condition.querySelector('.fm-value-input');
+                var categoryContainer = condition.querySelector('.cond-category-wrap');
+                var typeSelect = condition.querySelector('.type-select');
+                var stockSelect = condition.querySelector('.stock-select');
+                var valueInput = condition.querySelector('.value-input');
 
                 if (categoryContainer) categoryContainer.style.display = (isCategory && !hideValue) ? '' : 'none';
                 if (typeSelect) typeSelect.style.display = (isProductType && !hideValue) ? '' : 'none';
@@ -651,19 +540,19 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             },
 
             onOperatorChange: function(select) {
-                var condition = select.closest('.fm-condition');
-                var attrSelect = condition.querySelector('.fm-attr-select');
+                var condition = select.closest('.cond-row');
+                var attrSelect = condition.querySelector('.attr-select');
                 var attrValue = attrSelect ? attrSelect.value : '';
                 var isCategory = (attrValue === 'category_ids');
                 var isProductType = (attrValue === 'type_id');
                 var isStock = (attrValue === 'is_in_stock');
                 var hideValue = ['null', 'notnull'].indexOf(select.value) !== -1;
 
-                var categoryContainer = condition.querySelector('.fm-category-container');
-                var typeSelect = condition.querySelector('.fm-type-select');
-                var stockSelect = condition.querySelector('.fm-stock-select');
-                var valueInput = condition.querySelector('.fm-value-input');
-                var categorySelect = condition.querySelector('.fm-category-select');
+                var categoryContainer = condition.querySelector('.cond-category-wrap');
+                var typeSelect = condition.querySelector('.type-select');
+                var stockSelect = condition.querySelector('.stock-select');
+                var valueInput = condition.querySelector('.value-input');
+                var categorySelect = condition.querySelector('.category-select');
 
                 if (categoryContainer) categoryContainer.style.display = (isCategory && !hideValue) ? '' : 'none';
                 if (typeSelect) typeSelect.style.display = (isProductType && !hideValue) ? '' : 'none';
@@ -702,8 +591,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             },
 
             onCategoryChange: function(select) {
-                var condition = select.closest('.fm-condition');
-                var valueInput = condition.querySelector('.fm-value-input');
+                var condition = select.closest('.cond-row');
+                var valueInput = condition.querySelector('.value-input');
                 if (valueInput) {
                     var selected = Array.from(select.selectedOptions).map(function(opt) { return opt.value; });
                     valueInput.value = selected.join(',');
@@ -711,8 +600,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             },
 
             onTypeChange: function(select) {
-                var condition = select.closest('.fm-condition');
-                var valueInput = condition.querySelector('.fm-value-input');
+                var condition = select.closest('.cond-row');
+                var valueInput = condition.querySelector('.value-input');
                 if (valueInput) {
                     var selected = Array.from(select.selectedOptions).map(function(opt) { return opt.value; });
                     valueInput.value = selected.join(',');
@@ -720,63 +609,63 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             },
 
             onStockChange: function(select) {
-                var condition = select.closest('.fm-condition');
-                var valueInput = condition.querySelector('.fm-value-input');
+                var condition = select.closest('.cond-row');
+                var valueInput = condition.querySelector('.value-input');
                 if (valueInput) valueInput.value = select.value;
             },
 
             filterCategories: function(input) {
-                var container = input.closest('.fm-category-container');
-                var select = container.querySelector('.fm-category-select');
+                var container = input.closest('.cond-category-wrap');
+                var select = container.querySelector('.category-select');
                 var filter = input.value.toLowerCase();
                 Array.from(select.options).forEach(function(opt) {
                     var text = opt.textContent.toLowerCase();
-                    opt.classList.toggle('fm-hidden', filter && text.indexOf(filter) === -1);
+                    opt.classList.toggle('hidden', filter && text.indexOf(filter) === -1);
                 });
             },
 
             updateAndSeparators: function() {
-                var groups = document.querySelectorAll('.fm-group');
+                var groups = document.querySelectorAll('.cond-group');
                 groups.forEach(function(group, index) {
                     var prev = group.previousElementSibling;
-                    if (index > 0 && (!prev || !prev.classList.contains('fm-and-separator'))) {
+                    if (index > 0 && (!prev || !prev.classList.contains('logic-and'))) {
                         var separator = document.createElement('div');
-                        separator.className = 'fm-logic-separator fm-and-separator';
-                        separator.innerHTML = '<span class="fm-logic-label">AND</span>';
+                        separator.className = 'logic-sep logic-and';
+                        separator.innerHTML = '<span class="logic-label">AND</span>';
                         group.parentNode.insertBefore(separator, group);
-                    } else if (index === 0 && prev && prev.classList.contains('fm-and-separator')) {
+                    } else if (index === 0 && prev && prev.classList.contains('logic-and')) {
                         prev.remove();
                     }
                 });
             },
 
             checkEmpty: function() {
-                var container = document.getElementById('fm-groups-container');
-                if (container.querySelectorAll('.fm-group').length === 0) {
-                    container.innerHTML = '<div id="fm-empty-state" class="fm-empty-state">No conditions defined. All products will be included (subject to common exclusions above).</div>';
+                var container = document.getElementById('groups-container');
+                if (container.querySelectorAll('.cond-group').length === 0) {
+                    container.innerHTML = '<div id="cond-empty-state" class="cond-empty">No conditions defined. All products will be included (subject to common exclusions above).</div>';
                 }
             },
 
             getGroupHtml: function(groupIndex) {
-                return '<div class="fm-group" id="fm-group-' + groupIndex + '" data-group-index="' + groupIndex + '">' +
-                    '<div class="fm-group-header"><span class="fm-group-title">Condition Group</span>' +
-                    '<button type="button" class="fm-btn-icon-only fm-btn-danger" onclick="FMConditions.removeGroup(' + groupIndex + '); return false;" title="Remove Group">&#x2715;</button></div>' +
-                    '<div class="fm-group-body"><div class="fm-conditions-list" id="fm-conditions-' + groupIndex + '">' +
+                return '<div class="cond-group" id="cond-group-' + groupIndex + '" data-group-index="' + groupIndex + '">' +
+                    '<div class="cond-group-header"><span class="cond-group-title">Condition Group</span>' +
+                    '<button type="button" class="delete" onclick="FMConditions.removeGroup(' + groupIndex + '); return false;" title="Remove Group"><span>&#x2715;</span></button></div>' +
+                    '<div class="cond-group-body"><div class="cond-list" id="cond-list-' + groupIndex + '">' +
                     this.getConditionHtml(groupIndex, 0, false) +
-                    '</div><button type="button" class="fm-btn fm-btn-small" onclick="FMConditions.addCondition(' + groupIndex + '); return false;">' +
-                    '<span class="fm-btn-icon">+</span> Add OR Condition</button></div></div>';
+                    '</div><button type="button" onclick="FMConditions.addCondition(' + groupIndex + '); return false;">' +
+                    '<span>Add OR Condition</span></button></div></div>';
             },
 
             getConditionHtml: function(groupIndex, condIndex, showOr) {
                 var html = '';
                 if (showOr) {
-                    html += '<div class="fm-logic-separator fm-or-separator"><span class="fm-logic-label fm-or-label">OR</span></div>';
+                    html += '<div class="logic-sep logic-or"><span class="logic-label">OR</span></div>';
                 }
 
-                html += '<div class="fm-condition" id="fm-cond-' + groupIndex + '-' + condIndex + '">';
+                html += '<div class="cond-row" id="cond-row-' + groupIndex + '-' + condIndex + '">';
 
                 // Attribute select with optgroups
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][attribute]" class="fm-select fm-attr-select" onchange="FMConditions.onAttributeChange(this)">';
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][attribute]" class="attr-select" onchange="FMConditions.onAttributeChange(this)">';
                 html += '<option value="">-- Select Attribute --</option>';
                 for (var groupLabel in this.attributeGroups) {
                     html += '<optgroup label="' + this.escapeHtml(groupLabel) + '">';
@@ -788,37 +677,37 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 html += '</select>';
 
                 // Operator select
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][operator]" class="fm-select fm-op-select" onchange="FMConditions.onOperatorChange(this)">';
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][operator]" class="op-select" onchange="FMConditions.onOperatorChange(this)">';
                 for (var op in this.operators) {
                     html += '<option value="' + this.escapeHtml(op) + '">' + this.escapeHtml(this.operators[op]) + '</option>';
                 }
                 html += '</select>';
 
                 // Stock select (hidden by default)
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][stock_value]" class="fm-select fm-stock-select" style="display:none" onchange="FMConditions.onStockChange(this)">';
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][stock_value]" class="stock-select" style="display:none" onchange="FMConditions.onStockChange(this)">';
                 html += '<option value="1">In Stock</option><option value="0">Out of Stock</option></select>';
 
                 // Product type select (hidden by default)
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][type_value]" class="fm-select fm-type-select" style="display:none" onchange="FMConditions.onTypeChange(this)">';
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][type_value]" class="type-select" style="display:none" onchange="FMConditions.onTypeChange(this)">';
                 for (var typeCode in this.productTypes) {
                     html += '<option value="' + this.escapeHtml(typeCode) + '">' + this.escapeHtml(this.productTypes[typeCode]) + '</option>';
                 }
                 html += '</select>';
 
                 // Category container (hidden by default)
-                html += '<div class="fm-category-container" style="display:none">';
-                html += '<input type="text" class="fm-input fm-category-search" placeholder="Filter categories..." onkeyup="FMConditions.filterCategories(this)" />';
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][category_value]" class="fm-select fm-category-select" multiple="multiple" onchange="FMConditions.onCategoryChange(this)">';
+                html += '<div class="cond-category-wrap" style="display:none">';
+                html += '<input type="text" class="input-text" placeholder="Filter categories..." onkeyup="FMConditions.filterCategories(this)" />';
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][category_value]" class="category-select" multiple="multiple" onchange="FMConditions.onCategoryChange(this)">';
                 for (var catId in this.categories) {
                     html += '<option value="' + this.escapeHtml(catId) + '">' + this.escapeHtml(this.categories[catId]) + '</option>';
                 }
                 html += '</select></div>';
 
                 // Value input
-                html += '<input type="text" name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][value]" class="fm-input fm-value-input" placeholder="Value" />';
+                html += '<input type="text" name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][value]" class="input-text value-input" placeholder="Value" />';
 
                 // Remove button
-                html += '<button type="button" class="fm-btn-icon-only" onclick="FMConditions.removeCondition(' + groupIndex + ', ' + condIndex + '); return false;" title="Remove">&#x2715;</button>';
+                html += '<button type="button" class="delete" onclick="FMConditions.removeCondition(' + groupIndex + ', ' + condIndex + '); return false;" title="Remove"><span>&#x2715;</span></button>';
 
                 html += '</div>';
 
