@@ -28,36 +28,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
             if ($oldValue) {
                 $this->_deleteFile($oldValue);
             }
-
-            $adapter = $object->getResource()->getWriteConnection();
-            $table = $this->getAttribute()->getBackend()->getTable();
-            $storeId = $object->getStoreId();
-            $entityId = $object->getId();
-            $attributeId = $this->getAttribute()->getId();
-
-            // Find the actual store_id used in database
-            $existingStoreId = $adapter->fetchOne(
-                $adapter->select()
-                    ->from($table, 'store_id')
-                    ->where('entity_id = ?', $entityId)
-                    ->where('attribute_id = ?', $attributeId)
-                    ->where('store_id IN (?)', [$storeId, 0])
-                    ->order('store_id DESC')
-            );
-
-            $actualStoreId = $existingStoreId !== false ? $existingStoreId : $storeId;
-
-            $adapter->update(
-                $table,
-                ['value' => ''],
-                [
-                    'entity_id = ?' => $entityId,
-                    'attribute_id = ?' => $attributeId,
-                    'store_id = ?' => $actualStoreId
-                ]
-            );
-
-            $object->setData($name, '');
+            $this->_saveAttributeValue($object, '');
             return $this;
         }
 
@@ -75,53 +46,11 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                 if ($result && isset($result['file'])) {
                     $fileName = $result['file'];
 
-                    // Delete old file if replacing
                     if ($oldValue && $oldValue !== $fileName) {
                         $this->_deleteFile($oldValue);
                     }
 
-                    $adapter = $object->getResource()->getWriteConnection();
-                    $table = $this->getAttribute()->getBackend()->getTable();
-                    $storeId = $object->getStoreId();
-                    $entityId = $object->getId();
-                    $attributeId = $this->getAttribute()->getId();
-
-                    // Check if row exists
-                    $existingStoreId = $adapter->fetchOne(
-                        $adapter->select()
-                            ->from($table, 'store_id')
-                            ->where('entity_id = ?', $entityId)
-                            ->where('attribute_id = ?', $attributeId)
-                            ->where('store_id IN (?)', [$storeId, 0])
-                            ->order('store_id DESC')
-                    );
-
-                    if ($existingStoreId !== false) {
-                        // Row exists, UPDATE it
-                        $adapter->update(
-                            $table,
-                            ['value' => $fileName],
-                            [
-                                'entity_id = ?' => $entityId,
-                                'attribute_id = ?' => $attributeId,
-                                'store_id = ?' => $existingStoreId
-                            ]
-                        );
-                    } else {
-                        // No row exists, INSERT it
-                        $adapter->insert(
-                            $table,
-                            [
-                                'entity_type_id' => $object->getEntityTypeId(),
-                                'attribute_id' => $attributeId,
-                                'store_id' => 0,
-                                'entity_id' => $entityId,
-                                'value' => $fileName
-                            ]
-                        );
-                    }
-
-                    $object->setData($name, $fileName);
+                    $this->_saveAttributeValue($object, $fileName);
                 }
             } catch (Exception $e) {
                 if ($e->getCode() != UPLOAD_ERR_NO_FILE) {
@@ -131,6 +60,56 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
         }
 
         return $this;
+    }
+
+    /**
+     * Save attribute value to database
+     * Uses direct SQL to avoid UNIQUE constraint violations from double-save
+     */
+    protected function _saveAttributeValue($object, string $value): void
+    {
+        $adapter = $object->getResource()->getWriteConnection();
+        $table = $this->getAttribute()->getBackend()->getTable();
+        $storeId = $object->getStoreId();
+        $entityId = $object->getId();
+        $attributeId = $this->getAttribute()->getId();
+
+        // Find actual store_id in database (could be 0 or current store)
+        $existingStoreId = $adapter->fetchOne(
+            $adapter->select()
+                ->from($table, 'store_id')
+                ->where('entity_id = ?', $entityId)
+                ->where('attribute_id = ?', $attributeId)
+                ->where('store_id IN (?)', [$storeId, 0])
+                ->order('store_id DESC')
+        );
+
+        if ($existingStoreId !== false) {
+            // Row exists, UPDATE it
+            $adapter->update(
+                $table,
+                ['value' => $value],
+                [
+                    'entity_id = ?' => $entityId,
+                    'attribute_id = ?' => $attributeId,
+                    'store_id = ?' => $existingStoreId
+                ]
+            );
+        } else {
+            // No row exists, INSERT it
+            $adapter->insert(
+                $table,
+                [
+                    'entity_type_id' => $object->getEntityTypeId(),
+                    'attribute_id' => $attributeId,
+                    'store_id' => 0,
+                    'entity_id' => $entityId,
+                    'value' => $value
+                ]
+            );
+        }
+
+        $object->setData($this->getAttribute()->getName(), $value);
     }
 
     /**
