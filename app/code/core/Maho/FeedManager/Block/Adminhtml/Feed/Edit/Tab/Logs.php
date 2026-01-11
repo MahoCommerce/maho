@@ -82,6 +82,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs extends Mage_Adminhtml
             'renderer' => Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Filesize::class,
         ]);
 
+        $this->addColumn('upload_status', [
+            'header' => $this->__('Upload'),
+            'index' => 'upload_status',
+            'width' => '120px',
+            'renderer' => Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Upload::class,
+        ]);
+
         $this->addColumn('error_messages', [
             'header' => $this->__('Errors'),
             'index' => 'error_messages',

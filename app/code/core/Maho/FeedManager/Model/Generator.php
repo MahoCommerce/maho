@@ -26,6 +26,7 @@ class Maho_FeedManager_Model_Generator
     protected int $_productCount = 0;
     protected int $_errorCount = 0;
     protected array $_errors = [];
+    protected ?string $_tempPath = null;
 
     /**
      * Generate a feed
@@ -55,8 +56,10 @@ class Maho_FeedManager_Model_Generator
             // Configure mapper with builder definitions if available
             $this->_configureMapperFromBuilder();
 
-            // Get output path
+            // Get output path and create temp path for atomic writes
             $outputPath = $this->_getOutputPath();
+            $outputDir = dirname($outputPath);
+            $this->_tempPath = $outputDir . DS . 'feed_' . $feed->getId() . '.tmp';
 
             // Check XML generation mode
             $xmlStructure = $feed->getXmlStructure();
@@ -64,16 +67,16 @@ class Maho_FeedManager_Model_Generator
 
             if (!empty($xmlStructure) && $feed->getFileFormat() === 'xml') {
                 // New visual builder XML generation
-                $this->_generateXmlStructureFile($outputPath);
+                $this->_generateXmlStructureFile($this->_tempPath);
             } elseif (!empty($xmlTemplate) && $feed->getFileFormat() === 'xml') {
                 // Legacy template-based XML generation
-                $this->_generateXmlTemplateFile($outputPath);
+                $this->_generateXmlTemplateFile($this->_tempPath);
             } else {
                 // Standard writer-based generation
                 $this->_writer = $this->_createWriter($feed->getFileFormat());
 
                 // Open writer
-                $this->_writer->open($outputPath, $this->_platform);
+                $this->_writer->open($this->_tempPath, $this->_platform);
 
                 // Process products in batches
                 $this->_processProducts();
@@ -84,7 +87,7 @@ class Maho_FeedManager_Model_Generator
 
             // Validate the generated feed
             $validator = new Maho_FeedManager_Model_Validator();
-            if (!$validator->validate($outputPath, $feed->getFileFormat())) {
+            if (!$validator->validate($this->_tempPath, $feed->getFileFormat())) {
                 $this->_errors = array_merge($this->_errors, $validator->getErrors());
                 throw new RuntimeException('Feed validation failed: ' . implode(', ', $validator->getErrors()));
             }
@@ -93,6 +96,12 @@ class Maho_FeedManager_Model_Generator
             foreach ($validator->getWarnings() as $warning) {
                 $this->_errors[] = "[Validation Warning] {$warning}";
             }
+
+            // Atomic move: rename temp file to final path (preserves existing file until success)
+            if (!rename($this->_tempPath, $outputPath)) {
+                throw new RuntimeException("Failed to move temp file to final path: {$outputPath}");
+            }
+            $this->_tempPath = null; // Clear temp path after successful move
 
             // Apply gzip compression if enabled
             $finalPath = $outputPath;
@@ -121,6 +130,11 @@ class Maho_FeedManager_Model_Generator
         } catch (Exception $e) {
             $this->_errors[] = $e->getMessage();
             $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED);
+
+            // Clean up temp file on failure (preserves existing feed file)
+            if ($this->_tempPath && file_exists($this->_tempPath)) {
+                @unlink($this->_tempPath);
+            }
 
             Mage::logException($e);
             Mage::log(

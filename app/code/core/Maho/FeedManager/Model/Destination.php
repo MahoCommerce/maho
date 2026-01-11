@@ -125,9 +125,9 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     public static function getRequiredConfigFields(string $type): array
     {
         return match ($type) {
-            self::TYPE_SFTP => ['host', 'port', 'username', 'auth_type', 'remote_path'],
-            self::TYPE_FTP => ['host', 'port', 'username', 'password', 'remote_path'],
-            self::TYPE_GOOGLE_API => ['merchant_id', 'target_country'],
+            self::TYPE_SFTP => ['host', 'username', 'auth_type'],
+            self::TYPE_FTP => ['host', 'username', 'password'],
+            self::TYPE_GOOGLE_API => ['merchant_id', 'service_account_json'],
             self::TYPE_FACEBOOK_API => ['catalog_id', 'access_token'],
             default => [],
         };

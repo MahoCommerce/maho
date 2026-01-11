@@ -170,7 +170,11 @@ class Maho_FeedManager_Model_Cron
 
                 // Auto-upload if configured
                 if ($feed->getAutoUpload() && $feed->getDestinationId()) {
-                    $this->_uploadFeed($feed);
+                    $this->_uploadFeed($feed, $log);
+                } else {
+                    $log->recordUploadSkipped(
+                        !$feed->getAutoUpload() ? 'Auto-upload disabled' : 'No destination configured',
+                    );
                 }
             } else {
                 Mage::log(
@@ -190,41 +194,51 @@ class Maho_FeedManager_Model_Cron
     /**
      * Upload feed to configured destination
      */
-    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed): void
+    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, ?Maho_FeedManager_Model_Log $log = null): void
     {
+        $destinationId = (int) $feed->getDestinationId();
+
         try {
-            $destination = Mage::getModel('feedmanager/destination')->load($feed->getDestinationId());
+            $destination = Mage::getModel('feedmanager/destination')->load($destinationId);
 
             if (!$destination->getId() || !$destination->isEnabled()) {
+                $message = 'Destination not found or disabled';
                 Mage::log(
-                    "FeedManager: Destination not found or disabled for feed '{$feed->getName()}'",
+                    "FeedManager: {$message} for feed '{$feed->getName()}'",
                     Mage::LOG_WARNING,
                 );
+                $log?->recordUploadFailure($destinationId, $message);
                 return;
             }
 
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
             $filePath = $feed->getOutputFilePath();
+            $remoteName = $feed->getFilename() . '.' . $feed->getFileFormat();
 
-            $success = $uploader->upload($filePath, $feed->getFilename() . '.' . $feed->getFileFormat());
+            $success = $uploader->upload($filePath, $remoteName);
 
             $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
                 ->setLastUploadStatus($success ? 'success' : 'failed')
                 ->save();
 
             if ($success) {
+                $message = "Uploaded to {$destination->getName()} as {$remoteName}";
                 Mage::log(
                     "FeedManager: Successfully uploaded feed '{$feed->getName()}' to destination '{$destination->getName()}'",
                     Mage::LOG_INFO,
                 );
+                $log?->recordUploadSuccess($destinationId, $message);
             } else {
+                $message = 'Upload returned false';
                 Mage::log(
                     "FeedManager: Failed to upload feed '{$feed->getName()}' to destination '{$destination->getName()}'",
                     Mage::LOG_ERROR,
                 );
+                $log?->recordUploadFailure($destinationId, $message);
             }
         } catch (Exception $e) {
             Mage::logException($e);
+            $log?->recordUploadFailure($destinationId, $e->getMessage());
         }
     }
 

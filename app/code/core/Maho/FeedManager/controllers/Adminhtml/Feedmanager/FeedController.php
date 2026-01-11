@@ -1250,6 +1250,98 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     /**
+     * AJAX action for manual upload
+     */
+    public function uploadAction(): void
+    {
+        $id = (int) $this->getRequest()->getParam('id');
+
+        if (!$id) {
+            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed ID required')]);
+            return;
+        }
+
+        try {
+            /** @var Maho_FeedManager_Model_Feed $feed */
+            $feed = Mage::getModel('feedmanager/feed')->load($id);
+
+            if (!$feed->getId()) {
+                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed not found')]);
+                return;
+            }
+
+            $destinationId = (int) $feed->getDestinationId();
+            if (!$destinationId) {
+                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No destination configured for this feed')]);
+                return;
+            }
+
+            // Check if file exists
+            $filePath = $feed->getOutputFilePath();
+            if (!file_exists($filePath)) {
+                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed file not found. Please generate the feed first.')]);
+                return;
+            }
+
+            /** @var Maho_FeedManager_Model_Destination $destination */
+            $destination = Mage::getModel('feedmanager/destination')->load($destinationId);
+
+            if (!$destination->getId()) {
+                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Destination not found')]);
+                return;
+            }
+
+            if (!$destination->isEnabled()) {
+                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Destination is disabled')]);
+                return;
+            }
+
+            // Perform upload
+            $uploader = new Maho_FeedManager_Model_Uploader($destination);
+            $remoteName = $feed->getFilename() . '.' . $feed->getFileFormat();
+            $success = $uploader->upload($filePath, $remoteName);
+
+            // Update destination last upload info
+            $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
+                ->setLastUploadStatus($success ? 'success' : 'failed')
+                ->save();
+
+            // Get or create log entry for this upload
+            /** @var Maho_FeedManager_Model_Resource_Log_Collection $logCollection */
+            $logCollection = Mage::getResourceModel('feedmanager/log_collection')
+                ->addFeedFilter($id)
+                ->setOrder('started_at', 'DESC')
+                ->setPageSize(1);
+
+            $log = $logCollection->getFirstItem();
+
+            if ($success) {
+                $message = $this->__('Uploaded to %s as %s', $destination->getName(), $remoteName);
+                if ($log->getId()) {
+                    $log->recordUploadSuccess($destinationId, $message);
+                }
+                $this->_sendJsonResponse([
+                    'success' => true,
+                    'message' => $message,
+                ]);
+            } else {
+                $message = $this->__('Upload failed');
+                if ($log->getId()) {
+                    $log->recordUploadFailure($destinationId, $message);
+                }
+                $this->_sendJsonResponse([
+                    'error' => true,
+                    'message' => $message,
+                ]);
+            }
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
      * New condition HTML action (AJAX)
      * Used by the Rule conditions builder to add new conditions
      */

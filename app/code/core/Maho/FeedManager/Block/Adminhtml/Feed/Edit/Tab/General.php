@@ -140,6 +140,28 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
             'note' => $this->__('Automatically upload feed after generation'),
         ]);
 
+        // Add Upload Now button for existing feeds with a generated file and destination
+        if ($feed->getId() && $feed->getLastGeneratedAt() && $feed->getDestinationId()) {
+            $uploadUrl = $this->getUrl('*/*/upload', ['id' => $feed->getId()]);
+            $uploadFieldset->addField('upload_now', 'note', [
+                'label' => $this->__('Manual Upload'),
+                'text' => '<button type="button" class="scalable" onclick="FeedUploader.upload(\'' . $uploadUrl . '\')" id="upload-now-btn-fieldset">'
+                    . '<span><span><span>' . $this->__('Upload Now') . '</span></span></span></button>'
+                    . '<span id="upload-status" style="margin-left: 10px;"></span>'
+                    . $this->_getUploadScript(),
+            ]);
+        } elseif ($feed->getId() && !$feed->getDestinationId()) {
+            $uploadFieldset->addField('upload_now', 'note', [
+                'label' => $this->__('Manual Upload'),
+                'text' => '<span class="note">' . $this->__('Select a destination to enable manual upload') . '</span>',
+            ]);
+        } elseif ($feed->getId() && !$feed->getLastGeneratedAt()) {
+            $uploadFieldset->addField('upload_now', 'note', [
+                'label' => $this->__('Manual Upload'),
+                'text' => '<span class="note">' . $this->__('Generate the feed first to enable upload') . '</span>',
+            ]);
+        }
+
         $form->setValues($feed->getData());
         $this->setForm($form);
 
@@ -149,5 +171,70 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
     protected function _getFeed(): Maho_FeedManager_Model_Feed
     {
         return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
+    }
+
+    /**
+     * Get JavaScript for upload button
+     */
+    protected function _getUploadScript(): string
+    {
+        $uploading = addslashes($this->__('Uploading...'));
+        $uploadNow = addslashes($this->__('Upload Now'));
+        $success = addslashes($this->__('Upload successful!'));
+        $failed = addslashes($this->__('Upload failed'));
+
+        return <<<JS
+<script>
+const FeedUploader = {
+    upload: function(url) {
+        const btn = document.getElementById('upload-now-btn-fieldset');
+        const status = document.getElementById('upload-status');
+
+        if (btn) {
+            btn.disabled = true;
+            btn.querySelector('span span span').textContent = '{$uploading}';
+        }
+        if (status) {
+            status.innerHTML = '';
+        }
+
+        mahoFetch(url, {
+            method: 'POST',
+            body: new URLSearchParams({ form_key: FORM_KEY }),
+            loaderArea: false
+        })
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.querySelector('span span span').textContent = '{$uploadNow}';
+            }
+            if (data.success) {
+                if (status) {
+                    status.innerHTML = '<span style="color: #2e7d32;">✓ ' + this.escapeHtml(data.message || '{$success}') + '</span>';
+                }
+            } else {
+                if (status) {
+                    status.innerHTML = '<span style="color: #c62828;">✗ ' + this.escapeHtml(data.message || '{$failed}') + '</span>';
+                }
+            }
+        })
+        .catch(error => {
+            if (btn) {
+                btn.disabled = false;
+                btn.querySelector('span span span').textContent = '{$uploadNow}';
+            }
+            if (status) {
+                status.innerHTML = '<span style="color: #c62828;">✗ ' + this.escapeHtml(error.message || '{$failed}') + '</span>';
+            }
+        });
+    },
+    escapeHtml: function(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+};
+</script>
+JS;
     }
 }

@@ -29,17 +29,9 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit extends Mage_Adminhtml_B
             'class' => 'save',
         ], -100);
 
-        if ($this->_getDestination()->getId()) {
-            $this->_addButton('test', [
-                'label' => $this->__('Test Connection'),
-                'onclick' => "setLocation('{$this->getTestUrl()}')",
-                'class' => 'add',
-            ], -90);
-        }
-
         $this->_formScripts[] = "
             function saveAndContinueEdit() {
-                var form = $('edit_form');
+                var form = document.getElementById('edit_form');
                 if (form) {
                     form.action = form.action + 'back/edit/';
                     form.submit();

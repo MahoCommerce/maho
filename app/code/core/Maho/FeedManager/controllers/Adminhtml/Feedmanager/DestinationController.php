@@ -151,43 +151,44 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
 
     /**
      * Extract config fields from POST data based on destination type
+     * Form sends data as config[field] which becomes $data['config']['field']
      */
     protected function _extractConfigFields(array $data): array
     {
         $type = $data['type'] ?? '';
-        $config = [];
+        $configData = $data['config'] ?? [];
 
-        $config = match ($type) {
+        return match ($type) {
             Maho_FeedManager_Model_Destination::TYPE_SFTP => [
-                'host' => $data['host'] ?? '',
-                'port' => $data['port'] ?? '22',
-                'username' => $data['username'] ?? '',
-                'auth_type' => $data['auth_type'] ?? 'password',
-                'password' => $data['password'] ?? '',
-                'private_key' => $data['private_key'] ?? '',
-                'remote_path' => $data['remote_path'] ?? '/',
+                'host' => $configData['host'] ?? '',
+                'port' => $configData['port'] ?? '22',
+                'username' => $configData['username'] ?? '',
+                'auth_type' => $configData['auth_type'] ?? 'password',
+                'password' => $configData['password'] ?? '',
+                'private_key' => $configData['private_key'] ?? '',
+                'remote_path' => $configData['remote_path'] ?? '/',
             ],
             Maho_FeedManager_Model_Destination::TYPE_FTP => [
-                'host' => $data['host'] ?? '',
-                'port' => $data['port'] ?? '21',
-                'username' => $data['username'] ?? '',
-                'password' => $data['password'] ?? '',
-                'remote_path' => $data['remote_path'] ?? '/',
-                'passive_mode' => $data['passive_mode'] ?? '1',
-                'ssl' => $data['ssl'] ?? '0',
+                'host' => $configData['host'] ?? '',
+                'port' => $configData['port'] ?? '21',
+                'username' => $configData['username'] ?? '',
+                'password' => $configData['password'] ?? '',
+                'remote_path' => $configData['remote_path'] ?? '/',
+                'passive_mode' => $configData['passive_mode'] ?? '1',
+                'ssl' => $configData['ssl'] ?? '0',
             ],
             Maho_FeedManager_Model_Destination::TYPE_GOOGLE_API => [
-                'merchant_id' => $data['merchant_id'] ?? '',
-                'content_api_key' => $data['content_api_key'] ?? '',
+                'merchant_id' => $configData['merchant_id'] ?? '',
+                'target_country' => $configData['target_country'] ?? 'AU',
+                'service_account_json' => $configData['service_account_json'] ?? '',
             ],
             Maho_FeedManager_Model_Destination::TYPE_FACEBOOK_API => [
-                'catalog_id' => $data['catalog_id'] ?? '',
-                'access_token' => $data['access_token'] ?? '',
+                'business_id' => $configData['business_id'] ?? '',
+                'catalog_id' => $configData['catalog_id'] ?? '',
+                'access_token' => $configData['access_token'] ?? '',
             ],
-            default => $config,
+            default => [],
         };
-
-        return $config;
     }
 
     public function deleteAction(): void

@@ -27,6 +27,36 @@ class Maho_FeedManager_Model_Uploader
     }
 
     /**
+     * Check if SSH2 extension is available
+     */
+    protected function _hasSsh2Extension(): bool
+    {
+        return extension_loaded('ssh2') && function_exists('ssh2_connect');
+    }
+
+    /**
+     * Check if phpseclib is available
+     */
+    protected function _hasPhpseclib(): bool
+    {
+        return class_exists(\phpseclib3\Net\SFTP::class);
+    }
+
+    /**
+     * Get SFTP availability status message
+     */
+    protected function _getSftpAvailabilityError(): ?string
+    {
+        if ($this->_hasSsh2Extension() || $this->_hasPhpseclib()) {
+            return null;
+        }
+
+        return 'SFTP requires either the PHP ssh2 extension or phpseclib library. ' .
+               'Install with: sudo apt install php' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '-ssh2 ' .
+               'OR composer require phpseclib/phpseclib:^3.0';
+    }
+
+    /**
      * Upload a file to the destination
      *
      * @param string $localPath Local file path
@@ -70,6 +100,76 @@ class Maho_FeedManager_Model_Uploader
      * Upload via SFTP
      */
     protected function _uploadSftp(string $localPath, string $remoteName): bool
+    {
+        // Check SFTP availability
+        $error = $this->_getSftpAvailabilityError();
+        if ($error) {
+            throw new RuntimeException($error);
+        }
+
+        // Use phpseclib if available (preferred), otherwise fall back to ssh2 extension
+        if ($this->_hasPhpseclib()) {
+            return $this->_uploadSftpPhpseclib($localPath, $remoteName);
+        }
+
+        return $this->_uploadSftpExtension($localPath, $remoteName);
+    }
+
+    /**
+     * Upload via SFTP using phpseclib
+     */
+    protected function _uploadSftpPhpseclib(string $localPath, string $remoteName): bool
+    {
+        $host = $this->_config['host'] ?? '';
+        $port = (int) ($this->_config['port'] ?? 22);
+        $username = $this->_config['username'] ?? '';
+        $authType = $this->_config['auth_type'] ?? 'password';
+        $remotePath = rtrim($this->_config['remote_path'] ?? '/', '/');
+
+        $sftp = new \phpseclib3\Net\SFTP($host, $port);
+
+        // Authenticate
+        if ($authType === 'key') {
+            $privateKey = $this->_config['private_key'] ?? '';
+            /** @var \phpseclib3\Crypt\Common\PrivateKey $key @phpstan-ignore varTag.type */
+            $key = \phpseclib3\Crypt\PublicKeyLoader::load($privateKey);
+            if (!$sftp->login($username, $key)) {
+                throw new RuntimeException("SFTP key authentication failed for user: {$username}");
+            }
+        } else {
+            $password = $this->_config['password'] ?? '';
+            if (!$sftp->login($username, $password)) {
+                throw new RuntimeException("SFTP password authentication failed for user: {$username}");
+            }
+        }
+
+        // Upload file
+        $remoteFile = "{$remotePath}/{$remoteName}";
+        if (!$sftp->put($remoteFile, $localPath, \phpseclib3\Net\SFTP::SOURCE_LOCAL_FILE)) {
+            $error = $sftp->getLastSFTPError() ?: 'Unknown SFTP error';
+            throw new RuntimeException("Failed to upload file to: {$remoteFile} - {$error}");
+        }
+
+        // Verify upload by checking file exists and size matches
+        $localSize = filesize($localPath);
+        $stat = $sftp->stat($remoteFile);
+        if ($stat === false) {
+            throw new RuntimeException("Upload verification failed: file not found on server after upload");
+        }
+        $remoteSize = $stat['size'] ?? 0;
+        if ($remoteSize !== $localSize) {
+            throw new RuntimeException("Upload verification failed: size mismatch (local: {$localSize}, remote: {$remoteSize})");
+        }
+
+        Mage::log("FeedManager: SFTP upload successful to {$host}:{$remoteFile} ({$remoteSize} bytes)", Mage::LOG_INFO);
+
+        return true;
+    }
+
+    /**
+     * Upload via SFTP using ssh2 extension
+     */
+    protected function _uploadSftpExtension(string $localPath, string $remoteName): bool
     {
         $host = $this->_config['host'] ?? '';
         $port = (int) ($this->_config['port'] ?? 22);
@@ -246,30 +346,150 @@ class Maho_FeedManager_Model_Uploader
     }
 
     /**
-     * Test SFTP connection
+     * Test SFTP connection (including authentication)
      */
     protected function _testSftpConnection(): array
     {
+        // Check SFTP availability first
+        $error = $this->_getSftpAvailabilityError();
+        if ($error) {
+            return ['success' => false, 'message' => $error];
+        }
+
+        // Use phpseclib if available (preferred), otherwise fall back to ssh2 extension
+        if ($this->_hasPhpseclib()) {
+            return $this->_testSftpConnectionPhpseclib();
+        }
+
+        return $this->_testSftpConnectionExtension();
+    }
+
+    /**
+     * Test SFTP connection using phpseclib
+     */
+    protected function _testSftpConnectionPhpseclib(): array
+    {
         $host = $this->_config['host'] ?? '';
         $port = (int) ($this->_config['port'] ?? 22);
+        $username = $this->_config['username'] ?? '';
+        $authType = $this->_config['auth_type'] ?? 'password';
+        $remotePath = $this->_config['remote_path'] ?? '/';
 
+        try {
+            $sftp = new \phpseclib3\Net\SFTP($host, $port, 10); // 10 second timeout
+
+            // Authenticate
+            if ($authType === 'key') {
+                $privateKey = $this->_config['private_key'] ?? '';
+                if (empty($privateKey)) {
+                    return ['success' => false, 'message' => 'Private key is required for key authentication'];
+                }
+                try {
+                    /** @var \phpseclib3\Crypt\Common\PrivateKey $key @phpstan-ignore varTag.type */
+                    $key = \phpseclib3\Crypt\PublicKeyLoader::load($privateKey);
+                } catch (\Exception $e) {
+                    return ['success' => false, 'message' => 'Invalid private key format: ' . $e->getMessage()];
+                }
+                if (!$sftp->login($username, $key)) {
+                    return ['success' => false, 'message' => "Key authentication failed for user '{$username}'"];
+                }
+            } else {
+                $password = $this->_config['password'] ?? '';
+                if (!$sftp->login($username, $password)) {
+                    return ['success' => false, 'message' => "Password authentication failed for user '{$username}'"];
+                }
+            }
+
+            // Check if remote path exists
+            $stat = $sftp->stat($remotePath);
+            if ($stat === false) {
+                return ['success' => false, 'message' => "Remote path does not exist: {$remotePath}"];
+            }
+
+            return ['success' => true, 'message' => "Connected and authenticated to {$host}:{$port} as '{$username}'. Remote path verified."];
+
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            if (str_contains($message, 'Connection timed out') || str_contains($message, 'Connection refused')) {
+                return ['success' => false, 'message' => "Cannot connect to {$host}:{$port} - " . $message];
+            }
+            return ['success' => false, 'message' => 'Connection error: ' . $message];
+        }
+    }
+
+    /**
+     * Test SFTP connection using ssh2 extension
+     */
+    protected function _testSftpConnectionExtension(): array
+    {
+        $host = $this->_config['host'] ?? '';
+        $port = (int) ($this->_config['port'] ?? 22);
+        $username = $this->_config['username'] ?? '';
+        $authType = $this->_config['auth_type'] ?? 'password';
+        $remotePath = $this->_config['remote_path'] ?? '/';
+
+        // Test TCP connection
         $connection = @ssh2_connect($host, $port);
         if (!$connection) {
             return ['success' => false, 'message' => "Cannot connect to {$host}:{$port}"];
         }
 
-        return ['success' => true, 'message' => "Successfully connected to {$host}:{$port}"];
+        // Test authentication
+        try {
+            if ($authType === 'key') {
+                $privateKey = $this->_config['private_key'] ?? '';
+                if (empty($privateKey)) {
+                    return ['success' => false, 'message' => 'Private key is required for key authentication'];
+                }
+                $keyFile = tempnam(sys_get_temp_dir(), 'sftp_key_');
+                file_put_contents($keyFile, $privateKey);
+                chmod($keyFile, 0600);
+
+                /** @phpstan-ignore argument.type (null pubkey file works for key-only auth) */
+                $authenticated = @ssh2_auth_pubkey_file($connection, $username, null, $keyFile);
+                @unlink($keyFile);
+            } else {
+                $password = $this->_config['password'] ?? '';
+                $authenticated = @ssh2_auth_password($connection, $username, $password);
+            }
+
+            if (!$authenticated) {
+                return ['success' => false, 'message' => "Authentication failed for user '{$username}'"];
+            }
+
+            // Test SFTP subsystem and remote path
+            $sftp = @ssh2_sftp($connection);
+            if (!$sftp) {
+                return ['success' => false, 'message' => 'Failed to initialize SFTP subsystem'];
+            }
+
+            // Check if remote path exists
+            $realPath = @ssh2_sftp_realpath($sftp, $remotePath);
+            if ($realPath === false) {
+                return ['success' => false, 'message' => "Remote path does not exist: {$remotePath}"];
+            }
+
+            return ['success' => true, 'message' => "Connected and authenticated to {$host}:{$port} as '{$username}'. Remote path verified."];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Authentication error: ' . $e->getMessage()];
+        }
     }
 
     /**
-     * Test FTP connection
+     * Test FTP connection (including authentication)
      */
     protected function _testFtpConnection(): array
     {
         $host = $this->_config['host'] ?? '';
         $port = (int) ($this->_config['port'] ?? 21);
+        $username = $this->_config['username'] ?? '';
+        $password = $this->_config['password'] ?? '';
         $ssl = (bool) ($this->_config['ssl'] ?? false);
+        $passiveMode = (bool) ($this->_config['passive_mode'] ?? true);
+        $remotePath = $this->_config['remote_path'] ?? '/';
 
+        // Test TCP connection
         if ($ssl) {
             $connection = @ftp_ssl_connect($host, $port, 10);
         } else {
@@ -280,8 +500,25 @@ class Maho_FeedManager_Model_Uploader
             return ['success' => false, 'message' => "Cannot connect to {$host}:{$port}"];
         }
 
-        ftp_close($connection);
-        return ['success' => true, 'message' => "Successfully connected to {$host}:{$port}"];
+        // Test authentication
+        if (!@ftp_login($connection, $username, $password)) {
+            @ftp_close($connection);
+            return ['success' => false, 'message' => "Authentication failed for user '{$username}'"];
+        }
+
+        // Set passive mode
+        if ($passiveMode) {
+            @ftp_pasv($connection, true);
+        }
+
+        // Test remote path
+        if (!@ftp_chdir($connection, $remotePath)) {
+            @ftp_close($connection);
+            return ['success' => false, 'message' => "Remote path does not exist or not accessible: {$remotePath}"];
+        }
+
+        @ftp_close($connection);
+        return ['success' => true, 'message' => "Connected and authenticated to {$host}:{$port} as '{$username}'. Remote path verified."];
     }
 
     /**

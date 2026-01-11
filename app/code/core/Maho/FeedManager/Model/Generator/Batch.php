@@ -293,6 +293,9 @@ class Maho_FeedManager_Model_Generator_Batch
                 ->setLastFileSize($fileSize)
                 ->save();
 
+            // Handle upload if configured
+            $uploadResult = $this->_handleUpload();
+
             // Update state
             $this->_state['status'] = self::STATUS_COMPLETED;
             $this->_saveState();
@@ -313,6 +316,8 @@ class Maho_FeedManager_Model_Generator_Batch
                 'file_size_formatted' => Mage::helper('feedmanager')->formatFileSize($fileSize),
                 'message' => "Feed generated successfully with {$this->_state['product_count']} products",
                 'errors' => $this->_state['errors'],
+                'upload_status' => $uploadResult['status'],
+                'upload_message' => $uploadResult['message'],
             ];
         } catch (Exception $e) {
             return $this->_failWithError($e->getMessage());
@@ -1018,6 +1023,99 @@ class Maho_FeedManager_Model_Generator_Batch
             'message' => $message,
             'errors' => $this->_state['errors'],
         ];
+    }
+
+    /**
+     * Handle upload after successful generation
+     *
+     * @return array{status: string, message: string}
+     */
+    protected function _handleUpload(): array
+    {
+        // Check if auto-upload is enabled
+        if (!$this->_feed->getAutoUpload()) {
+            $this->_log->recordUploadSkipped('Auto-upload disabled');
+            return [
+                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_SKIPPED,
+                'message' => 'Auto-upload disabled',
+            ];
+        }
+
+        // Check if destination is configured
+        $destinationId = (int) $this->_feed->getDestinationId();
+        if (!$destinationId) {
+            $this->_log->recordUploadSkipped('No destination configured');
+            return [
+                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_SKIPPED,
+                'message' => 'No destination configured',
+            ];
+        }
+
+        try {
+            $destination = Mage::getModel('feedmanager/destination')->load($destinationId);
+
+            if (!$destination->getId()) {
+                $message = 'Destination not found';
+                $this->_log->recordUploadFailure($destinationId, $message);
+                return [
+                    'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
+                    'message' => $message,
+                ];
+            }
+
+            if (!$destination->isEnabled()) {
+                $message = 'Destination is disabled';
+                $this->_log->recordUploadFailure($destinationId, $message);
+                return [
+                    'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
+                    'message' => $message,
+                ];
+            }
+
+            // Perform upload
+            $uploader = new Maho_FeedManager_Model_Uploader($destination);
+            $filePath = $this->_feed->getOutputFilePath();
+            $remoteName = $this->_feed->getFilename() . '.' . $this->_feed->getFileFormat();
+
+            $success = $uploader->upload($filePath, $remoteName);
+
+            // Update destination last upload info
+            $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
+                ->setLastUploadStatus($success ? 'success' : 'failed')
+                ->save();
+
+            if ($success) {
+                $message = "Uploaded to {$destination->getName()} as {$remoteName}";
+                $this->_log->recordUploadSuccess($destinationId, $message);
+                Mage::log(
+                    "FeedManager: Successfully uploaded feed '{$this->_feed->getName()}' to destination '{$destination->getName()}'",
+                    Mage::LOG_INFO,
+                );
+                return [
+                    'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_SUCCESS,
+                    'message' => $message,
+                ];
+            }
+
+            $message = 'Upload failed';
+            $this->_log->recordUploadFailure($destinationId, $message);
+            Mage::log(
+                "FeedManager: Failed to upload feed '{$this->_feed->getName()}' to destination '{$destination->getName()}'",
+                Mage::LOG_ERROR,
+            );
+            return [
+                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
+                'message' => $message,
+            ];
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $message = $e->getMessage();
+            $this->_log->recordUploadFailure($destinationId, $message);
+            return [
+                'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
+                'message' => $message,
+            ];
+        }
     }
 
     /**

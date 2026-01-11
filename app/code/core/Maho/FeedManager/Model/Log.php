@@ -32,12 +32,25 @@ declare(strict_types=1);
  * @method $this setFilePath(string|null $path)
  * @method int|null getFileSize()
  * @method $this setFileSize(int|null $size)
+ * @method string|null getUploadStatus()
+ * @method $this setUploadStatus(string|null $status)
+ * @method string|null getUploadedAt()
+ * @method $this setUploadedAt(string|null $datetime)
+ * @method string|null getUploadMessage()
+ * @method $this setUploadMessage(string|null $message)
+ * @method int|null getDestinationId()
+ * @method $this setDestinationId(int|null $id)
  */
 class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 {
     public const STATUS_RUNNING = 'running';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_FAILED = 'failed';
+
+    public const UPLOAD_STATUS_PENDING = 'pending';
+    public const UPLOAD_STATUS_SUCCESS = 'success';
+    public const UPLOAD_STATUS_FAILED = 'failed';
+    public const UPLOAD_STATUS_SKIPPED = 'skipped';
 
     protected $_eventPrefix = 'feedmanager_log';
     protected $_eventObject = 'log';
@@ -213,5 +226,96 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
             self::STATUS_COMPLETED => 'Completed',
             self::STATUS_FAILED => 'Failed',
         ];
+    }
+
+    /**
+     * Get upload status options
+     */
+    public static function getUploadStatusOptions(): array
+    {
+        return [
+            self::UPLOAD_STATUS_PENDING => 'Pending',
+            self::UPLOAD_STATUS_SUCCESS => 'Success',
+            self::UPLOAD_STATUS_FAILED => 'Failed',
+            self::UPLOAD_STATUS_SKIPPED => 'Skipped',
+        ];
+    }
+
+    /**
+     * Record upload success
+     */
+    public function recordUploadSuccess(int $destinationId, string $message = 'Upload successful'): self
+    {
+        $this->setUploadStatus(self::UPLOAD_STATUS_SUCCESS)
+            ->setUploadedAt(Mage_Core_Model_Locale::now())
+            ->setUploadMessage($message)
+            ->setDestinationId($destinationId)
+            ->save();
+        return $this;
+    }
+
+    /**
+     * Record upload failure
+     */
+    public function recordUploadFailure(int $destinationId, string $message): self
+    {
+        $this->setUploadStatus(self::UPLOAD_STATUS_FAILED)
+            ->setUploadedAt(Mage_Core_Model_Locale::now())
+            ->setUploadMessage($message)
+            ->setDestinationId($destinationId)
+            ->save();
+        return $this;
+    }
+
+    /**
+     * Record upload skipped (no destination configured)
+     */
+    public function recordUploadSkipped(string $reason = 'No destination configured'): self
+    {
+        $this->setUploadStatus(self::UPLOAD_STATUS_SKIPPED)
+            ->setUploadMessage($reason)
+            ->save();
+        return $this;
+    }
+
+    /**
+     * Check if upload was successful
+     */
+    public function isUploadSuccessful(): bool
+    {
+        return $this->getUploadStatus() === self::UPLOAD_STATUS_SUCCESS;
+    }
+
+    /**
+     * Get formatted upload status for display
+     */
+    public function getFormattedUploadStatus(): string
+    {
+        $status = $this->getUploadStatus();
+        if (!$status) {
+            return '-';
+        }
+
+        $options = self::getUploadStatusOptions();
+        $label = $options[$status] ?? ucfirst($status);
+        $message = $this->getUploadMessage();
+
+        if ($message && $status !== self::UPLOAD_STATUS_SUCCESS) {
+            return "{$label}: {$message}";
+        }
+
+        return $label;
+    }
+
+    /**
+     * Get destination name (if uploaded)
+     */
+    public function getDestinationName(): ?string
+    {
+        if (!$this->getDestinationId()) {
+            return null;
+        }
+        $destination = Mage::getModel('feedmanager/destination')->load($this->getDestinationId());
+        return $destination->getId() ? $destination->getName() : null;
     }
 }

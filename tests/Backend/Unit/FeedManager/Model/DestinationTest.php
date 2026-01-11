@@ -77,14 +77,20 @@ describe('FeedManager Destination Model', function () {
         $sftpFields = Maho_FeedManager_Model_Destination::getRequiredConfigFields('sftp');
         expect($sftpFields)->toContain('host');
         expect($sftpFields)->toContain('username');
-        expect($sftpFields)->toContain('remote_path');
+        expect($sftpFields)->toContain('auth_type');
 
         $ftpFields = Maho_FeedManager_Model_Destination::getRequiredConfigFields('ftp');
         expect($ftpFields)->toContain('host');
+        expect($ftpFields)->toContain('username');
         expect($ftpFields)->toContain('password');
 
         $googleFields = Maho_FeedManager_Model_Destination::getRequiredConfigFields('google_api');
         expect($googleFields)->toContain('merchant_id');
+        expect($googleFields)->toContain('service_account_json');
+
+        $facebookFields = Maho_FeedManager_Model_Destination::getRequiredConfigFields('facebook_api');
+        expect($facebookFields)->toContain('catalog_id');
+        expect($facebookFields)->toContain('access_token');
     });
 
     test('validates config correctly', function () {

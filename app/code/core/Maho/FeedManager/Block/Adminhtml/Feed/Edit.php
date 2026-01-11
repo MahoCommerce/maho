@@ -62,6 +62,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 
+    /**
+     * Convert PHP bool to JavaScript boolean string
+     */
+    protected function _boolToJs(bool $value): string
+    {
+        return $value ? 'true' : 'false';
+    }
+
     public function getGenerateUrl(): string
     {
         return $this->getUrl('*/*/generate', ['id' => $this->_getFeed()->getId()]);
@@ -77,6 +85,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         $finalizeUrl = $this->getUrl('*/*/generateFinalize');
         $cancelUrl = $this->getUrl('*/*/generateCancel');
         $resetUrl = $this->getUrl('*/*/forceReset');
+        $uploadUrl = $this->getUrl('*/*/upload');
+
+        // Check if feed has a destination configured
+        $hasDestination = (bool) $this->_getFeed()->getDestinationId();
 
         $translations = Mage::helper('core')->jsonEncode([
             'generating' => $this->__('Generating Feed...'),
@@ -90,6 +102,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
             'cancel' => $this->__('Cancel'),
             'close' => $this->__('Close'),
             'download' => $this->__('Download'),
+            'upload' => $this->__('Upload Now'),
+            'uploading' => $this->__('Uploading...'),
+            'upload_success' => $this->__('Upload successful!'),
+            'upload_failed' => $this->__('Upload failed'),
+            'upload_skipped' => $this->__('Upload skipped'),
             'confirm' => $this->__('Are you sure you want to generate this feed now?'),
             'confirm_reset' => $this->__('This will clear any stuck generation status. Continue?'),
             'reset_success' => $this->__('Generation status has been reset.'),
@@ -116,10 +133,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     batch: '{$batchUrl}',
                     finalize: '{$finalizeUrl}',
                     cancel: '{$cancelUrl}',
-                    reset: '{$resetUrl}'
+                    reset: '{$resetUrl}',
+                    upload: '{$uploadUrl}'
                 },
                 translations: {$translations},
+                hasDestination: {$this->_boolToJs($hasDestination)},
                 currentJobId: null,
+                currentFeedId: null,
                 cancelled: false,
                 modal: null,
 
@@ -145,6 +165,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 
                 start: function(feedId, force) {
                     this.cancelled = false;
+                    this.currentFeedId = feedId;
                     this.showModal();
                     this.updateProgress(0, 0, this.translations.initializing);
 
@@ -452,15 +473,73 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     }
                     successHtml += '</div>';
 
+                    // Show upload status if available
+                    if (data.upload_status) {
+                        const uploadStatusClass = data.upload_status === 'success' ? 'success-message' :
+                            (data.upload_status === 'failed' ? 'error-message' : 'info-message');
+                        const uploadIcon = data.upload_status === 'success' ? '✓' :
+                            (data.upload_status === 'failed' ? '✗' : '⊘');
+                        successHtml += '<div class="' + uploadStatusClass + '" style="margin-top:8px">' +
+                            uploadIcon + ' Upload: ' + (data.upload_message || data.upload_status) + '</div>';
+                    }
+
                     if (statusEl) statusEl.innerHTML = successHtml;
 
                     let buttonsHtml = '<button class="modal-btn btn-cancel" onclick="FeedGenerator.hideModal()">' +
                         this.translations.close + '</button>';
+
+                    // Show Upload Now button if destination is configured and upload wasn't successful
+                    if (this.hasDestination && data.upload_status !== 'success') {
+                        buttonsHtml += ' <button class="modal-btn btn-primary" id="upload-now-btn" onclick="FeedGenerator.upload()">' +
+                            this.translations.upload + '</button>';
+                    }
+
                     if (data.file_url) {
                         buttonsHtml += ' <a href="' + data.file_url + '" class="modal-btn btn-success" target="_blank">' +
                             this.translations.download + '</a>';
                     }
                     if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
+                },
+
+                upload: function() {
+                    const btn = document.getElementById('upload-now-btn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.textContent = this.translations.uploading;
+                    }
+
+                    mahoFetch(this.urls.upload, {
+                        method: 'POST',
+                        body: new URLSearchParams({ id: this.currentFeedId, form_key: FORM_KEY }),
+                        loaderArea: false
+                    })
+                    .then(data => {
+                        const statusEl = document.getElementById('gen-status');
+                        if (data.success) {
+                            // Update status area with success
+                            const existingContent = statusEl ? statusEl.innerHTML : '';
+                            const uploadHtml = '<div class="success-message" style="margin-top:8px">✓ ' +
+                                this.escapeHtml(data.message) + '</div>';
+                            if (statusEl) {
+                                // Remove any existing upload status and add new one
+                                statusEl.innerHTML = existingContent.replace(/<div class="(success|error|info)-message" style="margin-top:8px">.*?<\\/div>/g, '') + uploadHtml;
+                            }
+                            if (btn) btn.remove();
+                        } else {
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.textContent = this.translations.upload;
+                            }
+                            alert(data.message || this.translations.upload_failed);
+                        }
+                    })
+                    .catch(error => {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.textContent = this.translations.upload;
+                        }
+                        alert(error.message || this.translations.upload_failed);
+                    });
                 },
 
                 escapeHtml: function(text) {

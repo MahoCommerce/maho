@@ -94,11 +94,15 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
 
     /**
      * Get JavaScript for showing/hiding config fieldsets based on type
+     * Also disables hidden fields to prevent them from being submitted
      */
     protected function _getTypeToggleScript(?string $currentType): string
     {
-        $types = array_keys(Maho_FeedManager_Model_Destination::getTypeOptions());
         $currentType = $currentType ?: '';
+        $destination = $this->_getDestination();
+        $testUrl = $destination->getId()
+            ? $this->getUrl('*/*/test', ['id' => $destination->getId()])
+            : '';
 
         return <<<SCRIPT
         <script type="text/javascript">
@@ -110,7 +114,14 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
                 types.forEach(function(type) {
                     var fieldset = document.getElementById('destination_' + type + '_fieldset');
                     if (fieldset) {
-                        fieldset.style.display = (type === selectedType) ? '' : 'none';
+                        var isVisible = (type === selectedType);
+                        fieldset.style.display = isVisible ? '' : 'none';
+
+                        // Disable/enable all inputs in fieldset to prevent hidden fields from submitting
+                        var inputs = fieldset.querySelectorAll('input, select, textarea');
+                        inputs.forEach(function(input) {
+                            input.disabled = !isVisible;
+                        });
                     }
                 });
             }
@@ -124,6 +135,57 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
                     toggleFieldsets(this.value);
                 });
             }
+
+            // Test connection function
+            window.testConnection = function(type) {
+                var testUrl = '{$testUrl}';
+                if (!testUrl) {
+                    alert('Please save the destination first before testing.');
+                    return;
+                }
+
+                var btn = document.getElementById(type + '_test_btn');
+                var result = document.getElementById(type + '_test_result');
+                var originalLabel = btn ? btn.querySelector('span').textContent : '';
+
+                if (btn) {
+                    btn.disabled = true;
+                    btn.querySelector('span').textContent = 'Testing...';
+                }
+                if (result) {
+                    result.textContent = '';
+                    result.style.color = '';
+                }
+
+                mahoFetch(testUrl, {
+                    method: 'POST',
+                    body: new URLSearchParams({ form_key: FORM_KEY }),
+                    loaderArea: false
+                })
+                .then(function(data) {
+                    if (result) {
+                        if (data.success) {
+                            result.textContent = '✓ ' + data.message;
+                            result.style.color = '#2e7d32';
+                        } else {
+                            result.textContent = '✗ ' + (data.message || 'Connection failed');
+                            result.style.color = '#c62828';
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    if (result) {
+                        result.textContent = '✗ Error: ' + err.message;
+                        result.style.color = '#c62828';
+                    }
+                })
+                .finally(function() {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.querySelector('span').textContent = originalLabel;
+                    }
+                });
+            };
         })();
         </script>
 SCRIPT;
@@ -182,6 +244,15 @@ SCRIPT;
             'value' => '/',
             'note' => $this->__('Directory on the remote server'),
         ]);
+
+        // Add test connection button if destination exists
+        if ($destination->getId()) {
+            $fieldset->addField('sftp_test_connection', 'note', [
+                'label' => '',
+                'text' => '<button type="button" class="scalable" onclick="testConnection(\'sftp\')" id="sftp_test_btn"><span>' . $this->__('Test Connection') . '</span></button>
+                           <span id="sftp_test_result" style="margin-left: 10px;"></span>',
+            ]);
+        }
     }
 
     protected function _addFtpFields(Maho\Data\Form $form, Maho_FeedManager_Model_Destination $destination): void
@@ -238,6 +309,15 @@ SCRIPT;
             'label' => $this->__('Remote Path'),
             'value' => '/',
         ]);
+
+        // Add test connection button if destination exists
+        if ($destination->getId()) {
+            $fieldset->addField('ftp_test_connection', 'note', [
+                'label' => '',
+                'text' => '<button type="button" class="scalable" onclick="testConnection(\'ftp\')" id="ftp_test_btn"><span>' . $this->__('Test Connection') . '</span></button>
+                           <span id="ftp_test_result" style="margin-left: 10px;"></span>',
+            ]);
+        }
     }
 
     protected function _addGoogleApiFields(Maho\Data\Form $form, Maho_FeedManager_Model_Destination $destination): void
